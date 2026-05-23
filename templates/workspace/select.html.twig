@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecionar Área de Trabalho | Huplex</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+    <style>
+        :root, [data-theme="dark"] {
+            --accent: #4F7FFF;
+            --bg:     #080A12;
+            --surface:#0D0F1A;
+            --border: rgba(255,255,255,0.07);
+            --text-1: #E2E4EA;
+            --text-2: rgba(226,228,234,0.5);
+            --text-3: rgba(226,228,234,0.24);
+        }
+        [data-theme="light"] {
+            --accent: #3D6FFF;
+            --bg:     #F2F4F8;
+            --surface:#FFFFFF;
+            --border: rgba(0,0,0,0.08);
+            --text-1: #111827;
+            --text-2: rgba(17,24,39,0.55);
+            --text-3: rgba(17,24,39,0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .ws-wrap { width: 100%; max-width: 560px; }
+
+        /* header */
+        .ws-header { text-align: center; margin-bottom: 36px; }
+        .ws-header .logo {
+            font-size: 22px; font-weight: 700;
+            color: var(--text-1); letter-spacing: -0.03em; margin-bottom: 20px;
+        }
+        .ws-header .logo span { color: var(--accent); }
+        .ws-header h2 {
+            font-size: 20px; font-weight: 700;
+            color: var(--text-1); letter-spacing: -0.02em; margin-bottom: 6px;
+        }
+        .ws-header p { font-size: 13px; color: var(--text-2); }
+
+        /* user chip */
+        .user-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; padding: 5px 14px 5px 6px;
+            margin-bottom: 28px;
+        }
+        .user-chip .uc-avatar {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: rgba(79,127,255,0.12); border: 1px solid rgba(79,127,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700; color: var(--accent);
+        }
+        .user-chip .uc-name { font-size: 12px; font-weight: 500; color: var(--text-1); }
+
+        /* empresa cards */
+        .ws-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+        .ws-card {
+            display: flex; align-items: center; gap: 14px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 16px 18px;
+            cursor: pointer; text-decoration: none;
+            transition: border-color 0.15s, background 0.15s, transform 0.12s;
+            position: relative;
+        }
+        .ws-card:hover {
+            border-color: rgba(79,127,255,0.3);
+            background: rgba(79,127,255,0.04);
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+        .ws-card.ws-active {
+            border-color: rgba(79,127,255,0.35);
+            background: rgba(79,127,255,0.07);
+        }
+
+        .ws-card .wc-logo {
+            width: 44px; height: 44px; border-radius: 11px;
+            background: rgba(79,127,255,0.1); border: 1px solid rgba(79,127,255,0.18);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: var(--accent);
+            flex-shrink: 0; letter-spacing: -0.03em;
+        }
+        .ws-card .wc-info { flex: 1; min-width: 0; }
+        .ws-card .wc-name {
+            font-size: 14px; font-weight: 600; color: var(--text-1);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+        .ws-card .wc-meta {
+            font-size: 11.5px; color: var(--text-3); margin-top: 2px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .ws-card .wc-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-3); }
+
+        .ws-card .wc-check {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 1.5px solid rgba(79,127,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.15s;
+        }
+        .ws-card.ws-active .wc-check {
+            background: var(--accent); border-color: var(--accent);
+        }
+        .ws-card .wc-check i {
+            font-size: 10px; color: transparent; transition: color 0.15s;
+        }
+        .ws-card.ws-active .wc-check i { color: #fff; }
+
+        /* arrow */
+        .ws-card .wc-arrow {
+            font-size: 11px; color: var(--text-3);
+            transition: color 0.15s, transform 0.15s;
+        }
+        .ws-card:hover .wc-arrow { color: var(--accent); transform: translateX(2px); }
+
+        /* footer */
+        .ws-footer { text-align: center; }
+        .ws-footer a {
+            font-size: 12px; color: var(--text-3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        .ws-footer a:hover { color: var(--text-2); }
+        .ws-footer a i { font-size: 10px; margin-right: 4px; }
+
+        /* theme toggle */
+        .theme-float {
+            position: fixed; top: 16px; right: 16px;
+            width: 34px; height: 34px; border-radius: 8px;
+            background: var(--surface); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-2); font-size: 13px;
+            transition: all 0.15s;
+        }
+        .theme-float:hover { color: var(--text-1); border-color: rgba(255,255,255,0.15); }
+    </style>
+</head>
+<body>
+
+<button class="theme-float" onclick="toggleTheme()" title="Alternar tema">
+    <i class="fa-regular fa-sun" id="themeIcon"></i>
+</button>
+
+<div class="ws-wrap">
+    <div class="ws-header">
+        <div class="logo">Hup<span>lex</span></div>
+        <h2>Selecione a área de trabalho</h2>
+        <p>Escolha a empresa que deseja acessar agora</p>
+    </div>
+
+    <div class="text-center">
+        <div class="user-chip d-inline-flex">
+            <div class="uc-avatar">{{ app.user.initials }}</div>
+            <span class="uc-name">{{ app.user.nome }}</span>
+        </div>
+    </div>
+
+    <div class="ws-grid">
+        {% for emp in empresas %}
+        <a href="{{ path('app_workspace_switch', {id: emp.id}) }}"
+           class="ws-card {% if current and current.id == emp.id %}ws-active{% endif %}">
+
+            <div class="wc-logo">{{ emp.nome|slice(0,2)|upper }}</div>
+
+            <div class="wc-info">
+                <div class="wc-name">{{ emp.nome }}</div>
+                <div class="wc-meta">
+                    {% if emp.setor %}<span>{{ emp.setor }}</span>{% endif %}
+                </div>
+            </div>
+
+            <div class="wc-check">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <i class="fa-regular fa-arrow-right wc-arrow"></i>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="ws-footer">
+        <a href="{{ path('app_logout') }}">
+            <i class="fa-regular fa-arrow-left"></i> Sair da conta
+        </a>
+    </div>
+</div>
+
+<script>
+    (function() {
+        var saved = localStorage.getItem('huplex-theme') || 'dark';
+        applyTheme(saved);
+        function applyTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            var icon = document.getElementById('themeIcon');
+            if (icon) icon.className = t === 'dark' ? 'fa-regular fa-sun' : 'fa-regular fa-moon';
+        }
+        window.toggleTheme = function() {
+            var cur  = document.documentElement.getAttribute('data-theme') || 'dark';
+            var next = cur === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('huplex-theme', next);
+            applyTheme(next);
+        };
+    })();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
