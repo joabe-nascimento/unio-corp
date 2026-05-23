@@ -8,7 +8,7 @@
 <div class="page-lead-zone">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: 'Meu Perfil',
-        hide_search: true
+        search_disabled: true
     } %}
         {% block toolbar_actions %}
             {% if empresas is defined and empresas|length > 1 %}
@@ -44,9 +44,6 @@
         <div class="ficha-hero-meta">
             <span><i class="fas fa-envelope"></i> {{ app.user.email }}</span>
             <span><i class="fas fa-calendar-check"></i> Conta desde {{ member_since }}</span>
-            {% if empresa %}
-                <span><i class="fas fa-building"></i> {{ empresa.nome }}</span>
-            {% endif %}
         </div>
     </div>
     <div class="ficha-hero-actions">
@@ -141,7 +138,9 @@
                 {% include 'components/empty_state.html.twig' with {
                     icon: 'fa-building',
                     title: 'Nenhuma área selecionada',
-                    text: 'Escolha uma área de trabalho para continuar.'
+                    text: 'Escolha uma área de trabalho para continuar.',
+                    btn_label: 'Escolher área de trabalho',
+                    btn_href: path('app_workspace_select')
                 } %}
             {% endif %}
         </div>
