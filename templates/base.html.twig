@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Huplex{% endblock %} | Huplex</title>
+
+    {# AdminLTE 3 + Bootstrap 4 via CDN #}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+    <style>
+        :root {
+            --huplex-blue:   #3D72FF;
+            --huplex-dark:   #07080F;
+            --huplex-card:   #0C0D18;
+            --huplex-border: rgba(255,255,255,0.07);
+        }
+
+        body, .wrapper { font-family: 'Inter', sans-serif !important; }
+
+        .main-header.navbar {
+            background: #0C0D18 !important;
+            border-bottom: 1px solid var(--huplex-border);
+        }
+
+        .main-sidebar {
+            background: #07080F !important;
+            border-right: 1px solid var(--huplex-border);
+        }
+
+        .brand-link {
+            background: #07080F !important;
+            border-bottom: 1px solid var(--huplex-border) !important;
+        }
+
+        .brand-text {
+            color: #fff !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-text span.accent { color: var(--huplex-blue); }
+
+        .nav-sidebar .nav-item .nav-link {
+            color: rgba(255,255,255,0.45) !important;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            margin: 1px 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-sidebar .nav-item .nav-link:hover,
+        .nav-sidebar .nav-item .nav-link.active {
+            color: #fff !important;
+            background: rgba(61,114,255,0.12) !important;
+        }
+
+        .nav-sidebar .nav-item .nav-link.active {
+            border-left: 3px solid var(--huplex-blue);
+        }
+
+        .nav-sidebar .nav-item .nav-link i {
+            color: rgba(255,255,255,0.3);
+            width: 18px;
+            transition: color 0.2s;
+        }
+
+        .nav-sidebar .nav-item .nav-link:hover i,
+        .nav-sidebar .nav-item .nav-link.active i {
+            color: var(--huplex-blue) !important;
+        }
+
+        .nav-header {
+            color: rgba(255,255,255,0.2) !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.1em !important;
+            text-transform: uppercase !important;
+            padding: 16px 16px 4px !important;
+        }
+
+        .content-wrapper {
+            background: #07080F !important;
+        }
+
+        .content-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .breadcrumb {
+            background: transparent !important;
+        }
+
+        .breadcrumb-item a,
+        .breadcrumb-item.active {
+            color: rgba(255,255,255,0.35) !important;
+            font-size: 12px;
+        }
+
+        .huplex-card {
+            background: #0C0D18;
+            border: 1px solid var(--huplex-border);
+            border-radius: 10px;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .huplex-card:hover {
+            border-color: rgba(61,114,255,0.22);
+        }
+
+        .huplex-card .card-title {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .huplex-card .card-value {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        .huplex-card .card-label {
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+        }
+
+        .huplex-card .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(61,114,255,0.1);
+            border: 1px solid rgba(61,114,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--huplex-blue);
+            font-size: 18px;
+        }
+
+        .section-title {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .section-subtitle {
+            color: rgba(255,255,255,0.3);
+            font-size: 13px;
+        }
+
+        .badge-perfil {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(61,114,255,0.12);
+            color: var(--huplex-blue);
+            border: 1px solid rgba(61,114,255,0.25);
+        }
+
+        .badge-perfil.tenant     { background: rgba(139,92,246,0.12); color: #8b5cf6; border-color: rgba(139,92,246,0.25); }
+        .badge-perfil.admin      { background: rgba(239,68,68,0.12);  color: #ef4444; border-color: rgba(239,68,68,0.25); }
+        .badge-perfil.gestor     { background: rgba(234,179,8,0.12);  color: #eab308; border-color: rgba(234,179,8,0.25); }
+        .badge-perfil.supervisor { background: rgba(34,197,94,0.12);  color: #22c55e; border-color: rgba(34,197,94,0.25); }
+
+        .table-huplex {
+            color: rgba(255,255,255,0.75) !important;
+        }
+
+        .table-huplex thead th {
+            background: rgba(255,255,255,0.03) !important;
+            color: rgba(255,255,255,0.3) !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.08em !important;
+            text-transform: uppercase !important;
+            border-color: var(--huplex-border) !important;
+            padding: 12px 16px !important;
+        }
+
+        .table-huplex td {
+            border-color: var(--huplex-border) !important;
+            padding: 12px 16px !important;
+            vertical-align: middle !important;
+            font-size: 13px !important;
+        }
+
+        .table-huplex tbody tr:hover td {
+            background: rgba(255,255,255,0.02) !important;
+        }
+
+        .btn-huplex {
+            background: var(--huplex-blue);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-huplex:hover {
+            background: #5585ff;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn-huplex-ghost {
+            background: transparent;
+            color: rgba(255,255,255,0.4);
+            border: 1px solid var(--huplex-border);
+            border-radius: 6px;
+            padding: 7px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-huplex-ghost:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .avatar-circle {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(61,114,255,0.15);
+            border: 1px solid rgba(61,114,255,0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--huplex-blue);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px;
+            text-align: center;
+        }
+
+        .empty-state .empty-icon {
+            width: 60px; height: 60px;
+            border-radius: 14px;
+            background: rgba(61,114,255,0.08);
+            border: 1px dashed rgba(61,114,255,0.25);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--huplex-blue);
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h6 {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            color: rgba(255,255,255,0.3);
+            font-size: 13px;
+        }
+
+        .main-footer {
+            background: #07080F !important;
+            border-top: 1px solid var(--huplex-border) !important;
+            color: rgba(255,255,255,0.2) !important;
+            font-size: 12px;
+        }
+
+        [data-widget="pushmenu"] { color: rgba(255,255,255,0.4) !important; }
+        .navbar-nav .nav-link    { color: rgba(255,255,255,0.4) !important; }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    {# ── Top Navbar ── #}
+    <nav class="main-header navbar navbar-expand navbar-dark">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+                    <i class="fas fa-bars"></i>
+                </a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link" data-toggle="dropdown" href="#">
+                    <span class="avatar-circle mr-1">{{ app.user.initials }}</span>
+                    <span style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:500">{{ app.user.nome }}</span>
+                    <i class="fas fa-chevron-down ml-1" style="font-size:10px;color:rgba(255,255,255,0.3)"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" style="background:#0C0D18;border:1px solid var(--huplex-border);border-radius:8px;min-width:180px">
+                    <div class="px-3 py-2 border-bottom" style="border-color:var(--huplex-border)!important">
+                        <div style="color:#fff;font-size:13px;font-weight:600">{{ app.user.nome }}</div>
+                        <div style="color:rgba(255,255,255,0.3);font-size:11px">{{ app.user.email }}</div>
+                        <div class="mt-1">
+                            <span class="badge-perfil {{ app.user.perfil|lower }}">{{ app.user.perfilLabel }}</span>
+                        </div>
+                    </div>
+                    <a class="dropdown-item py-2" href="#" style="color:rgba(255,255,255,0.5);font-size:13px">
+                        <i class="fas fa-user-cog mr-2" style="width:16px;color:rgba(255,255,255,0.25)"></i> Meu Perfil
+                    </a>
+                    <div class="dropdown-divider" style="border-color:var(--huplex-border)"></div>
+                    <a class="dropdown-item py-2" href="{{ path('app_logout') }}" style="color:rgba(255,100,100,0.7);font-size:13px">
+                        <i class="fas fa-sign-out-alt mr-2" style="width:16px"></i> Sair
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    {# ── Sidebar ── #}
+    <aside class="main-sidebar sidebar-dark-primary elevation-0">
+        <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0 px-3">
+            <span class="brand-text font-weight-bold" style="font-size:17px">
+                Hup<span class="accent">lex</span>
+            </span>
+        </a>
+
+        <div class="sidebar">
+            <nav class="mt-2 pb-3">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+
+                    <li class="nav-item">
+                        <a href="{{ path('app_dashboard') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_dashboard' ? 'active' : '' }}">
+                            <i class="fas fa-th-large nav-icon"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-header">RH & Pessoas</li>
+
+                    <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_rh' ? 'menu-open' : '' }}">
+                        <a href="{{ path('app_rh') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_rh' ? 'active' : '' }}">
+                            <i class="fas fa-users nav-icon"></i>
+                            <p>RH <i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ path('app_rh_funcionarios') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_rh_funcionarios' ? 'active' : '' }}">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i>
+                                    <p>Funcionários</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_rh_admissoes') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_rh_admissoes' ? 'active' : '' }}">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i>
+                                    <p>Admissões</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_rh_ferias') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_rh_ferias' ? 'active' : '' }}">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i>
+                                    <p>Férias</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_rh_folha') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_rh_folha' ? 'active' : '' }}">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i>
+                                    <p>Folha de Pag.</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_pessoas' ? 'menu-open' : '' }}">
+                        <a href="{{ path('app_pessoas') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_pessoas' ? 'active' : '' }}">
+                            <i class="fas fa-sitemap nav-icon"></i>
+                            <p>Gest. de Pessoas <i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ path('app_pessoas_equipes') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Equipes</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_pessoas_cargos') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Cargos</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_pessoas_organograma') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Organograma</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_pessoas_avaliacao') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Avaliação</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-header">Hubs</li>
+
+                    <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_talentos' ? 'menu-open' : '' }}">
+                        <a href="{{ path('app_talentos') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_talentos' ? 'active' : '' }}">
+                            <i class="fas fa-star nav-icon"></i>
+                            <p>Hub de Talentos <i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ path('app_talentos_banco') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Banco de Talentos</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_talentos_vagas') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Vagas</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_talentos_trilhas') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Trilhas de Carreira</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_talentos_mentoria') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Mentoria</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_maturidade' ? 'menu-open' : '' }}">
+                        <a href="{{ path('app_maturidade') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_maturidade' ? 'active' : '' }}">
+                            <i class="fas fa-chart-radar nav-icon"></i>
+                            <p>Hub de Maturidade <i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ path('app_maturidade_avaliacao') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Avaliação</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_maturidade_radar') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Radar de Maturidade</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('app_maturidade_plano') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Plano de Ação</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <li class="nav-header">Administração</li>
+
+                    <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin' ? 'menu-open' : '' }}">
+                        <a href="{{ path('app_admin') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin' ? 'active' : '' }}">
+                            <i class="fas fa-cog nav-icon"></i>
+                            <p>Admin <i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ path('app_admin_usuarios') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Usuários</p>
+                                </a>
+                            </li>
+                            {% if is_granted('ROLE_TENANT') %}
+                            <li class="nav-item">
+                                <a href="{{ path('app_admin_empresas') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Empresas</p>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li class="nav-item">
+                                <a href="{{ path('app_admin_configuracoes') }}" class="nav-link">
+                                    <i class="fas fa-circle nav-icon" style="font-size:6px"></i><p>Configurações</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    {# ── Content ── #}
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2 align-items-center">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">{% block page_title '' %}</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Início</a></li>
+                            {% block breadcrumb %}{% endblock %}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="content">
+            <div class="container-fluid">
+                {% for flash_type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ flash_type }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </section>
+    </div>
+
+    <footer class="main-footer text-center">
+        <strong>Huplex</strong> &copy; {{ "now"|date("Y") }} — Plataforma de Gestão de Pessoas
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

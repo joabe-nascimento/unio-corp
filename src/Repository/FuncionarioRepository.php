@@ -1,0 +1,1 @@
+<?php\n\nnamespace App\Repository;\n\nuse App\Entity\Funcionario;\nuse Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;\nuse Doctrine\Persistence\ManagerRegistry;\n\nclass FuncionarioRepository extends ServiceEntityRepository\n{\n    public function __construct(ManagerRegistry \)\n    {\n        parent::__construct(\, Funcionario::class);\n    }\n}\n

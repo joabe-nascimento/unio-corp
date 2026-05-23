@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+{% block title %}Administração{% endblock %}
+{% block page_title %}Administração{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">Admin</li>{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <a href="{{ path('app_admin_usuarios') }}" class="text-decoration-none">
+            <div class="huplex-card" style="cursor:pointer">
+                <div class="card-icon mb-3"><i class="fas fa-user-cog"></i></div>
+                <div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:4px">Usuários</div>
+                <div style="color:rgba(255,255,255,0.3);font-size:13px">Gerencie acessos e perfis de usuário</div>
+            </div>
+        </a>
+    </div>
+    {% if is_granted('ROLE_TENANT') %}
+    <div class="col-md-4 mb-4">
+        <a href="{{ path('app_admin_empresas') }}" class="text-decoration-none">
+            <div class="huplex-card" style="cursor:pointer">
+                <div class="card-icon mb-3" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.2);color:#8b5cf6">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:4px">Empresas</div>
+                <div style="color:rgba(255,255,255,0.3);font-size:13px">Tenants e empresas cadastradas</div>
+            </div>
+        </a>
+    </div>
+    {% endif %}
+    <div class="col-md-4 mb-4">
+        <a href="{{ path('app_admin_configuracoes') }}" class="text-decoration-none">
+            <div class="huplex-card" style="cursor:pointer">
+                <div class="card-icon mb-3" style="background:rgba(234,179,8,0.1);border-color:rgba(234,179,8,0.2);color:#eab308">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:4px">Configurações</div>
+                <div style="color:rgba(255,255,255,0.3);font-size:13px">Parâmetros gerais da plataforma</div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+{% block title %}Hub de Maturidade{% endblock %}
+{% block page_title %}Hub de Maturidade{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">Hub de Maturidade</li>{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    {% for item in [
+        { icon:'fas fa-chart-line', title:'Nível Médio',        value:'—', sub:'Aguardando avaliação', color:'#3D72FF' },
+        { icon:'fas fa-clipboard-check', title:'Avaliações',    value:'0', sub:'Realizadas',            color:'#8b5cf6' },
+        { icon:'fas fa-tasks',      title:'Planos de Ação',     value:'0', sub:'Em andamento',           color:'#eab308' },
+        { icon:'fas fa-trophy',     title:'Maturidade Alta',    value:'0', sub:'Colaboradores',          color:'#22c55e' },
+    ] %}
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="huplex-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="card-label mb-1">{{ item.sub }}</div>
+                    <div class="card-value">{{ item.value }}</div>
+                    <div style="color:#fff;font-size:12px;font-weight:600;margin-top:4px">{{ item.title }}</div>
+                </div>
+                <div class="card-icon" style="background:{{ item.color }}12;border-color:{{ item.color }}25;color:{{ item.color }}">
+                    <i class="{{ item.icon }}"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row">
+    <div class="col-md-7 mb-4">
+        <div class="huplex-card h-100">
+            <div class="section-title mb-1">Radar de Maturidade</div>
+            <div class="section-subtitle mb-4">Visão geral por dimensão organizacional</div>
+            <div class="empty-state" style="padding:48px 24px">
+                <div class="empty-icon"><i class="fas fa-chart-radar"></i></div>
+                <h6>Radar não disponível</h6>
+                <p>Realize a primeira avaliação para gerar o radar.</p>
+                <a href="{{ path('app_maturidade_avaliacao') }}" class="btn-huplex mt-3">Iniciar Avaliação</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5 mb-4">
+        <div class="huplex-card mb-3">
+            <div class="section-title mb-1" style="font-size:15px">Dimensões Avaliadas</div>
+            <div class="section-subtitle mb-3">Clique para detalhar cada área</div>
+            {% for dim in ['Liderança','Cultura Organizacional','Processos','Tecnologia','Pessoas','Estratégia'] %}
+            <div class="d-flex align-items-center justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <span style="color:rgba(255,255,255,0.5);font-size:13px">{{ dim }}</span>
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width:80px;height:4px;background:rgba(255,255,255,0.08);border-radius:2px">
+                        <div style="width:0%;height:100%;background:#3D72FF;border-radius:2px"></div>
+                    </div>
+                    <span style="color:rgba(255,255,255,0.2);font-size:11px;font-family:monospace">—</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
