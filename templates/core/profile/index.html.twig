@@ -1,0 +1,188 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Meu Perfil{% endblock %}
+{% block page_show_title %}{% endblock %}
+
+{% block content %}
+
+{% embed 'components/list_toolbar.html.twig' with {
+    page_title: 'Meu Perfil',
+    search_disabled: true
+} %}
+    {% block toolbar_actions %}
+        {% if empresas is defined and empresas|length > 1 %}
+        <a href="{{ path('app_workspace_select', {force: 1}) }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-building mr-1"></i> Trocar área
+        </a>
+        {% endif %}
+    {% endblock %}
+{% endembed %}
+
+<div class="huplex-card ficha-hero mb-3">
+    <div class="ficha-hero-avatar">
+        {% include 'components/member_avatar.html.twig' with {
+            nome: app.user.nome,
+            foto: app.user.avatar,
+            size: 'xl'
+        } %}
+    </div>
+    <div class="ficha-hero-info">
+        <div class="ficha-hero-name">{{ app.user.nome }}</div>
+        <div class="ficha-hero-role">
+            {{ app.user.perfilLabel }}
+            {% if empresa %}
+                <span class="ficha-hero-dept">· {{ empresa.nome }}</span>
+            {% endif %}
+        </div>
+        <div class="ficha-hero-meta">
+            <span><i class="fas fa-envelope"></i> {{ app.user.email }}</span>
+            <span><i class="fas fa-calendar-check"></i> Conta desde {{ member_since }}</span>
+            {% if empresa %}
+                <span><i class="fas fa-building"></i> {{ empresa.nome }}</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="ficha-hero-actions">
+        <span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span>
+        <span class="member-status member-status--{{ app.user.ativo ? 'ativo' : 'inativo' }}">
+            {{ app.user.ativo ? 'Conta ativa' : 'Conta inativa' }}
+        </span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-3">
+        <div class="huplex-card mb-3">
+            <div class="section-title mb-3">Dados da conta</div>
+            <div class="ficha-fields-grid">
+                <div>
+                    <div class="ficha-field-label">Nome</div>
+                    <div class="ficha-field-value">{{ app.user.nome }}</div>
+                </div>
+                <div>
+                    <div class="ficha-field-label">E-mail</div>
+                    <div class="ficha-field-value">{{ app.user.email }}</div>
+                </div>
+                <div>
+                    <div class="ficha-field-label">Perfil de acesso</div>
+                    <div class="ficha-field-value">{{ app.user.perfilLabel }}</div>
+                </div>
+                <div>
+                    <div class="ficha-field-label">Membro desde</div>
+                    <div class="ficha-field-value">{{ member_since }}</div>
+                </div>
+            </div>
+            <p class="ficha-bio mt-3 mb-0">
+                Estas informações vêm da sua conta de acesso na Huplex. Em breve você poderá editar nome e foto aqui.
+            </p>
+        </div>
+
+        <div class="huplex-card">
+            <div class="section-title mb-3">Segurança</div>
+            <div class="profile-action-list">
+                <button type="button" class="profile-action-item" disabled title="Em breve">
+                    <i class="fas fa-key" aria-hidden="true"></i>
+                    <span>
+                        <strong>Alterar senha</strong>
+                        <small>Em breve</small>
+                    </span>
+                </button>
+                <button type="button" class="profile-action-item" disabled title="Em breve">
+                    <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                    <span>
+                        <strong>Autenticação em dois fatores</strong>
+                        <small>Em breve</small>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-3">
+        <div class="huplex-card mb-3">
+            <div class="section-title mb-3">Preferências</div>
+            <div class="profile-action-list">
+                <a href="#" class="profile-action-item" onclick="toggleTheme(); return false;">
+                    <i class="fas fa-adjust" id="profileThemeIcon" aria-hidden="true"></i>
+                    <span>
+                        <strong id="profileThemeLabel">Tema claro</strong>
+                        <small>Alternar aparência do sistema</small>
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <div class="huplex-card mb-3">
+            <div class="section-title mb-1">Área de trabalho</div>
+            <p class="section-subtitle mb-3">Empresa ativa nesta sessão</p>
+            {% if empresa %}
+                <div class="profile-workspace-card">
+                    <i class="fas fa-building" aria-hidden="true"></i>
+                    <div>
+                        <strong>{{ empresa.nome }}</strong>
+                        {% if empresas|length > 1 %}
+                            <small>{{ empresas|length }} áreas disponíveis</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if empresas|length > 1 %}
+                <a href="{{ path('app_workspace_select', {force: 1}) }}" class="btn btn-outline-secondary btn-sm btn-block mt-3">
+                    <i class="fas fa-right-left mr-1"></i> Trocar área de trabalho
+                </a>
+                {% endif %}
+            {% else %}
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-building',
+                    title: 'Nenhuma área selecionada',
+                    text: 'Escolha uma área de trabalho para continuar.'
+                } %}
+            {% endif %}
+        </div>
+
+        <div class="huplex-card">
+            <div class="section-title mb-1">Ficha na empresa</div>
+            <p class="section-subtitle mb-3">Cadastro de RH (Gestão de Pessoas)</p>
+            <p class="ficha-bio mb-3">
+                A ficha técnica completa — cargo, equipes, skills e histórico — fica no módulo de Pessoas.
+                A vinculação automática entre sua conta e o cadastro de membro chega em breve.
+            </p>
+            {% if nav_show_hub_operacoes|default(false) %}
+            <a href="{{ path('app_pessoas_membros') }}" class="btn btn-outline-secondary btn-sm btn-block">
+                <i class="fas fa-id-badge mr-1"></i> Ver membros da equipe
+            </a>
+            {% else %}
+            <span class="profile-soon-note"><i class="fas fa-circle-info"></i> Disponível conforme seu perfil de acesso.</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    function syncThemeLabel() {
+        var dark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+        var label = document.getElementById('profileThemeLabel');
+        var icon = document.getElementById('profileThemeIcon');
+        var menuLabel = document.getElementById('themeMenuLabel');
+        var menuIcon = document.getElementById('themeMenuIcon');
+        var text = dark ? 'Tema claro' : 'Tema escuro';
+        if (label) label.textContent = text;
+        if (menuLabel) menuLabel.textContent = text;
+        if (icon) icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+        if (menuIcon) menuIcon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    syncThemeLabel();
+    var orig = window.toggleTheme;
+    if (typeof orig === 'function') {
+        window.toggleTheme = function () {
+            orig();
+            syncThemeLabel();
+        };
+    }
+})();
+</script>
+{% endblock %}
