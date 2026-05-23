@@ -1,46 +1,42 @@
 ﻿{% extends 'base.html.twig' %}
 {% block title %}Equipes{% endblock %}
-{% block page_title %}Equipes{% endblock %}
-{% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ path('app_hub_operacoes') }}">Hub Operações</a></li>
-    <li class="breadcrumb-item active">Equipes</li>
-{% endblock %}
-{% block content %}
-
-{% include 'components/kpi_row.html.twig' with { items: [
-    { value: '4',  label: 'Equipes',          sub: 'Formadas' },
-    { value: '12', label: 'Total de Membros', sub: 'Em equipes', route: 'app_pessoas_membros' },
-    { value: '4',  label: 'Gestores',         sub: 'Responsáveis' },
-    { value: '0',  label: 'Sem equipe',       sub: 'Membros a alocar' },
-] } %}
-
-{# ── Toolbar ── #}
-<div class="huplex-card mb-3 members-toolbar">
-    <div class="members-toolbar-row">
-        <div class="members-search-wrap">
-            <i class="fas fa-magnifying-glass members-search-icon"></i>
-            <input type="text" class="members-search-input"
-                   placeholder="Buscar equipe por nome ou responsável…" disabled>
-        </div>
-        <div class="members-filters">
-            <div class="filter-group">
-                <label class="filter-label">Área</label>
-                <select class="filter-select" disabled>
-                    <option>Todas</option>
-                    <option>Tecnologia</option>
-                    <option>Engenharia</option>
-                    <option>Design</option>
-                    <option>Gestão</option>
-                </select>
-            </div>
+{% block page_toolbar_layout %}yes{% endblock %}
+{% block page_show_title %}{% endblock %}
+{% block content_lead %}
+<div class="page-lead-zone">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: 'Equipes',
+        search_placeholder: 'Buscar equipe por nome ou responsável…',
+        search_disabled: true
+    } %}
+        {% block toolbar_actions %}
             {% if is_granted('ROLE_GESTOR_EQUIPE') %}
-            <a href="{{ path('app_pessoas_equipe_nova') }}" class="btn-huplex members-add-btn">
+            <a href="{{ path('app_pessoas_equipe_nova') }}" class="btn-huplex">
                 <i class="fas fa-plus"></i> Nova Equipe
             </a>
             {% endif %}
-        </div>
+        {% endblock %}
+        {% block toolbar_filters %}
+            {% include 'components/filter_group.html.twig' with {
+                label: 'Área',
+                name: 'area',
+                disabled: true,
+                options: ['Todas', 'Tecnologia', 'Engenharia', 'Design', 'Gestão']
+            } %}
+        {% endblock %}
+    {% endembed %}
+
+    <div class="page-lead-kpis">
+        {% include 'components/kpi_row.html.twig' with { items: [
+            { value: '4',  label: 'Equipes',          sub: 'Formadas' },
+            { value: '12', label: 'Total de Membros', sub: 'Em equipes', route: 'app_pessoas_membros' },
+            { value: '4',  label: 'Gestores',         sub: 'Responsáveis' },
+            { value: '0',  label: 'Sem equipe',       sub: 'Membros a alocar' },
+        ], mb: 'mb-0' } %}
     </div>
 </div>
+{% endblock %}
+{% block content %}
 
 <div class="huplex-card">
     {% include 'components/section_header.html.twig' with {
@@ -54,7 +50,6 @@
     </div>
 
     <div class="team-grid">
-        {# Paleta de cores para avatares — letra inicial define a cor #}
         {% set av_palette = ['av-c1','av-c2','av-c3','av-c4','av-c5','av-c6','av-c7','av-c8'] %}
         {% set av_max = 4 %}
 

@@ -1,0 +1,31 @@
+{#
+  list_toolbar — ações à esquerda; filtros + busca à direita
+
+  Variáveis:
+    page_title         (string, opt) layout --page (colado no topo, sem margens)
+    search_placeholder (string)
+    search_disabled    (bool)
+
+  Blocks:
+    toolbar_actions
+    toolbar_filters
+#}
+<div class="list-toolbar{% if page_title is defined and page_title %} list-toolbar--page{% else %} huplex-card mb-3{% endif %}">
+    <div class="list-toolbar-main">
+        <div class="list-toolbar-left">
+            {% if page_title is defined and page_title %}
+                <h1 class="list-toolbar-title">{{ page_title }}</h1>
+            {% endif %}
+            <div class="list-toolbar-actions">
+                {% block toolbar_actions %}{% endblock %}
+            </div>
+        </div>
+        <div class="list-toolbar-end">
+            {% block toolbar_filters %}{% endblock %}
+            {% include 'components/toolbar_search.html.twig' with {
+                search_placeholder: search_placeholder|default('Buscar…'),
+                search_disabled: search_disabled|default(false)
+            } %}
+        </div>
+    </div>
+</div>

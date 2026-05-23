@@ -107,6 +107,11 @@ class NavigationService
             || str_starts_with($route, 'app_engenharia');
     }
 
+    public function isHubTalentosActive(?string $route): bool
+    {
+        return (bool) $route && str_starts_with($route, 'app_talentos');
+    }
+
     public function isHubMaturidadeActive(?string $route): bool
     {
         if (!$route) {
@@ -157,6 +162,7 @@ class NavigationService
             'nav_show_admin' => $showPlataforma,
             'nav_show_tenant_empresas' => $this->showTenantEmpresas($user),
             'nav_hub_operacoes_active' => $this->isHubOperacoesActive($route),
+            'nav_hub_talentos_active' => $this->isHubTalentosActive($route),
             'nav_hub_maturidade_active' => $this->isHubMaturidadeActive($route),
             'nav_modulo_rh_active' => $this->isModuloRhActive($route),
             'nav_modulo_pessoas_active' => $this->isModuloPessoasActive($route),

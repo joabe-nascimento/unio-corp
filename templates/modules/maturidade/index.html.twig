@@ -1,16 +1,17 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/hub.html.twig' %}
 {% block title %}Hub de Maturidade{% endblock %}
-{% block page_title %}Hub de Maturidade{% endblock %}
-{% block breadcrumb %}<li class="breadcrumb-item active">Hub de Maturidade</li>{% endblock %}
-{% block content %}
-
-{% include 'components/kpi_row.html.twig' with { items: [
-    { value: '—', label: 'Nível Médio',      sub: 'Aguardando avaliação' },
-    { value: '0',  label: 'Avaliações',       sub: 'Realizadas' },
-    { value: '0',  label: 'Planos de Ação',   sub: 'Em andamento' },
-    { value: '0',  label: 'Maturidade Alta',  sub: 'Colaboradores' },
-] } %}
-
+{% set hub_page_title = 'Hub de Maturidade' %}
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: '—', label: 'Nível Médio',      sub: 'Aguardando avaliação' },
+        { value: '0',  label: 'Avaliações',       sub: 'Realizadas' },
+        { value: '0',  label: 'Planos de Ação',   sub: 'Em andamento' },
+        { value: '0',  label: 'Maturidade Alta',  sub: 'Colaboradores' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+{% block hub_content %}
 <div class="row">
     <div class="col-md-7 mb-4 d-flex">
         <div class="huplex-card flex-fill">
@@ -47,7 +48,6 @@
             {% endfor %}
         </div>
     </div>
-
     {% if nav_show_modulo_publicidade|default(false) %}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {

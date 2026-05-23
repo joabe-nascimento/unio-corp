@@ -1,21 +1,18 @@
-﻿{% extends 'base.html.twig' %}
+﻿{% extends 'layout/hub.html.twig' %}
 {% block title %}Gestão de Pessoas{% endblock %}
-{% block page_title %}Gestão de Pessoas{% endblock %}
-{% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ path('app_hub_operacoes') }}">Hub Operações</a></li>
-    <li class="breadcrumb-item active">Gestão de Pessoas</li>
+{% set hub_page_title = 'Gestão de Pessoas' %}
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: '0', label: 'Total de Membros',  sub: 'Cadastrados',    route: 'app_pessoas_membros' },
+        { value: '0', label: 'Equipes Ativas',    sub: 'Formadas',       route: 'app_pessoas_equipes' },
+        { value: '0', label: 'Cargos',            sub: 'Registrados',    route: 'app_pessoas_cargos' },
+        { value: '0', label: 'Avaliações',        sub: 'Realizadas',     route: 'app_pessoas_avaliacao' },
+    ], mb: 'mb-0' } %}
+</div>
 {% endblock %}
-{% block content %}
-
-{% include 'components/kpi_row.html.twig' with { items: [
-    { value: '0', label: 'Total de Membros',  sub: 'Cadastrados',    route: 'app_pessoas_membros' },
-    { value: '0', label: 'Equipes Ativas',    sub: 'Formadas',       route: 'app_pessoas_equipes' },
-    { value: '0', label: 'Cargos',            sub: 'Registrados',    route: 'app_pessoas_cargos' },
-    { value: '0', label: 'Avaliações',        sub: 'Realizadas',     route: 'app_pessoas_avaliacao' },
-] } %}
-
+{% block hub_content %}
 <div class="row">
-    {# Membros — card de módulo principal #}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Membros',
@@ -27,8 +24,6 @@
             ]
         } %}
     </div>
-
-    {# Equipes #}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Equipes',
@@ -40,8 +35,6 @@
             ]
         } %}
     </div>
-
-    {# Cargos #}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Cargos',
@@ -52,8 +45,6 @@
             ]
         } %}
     </div>
-
-    {# Organograma #}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Organograma',

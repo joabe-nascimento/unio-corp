@@ -1,4 +1,5 @@
 {# Menu lateral por perfil principal (layout admin vs operacional) #}
+{% import 'macros/sidebar_nav.html.twig' as nav %}
 {% set route = app.request.attributes.get('_route') %}
 {% set perfil = app.user.perfil %}
 {% set hub_operacoes_open = nav_hub_operacoes_active|default(false) %}
@@ -20,13 +21,13 @@
 {% endif %}
 
 {% if nav_show_hub_operacoes|default(false) %}
-<li class="nav-item {{ hub_operacoes_open ? 'menu-open' : '' }}">
+<li class="nav-item has-treeview nav-hub {{ hub_operacoes_open ? 'menu-open' : '' }}">
     <a href="{{ path('app_hub_operacoes') }}" class="nav-link {{ route starts with 'app_hub_operacoes' ? 'active' : '' }}">
         <i class="fas fa-briefcase nav-icon"></i>
         <p>Hub Operações <i class="fas fa-angle-left right"></i></p>
     </a>
-    <ul class="nav nav-treeview">
-        <li class="nav-item">
+    <ul class="nav nav-treeview nav-hub-children{{ hub_operacoes_open ? ' menu-open' : '' }}">
+        <li class="nav-item nav-hub-overview">
             <a href="{{ path('app_hub_operacoes') }}" class="nav-link {{ route == 'app_hub_operacoes' ? 'active' : '' }}">
                 <i class="fas fa-table-cells nav-icon"></i>
                 <p>Visão geral</p>
@@ -34,12 +35,12 @@
         </li>
 
         {# Produto: Recursos Humanos #}
-        <li class="nav-item {{ modulo_rh_open ? 'menu-open' : '' }}">
+        <li class="nav-item has-treeview nav-product {{ modulo_rh_open ? 'menu-open' : '' }}">
             <a href="{{ path('app_rh') }}" class="nav-link {{ modulo_rh_open ? 'active' : '' }}">
                 <i class="fas fa-id-card nav-icon"></i>
                 <p>Recursos Humanos <i class="fas fa-angle-left right"></i></p>
             </a>
-            <ul class="nav nav-treeview">
+            <ul class="nav nav-treeview nav-product-children{{ modulo_rh_open ? ' menu-open' : '' }}">
                 <li class="nav-item">
                     <a href="{{ path('app_rh') }}" class="nav-link {{ route == 'app_rh' ? 'active' : '' }}">
                         <i class="fas fa-table-cells nav-icon"></i>
@@ -74,12 +75,12 @@
         </li>
 
         {# Produto: Gestão de Pessoas #}
-        <li class="nav-item {{ modulo_pessoas_open ? 'menu-open' : '' }}">
+        <li class="nav-item has-treeview nav-product {{ modulo_pessoas_open ? 'menu-open' : '' }}">
             <a href="{{ path('app_pessoas') }}" class="nav-link {{ modulo_pessoas_open ? 'active' : '' }}">
                 <i class="fas fa-people-group nav-icon"></i>
                 <p>Gestão de Pessoas <i class="fas fa-angle-left right"></i></p>
             </a>
-            <ul class="nav nav-treeview">
+            <ul class="nav nav-treeview nav-product-children{{ modulo_pessoas_open ? ' menu-open' : '' }}">
                 <li class="nav-item">
                     <a href="{{ path('app_pessoas') }}" class="nav-link {{ route == 'app_pessoas' ? 'active' : '' }}">
                         <i class="fas fa-table-cells nav-icon"></i>
@@ -121,12 +122,12 @@
 
         {% if nav_show_modulo_engenharia|default(false) %}
         {# Produto: Obras e Projetos #}
-        <li class="nav-item {{ modulo_engenharia_open ? 'menu-open' : '' }}">
+        <li class="nav-item has-treeview nav-product {{ modulo_engenharia_open ? 'menu-open' : '' }}">
             <a href="{{ path('app_engenharia') }}" class="nav-link {{ modulo_engenharia_open ? 'active' : '' }}">
                 <i class="fas fa-hard-hat nav-icon"></i>
                 <p>Obras e Projetos <i class="fas fa-angle-left right"></i></p>
             </a>
-            <ul class="nav nav-treeview">
+            <ul class="nav nav-treeview nav-product-children{{ modulo_engenharia_open ? ' menu-open' : '' }}">
                 <li class="nav-item">
                     <a href="{{ path('app_engenharia') }}" class="nav-link {{ route == 'app_engenharia' ? 'active' : '' }}">
                         <i class="fas fa-table-cells nav-icon"></i>
@@ -177,65 +178,46 @@
 {% endif %}
 
 {% if nav_show_hub_talentos|default(false) %}
-<li class="nav-item {{ route starts with 'app_talentos' ? 'menu-open' : '' }}">
-    <a href="{{ path('app_talentos') }}" class="nav-link {{ route starts with 'app_talentos' ? 'active' : '' }}">
+{% set hub_talentos_open = nav_hub_talentos_active|default(false) %}
+<li class="nav-item has-treeview nav-hub {{ hub_talentos_open ? 'menu-open' : '' }}">
+    <a href="{{ path('app_talentos') }}" class="nav-link {{ hub_talentos_open ? 'active' : '' }}">
         <i class="fas fa-gem nav-icon"></i>
         <p>Hub de Talentos <i class="fas fa-angle-left right"></i></p>
     </a>
-    <ul class="nav nav-treeview">
-        <li class="nav-item">
-            <a href="{{ path('app_talentos') }}" class="nav-link {{ route == 'app_talentos' ? 'active' : '' }}">
-                <i class="fas fa-table-cells nav-icon"></i><p>Visão geral</p>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ path('app_talentos_banco') }}" class="nav-link {{ route == 'app_talentos_banco' ? 'active' : '' }}">
-                <i class="fas fa-address-card nav-icon"></i><p>Banco de Talentos</p>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ path('app_talentos_vagas') }}" class="nav-link {{ route == 'app_talentos_vagas' ? 'active' : '' }}">
-                <i class="fas fa-clipboard-list nav-icon"></i><p>Vagas</p>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ path('app_talentos_trilhas') }}" class="nav-link {{ route == 'app_talentos_trilhas' ? 'active' : '' }}">
-                <i class="fas fa-route nav-icon"></i><p>Trilhas de Carreira</p>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ path('app_talentos_mentoria') }}" class="nav-link {{ route == 'app_talentos_mentoria' ? 'active' : '' }}">
-                <i class="fas fa-chalkboard-user nav-icon"></i><p>Mentoria</p>
-            </a>
-        </li>
+    <ul class="nav nav-treeview nav-hub-children{{ hub_talentos_open ? ' menu-open' : '' }}">
+        {{ nav.overview('Visão geral', path('app_talentos'), route == 'app_talentos') }}
+        {{ nav.module('Banco de Talentos', 'address-card', path('app_talentos_banco'), route == 'app_talentos_banco') }}
+        {{ nav.module('Vagas', 'clipboard-list', path('app_talentos_vagas'), route == 'app_talentos_vagas') }}
+        {{ nav.module('Trilhas de Carreira', 'route', path('app_talentos_trilhas'), route == 'app_talentos_trilhas') }}
+        {{ nav.module('Mentoria', 'chalkboard-user', path('app_talentos_mentoria'), route == 'app_talentos_mentoria') }}
     </ul>
 </li>
 {% endif %}
 
 {% if nav_show_hub_maturidade|default(false) %}
 {% set hub_maturidade_open = nav_hub_maturidade_active|default(false) %}
-<li class="nav-item {{ hub_maturidade_open ? 'menu-open' : '' }}">
+<li class="nav-item has-treeview nav-hub {{ hub_maturidade_open ? 'menu-open' : '' }}">
     <a href="{{ path('app_maturidade') }}" class="nav-link {{ hub_maturidade_open ? 'active' : '' }}">
         <i class="fas fa-gauge-high nav-icon"></i>
         <p>Hub de Maturidade <i class="fas fa-angle-left right"></i></p>
     </a>
-    <ul class="nav nav-treeview">
-        <li class="nav-item">
+    <ul class="nav nav-treeview nav-hub-children{{ hub_maturidade_open ? ' menu-open' : '' }}">
+        <li class="nav-item nav-hub-overview">
             <a href="{{ path('app_maturidade') }}" class="nav-link {{ route == 'app_maturidade' ? 'active' : '' }}">
                 <i class="fas fa-table-cells nav-icon"></i><p>Visão geral</p>
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item nav-hub-module">
             <a href="{{ path('app_maturidade_avaliacao') }}" class="nav-link {{ route == 'app_maturidade_avaliacao' ? 'active' : '' }}">
                 <i class="fas fa-clipboard-check nav-icon"></i><p>Avaliação</p>
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item nav-hub-module">
             <a href="{{ path('app_maturidade_radar') }}" class="nav-link {{ route == 'app_maturidade_radar' ? 'active' : '' }}">
                 <i class="fas fa-bullseye nav-icon"></i><p>Radar de Maturidade</p>
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item nav-hub-module">
             <a href="{{ path('app_maturidade_plano') }}" class="nav-link {{ route == 'app_maturidade_plano' ? 'active' : '' }}">
                 <i class="fas fa-list-check nav-icon"></i><p>Plano de Ação</p>
             </a>
@@ -243,12 +225,12 @@
 
         {% if nav_show_modulo_publicidade|default(false) %}
         {# Produto: Marca e Comunicação #}
-        <li class="nav-item {{ modulo_publicidade_open ? 'menu-open' : '' }}">
+        <li class="nav-item has-treeview nav-product {{ modulo_publicidade_open ? 'menu-open' : '' }}">
             <a href="{{ path('app_publicidade') }}" class="nav-link {{ modulo_publicidade_open ? 'active' : '' }}">
                 <i class="fas fa-bullhorn nav-icon"></i>
                 <p>Marca e Comunicação <i class="fas fa-angle-left right"></i></p>
             </a>
-            <ul class="nav nav-treeview">
+            <ul class="nav nav-treeview nav-product-children{{ modulo_publicidade_open ? ' menu-open' : '' }}">
                 <li class="nav-item">
                     <a href="{{ path('app_publicidade') }}" class="nav-link {{ route == 'app_publicidade' ? 'active' : '' }}">
                         <i class="fas fa-table-cells nav-icon"></i>
@@ -301,30 +283,30 @@
 {# ── TENANT: gestão da plataforma ── #}
 {% if nav_show_plataforma|default(false) %}
 <li class="nav-header">Plataforma</li>
-<li class="nav-item {{ route starts with 'app_admin' ? 'menu-open' : '' }}">
+<li class="nav-item has-treeview nav-hub {{ route starts with 'app_admin' ? 'menu-open' : '' }}">
     <a href="{{ path('app_admin') }}" class="nav-link {{ route starts with 'app_admin' ? 'active' : '' }}">
         <i class="fas fa-shield-halved nav-icon"></i>
         <p>Admin <i class="fas fa-angle-left right"></i></p>
     </a>
-    <ul class="nav nav-treeview">
-        <li class="nav-item">
+    <ul class="nav nav-treeview nav-hub-children{{ route starts with 'app_admin' ? ' menu-open' : '' }}">
+        <li class="nav-item nav-hub-overview">
             <a href="{{ path('app_admin') }}" class="nav-link {{ route == 'app_admin' ? 'active' : '' }}">
                 <i class="fas fa-table-cells nav-icon"></i><p>Visão geral</p>
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item nav-hub-module">
             <a href="{{ path('app_admin_usuarios') }}" class="nav-link {{ route == 'app_admin_usuarios' ? 'active' : '' }}">
                 <i class="fas fa-user-shield nav-icon"></i><p>Usuários</p>
             </a>
         </li>
         {% if nav_show_tenant_empresas|default(false) %}
-        <li class="nav-item">
+        <li class="nav-item nav-hub-module">
             <a href="{{ path('app_admin_empresas') }}" class="nav-link {{ route == 'app_admin_empresas' ? 'active' : '' }}">
                 <i class="fas fa-building nav-icon"></i><p>Empresas</p>
             </a>
         </li>
         {% endif %}
-        <li class="nav-item">
+        <li class="nav-item nav-hub-module">
             <a href="{{ path('app_admin_configuracoes') }}" class="nav-link {{ route == 'app_admin_configuracoes' ? 'active' : '' }}">
                 <i class="fas fa-sliders nav-icon"></i><p>Configurações</p>
             </a>

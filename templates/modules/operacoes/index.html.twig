@@ -1,20 +1,21 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/hub.html.twig' %}
 {% block title %}Hub Operações{% endblock %}
-{% block page_title %}Hub Operações{% endblock %}
-{% block breadcrumb %}<li class="breadcrumb-item active">Hub Operações</li>{% endblock %}
-{% block content %}
-
-{% set kpi_items = [
-    { value: '—', label: 'Recursos Humanos',  sub: 'Colaboradores ativos',  route: 'app_rh' },
-    { value: '—', label: 'Gestão de Pessoas', sub: 'Equipes e estrutura',   route: 'app_pessoas' },
-] %}
-{% if nav_show_modulo_engenharia|default(false) %}
-    {% set kpi_items = kpi_items|merge([
-        { value: '—', label: 'Obras e Projetos', sub: 'Obras em execução', route: 'app_engenharia' }
-    ]) %}
-{% endif %}
-{% include 'components/kpi_row.html.twig' with { items: kpi_items } %}
-
+{% set hub_page_title = 'Hub Operações' %}
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% set kpi_items = [
+        { value: '—', label: 'Recursos Humanos',  sub: 'Colaboradores ativos',  route: 'app_rh' },
+        { value: '—', label: 'Gestão de Pessoas', sub: 'Equipes e estrutura',   route: 'app_pessoas' },
+    ] %}
+    {% if nav_show_modulo_engenharia|default(false) %}
+        {% set kpi_items = kpi_items|merge([
+            { value: '—', label: 'Obras e Projetos', sub: 'Obras em execução', route: 'app_engenharia' }
+        ]) %}
+    {% endif %}
+    {% include 'components/kpi_row.html.twig' with { items: kpi_items, mb: 'mb-0' } %}
+</div>
+{% endblock %}
+{% block hub_content %}
 <div class="row">
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {

@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+{% block page_toolbar_layout %}yes{% endblock %}
+{% block page_show_title %}{% endblock %}
+{% block content_lead %}
+<div class="page-lead-zone">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: stub_page_title|default(''),
+        search_disabled: true
+    } %}
+        {% block toolbar_actions %}{% block stub_toolbar_actions %}{% endblock %}{% endblock %}
+        {% block toolbar_filters %}{% block stub_toolbar_filters %}{% endblock %}{% endblock %}
+    {% endembed %}
+</div>
+{% endblock %}
+{% block content %}
+{% include 'components/page_stub.html.twig' with {
+    page_subtitle: stub_page_subtitle|default('Em construção'),
+    empty_icon: stub_empty_icon|default('fa-tools'),
+    empty_title: stub_empty_title|default('Módulo em desenvolvimento'),
+    empty_text: stub_empty_text|default('Esta funcionalidade estará disponível em breve.')
+} %}
+{% endblock %}

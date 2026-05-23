@@ -1,12 +1,5 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/hub.html.twig' %}
 {% block title %}Ficha Técnica{% endblock %}
-{% block page_title %}Ficha Técnica{% endblock %}
-{% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ path('app_hub_operacoes') }}">Hub Operações</a></li>
-    <li class="breadcrumb-item"><a href="{{ path('app_pessoas_membros') }}">Membros</a></li>
-    <li class="breadcrumb-item active">Ficha Técnica</li>
-{% endblock %}
-{% block content %}
 
 {# ── Banco de membros mock ── #}
 {% set all = {
@@ -26,6 +19,22 @@
 
 {% set m = all[membro_id] ?? all[1] %}
 
+{% block content_lead %}
+<div class="page-lead-zone">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: m.nome,
+        search_disabled: true
+    } %}
+        {% block toolbar_actions %}
+            <a href="{{ path('app_pessoas_membros') }}" class="btn-huplex-ghost btn-sm">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        {% endblock %}
+    {% endembed %}
+</div>
+{% endblock %}
+
+{% block hub_content %}
 <div class="ficha-stub-banner mb-3">
     <i class="fas fa-circle-info"></i>
     Dados fictícios de demonstração — ficha de <strong>{{ m.nome }}</strong> (ID #{{ membro_id }}).

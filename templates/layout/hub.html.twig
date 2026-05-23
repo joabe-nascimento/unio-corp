@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+{% block page_toolbar_layout %}yes{% endblock %}
+{% block page_show_title %}{% endblock %}
+{% block content_lead %}
+<div class="page-lead-zone">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: hub_page_title|default(''),
+        search_placeholder: hub_search_placeholder|default('Buscar…'),
+        search_disabled: hub_search_disabled|default(true)
+    } %}
+        {% block toolbar_actions %}{% block hub_toolbar_actions %}{% endblock %}{% endblock %}
+        {% block toolbar_filters %}{% block hub_toolbar_filters %}{% endblock %}{% endblock %}
+    {% endembed %}
+    {% block hub_kpis %}{% endblock %}
+</div>
+{% endblock %}
+{% block content %}
+<div class="page-body-inner">
+    {% block hub_content %}{% endblock %}
+</div>
+{% endblock %}

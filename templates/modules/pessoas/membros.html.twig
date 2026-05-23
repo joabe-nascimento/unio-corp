@@ -1,68 +1,55 @@
 {% extends 'base.html.twig' %}
 {% block title %}Membros{% endblock %}
-{% block page_title %}Membros{% endblock %}
-{% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ path('app_hub_operacoes') }}">Hub Operações</a></li>
-    <li class="breadcrumb-item active">Membros</li>
-{% endblock %}
-{% block content %}
-
-{# KPIs com números de demo #}
-{% include 'components/kpi_row.html.twig' with { items: [
-    { value: '12', label: 'Total de Membros',  sub: 'Cadastrados' },
-    { value: '10', label: 'Ativos',            sub: 'Trabalhando agora' },
-    { value: '1',  label: 'Em Férias',         sub: 'Este mês' },
-    { value: '4',  label: 'Equipes',           sub: 'Formadas', route: 'app_pessoas_equipes' },
-] } %}
-
-{# ── Toolbar: busca + filtros ── #}
-<div class="huplex-card mb-3 members-toolbar">
-    <div class="members-toolbar-row">
-        <div class="members-search-wrap">
-            <i class="fas fa-magnifying-glass members-search-icon"></i>
-            <input type="text" class="members-search-input"
-                   placeholder="Buscar por nome, cargo ou equipe…" disabled>
-        </div>
-        <div class="members-filters">
-            <div class="filter-group">
-                <label class="filter-label">Status</label>
-                <select class="filter-select" disabled>
-                    <option>Todos</option>
-                    <option>Ativo</option>
-                    <option>Inativo</option>
-                    <option>Férias</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label class="filter-label">Equipe</label>
-                <select class="filter-select" disabled>
-                    <option>Todas</option>
-                    <option>Squad Backend</option>
-                    <option>Design &amp; Marca</option>
-                    <option>Obras e Projetos</option>
-                    <option>PMO</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label class="filter-label">Cargo</label>
-                <select class="filter-select" disabled>
-                    <option>Todos</option>
-                    <option>Desenvolvedor</option>
-                    <option>Designer</option>
-                    <option>Engenheiro</option>
-                    <option>Gestor</option>
-                </select>
-            </div>
+{% block page_toolbar_layout %}yes{% endblock %}
+{% block page_show_title %}{% endblock %}
+{% block content_lead %}
+<div class="page-lead-zone">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: 'Membros',
+        search_placeholder: 'Buscar por nome, cargo ou equipe…',
+        search_disabled: true
+    } %}
+        {% block toolbar_actions %}
             {% if is_granted('ROLE_GESTOR_EQUIPE') %}
-            <a href="{{ path('app_pessoas_membro_novo') }}" class="btn-huplex members-add-btn">
+            <a href="{{ path('app_pessoas_membro_novo') }}" class="btn-huplex">
                 <i class="fas fa-user-plus"></i> Novo Membro
             </a>
             {% endif %}
-        </div>
+        {% endblock %}
+        {% block toolbar_filters %}
+            {% include 'components/filter_group.html.twig' with {
+                label: 'Status',
+                name: 'status',
+                disabled: true,
+                options: ['Todos', 'Ativo', 'Inativo', 'Férias']
+            } %}
+            {% include 'components/filter_group.html.twig' with {
+                label: 'Equipe',
+                name: 'equipe',
+                disabled: true,
+                options: ['Todas', 'Squad Backend', 'Design & Marca', 'Obras e Projetos', 'PMO']
+            } %}
+            {% include 'components/filter_group.html.twig' with {
+                label: 'Cargo',
+                name: 'cargo',
+                disabled: true,
+                options: ['Todos', 'Desenvolvedor', 'Designer', 'Engenheiro', 'Gestor']
+            } %}
+        {% endblock %}
+    {% endembed %}
+
+    <div class="page-lead-kpis">
+        {% include 'components/kpi_row.html.twig' with { items: [
+            { value: '12', label: 'Total de Membros',  sub: 'Cadastrados' },
+            { value: '10', label: 'Ativos',            sub: 'Trabalhando agora' },
+            { value: '1',  label: 'Em Férias',         sub: 'Este mês' },
+            { value: '4',  label: 'Equipes',           sub: 'Formadas', route: 'app_pessoas_equipes' },
+        ], mb: 'mb-0' } %}
     </div>
 </div>
+{% endblock %}
+{% block content %}
 
-{# ── Lista de membros (mock) ── #}
 <div class="huplex-card">
     <div class="list-header-row">
         <div class="list-header-text">
@@ -82,7 +69,6 @@
         Dados fictícios de demonstração — clique em qualquer membro para ver a ficha técnica completa.
     </div>
 
-    {# av_palette para cores do avatar no grid #}
     {% set av_palette = ['av-c1','av-c2','av-c3','av-c4','av-c5','av-c6','av-c7','av-c8'] %}
 
     <div id="members-container" data-view-mode="list">
@@ -100,7 +86,6 @@
             { id:11, nome: 'Kleber Araújo',         cargo: 'Orçamentista',                  equipe: 'Obras e Projetos', status: 'inativo' },
             { id:12, nome: 'Larissa Neves',         cargo: 'Product Designer',              equipe: 'Design & Marca',   status: 'ativo'   },
         ] %}
-        {# Modo lista #}
         <div class="view-list-only">
             {% include 'components/member_card.html.twig' with {
                 nome: m.nome, cargo: m.cargo, equipe: m.equipe, status: m.status,
@@ -108,7 +93,6 @@
             } %}
         </div>
 
-        {# Modo grid — usa componente member_avatar #}
         {% set ci = (loop.index - 1) % av_palette|length %}
         <a href="{{ path('app_pessoas_membro_ficha', {id: m.id}) }}"
            class="view-grid-only text-decoration-none">

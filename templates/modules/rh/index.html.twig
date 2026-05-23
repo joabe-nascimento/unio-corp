@@ -1,16 +1,17 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/hub.html.twig' %}
 {% block title %}RH{% endblock %}
-{% block page_title %}Recursos Humanos{% endblock %}
-{% block breadcrumb %}<li class="breadcrumb-item active">RH</li>{% endblock %}
-{% block content %}
-
-{% include 'components/kpi_row.html.twig' with { items: [
-    { value: '3',  label: 'Admissões',  sub: 'Novas contratações', route: 'app_rh_admissoes' },
-    { value: '8',  label: 'Férias',     sub: 'Em férias agora',    route: 'app_rh_ferias' },
-    { value: '1',  label: 'Demissões',  sub: 'Em andamento',       route: 'app_rh_demissoes' },
-    { value: 'OK', label: 'Folha',      sub: 'Mês atual',          route: 'app_rh_folha' },
-] } %}
-
+{% set hub_page_title = 'Recursos Humanos' %}
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: '3',  label: 'Admissões',  sub: 'Novas contratações', route: 'app_rh_admissoes' },
+        { value: '8',  label: 'Férias',     sub: 'Em férias agora',    route: 'app_rh_ferias' },
+        { value: '1',  label: 'Demissões',  sub: 'Em andamento',       route: 'app_rh_demissoes' },
+        { value: 'OK', label: 'Folha',      sub: 'Mês atual',          route: 'app_rh_folha' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+{% block hub_content %}
 <div class="huplex-card">
     {% include 'components/section_header.html.twig' with {
         title: 'Funcionários Recentes',

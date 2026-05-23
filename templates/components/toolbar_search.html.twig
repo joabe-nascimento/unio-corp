@@ -1,0 +1,26 @@
+{#
+  toolbar_search — busca expansível (lupa → campo), alinhada aos filter_group
+
+  Props:
+    search_placeholder (string)
+    search_disabled    (bool)
+#}
+<div class="filter-group filter-group--search">
+    <span class="filter-label">Busca</span>
+    <div class="list-search-expand" data-search-expand>
+        <button type="button" class="list-search-toggle" aria-label="Buscar" aria-expanded="false">
+            <i class="fas fa-magnifying-glass"></i>
+        </button>
+        <div class="list-search-field">
+            <i class="fas fa-magnifying-glass list-search-field-icon" aria-hidden="true"></i>
+            <input type="search"
+                   class="list-search-input"
+                   placeholder="{{ search_placeholder|default('Buscar…') }}"
+                   {% if search_disabled|default(false) %}disabled{% endif %}
+                   autocomplete="off">
+            <button type="button" class="list-search-close" aria-label="Fechar busca">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+</div>

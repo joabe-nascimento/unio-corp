@@ -1,12 +1,5 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/hub.html.twig' %}
 {% block title %}Detalhe da Equipe{% endblock %}
-{% block page_title %}Equipe{% endblock %}
-{% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ path('app_hub_operacoes') }}">Hub Operações</a></li>
-    <li class="breadcrumb-item"><a href="{{ path('app_pessoas_equipes') }}">Equipes</a></li>
-    <li class="breadcrumb-item active">Detalhe</li>
-{% endblock %}
-{% block content %}
 
 {# ── Banco de equipes mock ── #}
 {% set all_teams = {
@@ -67,6 +60,30 @@
 {# Seleciona a equipe pelo ID ou usa a 1 como fallback #}
 {% set eq = all_teams[equipe_id] ?? all_teams[1] %}
 
+{% block content_lead %}
+<div class="page-lead-zone">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: eq.nome,
+        search_disabled: true
+    } %}
+        {% block toolbar_actions %}
+            <a href="{{ path('app_pessoas_equipes') }}" class="btn-huplex-ghost btn-sm">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        {% endblock %}
+    {% endembed %}
+    <div class="page-lead-kpis">
+        {% include 'components/kpi_row.html.twig' with { items: [
+            { value: eq.membros|length,                                   label: 'Total de Membros' },
+            { value: eq.membros|filter(m => m.status == 'ativo')|length,  label: 'Ativos' },
+            { value: eq.membros|filter(m => m.status == 'ferias')|length, label: 'Em Férias' },
+            { value: eq.membros|filter(m => m.status == 'inativo')|length, label: 'Inativos' },
+        ], mb: 'mb-0' } %}
+    </div>
+</div>
+{% endblock %}
+
+{% block hub_content %}
 <div class="ficha-stub-banner mb-3">
     <i class="fas fa-circle-info"></i>
     Dados fictícios de demonstração — equipe <strong>{{ eq.nome }}</strong>
@@ -97,14 +114,6 @@
     </div>
     {% endif %}
 </div>
-
-{# KPIs #}
-{% include 'components/kpi_row.html.twig' with { items: [
-    { value: eq.membros|length,                                              label: 'Total de Membros' },
-    { value: eq.membros|filter(m => m.status == 'ativo')|length,             label: 'Ativos' },
-    { value: eq.membros|filter(m => m.status == 'ferias')|length,            label: 'Em Férias' },
-    { value: eq.membros|filter(m => m.status == 'inativo')|length,           label: 'Inativos' },
-] } %}
 
 {# Lista de membros com toggle lista/grid #}
 {% set av_palette = ['av-c1','av-c2','av-c3','av-c4','av-c5','av-c6','av-c7','av-c8'] %}
