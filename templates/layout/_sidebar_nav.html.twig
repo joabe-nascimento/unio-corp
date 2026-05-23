@@ -15,6 +15,18 @@
     </a>
 </li>
 
+<li class="nav-item">
+    <a href="{{ path('app_notifications') }}" class="nav-link {{ route starts with 'app_notifications' ? 'active' : '' }}">
+        <i class="fas fa-bell nav-icon"></i>
+        <p>
+            Notificações
+            {% if nav_notifications_unread|default(0) > 0 %}
+                <span class="nav-notif-badge">{{ nav_notifications_unread }}</span>
+            {% endif %}
+        </p>
+    </a>
+</li>
+
 {# ── Layout operacional: hubs conforme o perfil ── #}
 {% if nav_show_hub_operacoes|default(false) or nav_show_hub_talentos|default(false) or nav_show_hub_maturidade|default(false) %}
 <li class="nav-header">Hubs</li>

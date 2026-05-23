@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notificações{% endblock %}
+{% block page_show_title %}{% endblock %}
+
+{% block content %}
+
+{% embed 'components/list_toolbar.html.twig' with { page_title: 'Notificações', search_placeholder: 'Buscar notificações…', search_disabled: true } %}
+    {% block toolbar_actions %}
+        <span class="notif-toolbar-badge">{{ unread_count }} não lida{{ unread_count != 1 ? 's' : '' }}</span>
+        <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="Em breve">
+            <i class="fas fa-check-double mr-1"></i> Marcar todas como lidas
+        </button>
+    {% endblock %}
+    {% block toolbar_filters %}
+        <div class="notif-filter-chips" role="group" aria-label="Filtrar notificações">
+            <span class="notif-filter-chip notif-filter-chip--active">Todas ({{ total_count }})</span>
+            <span class="notif-filter-chip">Não lidas ({{ unread_count }})</span>
+        </div>
+    {% endblock %}
+{% endembed %}
+
+<div class="huplex-card notif-card">
+    <p class="section-subtitle mb-3">Atualizações recentes da sua área de trabalho</p>
+    {% include 'components/notifications_list.html.twig' with { notifications: notifications } %}
+</div>
+
+{% endblock %}

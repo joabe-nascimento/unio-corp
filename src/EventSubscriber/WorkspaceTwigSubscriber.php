@@ -4,6 +4,7 @@ namespace App\EventSubscriber;
 
 use App\Entity\User;
 use App\Service\NavigationService;
+use App\Service\NotificationMockService;
 use App\Service\WorkspaceService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -24,7 +25,8 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private Environment $twig,
         private TokenStorageInterface $tokenStorage,
         private WorkspaceService $workspaceService,
-        private NavigationService $navigation
+        private NavigationService $navigation,
+        private NotificationMockService $notifications,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -56,6 +58,8 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         foreach ($this->navigation->getNavGlobals($user, $route) as $name => $value) {
             $this->twig->addGlobal($name, $value);
         }
+
+        $this->twig->addGlobal('nav_notifications_unread', $this->notifications->getUnreadCount());
     }
 
     private function shouldSkip(?string $route): bool
