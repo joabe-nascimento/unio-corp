@@ -322,6 +322,17 @@
         /* ── Content ── */
         .content-wrapper { background: var(--bg) !important; }
 
+        /* Dashboard, bem-vindo etc. — sem breadcrumb nem toolbar */
+        .content.content--no-header {
+            padding: 20px 24px 24px;
+        }
+
+        .content.content--no-header > .container-fluid--page-body {
+            padding-left: 0;
+            padding-right: 0;
+            max-width: 100%;
+        }
+
         .content-header h1 {
             font-size: 20px;
             font-weight: 700;
@@ -335,6 +346,12 @@
         .breadcrumb-item.active {
             color: var(--text-3) !important;
             font-size: 12px;
+        }
+
+        @media (min-width: 576px) {
+            .breadcrumb--page {
+                float: right;
+            }
         }
 
         /* ── Cards ── */
@@ -2127,3 +2144,289 @@
             line-height: 1;
         }
         .welcome-novidade-item:hover .welcome-novidade-arrow { color: var(--accent); }
+
+        /* Utilitários (compatíveis com Bootstrap 4) */
+        .gap-1 { gap: 0.25rem; }
+        .gap-2 { gap: 0.5rem; }
+        .min-w-0 { min-width: 0; }
+
+        /* ── Mobile: shell, navbar, fichas ── */
+        @media (max-width: 991.98px) {
+            body:not(.sidebar-collapse) .content-wrapper,
+            body:not(.sidebar-collapse) .main-footer,
+            body:not(.sidebar-collapse) .main-header,
+            .sidebar-mini.sidebar-collapse .content-wrapper,
+            .sidebar-mini.sidebar-collapse .main-footer,
+            .sidebar-mini.sidebar-collapse .main-header {
+                margin-left: 0 !important;
+            }
+
+            body:not(.sidebar-collapse) .main-sidebar,
+            .sidebar-mini.sidebar-collapse .main-sidebar {
+                width: 224px !important;
+            }
+
+            body:not(.sidebar-open) .main-sidebar {
+                transform: translateX(-100%) !important;
+            }
+
+            body.sidebar-open .main-sidebar {
+                transform: translateX(0) !important;
+                z-index: 1040 !important;
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+            }
+
+            .sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover {
+                transform: translateX(-100%) !important;
+                box-shadow: none !important;
+            }
+
+            body.sidebar-open::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.45);
+                z-index: 1037;
+            }
+
+            .content-header {
+                padding: 12px 16px 10px;
+            }
+
+            .content-header .container-fluid {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .content-header .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .content-header .breadcrumb {
+                float: none !important;
+                margin: 0;
+                padding: 0;
+            }
+
+            .content:not(.content--no-header) > .container-fluid,
+            .content:not(.content--no-header) .container-fluid--page-body {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .content.content--no-header {
+                padding: 16px !important;
+            }
+
+            .content:not(.content--no-header):not(.content--with-toolbar) {
+                padding-top: 12px !important;
+                padding-bottom: 16px !important;
+            }
+
+            .huplex-card {
+                padding: 16px;
+            }
+
+            .dashboard-welcome {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                padding: 16px;
+                min-height: 0;
+            }
+
+            .dashboard-welcome-greeting {
+                font-size: 18px;
+                margin-bottom: 6px;
+            }
+
+            .dashboard-welcome-user {
+                gap: 8px;
+            }
+
+            .dashboard-welcome-empresa {
+                margin-top: 4px;
+            }
+
+            .dashboard-welcome-datetime {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                width: 100%;
+                margin-top: 14px;
+                padding-top: 14px;
+                border-top: 1px solid var(--border);
+                text-align: left;
+            }
+
+            .dashboard-welcome-datetime .dw-date,
+            .dashboard-welcome-datetime .dw-time {
+                font-size: 12px;
+                line-height: 1.4;
+            }
+
+            .dashboard-welcome-datetime .dw-time {
+                font-size: 15px;
+                font-weight: 700;
+                flex-shrink: 0;
+                text-align: right;
+            }
+
+            .welcome-hero {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                padding: 16px;
+            }
+
+            .welcome-hero-main {
+                width: 100%;
+            }
+
+            .welcome-hero-greeting {
+                font-size: 18px;
+            }
+
+            .welcome-hero-sub {
+                margin-bottom: 10px;
+            }
+
+            .welcome-hero-datetime {
+                gap: 12px;
+                padding-top: 12px;
+                border-top: 1px solid var(--border);
+            }
+
+            .welcome-hero-actions {
+                width: 100%;
+                margin-top: 14px;
+                padding-top: 14px;
+                border-top: 1px solid var(--border);
+                justify-content: flex-start;
+            }
+
+            .welcome-hero-actions .btn {
+                flex: 1 1 auto;
+                min-width: 0;
+                white-space: nowrap;
+            }
+
+            .welcome-novidade-item {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .welcome-novidade-end {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .page-banner {
+                padding: 12px 14px;
+                gap: 10px;
+            }
+
+            .stats-row {
+                margin-left: -8px;
+                margin-right: -8px;
+            }
+
+            .stats-row > [class*="col"] {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .ficha-hero-info {
+                min-width: 0;
+            }
+
+            .ficha-hero-actions {
+                width: 100%;
+                min-width: 0;
+                align-items: stretch;
+            }
+
+            .ficha-hero-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .content-header {
+                padding: 10px 14px 8px;
+            }
+
+            .content:not(.content--no-header) > .container-fluid,
+            .content:not(.content--no-header) .container-fluid--page-body {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .content.content--no-header {
+                padding: 14px !important;
+            }
+
+            .huplex-card {
+                padding: 14px;
+            }
+
+            .dashboard-welcome {
+                padding: 14px;
+            }
+
+            .dashboard-welcome-greeting {
+                font-size: 17px;
+            }
+
+            .dashboard-welcome-user {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .dashboard-welcome-datetime {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .dashboard-welcome-datetime .dw-time {
+                text-align: left;
+                font-size: 14px;
+            }
+
+            .welcome-hero {
+                padding: 14px;
+            }
+
+            .welcome-hero-greeting {
+                font-size: 17px;
+            }
+
+            .welcome-hero-datetime {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .welcome-hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .welcome-hero-actions .btn {
+                width: 100%;
+                flex: none;
+                white-space: normal;
+            }
+
+            .breadcrumb-item a,
+            .breadcrumb-item.active {
+                font-size: 11px;
+            }
+        }
