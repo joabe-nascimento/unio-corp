@@ -13,6 +13,7 @@ src/
 │   ├── Auth/
 │   │   └── SecurityController.php
 │   └── Module/            # Um namespace por módulo/hub
+│       ├── Operacoes/     # Hub RH + Pessoas
 │       ├── Rh/
 │       ├── Pessoas/
 │       ├── Talentos/      # Hub
@@ -71,6 +72,23 @@ public/
 ├── images/logos/        # Logos das empresas (campo Empresa.logo)
 └── index.php
 ```
+
+## Menu lateral (por perfil)
+
+O menu usa o **perfil principal** do usuário (`User.perfil`), não a hierarquia Symfony (evita admin ver RH/Talentos).
+
+| Perfil | Dashboard | Hub Operações | Hub Talentos | Hub Maturidade | Admin |
+|--------|-----------|---------------|--------------|----------------|-------|
+| MEMBRO | sim | — | — | — | — |
+| SUPERVISOR_* | sim | sim | — | — | — |
+| GESTOR_* | sim | sim | sim | sim | — |
+| ADMIN / TENANT | sim (layout admin) | — | — | — | sim |
+
+- **Hub Operações** (`/hub/operacoes`): agrupa RH e Gestão de Pessoas num único hub.
+- **Layout admin**: `NavigationService::getLayout()` → `admin` (banner e stats multi-empresa).
+- **Layout user**: `gestor`, `supervisor` ou `membro`.
+
+Globais Twig: `nav_show_*`, `nav_layout`, definidos em `WorkspaceTwigSubscriber`.
 
 ## Comandos úteis
 

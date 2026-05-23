@@ -2,6 +2,7 @@
 
 namespace App\Controller\Core;
 
+use App\Service\NavigationService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,26 +19,20 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/dashboard', name: 'app_dashboard')]
-    public function index(WorkspaceService $workspaceService): Response
+    public function index(WorkspaceService $workspaceService, NavigationService $navigation): Response
     {
         /** @var \App\Entity\User $user */
         $user     = $this->getUser();
         $empresa  = $workspaceService->getActiveEmpresa($user);
         $empresas = $workspaceService->getAvailableEmpresas($user);
+        $layout   = $navigation->getLayout($user);
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $stats  = ['funcionarios' => 128, 'departamentos' => 12, 'vagas_abertas' => 7, 'treinamentos' => 23, 'usuarios' => 34, 'empresas' => count($empresas)];
-            $layout = 'admin';
-        } elseif ($this->isGranted('ROLE_GESTOR')) {
-            $stats  = ['funcionarios' => 64, 'departamentos' => 6, 'vagas_abertas' => 4, 'treinamentos' => 11];
-            $layout = 'gestor';
-        } elseif ($this->isGranted('ROLE_SUPERVISOR')) {
-            $stats  = ['funcionarios' => 28, 'departamentos' => 3, 'vagas_abertas' => 2, 'treinamentos' => 5];
-            $layout = 'supervisor';
-        } else {
-            $stats  = ['treinamentos' => 3, 'avaliacoes' => 1];
-            $layout = 'membro';
-        }
+        $stats = match ($layout) {
+            'admin' => ['funcionarios' => 128, 'departamentos' => 12, 'vagas_abertas' => 7, 'treinamentos' => 23, 'usuarios' => 34, 'empresas' => count($empresas)],
+            'gestor' => ['funcionarios' => 64, 'departamentos' => 6, 'vagas_abertas' => 4, 'treinamentos' => 11],
+            'supervisor' => ['funcionarios' => 28, 'departamentos' => 3, 'vagas_abertas' => 2, 'treinamentos' => 5],
+            default => ['treinamentos' => 3, 'avaliacoes' => 1],
+        };
 
         return $this->render('core/dashboard/index.html.twig', [
             'stats'    => $stats,

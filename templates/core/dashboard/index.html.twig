@@ -87,20 +87,46 @@
                 <div class="section-subtitle">Acesso rápido às funcionalidades</div>
             </div>
             <div class="row">
-                {% set modules = [
-                    {icon:'fa-id-card',    title:'Recursos Humanos',  subtitle:'Funcionários e folha',     route:'app_rh',         role:'ROLE_SUPERVISOR_EQUIPE'},
-                    {icon:'fa-users',      title:'Gestão de Pessoas', subtitle:'Equipes e organograma',   route:'app_pessoas',    role:'ROLE_SUPERVISOR_EQUIPE'},
-                    {icon:'fa-gem',        title:'Hub de Talentos',   subtitle:'Banco, vagas e trilhas',  route:'app_talentos',   role:'ROLE_GESTOR_EQUIPE'},
-                    {icon:'fa-chart-line', title:'Hub de Maturidade', subtitle:'Radar e plano de ação',   route:'app_maturidade', role:'ROLE_GESTOR_EQUIPE'},
-                    {icon:'fa-cog',        title:'Administração',     subtitle:'Usuários e configurações',route:'app_admin',      role:'ROLE_ADMIN'},
-                ] %}
-                {% for m in modules %}
-                    {% if is_granted(m.role) %}
-                    <div class="col-md-6 mb-3 d-flex">
-                        {% include 'components/module_tile.html.twig' with m %}
-                    </div>
-                    {% endif %}
-                {% endfor %}
+                {% if nav_show_hub_operacoes|default(false) %}
+                <div class="col-md-6 mb-3 d-flex">
+                    {% include 'components/module_tile.html.twig' with {
+                        icon: 'fa-briefcase',
+                        title: 'Hub Operações',
+                        subtitle: 'RH e Gestão de Pessoas',
+                        route: 'app_hub_operacoes'
+                    } %}
+                </div>
+                {% endif %}
+                {% if nav_show_hub_talentos|default(false) %}
+                <div class="col-md-6 mb-3 d-flex">
+                    {% include 'components/module_tile.html.twig' with {
+                        icon: 'fa-gem',
+                        title: 'Hub de Talentos',
+                        subtitle: 'Banco, vagas e trilhas',
+                        route: 'app_talentos'
+                    } %}
+                </div>
+                {% endif %}
+                {% if nav_show_hub_maturidade|default(false) %}
+                <div class="col-md-6 mb-3 d-flex">
+                    {% include 'components/module_tile.html.twig' with {
+                        icon: 'fa-gauge-high',
+                        title: 'Hub de Maturidade',
+                        subtitle: 'Radar e plano de ação',
+                        route: 'app_maturidade'
+                    } %}
+                </div>
+                {% endif %}
+                {% if nav_show_admin|default(false) %}
+                <div class="col-md-6 mb-3 d-flex">
+                    {% include 'components/module_tile.html.twig' with {
+                        icon: 'fa-shield-halved',
+                        title: 'Administração',
+                        subtitle: 'Usuários e configurações',
+                        route: 'app_admin'
+                    } %}
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -132,14 +158,12 @@
 
             <div style="font-size:10px;color:var(--text-3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">Permissões</div>
             {% set perms = [
-                {l:'Dashboard',           g: is_granted('ROLE_USER')},
-                {l:'RH & Pessoas',        g: is_granted('ROLE_SUPERVISOR_EQUIPE')},
-                {l:'Visão global RH',     g: is_granted('ROLE_SUPERVISOR')},
-                {l:'Hub Talentos',        g: is_granted('ROLE_GESTOR_EQUIPE')},
-                {l:'Hub Talentos total',  g: is_granted('ROLE_GESTOR')},
-                {l:'Hub Maturidade',      g: is_granted('ROLE_GESTOR_EQUIPE')},
-                {l:'Administração',       g: is_granted('ROLE_ADMIN')},
-                {l:'Multi-empresa',       g: is_granted('ROLE_TENANT')},
+                {l:'Dashboard',        g: true},
+                {l:'Hub Operações',  g: nav_show_hub_operacoes|default(false)},
+                {l:'Hub Talentos',   g: nav_show_hub_talentos|default(false)},
+                {l:'Hub Maturidade', g: nav_show_hub_maturidade|default(false)},
+                {l:'Administração',  g: nav_show_admin|default(false)},
+                {l:'Multi-empresa',  g: nav_show_tenant_empresas|default(false)},
             ] %}
             {% for p in perms %}
             <div class="perm-row">
