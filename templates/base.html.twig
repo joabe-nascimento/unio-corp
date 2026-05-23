@@ -462,20 +462,28 @@
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-link {
             padding: 13px 10px !important;
         }
-        /* AdminLTE overrides */
+        /* AdminLTE overrides — ordem importa: collapsed < normal */
         .sidebar { padding-bottom: 64px; }
-        .main-sidebar,
-        .main-sidebar::before { width: 224px !important; }
-        .content-wrapper,
-        .main-footer { margin-left: 224px !important; }
-        /* Navbar começa depois da sidebar */
-        .main-header.navbar { margin-left: 224px !important; left: 0; }
-        /* Estado colapsado (mini) */
+
+        /* Estado EXPANDIDO */
+        body:not(.sidebar-collapse) .main-sidebar { width: 224px; }
+        body:not(.sidebar-collapse) .content-wrapper,
+        body:not(.sidebar-collapse) .main-footer,
+        body:not(.sidebar-collapse) .main-header.navbar { margin-left: 224px; }
+
+        /* Estado COLAPSADO (mini) — AdminLTE usa 4.6rem */
+        .sidebar-mini.sidebar-collapse .main-sidebar { width: 4.6rem !important; }
         .sidebar-mini.sidebar-collapse .content-wrapper,
-        .sidebar-mini.sidebar-collapse .main-footer { margin-left: 4.6rem !important; }
+        .sidebar-mini.sidebar-collapse .main-footer,
         .sidebar-mini.sidebar-collapse .main-header.navbar { margin-left: 4.6rem !important; }
+
+        /* Hover no mini — sidebar expande por cima sem deslocar conteúdo */
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover,
+        .sidebar-mini.sidebar-open .main-sidebar { width: 224px !important; z-index: 1050; }
+
         @media (max-width: 767px) {
             .content-wrapper, .main-footer, .main-header.navbar { margin-left: 0 !important; }
+            .main-sidebar { width: 224px !important; }
         }
 
         /* Light theme - AdminLTE body bg */
