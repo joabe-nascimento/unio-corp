@@ -148,15 +148,73 @@
             margin: 0 !important;
             width: 100% !important;
         }
-        .nav-treeview { padding-left: 0 !important; background: transparent !important; }
+        .nav-treeview {
+            padding: 0 !important;
+            margin: 0 !important;
+            background: transparent !important;
+            width: 100% !important;
+        }
+        .nav-treeview > .nav-item { width: 100%; margin: 0; padding: 0; }
         .nav-treeview .nav-link {
-            padding-left: 36px !important;
+            padding: 7px 10px 7px 32px !important;
+            margin: 1px 8px !important;
             width: calc(100% - 16px) !important;
+            max-width: calc(100% - 16px) !important;
+            box-sizing: border-box;
+        }
+        .nav-treeview .nav-link:hover,
+        .nav-treeview .nav-link:focus {
+            margin-left: 8px !important;
+            padding-left: 32px !important;
+            transform: none !important;
         }
         .nav-treeview .nav-link .nav-icon { font-size: 11px !important; }
         .nav-sidebar .nav-item.menu-open > .nav-link,
-        .nav-sidebar .nav-item.menu-is-opening > .nav-link {
+        .nav-sidebar .nav-item.menu-is-opening > .nav-link,
+        .nav-sidebar .nav-item.has-treeview > .nav-link {
             width: calc(100% - 16px) !important;
+            max-width: calc(100% - 16px) !important;
+            margin-left: 8px !important;
+            margin-right: 8px !important;
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+            transform: none !important;
+        }
+        .nav-sidebar .nav-item.has-treeview > .nav-link:hover,
+        .nav-sidebar .nav-item.has-treeview > .nav-link:focus {
+            margin-left: 8px !important;
+            padding-left: 10px !important;
+        }
+
+        /* Sidebar expandida: itens não deslocam no hover */
+        body:not(.sidebar-collapse) .main-sidebar .sidebar {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        body:not(.sidebar-collapse) .main-sidebar .nav-sidebar > .nav-item > .nav-link {
+            display: flex !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+            width: calc(100% - 16px) !important;
+            max-width: calc(100% - 16px) !important;
+            margin-left: 8px !important;
+            margin-right: 8px !important;
+            left: 0 !important;
+            transform: none !important;
+        }
+        body:not(.sidebar-collapse) .main-sidebar .nav-sidebar > .nav-item > .nav-link:hover,
+        body:not(.sidebar-collapse) .main-sidebar .nav-sidebar > .nav-item > .nav-link:focus,
+        body:not(.sidebar-collapse) .main-sidebar .nav-sidebar > .nav-item > .nav-link.active {
+            margin-left: 8px !important;
+            margin-right: 8px !important;
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+            width: calc(100% - 16px) !important;
+            transform: none !important;
+        }
+        body:not(.sidebar-collapse) .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link {
+            width: calc(100% - 16px) !important;
+            margin-left: 8px !important;
         }
 
         /* ── Content ── */
@@ -666,6 +724,12 @@
             gap: 10px;
             width: 100% !important;
         }
+        .huplex-brand-mark {
+            width: 32px; height: 32px;
+            flex-shrink: 0;
+            object-fit: contain;
+            display: block;
+        }
         .empresa-logo,
         .empresa-logo-fallback {
             width: 32px; height: 32px;
@@ -688,6 +752,12 @@
             flex: 1; min-width: 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             font-size: 14px !important;
+        }
+        .brand-text .brand-suffix {
+            font-weight: 500;
+            color: var(--text-3);
+            font-size: 12px;
+            margin-left: 2px;
         }
         .brand-link:focus,
         .brand-link:focus-visible {
@@ -735,6 +805,9 @@
             gap: 0 !important;
         }
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-text { display: none !important; }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .huplex-brand-mark {
+            width: 30px; height: 30px;
+        }
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .empresa-logo,
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .empresa-logo-fallback {
             width: 30px; height: 30px;
@@ -811,17 +884,41 @@
         .sidebar-mini.sidebar-open .nav-header { display: block !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link,
         .sidebar-mini.sidebar-open .nav-sidebar > .nav-item > .nav-link {
-            width: auto !important;
+            width: calc(100% - 16px) !important;
+            max-width: calc(100% - 16px) !important;
             height: auto !important;
             margin: 1px 8px !important;
-            padding: 7px 12px !important;
+            padding: 8px 10px !important;
             justify-content: flex-start !important;
+            transform: none !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link:hover,
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link:focus {
+            margin-left: 8px !important;
+            padding-left: 10px !important;
+            width: calc(100% - 16px) !important;
         }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link p,
         .sidebar-mini.sidebar-open .nav-sidebar > .nav-item > .nav-link p { display: block !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-treeview .nav-link {
+            width: calc(100% - 16px) !important;
+            margin-left: 8px !important;
+            padding-left: 32px !important;
+        }
 
         .main-sidebar { display: flex !important; flex-direction: column !important; height: 100vh; }
-        .main-sidebar .sidebar { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 8px; }
+        .main-sidebar .sidebar {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0 0 8px 0 !important;
+        }
+        /* AdminLTE sidebar-mini: não estreitar links quando expandido */
+        .sidebar-mini:not(.sidebar-collapse) .nav-sidebar .nav-link {
+            width: calc(100% - 16px) !important;
+            margin-left: 8px !important;
+            margin-right: 8px !important;
+        }
 
         /* Layout alinhado — sidebar e header na mesma largura */
         body:not(.sidebar-collapse) .main-sidebar { width: 224px !important; }
@@ -846,9 +943,11 @@
         }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link:focus,
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link:hover {
-            width: auto !important;
-            margin: 1px 8px !important;
-            padding: 7px 12px !important;
+            width: calc(100% - 16px) !important;
+            margin-left: 8px !important;
+            margin-right: 8px !important;
+            padding: 8px 10px !important;
+            transform: none !important;
         }
     </style>
 
@@ -906,15 +1005,12 @@
     {# ── Sidebar ── #}
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <div class="sidebar-top">
-            <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0">
-                {% if empresa is defined and empresa %}
-                    {{ empresa_macro.logo(empresa, 'empresa-logo') }}
-                    <span class="brand-text font-weight-bold">{{ empresa.nome }}</span>
-                {% else %}
-                    <span class="brand-text font-weight-bold">
-                        Hup<span class="accent">lex</span>
-                    </span>
-                {% endif %}
+            <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0" title="Huplex Corp">
+                <img src="{{ asset('images/huplex-mark.svg') }}" alt="" class="huplex-brand-mark" width="32" height="32">
+                <span class="brand-text font-weight-bold">
+                    Hup<span class="accent">lex</span>
+                    <span class="brand-suffix">Corp</span>
+                </span>
             </a>
         </div>
 

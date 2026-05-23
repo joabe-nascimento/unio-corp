@@ -2,8 +2,10 @@
 {% import 'macros/empresa.html.twig' as empresa_macro %}
 <div class="page-banner">
     <div class="page-banner-icon">
-        {% if empresa is defined and empresa and empresa.logo and use_empresa_logo|default(true) %}
+        {% if use_empresa_logo|default(false) and empresa is defined and empresa and empresa.logo %}
             {{ empresa_macro.logo(empresa, 'empresa-logo banner-logo') }}
+        {% elseif use_huplex_mark|default(true) %}
+            <img src="{{ asset('images/huplex-mark.svg') }}" alt="" class="banner-logo huplex-brand-mark" width="32" height="32">
         {% else %}
             <i class="fas {{ icon|default('fa-circle-info') }}"></i>
         {% endif %}
