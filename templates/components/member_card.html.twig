@@ -1,0 +1,49 @@
+{#
+  member_card — card de membro para listagens
+  Props:
+    nome      (string)       nome completo
+    cargo     (string, opt)  cargo / função
+    equipe    (string, opt)  nome da equipe principal
+    status    (string, opt)  'ativo' | 'inativo' | 'ferias' (default: 'ativo')
+    foto      (string, opt)  URL da foto
+    route     (string, opt)  rota Symfony para a ficha (abre o card como link)
+    route_params (obj, opt)  parâmetros da rota ex: {id: 1}
+    size      (string, opt)  'sm' | 'md' (default: 'md')
+
+  Uso:
+    {% include 'components/member_card.html.twig' with {
+        nome: 'Ana Silva', cargo: 'Dev Full Stack',
+        equipe: 'Squad Backend', status: 'ativo',
+        route: 'app_pessoas_membro_ficha', route_params: {id: 1}
+    } %}
+#}
+{% set _tag   = (route is defined and route) ? 'a' : 'div' %}
+{% set _href  = (route is defined and route) ? path(route, route_params|default({})) : null %}
+{% set _labels = { ativo: 'Ativo', inativo: 'Inativo', ferias: 'Férias' } %}
+{% set _colors = { ativo: 'success', inativo: 'secondary', ferias: 'warning' } %}
+
+<{{ _tag }}{% if _href %} href="{{ _href }}"{% endif %}
+    class="member-card member-card--{{ size|default('md') }} text-decoration-none">
+    {% include 'components/member_avatar.html.twig' with {
+        nome: nome, foto: foto|default(null), size: size|default('md') == 'sm' ? 'sm' : 'md'
+    } %}
+    <div class="member-card-info">
+        <div class="member-card-name">{{ nome }}</div>
+        {% if cargo is defined and cargo %}
+            <div class="member-card-role">{{ cargo }}</div>
+        {% endif %}
+        {% if equipe is defined and equipe %}
+            <div class="member-card-team">
+                <i class="fas fa-user-group" style="font-size:10px;opacity:.5;margin-right:3px"></i>{{ equipe }}
+            </div>
+        {% endif %}
+    </div>
+    <div class="member-card-status">
+        <span class="member-status member-status--{{ status|default('ativo') }}">
+            {{ _labels[status|default('ativo')] }}
+        </span>
+    </div>
+    {% if _href %}
+        <i class="fas fa-chevron-right member-card-arrow"></i>
+    {% endif %}
+</{{ _tag }}>

@@ -1,0 +1,34 @@
+{#
+  view_toggle — botões de alternância lista / grid (reutilizável)
+
+  Props:
+    container_id   (string)       ID do elemento pai que contém os itens
+    storage_key    (string, opt)  chave no localStorage; default: container_id ~ '_view'
+    default_view   (string, opt)  'list' | 'grid'  (default: 'list')
+
+  Requerimentos do HTML ao redor:
+    • O container deve ter  id="{{ container_id }}"  e  data-view-mode="list"
+    • Itens visíveis SÓ na lista:  classe  view-list-only
+    • Itens visíveis SÓ no grid:   classe  view-grid-only
+
+  O JS genérico está em base.html.twig (bloco global, carregado uma vez).
+
+  Uso:
+    {% include 'components/view_toggle.html.twig' with {
+        container_id: 'members-container'
+    } %}
+#}
+{% set _key     = storage_key|default(container_id ~ '_view') %}
+{% set _default = default_view|default('list') %}
+
+<div class="view-toggle-group"
+     data-vt-container="{{ container_id }}"
+     data-vt-key="{{ _key }}"
+     data-vt-default="{{ _default }}">
+    <button class="view-btn" data-vt-mode="list" title="Vista em lista">
+        <i class="fas fa-list"></i>
+    </button>
+    <button class="view-btn" data-vt-mode="grid" title="Vista em grid">
+        <i class="fas fa-grip"></i>
+    </button>
+</div>

@@ -1,0 +1,27 @@
+{#
+  action_card — card clicável de navegação/ação (ex: admin)
+  Props:
+    title     (string)       título
+    subtitle  (string, opt)  descrição
+    route     (string)       nome da rota Symfony
+    icon      (string, opt)  ícone FA, ex: 'fa-user-shield'
+
+  Uso:
+    {% include 'components/action_card.html.twig' with {
+        title: 'Usuários',
+        subtitle: 'Gerencie acessos e perfis',
+        route: 'app_admin_usuarios',
+        icon: 'fa-user-shield'
+    } %}
+#}
+<a href="{{ path(route) }}" class="text-decoration-none d-flex w-100">
+    <div class="huplex-card action-card w-100">
+        {% if icon is defined and icon %}
+            <div class="card-icon mb-3"><i class="fas {{ icon }}"></i></div>
+        {% endif %}
+        <div class="action-card-title">{{ title }}</div>
+        {% if subtitle is defined and subtitle %}
+            <div class="action-card-sub">{{ subtitle }}</div>
+        {% endif %}
+    </div>
+</a>

@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+{% block title %}Marca e Comunicação{% endblock %}
+{% block page_title %}Marca e Comunicação{% endblock %}
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{{ path('app_maturidade') }}">Hub de Maturidade</a></li>
+    <li class="breadcrumb-item active">Marca e Comunicação</li>
+{% endblock %}
+{% block content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: '0', label: 'Campanhas Ativas', sub: 'Em veiculação' },
+    { value: '0', label: 'Clientes',          sub: 'Ativos' },
+    { value: '0', label: 'Criativos',         sub: 'Em produção' },
+    { value: '?', label: 'ROI Médio',         sub: 'Acumulado' },
+] } %}
+
+{% include 'components/module_grid.html.twig' with {
+    title: 'Funções do módulo',
+    subtitle: 'Campanhas, criativos, mídia e performance de marca',
+    items: [
+        { icon:'fa-bullhorn',          title:'Campanhas',       subtitle:'Planejamento e veiculação',          route:'app_publicidade_campanhas' },
+        { icon:'fa-building-columns',  title:'Clientes e Marcas',subtitle:'Contas e contratos',               route:'app_publicidade_clientes' },
+        { icon:'fa-palette',           title:'Criativos',       subtitle:'Peças, revisões e aprovações',      route:'app_publicidade_criativos' },
+        { icon:'fa-tower-broadcast',   title:'Mídia e Canais',  subtitle:'TV, digital, OOH e mídia paga',     route:'app_publicidade_midia' },
+        { icon:'fa-lightbulb',         title:'Briefings',       subtitle:'Demandas e direcionamento criativo', route:'app_publicidade_briefings' },
+        { icon:'fa-chart-line',        title:'Métricas e ROI',  subtitle:'KPIs, alcance e conversão',         route:'app_publicidade_metricas' },
+    ]
+} %}
+{% endblock %}

@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/rh')]
-#[IsGranted('ROLE_SUPERVISOR')]
+#[IsGranted('ROLE_SUPERVISOR_EQUIPE')]
 class RhController extends AbstractController
 {
     private const T = 'modules/rh/';

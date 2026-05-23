@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/talentos')]
-#[IsGranted('ROLE_GESTOR')]
+#[IsGranted('ROLE_GESTOR_EQUIPE')]
 class TalentosController extends AbstractController
 {
     private const T = 'modules/talentos/';

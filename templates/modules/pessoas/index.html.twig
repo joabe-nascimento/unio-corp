@@ -2,9 +2,67 @@
 {% block title %}Gestão de Pessoas{% endblock %}
 {% block page_title %}Gestão de Pessoas{% endblock %}
 {% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ path('app_pessoas') }}">Pessoas</a></li>
-    <li class="breadcrumb-item active">Gestao de Pessoas</li>
+    <li class="breadcrumb-item"><a href="{{ path('app_hub_operacoes') }}">Hub Operações</a></li>
+    <li class="breadcrumb-item active">Gestão de Pessoas</li>
 {% endblock %}
 {% block content %}
-{% include 'components/page_stub.html.twig' with { page_title: 'Gestão de Pessoas', page_subtitle: 'Visão geral do módulo' } %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: '0', label: 'Total de Membros',  sub: 'Cadastrados',    route: 'app_pessoas_membros' },
+    { value: '0', label: 'Equipes Ativas',    sub: 'Formadas',       route: 'app_pessoas_equipes' },
+    { value: '0', label: 'Cargos',            sub: 'Registrados',    route: 'app_pessoas_cargos' },
+    { value: '0', label: 'Avaliações',        sub: 'Realizadas',     route: 'app_pessoas_avaliacao' },
+] } %}
+
+<div class="row">
+    {# Membros — card de módulo principal #}
+    <div class="col-md-6 mb-4 d-flex">
+        {% include 'components/module_card.html.twig' with {
+            title: 'Membros',
+            subtitle: 'Fichas técnicas, perfis, habilidades e histórico',
+            links: [
+                { label: 'Ver todos',       route: 'app_pessoas_membros' },
+                { label: 'Adicionar',       route: 'app_pessoas_membro_novo' },
+                { label: 'Abrir módulo',    route: 'app_pessoas_membros', primary: true },
+            ]
+        } %}
+    </div>
+
+    {# Equipes #}
+    <div class="col-md-6 mb-4 d-flex">
+        {% include 'components/module_card.html.twig' with {
+            title: 'Equipes',
+            subtitle: 'Criação e gestão de times, líderes e composição',
+            links: [
+                { label: 'Ver equipes',     route: 'app_pessoas_equipes' },
+                { label: 'Nova equipe',     route: 'app_pessoas_equipe_nova' },
+                { label: 'Abrir módulo',    route: 'app_pessoas_equipes', primary: true },
+            ]
+        } %}
+    </div>
+
+    {# Cargos #}
+    <div class="col-md-6 mb-4 d-flex">
+        {% include 'components/module_card.html.twig' with {
+            title: 'Cargos',
+            subtitle: 'Estrutura de funções e hierarquia de posições',
+            links: [
+                { label: 'Ver cargos',      route: 'app_pessoas_cargos' },
+                { label: 'Abrir módulo',    route: 'app_pessoas_cargos', primary: true },
+            ]
+        } %}
+    </div>
+
+    {# Organograma #}
+    <div class="col-md-6 mb-4 d-flex">
+        {% include 'components/module_card.html.twig' with {
+            title: 'Organograma',
+            subtitle: 'Visualização da estrutura organizacional',
+            links: [
+                { label: 'Ver organograma', route: 'app_pessoas_organograma' },
+                { label: 'Abrir módulo',    route: 'app_pessoas_organograma', primary: true },
+            ]
+        } %}
+    </div>
+</div>
 {% endblock %}

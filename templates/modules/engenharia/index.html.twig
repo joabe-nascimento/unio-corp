@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+{% block title %}Obras e Projetos{% endblock %}
+{% block page_title %}Obras e Projetos{% endblock %}
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{{ path('app_hub_operacoes') }}">Hub Operações</a></li>
+    <li class="breadcrumb-item active">Obras e Projetos</li>
+{% endblock %}
+{% block content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: '0', label: 'Obras Ativas',     sub: 'Em execução' },
+    { value: '0', label: 'Marcos no Prazo',  sub: 'Este mês' },
+    { value: '—', label: 'Orçamento Total',  sub: 'Acumulado' },
+    { value: '0', label: 'Equipes em Campo', sub: 'Alocadas' },
+] } %}
+
+{% include 'components/module_grid.html.twig' with {
+    title: 'Funções do módulo',
+    subtitle: 'Gestão de obras, prazos, custos e conformidade técnica',
+    items: [
+        { icon:'fa-building',        title:'Projetos e Obras',     subtitle:'Cadastro e status das obras',       route:'app_engenharia_projetos' },
+        { icon:'fa-calendar-days',   title:'Cronograma',           subtitle:'Marcos, entregas e prazos',         route:'app_engenharia_cronograma' },
+        { icon:'fa-calculator',      title:'Orçamentos',           subtitle:'Custos, medições e aditivos',       route:'app_engenharia_orcamentos' },
+        { icon:'fa-hard-hat',        title:'Equipes de Campo',     subtitle:'Alocação e produtividade',          route:'app_engenharia_equipes' },
+        { icon:'fa-file-lines',      title:'Documentação Técnica', subtitle:'Plantas, ART e relatórios',         route:'app_engenharia_documentacao' },
+        { icon:'fa-clipboard-check', title:'Normas e Conformidade',subtitle:'NBRs, licenças e inspeções',        route:'app_engenharia_normas' },
+    ]
+} %}
+{% endblock %}

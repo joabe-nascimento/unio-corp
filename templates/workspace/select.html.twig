@@ -45,12 +45,15 @@
         /* header */
         .ws-header { text-align: center; margin-bottom: 36px; }
         .ws-header .logo {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 22px; font-weight: 700;
+            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+            font-size: 24px; font-weight: 700;
             color: var(--text-1); letter-spacing: -0.03em; margin-bottom: 20px;
         }
-        .ws-header .logo img { width: 36px; height: 36px; flex-shrink: 0; }
-        .ws-header .logo span { color: var(--accent); }
+        .ws-header .logo img {
+            width: 42px; height: 42px; flex-shrink: 0;
+            filter: drop-shadow(0 2px 12px rgba(79,127,255,0.35));
+        }
+        .ws-header .logo .logo-accent { color: var(--accent); }
         .ws-header h2 {
             font-size: 20px; font-weight: 700;
             color: var(--text-1); letter-spacing: -0.02em; margin-bottom: 6px;
@@ -94,19 +97,18 @@
             background: rgba(79,127,255,0.07);
         }
 
-        .ws-card .wc-logo,
-        .ws-card .wc-logo-img {
-            width: 44px; height: 44px; border-radius: 11px;
+        .ws-card .empresa-icon-user,
+        .ws-card .empresa-logo-fallback {
+            width: 44px; height: 44px;
+            border-radius: 11px;
             flex-shrink: 0;
-            object-fit: contain;
-            background: var(--surface);
-            border: 1px solid var(--border);
-        }
-        .ws-card .wc-logo {
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(79,127,255,0.1); border: 1px solid rgba(79,127,255,0.18);
-            font-size: 14px; font-weight: 700; color: var(--accent);
-            letter-spacing: -0.03em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(79,127,255,0.12);
+            border: 1px solid rgba(79,127,255,0.28);
+            color: var(--accent);
+            font-size: 26px;
         }
         .ws-card .wc-info { flex: 1; min-width: 0; }
         .ws-card .wc-name {
@@ -172,8 +174,7 @@
 <div class="ws-wrap">
     <div class="ws-header">
         <div class="logo">
-            <img src="{{ asset('images/huplex-mark.svg') }}" alt="" width="36" height="36">
-            <span>Hup<span>lex</span> Corp</span>
+            <span>Hup<span class="logo-accent">lex</span></span>
         </div>
         <h2>Selecione a área de trabalho</h2>
         <p>Escolha a empresa que deseja acessar agora</p>
@@ -191,11 +192,7 @@
         <a href="{{ path('app_workspace_switch', {id: emp.id}) }}"
            class="ws-card {% if current and current.id == emp.id %}ws-active{% endif %}">
 
-            {% if emp.logo %}
-                {{ empresa_macro.logo(emp, 'wc-logo-img') }}
-            {% else %}
-                <div class="wc-logo">{{ emp.nome|slice(0,2)|upper }}</div>
-            {% endif %}
+            {{ empresa_macro.logo(emp, 'wc-logo') }}
 
             <div class="wc-info">
                 <div class="wc-name">{{ emp.nome }}</div>

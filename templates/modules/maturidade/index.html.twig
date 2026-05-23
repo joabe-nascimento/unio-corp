@@ -4,31 +4,20 @@
 {% block breadcrumb %}<li class="breadcrumb-item active">Hub de Maturidade</li>{% endblock %}
 {% block content %}
 
-<div class="row stats-row mb-2">
-    {% for item in [
-        { icon:'fa-chart-line', value:'—', label:'Nível Médio', sub:'Aguardando avaliação' },
-        { icon:'fa-clipboard-check', value:'0', label:'Avaliações', sub:'Realizadas' },
-        { icon:'fa-list-check', value:'0', label:'Planos de Ação', sub:'Em andamento' },
-        { icon:'fa-trophy', value:'0', label:'Maturidade Alta', sub:'Colaboradores' },
-    ] %}
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="huplex-card stat-card w-100">
-            <div class="card-icon"><i class="fas {{ item.icon }}"></i></div>
-            <div class="stat-card-body">
-                <div class="card-value">{{ item.value }}</div>
-                <div class="card-label">{{ item.label }}</div>
-                <div style="color:var(--text-3);font-size:11px;margin-top:2px">{{ item.sub }}</div>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: '—', label: 'Nível Médio',      sub: 'Aguardando avaliação' },
+    { value: '0',  label: 'Avaliações',       sub: 'Realizadas' },
+    { value: '0',  label: 'Planos de Ação',   sub: 'Em andamento' },
+    { value: '0',  label: 'Maturidade Alta',  sub: 'Colaboradores' },
+] } %}
 
 <div class="row">
     <div class="col-md-7 mb-4 d-flex">
         <div class="huplex-card flex-fill">
-            <div class="section-title mb-1">Radar de Maturidade</div>
-            <div class="section-subtitle mb-4">Visão geral por dimensão organizacional</div>
+            {% include 'components/section_header.html.twig' with {
+                title: 'Radar de Maturidade',
+                subtitle: 'Visão geral por dimensão organizacional'
+            } %}
             {% include 'components/empty_state.html.twig' with {
                 icon: 'fa-bullseye',
                 title: 'Radar não disponível',
@@ -41,8 +30,10 @@
     </div>
     <div class="col-md-5 mb-4">
         <div class="huplex-card">
-            <div class="section-title mb-1" style="font-size:15px">Dimensões Avaliadas</div>
-            <div class="section-subtitle mb-3">Clique para detalhar cada área</div>
+            {% include 'components/section_header.html.twig' with {
+                title: 'Dimensões Avaliadas',
+                subtitle: 'Clique para detalhar cada área'
+            } %}
             {% for dim in ['Liderança','Cultura Organizacional','Processos','Tecnologia','Pessoas','Estratégia'] %}
             <div class="d-flex align-items-center justify-content-between py-2 perm-row">
                 <span class="perm-label">{{ dim }}</span>
@@ -56,5 +47,19 @@
             {% endfor %}
         </div>
     </div>
+
+    {% if nav_show_modulo_publicidade|default(false) %}
+    <div class="col-md-6 mb-4 d-flex">
+        {% include 'components/module_card.html.twig' with {
+            title: 'Marca e Comunicação',
+            subtitle: 'Campanhas, criativos, mídia e ROI',
+            links: [
+                { label: 'Campanhas',  route: 'app_publicidade_campanhas' },
+                { label: 'Métricas',   route: 'app_publicidade_metricas' },
+                { label: 'Abrir módulo', route: 'app_publicidade', primary: true },
+            ]
+        } %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

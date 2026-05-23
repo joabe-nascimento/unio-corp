@@ -1,0 +1,26 @@
+{#
+  member_avatar — avatar circular com foto ou iniciais geradas
+  Props:
+    nome    (string)       nome do membro (usado para gerar iniciais)
+    foto    (string, opt)  URL da foto
+    size    (string, opt)  'xs'|'sm'|'md'|'lg'|'xl'  (default: 'md')
+    class   (string, opt)  classes extras
+
+  Tamanhos: xs=24 | sm=32 | md=44 | lg=60 | xl=88
+
+  Uso:
+    {% include 'components/member_avatar.html.twig' with { nome: 'Ana Silva', size: 'lg' } %}
+#}
+{% set _sizes = { xs: 24, sm: 32, md: 44, lg: 60, xl: 88 } %}
+{% set _s     = size|default('md') %}
+{% set _px    = _sizes[_s]|default(44) %}
+{% set _parts = nome|default('?')|split(' ')|filter(p => p != '') %}
+{% set _init  = (_parts|first|slice(0,1) ~ (_parts|length > 1 ? _parts|last|slice(0,1) : ''))|upper %}
+<div class="member-avatar member-avatar--{{ _s }} {{ class|default('') }}"
+     title="{{ nome }}">
+    {%- if foto is defined and foto -%}
+        <img src="{{ foto }}" alt="{{ nome }}" class="member-avatar-img">
+    {%- else -%}
+        {{- _init -}}
+    {%- endif -%}
+</div>

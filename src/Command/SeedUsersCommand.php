@@ -34,8 +34,8 @@ class SeedUsersCommand extends Command
         $empresas = [];
         foreach ([
             ['nome' => 'Huplex Corp',     'cnpj' => '11.111.111/0001-11', 'setor' => 'Tecnologia', 'logo' => 'images/logos/huplex-corp.svg'],
-            ['nome' => 'Nexus Saude S/A', 'cnpj' => '22.222.222/0001-22', 'setor' => 'Saude',      'logo' => 'images/logos/nexus-saude.svg'],
-            ['nome' => 'Edu360 Ensino',   'cnpj' => '33.333.333/0001-33', 'setor' => 'Educacao',   'logo' => 'images/logos/edu360.svg'],
+            ['nome' => 'Nexus Saúde S/A', 'cnpj' => '22.222.222/0001-22', 'setor' => 'Saúde',      'logo' => 'images/logos/nexus-saude.svg'],
+            ['nome' => 'Edu360 Ensino',   'cnpj' => '33.333.333/0001-33', 'setor' => 'Educação',   'logo' => 'images/logos/edu360.svg'],
         ] as $data) {
             $emp = new Empresa();
             $emp->setNome($data['nome'])->setCnpj($data['cnpj'])->setSetor($data['setor'])->setLogo($data['logo']);

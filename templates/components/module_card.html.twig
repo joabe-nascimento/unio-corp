@@ -1,0 +1,35 @@
+{#
+  module_card — card de submódulo com título, descrição e links de ação
+  Props:
+    title     (string)         título do card
+    subtitle  (string, opt)    descrição curta
+    links     (array, opt)     lista de ações: { label, route, primary? }
+                               primary: true → btn-huplex | false/omit → btn-huplex-ghost
+
+  Uso:
+    {% include 'components/module_card.html.twig' with {
+        title: 'Recursos Humanos',
+        subtitle: 'Funcionários, admissões e folha',
+        links: [
+            { label: 'Funcionários', route: 'app_rh_funcionarios' },
+            { label: 'Admissões',    route: 'app_rh_admissoes' },
+            { label: 'Abrir RH',     route: 'app_rh', primary: true },
+        ]
+    } %}
+#}
+<div class="huplex-card flex-fill">
+    <div class="section-title mb-1">{{ title }}</div>
+    {% if subtitle is defined and subtitle %}
+        <div class="section-subtitle {% if links is defined and links %}mb-4{% else %}mb-0{% endif %}">{{ subtitle }}</div>
+    {% endif %}
+    {% if links is defined and links %}
+        <div class="d-flex flex-wrap gap-2">
+            {% for link in links %}
+                <a href="{{ path(link.route) }}"
+                   class="{{ link.primary|default(false) ? 'btn-huplex' : 'btn-huplex-ghost' }} btn-sm">
+                    {{ link.label }}
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

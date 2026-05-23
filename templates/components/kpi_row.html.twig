@@ -1,0 +1,25 @@
+{#
+  kpi_row — linha de KPIs componentizada
+  Props:
+    items   (array)   cada item: { value, label, sub?, route?, trend? }
+    mb      (string, opt)  margem bottom Bootstrap, ex: 'mb-3'. Default: 'mb-3'
+
+  Uso:
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: '0', label: 'Total', sub: 'Cadastrados' },
+        { value: '3', label: 'Ativos', route: 'app_rh_funcionarios' },
+    ]} %}
+#}
+{% set n = items|length %}
+{% set col_class = n == 1 ? 'col-12'
+    : (n == 2 ? 'col-md-6'
+    : (n == 3 ? 'col-md-4'
+    : 'col-lg-3 col-md-6')) %}
+
+<div class="row stats-row {{ mb|default('mb-3') }}">
+    {% for item in items %}
+    <div class="col-sm-6 {{ col_class }}">
+        {% include 'components/stat_card.html.twig' with item %}
+    </div>
+    {% endfor %}
+</div>

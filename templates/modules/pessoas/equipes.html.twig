@@ -2,9 +2,100 @@
 {% block title %}Equipes{% endblock %}
 {% block page_title %}Equipes{% endblock %}
 {% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ path('app_pessoas') }}">Pessoas</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_hub_operacoes') }}">Hub Operações</a></li>
     <li class="breadcrumb-item active">Equipes</li>
 {% endblock %}
 {% block content %}
-{% include 'components/page_stub.html.twig' with { page_title: 'Equipes', page_subtitle: 'Gestão de equipes' } %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: '4',  label: 'Equipes',          sub: 'Formadas' },
+    { value: '12', label: 'Total de Membros', sub: 'Em equipes', route: 'app_pessoas_membros' },
+    { value: '4',  label: 'Gestores',         sub: 'Responsáveis' },
+    { value: '0',  label: 'Sem equipe',       sub: 'Membros a alocar' },
+] } %}
+
+{# ── Toolbar ── #}
+<div class="huplex-card mb-3 members-toolbar">
+    <div class="members-toolbar-row">
+        <div class="members-search-wrap">
+            <i class="fas fa-magnifying-glass members-search-icon"></i>
+            <input type="text" class="members-search-input"
+                   placeholder="Buscar equipe por nome ou responsável…" disabled>
+        </div>
+        <div class="members-filters">
+            <div class="filter-group">
+                <label class="filter-label">Área</label>
+                <select class="filter-select" disabled>
+                    <option>Todas</option>
+                    <option>Tecnologia</option>
+                    <option>Engenharia</option>
+                    <option>Design</option>
+                    <option>Gestão</option>
+                </select>
+            </div>
+            {% if is_granted('ROLE_GESTOR_EQUIPE') %}
+            <a href="{{ path('app_pessoas_equipe_nova') }}" class="btn-huplex members-add-btn">
+                <i class="fas fa-plus"></i> Nova Equipe
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="huplex-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Todas as Equipes',
+        subtitle: '4 equipes ativas na organização'
+    } %}
+
+    <div class="ficha-stub-banner mb-3">
+        <i class="fas fa-circle-info"></i>
+        Dados fictícios de demonstração — clique em qualquer equipe para ver os detalhes e membros.
+    </div>
+
+    <div class="team-grid">
+        {# Paleta de cores para avatares — letra inicial define a cor #}
+        {% set av_palette = ['av-c1','av-c2','av-c3','av-c4','av-c5','av-c6','av-c7','av-c8'] %}
+        {% set av_max = 4 %}
+
+        {% set teams = [
+            { id:1, nome: 'Squad Backend',    descricao: 'Desenvolvimento back-end e APIs',         lider: 'Ana Silva',       membros: ['A','B','C','E','F'], count: 5,  area: 'Tecnologia'  },
+            { id:2, nome: 'Design & Marca',   descricao: 'UX, UI e identidade visual da empresa',   lider: 'Bruno Mendes',    membros: ['B','C','D','H'],     count: 4,  area: 'Design'      },
+            { id:3, nome: 'Obras e Projetos', descricao: 'Equipe de campo e gestão de obras civis',  lider: 'Diego Fonseca',   membros: ['D','E','F','G','K'], count: 5,  area: 'Engenharia'  },
+            { id:4, nome: 'PMO',              descricao: 'Gestão de portfólio, projetos e riscos',   lider: 'Carla Rodrigues', membros: ['C','I'],             count: 2,  area: 'Gestão'      },
+        ] %}
+        {% for team in teams %}
+        <a href="{{ path('app_pessoas_equipe_detalhe', {id: team.id}) }}" class="team-card text-decoration-none">
+            <div class="team-card-header">
+                <div class="team-card-icon">{{ team.nome|slice(0,2)|upper }}</div>
+                <div class="team-card-titles">
+                    <div class="team-card-name">{{ team.nome }}</div>
+                    <div class="team-card-desc">{{ team.descricao }}</div>
+                </div>
+            </div>
+            <div class="team-card-body">
+                <div class="team-avatars">
+                    {% for ini in team.membros %}
+                        {% if loop.index <= av_max %}
+                        {% set ci = (loop.index - 1) % av_palette|length %}
+                        <div class="member-avatar member-avatar--sm team-avatar-sm {{ av_palette[ci] }}"
+                             title="{{ ini }}">{{ ini|slice(0,1)|upper }}</div>
+                        {% endif %}
+                    {% endfor %}
+                    {% set hidden = team.count - (team.membros|length < av_max ? team.membros|length : av_max) %}
+                    {% if hidden > 0 %}
+                    <div class="team-avatars-more" title="{{ hidden }} membros adicionais">+{{ hidden }}</div>
+                    {% endif %}
+                </div>
+                <div class="team-card-footer">
+                    <span class="team-card-area-badge">{{ team.area }}</span>
+                    <span class="team-card-meta">
+                        <i class="fas fa-user-tie"></i> {{ team.lider }}
+                    </span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

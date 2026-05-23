@@ -1,0 +1,33 @@
+{#
+  module_grid — card com grade de módulos/funcionalidades
+  Props:
+    items     (array)         cada item: { icon, title, subtitle, route }
+    title     (string, opt)   título do card
+    subtitle  (string, opt)   subtítulo do card
+    cols      (int, opt)      colunas por linha: 2 | 3 (default: 3)
+
+  Uso:
+    {% include 'components/module_grid.html.twig' with {
+        title: 'Funções do módulo',
+        subtitle: 'Gestão de obras, prazos e custos',
+        items: [
+            { icon:'fa-building', title:'Projetos', subtitle:'Obras ativas', route:'app_engenharia_projetos' },
+        ]
+    } %}
+#}
+<div class="huplex-card">
+    {% if title is defined and title %}
+        {% include 'components/section_header.html.twig' with {
+            title: title,
+            subtitle: subtitle|default('')
+        } %}
+    {% endif %}
+    <div class="row">
+        {% set col_class = (cols|default(3)) == 2 ? 'col-md-6' : 'col-md-6 col-lg-4' %}
+        {% for m in items %}
+        <div class="{{ col_class }} mb-3 d-flex">
+            {% include 'components/module_tile.html.twig' with m %}
+        </div>
+        {% endfor %}
+    </div>
+</div>

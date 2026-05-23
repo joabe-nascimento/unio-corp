@@ -25,7 +25,8 @@ class WorkspaceController extends AbstractController
 
         if (count($empresas) === 1 && !$request->query->has('force')) {
             $ws->switchTo($user, $empresas[0]->getId());
-            return $this->redirectToRoute('app_dashboard');
+
+            return $this->redirectToRoute('app_welcome');
         }
 
         return $this->render('workspace/select.html.twig', [
@@ -38,7 +39,7 @@ class WorkspaceController extends AbstractController
     public function switch(int $id, WorkspaceService $ws, Request $request): Response
     {
         $ws->switchTo($this->getUser(), $id);
-        $redirect = $request->query->get('back', 'app_dashboard');
+        $redirect = $request->query->get('back', 'app_welcome');
 
         return $this->redirectToRoute($redirect);
     }

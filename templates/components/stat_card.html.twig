@@ -1,8 +1,31 @@
-{# Uso: {% include 'components/stat_card.html.twig' with { icon: 'fa-users', value: 10, label: 'Funcionários' } %} #}
-<div class="huplex-card stat-card">
-    <div class="card-icon"><i class="fas {{ icon }}"></i></div>
+{#
+  stat_card — KPI sem ícone
+  Props:
+    value   (string|int)  valor principal
+    label   (string)      descrição
+    sub     (string, opt) texto secundário pequeno
+    route   (string, opt) se passado, envolve o card em <a href>
+    trend   (string, opt) 'up' | 'down' | null
+#}
+{% set card_html %}
+<div class="huplex-card stat-card w-100">
     <div class="stat-card-body">
         <div class="card-value">{{ value }}</div>
         <div class="card-label">{{ label }}</div>
+        {% if sub is defined and sub %}
+            <div class="card-sub">{{ sub }}</div>
+        {% endif %}
     </div>
+    {% if trend is defined and trend %}
+        <div class="stat-trend stat-trend--{{ trend }}">
+            <i class="fas fa-arrow-{{ trend == 'up' ? 'up' : 'down' }}"></i>
+        </div>
+    {% endif %}
 </div>
+{% endset %}
+
+{% if route is defined and route %}
+    <a href="{{ path(route) }}" class="text-decoration-none d-flex w-100">{{ card_html }}</a>
+{% else %}
+    {{ card_html }}
+{% endif %}

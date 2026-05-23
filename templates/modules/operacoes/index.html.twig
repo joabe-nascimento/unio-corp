@@ -4,41 +4,52 @@
 {% block breadcrumb %}<li class="breadcrumb-item active">Hub Operações</li>{% endblock %}
 {% block content %}
 
-<div class="row stats-row mb-2">
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <a href="{{ path('app_rh') }}" class="text-decoration-none d-flex w-100">
-            {% include 'components/stat_card.html.twig' with { icon: 'fa-id-card', value: '—', label: 'Recursos Humanos' } %}
-        </a>
-    </div>
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <a href="{{ path('app_pessoas') }}" class="text-decoration-none d-flex w-100">
-            {% include 'components/stat_card.html.twig' with { icon: 'fa-users', value: '—', label: 'Gestão de Pessoas' } %}
-        </a>
-    </div>
-</div>
+{% set kpi_items = [
+    { value: '—', label: 'Recursos Humanos',  sub: 'Colaboradores ativos',  route: 'app_rh' },
+    { value: '—', label: 'Gestão de Pessoas', sub: 'Equipes e estrutura',   route: 'app_pessoas' },
+] %}
+{% if nav_show_modulo_engenharia|default(false) %}
+    {% set kpi_items = kpi_items|merge([
+        { value: '—', label: 'Obras e Projetos', sub: 'Obras em execução', route: 'app_engenharia' }
+    ]) %}
+{% endif %}
+{% include 'components/kpi_row.html.twig' with { items: kpi_items } %}
 
 <div class="row">
     <div class="col-md-6 mb-4 d-flex">
-        <div class="huplex-card flex-fill">
-            <div class="section-title mb-1">Recursos Humanos</div>
-            <div class="section-subtitle mb-4">Funcionários, admissões, férias e folha</div>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{{ path('app_rh_funcionarios') }}" class="btn-huplex-ghost btn-sm">Funcionários</a>
-                <a href="{{ path('app_rh_admissoes') }}" class="btn-huplex-ghost btn-sm">Admissões</a>
-                <a href="{{ path('app_rh') }}" class="btn-huplex btn-sm">Abrir RH</a>
-            </div>
-        </div>
+        {% include 'components/module_card.html.twig' with {
+            title: 'Recursos Humanos',
+            subtitle: 'Funcionários, admissões, férias e folha',
+            links: [
+                { label: 'Funcionários', route: 'app_rh_funcionarios' },
+                { label: 'Admissões',    route: 'app_rh_admissoes' },
+                { label: 'Abrir RH',     route: 'app_rh', primary: true },
+            ]
+        } %}
     </div>
     <div class="col-md-6 mb-4 d-flex">
-        <div class="huplex-card flex-fill">
-            <div class="section-title mb-1">Gestão de Pessoas</div>
-            <div class="section-subtitle mb-4">Equipes, cargos e organograma</div>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{{ path('app_pessoas_equipes') }}" class="btn-huplex-ghost btn-sm">Equipes</a>
-                <a href="{{ path('app_pessoas_organograma') }}" class="btn-huplex-ghost btn-sm">Organograma</a>
-                <a href="{{ path('app_pessoas') }}" class="btn-huplex btn-sm">Abrir Pessoas</a>
-            </div>
-        </div>
+        {% include 'components/module_card.html.twig' with {
+            title: 'Gestão de Pessoas',
+            subtitle: 'Membros, equipes, cargos e organograma',
+            links: [
+                { label: 'Membros',       route: 'app_pessoas_membros' },
+                { label: 'Equipes',       route: 'app_pessoas_equipes' },
+                { label: 'Abrir Pessoas', route: 'app_pessoas', primary: true },
+            ]
+        } %}
     </div>
+    {% if nav_show_modulo_engenharia|default(false) %}
+    <div class="col-md-6 mb-4 d-flex">
+        {% include 'components/module_card.html.twig' with {
+            title: 'Obras e Projetos',
+            subtitle: 'Cronograma, orçamentos e equipes de campo',
+            links: [
+                { label: 'Projetos',    route: 'app_engenharia_projetos' },
+                { label: 'Cronograma',  route: 'app_engenharia_cronograma' },
+                { label: 'Abrir módulo', route: 'app_engenharia', primary: true },
+            ]
+        } %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

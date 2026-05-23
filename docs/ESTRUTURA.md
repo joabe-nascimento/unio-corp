@@ -18,6 +18,8 @@ src/
 │       ├── Pessoas/
 │       ├── Talentos/      # Hub
 │       ├── Maturidade/    # Hub
+│       ├── Engenharia/    # Hub — obras e conformidade
+│       ├── Publicidade/   # Hub — campanhas e mídia
 │       └── Admin/
 ├── Entity/
 ├── Repository/
@@ -52,6 +54,8 @@ templates/
     ├── pessoas/
     ├── talentos/        # Hub
     ├── maturidade/      # Hub
+    ├── engenharia/      # Módulo — dentro do Hub Operações
+    ├── publicidade/     # Módulo — dentro do Hub de Maturidade
     └── admin/
 ```
 
@@ -77,19 +81,37 @@ public/
 
 O menu usa o **perfil principal** do usuário (`User.perfil`), não a hierarquia Symfony (evita admin ver RH/Talentos).
 
-| Perfil | Dashboard | Hub Operações | Hub Talentos | Hub Maturidade | Plataforma |
-|--------|-----------|---------------|--------------|----------------|------------|
+| Perfil | Dashboard | Operações | Talentos | Maturidade | Plataforma |
+|--------|-----------|-----------|----------|------------|------------|
 | MEMBRO | sim | — | — | — | — |
-| SUPERVISOR_* | sim | sim | — | — | — |
-| GESTOR_* | sim | sim | sim | sim | — |
-| **TENANT** | sim (layout tenant) | **sim** | **sim** | **sim** | **sim** |
+| SUPERVISOR_* | sim | sim (RH + Pessoas) | — | — | — |
+| GESTOR_* | sim | sim (+ Obras) | sim | sim (+ Marca) | — |
+| **TENANT** | sim (layout tenant) | sim | sim | sim | sim |
+
+\* Supervisor vê apenas RH e Gestão de Pessoas dentro do Hub Operações.
+
+### Módulos dentro dos hubs (gestor+)
+
+**Hub Operações** — seção **Obras e Projetos** (`/engenharia`): Projetos · Cronograma · Orçamentos · Equipes de Campo · Documentação · Normas
+
+**Hub de Maturidade** — seção **Marca e Comunicação** (`/publicidade`): Campanhas · Clientes · Criativos · Mídia · Briefings · Métricas e ROI
 
 - **TENANT** = operador da plataforma (acesso 100 %). Não existe mais perfil `ADMIN` (legado migra para `GESTOR` com `app:migrate-admin-perfil`).
-- **Hub Operações** (`/hub/operacoes`): agrupa RH e Gestão de Pessoas.
+- **Hub Operações** (`/hub/operacoes`): RH, Gestão de Pessoas e Obras e Projetos.
 - **Plataforma** (`/admin`): usuários, empresas e configurações — só TENANT.
 - **Layout tenant**: banner multi-empresa e stats globais.
 
 Globais Twig: `nav_show_*`, `nav_layout`, definidos em `WorkspaceTwigSubscriber`.
+
+### Enforço de acesso (Symfony)
+
+O menu usa `User.perfil`; as rotas usam **roles** (`security.yaml` + `#[IsGranted]`). Hierarquia:
+
+- `ROLE_SUPERVISOR_EQUIPE` → Hub Operações, RH, Pessoas
+- `ROLE_GESTOR_EQUIPE` → + Talentos, Maturidade, Engenharia, Publicidade
+- `ROLE_TENANT` → + Plataforma (`/admin`)
+
+Controllers alinhados com a tabela acima (`RhController`, `PessoasController` = `ROLE_SUPERVISOR_EQUIPE`; `Talentos`/`Maturidade` = `ROLE_GESTOR_EQUIPE`).
 
 ## Comandos úteis
 

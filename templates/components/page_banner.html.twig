@@ -1,15 +1,24 @@
-{# Banner de contexto (perfil / empresa) #}
+{# Banner de contexto (perfil / empresa)
+   Props: title, subtitle (opt), icon (opt, FA class), use_empresa_logo (opt), use_huplex_mark (opt — ignorado, ícone removido)
+#}
 {% import 'macros/empresa.html.twig' as empresa_macro %}
+
+{# Decide o conteúdo do ícone #}
+{% set _has_empresa_logo = use_empresa_logo|default(false) and empresa is defined and empresa %}
+{% set _icon_class = icon|default(null) %}
+
 <div class="page-banner">
+    {# Só renderiza a caixa do ícone se houver algo para mostrar #}
+    {% if _has_empresa_logo or _icon_class %}
     <div class="page-banner-icon">
-        {% if use_empresa_logo|default(false) and empresa is defined and empresa and empresa.logo %}
+        {% if _has_empresa_logo %}
             {{ empresa_macro.logo(empresa, 'empresa-logo banner-logo') }}
-        {% elseif use_huplex_mark|default(true) %}
-            <img src="{{ asset('images/huplex-mark.svg') }}" alt="" class="banner-logo huplex-brand-mark" width="32" height="32">
-        {% else %}
-            <i class="fas {{ icon|default('fa-circle-info') }}"></i>
+        {% elseif _icon_class %}
+            <i class="fas {{ _icon_class }}"></i>
         {% endif %}
     </div>
+    {% endif %}
+
     <div class="page-banner-text">
         <div class="page-banner-title">{{ title }}</div>
         {% if subtitle is defined and subtitle %}

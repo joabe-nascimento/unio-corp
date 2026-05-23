@@ -3,6 +3,7 @@
 namespace App\Controller\Core;
 
 use App\Service\NavigationService;
+use App\Service\WelcomeService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,13 +20,14 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/dashboard', name: 'app_dashboard')]
-    public function index(WorkspaceService $workspaceService, NavigationService $navigation): Response
+    public function index(WorkspaceService $workspaceService, NavigationService $navigation, WelcomeService $welcome): Response
     {
         /** @var \App\Entity\User $user */
         $user     = $this->getUser();
         $empresa  = $workspaceService->getActiveEmpresa($user);
         $empresas = $workspaceService->getAvailableEmpresas($user);
         $layout   = $navigation->getLayout($user);
+        $dt       = $welcome->getDateTimeInfo();
 
         $stats = match ($layout) {
             'tenant' => ['funcionarios' => 128, 'departamentos' => 12, 'vagas_abertas' => 7, 'treinamentos' => 23, 'usuarios' => 34, 'empresas' => count($empresas)],
@@ -35,11 +37,15 @@ class DashboardController extends AbstractController
         };
 
         return $this->render('core/dashboard/index.html.twig', [
-            'stats'    => $stats,
-            'layout'   => $layout,
-            'user'     => $user,
-            'empresa'  => $empresa,
-            'empresas' => $empresas,
+            'stats'      => $stats,
+            'layout'     => $layout,
+            'user'       => $user,
+            'empresa'    => $empresa,
+            'empresas'   => $empresas,
+            'greeting'   => $welcome->getGreeting(),
+            'date_label' => $dt['date_label'],
+            'time_label' => $dt['time_label'],
+            'weekday'    => $dt['weekday'],
         ]);
     }
 }

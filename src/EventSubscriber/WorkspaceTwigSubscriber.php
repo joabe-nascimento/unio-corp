@@ -13,6 +13,13 @@ use Twig\Environment;
 
 class WorkspaceTwigSubscriber implements EventSubscriberInterface
 {
+    private const SKIP_ROUTE_PREFIXES = ['_profiler', '_wdt'];
+
+    private const SKIP_ROUTES = [
+        'app_login',
+        'app_logout',
+    ];
+
     public function __construct(
         private Environment $twig,
         private TokenStorageInterface $tokenStorage,
@@ -31,6 +38,11 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $route = $event->getRequest()->attributes->get('_route');
+        if ($this->shouldSkip($route)) {
+            return;
+        }
+
         $token = $this->tokenStorage->getToken();
         $user = $token?->getUser();
 
@@ -38,17 +50,26 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $route = $event->getRequest()->attributes->get('_route');
-
         $this->twig->addGlobal('empresa', $this->workspaceService->getActiveEmpresa($user));
         $this->twig->addGlobal('empresas', $this->workspaceService->getAvailableEmpresas($user));
-        $this->twig->addGlobal('nav_layout', $this->navigation->getLayout($user));
-        $this->twig->addGlobal('nav_show_hub_operacoes', $this->navigation->showHubOperacoes($user));
-        $this->twig->addGlobal('nav_show_hub_talentos', $this->navigation->showHubTalentos($user));
-        $this->twig->addGlobal('nav_show_hub_maturidade', $this->navigation->showHubMaturidade($user));
-        $this->twig->addGlobal('nav_show_plataforma', $this->navigation->showPlataforma($user));
-        $this->twig->addGlobal('nav_show_admin', $this->navigation->showPlataforma($user));
-        $this->twig->addGlobal('nav_show_tenant_empresas', $this->navigation->showTenantEmpresas($user));
-        $this->twig->addGlobal('nav_hub_operacoes_active', $this->navigation->isHubOperacoesActive($route));
+
+        foreach ($this->navigation->getNavGlobals($user, $route) as $name => $value) {
+            $this->twig->addGlobal($name, $value);
+        }
+    }
+
+    private function shouldSkip(?string $route): bool
+    {
+        if (!$route || \in_array($route, self::SKIP_ROUTES, true)) {
+            return true;
+        }
+
+        foreach (self::SKIP_ROUTE_PREFIXES as $prefix) {
+            if (str_starts_with($route, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
