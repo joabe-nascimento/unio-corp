@@ -389,6 +389,113 @@
         }
         .theme-btn:hover { color: var(--text-1); border-color: var(--border-2); }
 
+        /* ── Dropdowns (sobrescreve Bootstrap focus/active branco) ── */
+        .huplex-dropdown {
+            background: var(--surface) !important;
+            border: 1px solid var(--border-2) !important;
+            border-radius: 10px !important;
+            padding: 6px !important;
+            min-width: 200px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+        }
+        [data-theme="light"] .huplex-dropdown {
+            box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+        }
+        .huplex-dropdown .dd-head {
+            padding: 8px 10px 10px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+        .huplex-dropdown .dropdown-item {
+            display: flex !important;
+            align-items: center !important;
+            gap: 0;
+            color: var(--text-2) !important;
+            background-color: transparent !important;
+            background-image: none !important;
+            font-size: 13px !important;
+            border-radius: 6px !important;
+            padding: 8px 10px !important;
+            margin: 1px 0;
+            border: none !important;
+            transition: background 0.12s, color 0.12s;
+        }
+        .huplex-dropdown .dropdown-item i {
+            width: 16px;
+            margin-right: 8px;
+            color: var(--text-3) !important;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .huplex-dropdown .dropdown-item:hover,
+        .huplex-dropdown .dropdown-item:focus,
+        .huplex-dropdown .dropdown-item:focus-visible {
+            color: var(--text-1) !important;
+            background-color: var(--nav-hover-bg) !important;
+            background-image: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .huplex-dropdown .dropdown-item:hover i,
+        .huplex-dropdown .dropdown-item:focus i {
+            color: var(--text-2) !important;
+        }
+        .huplex-dropdown .dropdown-item.active,
+        .huplex-dropdown .dropdown-item:active {
+            color: var(--accent) !important;
+            background-color: var(--nav-active-bg) !important;
+            background-image: none !important;
+        }
+        .huplex-dropdown .dropdown-item.active i,
+        .huplex-dropdown .dropdown-item:active i {
+            color: var(--accent) !important;
+        }
+        .huplex-dropdown .dropdown-item-danger {
+            color: rgba(220, 80, 80, 0.85) !important;
+        }
+        .huplex-dropdown .dropdown-item-danger i {
+            color: inherit !important;
+        }
+        .huplex-dropdown .dropdown-item-danger:hover,
+        .huplex-dropdown .dropdown-item-danger:focus {
+            color: rgba(235, 90, 90, 0.95) !important;
+            background-color: rgba(220, 80, 80, 0.1) !important;
+        }
+        .huplex-dropdown .dropdown-divider {
+            border-top-color: var(--border) !important;
+            margin: 4px 0 !important;
+        }
+
+        /* Qualquer dropdown dentro do app */
+        .wrapper .dropdown-menu {
+            background: var(--surface) !important;
+            border-color: var(--border-2) !important;
+        }
+        .wrapper .dropdown-menu .dropdown-item {
+            color: var(--text-2) !important;
+            background-color: transparent !important;
+        }
+        .wrapper .dropdown-menu .dropdown-item:hover,
+        .wrapper .dropdown-menu .dropdown-item:focus,
+        .wrapper .dropdown-menu .dropdown-item:focus-visible,
+        .wrapper .dropdown-menu .dropdown-item.active,
+        .wrapper .dropdown-menu .dropdown-item:active {
+            color: var(--text-1) !important;
+            background-color: var(--nav-hover-bg) !important;
+            background-image: none !important;
+            outline: none !important;
+        }
+        .wrapper .dropdown-menu .dropdown-item.active,
+        .wrapper .dropdown-menu .dropdown-item:active {
+            color: var(--accent) !important;
+            background-color: var(--nav-active-bg) !important;
+        }
+
+        /* Alerts e botões secundários no tema escuro */
+        .content .alert {
+            border-radius: 8px;
+        }
+
         /* ── Topo: logo com ícone ── */
         .sidebar-top {
             border-bottom: 1px solid var(--border);
@@ -589,28 +696,27 @@
                     <span style="color:var(--text-2);font-size:13px;font-weight:500">{{ app.user.nome|split(' ')|first }}</span>
                     <i class="fas fa-chevron-down" style="font-size:9px;color:var(--text-3)"></i>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right"
-                     style="background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:200px;padding:6px">
-                    <div class="px-3 py-2" style="border-bottom:1px solid var(--border);margin-bottom:4px">
+                <div class="dropdown-menu dropdown-menu-right huplex-dropdown">
+                    <div class="dd-head">
                         <div style="color:var(--text-1);font-size:13px;font-weight:600">{{ app.user.nome }}</div>
                         <div style="color:var(--text-3);font-size:11px">{{ app.user.email }}</div>
                         <div class="mt-1"><span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span></div>
                     </div>
-                    <a class="dropdown-item py-2" href="#" style="color:var(--text-2);font-size:13px;border-radius:6px">
-                        <i class="fas fa-user mr-2" style="width:16px;color:var(--text-3)"></i> Meu Perfil
+                    <a class="dropdown-item" href="#">
+                        <i class="fas fa-user"></i> Meu Perfil
                     </a>
                     {% if empresas is defined and empresas|length > 0 %}
-                    <a class="dropdown-item py-2" href="{{ path('app_workspace_select', {force: 1}) }}" style="color:var(--text-2);font-size:13px;border-radius:6px">
-                        <i class="fas fa-building mr-2" style="width:16px;color:var(--text-3)"></i> Trocar área de trabalho
+                    <a class="dropdown-item" href="{{ path('app_workspace_select', {force: 1}) }}">
+                        <i class="fas fa-building"></i> Trocar área de trabalho
                     </a>
                     {% endif %}
-                    <a class="dropdown-item py-2" href="#" onclick="toggleTheme();return false;" style="color:var(--text-2);font-size:13px;border-radius:6px">
-                        <i class="fas fa-adjust mr-2" id="themeMenuIcon" style="width:16px;color:var(--text-3)"></i>
+                    <a class="dropdown-item" href="#" onclick="toggleTheme();return false;">
+                        <i class="fas fa-adjust" id="themeMenuIcon"></i>
                         <span id="themeMenuLabel">Tema claro</span>
                     </a>
-                    <div class="dropdown-divider" style="border-color:var(--border);margin:4px 0"></div>
-                    <a class="dropdown-item py-2" href="{{ path('app_logout') }}" style="color:rgba(220,80,80,0.8);font-size:13px;border-radius:6px">
-                        <i class="fas fa-sign-out-alt mr-2" style="width:16px"></i> Sair
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item dropdown-item-danger" href="{{ path('app_logout') }}">
+                        <i class="fas fa-sign-out-alt"></i> Sair
                     </a>
                 </div>
             </li>
