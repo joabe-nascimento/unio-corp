@@ -369,19 +369,72 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* Mini: só logo abreviado + ícone empresa */
+        /* ── Sidebar mini (colapsada): logo pequeno + ícones centralizados ── */
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-top .brand-link {
+            justify-content: center !important;
+            padding: 10px 4px !important;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-text {
+            display: inline !important;
+            font-size: 10.5px !important;
+            letter-spacing: -0.04em;
+            line-height: 1.15;
+            text-align: center;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-link::after { content: none !important; }
+
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-empresa .se-info { display: none; }
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-empresa {
-            justify-content: center; padding: 0 0 10px;
+            justify-content: center;
+            padding: 0 0 8px;
         }
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-text { display: none !important; }
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-link::after {
-            content: 'H';
-            color: var(--accent);
-            font-weight: 700;
-            font-size: 15px;
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-empresa .se-logo {
+            width: 28px; height: 28px;
+            font-size: 10px;
         }
-        /* Hover expande e mostra tudo */
+
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-header { display: none !important; }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-treeview { display: none !important; }
+
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 36px !important;
+            height: 36px !important;
+            margin: 2px auto !important;
+            padding: 0 !important;
+            border-radius: 8px !important;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link p,
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link .right {
+            display: none !important;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link .nav-icon {
+            margin: 0 !important;
+            width: auto !important;
+            min-width: 0 !important;
+            font-size: 14px !important;
+            text-align: center !important;
+            float: none !important;
+        }
+
+        /* Sobrescreve AdminLTE sidebar-mini */
+        .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item.menu-open > .nav-link {
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        /* Hover expande — volta ao layout normal */
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-empresa .se-info,
         .sidebar-mini.sidebar-open .sidebar-empresa .se-info { display: block !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-empresa,
@@ -390,9 +443,24 @@
             padding: 0 14px 12px !important;
         }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-text,
-        .sidebar-mini.sidebar-open .brand-text { display: inline !important; }
-        .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-link::after,
-        .sidebar-mini.sidebar-open .brand-link::after { content: none !important; }
+        .sidebar-mini.sidebar-open .brand-text { font-size: 16px !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-top .brand-link,
+        .sidebar-mini.sidebar-open .sidebar-top .brand-link {
+            justify-content: flex-start !important;
+            padding: 12px 14px !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-header,
+        .sidebar-mini.sidebar-open .nav-header { display: block !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link,
+        .sidebar-mini.sidebar-open .nav-sidebar > .nav-item > .nav-link {
+            width: auto !important;
+            height: auto !important;
+            margin: 1px 8px !important;
+            padding: 7px 12px !important;
+            justify-content: flex-start !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link p,
+        .sidebar-mini.sidebar-open .nav-sidebar > .nav-item > .nav-link p { display: block !important; }
 
         .main-sidebar { display: flex !important; flex-direction: column !important; }
         .main-sidebar .sidebar { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 56px; }
