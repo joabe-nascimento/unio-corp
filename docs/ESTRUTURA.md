@@ -77,16 +77,17 @@ public/
 
 O menu usa o **perfil principal** do usuário (`User.perfil`), não a hierarquia Symfony (evita admin ver RH/Talentos).
 
-| Perfil | Dashboard | Hub Operações | Hub Talentos | Hub Maturidade | Admin |
-|--------|-----------|---------------|--------------|----------------|-------|
+| Perfil | Dashboard | Hub Operações | Hub Talentos | Hub Maturidade | Plataforma |
+|--------|-----------|---------------|--------------|----------------|------------|
 | MEMBRO | sim | — | — | — | — |
 | SUPERVISOR_* | sim | sim | — | — | — |
 | GESTOR_* | sim | sim | sim | sim | — |
-| ADMIN / TENANT | sim (layout admin) | — | — | — | sim |
+| **TENANT** | sim (layout tenant) | **sim** | **sim** | **sim** | **sim** |
 
-- **Hub Operações** (`/hub/operacoes`): agrupa RH e Gestão de Pessoas num único hub.
-- **Layout admin**: `NavigationService::getLayout()` → `admin` (banner e stats multi-empresa).
-- **Layout user**: `gestor`, `supervisor` ou `membro`.
+- **TENANT** = operador da plataforma (acesso 100 %). Não existe mais perfil `ADMIN` (legado migra para `GESTOR` com `app:migrate-admin-perfil`).
+- **Hub Operações** (`/hub/operacoes`): agrupa RH e Gestão de Pessoas.
+- **Plataforma** (`/admin`): usuários, empresas e configurações — só TENANT.
+- **Layout tenant**: banner multi-empresa e stats globais.
 
 Globais Twig: `nav_show_*`, `nav_layout`, definidos em `WorkspaceTwigSubscriber`.
 

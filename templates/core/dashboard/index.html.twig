@@ -7,12 +7,12 @@
 {% block content %}
 
 {# ── Banner por perfil ── #}
-{% if layout == 'admin' %}
+{% if layout == 'tenant' %}
     {% include 'components/page_banner.html.twig' with {
         icon: 'fa-shield-halved',
-        title: 'Visão Administrativa' ~ (is_granted('ROLE_TENANT') ? ' · Multi-empresa' : ''),
-        subtitle: 'Acesso total à plataforma' ~ (empresa ? ' — ' ~ empresa.nome : ''),
-        use_empresa_logo: true
+        title: 'Gestão da Plataforma · Multi-empresa',
+        subtitle: 'Acesso total — hubs operacionais e configuração' ~ (empresa ? ' · ' ~ empresa.nome : ''),
+        use_huplex_mark: true
     } %}
 {% elseif layout == 'gestor' %}
     {% include 'components/page_banner.html.twig' with {
@@ -30,7 +30,7 @@
 
 {# ── Stats ── #}
 <div class="row stats-row mb-2">
-    {% if layout == 'admin' %}
+    {% if layout == 'tenant' %}
         {% set cards = [
             {icon:'fa-users',          v: stats.funcionarios,  l:'Funcionários'},
             {icon:'fa-sitemap',        v: stats.departamentos, l:'Departamentos'},
@@ -117,12 +117,12 @@
                     } %}
                 </div>
                 {% endif %}
-                {% if nav_show_admin|default(false) %}
+                {% if nav_show_plataforma|default(false) %}
                 <div class="col-md-6 mb-3 d-flex">
                     {% include 'components/module_tile.html.twig' with {
                         icon: 'fa-shield-halved',
-                        title: 'Administração',
-                        subtitle: 'Usuários e configurações',
+                        title: 'Plataforma',
+                        subtitle: 'Usuários, empresas e configurações',
                         route: 'app_admin'
                     } %}
                 </div>
@@ -162,7 +162,8 @@
                 {l:'Hub Operações',  g: nav_show_hub_operacoes|default(false)},
                 {l:'Hub Talentos',   g: nav_show_hub_talentos|default(false)},
                 {l:'Hub Maturidade', g: nav_show_hub_maturidade|default(false)},
-                {l:'Administração',  g: nav_show_admin|default(false)},
+                {l:'Plataforma',      g: nav_show_plataforma|default(false)},
+                {l:'Acesso total',   g: app.user.perfil == 'TENANT'},
                 {l:'Multi-empresa',  g: nav_show_tenant_empresas|default(false)},
             ] %}
             {% for p in perms %}

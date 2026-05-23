@@ -46,7 +46,8 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         $this->twig->addGlobal('nav_show_hub_operacoes', $this->navigation->showHubOperacoes($user));
         $this->twig->addGlobal('nav_show_hub_talentos', $this->navigation->showHubTalentos($user));
         $this->twig->addGlobal('nav_show_hub_maturidade', $this->navigation->showHubMaturidade($user));
-        $this->twig->addGlobal('nav_show_admin', $this->navigation->showAdmin($user));
+        $this->twig->addGlobal('nav_show_plataforma', $this->navigation->showPlataforma($user));
+        $this->twig->addGlobal('nav_show_admin', $this->navigation->showPlataforma($user));
         $this->twig->addGlobal('nav_show_tenant_empresas', $this->navigation->showTenantEmpresas($user));
         $this->twig->addGlobal('nav_hub_operacoes_active', $this->navigation->isHubOperacoesActive($route));
     }

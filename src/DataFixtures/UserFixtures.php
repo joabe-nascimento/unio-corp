@@ -15,7 +15,6 @@ class UserFixtures extends Fixture
     {
         $users = [
             ['nome' => 'Tenant Master',       'email' => 'tenant@huplex.dev',     'perfil' => 'TENANT'],
-            ['nome' => 'Admin Silva',          'email' => 'admin@huplex.dev',      'perfil' => 'ADMIN'],
             ['nome' => 'Gestor Oliveira',      'email' => 'gestor@huplex.dev',     'perfil' => 'GESTOR'],
             ['nome' => 'Gestor Equipe Costa',  'email' => 'gestor.eq@huplex.dev',  'perfil' => 'GESTOR_EQUIPE'],
             ['nome' => 'Supervisor Geral',     'email' => 'supervisor@huplex.dev', 'perfil' => 'SUPERVISOR'],

@@ -48,14 +48,13 @@ class SeedUsersCommand extends Command
         // Usuarios
         $users = [
             ['nome' => 'Tenant Master',      'email' => 'tenant@huplex.dev',     'perfil' => 'TENANT',            'empresa' => null],
-            ['nome' => 'Admin Silva',         'email' => 'admin@huplex.dev',      'perfil' => 'ADMIN',             'empresa' => $empresas[0]],
             ['nome' => 'Gestor Oliveira',     'email' => 'gestor@huplex.dev',     'perfil' => 'GESTOR',            'empresa' => $empresas[0]],
             ['nome' => 'Gestor Costa',        'email' => 'gestor.eq@huplex.dev',  'perfil' => 'GESTOR_EQUIPE',     'empresa' => $empresas[0]],
             ['nome' => 'Supervisor Geral',    'email' => 'supervisor@huplex.dev', 'perfil' => 'SUPERVISOR',        'empresa' => $empresas[0]],
             ['nome' => 'Supervisor Equipe',   'email' => 'sup.eq@huplex.dev',     'perfil' => 'SUPERVISOR_EQUIPE', 'empresa' => $empresas[0]],
             ['nome' => 'Membro Santos',       'email' => 'membro@huplex.dev',     'perfil' => 'MEMBRO',            'empresa' => $empresas[0]],
-            ['nome' => 'Admin Nexus',         'email' => 'admin@nexus.dev',       'perfil' => 'ADMIN',             'empresa' => $empresas[1]],
-            ['nome' => 'Admin Edu360',        'email' => 'admin@edu360.dev',      'perfil' => 'ADMIN',             'empresa' => $empresas[2]],
+            ['nome' => 'Gestor Nexus',        'email' => 'gestor@nexus.dev',      'perfil' => 'GESTOR',            'empresa' => $empresas[1]],
+            ['nome' => 'Gestor Edu360',       'email' => 'gestor@edu360.dev',     'perfil' => 'GESTOR',            'empresa' => $empresas[2]],
         ];
 
         foreach ($users as $data) {

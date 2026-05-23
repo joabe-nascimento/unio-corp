@@ -13,7 +13,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLE_TENANT            = 'ROLE_TENANT';
-    public const ROLE_ADMIN             = 'ROLE_ADMIN';
     public const ROLE_GESTOR            = 'ROLE_GESTOR';
     public const ROLE_GESTOR_EQUIPE     = 'ROLE_GESTOR_EQUIPE';
     public const ROLE_SUPERVISOR        = 'ROLE_SUPERVISOR';
@@ -27,7 +26,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         'SUPERVISOR'        => 3,
         'GESTOR_EQUIPE'     => 4,
         'GESTOR'            => 5,
-        'ADMIN'             => 6,
         'TENANT'            => 7,
     ];
 
@@ -108,8 +106,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     // ── Helpers de perfil ──────────────────────────────────────────────
 
-    public function isTenant(): bool           { return in_array(self::ROLE_TENANT, $this->getRoles()); }
-    public function isAdmin(): bool            { return in_array(self::ROLE_ADMIN, $this->getRoles()); }
+    public function isTenant(): bool           { return $this->perfil === 'TENANT' || \in_array(self::ROLE_TENANT, $this->getRoles(), true); }
     public function isGestor(): bool           { return in_array(self::ROLE_GESTOR, $this->getRoles()); }
     public function isGestorEquipe(): bool     { return in_array(self::ROLE_GESTOR_EQUIPE, $this->getRoles()); }
     public function isSupervisor(): bool       { return in_array(self::ROLE_SUPERVISOR, $this->getRoles()); }
@@ -125,7 +122,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return match ($this->perfil) {
             'TENANT'            => 'Tenant',
-            'ADMIN'             => 'Administrador',
+            'ADMIN'             => 'Gestor',
             'GESTOR'            => 'Gestor',
             'GESTOR_EQUIPE'     => 'Gestor de Equipe',
             'SUPERVISOR'        => 'Supervisor Geral',
@@ -140,7 +137,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return match ($this->perfil) {
             'TENANT'            => 'tenant',
-            'ADMIN'             => 'admin',
+            'ADMIN'             => 'gestor',
             'GESTOR'            => 'gestor',
             'GESTOR_EQUIPE'     => 'gestor-equipe',
             'SUPERVISOR'        => 'supervisor',
@@ -155,7 +152,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return match ($this->perfil) {
             'TENANT'            => self::ROLE_TENANT,
-            'ADMIN'             => self::ROLE_ADMIN,
+            'ADMIN'             => self::ROLE_GESTOR,
             'GESTOR'            => self::ROLE_GESTOR,
             'GESTOR_EQUIPE'     => self::ROLE_GESTOR_EQUIPE,
             'SUPERVISOR'        => self::ROLE_SUPERVISOR,

@@ -28,7 +28,7 @@ class DashboardController extends AbstractController
         $layout   = $navigation->getLayout($user);
 
         $stats = match ($layout) {
-            'admin' => ['funcionarios' => 128, 'departamentos' => 12, 'vagas_abertas' => 7, 'treinamentos' => 23, 'usuarios' => 34, 'empresas' => count($empresas)],
+            'tenant' => ['funcionarios' => 128, 'departamentos' => 12, 'vagas_abertas' => 7, 'treinamentos' => 23, 'usuarios' => 34, 'empresas' => count($empresas)],
             'gestor' => ['funcionarios' => 64, 'departamentos' => 6, 'vagas_abertas' => 4, 'treinamentos' => 11],
             'supervisor' => ['funcionarios' => 28, 'departamentos' => 3, 'vagas_abertas' => 2, 'treinamentos' => 5],
             default => ['treinamentos' => 3, 'avaliacoes' => 1],
