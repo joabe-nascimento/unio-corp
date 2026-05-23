@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('huplex-theme')||'dark')}catch(e){}</script>
 
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=28">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=30">
 
     {% block stylesheets %}{% endblock %}
 </head>
@@ -333,13 +333,29 @@ window.addEventListener('load', function () {
     var historyList = document.getElementById('helixHistoryList');
     var historyEmpty = document.getElementById('helixHistoryEmpty');
     var historyCount = document.getElementById('helixHistoryCount');
+    var historyToggle = document.getElementById('helixHistoryToggle');
+    var historyToggleCount = document.getElementById('helixHistoryToggleCount');
     var suggestions = document.getElementById('helixSuggestions');
+    var mobileMq = window.matchMedia('(max-width: 575.98px)');
 
     if (!panel || !openBtn) return;
 
     var FACE_SM = '<span class="helix-face helix-face--sm" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="helix-face-ring" cx="20" cy="20" r="18"/><circle class="helix-face-eye" cx="14.5" cy="17" r="2.25"/><circle class="helix-face-eye" cx="25.5" cy="17" r="2.25"/><path class="helix-face-smile" d="M13.5 24.2c2.6 2.4 10.4 2.4 13 0"/></svg></span>';
 
     var currentSessionId = null;
+
+    function isMobileHelix() {
+        return mobileMq.matches;
+    }
+
+    function setHistoryOpen(open) {
+        panel.classList.toggle('is-history-open', open);
+        if (historyToggle) historyToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    function closeHistoryIfMobile() {
+        if (isMobileHelix()) setHistoryOpen(false);
+    }
 
     function loadSessions() {
         try {
@@ -400,11 +416,13 @@ window.addEventListener('load', function () {
 
     function renderWelcomeOnly() {
         if (!messagesEl) return;
+        var first = panel.dataset.userFirst || '';
+        var greeting = first ? 'Olá, ' + escapeHtml(first) + '.' : 'Olá.';
         messagesEl.innerHTML =
             '<div class="helix-msg helix-msg--assistant">' + FACE_SM +
             '<div class="helix-msg-bubble">' +
-            '<p>Olá. Sou o Helix, seu assistente na Huplex.</p>' +
-            '<p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens ficam no histórico.</p>' +
+            '<p>' + greeting + ' Sou o Helix — seu assistente na Huplex.</p>' +
+            '<p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens já ficam salvas no histórico.</p>' +
             '</div></div>';
         if (suggestions) suggestions.style.display = '';
     }
@@ -471,8 +489,11 @@ window.addEventListener('load', function () {
 
     function renderHistory() {
         var sessions = loadSessions();
-        if (historyCount) {
-            historyCount.textContent = String(sessions.length);
+        var count = String(sessions.length);
+        if (historyCount) historyCount.textContent = count;
+        if (historyToggleCount) {
+            historyToggleCount.textContent = count;
+            historyToggleCount.setAttribute('data-count', count);
         }
         if (!historyList || !historyEmpty) return;
 
@@ -496,6 +517,7 @@ window.addEventListener('load', function () {
     }
 
     function openPanel() {
+        setHistoryOpen(false);
         panel.classList.add('is-open');
         panel.setAttribute('aria-hidden', 'false');
         openBtn.setAttribute('aria-expanded', 'true');
@@ -506,6 +528,7 @@ window.addEventListener('load', function () {
     }
 
     function closePanel() {
+        setHistoryOpen(false);
         panel.classList.remove('is-open');
         panel.setAttribute('aria-hidden', 'true');
         openBtn.setAttribute('aria-expanded', 'false');
@@ -517,6 +540,7 @@ window.addEventListener('load', function () {
         currentSessionId = null;
         renderWelcomeOnly();
         renderHistory();
+        closeHistoryIfMobile();
         if (input) {
             input.value = '';
             updateSendState();
@@ -530,6 +554,7 @@ window.addEventListener('load', function () {
         currentSessionId = id;
         renderMessages(session);
         renderHistory();
+        closeHistoryIfMobile();
     }
 
     function updateSendState() {
@@ -556,7 +581,7 @@ window.addEventListener('load', function () {
     if (input) {
         input.addEventListener('input', function () {
             input.style.height = 'auto';
-            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+            input.style.height = Math.min(input.scrollHeight, 100) + 'px';
             updateSendState();
         });
         input.addEventListener('keydown', function (e) {
@@ -569,12 +594,15 @@ window.addEventListener('load', function () {
 
     document.getElementById('helixNewChat')?.addEventListener('click', newChat);
 
+    historyToggle?.addEventListener('click', function () {
+        setHistoryOpen(!panel.classList.contains('is-history-open'));
+    });
+
     document.getElementById('helixClearHistory')?.addEventListener('click', function () {
         if (!confirm('Limpar todo o histórico do Helix?')) return;
         saveSessions([]);
         currentSessionId = null;
         newChat();
-        renderHistory();
     });
 
     if (historyList) {
@@ -594,10 +622,11 @@ window.addEventListener('load', function () {
     });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && panel.classList.contains('is-open')) closePanel();
+        if (e.key !== 'Escape' || !panel.classList.contains('is-open')) return;
+        if (panel.classList.contains('is-history-open')) setHistoryOpen(false);
+        else closePanel();
     });
 
-    renderWelcomeOnly();
     renderHistory();
     updateSendState();
 })();

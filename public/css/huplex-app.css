@@ -2668,6 +2668,43 @@
             background: var(--nav-hover-bg);
         }
 
+        .helix-history-toggle {
+            display: none;
+            position: relative;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text-3);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .helix-history-toggle:hover {
+            color: var(--text-1);
+            background: var(--nav-hover-bg);
+        }
+        .helix-history-toggle-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            border-radius: 100px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            line-height: 16px;
+            text-align: center;
+        }
+        .helix-history-toggle-count:empty,
+        .helix-history-toggle-count[data-count="0"] {
+            display: none;
+        }
+
         .helix-messages {
             flex: 1;
             overflow-y: auto;
@@ -2675,6 +2712,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
         }
         .helix-msg {
             display: flex;
@@ -2790,7 +2829,41 @@
             flex-direction: column;
             gap: 2px;
             min-height: 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
         }
+
+        .helix-messages::-webkit-scrollbar,
+        .helix-history-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .helix-messages::-webkit-scrollbar-track,
+        .helix-history-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .helix-messages::-webkit-scrollbar-thumb,
+        .helix-history-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 100px;
+        }
+        .helix-messages::-webkit-scrollbar-thumb:hover,
+        .helix-history-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        [data-theme="light"] .helix-messages,
+        [data-theme="light"] .helix-history-list {
+            scrollbar-color: rgba(0, 0, 0, 0.16) transparent;
+        }
+        [data-theme="light"] .helix-messages::-webkit-scrollbar-thumb,
+        [data-theme="light"] .helix-history-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.14);
+        }
+        [data-theme="light"] .helix-messages::-webkit-scrollbar-thumb:hover,
+        [data-theme="light"] .helix-history-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.22);
+        }
+
         .helix-history-item {
             width: 100%;
             text-align: left;
@@ -2845,9 +2918,54 @@
         @media (max-width: 575.98px) {
             .helix-drawer { width: 100vw; }
             .helix-badge-soon { display: none; }
-            .helix-sidebar { width: 112px; }
-            .helix-sidebar-btn span,
-            .helix-sidebar-btn { font-size: 0; gap: 0; }
-            .helix-sidebar-btn { flex: 1; padding: 8px; }
-            .helix-sidebar-btn i { font-size: 12px; }
+            .helix-history-toggle { display: inline-flex; align-items: center; justify-content: center; }
+            .helix-close-btn,
+            .helix-history-toggle {
+                width: 40px;
+                height: 40px;
+                font-size: 15px;
+            }
+            .helix-header { padding: 12px 12px 10px; }
+            .helix-body { position: relative; }
+            .helix-sidebar {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                z-index: 5;
+                transform: translateX(-100%);
+                transition: transform 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+                border-right: none;
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+            }
+            .helix-panel.is-history-open .helix-sidebar {
+                transform: translateX(0);
+            }
+            .helix-main { width: 100%; }
+            .helix-messages { padding: 10px 12px 6px; }
+            .helix-msg { max-width: 92%; }
+            .helix-msg-bubble { font-size: 14px; }
+            .helix-suggestions { padding: 4px 12px 6px; }
+            .helix-composer {
+                padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+            }
+            .helix-sidebar-btn {
+                min-height: 44px;
+                font-size: 12px;
+                padding: 10px 12px;
+            }
+            .helix-sidebar-btn--danger { flex: 0 0 44px; }
+            .helix-history-item {
+                padding: 12px 12px;
+                min-height: 44px;
+            }
+            .helix-history-item-title {
+                white-space: normal;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+            .helix-chip {
+                font-size: 12px;
+                padding: 7px 12px;
+            }
         }

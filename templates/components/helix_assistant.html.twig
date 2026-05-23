@@ -1,7 +1,7 @@
 {# Helix — assistente virtual (IA em implementação futura) #}
 {% import 'macros/helix.html.twig' as helix %}
 
-<div id="helixPanel" class="helix-panel" aria-hidden="true">
+<div id="helixPanel" class="helix-panel" aria-hidden="true"{% if app.user %} data-user-first="{{ app.user.nome|split(' ')|first|e('html_attr') }}"{% endif %}>
     <div class="helix-backdrop" data-helix-close tabindex="-1" aria-hidden="true"></div>
 
     <aside class="helix-drawer" role="dialog" aria-modal="true" aria-labelledby="helixTitle">
@@ -15,6 +15,10 @@
             </div>
             <div class="helix-header-actions">
                 <span class="helix-badge-soon">Em breve</span>
+                <button type="button" class="helix-history-toggle" id="helixHistoryToggle" aria-label="Histórico de conversas" aria-expanded="false" aria-controls="helixHistoryList">
+                    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                    <span class="helix-history-toggle-count" id="helixHistoryToggleCount" data-count="0"></span>
+                </button>
                 <button type="button" class="helix-close-btn" data-helix-close aria-label="Fechar">
                     <i class="fas fa-times"></i>
                 </button>
@@ -22,7 +26,7 @@
         </header>
 
         <div class="helix-body">
-            <aside class="helix-sidebar" aria-label="Histórico de conversas">
+            <div class="helix-sidebar" role="complementary" aria-label="Histórico de conversas">
                 <div class="helix-sidebar-head">
                     <span class="helix-sidebar-label">Histórico</span>
                     <span class="helix-history-count" id="helixHistoryCount">0</span>
@@ -32,14 +36,14 @@
                     <p>Sem conversas</p>
                 </div>
                 <div class="helix-sidebar-foot">
-                    <button type="button" class="helix-sidebar-btn" id="helixNewChat" title="Nova conversa">
-                        <i class="fas fa-plus"></i> Nova
+                    <button type="button" class="helix-sidebar-btn" id="helixNewChat" title="Nova conversa" aria-label="Nova conversa">
+                        <i class="fas fa-plus" aria-hidden="true"></i> Nova
                     </button>
-                    <button type="button" class="helix-sidebar-btn helix-sidebar-btn--danger" id="helixClearHistory" title="Limpar histórico">
-                        <i class="fas fa-trash-can"></i>
+                    <button type="button" class="helix-sidebar-btn helix-sidebar-btn--danger" id="helixClearHistory" title="Limpar histórico" aria-label="Limpar histórico">
+                        <i class="fas fa-trash-can" aria-hidden="true"></i>
                     </button>
                 </div>
-            </aside>
+            </div>
 
             <div class="helix-main">
                 <div class="helix-messages" id="helixMessages" aria-live="polite">
@@ -47,7 +51,7 @@
                         {{ helix.face('sm') }}
                         <div class="helix-msg-bubble">
                             <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou o Helix — seu assistente na Huplex.</p>
-                            <p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens já ficam salvas no histórico ao lado.</p>
+                            <p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens já ficam salvas no histórico.</p>
                         </div>
                     </div>
                 </div>
