@@ -12,10 +12,22 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    public const ROLE_TENANT     = 'ROLE_TENANT';
-    public const ROLE_ADMIN      = 'ROLE_ADMIN';
-    public const ROLE_GESTOR     = 'ROLE_GESTOR';
-    public const ROLE_SUPERVISOR = 'ROLE_SUPERVISOR';
+    public const ROLE_TENANT            = 'ROLE_TENANT';
+    public const ROLE_ADMIN             = 'ROLE_ADMIN';
+    public const ROLE_GESTOR            = 'ROLE_GESTOR';
+    public const ROLE_GESTOR_EQUIPE     = 'ROLE_GESTOR_EQUIPE';
+    public const ROLE_SUPERVISOR        = 'ROLE_SUPERVISOR';
+    public const ROLE_SUPERVISOR_EQUIPE = 'ROLE_SUPERVISOR_EQUIPE';
+
+    /** Ordem de hierarquia (maior = mais permissão) */
+    private const PERFIL_NIVEL = [
+        'SUPERVISOR_EQUIPE' => 1,
+        'SUPERVISOR'        => 2,
+        'GESTOR_EQUIPE'     => 3,
+        'GESTOR'            => 4,
+        'ADMIN'             => 5,
+        'TENANT'            => 6,
+    ];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -34,8 +46,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100)]
     private ?string $nome = null;
 
-    #[ORM\Column(length: 20)]
-    private string $perfil = 'SUPERVISOR';
+    #[ORM\Column(length: 30)]
+    private string $perfil = 'SUPERVISOR_EQUIPE';
 
     #[ORM\Column(nullable: true)]
     private ?string $avatar = null;
@@ -79,7 +91,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNome(string $nome): static { $this->nome = $nome; return $this; }
 
     public function getPerfil(): string { return $this->perfil; }
-    public function setPeril(string $perfil): static { $this->perfil = $perfil; return $this; }
+    public function setPerfil(string $perfil): static { $this->perfil = $perfil; return $this; }
 
     public function getAvatar(): ?string { return $this->avatar; }
     public function setAvatar(?string $avatar): static { $this->avatar = $avatar; return $this; }
@@ -92,18 +104,58 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getEmpresa(): ?Empresa { return $this->empresa; }
     public function setEmpresa(?Empresa $empresa): static { $this->empresa = $empresa; return $this; }
 
-    public function isTenant(): bool  { return in_array(self::ROLE_TENANT, $this->getRoles()); }
-    public function isAdmin(): bool   { return in_array(self::ROLE_ADMIN, $this->getRoles()); }
-    public function isGestor(): bool  { return in_array(self::ROLE_GESTOR, $this->getRoles()); }
+    // ── Helpers de perfil ──────────────────────────────────────────────
+
+    public function isTenant(): bool         { return in_array(self::ROLE_TENANT, $this->getRoles()); }
+    public function isAdmin(): bool          { return in_array(self::ROLE_ADMIN, $this->getRoles()); }
+    public function isGestor(): bool         { return in_array(self::ROLE_GESTOR, $this->getRoles()); }
+    public function isGestorEquipe(): bool   { return in_array(self::ROLE_GESTOR_EQUIPE, $this->getRoles()); }
+    public function isSupervisor(): bool     { return in_array(self::ROLE_SUPERVISOR, $this->getRoles()); }
+    public function isSupervisorEquipe(): bool { return in_array(self::ROLE_SUPERVISOR_EQUIPE, $this->getRoles()); }
+
+    public function getNivel(): int
+    {
+        return self::PERFIL_NIVEL[$this->perfil] ?? 0;
+    }
 
     public function getPerfilLabel(): string
     {
         return match ($this->perfil) {
-            'TENANT'     => 'Tenant',
-            'ADMIN'      => 'Administrador',
-            'GESTOR'     => 'Gestor',
-            'SUPERVISOR' => 'Supervisor',
-            default      => $this->perfil,
+            'TENANT'            => 'Tenant',
+            'ADMIN'             => 'Administrador',
+            'GESTOR'            => 'Gestor',
+            'GESTOR_EQUIPE'     => 'Gestor de Equipe',
+            'SUPERVISOR'        => 'Supervisor Geral',
+            'SUPERVISOR_EQUIPE' => 'Supervisor de Equipe',
+            default             => $this->perfil,
+        };
+    }
+
+    /** CSS class para o badge de perfil */
+    public function getPerfilClass(): string
+    {
+        return match ($this->perfil) {
+            'TENANT'            => 'tenant',
+            'ADMIN'             => 'admin',
+            'GESTOR'            => 'gestor',
+            'GESTOR_EQUIPE'     => 'gestor-equipe',
+            'SUPERVISOR'        => 'supervisor',
+            'SUPERVISOR_EQUIPE' => 'supervisor-equipe',
+            default             => 'default',
+        };
+    }
+
+    /** Role Symfony correspondente ao perfil */
+    public function getRolePrincipal(): string
+    {
+        return match ($this->perfil) {
+            'TENANT'            => self::ROLE_TENANT,
+            'ADMIN'             => self::ROLE_ADMIN,
+            'GESTOR'            => self::ROLE_GESTOR,
+            'GESTOR_EQUIPE'     => self::ROLE_GESTOR_EQUIPE,
+            'SUPERVISOR'        => self::ROLE_SUPERVISOR,
+            'SUPERVISOR_EQUIPE' => self::ROLE_SUPERVISOR_EQUIPE,
+            default             => 'ROLE_USER',
         };
     }
 

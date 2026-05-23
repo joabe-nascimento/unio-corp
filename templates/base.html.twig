@@ -174,10 +174,12 @@
             border: 1px solid rgba(61,114,255,0.25);
         }
 
-        .badge-perfil.tenant     { background: rgba(139,92,246,0.12); color: #8b5cf6; border-color: rgba(139,92,246,0.25); }
-        .badge-perfil.admin      { background: rgba(239,68,68,0.12);  color: #ef4444; border-color: rgba(239,68,68,0.25); }
-        .badge-perfil.gestor     { background: rgba(234,179,8,0.12);  color: #eab308; border-color: rgba(234,179,8,0.25); }
-        .badge-perfil.supervisor { background: rgba(34,197,94,0.12);  color: #22c55e; border-color: rgba(34,197,94,0.25); }
+        .badge-perfil.tenant            { background: rgba(139,92,246,0.12); color: #8b5cf6; border-color: rgba(139,92,246,0.25); }
+        .badge-perfil.admin             { background: rgba(239,68,68,0.12);  color: #ef4444; border-color: rgba(239,68,68,0.25); }
+        .badge-perfil.gestor            { background: rgba(234,179,8,0.12);  color: #eab308; border-color: rgba(234,179,8,0.25); }
+        .badge-perfil.gestor-equipe     { background: rgba(251,146,60,0.12); color: #fb923c; border-color: rgba(251,146,60,0.25); }
+        .badge-perfil.supervisor        { background: rgba(34,197,94,0.12);  color: #22c55e; border-color: rgba(34,197,94,0.25); }
+        .badge-perfil.supervisor-equipe { background: rgba(56,189,248,0.12); color: #38bdf8; border-color: rgba(56,189,248,0.25); }
 
         .table-huplex {
             color: rgba(255,255,255,0.75) !important;
@@ -320,7 +322,7 @@
                         <div style="color:#fff;font-size:13px;font-weight:600">{{ app.user.nome }}</div>
                         <div style="color:rgba(255,255,255,0.3);font-size:11px">{{ app.user.email }}</div>
                         <div class="mt-1">
-                            <span class="badge-perfil {{ app.user.perfil|lower }}">{{ app.user.perfilLabel }}</span>
+                            <span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span>
                         </div>
                     </div>
                     <a class="dropdown-item py-2" href="#" style="color:rgba(255,255,255,0.5);font-size:13px">
@@ -354,6 +356,7 @@
                         </a>
                     </li>
 
+                    {% if is_granted('ROLE_SUPERVISOR_EQUIPE') %}
                     <li class="nav-header">RH & Pessoas</li>
 
                     <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_rh' ? 'menu-open' : '' }}">
@@ -418,6 +421,9 @@
                         </ul>
                     </li>
 
+                    {% endif %}{# fim ROLE_SUPERVISOR_EQUIPE #}
+
+                    {% if is_granted('ROLE_GESTOR_EQUIPE') %}
                     <li class="nav-header">Hubs</li>
 
                     <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_talentos' ? 'menu-open' : '' }}">
@@ -472,6 +478,8 @@
                             </li>
                         </ul>
                     </li>
+
+                    {% endif %}{# fim ROLE_GESTOR_EQUIPE #}
 
                     {% if is_granted('ROLE_ADMIN') %}
                     <li class="nav-header">Administração</li>

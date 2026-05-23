@@ -9,10 +9,12 @@ security:
                 property: email
 
     role_hierarchy:
-        ROLE_SUPERVISOR: ROLE_USER
-        ROLE_GESTOR:     ROLE_SUPERVISOR
-        ROLE_ADMIN:      ROLE_GESTOR
-        ROLE_TENANT:     ROLE_ADMIN
+        ROLE_SUPERVISOR_EQUIPE: ROLE_USER
+        ROLE_SUPERVISOR:        ROLE_SUPERVISOR_EQUIPE
+        ROLE_GESTOR_EQUIPE:     ROLE_SUPERVISOR
+        ROLE_GESTOR:            ROLE_GESTOR_EQUIPE
+        ROLE_ADMIN:             ROLE_GESTOR
+        ROLE_TENANT:            ROLE_ADMIN
 
     firewalls:
         dev:
@@ -39,10 +41,10 @@ security:
     access_control:
         - { path: ^/login,       roles: PUBLIC_ACCESS }
         - { path: ^/dashboard,   roles: ROLE_USER }
-        - { path: ^/rh,          roles: ROLE_SUPERVISOR }
-        - { path: ^/talentos,    roles: ROLE_GESTOR }
-        - { path: ^/maturidade,  roles: ROLE_GESTOR }
-        - { path: ^/pessoas,     roles: ROLE_SUPERVISOR }
+        - { path: ^/rh,          roles: ROLE_SUPERVISOR_EQUIPE }
+        - { path: ^/pessoas,     roles: ROLE_SUPERVISOR_EQUIPE }
+        - { path: ^/talentos,    roles: ROLE_GESTOR_EQUIPE }
+        - { path: ^/maturidade,  roles: ROLE_GESTOR_EQUIPE }
         - { path: ^/admin,       roles: ROLE_ADMIN }
         - { path: ^/tenant,      roles: ROLE_TENANT }
         - { path: ^/,            roles: ROLE_USER }

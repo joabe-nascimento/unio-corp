@@ -109,7 +109,7 @@
                     <div style="color:#fff;font-weight:600;font-size:14px">{{ app.user.nome }}</div>
                     <div style="color:rgba(255,255,255,0.3);font-size:12px">{{ app.user.email }}</div>
                     <div class="mt-1">
-                        <span class="badge-perfil {{ app.user.perfil|lower }}">{{ app.user.perfilLabel }}</span>
+                        <span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span>
                     </div>
                 </div>
             </div>
@@ -117,12 +117,15 @@
             <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px">
                 <div style="font-size:11px;color:rgba(255,255,255,0.2);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Permissões</div>
                 {% set perms = [
-                    { label: 'Dashboard',        granted: is_granted('ROLE_USER') },
-                    { label: 'RH & Pessoas',     granted: is_granted('ROLE_SUPERVISOR') },
-                    { label: 'Hub de Talentos',  granted: is_granted('ROLE_GESTOR') },
-                    { label: 'Hub Maturidade',   granted: is_granted('ROLE_GESTOR') },
-                    { label: 'Administração',    granted: is_granted('ROLE_ADMIN') },
-                    { label: 'Visão Tenant',     granted: is_granted('ROLE_TENANT') },
+                    { label: 'Dashboard',              granted: is_granted('ROLE_USER') },
+                    { label: 'RH (equipe)',             granted: is_granted('ROLE_SUPERVISOR_EQUIPE') },
+                    { label: 'RH (visão geral)',        granted: is_granted('ROLE_SUPERVISOR') },
+                    { label: 'Pessoas (equipe)',        granted: is_granted('ROLE_SUPERVISOR_EQUIPE') },
+                    { label: 'Hub Talentos (equipe)',   granted: is_granted('ROLE_GESTOR_EQUIPE') },
+                    { label: 'Hub Talentos (completo)', granted: is_granted('ROLE_GESTOR') },
+                    { label: 'Hub Maturidade',          granted: is_granted('ROLE_GESTOR_EQUIPE') },
+                    { label: 'Administração',           granted: is_granted('ROLE_ADMIN') },
+                    { label: 'Visão Multi-empresa',     granted: is_granted('ROLE_TENANT') },
                 ] %}
                 {% for perm in perms %}
                 <div class="d-flex align-items-center justify-content-between py-1">
