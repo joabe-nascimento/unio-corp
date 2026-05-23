@@ -92,12 +92,19 @@
             background: rgba(79,127,255,0.07);
         }
 
-        .ws-card .wc-logo {
+        .ws-card .wc-logo,
+        .ws-card .wc-logo-img {
             width: 44px; height: 44px; border-radius: 11px;
-            background: rgba(79,127,255,0.1); border: 1px solid rgba(79,127,255,0.18);
+            flex-shrink: 0;
+            object-fit: contain;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+        .ws-card .wc-logo {
             display: flex; align-items: center; justify-content: center;
+            background: rgba(79,127,255,0.1); border: 1px solid rgba(79,127,255,0.18);
             font-size: 14px; font-weight: 700; color: var(--accent);
-            flex-shrink: 0; letter-spacing: -0.03em;
+            letter-spacing: -0.03em;
         }
         .ws-card .wc-info { flex: 1; min-width: 0; }
         .ws-card .wc-name {
@@ -159,6 +166,7 @@
     <i class="fas fa-sun" id="themeIcon"></i>
 </button>
 
+{% import 'macros/empresa.html.twig' as empresa_macro %}
 <div class="ws-wrap">
     <div class="ws-header">
         <div class="logo">Hup<span>lex</span></div>
@@ -178,7 +186,11 @@
         <a href="{{ path('app_workspace_switch', {id: emp.id}) }}"
            class="ws-card {% if current and current.id == emp.id %}ws-active{% endif %}">
 
-            <div class="wc-logo">{{ emp.nome|slice(0,2)|upper }}</div>
+            {% if emp.logo %}
+                {{ empresa_macro.logo(emp, 'wc-logo-img') }}
+            {% else %}
+                <div class="wc-logo">{{ emp.nome|slice(0,2)|upper }}</div>
+            {% endif %}
 
             <div class="wc-info">
                 <div class="wc-name">{{ emp.nome }}</div>

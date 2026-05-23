@@ -100,9 +100,13 @@
             transition: color 0.15s, background 0.15s;
             border-left: none !important;
         }
-        .nav-sidebar .nav-item .nav-link:hover {
+        .nav-sidebar .nav-item .nav-link:hover,
+        .nav-sidebar .nav-item .nav-link:focus,
+        .nav-sidebar .nav-item .nav-link:focus-visible {
             color: var(--text-1) !important;
             background: var(--nav-hover-bg) !important;
+            outline: none !important;
+            box-shadow: none !important;
         }
         .nav-sidebar .nav-item .nav-link.active {
             color: var(--accent) !important;
@@ -368,9 +372,26 @@
             display: inline-flex !important;
             align-items: center; justify-content: center;
             color: var(--text-2) !important;
-            transition: background 0.15s;
+            transition: background 0.15s, color 0.15s;
+            border: 1px solid transparent !important;
+            outline: none !important;
+            box-shadow: none !important;
         }
-        .nav-toggle-btn:hover { background: var(--nav-hover-bg) !important; }
+        .nav-toggle-btn:hover,
+        .nav-toggle-btn:focus,
+        .nav-toggle-btn:focus-visible,
+        .nav-toggle-btn:active {
+            background: var(--nav-hover-bg) !important;
+            color: var(--text-1) !important;
+            border-color: transparent !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .wrapper .navbar-nav .nav-link:focus,
+        .wrapper .navbar-nav .nav-link:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+        }
 
         /* Botão alternar tema */
         .theme-btn {
@@ -388,6 +409,23 @@
             margin-right: 8px;
         }
         .theme-btn:hover { color: var(--text-1); border-color: var(--border-2); }
+        .theme-btn:focus,
+        .theme-btn:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .user-menu-btn {
+            border-radius: 7px !important;
+            border: 1px solid transparent !important;
+            transition: background 0.15s;
+        }
+        .user-menu-btn:hover,
+        .user-menu-btn:focus,
+        .user-menu-btn:focus-visible {
+            background: var(--nav-hover-bg) !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
 
         /* ── Dropdowns (sobrescreve Bootstrap focus/active branco) ── */
         .huplex-dropdown {
@@ -511,19 +549,34 @@
             gap: 10px;
             width: 100% !important;
         }
-        .brand-mark {
+        .empresa-logo,
+        .empresa-logo-fallback {
             width: 32px; height: 32px;
             border-radius: 8px;
-            background: var(--accent-dim);
-            border: 1px solid var(--accent-line);
-            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
+            object-fit: contain;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+        .empresa-logo-fallback {
+            display: flex; align-items: center; justify-content: center;
+            background: var(--accent-dim);
+            border-color: var(--accent-line);
             color: var(--accent);
-            font-size: 15px;
-            font-weight: 800;
+            font-size: 11px;
+            font-weight: 700;
             line-height: 1;
         }
-        .brand-text { flex: 1; min-width: 0; }
+        .brand-text {
+            flex: 1; min-width: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-size: 14px !important;
+        }
+        .brand-link:focus,
+        .brand-link:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+        }
 
         /* ── Rodapé: empresa ativa ── */
         .sidebar-bottom {
@@ -540,13 +593,10 @@
             padding: 10px 14px;
             min-height: 44px;
         }
-        .sidebar-empresa .se-logo {
+        .sidebar-empresa .se-logo,
+        .sidebar-empresa .empresa-logo,
+        .sidebar-empresa .empresa-logo-fallback {
             width: 32px; height: 32px;
-            border-radius: 8px;
-            background: rgba(79,127,255,0.1);
-            border: 1px solid rgba(79,127,255,0.18);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 700; color: var(--accent);
             flex-shrink: 0;
         }
         .sidebar-empresa .se-info { min-width: 0; flex: 1; overflow: hidden; }
@@ -568,9 +618,9 @@
             gap: 0 !important;
         }
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-text { display: none !important; }
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-mark {
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .empresa-logo,
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .empresa-logo-fallback {
             width: 30px; height: 30px;
-            font-size: 14px;
         }
 
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-bottom .sidebar-empresa .se-info { display: none; }
@@ -578,9 +628,9 @@
             justify-content: center;
             padding: 10px 6px;
         }
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-bottom .sidebar-empresa .se-logo {
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-bottom .sidebar-empresa .empresa-logo,
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-bottom .sidebar-empresa .empresa-logo-fallback {
             width: 30px; height: 30px;
-            font-size: 10px;
         }
 
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-header { display: none !important; }
@@ -671,10 +721,23 @@
             z-index: 1040;
             box-shadow: 4px 0 24px rgba(0,0,0,0.35);
         }
+        /* Evita “pulo” e fundo branco ao passar o mouse na sidebar colapsada */
+        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item > .nav-link:focus,
+        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item > .nav-link:active {
+            background: var(--nav-hover-bg) !important;
+            color: var(--text-1) !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link:focus,
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link:hover {
+            width: auto !important;
+            margin: 1px 8px !important;
+            padding: 7px 12px !important;
+        }
     </style>
 
     {% block stylesheets %}{% endblock %}
 </head>
+{% import 'macros/empresa.html.twig' as empresa_macro %}
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
@@ -691,7 +754,7 @@
                 </button>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#" style="gap:8px;padding:4px 8px!important">
+                <a class="nav-link user-menu-btn d-flex align-items-center" data-toggle="dropdown" href="#" style="gap:8px;padding:4px 8px!important">
                     <span class="avatar-circle">{{ app.user.initials }}</span>
                     <span style="color:var(--text-2);font-size:13px;font-weight:500">{{ app.user.nome|split(' ')|first }}</span>
                     <i class="fas fa-chevron-down" style="font-size:9px;color:var(--text-3)"></i>
@@ -727,10 +790,14 @@
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <div class="sidebar-top">
             <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0">
-                <span class="brand-mark" aria-hidden="true">H</span>
-                <span class="brand-text font-weight-bold" style="font-size:15px">
-                    Hup<span class="accent">lex</span>
-                </span>
+                {% if empresa is defined and empresa %}
+                    {{ empresa_macro.logo(empresa, 'empresa-logo') }}
+                    <span class="brand-text font-weight-bold">{{ empresa.nome }}</span>
+                {% else %}
+                    <span class="brand-text font-weight-bold">
+                        Hup<span class="accent">lex</span>
+                    </span>
+                {% endif %}
             </a>
         </div>
 
@@ -907,7 +974,7 @@
         {% if empresa is defined and empresa %}
         <div class="sidebar-bottom">
             <div class="sidebar-empresa" title="{{ empresa.nome }}">
-                <span class="se-logo">{{ empresa.nome|slice(0,2)|upper }}</span>
+                {{ empresa_macro.logo(empresa, 'empresa-logo se-logo') }}
                 <div class="se-info">
                     <div class="se-name">{{ empresa.nome }}</div>
                     {% if empresa.setor %}<div class="se-setor">{{ empresa.setor }}</div>{% endif %}

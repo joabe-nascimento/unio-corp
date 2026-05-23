@@ -1,0 +1,8 @@
+{# Logo da empresa (imagem em public/) ou iniciais só se não houver arquivo #}
+{% macro logo(empresa, class) %}
+    {% if empresa.logo %}
+        <img src="{{ asset(empresa.logo) }}" alt="{{ empresa.nome }}" class="{{ class }}" loading="lazy" decoding="async">
+    {% else %}
+        <span class="{{ class }} empresa-logo-fallback" aria-hidden="true">{{ empresa.nome|slice(0,2)|upper }}</span>
+    {% endif %}
+{% endmacro %}
