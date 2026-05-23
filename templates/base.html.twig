@@ -429,22 +429,39 @@
         .main-footer { background: var(--bg) !important; border-top: 1px solid var(--border) !important; color: var(--text-3) !important; font-size: 11px !important; }
 
 
-        /* ══ Mini sidebar (colapsada) ══ */
-        .sidebar-mini.sidebar-collapse .main-sidebar { width: 4.6rem !important; overflow: hidden; }
-        .sidebar-mini.sidebar-collapse .content-wrapper,
-        .sidebar-mini.sidebar-collapse .main-footer { margin-left: 4.6rem !important; }
-        .sidebar-mini.sidebar-collapse .brand-link { padding: 13px 14px !important; justify-content: center !important; }
-        .sidebar-mini.sidebar-collapse .brand-text { display: none !important; }
-        .sidebar-mini.sidebar-collapse .nav-header { opacity: 0 !important; height: 0 !important; padding: 0 !important; overflow: hidden !important; }
-        .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link p { display: none !important; }
-        .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link { justify-content: center !important; padding: 8px !important; margin: 2px 6px !important; }
-        .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link .nav-icon { width: 16px !important; min-width: 16px !important; font-size: 13px !important; }
-        .sidebar-mini.sidebar-collapse .nav-treeview { display: none !important; }
-        .sidebar-mini.sidebar-collapse .sidebar-footer .sf-info,
-        .sidebar-mini.sidebar-collapse .sidebar-footer .sf-logout { display: none !important; }
-        .sidebar-mini.sidebar-collapse .sidebar-footer { justify-content: center !important; }
-        .sidebar-mini.sidebar-collapse .ws-pill .ws-name,
-        .sidebar-mini.sidebar-collapse .ws-pill .ws-caret { display: none !important; }
+        /* ══ Mini sidebar — delega ao AdminLTE, ajusta apenas visual ══ */
+        .sidebar-mini .main-sidebar,
+        .sidebar-mini .main-sidebar::before {
+            transition: width 0.3s ease-in-out, margin-left 0.3s ease-in-out !important;
+        }
+        /* Ícones na sidebar mini ficam centralizados e visíveis */
+        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item > .nav-link {
+            border-radius: 6px !important;
+        }
+        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item > .nav-link .nav-icon {
+            font-size: 13px !important;
+            color: var(--text-2) !important;
+        }
+        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item > .nav-link.active .nav-icon {
+            color: var(--accent) !important;
+        }
+        /* Sidebar aberta sobre o conteúdo ao hover (mini mode) */
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover {
+            width: 224px !important;
+        }
+        /* Footer na mini — esconde texto, mantém avatar */
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-footer .sf-info,
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-footer .sf-logout {
+            display: none !important;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-footer {
+            justify-content: center !important;
+            padding: 10px 6px !important;
+        }
+        /* Brand no mini — centraliza logo */
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-link {
+            padding: 13px 10px !important;
+        }
         /* AdminLTE overrides */
         .sidebar { padding-bottom: 64px; }
         .content-wrapper { margin-left: 224px !important; }
