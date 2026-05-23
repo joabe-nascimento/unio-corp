@@ -1,4 +1,4 @@
-{# Papo — chat interno (mock; backend em implementação futura) #}
+{# Chat Papo — chat interno (mock; backend em implementação futura) #}
 <div
     id="chatApp"
     class="chat-app"
@@ -7,15 +7,49 @@
 >
     <script type="application/json" id="chatInitialData">{{ conversations|json_encode|raw }}</script>
 
-    <aside class="chat-sidebar" id="chatSidebar" aria-label="Lista de conversas">
+    <aside class="chat-sidebar" id="chatSidebar" aria-label="Lista de conversas do Chat Papo">
         <header class="chat-sidebar-head">
             <div class="chat-sidebar-title-wrap">
-                <h2 class="chat-sidebar-title">Papo</h2>
-                <span class="chat-sidebar-sub">Chat interno</span>
+                <h2 class="chat-sidebar-title">Chat Papo</h2>
+                <span class="chat-sidebar-sub">Mensagens da equipe</span>
             </div>
-            <button type="button" class="chat-icon-btn" disabled title="Nova conversa (em breve)" aria-label="Nova conversa">
-                <i class="fas fa-pen-to-square" aria-hidden="true"></i>
-            </button>
+            <div class="dropdown">
+                <button
+                    type="button"
+                    class="chat-icon-btn"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-label="Ações do Chat Papo"
+                    title="Ações"
+                >
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right chat-action-menu">
+                    <h6 class="dropdown-header">Ações</h6>
+                    <button type="button" class="dropdown-item chat-action-soon" data-chat-action="nova-conversa">
+                        <i class="fas fa-comment-medical" aria-hidden="true"></i>
+                        <span>Nova conversa</span>
+                        <span class="chat-soon-badge">Em breve</span>
+                    </button>
+                    <button type="button" class="dropdown-item chat-action-soon" data-chat-action="criar-grupo">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <span>Criar grupo</span>
+                        <span class="chat-soon-badge">Em breve</span>
+                    </button>
+                    <button type="button" class="dropdown-item chat-action-soon" data-chat-action="transmissao">
+                        <i class="fas fa-tower-broadcast" aria-hidden="true"></i>
+                        <span>Iniciar transmissão</span>
+                        <span class="chat-soon-badge">Em breve</span>
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button type="button" class="dropdown-item chat-action-soon" data-chat-action="convidar">
+                        <i class="fas fa-user-plus" aria-hidden="true"></i>
+                        <span>Convidar membros</span>
+                        <span class="chat-soon-badge">Em breve</span>
+                    </button>
+                </div>
+            </div>
         </header>
 
         <div class="chat-sidebar-search">
@@ -84,4 +118,6 @@
             </footer>
         </div>
     </main>
+
+    <div id="chatToast" class="chat-toast" role="status" aria-live="polite" hidden></div>
 </div>

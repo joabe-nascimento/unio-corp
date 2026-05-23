@@ -1,6 +1,6 @@
 ﻿{% extends 'base.html.twig' %}
 
-{% block title %}Papo{% endblock %}
+{% block title %}Chat Papo{% endblock %}
 {% block page_show_title %}{% endblock %}
 
 {% block content %}
@@ -332,6 +332,21 @@
     });
 
     chatBackBtn && chatBackBtn.addEventListener('click', closeRoomMobile);
+
+    var chatToast = document.getElementById('chatToast');
+    function showSoonFeature(label) {
+        if (!chatToast) return;
+        chatToast.textContent = label + ' estará disponível em breve no Chat Papo.';
+        chatToast.hidden = false;
+        clearTimeout(showSoonFeature._t);
+        showSoonFeature._t = setTimeout(function () { chatToast.hidden = true; }, 3200);
+    }
+    app.querySelectorAll('.chat-action-soon').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var labelEl = btn.querySelector('span');
+            showSoonFeature(labelEl ? labelEl.textContent.trim() : 'Recurso');
+        });
+    });
 })();
 </script>
 {% endblock %}
