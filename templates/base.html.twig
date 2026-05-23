@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('huplex-theme')||'dark')}catch(e){}</script>
 
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=27">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=28">
 
     {% block stylesheets %}{% endblock %}
 </head>
@@ -472,7 +472,7 @@ window.addEventListener('load', function () {
     function renderHistory() {
         var sessions = loadSessions();
         if (historyCount) {
-            historyCount.textContent = sessions.length + (sessions.length === 1 ? ' conversa' : ' conversas');
+            historyCount.textContent = String(sessions.length);
         }
         if (!historyList || !historyEmpty) return;
 
@@ -488,12 +488,8 @@ window.addEventListener('load', function () {
             btn.type = 'button';
             btn.className = 'helix-history-item' + (s.id === currentSessionId ? ' helix-history-item--active' : '');
             btn.dataset.sessionId = s.id;
-            var preview = s.messages.length
-                ? (s.messages[s.messages.length - 1].text || '')
-                : 'Conversa vazia';
             btn.innerHTML =
                 '<span class="helix-history-item-title">' + escapeHtml(s.title || 'Conversa') + '</span>' +
-                '<span class="helix-history-item-preview">' + escapeHtml(preview.slice(0, 80)) + '</span>' +
                 '<span class="helix-history-item-date">' + escapeHtml(formatDate(s.updatedAt)) + '</span>';
             historyList.appendChild(btn);
         });
@@ -517,23 +513,10 @@ window.addEventListener('load', function () {
         document.body.classList.remove('helix-open');
     }
 
-    function switchTab(name) {
-        panel.querySelectorAll('[data-helix-tab]').forEach(function (tab) {
-            var active = tab.dataset.helixTab === name;
-            tab.classList.toggle('helix-tab--active', active);
-            tab.setAttribute('aria-selected', active ? 'true' : 'false');
-        });
-        panel.querySelectorAll('[data-helix-pane]').forEach(function (pane) {
-            var show = pane.dataset.helixPane === name;
-            pane.classList.toggle('helix-pane--active', show);
-            pane.hidden = !show;
-        });
-        if (name === 'history') renderHistory();
-    }
-
     function newChat() {
         currentSessionId = null;
         renderWelcomeOnly();
+        renderHistory();
         if (input) {
             input.value = '';
             updateSendState();
@@ -546,7 +529,6 @@ window.addEventListener('load', function () {
         if (!session) return;
         currentSessionId = id;
         renderMessages(session);
-        switchTab('chat');
         renderHistory();
     }
 
@@ -562,12 +544,6 @@ window.addEventListener('load', function () {
 
     panel.querySelectorAll('[data-helix-close]').forEach(function (el) {
         el.addEventListener('click', closePanel);
-    });
-
-    panel.querySelectorAll('[data-helix-tab]').forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            switchTab(tab.dataset.helixTab);
-        });
     });
 
     if (form) {
