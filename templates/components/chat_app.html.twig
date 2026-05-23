@@ -1,0 +1,87 @@
+{# Papo — chat interno (mock; backend em implementação futura) #}
+<div
+    id="chatApp"
+    class="chat-app"
+    data-user-initials="{{ user_initials|e('html_attr') }}"
+    data-storage-key="huplex-chat-papo"
+>
+    <script type="application/json" id="chatInitialData">{{ conversations|json_encode|raw }}</script>
+
+    <aside class="chat-sidebar" id="chatSidebar" aria-label="Lista de conversas">
+        <header class="chat-sidebar-head">
+            <div class="chat-sidebar-title-wrap">
+                <h2 class="chat-sidebar-title">Papo</h2>
+                <span class="chat-sidebar-sub">Chat interno</span>
+            </div>
+            <button type="button" class="chat-icon-btn" disabled title="Nova conversa (em breve)" aria-label="Nova conversa">
+                <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+            </button>
+        </header>
+
+        <div class="chat-sidebar-search">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" id="chatSearch" class="chat-search-input" placeholder="Buscar conversas…" autocomplete="off" aria-label="Buscar conversas">
+        </div>
+
+        <div class="chat-tabs" role="tablist" aria-label="Filtrar conversas">
+            <button type="button" class="chat-tab chat-tab--active" data-chat-tab="all" role="tab" aria-selected="true">Todas</button>
+            <button type="button" class="chat-tab" data-chat-tab="direct" role="tab" aria-selected="false">Diretas</button>
+            <button type="button" class="chat-tab" data-chat-tab="group" role="tab" aria-selected="false">Grupos</button>
+        </div>
+
+        <div class="chat-conv-list" id="chatConvList" role="list"></div>
+    </aside>
+
+    <main class="chat-main" id="chatMain">
+        <div class="chat-empty" id="chatEmpty">
+            <div class="chat-empty-icon" aria-hidden="true"><i class="fas fa-comments"></i></div>
+            <h3 class="chat-empty-title">Selecione uma conversa</h3>
+            <p class="chat-empty-text">Escolha um contato ou grupo na lista ao lado para começar.</p>
+        </div>
+
+        <div class="chat-room" id="chatRoom" hidden>
+            <header class="chat-room-head">
+                <button type="button" class="chat-back-btn" id="chatBackBtn" aria-label="Voltar para conversas">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                </button>
+                <div class="chat-room-avatar" id="chatRoomAvatar" aria-hidden="true"></div>
+                <div class="chat-room-meta">
+                    <h3 class="chat-room-name" id="chatRoomName"></h3>
+                    <p class="chat-room-status" id="chatRoomStatus"></p>
+                </div>
+                <div class="chat-room-actions">
+                    <button type="button" class="chat-icon-btn" disabled title="Chamada de voz (em breve)" aria-label="Chamada de voz">
+                        <i class="fas fa-phone" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="chat-icon-btn" disabled title="Chamada de vídeo (em breve)" aria-label="Chamada de vídeo">
+                        <i class="fas fa-video" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="chat-icon-btn" disabled title="Informações (em breve)" aria-label="Informações da conversa">
+                        <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+
+            <footer class="chat-composer">
+                <button type="button" class="chat-icon-btn" disabled title="Anexo (em breve)" aria-label="Anexar arquivo">
+                    <i class="fas fa-paperclip" aria-hidden="true"></i>
+                </button>
+                <form class="chat-composer-form" id="chatForm">
+                    <textarea
+                        id="chatInput"
+                        class="chat-input"
+                        rows="1"
+                        placeholder="Escreva uma mensagem…"
+                        maxlength="4000"
+                        aria-label="Mensagem"
+                    ></textarea>
+                    <button type="submit" class="chat-send-btn" id="chatSendBtn" aria-label="Enviar" disabled>
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </footer>
+        </div>
+    </main>
+</div>
