@@ -6,123 +6,32 @@
 
 {% block content %}
 
-{# ── LAYOUT ADMIN / TENANT ── #}
-{% if layout == 'admin' %}
-
+{# ── Cards de stats ── #}
 <div class="row mb-4">
-    <div class="col-12 mb-3">
-        <div style="background:rgba(79,127,255,0.06);border:1px solid rgba(79,127,255,0.15);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:12px">
-            <div style="width:38px;height:38px;border-radius:8px;background:rgba(79,127,255,0.1);border:1px solid rgba(79,127,255,0.2);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:15px;flex-shrink:0">
-                <i class="fas fa-shield-halved"></i>
-            </div>
-            <div>
-                <div style="color:var(--text-1);font-weight:600;font-size:13px">Visão Administrativa{% if is_granted('ROLE_TENANT') %} · Multi-empresa{% endif %}</div>
-                <div style="color:var(--text-3);font-size:12px">Você tem acesso total à plataforma{{ empresa ? ' — ' ~ empresa.nome : '' }}</div>
-            </div>
-        </div>
-    </div>
-    {% set statCards = [
-        { icon: 'fa-users',       value: stats.funcionarios,  label: 'Funcionários',   },
-        { icon: 'fa-sitemap',     value: stats.departamentos, label: 'Departamentos',  },
-        { icon: 'fa-briefcase',   value: stats.vagas_abertas, label: 'Vagas Abertas',  },
-        { icon: 'fa-graduation-cap', value: stats.treinamentos, label: 'Treinamentos', },
-        { icon: 'fa-user-shield', value: stats.usuarios,      label: 'Usuários',       },
-        { icon: 'fa-building',    value: stats.empresas,      label: 'Empresas Ativas',},
-    ] %}
-    {% for s in statCards %}
-    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-        <div class="huplex-card d-flex align-items-center">
-            <div class="card-icon"><i class="fas {{ s.icon }}"></i></div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="huplex-card d-flex align-items-center gap-3">
+            <div class="card-icon"><i class="fas fa-users"></i></div>
             <div class="ml-3">
-                <div class="card-value">{{ s.value }}</div>
-                <div class="card-label">{{ s.label }}</div>
+                <div class="card-value">{{ stats.funcionarios }}</div>
+                <div class="card-label">Funcionários Ativos</div>
             </div>
         </div>
     </div>
-    {% endfor %}
-</div>
-
-{# ── LAYOUT GESTOR ── #}
-{% elseif layout == 'gestor' %}
-
-<div class="row mb-4">
-    <div class="col-12 mb-3">
-        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:12px">
-            <div style="width:38px;height:38px;border-radius:8px;background:rgba(79,127,255,0.08);border:1px solid rgba(79,127,255,0.15);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:15px;flex-shrink:0">
-                <i class="fas fa-chart-pie"></i>
-            </div>
-            <div>
-                <div style="color:var(--text-1);font-weight:600;font-size:13px">Visão do Gestor{{ empresa ? ' — ' ~ empresa.nome : '' }}</div>
-                <div style="color:var(--text-3);font-size:12px">Dados consolidados da sua empresa</div>
-            </div>
-        </div>
-    </div>
-    {% set statCards = [
-        { icon: 'fa-users',          value: stats.funcionarios,  label: 'Funcionários'  },
-        { icon: 'fa-sitemap',        value: stats.departamentos, label: 'Departamentos' },
-        { icon: 'fa-briefcase',      value: stats.vagas_abertas, label: 'Vagas Abertas' },
-        { icon: 'fa-graduation-cap', value: stats.treinamentos,  label: 'Treinamentos'  },
-    ] %}
-    {% for s in statCards %}
     <div class="col-md-3 col-sm-6 mb-3">
         <div class="huplex-card d-flex align-items-center">
-            <div class="card-icon"><i class="fas {{ s.icon }}"></i></div>
+            <div class="card-icon"><i class="fas fa-sitemap"></i></div>
             <div class="ml-3">
-                <div class="card-value">{{ s.value }}</div>
-                <div class="card-label">{{ s.label }}</div>
+                <div class="card-value">{{ stats.departamentos }}</div>
+                <div class="card-label">Departamentos</div>
             </div>
         </div>
     </div>
-    {% endfor %}
-</div>
-
-{# ── LAYOUT SUPERVISOR ── #}
-{% elseif layout == 'supervisor' %}
-
-<div class="row mb-4">
-    <div class="col-12 mb-3">
-        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:12px">
-            <div style="width:38px;height:38px;border-radius:8px;background:rgba(79,127,255,0.08);border:1px solid rgba(79,127,255,0.15);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:15px;flex-shrink:0">
-                <i class="fas fa-user-group"></i>
-            </div>
-            <div>
-                <div style="color:var(--text-1);font-weight:600;font-size:13px">Sua Equipe{{ empresa ? ' — ' ~ empresa.nome : '' }}</div>
-                <div style="color:var(--text-3);font-size:12px">Visão dos colaboradores sob sua supervisão</div>
-            </div>
-        </div>
-    </div>
-    {% set statCards = [
-        { icon: 'fa-users',          value: stats.funcionarios, label: 'Na Equipe'     },
-        { icon: 'fa-sitemap',        value: stats.departamentos, label: 'Departamentos'},
-        { icon: 'fa-briefcase',      value: stats.vagas_abertas, label: 'Vagas'        },
-        { icon: 'fa-graduation-cap', value: stats.treinamentos,  label: 'Treinamentos' },
-    ] %}
-    {% for s in statCards %}
     <div class="col-md-3 col-sm-6 mb-3">
         <div class="huplex-card d-flex align-items-center">
-            <div class="card-icon"><i class="fas {{ s.icon }}"></i></div>
+            <div class="card-icon"><i class="fas fa-briefcase"></i></div>
             <div class="ml-3">
-                <div class="card-value">{{ s.value }}</div>
-                <div class="card-label">{{ s.label }}</div>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-{# ── LAYOUT MEMBRO ── #}
-{% else %}
-
-<div class="row mb-4">
-    <div class="col-12 mb-3">
-        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:20px 24px;display:flex;align-items:center;gap:14px">
-            <div class="avatar-circle" style="width:48px;height:48px;font-size:17px;border-radius:12px;flex-shrink:0">{{ app.user.initials }}</div>
-            <div>
-                <div style="color:var(--text-1);font-weight:600;font-size:15px">Olá, {{ app.user.nome }}</div>
-                <div style="color:var(--text-3);font-size:12px;margin-top:2px">
-                    <span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span>
-                    {% if empresa %}<span class="ml-2">· {{ empresa.nome }}</span>{% endif %}
-                </div>
+                <div class="card-value">{{ stats.vagas_abertas }}</div>
+                <div class="card-label">Vagas Abertas</div>
             </div>
         </div>
     </div>
@@ -131,25 +40,14 @@
             <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
             <div class="ml-3">
                 <div class="card-value">{{ stats.treinamentos }}</div>
-                <div class="card-label">Treinamentos</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6 mb-3">
-        <div class="huplex-card d-flex align-items-center">
-            <div class="card-icon"><i class="fas fa-star-half-stroke"></i></div>
-            <div class="ml-3">
-                <div class="card-value">{{ stats.avaliacoes }}</div>
-                <div class="card-label">Avaliações Pendentes</div>
+                <div class="card-label">Treinamentos Ativos</div>
             </div>
         </div>
     </div>
 </div>
 
-{% endif %}
-
-{# ── Módulos + painel lateral (todos os layouts) ── #}
 <div class="row">
+    {# ── Módulos de acesso rápido ── #}
     <div class="col-md-8 mb-4">
         <div class="huplex-card">
             <div class="d-flex align-items-center justify-content-between mb-4">
@@ -160,26 +58,27 @@
             </div>
             <div class="row">
                 {% set modules = [
-                    { icon: 'fas fa-id-card',     title: 'RH',               sub: 'Funcionários e folha',   route: 'app_rh',         role: 'ROLE_SUPERVISOR_EQUIPE' },
-                    { icon: 'fas fa-people-group', title: 'Gest. de Pessoas', sub: 'Equipes e organograma',  route: 'app_pessoas',    role: 'ROLE_SUPERVISOR_EQUIPE' },
-                    { icon: 'fas fa-gem',          title: 'Hub de Talentos',  sub: 'Banco e trilhas',        route: 'app_talentos',   role: 'ROLE_GESTOR_EQUIPE' },
-                    { icon: 'fas fa-gauge-high',   title: 'Hub Maturidade',   sub: 'Radar e plano de ação',  route: 'app_maturidade', role: 'ROLE_GESTOR_EQUIPE' },
-                    { icon: 'fas fa-shield-halved',title: 'Administração',    sub: 'Usuários e configurações',route: 'app_admin',     role: 'ROLE_ADMIN' },
+                    { icon: 'fas fa-users',      title: 'RH',               sub: 'Funcionários e folha',     route: 'app_rh',         color: '#3D72FF', role: 'ROLE_SUPERVISOR' },
+                    { icon: 'fas fa-sitemap',     title: 'Gest. de Pessoas', sub: 'Equipes e organograma',   route: 'app_pessoas',    color: '#8b5cf6', role: 'ROLE_SUPERVISOR' },
+                    { icon: 'fas fa-star',        title: 'Hub de Talentos',  sub: 'Banco e trilhas',          route: 'app_talentos',   color: '#eab308', role: 'ROLE_GESTOR' },
+                    { icon: 'fas fa-chart-line',  title: 'Hub Maturidade',   sub: 'Radar e plano de ação',   route: 'app_maturidade', color: '#22c55e', role: 'ROLE_GESTOR' },
                 ] %}
                 {% for m in modules %}
                     {% if is_granted(m.role) %}
                     <div class="col-md-6 mb-3">
                         <a href="{{ path(m.route) }}" class="d-block text-decoration-none">
-                            <div class="module-card">
-                                <div class="d-flex align-items-center">
-                                    <div style="width:38px;height:38px;border-radius:8px;background:rgba(79,127,255,0.08);border:1px solid rgba(79,127,255,0.14);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:15px;flex-shrink:0">
+                            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:18px 20px;transition:all 0.2s"
+                                 onmouseover="this.style.borderColor='rgba(61,114,255,0.22)';this.style.background='rgba(61,114,255,0.04)'"
+                                 onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.background='rgba(255,255,255,0.02)'">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div style="width:40px;height:40px;border-radius:9px;background:{{ m.color }}18;border:1px solid {{ m.color }}30;display:flex;align-items:center;justify-content:center;color:{{ m.color }};font-size:16px;flex-shrink:0">
                                         <i class="{{ m.icon }}"></i>
                                     </div>
-                                    <div class="ml-3 flex-grow-1">
-                                        <div style="color:var(--text-1);font-size:13px;font-weight:600">{{ m.title }}</div>
-                                        <div style="color:var(--text-3);font-size:11px">{{ m.sub }}</div>
+                                    <div class="ml-2">
+                                        <div style="color:#fff;font-size:13px;font-weight:600">{{ m.title }}</div>
+                                        <div style="color:rgba(255,255,255,0.3);font-size:11px">{{ m.sub }}</div>
                                     </div>
-                                    <i class="fas fa-arrow-right" style="color:var(--text-3);font-size:11px"></i>
+                                    <i class="fas fa-chevron-right ml-auto" style="color:rgba(255,255,255,0.15);font-size:11px"></i>
                                 </div>
                             </div>
                         </a>
@@ -190,51 +89,46 @@
         </div>
     </div>
 
+    {# ── Painel do usuário ── #}
     <div class="col-md-4 mb-4">
-        <div class="huplex-card h-100">
+        <div class="huplex-card">
             <div class="section-title mb-1">Meu Acesso</div>
             <div class="section-subtitle mb-4">Nível de permissão atual</div>
 
             <div class="d-flex align-items-center mb-4">
-                <div class="avatar-circle" style="width:48px;height:48px;font-size:16px;border-radius:12px;flex-shrink:0">{{ app.user.initials }}</div>
+                <div class="avatar-circle" style="width:52px;height:52px;font-size:18px;border-radius:14px">
+                    {{ app.user.initials }}
+                </div>
                 <div class="ml-3">
-                    <div style="color:var(--text-1);font-weight:600;font-size:14px">{{ app.user.nome }}</div>
-                    <div style="color:var(--text-3);font-size:11px">{{ app.user.email }}</div>
+                    <div style="color:#fff;font-weight:600;font-size:14px">{{ app.user.nome }}</div>
+                    <div style="color:rgba(255,255,255,0.3);font-size:12px">{{ app.user.email }}</div>
                     <div class="mt-1">
                         <span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span>
                     </div>
                 </div>
             </div>
 
-            {% if empresa %}
-            <div style="background:rgba(79,127,255,0.06);border:1px solid rgba(79,127,255,0.12);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
-                <i class="fas fa-building" style="color:var(--accent);font-size:13px"></i>
-                <div>
-                    <div style="color:var(--text-1);font-size:12px;font-weight:600">{{ empresa.nome }}</div>
-                    {% if empresa.setor %}<div style="color:var(--text-3);font-size:11px">{{ empresa.setor }}</div>{% endif %}
-                </div>
-            </div>
-            {% endif %}
-
-            <div style="border-top:1px solid var(--border);padding-top:14px">
-                <div style="font-size:10px;color:var(--text-3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Permissões</div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px">
+                <div style="font-size:11px;color:rgba(255,255,255,0.2);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Permissões</div>
                 {% set perms = [
                     { label: 'Dashboard',              granted: is_granted('ROLE_USER') },
-                    { label: 'RH & Pessoas',           granted: is_granted('ROLE_SUPERVISOR_EQUIPE') },
-                    { label: 'Visão global RH',        granted: is_granted('ROLE_SUPERVISOR') },
-                    { label: 'Hub Talentos',           granted: is_granted('ROLE_GESTOR_EQUIPE') },
-                    { label: 'Hub Talentos completo',  granted: is_granted('ROLE_GESTOR') },
-                    { label: 'Hub Maturidade',         granted: is_granted('ROLE_GESTOR_EQUIPE') },
-                    { label: 'Administração',          granted: is_granted('ROLE_ADMIN') },
-                    { label: 'Multi-empresa',          granted: is_granted('ROLE_TENANT') },
+                    { label: 'Perfil Pessoal',         granted: is_granted('ROLE_MEMBRO') },
+                    { label: 'RH (equipe)',             granted: is_granted('ROLE_SUPERVISOR_EQUIPE') },
+                    { label: 'RH (visão geral)',        granted: is_granted('ROLE_SUPERVISOR') },
+                    { label: 'Pessoas (equipe)',        granted: is_granted('ROLE_SUPERVISOR_EQUIPE') },
+                    { label: 'Hub Talentos (equipe)',   granted: is_granted('ROLE_GESTOR_EQUIPE') },
+                    { label: 'Hub Talentos (completo)', granted: is_granted('ROLE_GESTOR') },
+                    { label: 'Hub Maturidade',          granted: is_granted('ROLE_GESTOR_EQUIPE') },
+                    { label: 'Administração',           granted: is_granted('ROLE_ADMIN') },
+                    { label: 'Visão Multi-empresa',     granted: is_granted('ROLE_TENANT') },
                 ] %}
                 {% for perm in perms %}
                 <div class="d-flex align-items-center justify-content-between py-1">
-                    <span style="color:var(--text-2);font-size:12px">{{ perm.label }}</span>
+                    <span style="color:rgba(255,255,255,0.4);font-size:12px">{{ perm.label }}</span>
                     {% if perm.granted %}
-                        <i class="fas fa-check-circle" style="color:rgba(80,190,140,0.8);font-size:12px"></i>
+                        <i class="fas fa-check-circle" style="color:#22c55e;font-size:12px"></i>
                     {% else %}
-                        <i class="fas fa-lock" style="color:var(--text-3);font-size:11px"></i>
+                        <i class="fas fa-lock" style="color:rgba(255,255,255,0.12);font-size:11px"></i>
                     {% endif %}
                 </div>
                 {% endfor %}
@@ -242,19 +136,5 @@
         </div>
     </div>
 </div>
-
-<style>
-.module-card {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 14px 16px;
-    transition: border-color 0.15s, background 0.15s;
-}
-.module-card:hover {
-    border-color: rgba(79,127,255,0.2);
-    background: rgba(79,127,255,0.04);
-}
-</style>
 
 {% endblock %}
