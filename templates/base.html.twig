@@ -1,494 +1,417 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Huplex{% endblock %} | Huplex</title>
 
+    {# AdminLTE 3 + Bootstrap 4 via CDN #}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
     <style>
-        /* ══════════════════════════════════════════
-           TOKENS — Dark (padrão)
-        ══════════════════════════════════════════ */
-        :root,
-        [data-theme="dark"] {
-            --accent:       #4F7FFF;
-            --accent-dim:   rgba(79,127,255,0.1);
-            --accent-line:  rgba(79,127,255,0.18);
-            --bg:           #080A12;
-            --sidebar-bg:   #060810;
-            --surface:      #0D0F1A;
-            --surface-2:    #111424;
-            --border:       rgba(255,255,255,0.06);
-            --border-2:     rgba(255,255,255,0.1);
-            --text-1:       #E2E4EA;
-            --text-2:       rgba(226,228,234,0.5);
-            --text-3:       rgba(226,228,234,0.24);
-            --nav-hover-bg: rgba(255,255,255,0.04);
-            --nav-active-bg:rgba(79,127,255,0.1);
-            --shadow:       0 4px 24px rgba(0,0,0,0.4);
-            --dropdown-bg:  #0D0F1A;
+        :root {
+            --accent:  #4F7FFF;
+            --bg:      #080A12;
+            --surface: #0D0F1A;
+            --border:  rgba(255,255,255,0.06);
+            --text-1:  #E2E4EA;
+            --text-2:  rgba(226,228,234,0.45);
+            --text-3:  rgba(226,228,234,0.22);
         }
 
-        /* ══════════════════════════════════════════
-           TOKENS — Light
-        ══════════════════════════════════════════ */
-        [data-theme="light"] {
-            --accent:       #3D6FFF;
-            --accent-dim:   rgba(61,111,255,0.08);
-            --accent-line:  rgba(61,111,255,0.18);
-            --bg:           #F2F4F8;
-            --sidebar-bg:   #FFFFFF;
-            --surface:      #FFFFFF;
-            --surface-2:    #F0F2F7;
-            --border:       rgba(0,0,0,0.08);
-            --border-2:     rgba(0,0,0,0.14);
-            --text-1:       #111827;
-            --text-2:       rgba(17,24,39,0.6);
-            --text-3:       rgba(17,24,39,0.35);
-            --nav-hover-bg: rgba(0,0,0,0.04);
-            --nav-active-bg:rgba(61,111,255,0.08);
-            --shadow:       0 4px 24px rgba(0,0,0,0.08);
-            --dropdown-bg:  #FFFFFF;
-        }
-        /* Light mode — garantir contraste em areas que usam transparencias fixas */
-        [data-theme="light"] .huplex-card { box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-        [data-theme="light"] .ws-pill { background: #F0F2F7; }
-        [data-theme="light"] .user-pill { background: #F0F2F7; }
-        [data-theme="light"] .theme-btn { background: #F0F2F7; }
-        [data-theme="light"] .main-header.navbar { box-shadow: 0 1px 0 var(--border) !important; }
-        [data-theme="light"] .brand-link { border-bottom: 1px solid var(--border) !important; }
-        [data-theme="light"] .nav-header { color: rgba(17,24,39,0.35) !important; }
-        [data-theme="light"] .sidebar-footer { background: #FFFFFF; border-top-color: var(--border); }
-        [data-theme="light"] .sf-info .sf-name { color: #111827; }
-        [data-theme="light"] .sf-info .sf-role { color: rgba(17,24,39,0.4); }
+        body, .wrapper { font-family: 'Inter', sans-serif !important; }
 
-        * { box-sizing: border-box; }
-        body, .wrapper { font-family: 'Inter', sans-serif !important; background: var(--bg) !important; }
-
-        /* ══════════════════════════════════════════
-           NAVBAR
-        ══════════════════════════════════════════ */
+        /* ── Navbar ── */
         .main-header.navbar {
             background: var(--surface) !important;
-            border-bottom: 1px solid var(--border) !important;
-            box-shadow: none !important;
-            padding: 0 16px !important;
-            height: 54px;
-        }
-
-        .main-header .navbar-nav .nav-link { color: var(--text-2) !important; padding: 0 !important; }
-
-        [data-widget="pushmenu"] {
-            width: 34px; height: 34px;
-            border-radius: 7px;
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-2) !important;
-            transition: background 0.15s;
-        }
-        [data-widget="pushmenu"]:hover { background: var(--nav-hover-bg) !important; }
-        [data-widget="pushmenu"] i { font-size: 13px; }
-
-        /* workspace pill */
-        .ws-pill {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 5px 10px;
-            border: 1px solid var(--border-2);
-            border-radius: 8px;
-            background: var(--surface-2);
-            cursor: pointer;
-            transition: border-color 0.15s, background 0.15s;
-            text-decoration: none !important;
-            max-width: 180px;
-        }
-        .ws-pill:hover { border-color: var(--accent-line); background: var(--accent-dim); }
-        .ws-pill .ws-logo {
-            width: 22px; height: 22px;
-            border-radius: 5px;
-            background: var(--accent-dim);
-            border: 1px solid var(--accent-line);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 9px; font-weight: 700; color: var(--accent);
-            flex-shrink: 0;
-        }
-        .ws-pill .ws-name {
-            font-size: 12px; font-weight: 500;
-            color: var(--text-1);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .ws-pill .ws-caret { font-size: 8px; color: var(--text-3); flex-shrink: 0; }
-
-        /* theme toggle */
-        .theme-btn {
-            width: 34px; height: 34px;
-            border-radius: 7px;
-            border: 1px solid var(--border);
-            background: var(--surface-2);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: var(--text-2);
-            font-size: 13px;
-            transition: all 0.15s;
-        }
-        .theme-btn:hover { border-color: var(--border-2); color: var(--text-1); }
-
-        /* user pill */
-        .user-pill {
-            display: flex; align-items: center; gap: 8px;
-            padding: 4px 4px 4px 10px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--surface-2);
-            cursor: pointer;
-            transition: border-color 0.15s;
-            text-decoration: none !important;
-        }
-        .user-pill:hover { border-color: var(--border-2); }
-        .user-pill .u-name { font-size: 12px; font-weight: 500; color: var(--text-1); }
-        .user-pill .u-role { font-size: 10px; color: var(--text-3); }
-
-        .avatar-sm {
-            width: 28px; height: 28px;
-            border-radius: 7px;
-            background: var(--accent-dim);
-            border: 1px solid var(--accent-line);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent); font-size: 10px; font-weight: 700; flex-shrink: 0;
-        }
-        .avatar-circle {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: var(--accent-dim);
-            border: 1px solid var(--accent-line);
-            display: inline-flex; align-items: center; justify-content: center;
-            color: var(--accent); font-size: 12px; font-weight: 700;
-        }
-
-        /* dropdown */
-        .huplex-dropdown {
-            background: var(--dropdown-bg) !important;
-            border: 1px solid var(--border-2) !important;
-            border-radius: 10px !important;
-            box-shadow: var(--shadow) !important;
-            padding: 6px !important;
-            min-width: 200px;
-        }
-        .huplex-dropdown .dd-head {
-            padding: 8px 10px 10px;
             border-bottom: 1px solid var(--border);
-            margin-bottom: 4px;
-        }
-        .huplex-dropdown .dd-item {
-            display: flex; align-items: center; gap: 9px;
-            padding: 7px 10px;
-            border-radius: 7px;
-            font-size: 13px;
-            color: var(--text-2);
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.12s, color 0.12s;
-        }
-        .huplex-dropdown .dd-item:hover { background: var(--nav-hover-bg); color: var(--text-1); }
-        .huplex-dropdown .dd-item.danger { color: rgba(220,80,80,0.75); }
-        .huplex-dropdown .dd-item.danger:hover { background: rgba(220,80,80,0.07); color: rgba(220,80,80,0.9); }
-        .huplex-dropdown .dd-item i { width: 14px; font-size: 12px; color: var(--text-3); }
-        .huplex-dropdown .dd-item.danger i { color: inherit; }
-        .huplex-dropdown .dd-sep { height: 1px; background: var(--border); margin: 5px 0; }
-
-        /* ws dropdown items */
-        .ws-option {
-            display: flex; align-items: center; gap: 9px;
-            padding: 7px 10px; border-radius: 7px;
-            text-decoration: none; transition: background 0.12s;
-        }
-        .ws-option:hover { background: var(--nav-hover-bg); }
-        .ws-option.active-ws { background: var(--accent-dim); }
-        .ws-option .wo-logo {
-            width: 30px; height: 30px; border-radius: 7px;
-            background: var(--accent-dim); border: 1px solid var(--accent-line);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 700; color: var(--accent); flex-shrink: 0;
-        }
-        .ws-option .wo-name { font-size: 12px; font-weight: 500; color: var(--text-1); line-height: 1.3; }
-        .ws-option .wo-sub  { font-size: 10px; color: var(--text-3); }
-
-        /* ══════════════════════════════════════════
-           SIDEBAR
-        ══════════════════════════════════════════ */
-        .main-sidebar {
-            background: var(--sidebar-bg) !important;
-            border-right: 1px solid var(--border) !important;
             box-shadow: none !important;
-            width: 224px !important;
+        }
+
+        /* ── Sidebar ── */
+        .main-sidebar {
+            background: var(--bg) !important;
+            border-right: none !important;
+            box-shadow: none !important;
         }
 
         .brand-link {
-            background: var(--sidebar-bg) !important;
+            background: var(--bg) !important;
             border-bottom: 1px solid var(--border) !important;
-            padding: 13px 16px !important;
-            height: 54px;
-            display: flex !important;
-            align-items: center !important;
+            padding: 14px 16px !important;
         }
+
         .brand-text {
-            font-size: 15px !important; font-weight: 700 !important;
-            color: var(--text-1) !important; letter-spacing: -0.02em;
-        }
-        .brand-text .accent { color: var(--accent); }
-        .brand-text .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; margin: 0 1px 1px; }
-
-        /* nav section headers */
-        .nav-header {
-            font-size: 9.5px !important;
-            font-weight: 600 !important;
-            letter-spacing: 0.09em !important;
-            text-transform: uppercase !important;
-            color: var(--text-3) !important;
-            padding: 18px 16px 5px !important;
-        }
-
-        /* nav items */
-        .nav-sidebar .nav-item .nav-link {
-            display: flex !important;
-            align-items: center !important;
-            gap: 9px !important;
-            margin: 1px 8px !important;
-            padding: 6px 10px !important;
-            border-radius: 7px !important;
-            color: var(--text-2) !important;
-            font-size: 12.5px !important;
-            font-weight: 500 !important;
-            border: none !important;
-            transition: background 0.12s, color 0.12s !important;
-            white-space: nowrap;
-        }
-        .nav-sidebar .nav-item .nav-link:hover {
-            background: var(--nav-hover-bg) !important;
             color: var(--text-1) !important;
+            font-weight: 700 !important;
+            font-size: 16px !important;
+            letter-spacing: -0.02em;
         }
+
+        .brand-text span.accent { color: var(--accent); }
+
+        /* Nav links */
+        .nav-sidebar .nav-item .nav-link {
+            color: var(--text-2) !important;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            margin: 1px 8px;
+            padding: 7px 12px !important;
+            transition: color 0.15s, background 0.15s;
+            border-left: none !important;
+        }
+
+        .nav-sidebar .nav-item .nav-link:hover {
+            color: var(--text-1) !important;
+            background: rgba(255,255,255,0.04) !important;
+        }
+
         .nav-sidebar .nav-item .nav-link.active {
-            background: var(--nav-active-bg) !important;
+            color: var(--text-1) !important;
+            background: rgba(79,127,255,0.1) !important;
+            border-left: none !important;
+        }
+
+        .nav-sidebar .nav-item .nav-link i.nav-icon {
+            color: var(--text-3) !important;
+            width: 18px;
+            transition: color 0.15s;
+        }
+
+        .nav-sidebar .nav-item .nav-link:hover i.nav-icon,
+        .nav-sidebar .nav-item .nav-link.active i.nav-icon {
             color: var(--accent) !important;
         }
 
-        /* icon slot */
-        .nav-sidebar .nav-link .nav-icon {
-            font-size: 12px !important;
-            width: 14px !important;
-            min-width: 14px !important;
-            text-align: center !important;
-            color: var(--text-3) !important;
-            transition: color 0.12s !important;
-        }
-        .nav-sidebar .nav-link:hover .nav-icon { color: var(--text-2) !important; }
-        .nav-sidebar .nav-link.active .nav-icon { color: var(--accent) !important; }
-
-        /* treeview indent */
-        .nav-treeview { padding-left: 0 !important; }
-        .nav-treeview .nav-link {
-            padding-left: 33px !important;
-            font-size: 12px !important;
+        /* Submenu dot icons */
+        .nav-treeview .nav-link i.nav-icon {
             color: var(--text-3) !important;
         }
-        .nav-treeview .nav-link:hover { color: var(--text-1) !important; }
-        .nav-treeview .nav-link.active { color: var(--accent) !important; }
-        .nav-treeview .nav-link .nav-icon { font-size: 10px !important; }
+        .nav-treeview .nav-link.active i.nav-icon,
+        .nav-treeview .nav-link:hover i.nav-icon {
+            color: var(--accent) !important;
+        }
 
-        /* chevron arrow */
-        .nav-sidebar .nav-link .right {
-            font-size: 9px !important;
-            margin-left: auto !important;
+        /* Treeview arrow */
+        .nav-sidebar .nav-item .nav-link .right {
             color: var(--text-3) !important;
-            transition: transform 0.2s, color 0.12s !important;
+            font-size: 11px;
         }
-        .nav-sidebar .menu-open > .nav-link .right { transform: rotate(-90deg); color: var(--text-2) !important; }
 
-        /* sidebar bottom — user snippet */
-        .sidebar-footer {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            padding: 12px 10px;
-            border-top: 1px solid var(--border);
-            background: var(--sidebar-bg);
-            display: flex; align-items: center; gap: 9px;
+        .nav-header {
+            color: var(--text-3) !important;
+            font-size: 10px !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.08em !important;
+            text-transform: uppercase !important;
+            padding: 20px 20px 6px !important;
         }
-        .sidebar-footer .sf-info .sf-name { font-size: 12px; font-weight: 600; color: var(--text-1); line-height: 1.2; }
-        .sidebar-footer .sf-info .sf-role { font-size: 10px; color: var(--text-3); }
-        .sidebar-footer .sf-logout {
-            margin-left: auto; width: 28px; height: 28px;
-            border-radius: 7px; border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-3); font-size: 12px; cursor: pointer;
-            transition: all 0.12s; flex-shrink: 0; text-decoration: none;
-        }
-        .sidebar-footer .sf-logout:hover { border-color: rgba(220,80,80,0.3); color: rgba(220,80,80,0.7); background: rgba(220,80,80,0.06); }
 
-        /* ══════════════════════════════════════════
-           CONTENT
-        ══════════════════════════════════════════ */
+        /* ── Content ── */
         .content-wrapper { background: var(--bg) !important; }
 
-        .content-header {
-            padding: 16px 20px 0 !important;
-            background: var(--bg) !important;
-        }
         .content-header h1 {
-            font-size: 18px; font-weight: 700;
-            color: var(--text-1); letter-spacing: -0.02em;
-        }
-        .breadcrumb { background: transparent !important; margin-bottom: 0 !important; padding: 0 !important; }
-        .breadcrumb-item a, .breadcrumb-item.active, .breadcrumb-item + .breadcrumb-item::before {
-            color: var(--text-3) !important; font-size: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-1);
+            letter-spacing: -0.02em;
         }
 
-        /* ══════════════════════════════════════════
-           CARDS
-        ══════════════════════════════════════════ */
+        .breadcrumb { background: transparent !important; }
+
+        .breadcrumb-item a,
+        .breadcrumb-item.active {
+            color: var(--text-3) !important;
+            font-size: 12px;
+        }
+
+        /* ── Cards ── */
         .huplex-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 10px; padding: 20px;
-            transition: border-color 0.15s;
+            border-radius: 10px;
+            padding: 22px;
+            transition: border-color 0.2s;
         }
-        .huplex-card:hover { border-color: var(--accent-line); }
-        .card-value { color: var(--text-1); font-size: 28px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
-        .card-label { color: var(--text-3); font-size: 11.5px; margin-top: 2px; }
-        .card-icon {
-            width: 38px; height: 38px; border-radius: 9px;
-            background: var(--accent-dim); border: 1px solid var(--accent-line);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent); font-size: 14px; flex-shrink: 0;
-        }
-        .section-title { color: var(--text-1); font-size: 15px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2px; }
-        .section-subtitle { color: var(--text-3); font-size: 12px; }
 
-        /* module card */
-        .module-card {
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: 9px; padding: 13px 15px;
-            transition: border-color 0.15s, background 0.15s;
-        }
-        .module-card:hover { border-color: var(--accent-line); background: var(--accent-dim); }
+        .huplex-card:hover { border-color: rgba(79,127,255,0.18); }
 
-        /* ══════════════════════════════════════════
-           BADGES
-        ══════════════════════════════════════════ */
+        .huplex-card .card-title {
+            color: var(--text-1);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .huplex-card .card-value {
+            color: var(--text-1);
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        .huplex-card .card-label {
+            color: var(--text-3);
+            font-size: 12px;
+        }
+
+        .huplex-card .card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 9px;
+            background: rgba(79,127,255,0.08);
+            border: 1px solid rgba(79,127,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 17px;
+        }
+
+        .section-title {
+            color: var(--text-1);
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 3px;
+        }
+
+        .section-subtitle {
+            color: var(--text-3);
+            font-size: 13px;
+        }
+
+        /* ── Badges de perfil — paleta discreta, monocromática ── */
         .badge-perfil {
-            display: inline-block; font-size: 9.5px; font-weight: 600;
-            letter-spacing: 0.05em; text-transform: uppercase;
-            padding: 2px 8px; border-radius: 100px;
-            background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-line);
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 2px 9px;
+            border-radius: 100px;
+            background: rgba(79,127,255,0.1);
+            color: rgba(79,127,255,0.85);
+            border: 1px solid rgba(79,127,255,0.2);
         }
+
         .badge-perfil.tenant            { background: rgba(120,100,220,0.1); color: rgba(160,140,255,0.85); border-color: rgba(120,100,220,0.2); }
         .badge-perfil.admin             { background: rgba(200,70,70,0.08);  color: rgba(220,110,110,0.85); border-color: rgba(200,70,70,0.18); }
         .badge-perfil.gestor            { background: rgba(180,150,40,0.08); color: rgba(210,185,90,0.85);  border-color: rgba(180,150,40,0.18); }
         .badge-perfil.gestor-equipe     { background: rgba(190,120,50,0.08); color: rgba(215,160,90,0.85);  border-color: rgba(190,120,50,0.18); }
         .badge-perfil.supervisor        { background: rgba(50,160,100,0.08); color: rgba(90,190,140,0.85);  border-color: rgba(50,160,100,0.18); }
         .badge-perfil.supervisor-equipe { background: rgba(40,150,200,0.08); color: rgba(80,185,225,0.85);  border-color: rgba(40,150,200,0.18); }
-        .badge-perfil.membro            { background: rgba(120,130,150,0.07); color: rgba(160,170,190,0.7);  border-color: rgba(120,130,150,0.14); }
+        .badge-perfil.membro            { background: rgba(120,130,150,0.08); color: rgba(160,170,190,0.75); border-color: rgba(120,130,150,0.15); }
 
-        /* ══════════════════════════════════════════
-           TABLE
-        ══════════════════════════════════════════ */
+        /* ── Table ── */
         .table-huplex { color: var(--text-2) !important; }
+
         .table-huplex thead th {
-            background: var(--surface-2) !important; color: var(--text-3) !important;
-            font-size: 10.5px !important; font-weight: 600 !important;
-            letter-spacing: 0.07em !important; text-transform: uppercase !important;
-            border-color: var(--border) !important; padding: 10px 16px !important;
+            background: rgba(255,255,255,0.02) !important;
+            color: var(--text-3) !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.07em !important;
+            text-transform: uppercase !important;
+            border-color: var(--border) !important;
+            padding: 11px 16px !important;
         }
-        .table-huplex td { border-color: var(--border) !important; padding: 10px 16px !important; vertical-align: middle !important; font-size: 13px !important; }
-        .table-huplex tbody tr:hover td { background: var(--nav-hover-bg) !important; }
 
-        /* ══════════════════════════════════════════
-           BUTTONS
-        ══════════════════════════════════════════ */
-        .btn-huplex { background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 7px 16px; font-size: 12.5px; font-weight: 600; transition: opacity 0.15s; }
-        .btn-huplex:hover { opacity: 0.82; color: #fff; }
-        .btn-huplex-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border-2); border-radius: 7px; padding: 6px 14px; font-size: 12.5px; font-weight: 500; transition: all 0.15s; }
-        .btn-huplex-ghost:hover { color: var(--text-1); border-color: var(--border-2); background: var(--nav-hover-bg); }
+        .table-huplex td {
+            border-color: var(--border) !important;
+            padding: 11px 16px !important;
+            vertical-align: middle !important;
+            font-size: 13px !important;
+        }
 
-        /* ══════════════════════════════════════════
-           EMPTY STATE
-        ══════════════════════════════════════════ */
-        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 52px 24px; text-align: center; }
-        .empty-state .empty-icon { width: 52px; height: 52px; border-radius: 12px; background: var(--accent-dim); border: 1px dashed var(--accent-line); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 18px; margin-bottom: 14px; }
+        .table-huplex tbody tr:hover td {
+            background: rgba(255,255,255,0.015) !important;
+        }
+
+        /* ── Buttons ── */
+        .btn-huplex {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 17px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: opacity 0.15s;
+        }
+
+        .btn-huplex:hover { opacity: 0.85; color: #fff; }
+
+        .btn-huplex-ghost {
+            background: transparent;
+            color: var(--text-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 15px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .btn-huplex-ghost:hover { color: var(--text-1); border-color: rgba(255,255,255,0.15); }
+
+        /* ── Avatar ── */
+        .avatar-circle {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: rgba(79,127,255,0.1);
+            border: 1px solid rgba(79,127,255,0.22);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 56px 24px;
+            text-align: center;
+        }
+
+        .empty-state .empty-icon {
+            width: 56px; height: 56px;
+            border-radius: 12px;
+            background: rgba(79,127,255,0.07);
+            border: 1px dashed rgba(79,127,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent);
+            font-size: 20px;
+            margin-bottom: 14px;
+            opacity: 0.8;
+        }
+
         .empty-state h6 { color: var(--text-1); font-weight: 600; margin-bottom: 5px; }
         .empty-state p  { color: var(--text-3); font-size: 13px; }
 
-        /* ══════════════════════════════════════════
-           FOOTER
-        ══════════════════════════════════════════ */
-        .main-footer { background: var(--bg) !important; border-top: 1px solid var(--border) !important; color: var(--text-3) !important; font-size: 11px !important; }
-
-
-        /* ══ Mini sidebar — delega ao AdminLTE, ajusta apenas visual ══ */
-        .sidebar-mini .main-sidebar,
-        .sidebar-mini .main-sidebar::before {
-            transition: width 0.3s ease-in-out, margin-left 0.3s ease-in-out !important;
+        /* ── Footer ── */
+        .main-footer {
+            background: var(--bg) !important;
+            border-top: 1px solid var(--border) !important;
+            color: var(--text-3) !important;
+            font-size: 12px;
         }
-        /* Ícones na sidebar mini ficam centralizados e visíveis */
-        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item > .nav-link {
-            border-radius: 6px !important;
+
+        [data-widget="pushmenu"] { color: var(--text-2) !important; }
+        .navbar-nav .nav-link    { color: var(--text-2) !important; }
+
+        /* ── Navbar compacta (sem workspace) ── */
+        .main-header.navbar {
+            height: 54px;
+            padding: 0 16px !important;
+            display: flex !important;
+            align-items: center !important;
         }
-        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item > .nav-link .nav-icon {
-            font-size: 13px !important;
+        .main-header .navbar-nav { flex-direction: row; align-items: center; }
+        .nav-toggle-btn {
+            width: 34px; height: 34px;
+            border-radius: 7px;
+            display: inline-flex !important;
+            align-items: center; justify-content: center;
             color: var(--text-2) !important;
+            transition: background 0.15s;
         }
-        .sidebar-mini.sidebar-collapse .nav-sidebar > .nav-item > .nav-link.active .nav-icon {
-            color: var(--accent) !important;
-        }
-        /* Sidebar aberta sobre o conteúdo ao hover (mini mode) */
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover {
-            width: 224px !important;
-        }
-        /* Footer na mini — esconde texto, mantém avatar */
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-footer .sf-info,
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-footer .sf-logout {
-            display: none !important;
-        }
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-footer {
-            justify-content: center !important;
-            padding: 10px 6px !important;
-        }
-        /* Brand no mini — centraliza logo */
-        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-link {
-            padding: 13px 10px !important;
-        }
-        /* AdminLTE overrides — ordem importa: collapsed < normal */
-        .sidebar { padding-bottom: 64px; }
+        .nav-toggle-btn:hover { background: rgba(255,255,255,0.05) !important; }
 
-        /* Estado EXPANDIDO */
-        body:not(.sidebar-collapse) .main-sidebar { width: 224px; }
+        /* ── Topo da sidebar: logo + empresa ativa ── */
+        .sidebar-top {
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0;
+        }
+        .sidebar-top .brand-link {
+            border-bottom: none !important;
+            padding: 12px 14px !important;
+            height: auto !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .sidebar-empresa {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 14px 12px;
+            min-height: 40px;
+        }
+        .sidebar-empresa .se-logo {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: rgba(79,127,255,0.1);
+            border: 1px solid rgba(79,127,255,0.18);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: var(--accent);
+            flex-shrink: 0;
+        }
+        .sidebar-empresa .se-info { min-width: 0; flex: 1; overflow: hidden; }
+        .sidebar-empresa .se-name {
+            font-size: 12px; font-weight: 600;
+            color: var(--text-1);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+        .sidebar-empresa .se-setor {
+            font-size: 10px; color: var(--text-3);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* Mini: só logo abreviado + ícone empresa */
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-empresa .se-info { display: none; }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-empresa {
+            justify-content: center; padding: 0 0 10px;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-text { display: none !important; }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-link::after {
+            content: 'H';
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 15px;
+        }
+        /* Hover expande e mostra tudo */
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-empresa .se-info,
+        .sidebar-mini.sidebar-open .sidebar-empresa .se-info { display: block !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-empresa,
+        .sidebar-mini.sidebar-open .sidebar-empresa {
+            justify-content: flex-start !important;
+            padding: 0 14px 12px !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-text,
+        .sidebar-mini.sidebar-open .brand-text { display: inline !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-link::after,
+        .sidebar-mini.sidebar-open .brand-link::after { content: none !important; }
+
+        .main-sidebar { display: flex !important; flex-direction: column !important; }
+        .main-sidebar .sidebar { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 56px; }
+
+        /* Layout alinhado — sidebar e header na mesma largura */
+        body:not(.sidebar-collapse) .main-sidebar { width: 224px !important; }
         body:not(.sidebar-collapse) .content-wrapper,
         body:not(.sidebar-collapse) .main-footer,
-        body:not(.sidebar-collapse) .main-header.navbar { margin-left: 224px; }
-
-        /* Estado COLAPSADO (mini) — AdminLTE usa 4.6rem */
+        body:not(.sidebar-collapse) .main-header { margin-left: 224px !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar { width: 4.6rem !important; }
         .sidebar-mini.sidebar-collapse .content-wrapper,
         .sidebar-mini.sidebar-collapse .main-footer,
-        .sidebar-mini.sidebar-collapse .main-header.navbar { margin-left: 4.6rem !important; }
-
-        /* Hover no mini — sidebar expande por cima sem deslocar conteúdo */
+        .sidebar-mini.sidebar-collapse .main-header { margin-left: 4.6rem !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover,
-        .sidebar-mini.sidebar-open .main-sidebar { width: 224px !important; z-index: 1050; }
-
-        @media (max-width: 767px) {
-            .content-wrapper, .main-footer, .main-header.navbar { margin-left: 0 !important; }
-            .main-sidebar { width: 224px !important; }
+        .sidebar-mini.sidebar-open .main-sidebar {
+            width: 224px !important;
+            z-index: 1040;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.35);
         }
-
-        /* Light theme - AdminLTE body bg */
-        [data-theme="light"] body { background: var(--bg) !important; }
-        [data-theme="light"] .main-sidebar { background: var(--sidebar-bg) !important; }
     </style>
 
     {% block stylesheets %}{% endblock %}
@@ -496,96 +419,65 @@
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
-    {# ══ NAVBAR ══ #}
-    <nav class="main-header navbar navbar-expand navbar-white navbar-light d-flex align-items-center">
-
-        {# Hamburguer #}
-        <a class="nav-link mr-3" data-widget="pushmenu" href="#" role="button">
+    {# ── Top Navbar (sem workspace — só toggle + usuário) ── #}
+    <nav class="main-header navbar navbar-expand navbar-dark">
+        <a class="nav-link nav-toggle-btn" data-widget="pushmenu" href="#" role="button">
             <i class="fas fa-bars"></i>
         </a>
 
-        {# Workspace switcher #}
-        {% if empresas is defined and empresas|length > 0 %}
-        <div class="nav-item dropdown mr-3">
-            <a class="ws-pill nav-link" data-toggle="dropdown" href="#" id="wsDropdown">
-                <span class="ws-logo">{{ empresa is defined and empresa ? empresa.nome|slice(0,2)|upper : 'WS' }}</span>
-                <span class="ws-name">{{ empresa is defined and empresa ? empresa.nome : 'Workspace' }}</span>
-                <i class="fas fa-chevron-down ws-caret"></i>
-            </a>
-            <div class="dropdown-menu huplex-dropdown" style="min-width:220px">
-                <div class="dd-head">
-                    <div style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.07em">Área de trabalho</div>
-                </div>
-                {% for emp in empresas %}
-                <a href="{{ path('app_workspace_switch', {id: emp.id}) }}"
-                   class="ws-option {% if empresa is defined and empresa and empresa.id == emp.id %}active-ws{% endif %}">
-                    <span class="wo-logo">{{ emp.nome|slice(0,2)|upper }}</span>
-                    <div>
-                        <div class="wo-name">{{ emp.nome }}</div>
-                        {% if emp.setor %}<div class="wo-sub">{{ emp.setor }}</div>{% endif %}
+        <ul class="navbar-nav ml-auto align-items-center mb-0">
+            <li class="nav-item dropdown">
+                <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#" style="gap:8px;padding:4px 8px!important">
+                    <span class="avatar-circle">{{ app.user.initials }}</span>
+                    <span style="color:var(--text-2);font-size:13px;font-weight:500">{{ app.user.nome|split(' ')|first }}</span>
+                    <i class="fas fa-chevron-down" style="font-size:9px;color:var(--text-3)"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right"
+                     style="background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:200px;padding:6px">
+                    <div class="px-3 py-2" style="border-bottom:1px solid var(--border);margin-bottom:4px">
+                        <div style="color:var(--text-1);font-size:13px;font-weight:600">{{ app.user.nome }}</div>
+                        <div style="color:var(--text-3);font-size:11px">{{ app.user.email }}</div>
+                        <div class="mt-1"><span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span></div>
                     </div>
-                    {% if empresa is defined and empresa and empresa.id == emp.id %}
-                    <i class="fas fa-check ml-auto" style="font-size:10px;color:var(--accent)"></i>
+                    <a class="dropdown-item py-2" href="#" style="color:var(--text-2);font-size:13px;border-radius:6px">
+                        <i class="fas fa-user mr-2" style="width:16px;color:var(--text-3)"></i> Meu Perfil
+                    </a>
+                    {% if empresas is defined and empresas|length > 0 %}
+                    <a class="dropdown-item py-2" href="{{ path('app_workspace_select', {force: 1}) }}" style="color:var(--text-2);font-size:13px;border-radius:6px">
+                        <i class="fas fa-building mr-2" style="width:16px;color:var(--text-3)"></i> Trocar área de trabalho
+                    </a>
                     {% endif %}
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="ml-auto d-flex align-items-center" style="gap:8px">
-
-            {# Theme toggle #}
-            <button class="theme-btn" id="themeToggle" title="Alternar tema" onclick="toggleTheme()">
-                <i class="fas fa-sun" id="themeIcon"></i>
-            </button>
-
-            {# User dropdown #}
-            <div class="nav-item dropdown">
-                <a class="user-pill nav-link" data-toggle="dropdown" href="#">
-                    <div style="line-height:1.2">
-                        <div class="u-name">{{ app.user.nome }}</div>
-                        <div class="u-role">{{ app.user.perfilLabel }}</div>
-                    </div>
-                    <div class="avatar-sm">{{ app.user.initials }}</div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right huplex-dropdown">
-                    <div class="dd-head">
-                        <div style="color:var(--text-1);font-size:13px;font-weight:600;line-height:1.3">{{ app.user.nome }}</div>
-                        <div style="color:var(--text-3);font-size:11px;margin-top:1px">{{ app.user.email }}</div>
-                        <div class="mt-2"><span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span></div>
-                    </div>
-                    <a class="dd-item" href="#">
-                        <i class="fas fa-user"></i> Meu Perfil
-                    </a>
-                    <a class="dd-item" href="{{ path('app_workspace_select', {'force': 1}) }}">
-                        <i class="fas fa-building"></i> Trocar área de trabalho
-                    </a>
-                    <a class="dd-item" href="#" onclick="toggleTheme();return false;">
-                        <i class="fas fa-adjust" id="themeMenuIcon"></i>
-                        <span id="themeMenuLabel">Tema Claro</span>
-                    </a>
-                    <div class="dd-sep"></div>
-                    <a class="dd-item danger" href="{{ path('app_logout') }}">
-                        <i class="fas fa-sign-out-alt"></i> Sair
+                    <div class="dropdown-divider" style="border-color:var(--border);margin:4px 0"></div>
+                    <a class="dropdown-item py-2" href="{{ path('app_logout') }}" style="color:rgba(220,80,80,0.8);font-size:13px;border-radius:6px">
+                        <i class="fas fa-sign-out-alt mr-2" style="width:16px"></i> Sair
                     </a>
                 </div>
-            </div>
-        </div>
+            </li>
+        </ul>
     </nav>
 
-    {# ══ SIDEBAR ══ #}
-    <aside class="main-sidebar elevation-0">
-        {# Logo #}
-        <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0">
-            <span class="brand-text">
-                Hup<span class="accent">lex</span><span class="dot ml-1"></span>
-            </span>
-        </a>
+    {# ── Sidebar ── #}
+    <aside class="main-sidebar sidebar-dark-primary elevation-0">
+        <div class="sidebar-top">
+            <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0">
+                <span class="brand-text font-weight-bold" style="font-size:16px">
+                    Hup<span class="accent">lex</span>
+                </span>
+            </a>
+            {% if empresa is defined and empresa %}
+            <div class="sidebar-empresa" title="{{ empresa.nome }}">
+                <span class="se-logo">{{ empresa.nome|slice(0,2)|upper }}</span>
+                <div class="se-info">
+                    <div class="se-name">{{ empresa.nome }}</div>
+                    {% if empresa.setor %}<div class="se-setor">{{ empresa.setor }}</div>{% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
 
         <div class="sidebar">
-            <nav class="mt-1 pb-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" data-accordion="false" role="menu">
+            <nav class="mt-2 pb-3">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
 
                     <li class="nav-item">
                         <a href="{{ path('app_dashboard') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_dashboard' ? 'active' : '' }}">
@@ -595,32 +487,36 @@
                     </li>
 
                     {% if is_granted('ROLE_SUPERVISOR_EQUIPE') %}
-                    <li class="nav-header">RH &amp; Pessoas</li>
+                    <li class="nav-header">RH & Pessoas</li>
 
                     <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_rh' ? 'menu-open' : '' }}">
                         <a href="{{ path('app_rh') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_rh' ? 'active' : '' }}">
                             <i class="fas fa-id-card nav-icon"></i>
-                            <p>Recursos Humanos <i class="fas fa-angle-down right"></i></p>
+                            <p>RH <i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ path('app_rh_funcionarios') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_rh_funcionarios' ? 'active' : '' }}">
-                                    <i class="fas fa-user nav-icon"></i><p>Funcionários</p>
+                                    <i class="fas fa-user-tie nav-icon"></i>
+                                    <p>Funcionários</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ path('app_rh_admissoes') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_rh_admissoes' ? 'active' : '' }}">
-                                    <i class="fas fa-user-plus nav-icon"></i><p>Admissões</p>
+                                    <i class="fas fa-user-plus nav-icon"></i>
+                                    <p>Admissões</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ path('app_rh_ferias') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_rh_ferias' ? 'active' : '' }}">
-                                    <i class="fas fa-calendar-alt nav-icon"></i><p>Férias</p>
+                                    <i class="fas fa-umbrella-beach nav-icon"></i>
+                                    <p>Férias</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ path('app_rh_folha') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_rh_folha' ? 'active' : '' }}">
-                                    <i class="fas fa-file-invoice-dollar nav-icon"></i><p>Folha de Pagamento</p>
+                                    <i class="fas fa-money-bill-wave nav-icon"></i>
+                                    <p>Folha de Pag.</p>
                                 </a>
                             </li>
                         </ul>
@@ -628,8 +524,8 @@
 
                     <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_pessoas' ? 'menu-open' : '' }}">
                         <a href="{{ path('app_pessoas') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_pessoas' ? 'active' : '' }}">
-                            <i class="fas fa-users nav-icon"></i>
-                            <p>Gestão de Pessoas <i class="fas fa-angle-down right"></i></p>
+                            <i class="fas fa-people-group nav-icon"></i>
+                            <p>Gest. de Pessoas <i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
@@ -649,12 +545,13 @@
                             </li>
                             <li class="nav-item">
                                 <a href="{{ path('app_pessoas_avaliacao') }}" class="nav-link">
-                                    <i class="fas fa-chart-bar nav-icon"></i><p>Avaliações</p>
+                                    <i class="fas fa-star-half-stroke nav-icon"></i><p>Avaliação</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                    {% endif %}
+
+                    {% endif %}{# fim ROLE_SUPERVISOR_EQUIPE #}
 
                     {% if is_granted('ROLE_GESTOR_EQUIPE') %}
                     <li class="nav-header">Hubs</li>
@@ -662,7 +559,7 @@
                     <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_talentos' ? 'menu-open' : '' }}">
                         <a href="{{ path('app_talentos') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_talentos' ? 'active' : '' }}">
                             <i class="fas fa-gem nav-icon"></i>
-                            <p>Hub de Talentos <i class="fas fa-angle-down right"></i></p>
+                            <p>Hub de Talentos <i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
@@ -677,12 +574,12 @@
                             </li>
                             <li class="nav-item">
                                 <a href="{{ path('app_talentos_trilhas') }}" class="nav-link">
-                                    <i class="fas fa-map nav-icon"></i><p>Trilhas de Carreira</p>
+                                    <i class="fas fa-route nav-icon"></i><p>Trilhas de Carreira</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ path('app_talentos_mentoria') }}" class="nav-link">
-                                    <i class="fas fa-comments nav-icon"></i><p>Mentoria</p>
+                                    <i class="fas fa-chalkboard-user nav-icon"></i><p>Mentoria</p>
                                 </a>
                             </li>
                         </ul>
@@ -690,8 +587,8 @@
 
                     <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_maturidade' ? 'menu-open' : '' }}">
                         <a href="{{ path('app_maturidade') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_maturidade' ? 'active' : '' }}">
-                            <i class="fas fa-chart-line nav-icon"></i>
-                            <p>Hub de Maturidade <i class="fas fa-angle-down right"></i></p>
+                            <i class="fas fa-gauge-high nav-icon"></i>
+                            <p>Hub de Maturidade <i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
@@ -701,7 +598,7 @@
                             </li>
                             <li class="nav-item">
                                 <a href="{{ path('app_maturidade_radar') }}" class="nav-link">
-                                    <i class="fas fa-circle-dot nav-icon"></i><p>Radar</p>
+                                    <i class="fas fa-bullseye nav-icon"></i><p>Radar de Maturidade</p>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -711,20 +608,21 @@
                             </li>
                         </ul>
                     </li>
-                    {% endif %}
+
+                    {% endif %}{# fim ROLE_GESTOR_EQUIPE #}
 
                     {% if is_granted('ROLE_ADMIN') %}
                     <li class="nav-header">Administração</li>
 
                     <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin' ? 'menu-open' : '' }}">
                         <a href="{{ path('app_admin') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin' ? 'active' : '' }}">
-                            <i class="fas fa-cog nav-icon"></i>
-                            <p>Configurações <i class="fas fa-angle-down right"></i></p>
+                            <i class="fas fa-shield-halved nav-icon"></i>
+                            <p>Admin <i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ path('app_admin_usuarios') }}" class="nav-link">
-                                    <i class="fas fa-users nav-icon"></i><p>Usuários</p>
+                                    <i class="fas fa-user-shield nav-icon"></i><p>Usuários</p>
                                 </a>
                             </li>
                             {% if is_granted('ROLE_TENANT') %}
@@ -736,7 +634,7 @@
                             {% endif %}
                             <li class="nav-item">
                                 <a href="{{ path('app_admin_configuracoes') }}" class="nav-link">
-                                    <i class="fas fa-sliders-h nav-icon"></i><p>Preferências</p>
+                                    <i class="fas fa-sliders nav-icon"></i><p>Configurações</p>
                                 </a>
                             </li>
                         </ul>
@@ -746,88 +644,50 @@
                 </ul>
             </nav>
         </div>
-
-        {# Sidebar footer #}
-        <div class="sidebar-footer">
-            <div class="avatar-sm">{{ app.user.initials }}</div>
-            <div class="sf-info">
-                <div class="sf-name">{{ app.user.nome|split(' ')|first }} {{ app.user.nome|split(' ')|last }}</div>
-                <div class="sf-role">{{ app.user.perfilLabel }}</div>
-            </div>
-            <a href="{{ path('app_logout') }}" class="sf-logout" title="Sair">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
-        </div>
     </aside>
 
-    {# ══ CONTENT ══ #}
+    {# ── Content ── #}
     <div class="content-wrapper">
         <div class="content-header">
-            <div class="container-fluid px-0">
-                <div class="d-flex align-items-center justify-content-between">
-                    <h1 class="m-0">{% block page_title '' %}</h1>
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Início</a></li>
-                        {% block breadcrumb %}{% endblock %}
-                    </ol>
+            <div class="container-fluid">
+                <div class="row mb-2 align-items-center">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">{% block page_title '' %}</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Início</a></li>
+                            {% block breadcrumb %}{% endblock %}
+                        </ol>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <section class="content pt-3">
+        <section class="content">
             <div class="container-fluid">
                 {% for flash_type, messages in app.flashes %}
                     {% for message in messages %}
-                        <div class="alert alert-{{ flash_type }} alert-dismissible fade show mb-3" role="alert">
+                        <div class="alert alert-{{ flash_type }} alert-dismissible fade show" role="alert">
                             {{ message }}
                             <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
                         </div>
                     {% endfor %}
                 {% endfor %}
+
                 {% block content %}{% endblock %}
             </div>
         </section>
     </div>
 
-    <footer class="main-footer text-center py-2">
-        Huplex &copy; {{ "now"|date("Y") }}
+    <footer class="main-footer text-center">
+        <strong>Huplex</strong> &copy; {{ "now"|date("Y") }} — Plataforma de Gestão de Pessoas
     </footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-
-<script>
-    (function() {
-        var saved = localStorage.getItem('huplex-theme') || 'dark';
-        applyTheme(saved);
-
-        function applyTheme(t) {
-            document.documentElement.setAttribute('data-theme', t);
-            var icon    = document.getElementById('themeIcon');
-            var mIcon   = document.getElementById('themeMenuIcon');
-            var mLabel  = document.getElementById('themeMenuLabel');
-            if (t === 'dark') {
-                if (icon)   icon.className   = 'fas fa-sun';
-                if (mIcon)  mIcon.className  = 'fas fa-sun';
-                if (mLabel) mLabel.textContent = 'Tema Claro';
-            } else {
-                if (icon)   icon.className   = 'fas fa-moon';
-                if (mIcon)  mIcon.className  = 'fas fa-moon';
-                if (mLabel) mLabel.textContent = 'Tema Escuro';
-            }
-        }
-
-        window.toggleTheme = function() {
-            var cur = document.documentElement.getAttribute('data-theme') || 'dark';
-            var next = cur === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('huplex-theme', next);
-            applyTheme(next);
-        };
-    })();
-</script>
-
 {% block javascripts %}{% endblock %}
 </body>
 </html>
