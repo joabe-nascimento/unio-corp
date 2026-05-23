@@ -1,0 +1,17 @@
+{# Banner de contexto (perfil / empresa) #}
+{% import 'macros/empresa.html.twig' as empresa_macro %}
+<div class="page-banner">
+    <div class="page-banner-icon">
+        {% if empresa is defined and empresa and empresa.logo and use_empresa_logo|default(true) %}
+            {{ empresa_macro.logo(empresa, 'empresa-logo banner-logo') }}
+        {% else %}
+            <i class="fas {{ icon|default('fa-circle-info') }}"></i>
+        {% endif %}
+    </div>
+    <div class="page-banner-text">
+        <div class="page-banner-title">{{ title }}</div>
+        {% if subtitle is defined and subtitle %}
+            <div class="page-banner-sub">{{ subtitle }}</div>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+{% block title %}RH{% endblock %}
+{% block page_title %}Recursos Humanos{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">RH</li>{% endblock %}
+{% block content %}
+
+<div class="row stats-row mb-2">
+    {% for c in [
+        { icon:'fa-user-plus', route:'app_rh_admissoes', value:'3',  label:'Admissões', sub:'Novas contratações' },
+        { icon:'fa-umbrella-beach', route:'app_rh_ferias', value:'8',  label:'Férias', sub:'Em férias agora' },
+        { icon:'fa-user-minus', route:'app_rh_demissoes', value:'1',  label:'Demissões', sub:'Em andamento' },
+        { icon:'fa-file-invoice-dollar', route:'app_rh_folha', value:'OK', label:'Folha', sub:'Mês atual' },
+    ] %}
+    <div class="col-lg-3 col-md-6 col-sm-6">
+        <a href="{{ path(c.route) }}" class="text-decoration-none d-flex w-100">
+            <div class="huplex-card stat-card w-100">
+                <div class="card-icon"><i class="fas {{ c.icon }}"></i></div>
+                <div class="stat-card-body">
+                    <div class="card-value">{{ c.value }}</div>
+                    <div class="card-label">{{ c.label }}</div>
+                    <div style="color:var(--text-3);font-size:11px;margin-top:2px">{{ c.sub }}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="huplex-card">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <div class="section-title">Funcionários Recentes</div>
+            <div class="section-subtitle">Últimas alterações no quadro</div>
+        </div>
+        <a href="{{ path('app_rh_funcionarios') }}" class="btn-huplex">
+            <i class="fas fa-plus mr-1"></i> Novo Funcionário
+        </a>
+    </div>
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-users',
+        title: 'Nenhum funcionário cadastrado',
+        text: 'Comece cadastrando o primeiro funcionário da empresa.',
+        btn_label: 'Cadastrar Funcionário',
+        btn_href: path('app_rh_funcionarios')
+    } %}
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+{% block title %}Hub de Talentos{% endblock %}
+{% block page_title %}Hub de Talentos{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">Hub de Talentos</li>{% endblock %}
+{% block content %}
+
+<div class="row stats-row mb-2">
+    {% for item in [
+        { icon:'fa-database',  label:'Banco de Talentos', value:'0' },
+        { icon:'fa-briefcase', label:'Vagas Abertas',     value:'0' },
+        { icon:'fa-route',     label:'Trilhas Ativas',    value:'0' },
+        { icon:'fa-handshake', label:'Mentorias Ativas',  value:'0' },
+    ] %}
+    <div class="col-lg-3 col-md-6 col-sm-6">
+        {% include 'components/stat_card.html.twig' with { icon: item.icon, value: item.value, label: item.label } %}
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4 d-flex">
+        <div class="huplex-card flex-fill">
+            <div class="section-title mb-1">Banco de Talentos</div>
+            <div class="section-subtitle mb-4">Profissionais identificados para crescimento</div>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-star',
+                title: 'Banco de talentos vazio',
+                text: 'Identifique talentos a partir das avaliações de desempenho.',
+                btn_label: 'Gerenciar Talentos',
+                btn_href: path('app_talentos_banco'),
+                compact: true
+            } %}
+        </div>
+    </div>
+    <div class="col-md-6 mb-4 d-flex">
+        <div class="huplex-card flex-fill">
+            <div class="section-title mb-1">Trilhas de Carreira</div>
+            <div class="section-subtitle mb-4">Planos de desenvolvimento individuais</div>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-route',
+                title: 'Nenhuma trilha criada',
+                text: 'Crie trilhas de carreira personalizadas para cada cargo.',
+                btn_label: 'Criar Trilha',
+                btn_href: path('app_talentos_trilhas'),
+                compact: true
+            } %}
+        </div>
+    </div>
+</div>
+{% endblock %}

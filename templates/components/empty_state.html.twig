@@ -1,0 +1,15 @@
+{# Uso: {% include 'components/empty_state.html.twig' with { icon: 'fa-users', title: '...', text: '...', btn_label, btn_href } %} #}
+<div class="empty-state{% if compact|default(false) %} empty-state--compact{% endif %}">
+    <div class="empty-icon"><i class="fas {{ icon|default('fa-inbox') }}"></i></div>
+    <h6>{{ title|default('Nenhum registro') }}</h6>
+    {% if text is defined and text %}
+        <p>{{ text }}</p>
+    {% endif %}
+    {% if btn_label is defined and btn_label %}
+        {% if btn_href is defined and btn_href %}
+            <a href="{{ btn_href }}" class="btn-huplex mt-3">{{ btn_label }}</a>
+        {% else %}
+            <button type="button" class="btn-huplex mt-3">{{ btn_label }}</button>
+        {% endif %}
+    {% endif %}
+</div>

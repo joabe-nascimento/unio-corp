@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+{% block title %}Hub de Maturidade{% endblock %}
+{% block page_title %}Hub de Maturidade{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">Hub de Maturidade</li>{% endblock %}
+{% block content %}
+
+<div class="row stats-row mb-2">
+    {% for item in [
+        { icon:'fa-chart-line', value:'—', label:'Nível Médio', sub:'Aguardando avaliação' },
+        { icon:'fa-clipboard-check', value:'0', label:'Avaliações', sub:'Realizadas' },
+        { icon:'fa-list-check', value:'0', label:'Planos de Ação', sub:'Em andamento' },
+        { icon:'fa-trophy', value:'0', label:'Maturidade Alta', sub:'Colaboradores' },
+    ] %}
+    <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="huplex-card stat-card w-100">
+            <div class="card-icon"><i class="fas {{ item.icon }}"></i></div>
+            <div class="stat-card-body">
+                <div class="card-value">{{ item.value }}</div>
+                <div class="card-label">{{ item.label }}</div>
+                <div style="color:var(--text-3);font-size:11px;margin-top:2px">{{ item.sub }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row">
+    <div class="col-md-7 mb-4 d-flex">
+        <div class="huplex-card flex-fill">
+            <div class="section-title mb-1">Radar de Maturidade</div>
+            <div class="section-subtitle mb-4">Visão geral por dimensão organizacional</div>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-bullseye',
+                title: 'Radar não disponível',
+                text: 'Realize a primeira avaliação para gerar o radar.',
+                btn_label: 'Iniciar Avaliação',
+                btn_href: path('app_maturidade_avaliacao'),
+                compact: true
+            } %}
+        </div>
+    </div>
+    <div class="col-md-5 mb-4">
+        <div class="huplex-card">
+            <div class="section-title mb-1" style="font-size:15px">Dimensões Avaliadas</div>
+            <div class="section-subtitle mb-3">Clique para detalhar cada área</div>
+            {% for dim in ['Liderança','Cultura Organizacional','Processos','Tecnologia','Pessoas','Estratégia'] %}
+            <div class="d-flex align-items-center justify-content-between py-2 perm-row">
+                <span class="perm-label">{{ dim }}</span>
+                <div class="d-flex align-items-center" style="gap:8px">
+                    <div style="width:80px;height:4px;background:var(--border);border-radius:2px">
+                        <div style="width:0%;height:100%;background:var(--accent);border-radius:2px"></div>
+                    </div>
+                    <span style="color:var(--text-3);font-size:11px;font-family:monospace">—</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
