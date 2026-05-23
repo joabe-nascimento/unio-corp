@@ -1,1 +1,15 @@
-<?php\n\nnamespace App\Repository;\n\nuse App\Entity\Empresa;\nuse Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;\nuse Doctrine\Persistence\ManagerRegistry;\n\nclass EmpresaRepository extends ServiceEntityRepository\n{\n    public function __construct(ManagerRegistry \)\n    {\n        parent::__construct(\, Empresa::class);\n    }\n}\n
+<?php
+
+namespace App\Repository;
+
+use App\Entity\Empresa;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+class EmpresaRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Empresa::class);
+    }
+}
