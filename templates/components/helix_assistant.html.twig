@@ -1,0 +1,86 @@
+{# Helix — assistente virtual (IA em implementação futura) #}
+{% import 'macros/helix.html.twig' as helix %}
+
+<div id="helixPanel" class="helix-panel" aria-hidden="true">
+    <div class="helix-backdrop" data-helix-close tabindex="-1" aria-hidden="true"></div>
+
+    <aside class="helix-drawer" role="dialog" aria-modal="true" aria-labelledby="helixTitle">
+        <header class="helix-header">
+            <div class="helix-header-brand">
+                {{ helix.face('lg') }}
+                <div class="helix-header-text">
+                    <h2 id="helixTitle" class="helix-title">Helix</h2>
+                    <p class="helix-subtitle">Assistente virtual</p>
+                </div>
+            </div>
+            <div class="helix-header-actions">
+                <span class="helix-badge-soon">Em breve</span>
+                <button type="button" class="helix-close-btn" data-helix-close aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </header>
+
+        <nav class="helix-tabs" role="tablist" aria-label="Helix">
+            <button type="button" class="helix-tab helix-tab--active" role="tab" aria-selected="true" data-helix-tab="chat" id="helixTabChat">Conversa</button>
+            <button type="button" class="helix-tab" role="tab" aria-selected="false" data-helix-tab="history" id="helixTabHistory">Histórico</button>
+        </nav>
+
+        <div class="helix-panes">
+            <div class="helix-pane helix-pane--active" data-helix-pane="chat" role="tabpanel" aria-labelledby="helixTabChat">
+                <div class="helix-messages" id="helixMessages" aria-live="polite">
+                    <div class="helix-msg helix-msg--assistant">
+                        {{ helix.face('sm') }}
+                        <div class="helix-msg-bubble">
+                            <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou o Helix — seu assistente na Huplex.</p>
+                            <p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens já ficam salvas no histórico.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="helix-suggestions" id="helixSuggestions">
+                    <div class="helix-chips">
+                        <button type="button" class="helix-chip" data-helix-prompt="Como cadastrar um novo membro?">Membros</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Como trocar de área de trabalho?">Área de trabalho</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Quais módulos tenho acesso?">Módulos</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Preciso de ajuda com permissões">Permissões</button>
+                    </div>
+                </div>
+
+                <form class="helix-composer" id="helixForm">
+                    <div class="helix-composer-row">
+                        <button type="button" class="helix-icon-btn" id="helixNewChat" title="Nova conversa" aria-label="Nova conversa">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <div class="helix-composer-inner">
+                            <textarea
+                                id="helixInput"
+                                class="helix-input"
+                                rows="1"
+                                placeholder="Mensagem…"
+                                maxlength="2000"
+                                aria-label="Mensagem"
+                            ></textarea>
+                            <button type="submit" class="helix-send-btn" id="helixSendBtn" aria-label="Enviar" disabled>
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="helix-pane" data-helix-pane="history" role="tabpanel" aria-labelledby="helixTabHistory" hidden>
+                <div class="helix-history-toolbar">
+                    <span class="helix-history-count" id="helixHistoryCount">0 conversas</span>
+                    <button type="button" class="helix-text-btn helix-text-btn--danger" id="helixClearHistory">Limpar</button>
+                </div>
+                <div class="helix-history-list" id="helixHistoryList"></div>
+                <div class="helix-history-empty" id="helixHistoryEmpty">
+                    {{ helix.face('md') }}
+                    <p>Sem conversas</p>
+                    <span>O histórico aparece aqui.</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>

@@ -12,11 +12,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('huplex-theme')||'dark')}catch(e){}</script>
 
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=25">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=27">
 
     {% block stylesheets %}{% endblock %}
 </head>
 {% import 'macros/empresa.html.twig' as empresa_macro %}
+{% import 'macros/helix.html.twig' as helix %}
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
@@ -31,6 +32,11 @@
         </a>
 
         <ul class="navbar-nav ml-auto align-items-center mb-0">
+            <li class="nav-item d-flex align-items-center">
+                <button type="button" class="helix-trigger" id="helixOpenBtn" aria-expanded="false" aria-controls="helixPanel" title="Helix — Assistente virtual">
+                    {{ helix.face('xs') }}
+                </button>
+            </li>
             <li class="nav-item d-flex align-items-center">
                 <button type="button" class="theme-btn" id="themeToggle" title="Alternar tema" onclick="toggleTheme()">
                     <i class="fas fa-sun" id="themeIcon"></i>
@@ -152,6 +158,8 @@
         <strong>Huplex</strong> &copy; {{ "now"|date("Y") }} — Plataforma de Gestão de Pessoas
     </footer>
 </div>
+
+{% include 'components/helix_assistant.html.twig' %}
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -309,6 +317,313 @@ window.addEventListener('load', function () {
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.view-toggle-group').forEach(initToggle);
     });
+})();
+</script>
+<script>
+(function () {
+    'use strict';
+
+    var STORAGE_KEY = 'huplex-helix-sessions';
+    var panel = document.getElementById('helixPanel');
+    var openBtn = document.getElementById('helixOpenBtn');
+    var form = document.getElementById('helixForm');
+    var input = document.getElementById('helixInput');
+    var sendBtn = document.getElementById('helixSendBtn');
+    var messagesEl = document.getElementById('helixMessages');
+    var historyList = document.getElementById('helixHistoryList');
+    var historyEmpty = document.getElementById('helixHistoryEmpty');
+    var historyCount = document.getElementById('helixHistoryCount');
+    var suggestions = document.getElementById('helixSuggestions');
+
+    if (!panel || !openBtn) return;
+
+    var FACE_SM = '<span class="helix-face helix-face--sm" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="helix-face-ring" cx="20" cy="20" r="18"/><circle class="helix-face-eye" cx="14.5" cy="17" r="2.25"/><circle class="helix-face-eye" cx="25.5" cy="17" r="2.25"/><path class="helix-face-smile" d="M13.5 24.2c2.6 2.4 10.4 2.4 13 0"/></svg></span>';
+
+    var currentSessionId = null;
+
+    function loadSessions() {
+        try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveSessions(sessions) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+        } catch (e) {}
+    }
+
+    function uid() {
+        return 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function formatDate(iso) {
+        try {
+            var d = new Date(iso);
+            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function getSession(id) {
+        return loadSessions().find(function (s) { return s.id === id; }) || null;
+    }
+
+    function upsertSession(session) {
+        var sessions = loadSessions().filter(function (s) { return s.id !== session.id; });
+        sessions.unshift(session);
+        if (sessions.length > 50) sessions = sessions.slice(0, 50);
+        saveSessions(sessions);
+    }
+
+    function ensureSession() {
+        if (currentSessionId && getSession(currentSessionId)) return currentSessionId;
+        var session = {
+            id: uid(),
+            title: 'Nova conversa',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            messages: []
+        };
+        upsertSession(session);
+        currentSessionId = session.id;
+        return currentSessionId;
+    }
+
+    function scrollMessages() {
+        if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function renderWelcomeOnly() {
+        if (!messagesEl) return;
+        messagesEl.innerHTML =
+            '<div class="helix-msg helix-msg--assistant">' + FACE_SM +
+            '<div class="helix-msg-bubble">' +
+            '<p>Olá. Sou o Helix, seu assistente na Huplex.</p>' +
+            '<p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens ficam no histórico.</p>' +
+            '</div></div>';
+        if (suggestions) suggestions.style.display = '';
+    }
+
+    function renderMessages(session) {
+        if (!messagesEl || !session) return;
+        var html = '';
+        session.messages.forEach(function (m) {
+            html += messageHtml(m.role, m.text);
+        });
+        if (!html) {
+            renderWelcomeOnly();
+            return;
+        }
+        messagesEl.innerHTML = html;
+        if (suggestions) suggestions.style.display = session.messages.length ? 'none' : '';
+        scrollMessages();
+    }
+
+    function messageHtml(role, text) {
+        var isUser = role === 'user';
+        var esc = escapeHtml(text);
+        return '<div class="helix-msg helix-msg--' + (isUser ? 'user' : 'assistant') + '">' +
+            (isUser ? '' : FACE_SM) +
+            '<div class="helix-msg-bubble"><p class="mb-0">' + esc.replace(/\n/g, '<br>') + '</p></div>' +
+            '</div>';
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function assistantReply() {
+        return 'Obrigado pela mensagem! A inteligência artificial do Helix está em desenvolvimento — em breve responderei de forma automática. Sua conversa foi salva no histórico.';
+    }
+
+    function sendMessage(text) {
+        text = (text || '').trim();
+        if (!text) return;
+
+        var sid = ensureSession();
+        var session = getSession(sid);
+        if (!session) return;
+
+        session.messages.push({ role: 'user', text: text, at: new Date().toISOString() });
+        if (session.title === 'Nova conversa') {
+            session.title = text.length > 48 ? text.slice(0, 48) + '…' : text;
+        }
+        session.messages.push({ role: 'assistant', text: assistantReply(), at: new Date().toISOString() });
+        session.updatedAt = new Date().toISOString();
+        upsertSession(session);
+        renderMessages(session);
+        renderHistory();
+        if (input) {
+            input.value = '';
+            input.style.height = '';
+            updateSendState();
+        }
+    }
+
+    function renderHistory() {
+        var sessions = loadSessions();
+        if (historyCount) {
+            historyCount.textContent = sessions.length + (sessions.length === 1 ? ' conversa' : ' conversas');
+        }
+        if (!historyList || !historyEmpty) return;
+
+        historyList.innerHTML = '';
+        if (!sessions.length) {
+            historyEmpty.style.display = '';
+            return;
+        }
+        historyEmpty.style.display = 'none';
+
+        sessions.forEach(function (s) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'helix-history-item' + (s.id === currentSessionId ? ' helix-history-item--active' : '');
+            btn.dataset.sessionId = s.id;
+            var preview = s.messages.length
+                ? (s.messages[s.messages.length - 1].text || '')
+                : 'Conversa vazia';
+            btn.innerHTML =
+                '<span class="helix-history-item-title">' + escapeHtml(s.title || 'Conversa') + '</span>' +
+                '<span class="helix-history-item-preview">' + escapeHtml(preview.slice(0, 80)) + '</span>' +
+                '<span class="helix-history-item-date">' + escapeHtml(formatDate(s.updatedAt)) + '</span>';
+            historyList.appendChild(btn);
+        });
+    }
+
+    function openPanel() {
+        panel.classList.add('is-open');
+        panel.setAttribute('aria-hidden', 'false');
+        openBtn.setAttribute('aria-expanded', 'true');
+        openBtn.classList.add('is-active');
+        document.body.classList.add('helix-open');
+        setTimeout(function () { if (input) input.focus(); }, 200);
+        renderHistory();
+    }
+
+    function closePanel() {
+        panel.classList.remove('is-open');
+        panel.setAttribute('aria-hidden', 'true');
+        openBtn.setAttribute('aria-expanded', 'false');
+        openBtn.classList.remove('is-active');
+        document.body.classList.remove('helix-open');
+    }
+
+    function switchTab(name) {
+        panel.querySelectorAll('[data-helix-tab]').forEach(function (tab) {
+            var active = tab.dataset.helixTab === name;
+            tab.classList.toggle('helix-tab--active', active);
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        panel.querySelectorAll('[data-helix-pane]').forEach(function (pane) {
+            var show = pane.dataset.helixPane === name;
+            pane.classList.toggle('helix-pane--active', show);
+            pane.hidden = !show;
+        });
+        if (name === 'history') renderHistory();
+    }
+
+    function newChat() {
+        currentSessionId = null;
+        renderWelcomeOnly();
+        if (input) {
+            input.value = '';
+            updateSendState();
+            input.focus();
+        }
+    }
+
+    function loadSession(id) {
+        var session = getSession(id);
+        if (!session) return;
+        currentSessionId = id;
+        renderMessages(session);
+        switchTab('chat');
+        renderHistory();
+    }
+
+    function updateSendState() {
+        if (!sendBtn || !input) return;
+        sendBtn.disabled = !input.value.trim();
+    }
+
+    openBtn.addEventListener('click', function () {
+        if (panel.classList.contains('is-open')) closePanel();
+        else openPanel();
+    });
+
+    panel.querySelectorAll('[data-helix-close]').forEach(function (el) {
+        el.addEventListener('click', closePanel);
+    });
+
+    panel.querySelectorAll('[data-helix-tab]').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            switchTab(tab.dataset.helixTab);
+        });
+    });
+
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            sendMessage(input ? input.value : '');
+        });
+    }
+
+    if (input) {
+        input.addEventListener('input', function () {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+            updateSendState();
+        });
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit', { cancelable: true }));
+            }
+        });
+    }
+
+    document.getElementById('helixNewChat')?.addEventListener('click', newChat);
+
+    document.getElementById('helixClearHistory')?.addEventListener('click', function () {
+        if (!confirm('Limpar todo o histórico do Helix?')) return;
+        saveSessions([]);
+        currentSessionId = null;
+        newChat();
+        renderHistory();
+    });
+
+    if (historyList) {
+        historyList.addEventListener('click', function (e) {
+            var item = e.target.closest('.helix-history-item');
+            if (!item) return;
+            loadSession(item.dataset.sessionId);
+        });
+    }
+
+    panel.querySelectorAll('[data-helix-prompt]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            if (input) input.value = chip.dataset.helixPrompt || '';
+            updateSendState();
+            input.focus();
+        });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('is-open')) closePanel();
+    });
+
+    renderWelcomeOnly();
+    renderHistory();
+    updateSendState();
 })();
 </script>
 </body>
