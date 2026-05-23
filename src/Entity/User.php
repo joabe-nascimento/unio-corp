@@ -18,15 +18,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const ROLE_GESTOR_EQUIPE     = 'ROLE_GESTOR_EQUIPE';
     public const ROLE_SUPERVISOR        = 'ROLE_SUPERVISOR';
     public const ROLE_SUPERVISOR_EQUIPE = 'ROLE_SUPERVISOR_EQUIPE';
+    public const ROLE_MEMBRO            = 'ROLE_MEMBRO';
 
     /** Ordem de hierarquia (maior = mais permissão) */
     private const PERFIL_NIVEL = [
-        'SUPERVISOR_EQUIPE' => 1,
-        'SUPERVISOR'        => 2,
-        'GESTOR_EQUIPE'     => 3,
-        'GESTOR'            => 4,
-        'ADMIN'             => 5,
-        'TENANT'            => 6,
+        'MEMBRO'            => 1,
+        'SUPERVISOR_EQUIPE' => 2,
+        'SUPERVISOR'        => 3,
+        'GESTOR_EQUIPE'     => 4,
+        'GESTOR'            => 5,
+        'ADMIN'             => 6,
+        'TENANT'            => 7,
     ];
 
     #[ORM\Id]
@@ -47,7 +49,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $nome = null;
 
     #[ORM\Column(length: 30)]
-    private string $perfil = 'SUPERVISOR_EQUIPE';
+    private string $perfil = 'MEMBRO';
 
     #[ORM\Column(nullable: true)]
     private ?string $avatar = null;
@@ -106,12 +108,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     // ── Helpers de perfil ──────────────────────────────────────────────
 
-    public function isTenant(): bool         { return in_array(self::ROLE_TENANT, $this->getRoles()); }
-    public function isAdmin(): bool          { return in_array(self::ROLE_ADMIN, $this->getRoles()); }
-    public function isGestor(): bool         { return in_array(self::ROLE_GESTOR, $this->getRoles()); }
-    public function isGestorEquipe(): bool   { return in_array(self::ROLE_GESTOR_EQUIPE, $this->getRoles()); }
-    public function isSupervisor(): bool     { return in_array(self::ROLE_SUPERVISOR, $this->getRoles()); }
+    public function isTenant(): bool           { return in_array(self::ROLE_TENANT, $this->getRoles()); }
+    public function isAdmin(): bool            { return in_array(self::ROLE_ADMIN, $this->getRoles()); }
+    public function isGestor(): bool           { return in_array(self::ROLE_GESTOR, $this->getRoles()); }
+    public function isGestorEquipe(): bool     { return in_array(self::ROLE_GESTOR_EQUIPE, $this->getRoles()); }
+    public function isSupervisor(): bool       { return in_array(self::ROLE_SUPERVISOR, $this->getRoles()); }
     public function isSupervisorEquipe(): bool { return in_array(self::ROLE_SUPERVISOR_EQUIPE, $this->getRoles()); }
+    public function isMembro(): bool           { return in_array(self::ROLE_MEMBRO, $this->getRoles()); }
 
     public function getNivel(): int
     {
@@ -127,6 +130,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'GESTOR_EQUIPE'     => 'Gestor de Equipe',
             'SUPERVISOR'        => 'Supervisor Geral',
             'SUPERVISOR_EQUIPE' => 'Supervisor de Equipe',
+            'MEMBRO'            => 'Membro',
             default             => $this->perfil,
         };
     }
@@ -141,6 +145,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'GESTOR_EQUIPE'     => 'gestor-equipe',
             'SUPERVISOR'        => 'supervisor',
             'SUPERVISOR_EQUIPE' => 'supervisor-equipe',
+            'MEMBRO'            => 'membro',
             default             => 'default',
         };
     }
@@ -155,6 +160,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'GESTOR_EQUIPE'     => self::ROLE_GESTOR_EQUIPE,
             'SUPERVISOR'        => self::ROLE_SUPERVISOR,
             'SUPERVISOR_EQUIPE' => self::ROLE_SUPERVISOR_EQUIPE,
+            'MEMBRO'            => self::ROLE_MEMBRO,
             default             => 'ROLE_USER',
         };
     }
