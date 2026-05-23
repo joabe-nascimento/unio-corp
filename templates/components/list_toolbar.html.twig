@@ -10,7 +10,7 @@
     toolbar_actions
     toolbar_filters
 #}
-<div class="list-toolbar{% if page_title is defined and page_title %} list-toolbar--page{% else %} huplex-card mb-3{% endif %}">
+<div class="list-toolbar{% if page_title is defined and page_title %} list-toolbar--page{% if hide_search|default(false) %} list-toolbar--solo{% endif %}{% else %} huplex-card mb-3{% endif %}">
     <div class="list-toolbar-main">
         <div class="list-toolbar-left">
             {% if page_title is defined and page_title %}
@@ -22,10 +22,12 @@
         </div>
         <div class="list-toolbar-end">
             {% block toolbar_filters %}{% endblock %}
+            {% if not (hide_search|default(false)) %}
             {% include 'components/toolbar_search.html.twig' with {
                 search_placeholder: search_placeholder|default('Buscar…'),
                 search_disabled: search_disabled|default(false)
             } %}
+            {% endif %}
         </div>
     </div>
 </div>

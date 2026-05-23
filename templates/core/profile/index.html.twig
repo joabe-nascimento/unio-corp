@@ -2,21 +2,28 @@
 
 {% block title %}Meu Perfil{% endblock %}
 {% block page_show_title %}{% endblock %}
+{% block page_toolbar_layout %}1{% endblock %}
+
+{% block content_lead %}
+<div class="page-lead-zone">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: 'Meu Perfil',
+        hide_search: true
+    } %}
+        {% block toolbar_actions %}
+            {% if empresas is defined and empresas|length > 1 %}
+            <a href="{{ path('app_workspace_select', {force: 1}) }}" class="btn-huplex-ghost btn-sm">
+                <i class="fas fa-building"></i> Trocar área
+            </a>
+            {% endif %}
+        {% endblock %}
+    {% endembed %}
+</div>
+{% endblock %}
 
 {% block content %}
 
-{% embed 'components/list_toolbar.html.twig' with {
-    page_title: 'Meu Perfil',
-    search_disabled: true
-} %}
-    {% block toolbar_actions %}
-        {% if empresas is defined and empresas|length > 1 %}
-        <a href="{{ path('app_workspace_select', {force: 1}) }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-building mr-1"></i> Trocar área
-        </a>
-        {% endif %}
-    {% endblock %}
-{% endembed %}
+<div class="page-body-inner">
 
 <div class="huplex-card ficha-hero mb-3">
     <div class="ficha-hero-avatar">
@@ -155,6 +162,8 @@
             {% endif %}
         </div>
     </div>
+</div>
+
 </div>
 
 {% endblock %}
