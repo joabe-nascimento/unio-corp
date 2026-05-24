@@ -11,7 +11,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 class ChatController extends AbstractController
 {
-    #[Route('/papo', name: 'app_chat')]
+    #[Route('/bate-papo', name: 'app_chat')]
     public function index(ChatMockService $chat): Response
     {
         /** @var \App\Entity\User $user */
