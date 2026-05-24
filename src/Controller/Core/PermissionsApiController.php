@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/permissions/api')]
-#[IsGranted('ROLE_GESTOR_EQUIPE')]
+#[IsGranted('ROLE_USER')]
 class PermissionsApiController extends AbstractController
 {
     public function __construct(
@@ -20,7 +20,7 @@ class PermissionsApiController extends AbstractController
     ) {
     }
 
-    #[Route('/member/{memberId}/grants', name: 'app_permissions_api_grants', requirements: ['memberId' => '[a-zA-Z0-9.\-]+'], methods: ['PUT'])]
+    #[Route('/member/{memberId}/grants', name: 'app_permissions_api_grants', requirements: ['memberId' => '[a-zA-Z0-9._\-]+'], methods: ['PUT'])]
     public function saveGrants(string $memberId, Request $request): JsonResponse
     {
         if (!$this->isCsrfTokenValid('perm_grants', (string) $request->headers->get('X-CSRF-TOKEN', ''))) {
@@ -40,18 +40,29 @@ class PermissionsApiController extends AbstractController
         /** @var array<string, string> $grants */
         $grants = $payload['grants'];
 
+        if (!$this->permissions->canEditorSaveGrants($user, $grants)) {
+            return $this->json(['error' => 'Sem permissão para alterar grants.'], Response::HTTP_FORBIDDEN);
+        }
+
         try {
             $count = $this->permissions->saveMemberGrants($memberId, $grants, $user);
+            $grantCount = \count($this->permissions->getAllGrantsForMember($memberId));
         } catch (\InvalidArgumentException $e) {
             return $this->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         } catch (\Symfony\Component\Security\Core\Exception\AccessDeniedException $e) {
             return $this->json(['error' => $e->getMessage()], Response::HTTP_FORBIDDEN);
+        } catch (\Throwable $e) {
+            $message = $this->getParameter('kernel.debug')
+                ? $e->getMessage()
+                : 'Erro ao salvar permissões.';
+
+            return $this->json(['error' => $message], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return $this->json([
             'ok' => true,
             'saved' => $count,
-            'grant_count' => \count(array_filter($grants)),
+            'grant_count' => $grantCount,
         ]);
     }
 }

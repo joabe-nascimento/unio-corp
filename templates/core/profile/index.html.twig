@@ -37,7 +37,7 @@
     <div class="ficha-hero-info">
         <div class="ficha-hero-name">{{ app.user.nome }}</div>
         <div class="ficha-hero-role">
-            {{ app.user.perfilLabel }}
+            {{ user_access_badge().label }}
             {% if empresa %}
                 <span class="ficha-hero-dept">· {{ empresa.nome }}</span>
             {% endif %}
@@ -48,7 +48,11 @@
         </div>
     </div>
     <div class="ficha-hero-actions">
-        <span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span>
+        {% set access_badge = user_access_badge() %}
+        <span class="badge-perfil {{ access_badge.class }}"{% if access_badge.elevated %} title="Conta global: {{ access_badge.global_label }}"{% endif %}>{{ access_badge.label }}</span>
+        {% if access_badge.elevated %}
+            <span class="text-muted small d-block mt-1">Conta global: {{ access_badge.global_label }}</span>
+        {% endif %}
         <span class="member-status member-status--{{ app.user.ativo ? 'ativo' : 'inativo' }}">
             {{ app.user.ativo ? 'Conta ativa' : 'Conta inativa' }}
         </span>
@@ -70,7 +74,10 @@
                 </div>
                 <div>
                     <div class="ficha-field-label">Perfil de acesso</div>
-                    <div class="ficha-field-value">{{ app.user.perfilLabel }}</div>
+                    <p class="ficha-field-value mb-0">{{ user_access_badge().label }}</p>
+                    {% if user_access_badge().elevated %}
+                        <p class="text-muted small mb-0">Conta global: {{ app.user.perfilLabel }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <div class="ficha-field-label">Membro desde</div>

@@ -3,16 +3,29 @@
 {% block permissions_scope %}product_rh{% endblock %}
 {% set hub_page_title = 'Recursos Humanos' %}
 {% block hub_kpis %}
+{% if scope_has_products('product_rh') %}
 <div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: '3',  label: 'Admissões',  sub: 'Novas contratações', route: 'app_rh_admissoes' },
-        { value: '8',  label: 'Férias',     sub: 'Em férias agora',    route: 'app_rh_ferias' },
-        { value: '1',  label: 'Demissões',  sub: 'Em andamento',       route: 'app_rh_demissoes' },
-        { value: 'OK', label: 'Folha',      sub: 'Mês atual',          route: 'app_rh_folha' },
-    ], mb: 'mb-0' } %}
+    {% set kpi_items = [] %}
+    {% if product_grant('product_rh', 'admissoes') %}
+        {% set kpi_items = kpi_items|merge([{ value: '3', label: 'Admissões', sub: 'Novas contratações', route: 'app_rh_admissoes' }]) %}
+    {% endif %}
+    {% if product_grant('product_rh', 'ferias') %}
+        {% set kpi_items = kpi_items|merge([{ value: '8', label: 'Férias', sub: 'Em férias agora', route: 'app_rh_ferias' }]) %}
+    {% endif %}
+    {% if product_grant('product_rh', 'admissoes') %}
+        {% set kpi_items = kpi_items|merge([{ value: '1', label: 'Demissões', sub: 'Em andamento', route: 'app_rh_demissoes' }]) %}
+    {% endif %}
+    {% if product_grant('product_rh', 'folha') %}
+        {% set kpi_items = kpi_items|merge([{ value: 'OK', label: 'Folha', sub: 'Mês atual', route: 'app_rh_folha' }]) %}
+    {% endif %}
+    {% if kpi_items|length > 0 %}
+        {% include 'components/kpi_row.html.twig' with { items: kpi_items, mb: 'mb-0' } %}
+    {% endif %}
 </div>
+{% endif %}
 {% endblock %}
 {% block hub_section_toolbar %}
+{% if scope_has_products('product_rh') and grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') %}
 {% include 'components/section_toolbar.html.twig' with {
     btn_label: 'Novo Funcionário',
     btn_href: path('app_rh_funcionarios'),
@@ -21,15 +34,24 @@
     search_placeholder: 'Buscar funcionários…',
     search_disabled: true
 } %}
+{% endif %}
 {% endblock %}
 {% block hub_content %}
+{% if scope_has_products('product_rh') %}
 <div class="huplex-card">
     {% include 'components/empty_state.html.twig' with {
         icon: 'fa-users',
         title: 'Nenhum funcionário cadastrado',
         text: 'Comece cadastrando o primeiro funcionário da empresa.',
-        btn_label: 'Cadastrar Funcionário',
+        btn_label: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'Cadastrar Funcionário' : '',
         btn_href: path('app_rh_funcionarios')
     } %}
 </div>
+{% else %}
+    {% include 'components/hub_scope_empty.html.twig' with {
+        icon: 'fa-id-card',
+        title: 'Nenhuma área disponível em RH',
+        text: 'Você ainda não tem permissão para acessar Funcionários, Admissões ou outras áreas de RH. Solicite ao gestor da equipe.'
+    } %}
+{% endif %}
 {% endblock %}

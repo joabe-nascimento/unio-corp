@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('huplex-theme')||'dark')}catch(e){}</script>
 
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=61">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=63">
 
     {% block stylesheets %}{% endblock %}
 </head>
@@ -52,7 +52,10 @@
                     <div class="dd-head">
                         <div style="color:var(--text-1);font-size:13px;font-weight:600">{{ app.user.nome }}</div>
                         <div style="color:var(--text-3);font-size:11px">{{ app.user.email }}</div>
-                        <div class="mt-1"><span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span></div>
+                        <div class="mt-1">
+                            {% set access_badge = user_access_badge() %}
+                            <span class="badge-perfil {{ access_badge.class }}"{% if access_badge.elevated %} title="Conta global: {{ access_badge.global_label }}"{% endif %}>{{ access_badge.label }}</span>
+                        </div>
                     </div>
                     <a class="dropdown-item" href="{{ path('app_profile') }}">
                         <i class="fas fa-user"></i> Meu Perfil

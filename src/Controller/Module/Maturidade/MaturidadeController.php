@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/maturidade')]
-#[IsGranted('ROLE_GESTOR_EQUIPE')]
+#[IsGranted('ROLE_USER')]
 class MaturidadeController extends AbstractController
 {
     private const T = 'modules/maturidade/';
