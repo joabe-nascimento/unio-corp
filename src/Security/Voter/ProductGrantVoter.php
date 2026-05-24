@@ -50,7 +50,10 @@ final class ProductGrantVoter extends Voter
         );
 
         if (!$grant) {
-            // Sem registro no banco: não restringe além da role global.
+            if ($this->grantRepo->userHasAnyGrant($user)) {
+                return false;
+            }
+
             return true;
         }
 

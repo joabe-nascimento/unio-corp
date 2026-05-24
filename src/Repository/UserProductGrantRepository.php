@@ -72,6 +72,16 @@ class UserProductGrantRepository extends ServiceEntityRepository
         ]);
     }
 
+    public function userHasAnyGrant(User $user): bool
+    {
+        return (int) $this->createQueryBuilder('g')
+            ->select('COUNT(g.id)')
+            ->andWhere('g.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
+    }
+
     /**
      * @return list<UserProductGrant>
      */
