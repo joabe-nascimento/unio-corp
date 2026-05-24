@@ -3,6 +3,7 @@
 {% block permissions_scope %}hub_maturidade{% endblock %}
 {% set hub_page_title = 'Hub de Maturidade' %}
 {% block hub_kpis %}
+{% if scope_has_products('hub_maturidade') %}
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
         { value: '—', label: 'Nível Médio',      sub: 'Aguardando avaliação' },
@@ -11,9 +12,12 @@
         { value: '0',  label: 'Maturidade Alta',  sub: 'Colaboradores' },
     ], mb: 'mb-0' } %}
 </div>
+{% endif %}
 {% endblock %}
 {% block hub_content %}
+{% if scope_has_products('hub_maturidade') %}
 <div class="row">
+    {% if product_grant('hub_maturidade', 'avaliacao') or product_grant('hub_maturidade', 'radar') %}
     <div class="col-md-7 mb-4 d-flex">
         <div class="huplex-card flex-fill">
             {% include 'components/section_header.html.twig' with {
@@ -24,12 +28,14 @@
                 icon: 'fa-bullseye',
                 title: 'Radar não disponível',
                 text: 'Realize a primeira avaliação para gerar o radar.',
-                btn_label: 'Iniciar Avaliação',
+                btn_label: product_grant('hub_maturidade', 'avaliacao') ? 'Iniciar Avaliação' : '',
                 btn_href: path('app_maturidade_avaliacao'),
                 compact: true
             } %}
         </div>
     </div>
+    {% endif %}
+    {% if product_grant('hub_maturidade', 'avaliacao') %}
     <div class="col-md-5 mb-4">
         <div class="huplex-card">
             {% include 'components/section_header.html.twig' with {
@@ -49,7 +55,8 @@
             {% endfor %}
         </div>
     </div>
-    {% if nav_show_modulo_publicidade|default(false) %}
+    {% endif %}
+    {% if nav_show_modulo_publicidade|default(false) and scope_has_products('product_publicidade') %}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Marca e Comunicação',
@@ -63,4 +70,11 @@
     </div>
     {% endif %}
 </div>
+{% else %}
+    {% include 'components/hub_scope_empty.html.twig' with {
+        icon: 'fa-bullseye',
+        title: 'Nenhuma área disponível em Maturidade',
+        text: 'Você ainda não tem permissão para acessar Avaliações, Radar ou Planos de Ação. Solicite ao gestor da equipe.'
+    } %}
+{% endif %}
 {% endblock %}

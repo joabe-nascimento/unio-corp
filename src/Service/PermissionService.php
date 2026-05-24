@@ -27,6 +27,114 @@ class PermissionService
         ['id' => 'GESTOR', 'label' => 'Gestor', 'class' => 'gestor', 'nivel' => 5, 'description' => 'Controle amplo do produto ou módulo: configurações, acessos e operação completa da área.'],
     ];
 
+    /** Nível numérico do perfil assignável (para comparar grants). */
+    public static function profileNivel(string $profileId): int
+    {
+        foreach (self::ASSIGNABLE_PROFILES as $profile) {
+            if ($profile['id'] === $profileId) {
+                return $profile['nivel'];
+            }
+        }
+
+        return 0;
+    }
+
+    public static function profileLabel(string $profileId): string
+    {
+        foreach (self::ASSIGNABLE_PROFILES as $profile) {
+            if ($profile['id'] === $profileId) {
+                return $profile['label'];
+            }
+        }
+
+        return $profileId;
+    }
+
+    public static function profileClass(string $profileId): string
+    {
+        foreach (self::ASSIGNABLE_PROFILES as $profile) {
+            if ($profile['id'] === $profileId) {
+                return $profile['class'];
+            }
+        }
+
+        return 'default';
+    }
+
+    /** Painel/aba Permissões — perfil global ou grant ≥ Gestor de Equipe no escopo. */
+    public function canManagePermissions(User $user, ?string $scope = null): bool
+    {
+        if ($user->isTenant()) {
+            return true;
+        }
+
+        if (\in_array($user->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE'], true)) {
+            return true;
+        }
+
+        if ($scope !== null) {
+            return $this->userHasManageGrantInScope($user, $scope);
+        }
+
+        foreach (array_keys(self::SCOPES) as $scopeId) {
+            if ($this->userHasManageGrantInScope($user, $scopeId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Editor com grant granular só pode salvar escopos em que é gestor.
+     *
+     * @param array<string, string> $grantsMap keys "scope:productId" => perfil_id
+     */
+    public function canEditorSaveGrants(User $editor, array $grantsMap): bool
+    {
+        if ($this->canManagePermissions($editor)) {
+            if ($editor->isTenant() || \in_array($editor->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE'], true)) {
+                return true;
+            }
+        } else {
+            return false;
+        }
+
+        $scopesTouched = [];
+        foreach ($grantsMap as $key => $perfilGrant) {
+            if (!\is_string($key) || !str_contains($key, ':')) {
+                continue;
+            }
+            [$scope] = explode(':', $key, 2);
+            $scopesTouched[$scope] = true;
+        }
+
+        foreach (array_keys($scopesTouched) as $scope) {
+            if (!$this->userHasManageGrantInScope($editor, $scope)) {
+                return false;
+            }
+        }
+
+        return $scopesTouched !== [];
+    }
+
+    private function userHasManageGrantInScope(User $user, string $scope): bool
+    {
+        if (!isset(self::SCOPES[$scope])) {
+            return false;
+        }
+
+        $minLevel = self::profileNivel('GESTOR_EQUIPE');
+        foreach (self::SCOPES[$scope]['products'] as $product) {
+            $grant = $this->grantRepo->findOneForUserScopeProduct($user, $scope, $product['id']);
+            if ($grant && $grant->getPerfilGrant() !== '' && self::profileNivel($grant->getPerfilGrant()) >= $minLevel) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private const NO_ACCESS_DESCRIPTION = 'Sem permissão neste produto ou hub — o membro não consegue acessar a área.';
 
     /** @var array<string, array{equipe: string, cargo: string}> */
@@ -289,6 +397,7 @@ class PermissionService
                 'grants' => $grants,
                 'all_grants' => $allGrants,
                 'grant_count' => \count($allGrants),
+                'scope_summary' => $this->buildScopeGrantSummary($scope, $grants),
             ];
         }
 
@@ -312,6 +421,10 @@ class PermissionService
     {
         $empresa ??= $this->getActiveEmpresa();
         $user = $this->resolveUserForMemberId($memberId, $empresa);
+        if ($user && $this->grantRepo->userHasConfiguredMatrix($user)) {
+            return $this->grantRepo->findAllGrantKeysForUser($user);
+        }
+
         if ($user) {
             $dbGrants = $this->grantRepo->findAllGrantKeysForUser($user);
             if ($dbGrants !== []) {
@@ -336,6 +449,10 @@ class PermissionService
     {
         $empresa ??= $this->getActiveEmpresa();
         $user = $this->resolveUserForMemberId($memberId, $empresa);
+        if ($user && $this->grantRepo->userHasConfiguredMatrix($user)) {
+            return $this->grantRepo->findGrantMapForUserAndScope($user, $scope);
+        }
+
         if ($user) {
             $dbGrants = $this->grantRepo->findGrantMapForUserAndScope($user, $scope);
             if ($dbGrants !== []) {
@@ -355,11 +472,11 @@ class PermissionService
      */
     public function saveMemberGrants(string $memberId, array $grantsMap, User $editor): int
     {
-        if (!$editor->isGestorEquipe() && !$editor->isTenant()) {
+        if (!$this->canEditorSaveGrants($editor, $grantsMap)) {
             throw new AccessDeniedException('Sem permissão para alterar grants.');
         }
 
-        $empresa = $this->workspace->getActiveEmpresa($editor);
+        $empresa = $this->workspace->getActiveEmpresa($editor) ?? $editor->getEmpresa();
         $target = $this->resolveUserForMemberId($memberId, $empresa);
         if (!$target) {
             throw new \InvalidArgumentException('Membro não encontrado nesta empresa.');
@@ -369,9 +486,10 @@ class PermissionService
             throw new \InvalidArgumentException('Permissões de tenant não são editáveis.');
         }
 
-        foreach ($this->grantRepo->findBy(['user' => $target]) as $existing) {
-            $this->em->remove($existing);
-        }
+        $grantsMap = $this->syncOperacoesHubGrants($grantsMap);
+
+        $this->grantRepo->deleteAllForUser($target);
+        $target->getProductGrants()->clear();
 
         $saved = 0;
         foreach ($grantsMap as $key => $perfilGrant) {
@@ -393,17 +511,121 @@ class PermissionService
             }
 
             $grant = (new UserProductGrant())
-                ->setUser($target)
                 ->setScope($scope)
                 ->setProductId($productId)
                 ->setPerfilGrant($perfilGrant);
+            $target->addProductGrant($grant);
             $this->em->persist($grant);
             ++$saved;
         }
 
         $this->em->flush();
 
+        $this->grantRepo->ensureConfiguredMarker($target);
+
         return $saved;
+    }
+
+    /**
+     * Alinha hub_operacoes:rh|pessoas|engenharia com os grants de product_* (fonte da verdade na UI).
+     *
+     * @param array<string, string> $grantsMap
+     *
+     * @return array<string, string>
+     */
+    private function syncOperacoesHubGrants(array $grantsMap): array
+    {
+        $map = $grantsMap;
+        $links = [
+            'rh' => 'product_rh',
+            'pessoas' => 'product_pessoas',
+            'engenharia' => 'product_engenharia',
+        ];
+
+        foreach ($links as $hubProduct => $productScope) {
+            $bestProfile = $this->highestProfileInScope($map, $productScope);
+            $hubKey = 'hub_operacoes:' . $hubProduct;
+            if ($bestProfile !== null) {
+                $map[$hubKey] = $bestProfile;
+            } else {
+                unset($map[$hubKey]);
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * @param array<string, string> $grantsMap
+     */
+    private function highestProfileInScope(array $grantsMap, string $scope): ?string
+    {
+        if (!isset(self::SCOPES[$scope])) {
+            return null;
+        }
+
+        $bestLevel = 0;
+        $bestProfile = null;
+        foreach (self::SCOPES[$scope]['products'] as $product) {
+            $profile = $grantsMap[$scope . ':' . $product['id']] ?? '';
+            if ($profile === '') {
+                continue;
+            }
+            $level = self::profileNivel($profile);
+            if ($level > $bestLevel) {
+                $bestLevel = $level;
+                $bestProfile = $profile;
+            }
+        }
+
+        return $bestProfile;
+    }
+
+    /**
+     * @param array<string, string> $grantsInScope productId => perfil_id
+     *
+     * @return array{label: string, class: string, description: string}
+     */
+    public function buildScopeGrantSummary(string $scope, array $grantsInScope): array
+    {
+        if (!isset(self::SCOPES[$scope])) {
+            return ['label' => '—', 'class' => 'none', 'description' => 'Escopo não encontrado.'];
+        }
+
+        $values = [];
+        foreach (self::SCOPES[$scope]['products'] as $product) {
+            $value = $grantsInScope[$product['id']] ?? '';
+            if ($value !== '') {
+                $values[] = $value;
+            }
+        }
+
+        if ($values === []) {
+            return [
+                'label' => 'Sem acesso',
+                'class' => 'none',
+                'description' => 'Sem permissão neste escopo — produtos desta aba bloqueados.',
+            ];
+        }
+
+        $unique = array_values(array_unique($values));
+        if (\count($unique) === 1) {
+            foreach (self::ASSIGNABLE_PROFILES as $profile) {
+                if ($profile['id'] === $unique[0]) {
+                    return [
+                        'label' => $profile['label'],
+                        'class' => $profile['class'],
+                        'description' => $profile['description'],
+                    ];
+                }
+            }
+        }
+
+        return [
+            'label' => 'Misto (' . \count($values) . ')',
+            'class' => 'default',
+            'description' => 'Perfis diferentes entre os produtos desta aba.',
+        ];
     }
 
     private function isValidGrantTarget(string $scope, string $productId): bool

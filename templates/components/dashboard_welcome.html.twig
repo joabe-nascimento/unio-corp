@@ -1,10 +1,11 @@
 {# Saudação no dashboard: período do dia, usuário, data e hora #}
+{% set access_badge = user_access_badge() %}
 <div class="dashboard-welcome huplex-card mb-4">
     <div class="dashboard-welcome-main">
         <div class="dashboard-welcome-greeting">{{ greeting }}, {{ app.user.nome|split(' ')|first }}!</div>
         <div class="dashboard-welcome-user">
             <span class="dashboard-welcome-name">{{ app.user.nome }}</span>
-            <span class="badge-perfil {{ app.user.perfilClass }}">{{ app.user.perfilLabel }}</span>
+            <span class="badge-perfil {{ access_badge.class }}"{% if access_badge.elevated %} title="Conta global: {{ access_badge.global_label }}"{% endif %}>{{ access_badge.label }}</span>
         </div>
         {% if empresa %}
         <div class="dashboard-welcome-empresa">

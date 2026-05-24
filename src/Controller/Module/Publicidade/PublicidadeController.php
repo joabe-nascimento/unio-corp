@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/publicidade')]
-#[IsGranted('ROLE_GESTOR_EQUIPE')]
+#[IsGranted('ROLE_USER')]
 class PublicidadeController extends AbstractController
 {
     private const T = 'modules/publicidade/';

@@ -1,28 +1,45 @@
-{% extends 'layout/hub.html.twig' %}
+﻿{% extends 'layout/hub.html.twig' %}
 {% block title %}Marca e Comunicação{% endblock %}
 {% block permissions_scope %}product_publicidade{% endblock %}
 {% set hub_page_title = 'Marca e Comunicação' %}
+{% set pub_items = [
+    { icon:'fa-bullhorn',          title:'Campanhas',         subtitle:'Planejamento e veiculação',           route:'app_publicidade_campanhas',  product:'campanhas' },
+    { icon:'fa-building-columns',  title:'Clientes e Marcas', subtitle:'Contas e contratos',                  route:'app_publicidade_clientes',   product:'clientes' },
+    { icon:'fa-palette',           title:'Criativos',         subtitle:'Peças, revisões e aprovações',        route:'app_publicidade_criativos',  product:'criativos' },
+    { icon:'fa-tower-broadcast',   title:'Mídia e Canais',    subtitle:'TV, digital, OOH e mídia paga',       route:'app_publicidade_midia',      product:'campanhas' },
+    { icon:'fa-lightbulb',         title:'Briefings',         subtitle:'Demandas e direcionamento criativo',  route:'app_publicidade_briefings',  product:'campanhas' },
+    { icon:'fa-chart-line',        title:'Métricas e ROI',    subtitle:'KPIs, alcance e conversão',           route:'app_publicidade_metricas',   product:'metricas' },
+] %}
+{% set pub_visible_items = [] %}
+{% for item in pub_items %}
+    {% if product_grant('product_publicidade', item.product) %}
+        {% set pub_visible_items = pub_visible_items|merge([item]) %}
+    {% endif %}
+{% endfor %}
 {% block hub_kpis %}
+{% if pub_visible_items|length > 0 %}
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
-        { value: '0', label: 'Campanhas Ativas', sub: 'Em veiculaусo' },
+        { value: '0', label: 'Campanhas Ativas', sub: 'Em veiculação' },
         { value: '0', label: 'Clientes',          sub: 'Ativos' },
-        { value: '0', label: 'Criativos',         sub: 'Em produусo' },
-        { value: '?', label: 'ROI Mжdio',         sub: 'Acumulado' },
+        { value: '0', label: 'Criativos',         sub: 'Em produção' },
+        { value: '?', label: 'ROI Médio',         sub: 'Acumulado' },
     ], mb: 'mb-0' } %}
 </div>
+{% endif %}
 {% endblock %}
 {% block hub_content %}
+{% if pub_visible_items|length > 0 %}
 {% include 'components/module_grid.html.twig' with {
-    title: 'Funушes do mзdulo',
-    subtitle: 'Campanhas, criativos, mьdia e performance de marca',
-    items: [
-        { icon:'fa-bullhorn',          title:'Campanhas',        subtitle:'Planejamento e veiculaусo',           route:'app_publicidade_campanhas' },
-        { icon:'fa-building-columns',  title:'Clientes e Marcas', subtitle:'Contas e contratos',                 route:'app_publicidade_clientes' },
-        { icon:'fa-palette',           title:'Criativos',        subtitle:'Peуas, revisшes e aprovaушes',       route:'app_publicidade_criativos' },
-        { icon:'fa-tower-broadcast',   title:'Mьdia e Canais',   subtitle:'TV, digital, OOH e mьdia paga',      route:'app_publicidade_midia' },
-        { icon:'fa-lightbulb',         title:'Briefings',        subtitle:'Demandas e direcionamento criativo', route:'app_publicidade_briefings' },
-        { icon:'fa-chart-line',        title:'Mжtricas e ROI',   subtitle:'KPIs, alcance e conversсo',          route:'app_publicidade_metricas' },
-    ]
+    title: 'Funções do módulo',
+    subtitle: 'Campanhas, criativos, mídia e performance de marca',
+    items: pub_visible_items
 } %}
+{% else %}
+    {% include 'components/hub_scope_empty.html.twig' with {
+        icon: 'fa-bullhorn',
+        title: 'Nenhuma área disponível em Publicidade',
+        text: 'Você ainda não tem permissão para acessar Campanhas, Criativos ou Métricas. Solicite ao gestor da equipe.'
+    } %}
+{% endif %}
 {% endblock %}

@@ -4,9 +4,9 @@
     permission_data (array) retorno de permissions_scope()
 #}
 {% if permission_data %}
-{% set can_edit = is_granted('ROLE_GESTOR_EQUIPE') or is_granted('ROLE_TENANT') %}
+{% set can_edit = can_manage_permissions(permission_data.scope) %}
 {% set perm_tags_modal_id = 'perm-tags-modal-' ~ permission_data.scope %}
-<div class="permissions-panel" data-perm-panel data-perm-scope="{{ permission_data.scope }}" data-perm-api-url="{{ path('app_permissions_api_grants', {memberId: '__MEMBER__'}) }}" data-perm-csrf="{{ csrf_token('perm_grants') }}">
+<div class="permissions-panel" data-perm-panel data-perm-scope="{{ permission_data.scope }}" data-perm-api-url="{{ path('app_permissions_api_grants', {memberId: 'MEMBER'}) }}" data-perm-csrf="{{ csrf_token('perm_grants') }}">
     <div class="huplex-card permissions-panel-card">
         {% include 'components/section_header.html.twig' with {
             title: 'Permissões',
@@ -33,29 +33,20 @@
         <div id="perm-members-container" class="perm-member-list" data-view-mode="list">
             {% for row in permission_data.rows %}
                 {% set member = row.member %}
-                {# Descrição do perfil global para tooltip #}
-                {% set _profile = permission_data.profiles|filter(p => p.id == member.perfil_global)|first %}
-                {% set _profile_desc = _profile.description|default('Perfil global do membro na plataforma.') %}
+                {% set scope_summary = row.scope_summary %}
                 <div class="view-list-only perm-member-row">
                     <div class="perm-member-row-main">
                         <span class="permissions-avatar">{{ member.initials }}</span>
                         <div class="permissions-member-info">
                             <span class="permissions-member-name">{{ member.nome }}</span>
                             <span class="permissions-member-email">{{ member.email }}</span>
-                            <span class="permissions-member-meta">
-                                {% if member.cargo %}
-                                    <span>{{ member.cargo }}</span>
-                                {% endif %}
-                                {% if member.equipe is defined and member.equipe != '—' %}
-                                    <span><i class="fas fa-user-group"></i> {{ member.equipe }}</span>
-                                {% endif %}
-                            </span>
                         </div>
-                        {% include 'components/perfil_tag.html.twig' with {
-                            label: member.perfil_label ~ ' (global)',
-                            class: member.perfil_class ~ ' permissions-global-tag',
-                            description: _profile_desc
-                        } %}
+                        <span class="huplex-tooltip badge-perfil perm-scope-tag {{ scope_summary.class }}"
+                              data-perm-scope-badge="{{ member.id }}"
+                              tabindex="0">
+                            <span class="perm-scope-badge-label">{{ scope_summary.label }}</span>
+                            <span class="huplex-tooltip-bubble" data-perm-scope-badge-tip="{{ member.id }}">{{ scope_summary.description }}</span>
+                        </span>
                     </div>
                     <div class="perm-row-actions">
                         {% if can_edit %}
@@ -64,7 +55,7 @@
                                     class="perm-tags-btn"
                                     data-perm-picker-trigger
                                     data-value=""
-                                    title="Aplicar tag a todos os produtos deste escopo">
+                                    title="Aplicar perfil a todos os hubs e produtos de uma vez">
                                 <i class="fas fa-tags"></i>
                                 <span class="perm-tags-btn-label">Definir todos</span>
                                 <i class="fas fa-chevron-down perm-picker-chevron"></i>
@@ -94,15 +85,11 @@
                 <div class="view-grid-only perm-member-grid-card">
                     <span class="permissions-avatar permissions-avatar--grid">{{ member.initials }}</span>
                     <div class="perm-member-grid-name">{{ member.nome }}</div>
-                    <div class="perm-member-grid-meta">{{ member.cargo }}</div>
-                    {% if member.equipe is defined and member.equipe != '—' %}
-                        <div class="perm-member-grid-team"><i class="fas fa-user-group"></i> {{ member.equipe }}</div>
-                    {% endif %}
-                    {% include 'components/perfil_tag.html.twig' with {
-                        label: member.perfil_label,
-                        class: member.perfil_class ~ ' perm-member-grid-tag',
-                        description: _profile_desc
-                    } %}
+                    <span class="huplex-tooltip badge-perfil perm-scope-tag {{ scope_summary.class }} perm-member-grid-tag"
+                          data-perm-scope-badge="{{ member.id }}"
+                          tabindex="0">
+                        <span class="perm-scope-badge-label">{{ scope_summary.label }}</span>
+                    </span>
                     <button type="button"
                             class="perm-tags-btn perm-tags-btn--grid"
                             data-perm-open
@@ -119,7 +106,7 @@
         {% if can_edit %}
             <div class="permissions-footer">
                 <span class="permissions-save-hint" data-perm-status hidden>
-                    <i class="fas fa-check-circle"></i> Alterações salvas
+                    <i class="fas fa-check-circle"></i> Salvo — o membro verá ao recarregar a página (F5)
                 </span>
                 <span class="permissions-save-hint permissions-save-hint--error" data-perm-status-error hidden>
                     <i class="fas fa-circle-exclamation"></i> <span data-perm-status-error-text></span>
@@ -163,6 +150,7 @@
     var profiles = {{ permission_data.profiles|json_encode|raw }};
     var allHubs = {{ permission_data.all_hubs|json_encode|raw }};
     var permRows = {{ permission_data.rows|json_encode|raw }};
+    var permScopeProducts = {{ permission_data.products|json_encode|raw }};
 
     var members = permRows.map(function (r) { return r.member; });
     var defaultByMember = {};
@@ -180,7 +168,7 @@
     var panelScope = panel.getAttribute('data-perm-scope') || '';
 
     function memberApiUrl(memberId) {
-        return apiUrlTpl.replace('__MEMBER__', encodeURIComponent(memberId));
+        return apiUrlTpl.replace('/member/MEMBER/', '/member/' + encodeURIComponent(memberId) + '/');
     }
 
     function loadMemberGrants(memberId) {
@@ -193,8 +181,9 @@
 
     function saveMemberGrants(memberId, grantsMap) {
         if (!canEdit) return;
+        var snapshot = JSON.stringify(defaultByMember[memberId] || {});
         defaultByMember[memberId] = Object.assign({}, grantsMap);
-        updateGrantCount(memberId);
+        updateMemberRowUI(memberId);
         showSaving();
 
         fetch(memberApiUrl(memberId), {
@@ -213,12 +202,27 @@
             })
             .then(function (result) {
                 if (result.ok) {
+                    if (result.data && typeof result.data.grant_count === 'number') {
+                        var serverCount = String(result.data.grant_count);
+                        panel.querySelectorAll('[data-perm-count="' + memberId + '"]').forEach(function (el) {
+                            el.textContent = serverCount;
+                        });
+                    }
+                    updateMemberRowUI(memberId);
+                    if (activeMemberId === memberId) {
+                        var member = members.find(function (m) { return m.id === memberId; });
+                        if (member) renderDrawer(member);
+                    }
                     showSaved();
                 } else {
+                    defaultByMember[memberId] = JSON.parse(snapshot);
+                    updateMemberRowUI(memberId);
                     showError(result.data && result.data.error ? result.data.error : 'Erro ao salvar permissões.');
                 }
             })
             .catch(function () {
+                defaultByMember[memberId] = JSON.parse(snapshot);
+                updateMemberRowUI(memberId);
                 showError('Falha de rede ao salvar permissões.');
             });
     }
@@ -233,12 +237,12 @@
         saveMemberGrants(memberId, data);
     }
 
-    function applyHubGrants(memberId, hubScope, value) {
+    function applyScopeGrants(memberId, scope, value) {
         var data = loadMemberGrants(memberId);
-        var hub = allHubs.find(function (h) { return h.scope === hubScope; });
-        if (!hub) return;
-        hub.products.forEach(function (product) {
-            var key = hubScope + ':' + product.id;
+        var scopeDef = allHubs.find(function (h) { return h.scope === scope; });
+        if (!scopeDef) return;
+        scopeDef.products.forEach(function (product) {
+            var key = scope + ':' + product.id;
             if (value) {
                 data[key] = value;
             } else {
@@ -246,6 +250,148 @@
             }
         });
         saveMemberGrants(memberId, data);
+    }
+
+    function applyHubGrants(memberId, hubScope, value) {
+        applyScopeGrants(memberId, hubScope, value);
+    }
+
+    /** Aplica o perfil escolhido em todos os hubs/produtos da matriz. */
+    function applyAllGrants(memberId, value) {
+        var data = loadMemberGrants(memberId);
+        allHubs.forEach(function (hub) {
+            hub.products.forEach(function (product) {
+                var key = hub.scope + ':' + product.id;
+                if (value) {
+                    data[key] = value;
+                } else {
+                    delete data[key];
+                }
+            });
+        });
+        saveMemberGrants(memberId, data);
+    }
+
+    function collectGrantValues(grants, scopeFilter) {
+        var values = [];
+        allHubs.forEach(function (hub) {
+            if (scopeFilter && hub.scope !== scopeFilter) {
+                return;
+            }
+            hub.products.forEach(function (product) {
+                var v = grants[hub.scope + ':' + product.id];
+                if (v) {
+                    values.push(v);
+                }
+            });
+        });
+        return values;
+    }
+
+    function summarizeGrantValues(values, emptyDescription) {
+        if (values.length === 0) {
+            return {
+                label: 'Sem acesso',
+                class: 'none',
+                description: emptyDescription,
+                value: ''
+            };
+        }
+
+        var unique = values.filter(function (v, i, a) { return a.indexOf(v) === i; });
+        if (unique.length === 1) {
+            var meta = profileMeta(unique[0]);
+            var p = profiles.find(function (x) { return x.id === unique[0]; });
+            return {
+                label: meta.label,
+                class: meta.class,
+                description: p && p.description ? p.description : meta.label + ' em todos os produtos.',
+                value: unique[0]
+            };
+        }
+
+        return {
+            label: 'Misto (' + unique.length + ')',
+            class: 'default',
+            description: 'Perfis diferentes entre hubs ou produtos.',
+            value: ''
+        };
+    }
+
+    function resolveScopeDef(scope) {
+        var scopeDef = allHubs.find(function (h) { return h.scope === scope; });
+        if (!scopeDef && scope === panelScope && typeof permScopeProducts !== 'undefined') {
+            scopeDef = { scope: panelScope, products: permScopeProducts };
+        }
+        return scopeDef || null;
+    }
+
+    function computeScopeSummary(grants, scope) {
+        var scopeDef = resolveScopeDef(scope);
+        if (!scopeDef) {
+            return { label: '—', class: 'none', description: 'Escopo não encontrado.', value: '' };
+        }
+
+        var values = [];
+        scopeDef.products.forEach(function (product) {
+            var v = grants[scopeDef.scope + ':' + product.id];
+            if (v) values.push(v);
+        });
+
+        if (values.length === 0) {
+            return {
+                label: 'Sem acesso',
+                class: 'none',
+                description: 'Sem permissão neste escopo — produtos desta aba bloqueados.',
+                value: ''
+            };
+        }
+
+        return summarizeGrantValues(values, 'Sem permissão neste escopo — produtos desta aba bloqueados.');
+    }
+
+    function computeGlobalSummary(grants) {
+        return summarizeGrantValues(
+            collectGrantValues(grants),
+            'Sem permissão em nenhum hub ou produto.'
+        );
+    }
+
+    function scopeGrantSummary(memberId, scope) {
+        return computeScopeSummary(loadMemberGrants(memberId), scope || panelScope);
+    }
+
+    function updateScopeBadge(memberId) {
+        var meta = scopeGrantSummary(memberId);
+        panel.querySelectorAll('[data-perm-scope-badge="' + memberId + '"]').forEach(function (el) {
+            el.className = 'huplex-tooltip badge-perfil perm-scope-tag ' + meta.class;
+            var labelEl = el.querySelector('.perm-scope-badge-label');
+            if (labelEl) labelEl.textContent = meta.label;
+            var tip = el.querySelector('[data-perm-scope-badge-tip]');
+            if (tip) tip.textContent = meta.description;
+        });
+    }
+
+    function updateRowPickerTrigger(memberId) {
+        panel.querySelectorAll('[data-perm-row-picker][data-member-id="' + memberId + '"]').forEach(function (wrap) {
+            var trigger = wrap.querySelector('[data-perm-picker-trigger]');
+            if (!trigger) return;
+            var meta = computeGlobalSummary(loadMemberGrants(memberId));
+            trigger.setAttribute('data-value', meta.value || '');
+            if (meta.value) {
+                trigger.className = 'perm-tags-btn badge-perfil ' + meta.class;
+                trigger.innerHTML = '<i class="fas fa-tags"></i> <span class="perm-tags-btn-label">' + esc(meta.label) + '</span> <i class="fas fa-chevron-down perm-picker-chevron"></i>';
+            } else {
+                trigger.className = 'perm-tags-btn';
+                trigger.innerHTML = '<i class="fas fa-tags"></i><span class="perm-tags-btn-label">Definir todos</span><i class="fas fa-chevron-down perm-picker-chevron"></i>';
+            }
+        });
+    }
+
+    function updateMemberRowUI(memberId) {
+        updateGrantCount(memberId);
+        updateScopeBadge(memberId);
+        updateRowPickerTrigger(memberId);
     }
 
     function countGrants(memberId) {
@@ -267,7 +413,7 @@
         if (!status) return;
         status.hidden = false;
         clearTimeout(status._t);
-        status._t = setTimeout(function () { status.hidden = true; }, 2200);
+        status._t = setTimeout(function () { status.hidden = true; }, 3200);
     }
 
     function showSaving() {
@@ -350,8 +496,8 @@
         return false;
     }
 
-    function pickerHtml(value, attrs) {
-        var meta = profileMeta(value);
+    function pickerHtml(value, attrs, displayMeta) {
+        var meta = displayMeta || profileMeta(value);
         var extra = attrs || '';
         var html = '<div class="perm-picker-wrap"' + extra + '>';
         html += '<button type="button" class="perm-picker-trigger badge-perfil ' + meta.class + '"' +
@@ -360,7 +506,7 @@
             esc(meta.label) + ' <i class="fas fa-chevron-down perm-picker-chevron"></i></button>';
         if (canEdit) {
             html += '<div class="perm-picker-menu" hidden>';
-            html += '<button type="button" class="perm-picker-option' + (value === '' ? ' is-active' : '') + '" data-value="">Sem acesso</button>';
+            html += '<button type="button" class="perm-picker-option permissions-tag-none' + (value === '' ? ' is-active' : '') + '" data-value="">Sem acesso</button>';
             profiles.forEach(function (p) {
                 html += '<button type="button" class="perm-picker-option badge-perfil ' + p.class +
                     (value === p.id ? ' is-active' : '') + '" data-value="' + p.id + '">' + esc(p.label) + '</button>';
@@ -374,12 +520,6 @@
     function renderDrawer(member) {
         var grants = loadMemberGrants(member.id);
         var grantCount = countGrants(member.id);
-        var equipeHtml = (member.equipe && member.equipe !== '—')
-            ? '<span class="perm-profile-chip"><i class="fas fa-user-group"></i> ' + esc(member.equipe) + '</span>'
-            : '';
-        var cargoHtml = member.cargo
-            ? '<span class="perm-profile-chip"><i class="fas fa-briefcase"></i> ' + esc(member.cargo) + '</span>'
-            : '';
         var viewMemberHtml = member.ficha_id
             ? '<a href="' + esc(fichaUrl(member.ficha_id)) + '" class="perm-profile-view-btn btn-huplex-ghost btn-sm">' +
                 '<i class="fas fa-user"></i> Ver membro' +
@@ -395,7 +535,6 @@
                         '<p class="perm-offcanvas-email">' + esc(member.email) + '</p>' +
                     '</div>' +
                 '</div>' +
-                '<div class="perm-profile-chips">' + cargoHtml + equipeHtml + '</div>' +
                 '<div class="perm-profile-tags">' +
                     '<span class="badge-perfil ' + member.perfil_class + '">' + esc(member.perfil_label) + ' (global)</span>' +
                     '<span class="perm-profile-grant-count">' + grantCount + ' permissões ativas</span>' +
@@ -411,7 +550,11 @@
             if (canEdit) {
                 html += '<div class="perm-hub-bulk">';
                 html += '<span class="perm-hub-bulk-label">Aplicar neste hub</span>';
-                html += pickerHtml('', ' data-perm-bulk-hub="' + esc(hub.scope) + '"');
+                var hubSummary = computeScopeSummary(grants, hub.scope);
+                html += pickerHtml(hubSummary.value, ' data-perm-bulk-hub="' + esc(hub.scope) + '"', {
+                    label: hubSummary.label,
+                    class: hubSummary.class
+                });
                 html += '</div>';
             }
             html += '</div>';
@@ -475,7 +618,7 @@
         closeAllPickers();
     });
 
-    members.forEach(function (m) { updateGrantCount(m.id); });
+    members.forEach(function (m) { updateMemberRowUI(m.id); });
 
     // ── Row pickers — "Definir todos" por membro ────────────────────────────
     panel.querySelectorAll('[data-perm-row-picker]').forEach(function (wrap) {
@@ -495,16 +638,8 @@
             if (option) {
                 e.stopPropagation();
                 var value = option.getAttribute('data-value');
-                applyHubGrants(memberId, panelScope, value);
-                // feedback visual no trigger
-                var meta = profileMeta(value);
-                trigger.className = 'perm-tags-btn badge-perfil ' + meta.class + ' perm-row-picker-applied';
-                trigger.innerHTML = '<i class="fas fa-tags"></i> ' + esc(meta.label) + ' <i class="fas fa-chevron-down perm-picker-chevron"></i>';
+                applyAllGrants(memberId, value);
                 closeAllPickers();
-                setTimeout(function () {
-                    trigger.className = 'perm-tags-btn';
-                    trigger.innerHTML = '<i class="fas fa-tags"></i><span class="perm-tags-btn-label">Definir todos</span><i class="fas fa-chevron-down perm-picker-chevron"></i>';
-                }, 2000);
             }
         });
     });

@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/pessoas')]
-#[IsGranted('ROLE_SUPERVISOR_EQUIPE')]
+#[IsGranted('ROLE_USER')]
 class PessoasController extends AbstractController
 {
     private const T = 'modules/pessoas/';
@@ -28,7 +28,6 @@ class PessoasController extends AbstractController
     }
 
     #[Route('/membros/novo', name: 'app_pessoas_membro_novo')]
-    #[IsGranted('ROLE_GESTOR_EQUIPE')]
     public function membroNovo(): Response
     {
         return $this->render(self::T . 'membro_form.html.twig', ['modo' => 'novo']);
@@ -49,7 +48,6 @@ class PessoasController extends AbstractController
     }
 
     #[Route('/equipes/nova', name: 'app_pessoas_equipe_nova')]
-    #[IsGranted('ROLE_GESTOR_EQUIPE')]
     public function equipeNova(): Response
     {
         return $this->render(self::T . 'equipe_form.html.twig', ['modo' => 'nova']);
