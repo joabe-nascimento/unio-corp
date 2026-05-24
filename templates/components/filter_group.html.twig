@@ -1,16 +1,16 @@
 {#
-  filter_group — label + select (toolbar / listagem)
+  filter_group — select de filtro (toolbar / listagem)
 
   Props:
-    label     (string)  texto do label (ex.: Área)
+    label     (string)  usado em aria-label do select (ex.: Área)
     options   (array)   lista de opções (string ou { value, label })
     name      (string, opt)
     disabled  (bool, opt)
     min_width (string, opt)  ex.: '130px'
 #}
 <div class="filter-group">
-    <label class="filter-label"{% if name is defined and name %} for="filter-{{ name }}"{% endif %}>{{ label }}</label>
     <select class="filter-select"
+            aria-label="{{ label|default('Filtrar') }}"
             {% if name is defined and name %}id="filter-{{ name }}" name="{{ name }}"{% endif %}
             {% if disabled|default(false) %}disabled{% endif %}
             {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
