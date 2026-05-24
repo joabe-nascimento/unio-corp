@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -61,9 +63,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToOne(targetEntity: Empresa::class, inversedBy: 'usuarios')]
     private ?Empresa $empresa = null;
 
+    /** @var Collection<int, UserProductGrant> */
+    #[ORM\OneToMany(targetEntity: UserProductGrant::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $productGrants;
+
     public function __construct()
     {
         $this->criadoEm = new \DateTimeImmutable();
+        $this->productGrants = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -103,6 +110,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getEmpresa(): ?Empresa { return $this->empresa; }
     public function setEmpresa(?Empresa $empresa): static { $this->empresa = $empresa; return $this; }
+
+    /** @return Collection<int, UserProductGrant> */
+    public function getProductGrants(): Collection
+    {
+        return $this->productGrants;
+    }
+
+    public function addProductGrant(UserProductGrant $grant): static
+    {
+        if (!$this->productGrants->contains($grant)) {
+            $this->productGrants->add($grant);
+            $grant->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProductGrant(UserProductGrant $grant): static
+    {
+        if ($this->productGrants->removeElement($grant) && $grant->getUser() === $this) {
+            $grant->setUser(null);
+        }
+
+        return $this;
+    }
 
     // ── Helpers de perfil ──────────────────────────────────────────────
 

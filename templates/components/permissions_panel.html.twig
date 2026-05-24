@@ -222,19 +222,6 @@
         saveMemberGrants(memberId, data);
     }
 
-    function applyAllMembersGrants(value) {
-        members.forEach(function (m) {
-            var data = loadMemberGrants(m.id);
-            allHubs.forEach(function (hub) {
-                hub.products.forEach(function (product) {
-                    var key = hub.scope + ':' + product.id;
-                    if (value) { data[key] = value; } else { delete data[key]; }
-                });
-            });
-            saveMemberGrants(m.id, data);
-        });
-    }
-
     function applyMemberAllGrants(memberId, value) {
         var data = loadMemberGrants(memberId);
         allHubs.forEach(function (hub) {

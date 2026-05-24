@@ -2,14 +2,14 @@
 
 namespace App\Twig;
 
-use App\Service\PermissionMockService;
+use App\Service\PermissionService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class PermissionsExtension extends AbstractExtension
 {
     public function __construct(
-        private PermissionMockService $permissions,
+        private PermissionService $permissions,
     ) {}
 
     public function getFunctions(): array
