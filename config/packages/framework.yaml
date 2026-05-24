@@ -2,8 +2,16 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
-    # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        cookie_secure: auto
+        cookie_samesite: lax
+        cookie_httponly: true
+        # Sem "lembrar-me": sessão expira após 30 min de inatividade
+        gc_maxlifetime: 1800
+        # cookie_lifetime: 0 — cookie de sessão (some ao fechar o browser)
+        cookie_lifetime: 0
+        gc_probability: 1
+        gc_divisor: 100
 
     #esi: true
     #fragments: true
