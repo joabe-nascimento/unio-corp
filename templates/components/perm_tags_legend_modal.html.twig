@@ -1,0 +1,34 @@
+{#
+  perm_tags_legend_modal — modal com explicação de cada tag de permissão
+
+  Props:
+    profiles               (array)
+    no_access_description  (string)
+    modal_id               (string, opt)
+#}
+{% set _modal_id = modal_id|default('perm-tags-modal') %}
+<div class="perm-tags-modal" id="{{ _modal_id }}" data-perm-tags-modal aria-hidden="true" hidden>
+    <div class="perm-tags-modal-backdrop" data-perm-tags-modal-close tabindex="-1"></div>
+    <div class="perm-tags-modal-dialog" id="{{ _modal_id }}-dialog" role="dialog" aria-modal="true" aria-labelledby="{{ _modal_id }}-title">
+        <header class="perm-tags-modal-header">
+            <h3 class="perm-tags-modal-title" id="{{ _modal_id }}-title">Tags de permissão</h3>
+            <button type="button" class="perm-tags-modal-close" data-perm-tags-modal-close aria-label="Fechar">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </header>
+        <div class="perm-tags-modal-body">
+            <ul class="perm-tags-modal-list">
+                {% for profile in profiles %}
+                    <li class="perm-tags-modal-item">
+                        <span class="badge-perfil {{ profile.class }}">{{ profile.label }}</span>
+                        <p class="perm-tags-modal-desc">{{ profile.description }}</p>
+                    </li>
+                {% endfor %}
+                <li class="perm-tags-modal-item">
+                    <span class="badge-perfil permissions-tag-none">Sem acesso</span>
+                    <p class="perm-tags-modal-desc">{{ no_access_description }}</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

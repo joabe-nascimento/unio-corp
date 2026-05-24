@@ -1,5 +1,6 @@
 {% extends 'layout/hub.html.twig' %}
 {% block title %}RH{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
 {% set hub_page_title = 'Recursos Humanos' %}
 {% block hub_kpis %}
 <div class="page-lead-kpis">
@@ -11,15 +12,18 @@
     ], mb: 'mb-0' } %}
 </div>
 {% endblock %}
+{% block hub_section_toolbar %}
+{% include 'components/section_toolbar.html.twig' with {
+    btn_label: 'Novo Funcionário',
+    btn_href: path('app_rh_funcionarios'),
+    btn_icon: 'fa-plus',
+    show_search: true,
+    search_placeholder: 'Buscar funcionários…',
+    search_disabled: true
+} %}
+{% endblock %}
 {% block hub_content %}
 <div class="huplex-card">
-    {% include 'components/section_header.html.twig' with {
-        title: 'Funcionários Recentes',
-        subtitle: 'Últimas alterações no quadro',
-        btn_label: 'Novo Funcionário',
-        btn_href: path('app_rh_funcionarios'),
-        btn_icon: 'fa-plus'
-    } %}
     {% include 'components/empty_state.html.twig' with {
         icon: 'fa-users',
         title: 'Nenhum funcionário cadastrado',

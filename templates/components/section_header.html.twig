@@ -1,24 +1,16 @@
 {#
-  section_header — cabeçalho de seção reutilizável
-  Props:
-    title       (string)       título principal
-    subtitle    (string, opt)  subtítulo descritivo
-    btn_label   (string, opt)  texto do botão de ação
-    btn_href    (string, opt)  href do botão (url ou path já resolvido)
-    btn_icon    (string, opt)  ícone FA, ex: 'fa-plus'
-    btn_ghost   (bool, opt)    true para estilo ghost. Default: false
+  section_header — título de seção dentro de card (sem ações/filtros)
 
-  Uso:
-    {% include 'components/section_header.html.twig' with {
-        title: 'Funcionários',
-        subtitle: 'Quadro de colaboradores',
-        btn_label: 'Novo Funcionário',
-        btn_href: path('app_rh_funcionarios'),
-        btn_icon: 'fa-plus'
-    } %}
+  Props:
+    title       (string)
+    subtitle    (string, opt)
+    btn_label   (string, opt)  botão à direita (uso simples)
+    btn_href    (string, opt)
+    btn_icon    (string, opt)
+    btn_ghost   (bool, opt)
 #}
-<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-    <div>
+<div class="section-header section-header--in-card">
+    <div class="section-header-text">
         <div class="section-title">{{ title }}</div>
         {% if subtitle is defined and subtitle %}
             <div class="section-subtitle">{{ subtitle }}</div>
@@ -26,7 +18,7 @@
     </div>
     {% if btn_label is defined and btn_label %}
         <a href="{{ btn_href|default('#') }}"
-           class="{{ btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex' }}">
+           class="section-header-action {{ btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex' }}">
             {% if btn_icon is defined and btn_icon %}
                 <i class="fas {{ btn_icon }} mr-1"></i>
             {% endif %}

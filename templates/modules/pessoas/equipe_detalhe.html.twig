@@ -64,7 +64,8 @@
 <div class="page-lead-zone">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: eq.nome,
-        search_disabled: true
+        search_disabled: true,
+        actions_in_top: true
     } %}
         {% block toolbar_actions %}
             <a href="{{ path('app_pessoas_equipes') }}" class="btn-huplex-ghost btn-sm">
@@ -118,23 +119,21 @@
 {# Lista de membros com toggle lista/grid #}
 {% set av_palette = ['av-c1','av-c2','av-c3','av-c4','av-c5','av-c6','av-c7','av-c8'] %}
 
-<div class="huplex-card">
-    <div class="list-header-row">
-        <div class="list-header-text">
-            <div class="section-title">Membros da Equipe</div>
-            <div class="section-subtitle">{{ eq.membros|length }} integrantes no time {{ eq.nome }}</div>
-        </div>
-        <div class="list-header-actions">
-            <a href="{{ path('app_pessoas_membros') }}" class="btn-huplex-ghost btn-sm">
-                Ver todos os membros
-            </a>
-            {% include 'components/view_toggle.html.twig' with {
-                container_id: 'equipe-membros-container',
-                storage_key:  'equipe_membros_view'
-            } %}
-        </div>
-    </div>
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: 'Ver todos os membros',
+    btn_href: path('app_pessoas_membros'),
+    btn_icon: 'fa-users',
+    btn_ghost: true
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/view_toggle.html.twig' with {
+            container_id: 'equipe-membros-container',
+            storage_key:  'equipe_membros_view'
+        } %}
+    {% endblock %}
+{% endembed %}
 
+<div class="huplex-card">
     <div id="equipe-membros-container" data-view-mode="list">
         {% for mb in eq.membros %}
         {% set ci = (loop.index - 1) % av_palette|length %}

@@ -1,0 +1,29 @@
+{#
+  perm_tags_legend — botão Tags + modal com explicação de cada perfil
+
+  Props:
+    profiles               (array)  permission_data.profiles
+    no_access_description  (string)
+    modal_id               (string, opt)
+    render_button          (bool, opt) default true
+    render_modal           (bool, opt) default true
+#}
+{% set _modal_id = modal_id|default('perm-tags-modal') %}
+{% if render_button is not defined or render_button %}
+<button type="button"
+        class="perm-tags-legend-btn"
+        data-perm-tags-modal-open="{{ _modal_id }}"
+        aria-haspopup="dialog"
+        aria-controls="{{ _modal_id }}-dialog">
+    <i class="fas fa-tags"></i>
+    Tags
+</button>
+{% endif %}
+
+{% if render_modal is not defined or render_modal %}
+    {% include 'components/perm_tags_legend_modal.html.twig' with {
+        profiles: profiles,
+        no_access_description: no_access_description,
+        modal_id: _modal_id
+    } only %}
+{% endif %}

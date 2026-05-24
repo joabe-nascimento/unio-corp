@@ -1,20 +1,24 @@
 {% extends 'layout/hub.html.twig' %}
 {% block title %}Funcionários{% endblock %}
 {% set hub_page_title = 'Funcionários' %}
-{% block hub_toolbar_actions %}
-    <button type="button" class="btn-huplex"><i class="fas fa-plus"></i> Novo</button>
+{% block hub_section_toolbar %}
+{% include 'components/section_toolbar.html.twig' with {
+    btn_label: 'Novo Funcionário',
+    btn_href: path('app_rh_funcionarios'),
+    btn_icon: 'fa-plus',
+    show_search: true,
+    search_placeholder: 'Buscar funcionários…',
+    search_disabled: true
+} %}
 {% endblock %}
 {% block hub_content %}
 <div class="huplex-card">
-    {% include 'components/section_header.html.twig' with {
-        title: 'Lista de Funcionários',
-        subtitle: 'Gerencie o quadro completo de colaboradores'
-    } %}
     {% include 'components/empty_state.html.twig' with {
         icon: 'fa-id-card',
         title: 'Nenhum funcionário encontrado',
         text: 'Adicione funcionários para visualizá-los aqui.',
-        btn_label: 'Cadastrar Funcionário'
+        btn_label: 'Cadastrar Funcionário',
+        btn_href: path('app_rh_funcionarios')
     } %}
 </div>
 {% endblock %}

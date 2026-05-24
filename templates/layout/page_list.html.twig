@@ -1,0 +1,36 @@
+{#
+  page_list — layout padrão para listagens (título + KPIs no topo; ações/filtros/busca na section_toolbar)
+
+  Variáveis:
+    page_list_title (string)
+
+  Blocks:
+    page_list_toolbar_actions
+    page_list_toolbar_subnav
+    page_list_kpis
+    page_list_section_toolbar
+    page_list_content
+#}
+{% extends 'base.html.twig' %}
+{% block page_toolbar_layout %}yes{% endblock %}
+{% block page_show_title %}{% endblock %}
+
+{% block content_lead %}
+<div class="page-lead-zone">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: page_list_title|default(''),
+        actions_in_top: page_list_actions_in_top|default(false)
+    } %}
+        {% block toolbar_actions %}{% block page_list_toolbar_actions %}{% endblock %}{% endblock %}
+        {% block toolbar_subnav %}{% block page_list_toolbar_subnav %}{% endblock %}{% endblock %}
+    {% endembed %}
+    {% block page_list_kpis %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-body-inner">
+    {% block page_list_section_toolbar %}{% endblock %}
+    {% block page_list_content %}{% endblock %}
+</div>
+{% endblock %}

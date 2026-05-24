@@ -1,0 +1,510 @@
+{#
+  permissions_panel — lista de membros + offcanvas de tags por hub
+  Props:
+    permission_data (array) retorno de permissions_scope()
+#}
+{% if permission_data %}
+{% set can_edit = is_granted('ROLE_GESTOR_EQUIPE') or is_granted('ROLE_TENANT') %}
+{% set perm_tags_modal_id = 'perm-tags-modal-' ~ permission_data.scope %}
+<div class="permissions-panel" data-perm-panel data-perm-scope="{{ permission_data.scope }}">
+    <div class="huplex-card permissions-panel-card">
+        {% include 'components/section_header.html.twig' with {
+            title: 'Permissões',
+            subtitle: permission_data.subtitle
+        } %}
+
+
+        <div class="permissions-panel-toolbar">
+            <div class="permissions-panel-toolbar-start">
+                <span class="permissions-panel-toolbar-hint">{{ permission_data.rows|length }} membros com acesso configurável</span>
+                {% include 'components/perm_tags_legend.html.twig' with {
+                    profiles: permission_data.profiles,
+                    no_access_description: permission_data.no_access_description,
+                    modal_id: perm_tags_modal_id,
+                    render_modal: false
+                } %}
+            </div>
+            {% include 'components/view_toggle.html.twig' with {
+                container_id: 'perm-members-container',
+                storage_key: 'perm_members_view'
+            } %}
+        </div>
+
+        <div id="perm-members-container" class="perm-member-list" data-view-mode="list">
+            {% for row in permission_data.rows %}
+                {% set member = row.member %}
+                {# Descrição do perfil global para tooltip #}
+                {% set _profile = permission_data.profiles|filter(p => p.id == member.perfil_global)|first %}
+                {% set _profile_desc = _profile.description|default('Perfil global do membro na plataforma.') %}
+                <div class="view-list-only perm-member-row">
+                    <div class="perm-member-row-main">
+                        <span class="permissions-avatar">{{ member.initials }}</span>
+                        <div class="permissions-member-info">
+                            <span class="permissions-member-name">{{ member.nome }}</span>
+                            <span class="permissions-member-email">{{ member.email }}</span>
+                            <span class="permissions-member-meta">
+                                {% if member.cargo %}
+                                    <span>{{ member.cargo }}</span>
+                                {% endif %}
+                                {% if member.equipe is defined and member.equipe != '—' %}
+                                    <span><i class="fas fa-user-group"></i> {{ member.equipe }}</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% include 'components/perfil_tag.html.twig' with {
+                            label: member.perfil_label ~ ' (global)',
+                            class: member.perfil_class ~ ' permissions-global-tag',
+                            description: _profile_desc
+                        } %}
+                    </div>
+                    <div class="perm-row-actions">
+                        {% if can_edit %}
+                        <div class="perm-picker-wrap perm-row-picker" data-perm-row-picker data-member-id="{{ member.id }}">
+                            <button type="button"
+                                    class="perm-tags-btn"
+                                    data-perm-picker-trigger
+                                    data-value=""
+                                    title="Aplicar tag a todos os produtos deste escopo">
+                                <i class="fas fa-tags"></i>
+                                <span class="perm-tags-btn-label">Definir todos</span>
+                                <i class="fas fa-chevron-down perm-picker-chevron"></i>
+                            </button>
+                            <div class="perm-picker-menu" hidden>
+                                {% for profile in permission_data.profiles %}
+                                    <button type="button"
+                                            class="perm-picker-option badge-perfil {{ profile.class }}"
+                                            data-value="{{ profile.id }}">{{ profile.label }}</button>
+                                {% endfor %}
+                                <button type="button" class="perm-picker-option permissions-tag-none" data-value="">Sem acesso</button>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <button type="button"
+                                class="perm-tags-btn"
+                                data-perm-open
+                                data-member-id="{{ member.id }}"
+                                aria-label="Editar permissões de {{ member.nome }}">
+                            <i class="fas fa-tags"></i>
+                            <span class="perm-tags-btn-label">Tags</span>
+                            <span class="perm-tags-btn-count" data-perm-count="{{ member.id }}">{{ row.grant_count }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="view-grid-only perm-member-grid-card">
+                    <span class="permissions-avatar permissions-avatar--grid">{{ member.initials }}</span>
+                    <div class="perm-member-grid-name">{{ member.nome }}</div>
+                    <div class="perm-member-grid-meta">{{ member.cargo }}</div>
+                    {% if member.equipe is defined and member.equipe != '—' %}
+                        <div class="perm-member-grid-team"><i class="fas fa-user-group"></i> {{ member.equipe }}</div>
+                    {% endif %}
+                    {% include 'components/perfil_tag.html.twig' with {
+                        label: member.perfil_label,
+                        class: member.perfil_class ~ ' perm-member-grid-tag',
+                        description: _profile_desc
+                    } %}
+                    <button type="button"
+                            class="perm-tags-btn perm-tags-btn--grid"
+                            data-perm-open
+                            data-member-id="{{ member.id }}"
+                            aria-label="Editar permissões de {{ member.nome }}">
+                        <i class="fas fa-tags"></i>
+                        Tags
+                        <span class="perm-tags-btn-count" data-perm-count="{{ member.id }}">{{ row.grant_count }}</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if can_edit %}
+            <div class="permissions-footer">
+                <span class="permissions-save-hint" data-perm-status hidden>
+                    <i class="fas fa-check-circle"></i> Alterações salvas localmente (mock)
+                </span>
+            </div>
+        {% else %}
+            <div class="permissions-footer permissions-footer--readonly">
+                <i class="fas fa-lock"></i> Apenas gestores podem alterar permissões.
+            </div>
+        {% endif %}
+    </div>
+
+    {% include 'components/perm_tags_legend_modal.html.twig' with {
+        profiles: permission_data.profiles,
+        no_access_description: permission_data.no_access_description,
+        modal_id: perm_tags_modal_id
+    } only %}
+
+    <div class="perm-offcanvas" data-perm-offcanvas aria-hidden="true">
+        <div class="perm-offcanvas-backdrop" data-perm-close tabindex="-1"></div>
+        <aside class="perm-offcanvas-drawer" role="dialog" aria-modal="true" aria-labelledby="permOffcanvasTitle">
+            <header class="perm-offcanvas-header">
+                <div class="perm-offcanvas-profile" data-perm-drawer-profile></div>
+                <button type="button" class="perm-offcanvas-close" data-perm-close aria-label="Fechar">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </header>
+            <div class="perm-offcanvas-body">
+                <div data-perm-drawer-body></div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+(function () {
+    var panel = document.querySelector('[data-perm-panel][data-perm-scope="{{ permission_data.scope|e('js') }}"]');
+    if (!panel) return;
+
+    var canEdit = {{ can_edit ? 'true' : 'false' }};
+    var profiles = {{ permission_data.profiles|json_encode|raw }};
+    var allHubs = {{ permission_data.all_hubs|json_encode|raw }};
+    var permRows = {{ permission_data.rows|json_encode|raw }};
+
+    var members = permRows.map(function (r) { return r.member; });
+    var defaultByMember = {};
+    permRows.forEach(function (r) {
+        defaultByMember[r.member.id] = r.all_grants || {};
+    });
+
+    var offcanvas = panel.querySelector('[data-perm-offcanvas]');
+    var drawerBody = panel.querySelector('[data-perm-drawer-body]');
+    var drawerProfile = panel.querySelector('[data-perm-drawer-profile]');
+    var activeMemberId = null;
+    var fichaUrlTpl = {{ path('app_pessoas_membro_ficha', {id: 0})|json_encode|raw }};
+
+    function storageKey(memberId) {
+        return 'huplex-perm-member-' + memberId;
+    }
+
+    function loadMemberGrants(memberId) {
+        var base = Object.assign({}, defaultByMember[memberId] || {});
+        try {
+            var stored = JSON.parse(localStorage.getItem(storageKey(memberId)) || '{}');
+            return Object.assign(base, stored);
+        } catch (e) {
+            return base;
+        }
+    }
+
+    function fichaUrl(fichaId) {
+        return fichaUrlTpl.replace('/0', '/' + String(fichaId));
+    }
+
+    function saveMemberGrants(memberId, grantsMap) {
+        localStorage.setItem(storageKey(memberId), JSON.stringify(grantsMap));
+        updateGrantCount(memberId);
+        showSaved();
+    }
+
+    function saveMemberGrant(memberId, grantKey, value) {
+        var data = loadMemberGrants(memberId);
+        if (value) {
+            data[grantKey] = value;
+        } else {
+            delete data[grantKey];
+        }
+        saveMemberGrants(memberId, data);
+    }
+
+    function applyHubGrants(memberId, hubScope, value) {
+        var data = loadMemberGrants(memberId);
+        var hub = allHubs.find(function (h) { return h.scope === hubScope; });
+        if (!hub) return;
+        hub.products.forEach(function (product) {
+            var key = hubScope + ':' + product.id;
+            if (value) {
+                data[key] = value;
+            } else {
+                delete data[key];
+            }
+        });
+        saveMemberGrants(memberId, data);
+    }
+
+    function applyAllMembersGrants(value) {
+        members.forEach(function (m) {
+            var data = loadMemberGrants(m.id);
+            allHubs.forEach(function (hub) {
+                hub.products.forEach(function (product) {
+                    var key = hub.scope + ':' + product.id;
+                    if (value) { data[key] = value; } else { delete data[key]; }
+                });
+            });
+            saveMemberGrants(m.id, data);
+        });
+    }
+
+    function applyMemberAllGrants(memberId, value) {
+        var data = loadMemberGrants(memberId);
+        allHubs.forEach(function (hub) {
+            hub.products.forEach(function (product) {
+                var key = hub.scope + ':' + product.id;
+                if (value) { data[key] = value; } else { delete data[key]; }
+            });
+        });
+        saveMemberGrants(memberId, data);
+    }
+    function countGrants(memberId) {
+        var grants = loadMemberGrants(memberId);
+        return Object.keys(grants).filter(function (k) { return grants[k]; }).length;
+    }
+
+    function updateGrantCount(memberId) {
+        var count = String(countGrants(memberId));
+        panel.querySelectorAll('[data-perm-count="' + memberId + '"]').forEach(function (el) {
+            el.textContent = count;
+        });
+    }
+
+    function showSaved() {
+        var status = panel.querySelector('[data-perm-status]');
+        if (!status) return;
+        status.hidden = false;
+        clearTimeout(status._t);
+        status._t = setTimeout(function () { status.hidden = true; }, 2200);
+    }
+
+    function profileMeta(id) {
+        if (!id) return { label: 'Sem acesso', class: 'none' };
+        var p = profiles.find(function (x) { return x.id === id; });
+        return p ? { label: p.label, class: p.class } : { label: id, class: 'default' };
+    }
+
+    function esc(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+
+    function closeOffcanvas() {
+        offcanvas.classList.remove('is-open');
+        offcanvas.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('perm-offcanvas-open');
+        activeMemberId = null;
+        closeAllPickers();
+    }
+
+    function openOffcanvas(memberId) {
+        var member = members.find(function (m) { return m.id === memberId; });
+        if (!member) return;
+        activeMemberId = memberId;
+        renderDrawer(member);
+        offcanvas.classList.add('is-open');
+        offcanvas.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('perm-offcanvas-open');
+    }
+
+    function handlePickerClick(e) {
+        var trigger = e.target.closest('[data-perm-picker-trigger]');
+        if (trigger && canEdit) {
+            e.stopPropagation();
+            var wrap = trigger.closest('.perm-picker-wrap');
+            var menu = wrap.querySelector('.perm-picker-menu');
+            var wasOpen = !menu.hidden;
+            closeAllPickers();
+            if (!wasOpen) {
+                menu.hidden = false;
+                trigger.classList.add('is-open');
+            }
+            return true;
+        }
+
+        var option = e.target.closest('.perm-picker-option');
+        if (option && canEdit && activeMemberId) {
+            e.stopPropagation();
+            var value = option.getAttribute('data-value');
+            var wrap = option.closest('.perm-picker-wrap');
+            var member = members.find(function (m) { return m.id === activeMemberId; });
+
+            if (wrap.hasAttribute('data-perm-bulk-hub')) {
+                applyHubGrants(activeMemberId, wrap.getAttribute('data-perm-bulk-hub'), value);
+            } else {
+                var row = option.closest('.perm-product-row');
+                if (row) {
+                    saveMemberGrant(activeMemberId, row.getAttribute('data-grant-key'), value);
+                }
+            }
+
+            if (member) renderDrawer(member);
+            return true;
+        }
+        return false;
+    }
+
+    function pickerHtml(value, attrs) {
+        var meta = profileMeta(value);
+        var extra = attrs || '';
+        var html = '<div class="perm-picker-wrap"' + extra + '>';
+        html += '<button type="button" class="perm-picker-trigger badge-perfil ' + meta.class + '"' +
+            (canEdit ? '' : ' disabled') +
+            ' data-perm-picker-trigger data-value="' + esc(value) + '">' +
+            esc(meta.label) + ' <i class="fas fa-chevron-down perm-picker-chevron"></i></button>';
+        if (canEdit) {
+            html += '<div class="perm-picker-menu" hidden>';
+            html += '<button type="button" class="perm-picker-option' + (value === '' ? ' is-active' : '') + '" data-value="">Sem acesso</button>';
+            profiles.forEach(function (p) {
+                html += '<button type="button" class="perm-picker-option badge-perfil ' + p.class +
+                    (value === p.id ? ' is-active' : '') + '" data-value="' + p.id + '">' + esc(p.label) + '</button>';
+            });
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function renderDrawer(member) {
+        var grants = loadMemberGrants(member.id);
+        var grantCount = countGrants(member.id);
+        var equipeHtml = (member.equipe && member.equipe !== '—')
+            ? '<span class="perm-profile-chip"><i class="fas fa-user-group"></i> ' + esc(member.equipe) + '</span>'
+            : '';
+        var cargoHtml = member.cargo
+            ? '<span class="perm-profile-chip"><i class="fas fa-briefcase"></i> ' + esc(member.cargo) + '</span>'
+            : '';
+        var viewMemberHtml = member.ficha_id
+            ? '<a href="' + esc(fichaUrl(member.ficha_id)) + '" class="perm-profile-view-btn btn-huplex-ghost btn-sm">' +
+                '<i class="fas fa-user"></i> Ver membro' +
+              '</a>'
+            : '';
+
+        drawerProfile.innerHTML =
+            '<div class="perm-profile-card">' +
+                '<div class="perm-profile-top">' +
+                    '<span class="permissions-avatar permissions-avatar--lg">' + esc(member.initials) + '</span>' +
+                    '<div class="perm-profile-identity">' +
+                        '<h2 class="perm-offcanvas-title" id="permOffcanvasTitle">' + esc(member.nome) + '</h2>' +
+                        '<p class="perm-offcanvas-email">' + esc(member.email) + '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="perm-profile-chips">' + cargoHtml + equipeHtml + '</div>' +
+                '<div class="perm-profile-tags">' +
+                    '<span class="badge-perfil ' + member.perfil_class + '">' + esc(member.perfil_label) + ' (global)</span>' +
+                    '<span class="perm-profile-grant-count">' + grantCount + ' permissões ativas</span>' +
+                '</div>' +
+                viewMemberHtml +
+            '</div>';
+
+        var html = '';
+        allHubs.forEach(function (hub) {
+            html += '<section class="perm-hub-block" data-hub-scope="' + esc(hub.scope) + '">';
+            html += '<div class="perm-hub-head">';
+            html += '<h3 class="perm-hub-title">' + esc(hub.label) + '</h3>';
+            if (canEdit) {
+                html += '<div class="perm-hub-bulk">';
+                html += '<span class="perm-hub-bulk-label">Aplicar neste hub</span>';
+                html += pickerHtml('', ' data-perm-bulk-hub="' + esc(hub.scope) + '"');
+                html += '</div>';
+            }
+            html += '</div>';
+            html += '<ul class="perm-product-list">';
+            hub.products.forEach(function (product) {
+                var grantKey = hub.scope + ':' + product.id;
+                var value = grants[grantKey] || '';
+                html += '<li class="perm-product-row" data-grant-key="' + esc(grantKey) + '">';
+                html += '<span class="perm-product-label">' + esc(product.label) + '</span>';
+                html += pickerHtml(value);
+                html += '</li>';
+            });
+            html += '</ul></section>';
+        });
+        drawerBody.innerHTML = html;
+    }
+
+    function closeAllPickers() {
+        panel.querySelectorAll('.perm-picker-menu').forEach(function (m) { m.hidden = true; });
+        panel.querySelectorAll('.perm-picker-trigger.is-open').forEach(function (b) { b.classList.remove('is-open'); });
+    }
+
+    panel.querySelectorAll('[data-perm-open]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            openOffcanvas(btn.getAttribute('data-member-id'));
+        });
+    });
+
+    panel.querySelectorAll('[data-perm-close]').forEach(function (el) {
+        el.addEventListener('click', closeOffcanvas);
+    });
+
+    var tagsModal = document.getElementById('{{ perm_tags_modal_id|e('js') }}');
+    if (tagsModal && tagsModal.parentElement !== document.body) {
+        document.body.appendChild(tagsModal);
+    }
+
+    function closeTagsModal(modal) {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.hidden = true;
+        document.body.classList.remove('perm-tags-modal-open');
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (offcanvas.classList.contains('is-open')) {
+            closeOffcanvas();
+            return;
+        }
+        if (tagsModal && tagsModal.classList.contains('is-open')) {
+            closeTagsModal(tagsModal);
+        }
+    });
+
+    offcanvas.addEventListener('click', function (e) {
+        handlePickerClick(e);
+    });
+
+    document.addEventListener('click', function () {
+        closeAllPickers();
+    });
+
+    members.forEach(function (m) { updateGrantCount(m.id); });
+
+    // ── Row pickers — "Definir todos" por membro ────────────────────────────
+    panel.querySelectorAll('[data-perm-row-picker]').forEach(function (wrap) {
+        var memberId = wrap.getAttribute('data-member-id');
+        var trigger  = wrap.querySelector('[data-perm-picker-trigger]');
+        var menu     = wrap.querySelector('.perm-picker-menu');
+
+        wrap.addEventListener('click', function (e) {
+            if (e.target.closest('[data-perm-picker-trigger]')) {
+                e.stopPropagation();
+                var wasOpen = !menu.hidden;
+                closeAllPickers();
+                if (!wasOpen) { menu.hidden = false; trigger.classList.add('is-open'); }
+                return;
+            }
+            var option = e.target.closest('.perm-picker-option');
+            if (option) {
+                e.stopPropagation();
+                var value = option.getAttribute('data-value');
+                applyMemberAllGrants(memberId, value);
+                // feedback visual no trigger
+                var meta = profileMeta(value);
+                trigger.className = 'perm-tags-btn badge-perfil ' + meta.class + ' perm-row-picker-applied';
+                trigger.innerHTML = '<i class="fas fa-tags"></i> ' + esc(meta.label) + ' <i class="fas fa-chevron-down perm-picker-chevron"></i>';
+                closeAllPickers();
+                setTimeout(function () {
+                    trigger.className = 'perm-tags-btn';
+                    trigger.innerHTML = '<i class="fas fa-tags"></i><span class="perm-tags-btn-label">Definir todos</span><i class="fas fa-chevron-down perm-picker-chevron"></i>';
+                }, 2000);
+            }
+        });
+    });
+    // ────────────────────────────────────────────────────────────────────────
+
+    panel.querySelectorAll('[data-perm-tags-modal-open]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (!tagsModal) return;
+            tagsModal.hidden = false;
+            tagsModal.setAttribute('aria-hidden', 'false');
+            tagsModal.classList.add('is-open');
+            document.body.classList.add('perm-tags-modal-open');
+        });
+    });
+
+    if (tagsModal) {
+        tagsModal.querySelectorAll('[data-perm-tags-modal-close]').forEach(function (el) {
+            el.addEventListener('click', function () { closeTagsModal(tagsModal); });
+        });
+    }
+})();
+</script>
+{% endif %}

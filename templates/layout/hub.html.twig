@@ -1,21 +1,82 @@
 {% extends 'base.html.twig' %}
 {% block page_toolbar_layout %}yes{% endblock %}
 {% block page_show_title %}{% endblock %}
+{% block permissions_scope %}{% endblock %}
 {% block content_lead %}
-<div class="page-lead-zone">
+{% set perm_scope = block('permissions_scope')|trim %}
+<div class="page-lead-zone{% if perm_scope %} page-lead-zone--hub-tabs{% endif %}">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: hub_page_title|default(''),
         search_placeholder: hub_search_placeholder|default('Buscar…'),
-        search_disabled: hub_search_disabled|default(true)
+        search_disabled: hub_search_disabled|default(true),
+        search_hidden: hub_search_hidden|default(true)
     } %}
         {% block toolbar_actions %}{% block hub_toolbar_actions %}{% endblock %}{% endblock %}
         {% block toolbar_filters %}{% block hub_toolbar_filters %}{% endblock %}{% endblock %}
+        {% block toolbar_subnav %}
+            {% if perm_scope %}
+                <div class="list-toolbar-subnav">
+                    <div class="hub-overview-tabs" data-hub-tabs role="tablist" aria-label="Visão do hub">
+                        <button type="button" class="hub-overview-tab hub-overview-tab--active" data-hub-tab="overview" role="tab" aria-selected="true">
+                            Visão geral
+                        </button>
+                        <button type="button" class="hub-overview-tab" data-hub-tab="permissions" role="tab" aria-selected="false">
+                            <i class="fas fa-shield-halved mr-1"></i> Permissões
+                        </button>
+                    </div>
+                </div>
+                <hr class="hub-toolbar-tabs-divider">
+            {% endif %}
+        {% endblock %}
     {% endembed %}
     {% block hub_kpis %}{% endblock %}
 </div>
 {% endblock %}
 {% block content %}
-<div class="page-body-inner">
-    {% block hub_content %}{% endblock %}
+{% set perm_scope = block('permissions_scope')|trim %}
+<div class="page-body-inner{% if perm_scope %} page-body-inner--hub-tabs{% endif %}">
+    <div class="hub-tab-panel hub-tab-panel--active" data-hub-panel="overview" role="tabpanel">
+        {% block hub_section_toolbar %}{% endblock %}
+        {% block hub_content %}{% endblock %}
+    </div>
+
+    {% if perm_scope %}
+        {% set permission_data = permissions_scope(perm_scope) %}
+        <div class="hub-tab-panel" data-hub-panel="permissions" role="tabpanel" hidden>
+            {% if permission_data %}
+                {% include 'components/permissions_panel.html.twig' with { permission_data: permission_data } %}
+            {% else %}
+                <div class="huplex-card">
+                    <p class="text-muted mb-0">Permissões indisponíveis para este escopo.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
 </div>
+
+{% if perm_scope %}
+<script>
+(function () {
+    var tabs = document.querySelector('.page-lead-zone--hub-tabs [data-hub-tabs]');
+    var root = document.querySelector('.page-body-inner--hub-tabs');
+    if (!tabs || !root) return;
+
+    tabs.querySelectorAll('[data-hub-tab]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var name = btn.getAttribute('data-hub-tab');
+            tabs.querySelectorAll('[data-hub-tab]').forEach(function (b) {
+                var active = b === btn;
+                b.classList.toggle('hub-overview-tab--active', active);
+                b.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            root.querySelectorAll('[data-hub-panel]').forEach(function (panel) {
+                var active = panel.getAttribute('data-hub-panel') === name;
+                panel.hidden = !active;
+                panel.classList.toggle('hub-tab-panel--active', active);
+            });
+        });
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

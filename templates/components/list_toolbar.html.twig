@@ -1,31 +1,52 @@
 {#
-  list_toolbar — ações à esquerda; filtros + busca à direita
+  list_toolbar — título no topo; ações/filtros/busca opcionais
+
+  Layout --page (page_title definido):
+    - Busca oculta no topo por padrão (use section_toolbar)
+    - Passe search_in_top: true para manter busca aqui (ex.: Notificações)
 
   Variáveis:
     page_title         (string, opt) layout --page (colado no topo, sem margens)
     search_placeholder (string)
     search_disabled    (bool)
+    search_hidden      (bool)  default: true em --page, exceto search_in_top
+    search_in_top      (bool)  força busca no topo mesmo em --page
+    filters_in_top     (bool)  exibe bloco de filtros no topo
+    actions_in_top     (bool)  default: false em --page (ações vão na section_toolbar)
 
   Blocks:
     toolbar_actions
     toolbar_filters
+    toolbar_subnav
 #}
-<div class="list-toolbar{% if page_title is defined and page_title %} list-toolbar--page{% else %} huplex-card mb-3{% endif %}">
+{% set _is_page = page_title is defined and page_title %}
+{% set _search_in_top = search_in_top|default(false) %}
+{% set _search_hidden = search_hidden is defined ? search_hidden : (_is_page and not _search_in_top) %}
+{% set _filters_in_top = filters_in_top|default(false) %}
+{% set _show_toolbar_end = _filters_in_top or not _search_hidden %}
+<div class="list-toolbar{% if _is_page %} list-toolbar--page{% else %} huplex-card mb-3{% endif %}">
     <div class="list-toolbar-main">
         <div class="list-toolbar-left">
-            {% if page_title is defined and page_title %}
+            {% if _is_page %}
                 <h1 class="list-toolbar-title">{{ page_title }}</h1>
             {% endif %}
-            <div class="list-toolbar-actions">
-                {% block toolbar_actions %}{% endblock %}
+            {% if not _is_page or actions_in_top|default(false) %}
+                <div class="list-toolbar-actions">
+                    {% block toolbar_actions %}{% endblock %}
+                </div>
+            {% endif %}
+        </div>
+        {% if _show_toolbar_end %}
+            <div class="list-toolbar-end">
+                {% block toolbar_filters %}{% endblock %}
+                {% if not _search_hidden %}
+                    {% include 'components/toolbar_search.html.twig' with {
+                        search_placeholder: search_placeholder|default('Buscar…'),
+                        search_disabled: search_disabled|default(false)
+                    } %}
+                {% endif %}
             </div>
-        </div>
-        <div class="list-toolbar-end">
-            {% block toolbar_filters %}{% endblock %}
-            {% include 'components/toolbar_search.html.twig' with {
-                search_placeholder: search_placeholder|default('Buscar…'),
-                search_disabled: search_disabled|default(false)
-            } %}
-        </div>
+        {% endif %}
     </div>
+    {% block toolbar_subnav %}{% endblock %}
 </div>

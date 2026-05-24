@@ -23,7 +23,8 @@
 <div class="page-lead-zone">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: m.nome,
-        search_disabled: true
+        search_disabled: true,
+        actions_in_top: true
     } %}
         {% block toolbar_actions %}
             <a href="{{ path('app_pessoas_membros') }}" class="btn-huplex-ghost btn-sm">
@@ -141,9 +142,7 @@
             <div class="d-flex flex-column gap-2">
                 {% for eq in m.equipes %}
                 <a href="{{ path('app_pessoas_equipes') }}" class="ficha-equipe-item text-decoration-none">
-                    <div class="member-avatar member-avatar--sm" style="width:32px;height:32px;min-width:32px;font-size:11px">
-                        {{ eq.nome|slice(0,2)|upper }}
-                    </div>
+                    {% include 'components/member_avatar.html.twig' with { nome: eq.nome, size: 'sm' } %}
                     <div>
                         <div class="ficha-equipe-nome">{{ eq.nome }}</div>
                         <div class="ficha-equipe-papel">{{ eq.papel }}</div>

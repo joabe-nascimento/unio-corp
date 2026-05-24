@@ -1,31 +1,8 @@
-﻿{% extends 'base.html.twig' %}
+{% extends 'layout/page_list.html.twig' %}
 {% block title %}Equipes{% endblock %}
-{% block page_toolbar_layout %}yes{% endblock %}
-{% block page_show_title %}{% endblock %}
-{% block content_lead %}
-<div class="page-lead-zone">
-    {% embed 'components/list_toolbar.html.twig' with {
-        page_title: 'Equipes',
-        search_placeholder: 'Buscar equipe por nome ou responsável…',
-        search_disabled: true
-    } %}
-        {% block toolbar_actions %}
-            {% if is_granted('ROLE_GESTOR_EQUIPE') %}
-            <a href="{{ path('app_pessoas_equipe_nova') }}" class="btn-huplex">
-                <i class="fas fa-plus"></i> Nova Equipe
-            </a>
-            {% endif %}
-        {% endblock %}
-        {% block toolbar_filters %}
-            {% include 'components/filter_group.html.twig' with {
-                label: 'Área',
-                name: 'area',
-                disabled: true,
-                options: ['Todas', 'Tecnologia', 'Engenharia', 'Design', 'Gestão']
-            } %}
-        {% endblock %}
-    {% endembed %}
+{% set page_list_title = 'Equipes' %}
 
+{% block page_list_kpis %}
     <div class="page-lead-kpis">
         {% include 'components/kpi_row.html.twig' with { items: [
             { value: '4',  label: 'Equipes',          sub: 'Formadas' },
@@ -34,16 +11,30 @@
             { value: '0',  label: 'Sem equipe',       sub: 'Membros a alocar' },
         ], mb: 'mb-0' } %}
     </div>
-</div>
 {% endblock %}
-{% block content %}
 
+{% block page_list_section_toolbar %}
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: is_granted('ROLE_GESTOR_EQUIPE') ? 'Nova Equipe' : '',
+    btn_href: path('app_pessoas_equipe_nova'),
+    btn_icon: 'fa-plus',
+    search_in_section: true,
+    search_placeholder: 'Buscar equipe por nome ou responsável…',
+    search_disabled: true
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Área',
+            name: 'area',
+            disabled: true,
+            options: ['Todas', 'Tecnologia', 'Engenharia', 'Design', 'Gestão']
+        } %}
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block page_list_content %}
 <div class="huplex-card">
-    {% include 'components/section_header.html.twig' with {
-        title: 'Todas as Equipes',
-        subtitle: '4 equipes ativas na organização'
-    } %}
-
     <div class="ficha-stub-banner mb-3">
         <i class="fas fa-circle-info"></i>
         Dados fictícios de demonstração — clique em qualquer equipe para ver os detalhes e membros.
