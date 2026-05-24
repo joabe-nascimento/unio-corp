@@ -3,6 +3,7 @@
 {% block permissions_scope %}hub_talentos{% endblock %}
 {% set hub_page_title = 'Hub de Talentos' %}
 {% block hub_kpis %}
+{% if scope_has_products('hub_talentos') %}
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
         { value: '0', label: 'Banco de Talentos', sub: 'Cadastrados' },
@@ -11,9 +12,12 @@
         { value: '0', label: 'Mentorias Ativas',  sub: 'Em andamento' },
     ], mb: 'mb-0' } %}
 </div>
+{% endif %}
 {% endblock %}
 {% block hub_content %}
+{% if scope_has_products('hub_talentos') %}
 <div class="row">
+    {% if product_grant('hub_talentos', 'banco') %}
     <div class="col-md-6 mb-4 d-flex">
         <div class="huplex-card flex-fill">
             {% include 'components/section_header.html.twig' with {
@@ -31,6 +35,8 @@
             } %}
         </div>
     </div>
+    {% endif %}
+    {% if product_grant('hub_talentos', 'trilhas') %}
     <div class="col-md-6 mb-4 d-flex">
         <div class="huplex-card flex-fill">
             {% include 'components/section_header.html.twig' with {
@@ -48,5 +54,13 @@
             } %}
         </div>
     </div>
+    {% endif %}
 </div>
+{% else %}
+    {% include 'components/hub_scope_empty.html.twig' with {
+        icon: 'fa-star',
+        title: 'Nenhuma área disponível em Talentos',
+        text: 'Você ainda não tem permissão para acessar Banco de Talentos, Vagas ou Trilhas. Solicite ao gestor da equipe.'
+    } %}
+{% endif %}
 {% endblock %}

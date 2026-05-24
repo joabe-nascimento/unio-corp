@@ -50,7 +50,7 @@ final class ProductGrantVoter extends Voter
         );
 
         if (!$grant) {
-            if ($this->grantRepo->userHasAnyGrant($user)) {
+            if ($this->grantRepo->userHasConfiguredMatrix($user) || $this->grantRepo->userHasAnyGrant($user)) {
                 return false;
             }
 

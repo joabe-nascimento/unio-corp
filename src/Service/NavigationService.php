@@ -3,13 +3,25 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Security\ProductGrantAccess;
 
 /**
- * Menu e layout por perfil principal (não pela hierarquia Symfony).
+ * Menu e layout por perfil principal + grants granulares quando existem no banco.
  * TENANT = operador da plataforma, acesso total (hubs + plataforma).
  */
 class NavigationService
 {
+    /** @var list<string> */
+    private const PROFILES_HUB_OPERACOES = ['SUPERVISOR_EQUIPE', 'SUPERVISOR', 'GESTOR_EQUIPE', 'GESTOR'];
+
+    /** @var list<string> */
+    private const PROFILES_GESTOR_HUBS = ['GESTOR_EQUIPE', 'GESTOR'];
+
+    public function __construct(
+        private ProductGrantAccess $grants,
+    ) {
+    }
+
     public function isTenant(User $user): bool
     {
         return $user->getPerfil() === 'TENANT';
@@ -28,15 +40,47 @@ class NavigationService
         };
     }
 
+    public function showModuloRh(User $user): bool
+    {
+        if ($this->isTenant($user)) {
+            return true;
+        }
+
+        if ($this->grants->usesConfiguredMatrix($user)) {
+            return $this->grants->canViewAnyProductInScope($user, 'product_rh');
+        }
+
+        $hasGrant = $this->grants->canView($user, 'hub_operacoes', 'rh')
+            || $this->grants->canViewAnyProductInScope($user, 'product_rh');
+
+        return $this->resolveModuleVisibility($user, $hasGrant, self::PROFILES_HUB_OPERACOES);
+    }
+
+    public function showModuloPessoas(User $user): bool
+    {
+        if ($this->isTenant($user)) {
+            return true;
+        }
+
+        if ($this->grants->usesConfiguredMatrix($user)) {
+            return $this->grants->canViewAnyProductInScope($user, 'product_pessoas');
+        }
+
+        $hasGrant = $this->grants->canView($user, 'hub_operacoes', 'pessoas')
+            || $this->grants->canViewAnyProductInScope($user, 'product_pessoas');
+
+        return $this->resolveModuleVisibility($user, $hasGrant, self::PROFILES_HUB_OPERACOES);
+    }
+
     public function showHubOperacoes(User $user): bool
     {
         if ($this->isTenant($user)) {
             return true;
         }
 
-        return \in_array($user->getPerfil(), [
-            'SUPERVISOR_EQUIPE', 'SUPERVISOR', 'GESTOR_EQUIPE', 'GESTOR',
-        ], true);
+        return $this->showModuloRh($user)
+            || $this->showModuloPessoas($user)
+            || $this->showModuloEngenharia($user);
     }
 
     public function showHubTalentos(User $user): bool
@@ -45,7 +89,9 @@ class NavigationService
             return true;
         }
 
-        return \in_array($user->getPerfil(), ['GESTOR_EQUIPE', 'GESTOR'], true);
+        $hasGrant = $this->grants->canViewAnyProductInScope($user, 'hub_talentos');
+
+        return $this->resolveModuleVisibility($user, $hasGrant, self::PROFILES_GESTOR_HUBS);
     }
 
     public function showHubMaturidade(User $user): bool
@@ -54,27 +100,53 @@ class NavigationService
             return true;
         }
 
-        return \in_array($user->getPerfil(), ['GESTOR_EQUIPE', 'GESTOR'], true);
+        $hasGrant = $this->grants->canViewAnyProductInScope($user, 'hub_maturidade')
+            || $this->showModuloPublicidade($user);
+
+        if ($this->grants->usesGranularGrants($user)) {
+            return $hasGrant;
+        }
+
+        return \in_array($user->getPerfil(), self::PROFILES_GESTOR_HUBS, true);
     }
 
-    /** Obras e projetos — dentro do Hub Operações (gestor+) */
     public function showModuloEngenharia(User $user): bool
     {
         if ($this->isTenant($user)) {
             return true;
         }
 
-        return \in_array($user->getPerfil(), ['GESTOR_EQUIPE', 'GESTOR'], true);
+        if ($this->grants->usesConfiguredMatrix($user)) {
+            return $this->grants->canViewAnyProductInScope($user, 'product_engenharia');
+        }
+
+        $hasGrant = $this->grants->canView($user, 'hub_operacoes', 'engenharia')
+            || $this->grants->canViewAnyProductInScope($user, 'product_engenharia');
+
+        return $this->resolveModuleVisibility($user, $hasGrant, self::PROFILES_GESTOR_HUBS);
     }
 
-    /** Marca e comunicação — dentro do Hub de Maturidade (gestor+) */
     public function showModuloPublicidade(User $user): bool
     {
         if ($this->isTenant($user)) {
             return true;
         }
 
-        return \in_array($user->getPerfil(), ['GESTOR_EQUIPE', 'GESTOR'], true);
+        $hasGrant = $this->grants->canViewAnyProductInScope($user, 'product_publicidade');
+
+        return $this->resolveModuleVisibility($user, $hasGrant, self::PROFILES_GESTOR_HUBS);
+    }
+
+    /**
+     * @param list<string> $legacyProfiles
+     */
+    private function resolveModuleVisibility(User $user, bool $hasGrant, array $legacyProfiles): bool
+    {
+        if ($this->grants->usesGranularGrants($user)) {
+            return $hasGrant;
+        }
+
+        return \in_array($user->getPerfil(), $legacyProfiles, true);
     }
 
     public function hasAnyOperationalHub(User $user): bool
@@ -156,6 +228,8 @@ class NavigationService
             'nav_show_hub_operacoes' => $this->showHubOperacoes($user),
             'nav_show_hub_talentos' => $this->showHubTalentos($user),
             'nav_show_hub_maturidade' => $this->showHubMaturidade($user),
+            'nav_show_modulo_rh' => $this->showModuloRh($user),
+            'nav_show_modulo_pessoas' => $this->showModuloPessoas($user),
             'nav_show_modulo_engenharia' => $this->showModuloEngenharia($user),
             'nav_show_modulo_publicidade' => $this->showModuloPublicidade($user),
             'nav_show_plataforma' => $showPlataforma,

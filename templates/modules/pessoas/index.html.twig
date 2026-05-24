@@ -1,41 +1,65 @@
-{% extends 'layout/hub.html.twig' %}
+﻿{% extends 'layout/hub.html.twig' %}
 {% block title %}Gestão de Pessoas{% endblock %}
 {% block permissions_scope %}product_pessoas{% endblock %}
 {% set hub_page_title = 'Gestão de Pessoas' %}
 {% block hub_kpis %}
+{% if scope_has_products('product_pessoas') %}
 <div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: '0', label: 'Total de Membros',  sub: 'Cadastrados',    route: 'app_pessoas_membros' },
-        { value: '0', label: 'Equipes Ativas',    sub: 'Formadas',       route: 'app_pessoas_equipes' },
-        { value: '0', label: 'Cargos',            sub: 'Registrados',    route: 'app_pessoas_cargos' },
-        { value: '0', label: 'Avaliações',        sub: 'Realizadas',     route: 'app_pessoas_avaliacao' },
-    ], mb: 'mb-0' } %}
+    {% set kpi_items = [] %}
+    {% if product_grant('product_pessoas', 'membros') %}
+        {% set kpi_items = kpi_items|merge([{ value: '0', label: 'Total de Membros', sub: 'Cadastrados', route: 'app_pessoas_membros' }]) %}
+    {% endif %}
+    {% if product_grant('product_pessoas', 'equipes') %}
+        {% set kpi_items = kpi_items|merge([{ value: '0', label: 'Equipes Ativas', sub: 'Formadas', route: 'app_pessoas_equipes' }]) %}
+    {% endif %}
+    {% if product_grant('product_pessoas', 'cargos') %}
+        {% set kpi_items = kpi_items|merge([{ value: '0', label: 'Cargos', sub: 'Registrados', route: 'app_pessoas_cargos' }]) %}
+    {% endif %}
+    {% if product_grant('product_pessoas', 'avaliacao') %}
+        {% set kpi_items = kpi_items|merge([{ value: '0', label: 'Avaliações', sub: 'Realizadas', route: 'app_pessoas_avaliacao' }]) %}
+    {% endif %}
+    {% if kpi_items|length > 0 %}
+        {% include 'components/kpi_row.html.twig' with { items: kpi_items, mb: 'mb-0' } %}
+    {% endif %}
 </div>
+{% endif %}
 {% endblock %}
 {% block hub_content %}
+{% if scope_has_products('product_pessoas') %}
 <div class="row">
+    {% if product_grant('product_pessoas', 'membros') %}
+    {% set membros_links = [
+        { label: 'Ver todos', route: 'app_pessoas_membros' },
+        { label: 'Abrir módulo', route: 'app_pessoas_membros', primary: true },
+    ] %}
+    {% if grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') %}
+        {% set membros_links = [{ label: 'Adicionar', route: 'app_pessoas_membro_novo' }]|merge(membros_links) %}
+    {% endif %}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Membros',
             subtitle: 'Fichas técnicas, perfis, habilidades e histórico',
-            links: [
-                { label: 'Ver todos',       route: 'app_pessoas_membros' },
-                { label: 'Adicionar',       route: 'app_pessoas_membro_novo' },
-                { label: 'Abrir módulo',    route: 'app_pessoas_membros', primary: true },
-            ]
+            links: membros_links
         } %}
     </div>
+    {% endif %}
+    {% if product_grant('product_pessoas', 'equipes') %}
+    {% set equipes_links = [
+        { label: 'Ver equipes', route: 'app_pessoas_equipes' },
+        { label: 'Abrir módulo', route: 'app_pessoas_equipes', primary: true },
+    ] %}
+    {% if grant_at_least('product_pessoas', 'equipes', 'GESTOR_EQUIPE') %}
+        {% set equipes_links = [{ label: 'Nova equipe', route: 'app_pessoas_equipe_nova' }]|merge(equipes_links) %}
+    {% endif %}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Equipes',
             subtitle: 'Criação e gestão de times, líderes e composição',
-            links: [
-                { label: 'Ver equipes',     route: 'app_pessoas_equipes' },
-                { label: 'Nova equipe',     route: 'app_pessoas_equipe_nova' },
-                { label: 'Abrir módulo',    route: 'app_pessoas_equipes', primary: true },
-            ]
+            links: equipes_links
         } %}
     </div>
+    {% endif %}
+    {% if product_grant('product_pessoas', 'cargos') %}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Cargos',
@@ -46,6 +70,8 @@
             ]
         } %}
     </div>
+    {% endif %}
+    {% if product_grant('product_pessoas', 'membros') %}
     <div class="col-md-6 mb-4 d-flex">
         {% include 'components/module_card.html.twig' with {
             title: 'Organograma',
@@ -56,5 +82,13 @@
             ]
         } %}
     </div>
+    {% endif %}
 </div>
+{% else %}
+    {% include 'components/hub_scope_empty.html.twig' with {
+        icon: 'fa-people-group',
+        title: 'Nenhuma área disponível em Pessoas',
+        text: 'Você ainda não tem permissão para acessar Membros, Equipes ou outras áreas deste módulo. Solicite ao gestor da equipe.'
+    } %}
+{% endif %}
 {% endblock %}

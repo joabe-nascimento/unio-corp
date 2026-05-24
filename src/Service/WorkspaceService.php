@@ -81,19 +81,31 @@ class WorkspaceService
     /** @param list<Empresa> $available */
     private function resolveActiveEmpresa(User $user, array $available): ?Empresa
     {
-        $session = $this->requestStack->getSession();
-        $id = $session->get(self::SESSION_KEY);
+        $request = $this->requestStack->getCurrentRequest();
+        $session = null;
 
-        if ($id) {
-            $empresa = $this->empresaRepo->find($id);
-            if ($empresa && $this->canAccess($user, $empresa)) {
-                return $empresa;
+        if ($request?->hasSession()) {
+            $session = $request->getSession();
+        } elseif ($request?->hasPreviousSession()) {
+            $session = $request->getSession();
+        }
+
+        if ($session !== null) {
+            $id = $session->get(self::SESSION_KEY);
+
+            if ($id) {
+                $empresa = $this->empresaRepo->find($id);
+                if ($empresa && $this->canAccess($user, $empresa)) {
+                    return $empresa;
+                }
             }
         }
 
         if (!empty($available)) {
             $empresa = $available[0];
-            $session->set(self::SESSION_KEY, $empresa->getId());
+            if ($session !== null) {
+                $session->set(self::SESSION_KEY, $empresa->getId());
+            }
 
             return $empresa;
         }
