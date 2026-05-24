@@ -4,9 +4,12 @@ namespace App\Service;
 
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Entity\UserProductGrant;
 use App\Repository\UserProductGrantRepository;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * Escopos de permissão por hub/produto.
@@ -254,6 +257,7 @@ class PermissionService
         private UserProductGrantRepository $grantRepo,
         private WorkspaceService $workspace,
         private Security $security,
+        private EntityManagerInterface $em,
     ) {
     }
 
@@ -340,6 +344,81 @@ class PermissionService
         }
 
         return self::DEFAULT_GRANTS[$scope][$memberId] ?? [];
+    }
+
+    /**
+     * Persiste grants granulares de um membro (substitui todos os registros do usuário).
+     *
+     * @param array<string, string> $grantsMap keys "scope:productId" => perfil_id (vazio = sem acesso)
+     *
+     * @return int número de grants gravados
+     */
+    public function saveMemberGrants(string $memberId, array $grantsMap, User $editor): int
+    {
+        if (!$editor->isGestorEquipe() && !$editor->isTenant()) {
+            throw new AccessDeniedException('Sem permissão para alterar grants.');
+        }
+
+        $empresa = $this->workspace->getActiveEmpresa($editor);
+        $target = $this->resolveUserForMemberId($memberId, $empresa);
+        if (!$target) {
+            throw new \InvalidArgumentException('Membro não encontrado nesta empresa.');
+        }
+
+        if ($target->getPerfil() === 'TENANT') {
+            throw new \InvalidArgumentException('Permissões de tenant não são editáveis.');
+        }
+
+        foreach ($this->grantRepo->findBy(['user' => $target]) as $existing) {
+            $this->em->remove($existing);
+        }
+
+        $saved = 0;
+        foreach ($grantsMap as $key => $perfilGrant) {
+            if (!$perfilGrant) {
+                continue;
+            }
+
+            if (!\is_string($key) || !str_contains($key, ':')) {
+                continue;
+            }
+
+            [$scope, $productId] = explode(':', $key, 2);
+            if (!$this->isValidGrantTarget($scope, $productId)) {
+                continue;
+            }
+
+            if (!\in_array($perfilGrant, array_column(self::ASSIGNABLE_PROFILES, 'id'), true)) {
+                continue;
+            }
+
+            $grant = (new UserProductGrant())
+                ->setUser($target)
+                ->setScope($scope)
+                ->setProductId($productId)
+                ->setPerfilGrant($perfilGrant);
+            $this->em->persist($grant);
+            ++$saved;
+        }
+
+        $this->em->flush();
+
+        return $saved;
+    }
+
+    private function isValidGrantTarget(string $scope, string $productId): bool
+    {
+        if (!isset(self::SCOPES[$scope])) {
+            return false;
+        }
+
+        foreach (self::SCOPES[$scope]['products'] as $product) {
+            if ($product['id'] === $productId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static function memberIdFromEmail(string $email): string
