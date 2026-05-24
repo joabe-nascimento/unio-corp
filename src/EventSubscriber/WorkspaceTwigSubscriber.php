@@ -3,6 +3,7 @@
 namespace App\EventSubscriber;
 
 use App\Entity\User;
+use App\Service\ChatMockService;
 use App\Service\NavigationService;
 use App\Service\NotificationMockService;
 use App\Service\WorkspaceService;
@@ -27,6 +28,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private WorkspaceService $workspaceService,
         private NavigationService $navigation,
         private NotificationMockService $notifications,
+        private ChatMockService $chat,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -60,6 +62,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         }
 
         $this->twig->addGlobal('nav_notifications_unread', $this->notifications->getUnreadCount());
+        $this->twig->addGlobal('nav_chat_unread', $this->chat->getUnreadCount());
     }
 
     private function shouldSkip(?string $route): bool
