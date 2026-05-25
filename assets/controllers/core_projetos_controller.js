@@ -1,8 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 /**
- * Projetos e Metas — offcanvas de tarefas + integração com dev-kanban-board.
- * Abas navegam via Turbo Frame (links em core_projetos_tabs.html.twig).
+ * Projetos e Metas — abas client-side + offcanvas + dev-kanban-board.
  */
 export default class extends Controller {
     static outlets = ['kanbanBoard'];
@@ -14,17 +13,76 @@ export default class extends Controller {
     connect() {
         this.boundKanbanEdit = this.onKanbanEdit.bind(this);
         this.boundOpenTarefa = this.openTarefaOffcanvas.bind(this);
+        this.boundTabClick = this.onTabClick.bind(this);
         this.element.addEventListener('dev-kanban:edit', this.boundKanbanEdit);
         document.addEventListener('click', this.boundOpenTarefa, true);
+        document.addEventListener('click', this.boundTabClick);
         this.initOffcanvasMetaFilters();
-        if (this.initialViewValue === 'kanban') {
-            this.kanbanBoardOutlets.forEach((outlet) => outlet.refresh());
-        }
+        this.activateTab(this.initialViewValue);
     }
 
     disconnect() {
         this.element.removeEventListener('dev-kanban:edit', this.boundKanbanEdit);
         document.removeEventListener('click', this.boundOpenTarefa, true);
+        document.removeEventListener('click', this.boundTabClick);
+    }
+
+    onTabClick(event) {
+        const btn = event.target.closest('[data-hub-tab]');
+        if (!btn || !btn.closest('.page-lead-zone--hub-tabs [data-hub-tabs]')) {
+            return;
+        }
+        event.preventDefault();
+        const name = btn.getAttribute('data-hub-tab');
+        if (name) {
+            this.activateTab(name);
+        }
+    }
+
+    activateTab(name) {
+        const tabsRoot = document.querySelector('.page-lead-zone--hub-tabs [data-hub-tabs]');
+        if (tabsRoot) {
+            tabsRoot.querySelectorAll('[data-hub-tab]').forEach((btn) => {
+                const active = btn.getAttribute('data-hub-tab') === name;
+                btn.classList.toggle('hub-overview-tab--active', active);
+                btn.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+        }
+
+        this.element.querySelectorAll('[data-hub-panel]').forEach((panel) => {
+            const active = panel.getAttribute('data-hub-panel') === name;
+            panel.hidden = !active;
+            panel.classList.toggle('hub-tab-panel--active', active);
+        });
+
+        this.element.querySelectorAll('[data-core-toolbar-for]').forEach((el) => {
+            const show = el.getAttribute('data-core-toolbar-for') === name;
+            el.hidden = !show;
+            el.style.display = show ? '' : 'none';
+        });
+
+        if (name === 'permissions') {
+            document.querySelectorAll('.core-projetos-toolbar').forEach((el) => {
+                el.hidden = true;
+                el.style.display = 'none';
+            });
+        }
+
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', name);
+            const projeto = url.searchParams.get('projeto');
+            if (name !== 'kanban' && projeto) {
+                url.searchParams.delete('projeto');
+            }
+            window.history.replaceState({}, '', url.pathname + url.search);
+        } catch {
+            /* ignore */
+        }
+
+        if (name === 'kanban') {
+            this.kanbanBoardOutlets.forEach((outlet) => outlet.refresh());
+        }
     }
 
     openTarefaOffcanvas(event) {

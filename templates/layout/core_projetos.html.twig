@@ -23,8 +23,7 @@
             <div class="list-toolbar-subnav">
                 {% include 'components/core_projetos_tabs.html.twig' with {
                     active_view: active_view|default('kanban'),
-                    perm_scope: perm_scope,
-                    projeto_filter: projeto_filter|default(null)
+                    perm_scope: perm_scope
                 } %}
             </div>
             <hr class="hub-toolbar-tabs-divider">
@@ -36,40 +35,38 @@
 
 {% block content %}
 {% set _initial = active_view|default('kanban') %}
-<turbo-frame id="core-projetos-frame" data-turbo-action="advance">
-    <div class="page-body-inner page-body-inner--hub-tabs"
-         id="core-projetos-root"
-         data-core-projetos-root
-         data-controller="core-projetos"
-         data-core-projetos-initial-view-value="{{ _initial }}">
+<div class="page-body-inner page-body-inner--hub-tabs"
+     id="core-projetos-root"
+     data-core-projetos-root
+     data-controller="core-projetos"
+     data-core-projetos-initial-view-value="{{ _initial }}">
 
-        {% block core_projetos_section_toolbar %}{% endblock %}
+    {% block core_projetos_section_toolbar %}{% endblock %}
 
-        <div class="hub-tab-panel{% if _initial == 'kanban' %} hub-tab-panel--active{% endif %}" data-hub-panel="kanban" role="tabpanel"{% if _initial != 'kanban' %} hidden{% endif %}>
-            {% block core_panel_kanban %}{% endblock %}
-        </div>
-        <div class="hub-tab-panel{% if _initial == 'lista' %} hub-tab-panel--active{% endif %}" data-hub-panel="lista" role="tabpanel"{% if _initial != 'lista' %} hidden{% endif %}>
-            {% block core_panel_lista %}{% endblock %}
-        </div>
-        <div class="hub-tab-panel{% if _initial == 'metas' %} hub-tab-panel--active{% endif %}" data-hub-panel="metas" role="tabpanel"{% if _initial != 'metas' %} hidden{% endif %}>
-            {% block core_panel_metas %}{% endblock %}
-        </div>
-
-        {% set perm_scope = block('permissions_scope')|trim %}
-        {% if perm_scope and can_manage_permissions(perm_scope) %}
-            {% set permission_data = permissions_scope(perm_scope) %}
-            <div class="hub-tab-panel{% if _initial == 'permissions' %} hub-tab-panel--active{% endif %}" data-hub-panel="permissions" role="tabpanel"{% if _initial != 'permissions' %} hidden{% endif %}>
-                {% if permission_data %}
-                    {% include 'components/permissions_panel.html.twig' with { permission_data: permission_data } %}
-                {% else %}
-                    <div class="huplex-card">
-                        <p class="text-muted mb-0">Permissões indisponíveis para este escopo.</p>
-                    </div>
-                {% endif %}
-            </div>
-        {% endif %}
+    <div class="hub-tab-panel{% if _initial == 'kanban' %} hub-tab-panel--active{% endif %}" data-hub-panel="kanban" role="tabpanel"{% if _initial != 'kanban' %} hidden{% endif %}>
+        {% block core_panel_kanban %}{% endblock %}
     </div>
-</turbo-frame>
+    <div class="hub-tab-panel{% if _initial == 'lista' %} hub-tab-panel--active{% endif %}" data-hub-panel="lista" role="tabpanel"{% if _initial != 'lista' %} hidden{% endif %}>
+        {% block core_panel_lista %}{% endblock %}
+    </div>
+    <div class="hub-tab-panel{% if _initial == 'metas' %} hub-tab-panel--active{% endif %}" data-hub-panel="metas" role="tabpanel"{% if _initial != 'metas' %} hidden{% endif %}>
+        {% block core_panel_metas %}{% endblock %}
+    </div>
+
+    {% set perm_scope = block('permissions_scope')|trim %}
+    {% if perm_scope and can_manage_permissions(perm_scope) %}
+        {% set permission_data = permissions_scope(perm_scope) %}
+        <div class="hub-tab-panel{% if _initial == 'permissions' %} hub-tab-panel--active{% endif %}" data-hub-panel="permissions" role="tabpanel"{% if _initial != 'permissions' %} hidden{% endif %}>
+            {% if permission_data %}
+                {% include 'components/permissions_panel.html.twig' with { permission_data: permission_data } %}
+            {% else %}
+                <div class="huplex-card">
+                    <p class="text-muted mb-0">Permissões indisponíveis para este escopo.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block javascripts %}
