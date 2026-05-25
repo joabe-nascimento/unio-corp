@@ -466,10 +466,10 @@
             var wrap = trigger.closest('.perm-picker-wrap');
             var menu = wrap.querySelector('.perm-picker-menu');
             var wasOpen = !menu.hidden;
-            closeAllPickers();
             if (!wasOpen) {
-                menu.hidden = false;
-                trigger.classList.add('is-open');
+                openPickerMenu(wrap);
+            } else {
+                closeAllPickers();
             }
             return true;
         }
@@ -572,9 +572,45 @@
         drawerBody.innerHTML = html;
     }
 
+    function positionPickerMenu(menu, trigger) {
+        menu.classList.remove('is-drop-up');
+        if (trigger.closest('[data-perm-row-picker]')) {
+            return;
+        }
+        menu.hidden = false;
+        var menuHeight = menu.offsetHeight;
+        var gap = 8;
+        var rect = trigger.getBoundingClientRect();
+        var spaceBelow = window.innerHeight - rect.bottom - gap;
+        var spaceAbove = rect.top - gap;
+        if (menuHeight > spaceBelow && spaceAbove >= menuHeight) {
+            menu.classList.add('is-drop-up');
+        } else if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+            menu.classList.add('is-drop-up');
+        }
+        menu.hidden = true;
+    }
+
+    function openPickerMenu(wrap) {
+        var trigger = wrap.querySelector('[data-perm-picker-trigger]');
+        var menu = wrap.querySelector('.perm-picker-menu');
+        if (!trigger || !menu) {
+            return;
+        }
+        closeAllPickers();
+        positionPickerMenu(menu, trigger);
+        menu.hidden = false;
+        trigger.classList.add('is-open');
+    }
+
     function closeAllPickers() {
-        panel.querySelectorAll('.perm-picker-menu').forEach(function (m) { m.hidden = true; });
-        panel.querySelectorAll('.perm-picker-trigger.is-open').forEach(function (b) { b.classList.remove('is-open'); });
+        panel.querySelectorAll('.perm-picker-menu').forEach(function (m) {
+            m.hidden = true;
+            m.classList.remove('is-drop-up');
+        });
+        panel.querySelectorAll('.perm-picker-trigger.is-open, [data-perm-picker-trigger].is-open').forEach(function (b) {
+            b.classList.remove('is-open');
+        });
     }
 
     panel.querySelectorAll('[data-perm-open]').forEach(function (btn) {
@@ -630,8 +666,11 @@
             if (e.target.closest('[data-perm-picker-trigger]')) {
                 e.stopPropagation();
                 var wasOpen = !menu.hidden;
-                closeAllPickers();
-                if (!wasOpen) { menu.hidden = false; trigger.classList.add('is-open'); }
+                if (!wasOpen) {
+                    openPickerMenu(wrap);
+                } else {
+                    closeAllPickers();
+                }
                 return;
             }
             var option = e.target.closest('.perm-picker-option');
