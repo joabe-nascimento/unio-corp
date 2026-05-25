@@ -6,6 +6,8 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static outlets = ['kanbanBoard'];
 
+    static targets = ['projetoFilter', 'kanbanFilterEmpty'];
+
     static values = {
         initialView: { type: String, default: 'kanban' },
     };
@@ -19,12 +21,44 @@ export default class extends Controller {
         document.addEventListener('click', this.boundTabClick);
         this.initOffcanvasMetaFilters();
         this.activateTab(this.initialViewValue);
+        if (this.hasProjetoFilterTarget) {
+            this.filterKanban();
+        }
     }
 
     disconnect() {
         this.element.removeEventListener('dev-kanban:edit', this.boundKanbanEdit);
         document.removeEventListener('click', this.boundOpenTarefa, true);
         document.removeEventListener('click', this.boundTabClick);
+    }
+
+    filterKanban() {
+        if (!this.hasProjetoFilterTarget) {
+            return;
+        }
+        const projetoId = this.projetoFilterTarget.value;
+        let visible = 0;
+        this.kanbanBoardOutlets.forEach((board) => {
+            visible = board.applyProjetoFilter(projetoId);
+        });
+
+        if (this.hasKanbanFilterEmptyTarget) {
+            const showEmpty = projetoId !== '' && visible === 0;
+            this.kanbanFilterEmptyTarget.hidden = !showEmpty;
+        }
+
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', 'kanban');
+            if (projetoId) {
+                url.searchParams.set('projeto', projetoId);
+            } else {
+                url.searchParams.delete('projeto');
+            }
+            window.history.replaceState({}, '', url.pathname + url.search);
+        } catch {
+            /* ignore */
+        }
     }
 
     onTabClick(event) {

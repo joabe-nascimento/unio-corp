@@ -47,7 +47,7 @@ class DevProjetosController extends AbstractController
 
         $projetoFilter = (int) $request->query->get('projeto', 0);
         $projetoFilter = $projetoFilter > 0 ? $projetoFilter : null;
-        $tarefas = $this->tarefaRepo->findByEmpresa($empresa, $projetoFilter);
+        $tarefas = $this->tarefaRepo->findByEmpresa($empresa, null);
 
         $session = $request->getSession()->getFlashBag();
         $formFlash = $session->get('dev_projeto_form');
@@ -68,7 +68,7 @@ class DevProjetosController extends AbstractController
             'tarefa_form_rd' => $tarefaFormRd,
             'projetos' => $this->service->listProjetos($empresa),
             'metas' => $this->service->listMetas($empresa),
-            'kanban' => $this->service->kanban($empresa, $projetoFilter),
+            'kanban' => $this->service->kanban($empresa, null),
             'kanban_columns' => DevTarefa::KANBAN_COLUMNS,
             'projeto_filter' => $projetoFilter,
             'has_kanban_tasks' => $tarefas !== [],

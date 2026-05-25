@@ -20,6 +20,31 @@ export default class extends Controller {
     connect() {
         this.sortables = [];
         this.scheduleInitSortable();
+        this.applyProjetoFilter(this.projetoFilterValue);
+    }
+
+    /** Filtra cards por projeto sem recarregar a página. */
+    applyProjetoFilter(projetoId) {
+        const id = projetoId ? String(projetoId) : '';
+        this.projetoFilterValue = id;
+
+        this.element.querySelectorAll('.dev-kanban-card').forEach((card) => {
+            const match = !id || card.dataset.taskProjetoId === id;
+            card.classList.toggle('dev-kanban-card--hidden-filter', !match);
+        });
+
+        this.element.querySelectorAll('[data-kanban-add]').forEach((btn) => {
+            if (id) {
+                btn.setAttribute('data-kanban-projeto-id', id);
+            }
+        });
+
+        this.updateCounts();
+        return this.visibleCardCount();
+    }
+
+    visibleCardCount() {
+        return this.element.querySelectorAll('.dev-kanban-card:not(.dev-kanban-card--hidden-filter)').length;
     }
 
     scheduleInitSortable(attempt = 0) {
@@ -175,7 +200,9 @@ export default class extends Controller {
         this.countTargets.forEach((badge) => {
             const status = badge.dataset.kanbanCount;
             const col = this.element.querySelector(`[data-kanban-column="${status}"]`);
-            badge.textContent = col ? col.querySelectorAll('.dev-kanban-card').length : 0;
+            badge.textContent = col
+                ? col.querySelectorAll('.dev-kanban-card:not(.dev-kanban-card--hidden-filter)').length
+                : 0;
         });
     }
 

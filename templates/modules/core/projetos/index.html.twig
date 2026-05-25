@@ -20,16 +20,19 @@
         search_in_section: false
     } %}
         {% block section_toolbar_filters %}
-            <form method="get" class="d-flex align-items-center gap-2 mb-0" id="kanban-projeto-filter">
-                <input type="hidden" name="view" value="kanban">
+            <div class="d-flex align-items-center gap-2 mb-0" id="kanban-projeto-filter">
                 <label class="huplex-form-label mb-0 mr-2" for="projeto">Projeto</label>
-                <select name="projeto" id="projeto" class="huplex-form-control huplex-form-control--sm" style="width:auto;min-width:200px;">
+                <select id="projeto"
+                        class="huplex-form-control huplex-form-control--sm"
+                        style="width:auto;min-width:200px;"
+                        data-core-projetos-target="projetoFilter"
+                        data-action="change->core-projetos#filterKanban">
                     <option value="">Todos</option>
                     {% for p in projetos %}
                         <option value="{{ p.id }}" {{ projeto_filter == p.id ? 'selected' : '' }}>{{ p.nome }}</option>
                     {% endfor %}
                 </select>
-            </form>
+            </div>
         {% endblock %}
     {% endembed %}
 </div>
@@ -83,6 +86,11 @@
     {% endif %}
 </div>
 {% endif %}
+<p class="dev-kanban-filter-empty person-cell-sub mb-3"
+   data-core-projetos-target="kanbanFilterEmpty"
+   hidden>
+    <i class="fas fa-filter"></i> Nenhuma tarefa para o projeto selecionado.
+</p>
 {% include 'components/dev_kanban_board.html.twig' with {
     kanban: kanban,
     kanban_columns: kanban_columns,
