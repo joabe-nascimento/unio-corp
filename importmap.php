@@ -21,7 +21,7 @@ return [
         'entrypoint' => true,
     ],
     '@hotwired/stimulus' => [
-        'path' => './assets/vendor/@hotwired/stimulus/index.js',
+        'path' => './assets/lib/stimulus.js',
         'type' => 'js',
     ],
 ];
