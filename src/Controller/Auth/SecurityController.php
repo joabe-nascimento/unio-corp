@@ -2,6 +2,8 @@
 
 namespace App\Controller\Auth;
 
+use App\Entity\User;
+use App\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -16,9 +18,13 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
+        $registrationForm = $this->createForm(RegistrationFormType::class, new User());
+
         return $this->render('auth/login.html.twig', [
-            'error'         => $authenticationUtils->getLastAuthenticationError(),
-            'last_username' => $authenticationUtils->getLastUsername(),
+            'error'            => $authenticationUtils->getLastAuthenticationError(),
+            'last_username'    => $authenticationUtils->getLastUsername(),
+            'registrationForm' => $registrationForm,
+            'active_tab'       => 'login',
         ]);
     }
 
