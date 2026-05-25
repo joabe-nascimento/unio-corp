@@ -1,0 +1,16 @@
+<a href="{{ path('app_core_projetos_show', { id: projeto.id }) }}" class="project-card text-decoration-none">
+    <div class="project-card-accent" style="background: {{ projeto.cor|default('#4F7FFF') }};"></div>
+    <div class="project-card-body">
+        <div class="project-card-head">
+            <div class="project-card-title">{{ projeto.nome }}</div>
+            {% include 'components/status_badge.html.twig' with { label: projeto.statusLabel, variant: projeto.statusClass } %}
+        </div>
+        {% if projeto.area %}
+            <div class="project-card-code">{{ projeto.area }}{% if projeto.codigo %} · {{ projeto.codigo }}{% endif %}</div>
+        {% endif %}
+        {% if projeto.descricao %}
+            <p class="project-card-desc">{{ projeto.descricao|length > 120 ? projeto.descricao|slice(0, 120) ~ '…' : projeto.descricao }}</p>
+        {% endif %}
+        {% include 'components/progress_inline.html.twig' with { percent: projeto.progresso, variant: 'accent', min_width: 100 } %}
+    </div>
+</a>

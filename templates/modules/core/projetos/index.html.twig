@@ -1,0 +1,121 @@
+{% extends 'layout/core_projetos.html.twig' %}
+{% block title %}Projetos e Metas{% endblock %}
+{% set page_list_title = 'Projetos e Metas' %}
+
+{% block core_projetos_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: projetos_ativos, label: 'Em desenvolvimento', sub: 'Projetos ativos' },
+        { value: tarefas_abertas, label: 'Tarefas abertas', sub: 'No kanban' },
+        { value: projetos|length, label: 'Projetos', sub: 'Total' },
+        { value: metas|length, label: 'Metas', sub: 'Definidas' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block core_projetos_section_toolbar %}
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: 'Novo projeto',
+    btn_href: path('app_core_projetos_nova'),
+    btn_icon: 'fa-plus',
+    search_in_section: true,
+    search_placeholder: 'Buscar…',
+    search_disabled: true
+} %}
+    {% block section_toolbar_filters %}
+        <div data-core-toolbar-for="kanban" class="d-flex align-items-center gap-2 mb-0"{% if active_view|default('kanban') != 'kanban' %} hidden{% endif %}>
+            <form method="get" class="d-flex align-items-center gap-2 mb-0" id="kanban-projeto-filter">
+                <input type="hidden" name="view" value="kanban">
+                <label class="huplex-form-label mb-0 mr-2" for="projeto">Projeto</label>
+                <select name="projeto" id="projeto" class="huplex-form-control huplex-form-control--sm" style="width:auto;min-width:200px;">
+                    <option value="">Todos</option>
+                    {% for p in projetos %}
+                        <option value="{{ p.id }}" {{ projeto_filter == p.id ? 'selected' : '' }}>{{ p.nome }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div data-core-toolbar-for="metas"{% if active_view|default('kanban') != 'metas' %} hidden{% endif %}>
+            <a href="{{ path('app_core_metas_nova') }}" class="btn-huplex-ghost btn-sm ml-2"><i class="fas fa-bullseye"></i> Nova meta</a>
+        </div>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block core_panel_kanban %}
+<div class="dev-projetos-lead mb-3">
+    <p class="person-cell-sub mb-0">
+        <i class="fas fa-circle-info"></i>
+        Organize o que você está desenvolvendo na Unio. Use o <strong>ícone de arrastar</strong> nos cards para mover entre Backlog, A fazer, Em andamento e Feito.
+    </p>
+</div>
+{% if not has_kanban_tasks %}
+<div class="huplex-card mb-3">
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-columns',
+        title: 'Kanban vazio',
+        text: 'Crie um projeto e adicione tarefas — ou rode app:seed-dev-projetos para dados demo.',
+        btn_label: 'Novo projeto',
+        btn_href: path('app_core_projetos_nova')
+    } %}
+</div>
+{% endif %}
+{% include 'components/dev_kanban_board.html.twig' with {
+    kanban: kanban,
+    kanban_columns: kanban_columns,
+    projeto_filter: projeto_filter|default(0),
+    move_url_template: move_url_template,
+    csrf_move: csrf_move
+} %}
+<script>
+(function () {
+    var sel = document.getElementById('projeto');
+    if (!sel) return;
+    sel.addEventListener('change', function () {
+        var url = new URL(window.location.href);
+        url.searchParams.set('view', 'kanban');
+        if (sel.value) {
+            url.searchParams.set('projeto', sel.value);
+        } else {
+            url.searchParams.delete('projeto');
+        }
+        window.location.href = url.toString();
+    });
+})();
+</script>
+{% endblock %}
+
+{% block core_panel_lista %}
+{% if projetos is empty %}
+<div class="huplex-card">
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-diagram-project',
+        title: 'Nenhum projeto',
+        text: 'Cadastre o que está desenvolvendo.',
+        btn_label: 'Novo projeto',
+        btn_href: path('app_core_projetos_nova')
+    } %}
+</div>
+{% else %}
+<div class="project-grid">
+    {% for projeto in projetos %}
+        {% include 'components/dev_project_card.html.twig' with { projeto: projeto } %}
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block core_panel_metas %}
+<div class="huplex-card">
+    {% if metas is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-bullseye',
+            title: 'Nenhuma meta',
+            btn_label: 'Nova meta',
+            btn_href: path('app_core_metas_nova')
+        } %}
+    {% else %}
+        {% include 'components/dev_meta_list.html.twig' with { metas: metas } %}
+    {% endif %}
+</div>
+{% endblock %}

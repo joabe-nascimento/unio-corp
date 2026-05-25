@@ -157,6 +157,16 @@ class NavigationService
     }
 
     /** Seção Plataforma (usuários, empresas, configurações) — somente TENANT */
+    /** Quadro de desenvolvimento da plataforma (estilo Motion) — produto interno Unio. */
+    public function showProjetosMetas(User $user): bool
+    {
+        if ($this->isTenant($user)) {
+            return true;
+        }
+
+        return \in_array($user->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE', 'SUPERVISOR'], true);
+    }
+
     public function showPlataforma(User $user): bool
     {
         return $this->isTenant($user);
@@ -225,6 +235,7 @@ class NavigationService
 
         return [
             'nav_layout' => $this->getLayout($user),
+            'nav_show_projetos_metas' => $this->showProjetosMetas($user),
             'nav_show_hub_operacoes' => $this->showHubOperacoes($user),
             'nav_show_hub_talentos' => $this->showHubTalentos($user),
             'nav_show_hub_maturidade' => $this->showHubMaturidade($user),

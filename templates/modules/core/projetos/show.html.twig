@@ -1,0 +1,72 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}{{ projeto.nome }}{% endblock %}
+{% set page_list_title = projeto.nome %}
+
+{% block page_list_toolbar_actions %}
+{% include 'components/page_back_link.html.twig' with { href: path('app_core_projetos', { view: 'kanban', projeto: projeto.id }) } %}
+{% endblock %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: projeto.statusLabel, label: 'Status', sub: projeto.area|default('Projeto') },
+        { value: projeto.progresso ~ '%', label: 'Progresso', sub: 'Tarefas feitas' },
+        { value: metas|length, label: 'Metas', sub: 'Vinculadas' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row">
+    <div class="col-lg-4 mb-3">
+        <div class="huplex-card">
+            <div class="section-title mb-3">Resumo</div>
+            {% include 'components/detail_fields.html.twig' with { items: [
+                { label: 'Área', value: projeto.area|default('—') },
+                { label: 'Referência', value: projeto.codigo|default('—') },
+                { label: 'Descrição', value: projeto.descricao|default('—') },
+            ] } %}
+            {% include 'components/progress_inline.html.twig' with { percent: projeto.progresso, variant: 'accent' } %}
+        </div>
+    </div>
+    <div class="col-lg-8 mb-3">
+        <div class="huplex-card mb-3">
+            <div class="section-title mb-3">Nova tarefa</div>
+            <form method="post" class="huplex-form">
+                <input type="hidden" name="action" value="nova_tarefa">
+                <div class="row">
+                    <div class="col-md-8">
+                        {% include 'components/huplex_form_field.html.twig' with { id: 'titulo', name: 'titulo', label: 'Título', required: true } %}
+                    </div>
+                    <div class="col-md-4">
+                        {% include 'components/huplex_form_field.html.twig' with {
+                            id: 'status', name: 'status', label: 'Coluna', type: 'select',
+                            options: [
+                                { value: 'BACKLOG', label: 'Backlog' },
+                                { value: 'A_FAZER', label: 'A fazer' },
+                                { value: 'EM_ANDAMENTO', label: 'Em andamento' },
+                            ]
+                        } %}
+                    </div>
+                </div>
+                <button type="submit" class="btn-huplex btn-sm">Adicionar</button>
+            </form>
+        </div>
+        <div class="section-title mb-2">Kanban — arraste entre colunas</div>
+        {% include 'components/dev_kanban_board.html.twig' with {
+            kanban: kanban,
+            kanban_columns: kanban_columns,
+            move_url_template: move_url_template,
+            csrf_move: csrf_move,
+            redirect: 'show',
+            hide_project_link: true
+        } %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/sortable.min.js') }}"></script>
+<script src="{{ asset('js/dev-kanban.js') }}?v=3"></script>
+{% endblock %}

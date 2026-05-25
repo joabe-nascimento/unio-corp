@@ -69,6 +69,13 @@ final class ProductGrantRouteMap
         'app_publicidade_briefings' => ['scope' => 'product_publicidade', 'product' => 'campanhas'],
         'app_publicidade_metricas' => ['scope' => 'product_publicidade', 'product' => 'metricas'],
 
+        // Core — Projetos e Metas (desenvolvimento Unio)
+        'app_core_projetos' => ['scope' => 'product_core', 'product' => 'projetos'],
+        'app_core_projetos_nova' => ['scope' => 'product_core', 'product' => 'projetos'],
+        'app_core_projetos_show' => ['scope' => 'product_core', 'product' => 'projetos'],
+        'app_core_metas_nova' => ['scope' => 'product_core', 'product' => 'metas'],
+        'app_core_tarefa_mover' => ['scope' => 'product_core', 'product' => 'projetos'],
+
         // Admin (plataforma)
         'app_admin' => ['scope' => 'hub_admin', 'product' => 'usuarios'],
         'app_admin_usuarios' => ['scope' => 'hub_admin', 'product' => 'usuarios'],

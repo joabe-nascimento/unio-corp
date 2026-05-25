@@ -226,6 +226,14 @@ class PermissionService
                 ['id' => 'metricas', 'label' => 'Métricas'],
             ],
         ],
+        'product_core' => [
+            'label' => 'Projetos e Metas',
+            'subtitle' => 'Quadro de desenvolvimento da plataforma Unio',
+            'products' => [
+                ['id' => 'projetos', 'label' => 'Projetos e Kanban'],
+                ['id' => 'metas', 'label' => 'Metas'],
+            ],
+        ],
     ];
 
     /** @var list<array{id: string, label: string, scope: string, products: list<array{id: string, label: string}>}> */
@@ -357,6 +365,11 @@ class PermissionService
         ],
         'product_publicidade' => [
             'gestor' => ['campanhas' => 'GESTOR', 'clientes' => 'GESTOR', 'criativos' => 'GESTOR_EQUIPE', 'metricas' => 'GESTOR_EQUIPE'],
+        ],
+        'product_core' => [
+            'gestor' => ['projetos' => 'GESTOR', 'metas' => 'GESTOR'],
+            'gestor-eq' => ['projetos' => 'GESTOR_EQUIPE', 'metas' => 'GESTOR_EQUIPE'],
+            'supervisor' => ['projetos' => 'SUPERVISOR', 'metas' => 'SUPERVISOR'],
         ],
     ];
 

@@ -1,0 +1,84 @@
+{#
+  core_projetos — mesmo padrão do hub (abas hub-overview-tabs + painel Permissões)
+
+  Blocks:
+    core_projetos_kpis
+    core_projetos_section_toolbar
+    core_panel_kanban
+    core_panel_lista
+    core_panel_metas
+#}
+{% extends 'layout/page_list.html.twig' %}
+{% block permissions_scope %}product_core{% endblock %}
+
+{% block content_lead %}
+{% set perm_scope = block('permissions_scope')|trim %}
+{% set _hub_tabs = true %}
+<div class="page-lead-zone{% if _hub_tabs %} page-lead-zone--hub-tabs{% endif %}">
+    {% embed 'components/list_toolbar.html.twig' with {
+        page_title: page_list_title|default(''),
+        actions_in_top: page_list_actions_in_top|default(false)
+    } %}
+        {% block toolbar_actions %}{% block page_list_toolbar_actions %}{% endblock %}{% endblock %}
+        {% block toolbar_subnav %}
+            <div class="list-toolbar-subnav">
+                <div class="hub-overview-tabs" data-hub-tabs data-initial-tab="{{ active_view|default('kanban') }}" role="tablist" aria-label="Projetos e Metas">
+                    <button type="button" class="hub-overview-tab{% if active_view|default('kanban') == 'kanban' %} hub-overview-tab--active{% endif %}" data-hub-tab="kanban" role="tab" aria-selected="{{ active_view|default('kanban') == 'kanban' ? 'true' : 'false' }}">
+                        <i class="fas fa-columns mr-1"></i> Kanban
+                    </button>
+                    <button type="button" class="hub-overview-tab{% if active_view|default('kanban') == 'lista' %} hub-overview-tab--active{% endif %}" data-hub-tab="lista" role="tab" aria-selected="{{ active_view|default('kanban') == 'lista' ? 'true' : 'false' }}">
+                        <i class="fas fa-diagram-project mr-1"></i> Projetos
+                    </button>
+                    <button type="button" class="hub-overview-tab{% if active_view|default('kanban') == 'metas' %} hub-overview-tab--active{% endif %}" data-hub-tab="metas" role="tab" aria-selected="{{ active_view|default('kanban') == 'metas' ? 'true' : 'false' }}">
+                        <i class="fas fa-bullseye mr-1"></i> Metas
+                    </button>
+                    {% if perm_scope and can_manage_permissions(perm_scope) %}
+                    <button type="button" class="hub-overview-tab{% if active_view|default('kanban') == 'permissions' %} hub-overview-tab--active{% endif %}" data-hub-tab="permissions" role="tab" aria-selected="{{ active_view|default('kanban') == 'permissions' ? 'true' : 'false' }}">
+                        <i class="fas fa-shield-halved mr-1"></i> Permissões
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            <hr class="hub-toolbar-tabs-divider">
+        {% endblock %}
+    {% endembed %}
+    {% block page_list_kpis %}{% block core_projetos_kpis %}{% endblock %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block content %}
+{% set perm_scope = block('permissions_scope')|trim %}
+{% set _initial = active_view|default('kanban') %}
+<div class="page-body-inner page-body-inner--hub-tabs" data-core-projetos-root data-initial-view="{{ _initial }}">
+    {% block core_projetos_section_toolbar %}{% endblock %}
+
+    <div class="hub-tab-panel{% if _initial == 'kanban' %} hub-tab-panel--active{% endif %}" data-hub-panel="kanban" role="tabpanel"{% if _initial != 'kanban' %} hidden{% endif %}>
+        {% block core_panel_kanban %}{% endblock %}
+    </div>
+    <div class="hub-tab-panel{% if _initial == 'lista' %} hub-tab-panel--active{% endif %}" data-hub-panel="lista" role="tabpanel"{% if _initial != 'lista' %} hidden{% endif %}>
+        {% block core_panel_lista %}{% endblock %}
+    </div>
+    <div class="hub-tab-panel{% if _initial == 'metas' %} hub-tab-panel--active{% endif %}" data-hub-panel="metas" role="tabpanel"{% if _initial != 'metas' %} hidden{% endif %}>
+        {% block core_panel_metas %}{% endblock %}
+    </div>
+
+    {% if perm_scope and can_manage_permissions(perm_scope) %}
+        {% set permission_data = permissions_scope(perm_scope) %}
+        <div class="hub-tab-panel{% if _initial == 'permissions' %} hub-tab-panel--active{% endif %}" data-hub-panel="permissions" role="tabpanel"{% if _initial != 'permissions' %} hidden{% endif %}>
+            {% if permission_data %}
+                {% include 'components/permissions_panel.html.twig' with { permission_data: permission_data } %}
+            {% else %}
+                <div class="huplex-card">
+                    <p class="text-muted mb-0">Permissões indisponíveis para este escopo.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/sortable.min.js') }}"></script>
+<script src="{{ asset('js/dev-kanban.js') }}?v=3"></script>
+{% endblock %}

@@ -51,6 +51,11 @@ final class ProductGrantVoter extends Voter
 
         if (!$grant) {
             if ($this->grantRepo->userHasConfiguredMatrix($user) || $this->grantRepo->userHasAnyGrant($user)) {
+                // product_core: matriz antiga pode não ter o escopo — perfis de desenvolvimento mantêm acesso
+                if ((string) $subject['scope'] === 'product_core') {
+                    return \in_array($user->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE', 'SUPERVISOR'], true);
+                }
+
                 return false;
             }
 

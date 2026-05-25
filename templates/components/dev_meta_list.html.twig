@@ -1,0 +1,35 @@
+<div class="table-responsive">
+    <table class="table table-huplex mb-0">
+        <thead>
+            <tr>
+                <th>Meta</th>
+                <th>Projeto</th>
+                <th>Prioridade</th>
+                <th>Alvo</th>
+                <th>Progresso</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for meta in metas %}
+            <tr>
+                <td>
+                    <strong class="person-cell-name">{{ meta.titulo }}</strong>
+                    {% if meta.descricao %}<div class="person-cell-sub">{{ meta.descricao|slice(0, 80) }}{% if meta.descricao|length > 80 %}…{% endif %}</div>{% endif %}
+                </td>
+                <td>
+                    {% if meta.projeto %}
+                        <a href="{{ path('app_core_projetos_show', { id: meta.projeto.id }) }}" class="kanban-card-project">{{ meta.projeto.nome }}</a>
+                    {% else %}
+                        <span class="person-cell-sub">Plataforma</span>
+                    {% endif %}
+                </td>
+                <td><span class="kanban-card-priority kanban-card-priority--{{ meta.prioridade|lower }}">{{ meta.prioridadeLabel }}</span></td>
+                <td>{{ meta.dataAlvo ? meta.dataAlvo|date('d/m/Y') : '—' }}</td>
+                <td>{% include 'components/progress_inline.html.twig' with { percent: meta.progressoPercent, variant: 'info' } %}</td>
+                <td>{% include 'components/status_badge.html.twig' with { label: meta.statusLabel, variant: meta.statusClass } %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,41 @@
+{#
+  dev_kanban_board — kanban com drag-and-drop (SortableJS)
+
+  Props: kanban, kanban_columns, projeto_filter, move_url_template, csrf_move, redirect (opt)
+#}
+<div class="kanban-board dev-kanban-board"
+     data-dev-kanban
+     data-move-url-template="{{ move_url_template }}"
+     data-csrf="{{ csrf_move }}"
+     {% if projeto_filter|default(0) > 0 %}data-projeto-filter="{{ projeto_filter }}"{% endif %}
+     {% if redirect|default('') == 'show' %}data-redirect="show"{% endif %}>
+    {% for status, label in kanban_columns %}
+    <div class="kanban-column">
+        <div class="kanban-column-header">
+            <span class="kanban-column-title">{{ label }}</span>
+            <span class="kanban-column-count" data-kanban-count="{{ status }}">{{ kanban[status]|default([])|length }}</span>
+        </div>
+        <div class="kanban-column-body dev-kanban-column"
+             data-status="{{ status }}"
+             data-kanban-column="{{ status }}">
+            {% for tarefa in kanban[status]|default([]) %}
+            <div class="kanban-card dev-kanban-card" data-task-id="{{ tarefa.id }}">
+                <div class="kanban-card-top">
+                    <span class="kanban-card-drag-handle" title="Arrastar" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
+                    <div class="kanban-card-title">{{ tarefa.titulo }}</div>
+                </div>
+                {% if not hide_project_link|default(false) %}
+                <a href="{{ path('app_core_projetos_show', { id: tarefa.projeto.id }) }}" class="kanban-card-project">
+                    {{ tarefa.projeto.nome }}
+                </a>
+                {% endif %}
+                {% if tarefa.descricao %}
+                    <p class="kanban-card-desc">{{ tarefa.descricao|length > 90 ? tarefa.descricao|slice(0, 90) ~ '…' : tarefa.descricao }}</p>
+                {% endif %}
+                <span class="kanban-card-priority kanban-card-priority--{{ tarefa.prioridade|lower }}">{{ tarefa.prioridadeLabel }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
