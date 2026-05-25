@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\Rh;
 
+use App\Doctrine\DateNormalizer;
 use App\Entity\Empresa;
 use App\Entity\RhOffboardingProcess;
 use App\Entity\RhOnboardingProcess;
@@ -252,14 +253,8 @@ class RhController extends AbstractController
         return $process;
     }
 
-    private function parseDate(mixed $value): ?\DateTimeInterface
+    private function parseDate(mixed $value): ?\DateTimeImmutable
     {
-        if (!$value || !is_string($value) || $value === '') {
-            return null;
-        }
-
-        $date = \DateTime::createFromFormat('Y-m-d', $value);
-
-        return $date ?: null;
+        return DateNormalizer::fromFormDate($value);
     }
 }

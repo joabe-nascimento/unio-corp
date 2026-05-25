@@ -20,6 +20,10 @@ Offboarding (RhOffboardingProcess) → conclui → Funcionario (INATIVO) + data 
 - **Funcionario**: registro de RH da empresa.
 - **Pessoas / Membros**: visão organizacional (integração futura após admissão).
 
+## Datas (Doctrine)
+
+Campos só-data (`data_prevista`, `data_conclusao`, admissão/demissão) usam tipo `date_immutable` e `App\Doctrine\DateNormalizer` na UI e nos serviços.
+
 ## Branch
 
-`feature/core-onboarding-offboarding`
+`feature/core-onboarding-offboarding` → integrar em `product/core`

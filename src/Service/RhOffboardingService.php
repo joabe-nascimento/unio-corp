@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Doctrine\DateNormalizer;
 use App\Entity\Empresa;
 use App\Entity\Funcionario;
 use App\Entity\RhOffboardingProcess;
@@ -22,7 +23,7 @@ class RhOffboardingService
     public function create(
         Empresa $empresa,
         Funcionario $funcionario,
-        ?\DateTimeInterface $dataPrevista,
+        ?\DateTimeImmutable $dataPrevista,
         ?string $motivo,
         ?string $observacoes,
     ): RhOffboardingProcess {
@@ -59,7 +60,7 @@ class RhOffboardingService
     {
         $funcionario = $process->getFuncionario();
         $funcionario->setStatus('INATIVO');
-        $funcionario->setDataDemissao($this->asDate($process->getDataPrevista()));
+        $funcionario->setDataDemissao(DateNormalizer::immutableOrToday($process->getDataPrevista()));
 
         $user = $funcionario->getUser();
         if (!$user && $funcionario->getEmail()) {
@@ -71,7 +72,7 @@ class RhOffboardingService
         }
 
         $process->setStatus(RhOffboardingProcess::STATUS_CONCLUIDO);
-        $process->setDataConclusao(new \DateTime('today'));
+        $process->setDataConclusao(DateNormalizer::today());
         $process->touch();
 
         $this->em->flush();
@@ -97,12 +98,4 @@ class RhOffboardingService
         return $this->repo->countOpenByEmpresa($empresa);
     }
 
-    private function asDate(?\DateTimeInterface $value): \DateTime
-    {
-        if ($value === null) {
-            return new \DateTime('today');
-        }
-
-        return $value instanceof \DateTime ? $value : \DateTime::createFromInterface($value);
-    }
 }

@@ -39,11 +39,11 @@ class RhOnboardingProcess
     #[ORM\Column(length: 24)]
     private string $status = self::STATUS_RASCUNHO;
 
-    #[ORM\Column(type: 'date', nullable: true)]
-    private ?\DateTimeInterface $dataPrevista = null;
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dataPrevista = null;
 
-    #[ORM\Column(type: 'date', nullable: true)]
-    private ?\DateTimeInterface $dataConclusao = null;
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dataConclusao = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $observacoes = null;
@@ -94,11 +94,11 @@ class RhOnboardingProcess
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $status): static { $this->status = $status; return $this; }
 
-    public function getDataPrevista(): ?\DateTimeInterface { return $this->dataPrevista; }
-    public function setDataPrevista(?\DateTimeInterface $dataPrevista): static { $this->dataPrevista = $dataPrevista; return $this; }
+    public function getDataPrevista(): ?\DateTimeImmutable { return $this->dataPrevista; }
+    public function setDataPrevista(?\DateTimeImmutable $dataPrevista): static { $this->dataPrevista = $dataPrevista; return $this; }
 
-    public function getDataConclusao(): ?\DateTimeInterface { return $this->dataConclusao; }
-    public function setDataConclusao(?\DateTimeInterface $dataConclusao): static { $this->dataConclusao = $dataConclusao; return $this; }
+    public function getDataConclusao(): ?\DateTimeImmutable { return $this->dataConclusao; }
+    public function setDataConclusao(?\DateTimeImmutable $dataConclusao): static { $this->dataConclusao = $dataConclusao; return $this; }
 
     public function getObservacoes(): ?string { return $this->observacoes; }
     public function setObservacoes(?string $observacoes): static { $this->observacoes = $observacoes; return $this; }

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Doctrine\DateNormalizer;
 use App\Entity\Empresa;
 use App\Entity\Funcionario;
 use App\Entity\RhOnboardingProcess;
@@ -15,7 +16,7 @@ class RhOnboardingService
         private RhOnboardingProcessRepository $repo,
     ) {}
 
-    public function create(Empresa $empresa, string $nome, string $email, ?string $cargo, ?\DateTimeInterface $dataPrevista, ?string $observacoes): RhOnboardingProcess
+    public function create(Empresa $empresa, string $nome, string $email, ?string $cargo, ?\DateTimeImmutable $dataPrevista, ?string $observacoes): RhOnboardingProcess
     {
         $process = new RhOnboardingProcess();
         $process->setEmpresa($empresa);
@@ -54,14 +55,14 @@ class RhOnboardingService
         $funcionario->setNome($process->getNome());
         $funcionario->setEmail($process->getEmail());
         $funcionario->setCargo($process->getCargo());
-        $funcionario->setDataAdmissao($this->asDate($process->getDataPrevista()));
+        $funcionario->setDataAdmissao(DateNormalizer::immutableOrToday($process->getDataPrevista()));
         $funcionario->setStatus('ATIVO');
 
         $this->em->persist($funcionario);
 
         $process->setFuncionario($funcionario);
         $process->setStatus(RhOnboardingProcess::STATUS_CONCLUIDO);
-        $process->setDataConclusao(new \DateTime('today'));
+        $process->setDataConclusao(DateNormalizer::today());
         $process->touch();
 
         $this->em->flush();
@@ -80,12 +81,4 @@ class RhOnboardingService
         return $this->repo->countOpenByEmpresa($empresa);
     }
 
-    private function asDate(?\DateTimeInterface $value): \DateTime
-    {
-        if ($value === null) {
-            return new \DateTime('today');
-        }
-
-        return $value instanceof \DateTime ? $value : \DateTime::createFromInterface($value);
-    }
 }

@@ -65,7 +65,7 @@ class SeedRhProcessesCommand extends Command
             return Command::SUCCESS;
         }
 
-        $inicio = new \DateTime('+7 days');
+        $inicio = new \DateTimeImmutable('+7 days');
 
         $maria = $this->onboarding->create(
             $empresa,
@@ -93,7 +93,7 @@ class SeedRhProcessesCommand extends Command
             'Carlos Mendes',
             'carlos.mendes.demo@huplex.dev',
             'Coordenador de Operações',
-            new \DateTime('-30 days'),
+            new \DateTimeImmutable('-30 days'),
             'Concluído para servir de base ao offboarding demo.',
         );
         foreach (array_column($carlos->getChecklist(), 'id') as $itemId) {
@@ -107,7 +107,7 @@ class SeedRhProcessesCommand extends Command
         $ana->setNome('Ana Costa');
         $ana->setEmail('ana.costa.demo@huplex.dev');
         $ana->setCargo('Designer UX');
-        $ana->setDataAdmissao(new \DateTime('-180 days'));
+        $ana->setDataAdmissao(new \DateTimeImmutable('-180 days'));
         $ana->setStatus('ATIVO');
         $this->em->persist($ana);
         $this->em->flush();
@@ -116,7 +116,7 @@ class SeedRhProcessesCommand extends Command
         $off = $this->offboarding->create(
             $empresa,
             $ana,
-            new \DateTime('+3 days'),
+            new \DateTimeImmutable('+3 days'),
             'Pedido de demissão',
             'Offboarding de demonstração.',
         );

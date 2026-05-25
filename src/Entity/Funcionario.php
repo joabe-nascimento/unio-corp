@@ -25,11 +25,11 @@ class Funcionario
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $cargo = null;
 
-    #[ORM\Column(type: 'date', nullable: true)]
-    private ?\DateTimeInterface $dataAdmissao = null;
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dataAdmissao = null;
 
-    #[ORM\Column(type: 'date', nullable: true)]
-    private ?\DateTimeInterface $dataDemissao = null;
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dataDemissao = null;
 
     #[ORM\Column(length: 20)]
     private string $status = 'ATIVO'; // ATIVO, INATIVO, FERIAS, AFASTADO
@@ -74,10 +74,10 @@ class Funcionario
     public function setTelefone(?string $t): static { $this->telefone = $t; return $this; }
     public function getCargo(): ?string { return $this->cargo; }
     public function setCargo(?string $c): static { $this->cargo = $c; return $this; }
-    public function getDataAdmissao(): ?\DateTimeInterface { return $this->dataAdmissao; }
-    public function setDataAdmissao(?\DateTimeInterface $d): static { $this->dataAdmissao = $d; return $this; }
-    public function getDataDemissao(): ?\DateTimeInterface { return $this->dataDemissao; }
-    public function setDataDemissao(?\DateTimeInterface $d): static { $this->dataDemissao = $d; return $this; }
+    public function getDataAdmissao(): ?\DateTimeImmutable { return $this->dataAdmissao; }
+    public function setDataAdmissao(?\DateTimeImmutable $d): static { $this->dataAdmissao = $d; return $this; }
+    public function getDataDemissao(): ?\DateTimeImmutable { return $this->dataDemissao; }
+    public function setDataDemissao(?\DateTimeImmutable $d): static { $this->dataDemissao = $d; return $this; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $s): static { $this->status = $s; return $this; }
     public function getSalario(): ?string { return $this->salario; }
