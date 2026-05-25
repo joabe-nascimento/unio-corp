@@ -49,9 +49,14 @@ class DevProjetosController extends AbstractController
         $projetoFilter = $projetoFilter > 0 ? $projetoFilter : null;
         $tarefas = $this->tarefaRepo->findByEmpresa($empresa, $projetoFilter);
 
+        $formFlash = $request->getSession()->getFlashBag()->get('dev_projeto_form');
+        $projetoFormRd = \is_array($formFlash[0] ?? null) ? $formFlash[0] : [];
+
         return $this->render(self::T . 'index.html.twig', [
             'active_view' => $view,
             'view' => $view,
+            'projeto_form_rd' => $projetoFormRd,
+            'open_projeto_offcanvas' => $request->query->getBoolean('open_novo'),
             'projetos' => $this->service->listProjetos($empresa),
             'metas' => $this->service->listMetas($empresa),
             'kanban' => $this->service->kanban($empresa, $projetoFilter),
@@ -75,13 +80,24 @@ class DevProjetosController extends AbstractController
         $empresa = $this->requireEmpresa();
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('dev_projeto_create', (string) $request->request->get('_token'))) {
+                throw $this->createAccessDeniedException();
+            }
+
+            $view = (string) $request->request->get('redirect_view', 'kanban');
+            if (!\in_array($view, ['lista', 'kanban', 'metas'], true)) {
+                $view = 'kanban';
+            }
+
             $nome = trim((string) $request->request->get('nome', ''));
             if ($nome === '') {
                 $this->addFlash('error', 'Nome do projeto é obrigatório.');
-                return $this->render(self::T . 'form.html.twig', ['empresa' => $empresa, 'request_data' => $request->request->all()]);
+                $request->getSession()->getFlashBag()->add('dev_projeto_form', $request->request->all());
+
+                return $this->redirectToRoute('app_core_projetos', ['view' => $view, 'open_novo' => 1]);
             }
 
-            $projeto = $this->service->createProjeto(
+            $this->service->createProjeto(
                 $empresa,
                 $nome,
                 $request->request->get('codigo') ?: null,
@@ -94,10 +110,10 @@ class DevProjetosController extends AbstractController
 
             $this->addFlash('success', 'Projeto criado.');
 
-            return $this->redirectToRoute('app_core_projetos_show', ['id' => $projeto->getId()]);
+            return $this->redirectToRoute('app_core_projetos', ['view' => $view]);
         }
 
-        return $this->render(self::T . 'form.html.twig', ['empresa' => $empresa, 'request_data' => []]);
+        return $this->redirectToRoute('app_core_projetos', ['open_novo' => 1]);
     }
 
     #[Route('/meta/nova', name: 'app_core_metas_nova', methods: ['GET', 'POST'])]

@@ -1916,6 +1916,99 @@
 
         .dev-projetos-lead { padding: 0 2px; }
 
+        /* ── Offcanvas (direita) — reutilizável ── */
+        body.huplex-offcanvas-open {
+            overflow: hidden;
+        }
+        .huplex-offcanvas {
+            position: fixed;
+            inset: 0;
+            z-index: 1055;
+            pointer-events: none;
+            visibility: hidden;
+        }
+        .huplex-offcanvas.is-open {
+            pointer-events: auto;
+            visibility: visible;
+        }
+        .huplex-offcanvas-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.22s ease;
+        }
+        .huplex-offcanvas.is-open .huplex-offcanvas-backdrop {
+            opacity: 1;
+        }
+        .huplex-offcanvas-drawer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: min(440px, 100vw);
+            height: 100%;
+            max-height: 100dvh;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+            box-shadow: -8px 0 32px rgba(0, 0, 0, 0.25);
+        }
+        .huplex-offcanvas.is-open .huplex-offcanvas-drawer {
+            transform: translateX(0);
+        }
+        .huplex-offcanvas-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .huplex-offcanvas-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-1);
+            margin: 0 0 4px;
+        }
+        .huplex-offcanvas-subtitle {
+            font-size: 12px;
+            color: var(--text-3);
+            margin: 0;
+        }
+        .huplex-offcanvas-close {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-2);
+            color: var(--text-2);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+        .huplex-offcanvas-close:hover {
+            background: var(--nav-hover-bg);
+            color: var(--text-1);
+        }
+        .huplex-offcanvas-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 20px 24px;
+        }
+        .huplex-offcanvas-body .huplex-form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         /* ── Buttons ── */
         .btn-huplex {
             background: var(--accent);

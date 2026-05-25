@@ -18,7 +18,7 @@
 <div class="core-projetos-toolbar" data-core-toolbar-for="kanban"{% if active_view|default('kanban') != 'kanban' %} hidden{% endif %}>
     {% embed 'components/section_toolbar.html.twig' with {
         btn_label: 'Novo projeto',
-        btn_href: path('app_core_projetos_nova'),
+        btn_opens: 'dev-projeto',
         btn_icon: 'fa-plus',
         search_in_section: false
     } %}
@@ -41,7 +41,7 @@
 <div class="core-projetos-toolbar" data-core-toolbar-for="lista"{% if active_view|default('kanban') != 'lista' %} hidden{% endif %}>
     {% include 'components/section_toolbar.html.twig' with {
         btn_label: 'Novo projeto',
-        btn_href: path('app_core_projetos_nova'),
+        btn_opens: 'dev-projeto',
         btn_icon: 'fa-plus',
         search_in_section: false
     } %}
@@ -72,7 +72,7 @@
         title: 'Kanban vazio',
         text: 'Crie um projeto e adicione tarefas — ou rode app:seed-dev-projetos para dados demo.',
         btn_label: 'Novo projeto',
-        btn_href: path('app_core_projetos_nova')
+        btn_opens: 'dev-projeto'
     } %}
 </div>
 {% endif %}
@@ -109,7 +109,7 @@
         title: 'Nenhum projeto',
         text: 'Cadastre o que está desenvolvendo.',
         btn_label: 'Novo projeto',
-        btn_href: path('app_core_projetos_nova')
+        btn_opens: 'dev-projeto'
     } %}
 </div>
 {% else %}
@@ -135,4 +135,17 @@
         {% include 'components/dev_meta_list.html.twig' with { metas: metas } %}
     {% endif %}
 </div>
+{% endblock %}
+
+{% block core_projetos_offcanvas %}
+{% include 'components/dev_projeto_offcanvas.html.twig' with {
+    rd: projeto_form_rd|default({}),
+    open: open_projeto_offcanvas|default(false),
+    active_view: active_view|default('kanban')
+} %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/dev-projeto-offcanvas.js') }}?v=1"></script>
 {% endblock %}
