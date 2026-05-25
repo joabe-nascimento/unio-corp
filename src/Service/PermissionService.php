@@ -664,6 +664,16 @@ class PermissionService
     }
 
     /**
+     * Membros da empresa para busca global e painel de permissões.
+     *
+     * @return list<array{id: string, nome: string, email: string, initials: string, equipe: string, cargo: string, perfil_global: string, perfil_label: string, perfil_class: string, ficha_id: int|null, user_id: int|null}>
+     */
+    public function getMembersForSearch(?Empresa $empresa = null): array
+    {
+        return $this->getMembers($empresa);
+    }
+
+    /**
      * @return list<array{id: string, nome: string, email: string, initials: string, equipe: string, cargo: string, perfil_global: string, perfil_label: string, perfil_class: string, ficha_id: int|null, user_id: int|null}>
      */
     private function getMembers(?Empresa $empresa): array

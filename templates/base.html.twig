@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||localStorage.getItem('huplex-theme')||'dark')}catch(e){}</script>
 
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=77">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=80">
 
     {% block stylesheets %}{% endblock %}
 </head>
@@ -30,6 +30,10 @@
                 <span class="nav-toggle-line"></span>
             </span>
         </a>
+
+        <div class="main-header-search d-none d-md-flex">
+            {% include 'components/global_search.html.twig' %}
+        </div>
 
         <ul class="navbar-nav ml-auto align-items-center mb-0">
             <li class="nav-item d-flex align-items-center">
@@ -90,7 +94,14 @@
 
         <div class="sidebar">
             <nav class="mt-2 pb-3">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" data-animation-speed="0" data-expand-sidebar="true">
+                <ul class="nav nav-pills nav-sidebar flex-column"
+                    data-widget="treeview"
+                    data-sidebar-hubs
+                    data-active-hub="{{ nav_active_hub|default('') }}"
+                    role="menu"
+                    data-accordion="false"
+                    data-animation-speed="0"
+                    data-expand-sidebar="true">
                     {% include 'layout/_sidebar_nav.html.twig' %}
                 </ul>
             </nav>
@@ -277,6 +288,8 @@ window.addEventListener('load', function () {
 <script src="{{ asset('js/huplex-offcanvas.js') }}?v=1"></script>
 <script src="{{ asset('js/huplex-color-picker.js') }}?v=1"></script>
 <script src="{{ asset('js/huplex-toast.js') }}?v=1"></script>
+<script src="{{ asset('js/global-search.js') }}?v=1"></script>
+<script src="{{ asset('js/sidebar-hubs.js') }}?v=2"></script>
 {% block javascripts %}{% endblock %}
 
 {# ── View Toggle — JS genérico, carregado uma vez no base ── #}

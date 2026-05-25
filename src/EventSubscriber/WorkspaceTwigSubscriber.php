@@ -4,6 +4,7 @@ namespace App\EventSubscriber;
 
 use App\Entity\User;
 use App\Service\ChatMockService;
+use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
 use App\Service\NotificationMockService;
 use App\Service\WorkspaceService;
@@ -32,6 +33,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private NavigationService $navigation,
         private NotificationMockService $notifications,
         private ChatMockService $chat,
+        private GlobalSearchService $globalSearch,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -66,6 +68,13 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
 
         $this->twig->addGlobal('nav_notifications_unread', $this->notifications->getUnreadCount());
         $this->twig->addGlobal('nav_chat_unread', $this->chat->getUnreadCount());
+        $this->twig->addGlobal(
+            'global_search_members_json',
+            json_encode(
+                $this->globalSearch->getMemberItems($user, $this->workspaceService->getActiveEmpresa($user)),
+                \JSON_UNESCAPED_UNICODE,
+            ) ?: '[]',
+        );
     }
 
     private function shouldSkip(?string $route): bool

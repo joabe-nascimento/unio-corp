@@ -1,0 +1,47 @@
+{#
+  global_search — busca global no header (hubs, apps do menu, membros)
+#}
+<div class="global-search"
+     data-global-search
+     data-members="{{ global_search_members_json|default('[]')|e('html_attr') }}">
+    <div class="global-search-input-wrap">
+        <i class="fas fa-magnifying-glass global-search-icon" aria-hidden="true"></i>
+        <input type="search"
+               class="global-search-input"
+               placeholder="Busque por um app, hub ou membro…"
+               autocomplete="off"
+               aria-label="Busca global"
+               aria-expanded="false"
+               aria-controls="globalSearchPanel"
+               aria-autocomplete="list">
+        <kbd class="global-search-kbd d-none d-md-inline" aria-hidden="true">Ctrl K</kbd>
+    </div>
+
+    <div class="global-search-panel"
+         id="globalSearchPanel"
+         role="dialog"
+         aria-label="Resultados da busca"
+         hidden>
+        <div class="global-search-filters" role="tablist" aria-label="Filtrar resultados">
+            <button type="button" class="global-search-filter is-active" data-filter="all" role="tab" aria-selected="true">Tudo</button>
+            <button type="button" class="global-search-filter" data-filter="hub" role="tab" aria-selected="false">Hubs</button>
+            <button type="button" class="global-search-filter" data-filter="app" role="tab" aria-selected="false">
+                <i class="fas fa-grip" aria-hidden="true"></i> Apps
+            </button>
+            <button type="button" class="global-search-filter" data-filter="member" role="tab" aria-selected="false">Membros</button>
+            <button type="button" class="global-search-filter global-search-filter--helix" data-helix-open title="Abrir Helix — assistente">
+                <span class="global-search-filter-helix-dot" aria-hidden="true"></span>
+                Buscar com Helix
+            </button>
+        </div>
+
+        <div class="global-search-body">
+            <div class="global-search-empty" data-search-empty>
+                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                <p class="global-search-empty-title">Nada por aqui ainda!</p>
+                <p class="global-search-empty-text">Comece digitando no campo de busca para descobrir hubs, apps e membros.</p>
+            </div>
+            <ul class="global-search-results" data-search-results hidden></ul>
+        </div>
+    </div>
+</div>

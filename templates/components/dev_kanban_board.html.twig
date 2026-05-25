@@ -49,42 +49,42 @@
                      data-task-projeto-id="{{ tarefa.projeto.id }}"
                      data-task-meta-id="{{ tarefa.meta ? tarefa.meta.id : '' }}"
                      data-task-projeto-nome="{{ tarefa.projeto.nome|e('html_attr') }}">
+                    <div class="dropdown kanban-card-actions">
+                        <button type="button"
+                                class="kanban-card-menu-btn"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                aria-label="Opções da tarefa"
+                                title="Opções">
+                            <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right huplex-dropdown kanban-card-dropdown">
+                            <button type="button"
+                                    class="dropdown-item"
+                                    data-kanban-edit
+                                    data-task-id="{{ tarefa.id }}">
+                                <i class="fas fa-pen" aria-hidden="true"></i> Editar
+                            </button>
+                            {% if not hide_project_link|default(false) %}
+                            <a href="{{ path('app_core_projetos_show', { id: tarefa.projeto.id }) }}"
+                               class="dropdown-item">
+                                <i class="fas fa-diagram-project" aria-hidden="true"></i> Ver projeto
+                            </a>
+                            {% endif %}
+                            <div class="dropdown-divider"></div>
+                            <button type="button"
+                                    class="dropdown-item dropdown-item-danger"
+                                    data-kanban-delete
+                                    data-task-id="{{ tarefa.id }}"
+                                    data-task-titulo="{{ tarefa.titulo|e('html_attr') }}">
+                                <i class="fas fa-trash" aria-hidden="true"></i> Excluir
+                            </button>
+                        </div>
+                    </div>
                     <div class="kanban-card-top">
                         <span class="kanban-card-drag-handle" title="Arrastar" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
-                        <div class="kanban-card-title">{{ tarefa.titulo }}</div>
-                        <div class="dropdown kanban-card-menu">
-                            <button type="button"
-                                    class="kanban-card-menu-btn"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                    aria-label="Opções da tarefa"
-                                    title="Opções">
-                                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right huplex-dropdown kanban-card-dropdown">
-                                <button type="button"
-                                        class="dropdown-item"
-                                        data-kanban-edit
-                                        data-task-id="{{ tarefa.id }}">
-                                    <i class="fas fa-pen" aria-hidden="true"></i> Editar
-                                </button>
-                                {% if not hide_project_link|default(false) %}
-                                <a href="{{ path('app_core_projetos_show', { id: tarefa.projeto.id }) }}"
-                                   class="dropdown-item">
-                                    <i class="fas fa-diagram-project" aria-hidden="true"></i> Ver projeto
-                                </a>
-                                {% endif %}
-                                <div class="dropdown-divider"></div>
-                                <button type="button"
-                                        class="dropdown-item dropdown-item-danger"
-                                        data-kanban-delete
-                                        data-task-id="{{ tarefa.id }}"
-                                        data-task-titulo="{{ tarefa.titulo|e('html_attr') }}">
-                                    <i class="fas fa-trash" aria-hidden="true"></i> Excluir
-                                </button>
-                            </div>
-                        </div>
+                        <p class="kanban-card-title" title="{{ tarefa.titulo }}">{{ tarefa.titulo }}</p>
                     </div>
                     {% if not hide_project_link|default(false) %}
                     <a href="{{ path('app_core_projetos_show', { id: tarefa.projeto.id }) }}" class="kanban-card-project">
@@ -92,9 +92,11 @@
                     </a>
                     {% endif %}
                     {% if tarefa.descricao %}
-                        <p class="kanban-card-desc">{{ tarefa.descricao|length > 90 ? tarefa.descricao|slice(0, 90) ~ '…' : tarefa.descricao }}</p>
+                        <p class="kanban-card-desc" title="{{ tarefa.descricao }}">{{ tarefa.descricao|length > 90 ? tarefa.descricao|slice(0, 90) ~ '…' : tarefa.descricao }}</p>
                     {% endif %}
-                    <span class="kanban-card-priority kanban-card-priority--{{ tarefa.prioridade|lower }}">{{ tarefa.prioridadeLabel }}</span>
+                    <div class="kanban-card-footer">
+                        <span class="kanban-card-priority kanban-card-priority--{{ tarefa.prioridade|lower }}">{{ tarefa.prioridadeLabel }}</span>
+                    </div>
                 </div>
                 {% endfor %}
             </div>

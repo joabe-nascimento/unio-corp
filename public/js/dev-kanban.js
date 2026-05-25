@@ -42,7 +42,7 @@
                 draggable: '.dev-kanban-card',
                 ghostClass: 'dev-kanban-ghost',
                 dragClass: 'dev-kanban-drag',
-                filter: 'a, button, input, select, textarea, label, .kanban-card-menu, .dropdown-menu',
+                filter: 'a, button, input, select, textarea, label, .kanban-card-actions, .kanban-card-menu-btn, .dropdown-menu',
                 preventOnFilter: true,
                 delay: 80,
                 delayOnTouchOnly: true,
@@ -50,6 +50,14 @@
                 forceFallback: true,
                 fallbackOnBody: true,
                 swapThreshold: 0.65,
+                onStart: function () {
+                    board.querySelectorAll('.kanban-card-actions .dropdown-menu.show').forEach(function (menu) {
+                        menu.classList.remove('show');
+                    });
+                    board.querySelectorAll('.kanban-card-menu-btn[aria-expanded="true"]').forEach(function (btn) {
+                        btn.setAttribute('aria-expanded', 'false');
+                    });
+                },
                 onEnd: function (evt) {
                     var card = evt.item;
                     var taskId = card.dataset.taskId;

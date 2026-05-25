@@ -204,6 +204,37 @@ class NavigationService
             || str_starts_with($route, 'app_publicidade');
     }
 
+    /** Identificador do hub ativo pela rota atual (null = exibir lista de hubs). */
+    public function getActiveHubId(?string $route): ?string
+    {
+        if (!$route) {
+            return null;
+        }
+
+        if ($this->isHubOperacoesActive($route)) {
+            return 'operacoes';
+        }
+        if ($this->isHubTalentosActive($route)) {
+            return 'talentos';
+        }
+        if ($this->isHubMaturidadeActive($route)) {
+            return 'maturidade';
+        }
+        if (str_starts_with($route, 'app_admin')) {
+            return 'admin';
+        }
+
+        return null;
+    }
+
+    public function hasAnyHub(User $user): bool
+    {
+        return $this->showHubOperacoes($user)
+            || $this->showHubTalentos($user)
+            || $this->showHubMaturidade($user)
+            || $this->showPlataforma($user);
+    }
+
     public function isModuloRhActive(?string $route): bool
     {
         return (bool) $route && str_starts_with($route, 'app_rh');
@@ -253,6 +284,8 @@ class NavigationService
             'nav_modulo_pessoas_active' => $this->isModuloPessoasActive($route),
             'nav_modulo_engenharia_active' => $this->isModuloEngenhariaActive($route),
             'nav_modulo_publicidade_active' => $this->isModuloPublicidadeActive($route),
+            'nav_active_hub' => $this->getActiveHubId($route),
+            'nav_has_hubs' => $this->hasAnyHub($user),
         ];
     }
 }

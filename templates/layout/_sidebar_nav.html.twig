@@ -1,383 +1,64 @@
-{# Menu lateral por perfil principal (layout admin vs operacional) #}
-{% import 'macros/sidebar_nav.html.twig' as nav %}
+{# Menu lateral — itens principais + zona Hub Selecionado (lista / painel) #}
 {% set route = app.request.attributes.get('_route') %}
-{% set perfil = app.user.perfil %}
 {% set hub_operacoes_open = nav_hub_operacoes_active|default(false) %}
 {% set modulo_rh_open = nav_modulo_rh_active|default(false) %}
 {% set modulo_pessoas_open = nav_modulo_pessoas_active|default(false) %}
 {% set modulo_engenharia_open = nav_modulo_engenharia_active|default(false) %}
 {% set modulo_publicidade_open = nav_modulo_publicidade_active|default(false) %}
+{% set _active_hub = nav_active_hub|default(null) %}
+{% set _in_hub = _active_hub is not null %}
 
-<li class="nav-item">
-    <a href="{{ path('app_dashboard') }}" class="nav-link {{ route starts with 'app_dashboard' ? 'active' : '' }}">
-        <i class="fas fa-house nav-icon"></i>
-        <p>Dashboard</p>
-    </a>
+{% include 'layout/_sidebar_nav_primary.html.twig' %}
+
+{% if nav_has_hubs|default(false) %}
+<li class="sidebar-hub-separator" aria-hidden="true"></li>
+
+<li class="nav-item sidebar-hub-heading-item">
+    <div class="sidebar-hub-heading" data-sidebar-hub-heading>
+        <span class="sidebar-hub-heading-label">Hub Selecionado</span>
+        <a href="{{ path('app_dashboard') }}"
+           class="sidebar-hub-back{% if not _in_hub %} is-hidden{% endif %}"
+           data-sidebar-hub-back
+           aria-label="Voltar para lista de hubs"
+           title="Voltar">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        </a>
+    </div>
 </li>
 
-{% if nav_show_projetos_metas|default(false) %}
-<li class="nav-item">
-    <a href="{{ path('app_core_projetos') }}" class="nav-link {{ route starts with 'app_core_projetos' or route == 'app_core_metas_nova' or route == 'app_core_tarefa_mover' ? 'active' : '' }}">
-        <i class="fas fa-diagram-project nav-icon"></i>
-        <p>Projetos e Metas</p>
-    </a>
-</li>
-{% endif %}
-
-<li class="nav-item">
-    <a href="{{ path('app_chat') }}" class="nav-link {{ route starts with 'app_chat' ? 'active' : '' }}">
-        <i class="fas fa-comments nav-icon"></i>
-        <p>
-            Chat Bate Papo
-            {% if nav_chat_unread|default(0) > 0 %}
-                <span class="nav-unread-badge">{{ nav_chat_unread }}</span>
-            {% endif %}
-        </p>
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ path('app_notifications') }}" class="nav-link {{ route starts with 'app_notifications' ? 'active' : '' }}">
-        <i class="fas fa-bell nav-icon"></i>
-        <p>
-            Notificações
-            {% if nav_notifications_unread|default(0) > 0 %}
-                <span class="nav-notif-badge">{{ nav_notifications_unread }}</span>
-            {% endif %}
-        </p>
-    </a>
-</li>
-
-{# ── Layout operacional: hubs conforme o perfil ── #}
-{% if nav_show_hub_operacoes|default(false) or nav_show_hub_talentos|default(false) or nav_show_hub_maturidade|default(false) %}
-<li class="nav-header">Hubs</li>
+{% if not _in_hub %}
+    {% include 'layout/_sidebar_hub_picker.html.twig' %}
 {% endif %}
 
 {% if nav_show_hub_operacoes|default(false) %}
-<li class="nav-item has-treeview nav-hub {{ hub_operacoes_open ? 'menu-open' : '' }}">
-    <a href="{{ path('app_hub_operacoes') }}" class="nav-link {{ route starts with 'app_hub_operacoes' ? 'active' : '' }}">
-        <i class="fas fa-briefcase nav-icon"></i>
-        <p>Hub Operações <i class="fas fa-angle-left right"></i></p>
-    </a>
-    <ul class="nav nav-treeview nav-hub-children{{ hub_operacoes_open ? ' menu-open' : '' }}">
-        <li class="nav-item nav-hub-overview">
-            <a href="{{ path('app_hub_operacoes') }}" class="nav-link {{ route == 'app_hub_operacoes' ? 'active' : '' }}">
-                <i class="fas fa-table-cells nav-icon"></i>
-                <p>Visão geral</p>
-            </a>
-        </li>
-
-        {# Produto: Recursos Humanos #}
-        {% if nav_show_modulo_rh|default(false) %}
-        <li class="nav-item has-treeview nav-product {{ modulo_rh_open ? 'menu-open' : '' }}">
-            <a href="{{ path('app_rh') }}" class="nav-link {{ modulo_rh_open ? 'active' : '' }}">
-                <i class="fas fa-id-card nav-icon"></i>
-                <p>Recursos Humanos <i class="fas fa-angle-left right"></i></p>
-            </a>
-            <ul class="nav nav-treeview nav-product-children{{ modulo_rh_open ? ' menu-open' : '' }}">
-                <li class="nav-item">
-                    <a href="{{ path('app_rh') }}" class="nav-link {{ route == 'app_rh' ? 'active' : '' }}">
-                        <i class="fas fa-table-cells nav-icon"></i>
-                        <p>Visão geral</p>
-                    </a>
-                </li>
-                {% if product_grant('product_rh', 'funcionarios') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_rh_funcionarios') }}" class="nav-link {{ route == 'app_rh_funcionarios' ? 'active' : '' }}">
-                        <i class="fas fa-user-tie nav-icon"></i>
-                        <p>Funcionários</p>
-                    </a>
-                </li>
-                {% endif %}
-                {% if product_grant('product_rh', 'admissoes') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_rh_admissoes') }}" class="nav-link {{ route starts with 'app_rh_admissoes' ? 'active' : '' }}">
-                        <i class="fas fa-user-plus nav-icon"></i>
-                        <p>Admissões</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_rh_demissoes') }}" class="nav-link {{ route starts with 'app_rh_demissoes' ? 'active' : '' }}">
-                        <i class="fas fa-user-minus nav-icon"></i>
-                        <p>Demissões</p>
-                    </a>
-                </li>
-                {% endif %}
-                {% if product_grant('product_rh', 'ferias') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_rh_ferias') }}" class="nav-link {{ route == 'app_rh_ferias' ? 'active' : '' }}">
-                        <i class="fas fa-umbrella-beach nav-icon"></i>
-                        <p>Férias</p>
-                    </a>
-                </li>
-                {% endif %}
-                {% if product_grant('product_rh', 'folha') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_rh_folha') }}" class="nav-link {{ route == 'app_rh_folha' ? 'active' : '' }}">
-                        <i class="fas fa-money-bill-wave nav-icon"></i>
-                        <p>Folha de Pag.</p>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </li>
-        {% endif %}
-
-        {# Produto: Gestão de Pessoas #}
-        {% if nav_show_modulo_pessoas|default(false) %}
-        <li class="nav-item has-treeview nav-product {{ modulo_pessoas_open ? 'menu-open' : '' }}">
-            <a href="{{ path('app_pessoas') }}" class="nav-link {{ modulo_pessoas_open ? 'active' : '' }}">
-                <i class="fas fa-people-group nav-icon"></i>
-                <p>Gestão de Pessoas <i class="fas fa-angle-left right"></i></p>
-            </a>
-            <ul class="nav nav-treeview nav-product-children{{ modulo_pessoas_open ? ' menu-open' : '' }}">
-                <li class="nav-item">
-                    <a href="{{ path('app_pessoas') }}" class="nav-link {{ route == 'app_pessoas' ? 'active' : '' }}">
-                        <i class="fas fa-table-cells nav-icon"></i>
-                        <p>Visão geral</p>
-                    </a>
-                </li>
-                {% if product_grant('product_pessoas', 'membros') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_pessoas_membros') }}" class="nav-link {{ route starts with 'app_pessoas_membro' ? 'active' : '' }}">
-                        <i class="fas fa-id-badge nav-icon"></i>
-                        <p>Membros</p>
-                    </a>
-                </li>
-                {% endif %}
-                {% if product_grant('product_pessoas', 'equipes') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_pessoas_equipes') }}" class="nav-link {{ route starts with 'app_pessoas_equipe' ? 'active' : '' }}">
-                        <i class="fas fa-user-group nav-icon"></i>
-                        <p>Equipes</p>
-                    </a>
-                </li>
-                {% endif %}
-                {% if product_grant('product_pessoas', 'cargos') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_pessoas_cargos') }}" class="nav-link {{ route == 'app_pessoas_cargos' ? 'active' : '' }}">
-                        <i class="fas fa-layer-group nav-icon"></i>
-                        <p>Cargos</p>
-                    </a>
-                </li>
-                {% endif %}
-                {% if product_grant('product_pessoas', 'membros') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_pessoas_organograma') }}" class="nav-link {{ route == 'app_pessoas_organograma' ? 'active' : '' }}">
-                        <i class="fas fa-sitemap nav-icon"></i>
-                        <p>Organograma</p>
-                    </a>
-                </li>
-                {% endif %}
-                {% if product_grant('product_pessoas', 'avaliacao') %}
-                <li class="nav-item">
-                    <a href="{{ path('app_pessoas_avaliacao') }}" class="nav-link {{ route == 'app_pessoas_avaliacao' ? 'active' : '' }}">
-                        <i class="fas fa-star-half-stroke nav-icon"></i>
-                        <p>Avaliação</p>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </li>
-        {% endif %}
-
-        {% if nav_show_modulo_engenharia|default(false) %}
-        {# Produto: Obras e Projetos #}
-        <li class="nav-item has-treeview nav-product {{ modulo_engenharia_open ? 'menu-open' : '' }}">
-            <a href="{{ path('app_engenharia') }}" class="nav-link {{ modulo_engenharia_open ? 'active' : '' }}">
-                <i class="fas fa-hard-hat nav-icon"></i>
-                <p>Obras e Projetos <i class="fas fa-angle-left right"></i></p>
-            </a>
-            <ul class="nav nav-treeview nav-product-children{{ modulo_engenharia_open ? ' menu-open' : '' }}">
-                <li class="nav-item">
-                    <a href="{{ path('app_engenharia') }}" class="nav-link {{ route == 'app_engenharia' ? 'active' : '' }}">
-                        <i class="fas fa-table-cells nav-icon"></i>
-                        <p>Visão geral</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_engenharia_projetos') }}" class="nav-link {{ route == 'app_engenharia_projetos' ? 'active' : '' }}">
-                        <i class="fas fa-building nav-icon"></i>
-                        <p>Projetos e Obras</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_engenharia_cronograma') }}" class="nav-link {{ route == 'app_engenharia_cronograma' ? 'active' : '' }}">
-                        <i class="fas fa-calendar-days nav-icon"></i>
-                        <p>Cronograma</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_engenharia_orcamentos') }}" class="nav-link {{ route == 'app_engenharia_orcamentos' ? 'active' : '' }}">
-                        <i class="fas fa-calculator nav-icon"></i>
-                        <p>Orçamentos</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_engenharia_equipes') }}" class="nav-link {{ route == 'app_engenharia_equipes' ? 'active' : '' }}">
-                        <i class="fas fa-hard-hat nav-icon"></i>
-                        <p>Equipes de Campo</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_engenharia_documentacao') }}" class="nav-link {{ route == 'app_engenharia_documentacao' ? 'active' : '' }}">
-                        <i class="fas fa-file-lines nav-icon"></i>
-                        <p>Documentação Técnica</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_engenharia_normas') }}" class="nav-link {{ route == 'app_engenharia_normas' ? 'active' : '' }}">
-                        <i class="fas fa-clipboard-check nav-icon"></i>
-                        <p>Normas e Conformidade</p>
-                    </a>
-                </li>
-            </ul>
-        </li>
-        {% endif %}
+<li class="sidebar-hub-panel-root{% if _active_hub != 'operacoes' %} is-hidden{% endif %}" data-sidebar-hub-panel="operacoes">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list" data-widget="treeview" data-accordion="false" data-animation-speed="0">
+        {% include 'layout/_sidebar_hub_operacoes.html.twig' %}
     </ul>
 </li>
 {% endif %}
 
 {% if nav_show_hub_talentos|default(false) %}
-{% set hub_talentos_open = nav_hub_talentos_active|default(false) %}
-<li class="nav-item has-treeview nav-hub {{ hub_talentos_open ? 'menu-open' : '' }}">
-    <a href="{{ path('app_talentos') }}" class="nav-link {{ hub_talentos_open ? 'active' : '' }}">
-        <i class="fas fa-gem nav-icon"></i>
-        <p>Hub de Talentos <i class="fas fa-angle-left right"></i></p>
-    </a>
-    <ul class="nav nav-treeview nav-hub-children{{ hub_talentos_open ? ' menu-open' : '' }}">
-        {{ nav.overview('Visão geral', path('app_talentos'), route == 'app_talentos') }}
-        {% if product_grant('hub_talentos', 'banco') %}{{ nav.module('Banco de Talentos', 'address-card', path('app_talentos_banco'), route == 'app_talentos_banco') }}{% endif %}
-        {% if product_grant('hub_talentos', 'vagas') %}{{ nav.module('Vagas', 'clipboard-list', path('app_talentos_vagas'), route == 'app_talentos_vagas') }}{% endif %}
-        {% if product_grant('hub_talentos', 'trilhas') %}{{ nav.module('Trilhas de Carreira', 'route', path('app_talentos_trilhas'), route == 'app_talentos_trilhas') }}{% endif %}
-        {% if product_grant('hub_talentos', 'mentorias') %}{{ nav.module('Mentoria', 'chalkboard-user', path('app_talentos_mentoria'), route == 'app_talentos_mentoria') }}{% endif %}
+<li class="sidebar-hub-panel-root{% if _active_hub != 'talentos' %} is-hidden{% endif %}" data-sidebar-hub-panel="talentos">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list" data-widget="treeview" data-accordion="false" data-animation-speed="0">
+        {% include 'layout/_sidebar_hub_talentos.html.twig' %}
     </ul>
 </li>
 {% endif %}
 
 {% if nav_show_hub_maturidade|default(false) %}
-{% set hub_maturidade_open = nav_hub_maturidade_active|default(false) %}
-<li class="nav-item has-treeview nav-hub {{ hub_maturidade_open ? 'menu-open' : '' }}">
-    <a href="{{ path('app_maturidade') }}" class="nav-link {{ hub_maturidade_open ? 'active' : '' }}">
-        <i class="fas fa-gauge-high nav-icon"></i>
-        <p>Hub de Maturidade <i class="fas fa-angle-left right"></i></p>
-    </a>
-    <ul class="nav nav-treeview nav-hub-children{{ hub_maturidade_open ? ' menu-open' : '' }}">
-        <li class="nav-item nav-hub-overview">
-            <a href="{{ path('app_maturidade') }}" class="nav-link {{ route == 'app_maturidade' ? 'active' : '' }}">
-                <i class="fas fa-table-cells nav-icon"></i><p>Visão geral</p>
-            </a>
-        </li>
-        {% if product_grant('hub_maturidade', 'avaliacao') %}
-        <li class="nav-item nav-hub-module">
-            <a href="{{ path('app_maturidade_avaliacao') }}" class="nav-link {{ route == 'app_maturidade_avaliacao' ? 'active' : '' }}">
-                <i class="fas fa-clipboard-check nav-icon"></i><p>Avaliação</p>
-            </a>
-        </li>
-        {% endif %}
-        {% if product_grant('hub_maturidade', 'radar') %}
-        <li class="nav-item nav-hub-module">
-            <a href="{{ path('app_maturidade_radar') }}" class="nav-link {{ route == 'app_maturidade_radar' ? 'active' : '' }}">
-                <i class="fas fa-bullseye nav-icon"></i><p>Radar de Maturidade</p>
-            </a>
-        </li>
-        {% endif %}
-        {% if product_grant('hub_maturidade', 'plano') %}
-        <li class="nav-item nav-hub-module">
-            <a href="{{ path('app_maturidade_plano') }}" class="nav-link {{ route == 'app_maturidade_plano' ? 'active' : '' }}">
-                <i class="fas fa-list-check nav-icon"></i><p>Plano de Ação</p>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if nav_show_modulo_publicidade|default(false) %}
-        {# Produto: Marca e Comunicação #}
-        <li class="nav-item has-treeview nav-product {{ modulo_publicidade_open ? 'menu-open' : '' }}">
-            <a href="{{ path('app_publicidade') }}" class="nav-link {{ modulo_publicidade_open ? 'active' : '' }}">
-                <i class="fas fa-bullhorn nav-icon"></i>
-                <p>Marca e Comunicação <i class="fas fa-angle-left right"></i></p>
-            </a>
-            <ul class="nav nav-treeview nav-product-children{{ modulo_publicidade_open ? ' menu-open' : '' }}">
-                <li class="nav-item">
-                    <a href="{{ path('app_publicidade') }}" class="nav-link {{ route == 'app_publicidade' ? 'active' : '' }}">
-                        <i class="fas fa-table-cells nav-icon"></i>
-                        <p>Visão geral</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_publicidade_campanhas') }}" class="nav-link {{ route == 'app_publicidade_campanhas' ? 'active' : '' }}">
-                        <i class="fas fa-bullhorn nav-icon"></i>
-                        <p>Campanhas</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_publicidade_clientes') }}" class="nav-link {{ route == 'app_publicidade_clientes' ? 'active' : '' }}">
-                        <i class="fas fa-building-columns nav-icon"></i>
-                        <p>Clientes e Marcas</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_publicidade_criativos') }}" class="nav-link {{ route == 'app_publicidade_criativos' ? 'active' : '' }}">
-                        <i class="fas fa-palette nav-icon"></i>
-                        <p>Criativos</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_publicidade_midia') }}" class="nav-link {{ route == 'app_publicidade_midia' ? 'active' : '' }}">
-                        <i class="fas fa-tower-broadcast nav-icon"></i>
-                        <p>Mídia e Canais</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_publicidade_briefings') }}" class="nav-link {{ route == 'app_publicidade_briefings' ? 'active' : '' }}">
-                        <i class="fas fa-lightbulb nav-icon"></i>
-                        <p>Briefings</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_publicidade_metricas') }}" class="nav-link {{ route == 'app_publicidade_metricas' ? 'active' : '' }}">
-                        <i class="fas fa-chart-line nav-icon"></i>
-                        <p>Métricas e ROI</p>
-                    </a>
-                </li>
-            </ul>
-        </li>
-        {% endif %}
+<li class="sidebar-hub-panel-root{% if _active_hub != 'maturidade' %} is-hidden{% endif %}" data-sidebar-hub-panel="maturidade">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list" data-widget="treeview" data-accordion="false" data-animation-speed="0">
+        {% include 'layout/_sidebar_hub_maturidade.html.twig' %}
     </ul>
 </li>
 {% endif %}
 
-{# ── TENANT: gestão da plataforma ── #}
 {% if nav_show_plataforma|default(false) %}
-<li class="nav-header">Plataforma</li>
-<li class="nav-item has-treeview nav-hub {{ route starts with 'app_admin' ? 'menu-open' : '' }}">
-    <a href="{{ path('app_admin') }}" class="nav-link {{ route starts with 'app_admin' ? 'active' : '' }}">
-        <i class="fas fa-shield-halved nav-icon"></i>
-        <p>Admin <i class="fas fa-angle-left right"></i></p>
-    </a>
-    <ul class="nav nav-treeview nav-hub-children{{ route starts with 'app_admin' ? ' menu-open' : '' }}">
-        <li class="nav-item nav-hub-overview">
-            <a href="{{ path('app_admin') }}" class="nav-link {{ route == 'app_admin' ? 'active' : '' }}">
-                <i class="fas fa-table-cells nav-icon"></i><p>Visão geral</p>
-            </a>
-        </li>
-        <li class="nav-item nav-hub-module">
-            <a href="{{ path('app_admin_usuarios') }}" class="nav-link {{ route == 'app_admin_usuarios' ? 'active' : '' }}">
-                <i class="fas fa-user-shield nav-icon"></i><p>Usuários</p>
-            </a>
-        </li>
-        {% if nav_show_tenant_empresas|default(false) %}
-        <li class="nav-item nav-hub-module">
-            <a href="{{ path('app_admin_empresas') }}" class="nav-link {{ route == 'app_admin_empresas' ? 'active' : '' }}">
-                <i class="fas fa-building nav-icon"></i><p>Empresas</p>
-            </a>
-        </li>
-        {% endif %}
-        <li class="nav-item nav-hub-module">
-            <a href="{{ path('app_admin_configuracoes') }}" class="nav-link {{ route == 'app_admin_configuracoes' ? 'active' : '' }}">
-                <i class="fas fa-sliders nav-icon"></i><p>Configurações</p>
-            </a>
-        </li>
+<li class="sidebar-hub-panel-root{% if _active_hub != 'admin' %} is-hidden{% endif %}" data-sidebar-hub-panel="admin">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list" data-widget="treeview" data-accordion="false" data-animation-speed="0">
+        {% include 'layout/_sidebar_hub_admin.html.twig' %}
     </ul>
 </li>
+{% endif %}
 {% endif %}
