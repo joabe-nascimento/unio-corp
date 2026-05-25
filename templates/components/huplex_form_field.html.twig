@@ -1,0 +1,30 @@
+{#
+  huplex_form_field — campo de formulário temático
+
+  Props:
+    id, name, label, type (text|email|date|select|textarea), value, placeholder,
+    required (bool), options (array for select: {value, label}), rows (textarea)
+#}
+<div class="huplex-form-group">
+    <label class="huplex-form-label" for="{{ id }}">
+        {{ label }}
+        {% if required|default(false) %}<span class="huplex-form-required">*</span>{% endif %}
+    </label>
+    {% if type|default('text') == 'select' %}
+        <select class="huplex-form-control" id="{{ id }}" name="{{ name }}"{% if required|default(false) %} required{% endif %}>
+            {% for opt in options|default([]) %}
+                <option value="{{ opt.value }}"{% if opt.value == value|default('') %} selected{% endif %}>{{ opt.label }}</option>
+            {% endfor %}
+        </select>
+    {% elseif type == 'textarea' %}
+        <textarea class="huplex-form-control" id="{{ id }}" name="{{ name }}" rows="{{ rows|default(3) }}"{% if placeholder is defined %} placeholder="{{ placeholder }}"{% endif %}>{{ value|default('') }}</textarea>
+    {% else %}
+        <input type="{{ type|default('text') }}"
+               class="huplex-form-control"
+               id="{{ id }}"
+               name="{{ name }}"
+               value="{{ value|default('') }}"
+               {% if placeholder is defined %}placeholder="{{ placeholder }}"{% endif %}
+               {% if required|default(false) %}required{% endif %}>
+    {% endif %}
+</div>

@@ -3,46 +3,52 @@
 {% set page_list_title = 'Nova demissão' %}
 
 {% block page_list_toolbar_actions %}
-<a href="{{ path('app_rh_demissoes') }}" class="btn-huplex-ghost btn-sm">
-    <i class="fas fa-arrow-left"></i> Voltar
-</a>
+{% include 'components/page_back_link.html.twig' with { href: path('app_rh_demissoes') } %}
 {% endblock %}
 
 {% block page_list_content %}
-<div class="huplex-card" style="max-width: 640px;">
-    {% if funcionarios is empty %}
-        {% include 'components/empty_state.html.twig' with {
-            icon: 'fa-user-tie',
-            title: 'Nenhum funcionário ativo',
-            text: 'Cadastre funcionários ativos antes de iniciar um offboarding.',
-            btn_label: 'Ver funcionários',
-            btn_href: path('app_rh_funcionarios')
-        } %}
-    {% else %}
-    <form method="post">
-        <div class="form-group">
-            <label for="funcionario_id">Funcionário <span class="text-danger">*</span></label>
-            <select class="form-control" id="funcionario_id" name="funcionario_id" required>
-                <option value="">Selecione…</option>
-                {% for f in funcionarios %}
-                    <option value="{{ f.id }}">{{ f.nome }}{% if f.cargo %} — {{ f.cargo }}{% endif %}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="data_prevista">Data prevista de desligamento</label>
-            <input type="date" class="form-control" id="data_prevista" name="data_prevista">
-        </div>
-        <div class="form-group">
-            <label for="motivo">Motivo</label>
-            <input type="text" class="form-control" id="motivo" name="motivo" placeholder="Ex.: pedido de demissão, término de contrato">
-        </div>
-        <div class="form-group">
-            <label for="observacoes">Observações</label>
-            <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn-huplex">Iniciar offboarding</button>
-    </form>
-    {% endif %}
+{% if funcionarios is empty %}
+<div class="huplex-card huplex-form-panel" style="max-width: 640px;">
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-user-tie',
+        title: 'Nenhum funcionário ativo',
+        text: 'Cadastre funcionários ativos antes de iniciar um offboarding.',
+        btn_label: 'Ver funcionários',
+        btn_href: path('app_rh_funcionarios')
+    } %}
 </div>
+{% else %}
+{% set funcionario_options = [{ value: '', label: 'Selecione…' }] %}
+{% for f in funcionarios %}
+    {% set funcionario_options = funcionario_options|merge([{
+        value: f.id,
+        label: f.nome ~ (f.cargo ? ' — ' ~ f.cargo : '')
+    }]) %}
+{% endfor %}
+{% embed 'components/huplex_form_panel.html.twig' with {
+    subtitle: 'Selecione o funcionário e a data prevista de desligamento. O checklist de offboarding será aberto em seguida.',
+    submit_label: 'Iniciar offboarding'
+} %}
+    {% block form_panel_fields %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'funcionario_id',
+            name: 'funcionario_id',
+            label: 'Funcionário',
+            type: 'select',
+            required: true,
+            options: funcionario_options
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'data_prevista', name: 'data_prevista', label: 'Data prevista de desligamento', type: 'date'
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'motivo', name: 'motivo', label: 'Motivo',
+            placeholder: 'Ex.: pedido de demissão, término de contrato'
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'observacoes', name: 'observacoes', label: 'Observações', type: 'textarea'
+        } %}
+    {% endblock %}
+{% endembed %}
+{% endif %}
 {% endblock %}

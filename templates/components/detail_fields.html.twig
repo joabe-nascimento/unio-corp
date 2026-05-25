@@ -1,0 +1,20 @@
+{#
+  detail_fields — grade de campos label/valor (ficha, detalhe RH)
+
+  Props:
+    items  (array)  cada item: { label, value, html? }
+#}
+<div class="detail-fields">
+    {% for item in items %}
+        <div class="detail-fields-item">
+            <div class="detail-fields-label">{{ item.label }}</div>
+            <div class="detail-fields-value">
+                {% if item.html|default(false) %}
+                    {{ item.value|raw }}
+                {% else %}
+                    {{ item.value|default('—') }}
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>

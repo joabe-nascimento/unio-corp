@@ -1,0 +1,37 @@
+{#
+  rh_process_detail — layout de detalhe (checklist + dados)
+
+  Props:
+    process, checklist_title, complete_label, confirm_message,
+    detail_items (array for detail_fields), hint (string)
+#}
+<div class="row rh-process-detail">
+    <div class="col-lg-7 mb-3">
+        <div class="huplex-card">
+            <div class="section-title mb-3">{{ checklist_title }}</div>
+            {% include 'components/rh_process_checklist.html.twig' with { process: process } %}
+            {% if process.status != 'CONCLUIDO' and grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
+                <hr class="huplex-divider">
+                <form method="post" class="rh-process-complete-form" data-confirm="{{ confirm_message }}">
+                    <input type="hidden" name="action" value="complete">
+                    <button type="submit"
+                            class="btn-huplex"
+                            {% if process.checklistProgress < 100 %}disabled title="Marque todos os itens do checklist"{% endif %}>
+                        {{ complete_label }}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-5 mb-3">
+        <div class="huplex-card">
+            <div class="section-title mb-3">Dados</div>
+            {% include 'components/detail_fields.html.twig' with { items: detail_items } %}
+        </div>
+        {% if hint is defined and hint %}
+            <p class="rh-process-hint">
+                <i class="fas fa-map-marker-alt"></i> {{ hint|raw }}
+            </p>
+        {% endif %}
+    </div>
+</div>

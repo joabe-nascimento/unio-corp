@@ -3,35 +3,30 @@
 {% set page_list_title = 'Nova admissão' %}
 
 {% block page_list_toolbar_actions %}
-<a href="{{ path('app_rh_admissoes') }}" class="btn-huplex-ghost btn-sm">
-    <i class="fas fa-arrow-left"></i> Voltar
-</a>
+{% include 'components/page_back_link.html.twig' with { href: path('app_rh_admissoes') } %}
 {% endblock %}
 
 {% block page_list_content %}
-<div class="huplex-card" style="max-width: 640px;">
-    <form method="post">
-        <div class="form-group">
-            <label for="nome">Nome completo <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="nome" name="nome" required value="{{ nome|default('') }}">
-        </div>
-        <div class="form-group">
-            <label for="email">E-mail <span class="text-danger">*</span></label>
-            <input type="email" class="form-control" id="email" name="email" required value="{{ email|default('') }}">
-        </div>
-        <div class="form-group">
-            <label for="cargo">Cargo</label>
-            <input type="text" class="form-control" id="cargo" name="cargo" value="{{ cargo|default('') }}">
-        </div>
-        <div class="form-group">
-            <label for="data_prevista">Data prevista de início</label>
-            <input type="date" class="form-control" id="data_prevista" name="data_prevista" value="{{ data_prevista|default('') }}">
-        </div>
-        <div class="form-group">
-            <label for="observacoes">Observações</label>
-            <textarea class="form-control" id="observacoes" name="observacoes" rows="3">{{ observacoes|default('') }}</textarea>
-        </div>
-        <button type="submit" class="btn-huplex">Iniciar onboarding</button>
-    </form>
-</div>
+{% embed 'components/huplex_form_panel.html.twig' with {
+    subtitle: 'Preencha os dados do colaborador. Um checklist de onboarding será aberto em seguida.',
+    submit_label: 'Iniciar onboarding'
+} %}
+    {% block form_panel_fields %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'nome', name: 'nome', label: 'Nome completo', value: nome|default(''), required: true
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'email', name: 'email', label: 'E-mail', type: 'email', value: email|default(''), required: true
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'cargo', name: 'cargo', label: 'Cargo', value: cargo|default('')
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'data_prevista', name: 'data_prevista', label: 'Data prevista de início', type: 'date', value: data_prevista|default('')
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'observacoes', name: 'observacoes', label: 'Observações', type: 'textarea', value: observacoes|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
 {% endblock %}

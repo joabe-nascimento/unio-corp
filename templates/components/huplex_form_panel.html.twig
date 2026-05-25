@@ -1,0 +1,30 @@
+{#
+  huplex_form_panel — card de formulário padronizado
+
+  Props:
+    title     (string, opt)
+    subtitle  (string, opt)
+    max_width (int, opt)  px, default 640
+
+  Blocks:
+    form_panel_fields
+    form_panel_actions
+#}
+<div class="huplex-card huplex-form-panel"{% if max_width|default(640) %} style="max-width: {{ max_width }}px;"{% endif %}>
+    {% if title is defined and title %}
+        <div class="section-title mb-1">{{ title }}</div>
+    {% endif %}
+    {% if subtitle is defined and subtitle %}
+        <p class="section-subtitle mb-4">{{ subtitle }}</p>
+    {% elseif title is defined and title %}
+        <div class="mb-4"></div>
+    {% endif %}
+    <form method="post" class="huplex-form">
+        {% block form_panel_fields %}{% endblock %}
+        <div class="huplex-form-actions">
+            {% block form_panel_actions %}
+                <button type="submit" class="btn-huplex">{{ submit_label|default('Salvar') }}</button>
+            {% endblock %}
+        </div>
+    </form>
+</div>

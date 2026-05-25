@@ -1,0 +1,81 @@
+{#
+  rh_process_table — listagem de processos de admissão ou demissão
+
+  Props:
+    type        (string)  onboarding | offboarding
+    processos   (array)
+    empty_icon, empty_title, empty_text, empty_btn_label, empty_btn_href
+#}
+{% set _is_onboarding = type|default('onboarding') == 'onboarding' %}
+{% set _progress_variant = _is_onboarding ? 'accent' : 'warning' %}
+{% set _show_route = _is_onboarding ? 'app_rh_admissoes_show' : 'app_rh_demissoes_show' %}
+
+<div class="huplex-card">
+    {% if processos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: empty_icon|default(_is_onboarding ? 'fa-user-plus' : 'fa-user-minus'),
+            title: empty_title|default('Nenhum processo'),
+            text: empty_text|default(''),
+            btn_label: empty_btn_label|default(''),
+            btn_href: empty_btn_href|default('#')
+        } %}
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-huplex mb-0">
+                <thead>
+                    <tr>
+                        <th>{{ _is_onboarding ? 'Colaborador' : 'Funcionário' }}</th>
+                        <th>{{ _is_onboarding ? 'Cargo' : 'Motivo' }}</th>
+                        <th>Previsto</th>
+                        <th>Progresso</th>
+                        <th>Status</th>
+                        <th class="text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in processos %}
+                    <tr>
+                        <td>
+                            {% if _is_onboarding %}
+                                {% include 'components/person_cell.html.twig' with {
+                                    name: p.nome,
+                                    subtitle: p.email
+                                } %}
+                            {% else %}
+                                {% set f = p.funcionario %}
+                                {% include 'components/person_cell.html.twig' with {
+                                    name: f.nome,
+                                    subtitle: f.email|default('')
+                                } %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if _is_onboarding %}
+                                {{ p.cargo|default('—') }}
+                            {% else %}
+                                {{ p.motivo|default('—') }}
+                            {% endif %}
+                        </td>
+                        <td>{{ p.dataPrevista ? p.dataPrevista|date('d/m/Y') : '—' }}</td>
+                        <td>
+                            {% include 'components/progress_inline.html.twig' with {
+                                percent: p.checklistProgress,
+                                variant: _progress_variant
+                            } %}
+                        </td>
+                        <td>
+                            {% include 'components/status_badge.html.twig' with {
+                                label: p.statusLabel,
+                                variant: p.statusClass
+                            } %}
+                        </td>
+                        <td class="text-right">
+                            <a href="{{ path(_show_route, { id: p.id }) }}" class="btn-huplex-ghost btn-sm">Abrir</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
