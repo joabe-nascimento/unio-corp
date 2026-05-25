@@ -5,26 +5,31 @@
     id, name, label, type (text|email|date|select|textarea), value, placeholder,
     required (bool), options (array for select: {value, label}), rows (textarea)
 #}
+{% set field_type = type is defined ? type : 'text' %}
+{% set field_required = required is defined and required %}
+{% set field_value = value is defined ? value : '' %}
+{% set field_options = options is defined ? options : [] %}
+{% set field_rows = rows is defined ? rows : 3 %}
 <div class="huplex-form-group">
     <label class="huplex-form-label" for="{{ id }}">
         {{ label }}
-        {% if required|default(false) %}<span class="huplex-form-required">*</span>{% endif %}
+        {% if field_required %}<span class="huplex-form-required">*</span>{% endif %}
     </label>
-    {% if type|default('text') == 'select' %}
-        <select class="huplex-form-control" id="{{ id }}" name="{{ name }}"{% if required|default(false) %} required{% endif %}>
-            {% for opt in options|default([]) %}
-                <option value="{{ opt.value }}"{% if opt.value == value|default('') %} selected{% endif %}>{{ opt.label }}</option>
+    {% if field_type == 'select' %}
+        <select class="huplex-form-control" id="{{ id }}" name="{{ name }}"{% if field_required %} required{% endif %}>
+            {% for opt in field_options %}
+                <option value="{{ opt.value }}"{% if opt.value == field_value %} selected{% endif %}>{{ opt.label }}</option>
             {% endfor %}
         </select>
-    {% elseif type == 'textarea' %}
-        <textarea class="huplex-form-control" id="{{ id }}" name="{{ name }}" rows="{{ rows|default(3) }}"{% if placeholder is defined %} placeholder="{{ placeholder }}"{% endif %}>{{ value|default('') }}</textarea>
+    {% elseif field_type == 'textarea' %}
+        <textarea class="huplex-form-control" id="{{ id }}" name="{{ name }}" rows="{{ field_rows }}"{% if placeholder is defined and placeholder %} placeholder="{{ placeholder }}"{% endif %}>{{ field_value }}</textarea>
     {% else %}
-        <input type="{{ type|default('text') }}"
+        <input type="{{ field_type }}"
                class="huplex-form-control"
                id="{{ id }}"
                name="{{ name }}"
-               value="{{ value|default('') }}"
-               {% if placeholder is defined %}placeholder="{{ placeholder }}"{% endif %}
-               {% if required|default(false) %}required{% endif %}>
+               value="{{ field_value }}"
+               {% if placeholder is defined and placeholder %}placeholder="{{ placeholder }}"{% endif %}
+               {% if field_required %}required{% endif %}>
     {% endif %}
 </div>
