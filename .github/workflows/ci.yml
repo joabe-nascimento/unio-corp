@@ -65,8 +65,11 @@ jobs:
 
       - name: Prepare database
         run: |
-          php bin/console doctrine:database:create --if-not-exists --no-interaction
-          php bin/console doctrine:migrations:migrate --no-interaction
+          # Banco vazio no CI: migrations incrementais não criam user/empresa (schema legado).
+          # schema:create gera todas as tabelas a partir das entidades Doctrine.
+          php bin/console doctrine:database:drop --force --if-exists --no-interaction
+          php bin/console doctrine:database:create --no-interaction
+          php bin/console doctrine:schema:create --no-interaction
           php bin/console app:seed-users --no-interaction
           php bin/console app:seed-product-grants --force --no-interaction
 
