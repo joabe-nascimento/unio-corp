@@ -1,0 +1,23 @@
+{#
+  huplex_toast_stack — notificações suspensas (canto superior direito)
+#}
+<div class="huplex-toast-stack" id="huplexToastStack" aria-live="polite" aria-atomic="false">
+    {% for flash_type, messages in app.flashes %}
+        {% for message in messages %}
+            {% set _type = flash_type in ['success', 'error', 'warning', 'info'] ? flash_type : 'info' %}
+            <div class="huplex-toast huplex-toast--{{ _type }}" data-huplex-toast role="status">
+                <span class="huplex-toast-icon" aria-hidden="true">
+                    {% if _type == 'success' %}<i class="fas fa-circle-check"></i>
+                    {% elseif _type == 'error' %}<i class="fas fa-circle-xmark"></i>
+                    {% elseif _type == 'warning' %}<i class="fas fa-triangle-exclamation"></i>
+                    {% else %}<i class="fas fa-circle-info"></i>
+                    {% endif %}
+                </span>
+                <span class="huplex-toast-message">{{ message }}</span>
+                <button type="button" class="huplex-toast-close" data-huplex-toast-close aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>

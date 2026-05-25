@@ -1,0 +1,44 @@
+{#
+  dev_tarefa_edit_offcanvas — editar tarefa do kanban
+#}
+{% embed 'components/huplex_offcanvas.html.twig' with {
+    id: 'dev-tarefa-edit',
+    title: 'Editar tarefa',
+    subtitle: 'Atualize título, coluna, prioridade e vínculos.',
+    icon: 'fa-pen-to-square',
+    open: open is defined and open,
+    size: 'md'
+} %}
+    {% block offcanvas_body %}
+        <form method="post"
+              action="#"
+              class="huplex-form huplex-offcanvas-form"
+              data-dev-tarefa-edit-form
+              data-locked-projeto="{{ locked_projeto_id|default(0) }}"
+              data-edit-url-template="{{ tarefa_edit_url_template|default('') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('dev_tarefa_edit') }}">
+            <input type="hidden" name="tarefa_id" value="" data-dev-tarefa-edit-id>
+            {% if redirect|default('') == 'show' %}
+                <input type="hidden" name="redirect" value="show">
+            {% else %}
+                <input type="hidden" name="redirect_view" value="{{ active_view|default('kanban') }}">
+            {% endif %}
+            {% if projeto_filter|default(0) > 0 %}
+                <input type="hidden" name="projeto_filter" value="{{ projeto_filter }}">
+            {% endif %}
+            {% include 'modules/core/projetos/_tarefa_form_fields.html.twig' with {
+                rd: rd|default({}),
+                projetos: projetos|default([]),
+                metas: metas|default([]),
+                kanban_columns: kanban_columns|default({}),
+                locked_projeto_id: locked_projeto_id|default(0)
+            } %}
+            <div class="huplex-form-actions huplex-offcanvas-form-actions">
+                <button type="submit" class="btn-huplex">
+                    <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar alterações
+                </button>
+                <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}

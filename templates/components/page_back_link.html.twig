@@ -5,7 +5,13 @@
     label (string, opt)  default: Voltar
     href  (string)
     icon  (string, opt)  default: fa-arrow-left
+    icon_only (bool, opt)  só a seta
 #}
-<a href="{{ href }}" class="btn-huplex-ghost btn-sm">
-    <i class="fas {{ icon|default('fa-arrow-left') }}"></i> {{ label|default('Voltar') }}
+<a href="{{ href }}"
+   class="page-back-link{% if icon_only|default(false) %} page-back-link--icon-only{% endif %}"
+   aria-label="{{ label|default('Voltar') }}">
+    <i class="fas {{ icon|default('fa-arrow-left') }}" aria-hidden="true"></i>
+    {% if not icon_only|default(false) %}
+        <span>{{ label|default('Voltar') }}</span>
+    {% endif %}
 </a>

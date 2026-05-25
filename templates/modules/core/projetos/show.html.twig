@@ -1,9 +1,26 @@
 {% extends 'layout/page_list.html.twig' %}
 {% block title %}{{ projeto.nome }}{% endblock %}
 {% set page_list_title = projeto.nome %}
+{% set page_list_actions_in_top = true %}
+{% set page_list_actions_before_title = true %}
 
 {% block page_list_toolbar_actions %}
-{% include 'components/page_back_link.html.twig' with { href: path('app_core_projetos', { view: 'kanban', projeto: projeto.id }) } %}
+{% include 'components/page_back_link.html.twig' with {
+    href: path('app_core_projetos', { view: 'lista' }),
+    label: 'Voltar',
+    icon_only: true
+} %}
+{% endblock %}
+
+{% block page_list_toolbar_subnav %}
+<div class="dev-projeto-show-meta">
+    <span class="dev-projeto-show-accent" style="background: {{ projeto.cor|default('#4F7FFF') }};" aria-hidden="true"></span>
+    <div class="dev-projeto-show-meta-text">
+        {% if projeto.area %}<span>{{ projeto.area }}</span>{% endif %}
+        {% if projeto.codigo %}<span class="dev-projeto-show-code">{{ projeto.codigo }}</span>{% endif %}
+        {% include 'components/status_badge.html.twig' with { label: projeto.statusLabel, variant: projeto.statusClass } %}
+    </div>
+</div>
 {% endblock %}
 
 {% block page_list_kpis %}
@@ -19,7 +36,7 @@
 {% block page_list_content %}
 <div class="row">
     <div class="col-lg-4 mb-3">
-        <div class="huplex-card">
+        <div class="huplex-card dev-projeto-resumo-card" style="border-top-color: {{ projeto.cor|default('#4F7FFF') }};">
             <div class="section-title mb-3">Resumo</div>
             {% include 'components/detail_fields.html.twig' with { items: [
                 { label: 'Área', value: projeto.area|default('—') },
@@ -27,37 +44,48 @@
                 { label: 'Descrição', value: projeto.descricao|default('—') },
             ] } %}
             {% include 'components/progress_inline.html.twig' with { percent: projeto.progresso, variant: 'accent' } %}
+            {% if metas is not empty %}
+            <hr class="huplex-divider">
+            <div class="section-subtitle mb-2">Metas vinculadas</div>
+            <ul class="dev-projeto-metas-mini mb-0">
+                {% for meta in metas %}
+                <li>{{ meta.titulo }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </div>
     </div>
     <div class="col-lg-8 mb-3">
         <div class="huplex-card mb-3">
-            <div class="section-title mb-3">Nova tarefa</div>
-            <form method="post" class="huplex-form">
-                <input type="hidden" name="action" value="nova_tarefa">
-                <div class="row">
-                    <div class="col-md-8">
-                        {% include 'components/huplex_form_field.html.twig' with { id: 'titulo', name: 'titulo', label: 'Título', required: true } %}
-                    </div>
-                    <div class="col-md-4">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'status', name: 'status', label: 'Coluna', type: 'select',
-                            options: [
-                                { value: 'BACKLOG', label: 'Backlog' },
-                                { value: 'A_FAZER', label: 'A fazer' },
-                                { value: 'EM_ANDAMENTO', label: 'Em andamento' },
-                            ]
-                        } %}
-                    </div>
-                </div>
-                <button type="submit" class="btn-huplex btn-sm">Adicionar</button>
-            </form>
+            <div class="section-title mb-1">Nova tarefa</div>
+            <p class="person-cell-sub mb-3">Tarefas aparecem aqui e no kanban geral (aba Kanban).</p>
+            <button type="button" class="btn-huplex btn-sm" data-huplex-offcanvas-open="dev-tarefa" data-kanban-projeto-id="{{ projeto.id }}" data-kanban-status="BACKLOG">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova tarefa
+            </button>
         </div>
-        <div class="section-title mb-2">Kanban — arraste entre colunas</div>
+        <div class="section-title mb-2">Kanban do projeto</div>
+        {% set _total_tarefas = 0 %}
+        {% for _col in kanban_columns %}
+            {% set _total_tarefas = _total_tarefas + kanban[_col]|default([])|length %}
+        {% endfor %}
+        {% if _total_tarefas == 0 %}
+        <div class="huplex-card mb-3 dev-projeto-kanban-empty">
+            <p class="person-cell-sub mb-0">
+                <i class="fas fa-hand-pointer"></i>
+                Nenhuma tarefa ainda — clique no + em uma coluna ou em "Nova tarefa".
+            </p>
+        </div>
+        {% endif %}
         {% include 'components/dev_kanban_board.html.twig' with {
             kanban: kanban,
             kanban_columns: kanban_columns,
+            projeto_filter: projeto.id,
+            projetos: [projeto],
             move_url_template: move_url_template,
             csrf_move: csrf_move,
+            tarefa_edit_url_template: tarefa_edit_url_template,
+            tarefa_delete_url_template: tarefa_delete_url_template,
+            csrf_tarefa_delete: csrf_tarefa_delete,
             redirect: 'show',
             hide_project_link: true
         } %}
@@ -65,8 +93,31 @@
 </div>
 {% endblock %}
 
+{% block page_overlays %}
+{% include 'components/dev_tarefa_offcanvas.html.twig' with {
+    rd: tarefa_form_rd|default({}),
+    open: open_tarefa_offcanvas|default(false),
+    projetos: [projeto],
+    metas: metas,
+    kanban_columns: kanban_columns,
+    locked_projeto_id: projeto.id,
+    redirect: 'show'
+} %}
+{% include 'components/dev_tarefa_edit_offcanvas.html.twig' with {
+    rd: {},
+    open: false,
+    projetos: [projeto],
+    metas: metas,
+    kanban_columns: kanban_columns,
+    tarefa_edit_url_template: tarefa_edit_url_template,
+    locked_projeto_id: projeto.id,
+    projeto_filter: projeto.id,
+    redirect: 'show'
+} %}
+{% endblock %}
+
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/sortable.min.js') }}"></script>
-<script src="{{ asset('js/dev-kanban.js') }}?v=3"></script>
+<script src="{{ asset('js/dev-kanban.js') }}?v=9"></script>
 {% endblock %}

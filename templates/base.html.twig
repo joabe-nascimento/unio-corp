@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||localStorage.getItem('huplex-theme')||'dark')}catch(e){}</script>
 
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=75">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=77">
 
     {% block stylesheets %}{% endblock %}
 </head>
@@ -143,21 +143,14 @@
         <section class="content{% if block('page_toolbar_layout')|trim %} content--with-toolbar{% elseif not show_page_header %} content--no-header{% endif %}">
             {% block content_lead %}{% endblock %}
             <div class="container-fluid container-fluid--page-body">
-                {% for flash_type, messages in app.flashes %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ flash_type }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
-                        </div>
-                    {% endfor %}
-                {% endfor %}
-
                 {% block content %}{% endblock %}
             </div>
         </section>
     </div>
 
     {% block page_overlays %}{% endblock %}
+
+    {% include 'components/huplex_toast_stack.html.twig' %}
 
     <footer class="main-footer text-center">
         <strong>Unio</strong> &copy; {{ "now"|date("Y") }} — Plataforma de Gestão de Pessoas
@@ -283,6 +276,7 @@ window.addEventListener('load', function () {
 </script>
 <script src="{{ asset('js/huplex-offcanvas.js') }}?v=1"></script>
 <script src="{{ asset('js/huplex-color-picker.js') }}?v=1"></script>
+<script src="{{ asset('js/huplex-toast.js') }}?v=1"></script>
 {% block javascripts %}{% endblock %}
 
 {# ── View Toggle — JS genérico, carregado uma vez no base ── #}

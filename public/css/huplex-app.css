@@ -896,6 +896,50 @@
             gap: 12px;
             min-width: 0;
         }
+        .list-toolbar-left--back-first {
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .list-toolbar-left--back-first .list-toolbar-back {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .list-toolbar-left--back-first .list-toolbar-heading {
+            flex: 1;
+            min-width: 0;
+        }
+        .page-back-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface-2);
+            color: var(--text-2);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+        }
+        .page-back-link:hover {
+            text-decoration: none;
+            color: var(--accent);
+            border-color: var(--accent-line);
+            background: var(--accent-dim);
+            box-shadow: 0 0 0 3px rgba(79, 127, 255, 0.08);
+        }
+        .page-back-link--icon-only {
+            width: 40px;
+            padding: 0;
+        }
+        .page-back-link--icon-only i {
+            font-size: 15px;
+        }
         .list-toolbar--page {
             margin: 0;
             width: 100%;
@@ -1930,6 +1974,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 8px;
             padding: 12px 14px;
             border-bottom: 1px solid var(--border);
         }
@@ -1953,6 +1998,45 @@
             flex-direction: column;
             gap: 8px;
             min-height: 120px;
+        }
+        .kanban-column-add-card {
+            flex-shrink: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-3);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+        }
+        .kanban-column-add-card i {
+            font-size: 11px;
+        }
+        .kanban-column-add-card:hover,
+        .kanban-column-add-card.is-active {
+            background: var(--accent-dim);
+            border-color: var(--accent-line);
+            border-style: solid;
+            color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 127, 255, 0.08);
+        }
+        .dev-kanban-board[data-kanban-add-disabled] .kanban-column-add-card {
+            opacity: 0.45;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        .kanban-column-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 48px;
         }
         .kanban-card {
             background: var(--surface-2);
@@ -1996,8 +2080,45 @@
         .kanban-card-top {
             display: flex;
             align-items: flex-start;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 4px;
+        }
+        .kanban-card-menu {
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .kanban-card-menu-btn {
+            width: 26px;
+            height: 26px;
+            padding: 0;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-3);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+        .kanban-card-menu-btn:hover,
+        .kanban-card-menu-btn[aria-expanded="true"] {
+            background: var(--surface-3, rgba(255, 255, 255, 0.06));
+            color: var(--text-1);
+        }
+        .kanban-card-dropdown {
+            min-width: 168px;
+            margin-top: 4px;
+        }
+        .kanban-card-dropdown .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
         }
         .kanban-card-drag-handle {
             flex: 0 0 auto;
@@ -2008,13 +2129,58 @@
             touch-action: none;
         }
         .kanban-card-drag-handle:active { cursor: grabbing; }
-        .kanban-card-top .kanban-card-title { flex: 1; margin-bottom: 0; }
+        .kanban-card-top .kanban-card-title { flex: 1; min-width: 0; margin-bottom: 0; }
         .dev-kanban-card { user-select: none; }
         .dev-kanban-card--saving { opacity: 0.55; pointer-events: none; }
         .dev-kanban-ghost { opacity: 0.45; background: var(--accent-dim); border: 1px dashed var(--accent) !important; }
         .dev-kanban-drag { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
 
         .dev-projetos-lead { padding: 0 2px; }
+
+        .dev-projeto-show-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .dev-projeto-show-accent {
+            width: 4px;
+            height: 28px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .dev-projeto-show-meta-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: var(--text-2);
+        }
+        .dev-projeto-show-code {
+            font-family: ui-monospace, 'Consolas', monospace;
+            color: var(--text-3);
+        }
+        .dev-projeto-metas-mini {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-2);
+        }
+        .dev-projeto-metas-mini li {
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .dev-projeto-metas-mini li:last-child { border-bottom: none; }
+        .dev-projeto-kanban-empty {
+            padding: 14px 16px;
+            border-style: dashed;
+        }
+        .dev-projeto-resumo-card {
+            border-top: 3px solid var(--accent);
+        }
 
         /* ── Offcanvas Huplex — componente lateral reutilizável ── */
         body.huplex-offcanvas-open {
@@ -2580,9 +2746,97 @@
             background-color: var(--nav-active-bg) !important;
         }
 
-        /* Alerts e botões secundários no tema escuro */
+        /* Alerts legado (preferir huplex-toast) */
         .content .alert {
             border-radius: 8px;
+        }
+
+        /* Toast — canto superior direito */
+        .huplex-toast-stack {
+            position: fixed;
+            top: calc(var(--layout-header-h, 54px) + 12px);
+            right: 16px;
+            z-index: 1085;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            max-width: min(380px, calc(100vw - 32px));
+            pointer-events: none;
+        }
+        .huplex-toast {
+            pointer-events: auto;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+            color: var(--text-1);
+            font-size: 13px;
+            line-height: 1.4;
+            animation: huplex-toast-in 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .huplex-toast.is-leaving {
+            animation: huplex-toast-out 0.28s ease forwards;
+        }
+        @keyframes huplex-toast-in {
+            from { opacity: 0; transform: translateX(16px) translateY(-6px); }
+            to { opacity: 1; transform: translateX(0) translateY(0); }
+        }
+        @keyframes huplex-toast-out {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(12px); }
+        }
+        .huplex-toast-icon {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            margin-top: 1px;
+        }
+        .huplex-toast-message { flex: 1; min-width: 0; }
+        .huplex-toast-close {
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-3);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+        .huplex-toast-close:hover {
+            background: var(--nav-hover-bg);
+            color: var(--text-1);
+        }
+        .huplex-toast--success {
+            border-color: rgba(34, 197, 94, 0.35);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, var(--surface) 55%);
+        }
+        .huplex-toast--success .huplex-toast-icon { color: #4ade80; }
+        .huplex-toast--error {
+            border-color: rgba(239, 68, 68, 0.35);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, var(--surface) 55%);
+        }
+        .huplex-toast--error .huplex-toast-icon { color: #f87171; }
+        .huplex-toast--warning {
+            border-color: rgba(245, 158, 11, 0.35);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, var(--surface) 55%);
+        }
+        .huplex-toast--warning .huplex-toast-icon { color: #fbbf24; }
+        .huplex-toast--info .huplex-toast-icon { color: var(--accent); }
+        [data-theme="light"] .huplex-toast {
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
         }
 
         /* ── Topo sidebar: mesma altura do header para alinhar a borda ── */

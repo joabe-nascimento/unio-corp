@@ -6,15 +6,16 @@
 
     var initialized = new WeakSet();
 
-    function moveUrl(template, taskId) {
+    function taskUrl(template, taskId) {
         if (!template) {
             return '';
         }
         var id = String(taskId);
-        return template
-            .replace(/\/tarefas\/0\/mover/, '/tarefas/' + id + '/mover')
-            .replace(/\/tarefas\/__TASK_ID__\/mover/, '/tarefas/' + id + '/mover')
-            .replace(/\/0\/mover$/, '/' + id + '/mover');
+        return template.replace(/\/tarefas\/0(\/|$)/g, '/tarefas/' + id + '$1').replace(/\/0(\/|$)/g, '/' + id + '$1');
+    }
+
+    function moveUrl(template, taskId) {
+        return taskUrl(template, taskId);
     }
 
     function initBoard(board) {
@@ -41,7 +42,7 @@
                 draggable: '.dev-kanban-card',
                 ghostClass: 'dev-kanban-ghost',
                 dragClass: 'dev-kanban-drag',
-                filter: 'a, button, input, select, textarea, label',
+                filter: 'a, button, input, select, textarea, label, .kanban-card-menu, .dropdown-menu',
                 preventOnFilter: true,
                 delay: 80,
                 delayOnTouchOnly: true,
@@ -117,6 +118,275 @@
         initialized.add(board);
     }
 
+    function getTarefaOffcanvasForm() {
+        var root = document.querySelector('[data-huplex-offcanvas="dev-tarefa"]');
+        return root ? root.querySelector('[data-dev-tarefa-form]') : null;
+    }
+
+    function resolveProjetoId(trigger) {
+        var id = trigger.getAttribute('data-kanban-projeto-id') || '';
+        if (id && id !== '0') {
+            return id;
+        }
+        var board = trigger.closest('[data-dev-kanban]');
+        if (board && board.dataset.projetoFilter) {
+            return board.dataset.projetoFilter;
+        }
+        var filterSel = document.getElementById('projeto');
+        if (filterSel && filterSel.value) {
+            return filterSel.value;
+        }
+        return '';
+    }
+
+    function filterTarefaMetas(projetoId) {
+        var metaSelect = document.querySelector('[data-dev-tarefa-meta-select]');
+        if (!metaSelect) {
+            return;
+        }
+        var pid = projetoId ? String(projetoId) : '';
+        metaSelect.querySelectorAll('option').forEach(function (opt) {
+            if (!opt.value) {
+                return;
+            }
+            var optPid = opt.getAttribute('data-projeto-id') || '';
+            var show = !pid || optPid === '' || optPid === pid;
+            opt.hidden = !show;
+            opt.disabled = !show;
+            if (!show && opt.selected) {
+                opt.selected = false;
+            }
+        });
+    }
+
+    function setFieldValue(form, name, value) {
+        var el = form.querySelector('[name="' + name + '"]');
+        if (!el) {
+            return;
+        }
+        el.value = value != null ? String(value) : '';
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function applyTarefaOffcanvasContext(trigger) {
+        var form = getTarefaOffcanvasForm();
+        if (!form || !trigger) {
+            return;
+        }
+
+        var status = trigger.getAttribute('data-kanban-status') || 'BACKLOG';
+        var projetoId = resolveProjetoId(trigger);
+        var locked = form.getAttribute('data-locked-projeto') || '0';
+
+        setFieldValue(form, 'status', status);
+
+        if (locked !== '0' && locked !== '') {
+            setFieldValue(form, 'projeto_id', locked);
+            filterTarefaMetas(locked);
+        } else if (projetoId) {
+            setFieldValue(form, 'projeto_id', projetoId);
+            filterTarefaMetas(projetoId);
+        } else {
+            setFieldValue(form, 'projeto_id', '');
+            filterTarefaMetas('');
+        }
+
+        setFieldValue(form, 'titulo', '');
+        setFieldValue(form, 'descricao', '');
+        setFieldValue(form, 'prioridade', 'MEDIA');
+        setFieldValue(form, 'meta_id', '');
+
+        if (trigger.hasAttribute('data-kanban-add')) {
+            document.querySelectorAll('.kanban-column-add-card.is-active').forEach(function (btn) {
+                btn.classList.remove('is-active');
+            });
+            trigger.classList.add('is-active');
+        }
+    }
+
+    function focusTarefaTitulo() {
+        var form = getTarefaOffcanvasForm();
+        if (!form) {
+            return;
+        }
+        var titulo = form.querySelector('[name="titulo"]');
+        if (titulo) {
+            window.setTimeout(function () {
+                titulo.focus();
+            }, 300);
+        }
+    }
+
+    var tarefaOffcanvasClickBound = false;
+
+    function initKanbanTarefaOffcanvas() {
+        if (tarefaOffcanvasClickBound) {
+            return;
+        }
+        tarefaOffcanvasClickBound = true;
+
+        document.addEventListener(
+            'click',
+            function (e) {
+                var trigger = e.target.closest('[data-kanban-add], [data-huplex-offcanvas-open="dev-tarefa"]');
+                if (!trigger) {
+                    return;
+                }
+                if (trigger.closest('[data-kanban-add-disabled]')) {
+                    return;
+                }
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                applyTarefaOffcanvasContext(trigger);
+                if (window.HuplexOffcanvas && typeof window.HuplexOffcanvas.open === 'function') {
+                    window.HuplexOffcanvas.open('dev-tarefa');
+                    focusTarefaTitulo();
+                }
+            },
+            true
+        );
+
+        document.addEventListener('change', function (e) {
+            var sel = e.target.closest('[name="projeto_id"]');
+            if (!sel || !sel.closest('[data-dev-tarefa-form], [data-dev-tarefa-edit-form]')) {
+                return;
+            }
+            filterTarefaMetas(sel.value);
+        });
+
+        var form = getTarefaOffcanvasForm();
+        if (form) {
+            var locked = form.getAttribute('data-locked-projeto') || '0';
+            filterTarefaMetas(locked !== '0' ? locked : '');
+        }
+        var editForm = getTarefaEditOffcanvasForm();
+        if (editForm) {
+            var lockedEdit = editForm.getAttribute('data-locked-projeto') || '0';
+            filterTarefaMetas(lockedEdit !== '0' ? lockedEdit : '');
+        }
+    }
+
+    function getTarefaEditOffcanvasForm() {
+        var root = document.querySelector('[data-huplex-offcanvas="dev-tarefa-edit"]');
+        return root ? root.querySelector('[data-dev-tarefa-edit-form]') : null;
+    }
+
+    function applyTarefaEditFromCard(card) {
+        var form = getTarefaEditOffcanvasForm();
+        if (!form || !card) {
+            return;
+        }
+
+        var board = card.closest('[data-dev-kanban]');
+        var template = form.getAttribute('data-edit-url-template') || (board ? board.dataset.editUrlTemplate : '');
+        var taskId = card.dataset.taskId;
+
+        if (template && taskId) {
+            form.action = taskUrl(template, taskId);
+        }
+
+        var idField = form.querySelector('[data-dev-tarefa-edit-id]');
+        if (idField) {
+            idField.value = taskId || '';
+        }
+
+        var locked = form.getAttribute('data-locked-projeto') || '0';
+        var projetoId = locked !== '0' && locked !== '' ? locked : card.dataset.taskProjetoId || '';
+
+        setFieldValue(form, 'projeto_id', projetoId);
+        setFieldValue(form, 'titulo', card.dataset.taskTitulo || '');
+        setFieldValue(form, 'descricao', card.dataset.taskDescricao || '');
+        setFieldValue(form, 'status', card.dataset.taskStatus || 'BACKLOG');
+        setFieldValue(form, 'prioridade', card.dataset.taskPrioridade || 'MEDIA');
+        setFieldValue(form, 'meta_id', card.dataset.taskMetaId || '');
+        filterTarefaMetas(projetoId);
+    }
+
+    function focusTarefaEditTitulo() {
+        var form = getTarefaEditOffcanvasForm();
+        if (!form) {
+            return;
+        }
+        var titulo = form.querySelector('[name="titulo"]');
+        if (titulo) {
+            window.setTimeout(function () {
+                titulo.focus();
+                titulo.select();
+            }, 300);
+        }
+    }
+
+    var cardActionsBound = false;
+
+    function initKanbanCardActions() {
+        if (cardActionsBound) {
+            return;
+        }
+        cardActionsBound = true;
+
+        document.addEventListener('click', function (e) {
+            var editBtn = e.target.closest('[data-kanban-edit]');
+            if (editBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                var card = editBtn.closest('.dev-kanban-card');
+                if (!card) {
+                    return;
+                }
+                applyTarefaEditFromCard(card);
+                if (window.HuplexOffcanvas && typeof window.HuplexOffcanvas.open === 'function') {
+                    window.HuplexOffcanvas.open('dev-tarefa-edit');
+                    focusTarefaEditTitulo();
+                }
+                return;
+            }
+
+            var deleteBtn = e.target.closest('[data-kanban-delete]');
+            if (!deleteBtn) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+
+            var cardDel = deleteBtn.closest('.dev-kanban-card');
+            var boardDel = cardDel ? cardDel.closest('[data-dev-kanban]') : null;
+            if (!cardDel || !boardDel) {
+                return;
+            }
+
+            var titulo = deleteBtn.getAttribute('data-task-titulo') || cardDel.dataset.taskTitulo || 'esta tarefa';
+            if (!window.confirm('Excluir "' + titulo + '"? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            var deleteTemplate = boardDel.dataset.deleteUrlTemplate;
+            var csrf = boardDel.dataset.csrfDelete;
+            var taskIdDel = deleteBtn.getAttribute('data-task-id') || cardDel.dataset.taskId;
+            if (!deleteTemplate || !csrf || !taskIdDel) {
+                return;
+            }
+
+            var body = new FormData();
+            body.append('_token', csrf);
+            if (boardDel.dataset.redirect) {
+                body.append('redirect', boardDel.dataset.redirect);
+            } else {
+                body.append('redirect_view', 'kanban');
+            }
+            if (boardDel.dataset.projetoFilter) {
+                body.append('projeto_filter', boardDel.dataset.projetoFilter);
+            }
+
+            fetch(taskUrl(deleteTemplate, taskIdDel), {
+                method: 'POST',
+                body: body,
+                credentials: 'same-origin',
+            }).then(function () {
+                window.location.reload();
+            });
+        });
+    }
+
     function initKanbanIn(root) {
         var scope = root || document;
         scope.querySelectorAll('[data-dev-kanban]').forEach(function (board) {
@@ -177,6 +447,8 @@
     }
 
     function boot() {
+        initKanbanTarefaOffcanvas();
+        initKanbanCardActions();
         initCoreProjetosTabs();
         initKanbanIn(document);
     }

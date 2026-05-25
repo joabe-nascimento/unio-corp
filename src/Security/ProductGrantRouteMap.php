@@ -75,6 +75,9 @@ final class ProductGrantRouteMap
         'app_core_projetos_show' => ['scope' => 'product_core', 'product' => 'projetos'],
         'app_core_metas_nova' => ['scope' => 'product_core', 'product' => 'metas'],
         'app_core_tarefa_mover' => ['scope' => 'product_core', 'product' => 'projetos'],
+        'app_core_tarefa_nova' => ['scope' => 'product_core', 'product' => 'projetos'],
+        'app_core_tarefa_editar' => ['scope' => 'product_core', 'product' => 'projetos'],
+        'app_core_tarefa_excluir' => ['scope' => 'product_core', 'product' => 'projetos'],
 
         // Admin (plataforma)
         'app_admin' => ['scope' => 'hub_admin', 'product' => 'usuarios'],

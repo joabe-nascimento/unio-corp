@@ -95,6 +95,41 @@ class DevProjetoService
         return $t;
     }
 
+    public function updateTarefa(
+        DevTarefa $tarefa,
+        DevProjeto $projeto,
+        string $titulo,
+        ?string $descricao,
+        string $status,
+        string $prioridade,
+        ?DevMeta $meta = null,
+    ): DevTarefa {
+        $oldProjeto = $tarefa->getProjeto();
+        $tarefa->setProjeto($projeto);
+        $tarefa->setEmpresa($projeto->getEmpresa());
+        $tarefa->setMeta($meta);
+        $tarefa->setTitulo($titulo);
+        $tarefa->setDescricao($descricao);
+        $tarefa->setStatus($status);
+        $tarefa->setPrioridade($prioridade);
+        $tarefa->touch();
+        $this->em->flush();
+        $this->recalculateProgress($projeto);
+        if ($oldProjeto->getId() !== $projeto->getId()) {
+            $this->recalculateProgress($oldProjeto);
+        }
+
+        return $tarefa;
+    }
+
+    public function deleteTarefa(DevTarefa $tarefa): void
+    {
+        $projeto = $tarefa->getProjeto();
+        $this->em->remove($tarefa);
+        $this->em->flush();
+        $this->recalculateProgress($projeto);
+    }
+
     public function moveTarefa(DevTarefa $tarefa, string $status, int $ordem): bool
     {
         if (!isset(DevTarefa::KANBAN_COLUMNS[$status])) {
@@ -113,6 +148,9 @@ class DevProjetoService
     {
         $tarefas = $this->tarefaRepo->findByEmpresa($projeto->getEmpresa(), $projeto->getId());
         if ($tarefas === []) {
+            $projeto->setProgresso(0);
+            $projeto->touch();
+
             return;
         }
         $done = count(array_filter($tarefas, static fn (DevTarefa $t) => $t->getStatus() === DevTarefa::STATUS_CONCLUIDO));

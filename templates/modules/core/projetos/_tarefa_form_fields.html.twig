@@ -1,0 +1,82 @@
+{#
+  Campos do formulário de tarefa (offcanvas kanban)
+
+  Variáveis: rd, projetos, metas, kanban_columns, locked_projeto_id (opt)
+#}
+{% set rd = rd|default({}) %}
+{% set _locked = locked_projeto_id|default(0) %}
+{% set projeto_options = [{ value: '', label: 'Selecione o projeto…' }] %}
+{% for p in projetos|default([]) %}
+    {% set projeto_options = projeto_options|merge([{ value: p.id, label: p.nome }]) %}
+{% endfor %}
+{% set status_options = [] %}
+{% for code, label in kanban_columns|default({}) %}
+    {% set status_options = status_options|merge([{ value: code, label: label }]) %}
+{% endfor %}
+
+{% if _locked > 0 %}
+    <input type="hidden" name="projeto_id" id="dev_tarefa_projeto_id" value="{{ _locked }}">
+{% else %}
+    {% include 'components/huplex_form_field.html.twig' with {
+        id: 'dev_tarefa_projeto_id',
+        name: 'projeto_id',
+        label: 'Projeto',
+        type: 'select',
+        value: rd.projeto_id|default(''),
+        required: true,
+        options: projeto_options
+    } %}
+{% endif %}
+
+{% include 'components/huplex_form_field.html.twig' with {
+    id: 'dev_tarefa_titulo',
+    name: 'titulo',
+    label: 'Título',
+    value: rd.titulo|default(''),
+    required: true,
+    placeholder: 'Ex.: Implementar filtro no kanban'
+} %}
+{% include 'components/huplex_form_field.html.twig' with {
+    id: 'dev_tarefa_descricao',
+    name: 'descricao',
+    label: 'Descrição',
+    type: 'textarea',
+    value: rd.descricao|default(''),
+    placeholder: 'Detalhes, critérios de aceite, links…',
+    rows: 4
+} %}
+{% include 'components/huplex_form_field.html.twig' with {
+    id: 'dev_tarefa_status',
+    name: 'status',
+    label: 'Coluna no kanban',
+    type: 'select',
+    value: rd.status|default('BACKLOG'),
+    required: true,
+    options: status_options
+} %}
+{% include 'components/huplex_form_field.html.twig' with {
+    id: 'dev_tarefa_prioridade',
+    name: 'prioridade',
+    label: 'Prioridade',
+    type: 'select',
+    value: rd.prioridade|default('MEDIA'),
+    options: [
+        { value: 'ALTA', label: 'Alta' },
+        { value: 'MEDIA', label: 'Média' },
+        { value: 'BAIXA', label: 'Baixa' }
+    ]
+} %}
+<div class="huplex-form-group" data-dev-tarefa-meta-group>
+    <label class="huplex-form-label" for="dev_tarefa_meta_id">Meta vinculada</label>
+    <select class="huplex-form-control" id="dev_tarefa_meta_id" name="meta_id" data-dev-tarefa-meta-select>
+        <option value="">Nenhuma</option>
+        {% for m in metas|default([]) %}
+            <option value="{{ m.id }}"
+                    data-projeto-id="{{ m.projeto ? m.projeto.id : '' }}"
+                    {{ rd.meta_id|default('') == m.id ? 'selected' : '' }}>
+                {{ m.titulo }}{% if not m.projeto %} (plataforma){% endif %}
+            </option>
+        {% endfor %}
+    </select>
+    <p class="person-cell-sub mt-1 mb-0">Opcional — vincule a uma meta do projeto selecionado.</p>
+</div>

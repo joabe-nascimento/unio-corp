@@ -14,12 +14,9 @@
 {% endblock %}
 
 {% block core_projetos_section_toolbar %}
-{# Kanban: Novo projeto à esquerda (padrão); filtro Projeto à direita #}
+{# Kanban: apenas filtro de projeto (novo projeto fica na aba Projetos) #}
 <div class="core-projetos-toolbar" data-core-toolbar-for="kanban"{% if active_view|default('kanban') != 'kanban' %} hidden{% endif %}>
     {% embed 'components/section_toolbar.html.twig' with {
-        btn_label: 'Novo projeto',
-        btn_opens: 'dev-projeto',
-        btn_icon: 'fa-plus',
         search_in_section: false
     } %}
         {% block section_toolbar_filters %}
@@ -67,21 +64,35 @@
 </div>
 {% if not has_kanban_tasks %}
 <div class="huplex-card mb-3">
-    {% include 'components/empty_state.html.twig' with {
-        icon: 'fa-columns',
-        title: 'Kanban vazio',
-        text: 'Crie um projeto e adicione tarefas — ou rode app:seed-dev-projetos para dados demo.',
-        btn_label: 'Novo projeto',
-        btn_opens: 'dev-projeto'
-    } %}
+    {% if projetos is not empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-columns',
+            title: 'Nenhuma tarefa no kanban',
+            text: 'Você já tem projetos — clique no + em uma coluna para abrir o formulário e criar a primeira tarefa.',
+            btn_label: 'Ver projetos',
+            btn_href: path('app_core_projetos', { view: 'lista' })
+        } %}
+    {% else %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-columns',
+            title: 'Kanban vazio',
+            text: 'Crie um projeto e adicione tarefas — ou rode app:seed-dev-projetos para dados demo.',
+            btn_label: 'Novo projeto',
+            btn_opens: 'dev-projeto'
+        } %}
+    {% endif %}
 </div>
 {% endif %}
 {% include 'components/dev_kanban_board.html.twig' with {
     kanban: kanban,
     kanban_columns: kanban_columns,
     projeto_filter: projeto_filter|default(0),
+    projetos: projetos,
     move_url_template: move_url_template,
-    csrf_move: csrf_move
+    csrf_move: csrf_move,
+    tarefa_edit_url_template: tarefa_edit_url_template,
+    tarefa_delete_url_template: tarefa_delete_url_template,
+    csrf_tarefa_delete: csrf_tarefa_delete
 } %}
 <script>
 (function () {
@@ -147,5 +158,24 @@
     rd: meta_form_rd|default({}),
     open: open_meta_offcanvas|default(false),
     projetos: projetos
+} %}
+{% include 'components/dev_tarefa_offcanvas.html.twig' with {
+    rd: tarefa_form_rd|default({}),
+    open: open_tarefa_offcanvas|default(false),
+    projetos: projetos,
+    metas: metas,
+    kanban_columns: kanban_columns,
+    locked_projeto_id: projeto_filter|default(0),
+    active_view: active_view|default('kanban')
+} %}
+{% include 'components/dev_tarefa_edit_offcanvas.html.twig' with {
+    rd: {},
+    open: false,
+    projetos: projetos,
+    metas: metas,
+    kanban_columns: kanban_columns,
+    tarefa_edit_url_template: tarefa_edit_url_template,
+    projeto_filter: projeto_filter|default(0),
+    active_view: active_view|default('kanban')
 } %}
 {% endblock %}
