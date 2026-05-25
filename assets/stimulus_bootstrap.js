@@ -1,5 +1,5 @@
-import { startStimulusApp } from '@symfony/stimulus-bundle';
+import { Application } from '@hotwired/stimulus';
 
-const app = startStimulusApp();
-// register any custom, 3rd party controllers here
-// app.register('some_controller_name', SomeImportedController);
+/** Entrypoint global `app` — inicia Stimulus sem @symfony/stimulus-bundle. */
+const application = Application.start();
+export default application;

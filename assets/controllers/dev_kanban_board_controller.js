@@ -19,7 +19,17 @@ export default class extends Controller {
 
     connect() {
         this.sortables = [];
-        this.initSortable();
+        this.scheduleInitSortable();
+    }
+
+    scheduleInitSortable(attempt = 0) {
+        if (typeof Sortable !== 'undefined') {
+            this.initSortable();
+            return;
+        }
+        if (attempt < 60) {
+            window.setTimeout(() => this.scheduleInitSortable(attempt + 1), 50);
+        }
     }
 
     disconnect() {
