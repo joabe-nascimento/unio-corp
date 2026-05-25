@@ -8,22 +8,24 @@
 {% set _projetos = projetos|default([]) %}
 {% set _can_add = _projetos is not empty %}
 <div class="kanban-board dev-kanban-board"
-     data-dev-kanban
-     data-move-url-template="{{ move_url_template }}"
-     data-csrf="{{ csrf_move }}"
-     {% if tarefa_edit_url_template is defined %}data-edit-url-template="{{ tarefa_edit_url_template }}"{% endif %}
-     {% if tarefa_delete_url_template is defined %}data-delete-url-template="{{ tarefa_delete_url_template }}"{% endif %}
-     {% if csrf_tarefa_delete is defined %}data-csrf-delete="{{ csrf_tarefa_delete }}"{% endif %}
-     {% if _projeto_filter > 0 %}data-projeto-filter="{{ _projeto_filter }}"{% endif %}
-     {% if redirect|default('') == 'show' %}data-redirect="show"{% endif %}
-     {% if not _can_add %}data-kanban-add-disabled{% endif %}>
+     data-controller="dev-kanban-board"
+     data-action="click->dev-kanban-board#onClick"
+     data-core-projetos-kanban-board-outlet
+     data-dev-kanban-board-move-url-template-value="{{ move_url_template }}"
+     data-dev-kanban-board-csrf-value="{{ csrf_move }}"
+     {% if tarefa_edit_url_template is defined %}data-dev-kanban-board-edit-url-template-value="{{ tarefa_edit_url_template }}"{% endif %}
+     {% if tarefa_delete_url_template is defined %}data-dev-kanban-board-delete-url-template-value="{{ tarefa_delete_url_template }}"{% endif %}
+     {% if csrf_tarefa_delete is defined %}data-dev-kanban-board-csrf-delete-value="{{ csrf_tarefa_delete }}"{% endif %}
+     {% if _projeto_filter > 0 %}data-dev-kanban-board-projeto-filter-value="{{ _projeto_filter }}"{% endif %}
+     {% if redirect|default('') == 'show' %}data-dev-kanban-board-redirect-value="show"{% endif %}
+     {% if not _can_add %}data-dev-kanban-board-add-disabled-value="true"{% endif %}>
     {% for status, label in kanban_columns %}
     {% set _column_tasks = kanban[status]|default([]) %}
     {% set _default_projeto_id = _projeto_filter > 0 ? _projeto_filter : (_column_tasks|first.projeto.id|default(0)) %}
     <div class="kanban-column" data-kanban-column-wrap="{{ status }}">
         <div class="kanban-column-header">
             <span class="kanban-column-title">{{ label }}</span>
-            <span class="kanban-column-count" data-kanban-count="{{ status }}">{{ _column_tasks|length }}</span>
+            <span class="kanban-column-count" data-dev-kanban-board-target="count" data-kanban-count="{{ status }}">{{ _column_tasks|length }}</span>
         </div>
         <div class="kanban-column-body">
             <button type="button"
@@ -37,6 +39,7 @@
                 <span>Adicionar tarefa</span>
             </button>
             <div class="kanban-column-cards dev-kanban-column"
+                 data-dev-kanban-board-target="column"
                  data-status="{{ status }}"
                  data-kanban-column="{{ status }}">
                 {% for tarefa in _column_tasks %}

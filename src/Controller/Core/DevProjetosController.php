@@ -342,6 +342,11 @@ class DevProjetosController extends AbstractController
         }
 
         $this->service->deleteTarefa($tarefa);
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(['ok' => true]);
+        }
+
         $this->addFlash('success', 'Tarefa excluída.');
 
         if ($redirect === 'show') {

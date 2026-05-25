@@ -34,6 +34,9 @@
 {% endblock %}
 
 {% block page_list_content %}
+<div id="core-projetos-root"
+     data-controller="core-projetos"
+     data-core-projetos-initial-view-value="kanban">
 <div class="row">
     <div class="col-lg-4 mb-3">
         <div class="huplex-card dev-projeto-resumo-card" style="border-top-color: {{ projeto.cor|default('#4F7FFF') }};">
@@ -91,6 +94,7 @@
         } %}
     </div>
 </div>
+</div>
 {% endblock %}
 
 {% block page_overlays %}
@@ -119,5 +123,5 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/sortable.min.js') }}"></script>
-<script src="{{ asset('js/dev-kanban.js') }}?v=10"></script>
+{{ importmap('core_projetos') }}
 {% endblock %}

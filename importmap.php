@@ -16,4 +16,8 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    'core_projetos' => [
+        'path' => './assets/core_projetos.js',
+        'entrypoint' => true,
+    ],
 ];

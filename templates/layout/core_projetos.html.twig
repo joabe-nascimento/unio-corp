@@ -49,7 +49,11 @@
 {% block content %}
 {% set perm_scope = block('permissions_scope')|trim %}
 {% set _initial = active_view|default('kanban') %}
-<div class="page-body-inner page-body-inner--hub-tabs" data-core-projetos-root data-initial-view="{{ _initial }}">
+<div class="page-body-inner page-body-inner--hub-tabs"
+     id="core-projetos-root"
+     data-core-projetos-root
+     data-controller="core-projetos"
+     data-core-projetos-initial-view-value="{{ _initial }}">
     {% block core_projetos_section_toolbar %}{% endblock %}
 
     <div class="hub-tab-panel{% if _initial == 'kanban' %} hub-tab-panel--active{% endif %}" data-hub-panel="kanban" role="tabpanel"{% if _initial != 'kanban' %} hidden{% endif %}>
@@ -80,5 +84,5 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/sortable.min.js') }}"></script>
-<script src="{{ asset('js/dev-kanban.js') }}?v=10"></script>
+{{ importmap('core_projetos') }}
 {% endblock %}
