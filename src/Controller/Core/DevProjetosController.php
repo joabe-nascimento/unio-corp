@@ -49,14 +49,19 @@ class DevProjetosController extends AbstractController
         $projetoFilter = $projetoFilter > 0 ? $projetoFilter : null;
         $tarefas = $this->tarefaRepo->findByEmpresa($empresa, $projetoFilter);
 
-        $formFlash = $request->getSession()->getFlashBag()->get('dev_projeto_form');
+        $session = $request->getSession()->getFlashBag();
+        $formFlash = $session->get('dev_projeto_form');
         $projetoFormRd = \is_array($formFlash[0] ?? null) ? $formFlash[0] : [];
+        $metaFlash = $session->get('dev_meta_form');
+        $metaFormRd = \is_array($metaFlash[0] ?? null) ? $metaFlash[0] : [];
 
         return $this->render(self::T . 'index.html.twig', [
             'active_view' => $view,
             'view' => $view,
             'projeto_form_rd' => $projetoFormRd,
+            'meta_form_rd' => $metaFormRd,
             'open_projeto_offcanvas' => $request->query->getBoolean('open_novo'),
+            'open_meta_offcanvas' => $request->query->getBoolean('open_nova_meta'),
             'projetos' => $this->service->listProjetos($empresa),
             'metas' => $this->service->listMetas($empresa),
             'kanban' => $this->service->kanban($empresa, $projetoFilter),
@@ -121,13 +126,18 @@ class DevProjetosController extends AbstractController
     {
         $this->denyUnlessAllowed();
         $empresa = $this->requireEmpresa();
-        $projetos = $this->service->listProjetos($empresa);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('dev_meta_create', (string) $request->request->get('_token'))) {
+                throw $this->createAccessDeniedException();
+            }
+
             $titulo = trim((string) $request->request->get('titulo', ''));
             if ($titulo === '') {
                 $this->addFlash('error', 'Título da meta é obrigatório.');
-                return $this->render(self::T . 'meta_form.html.twig', ['projetos' => $projetos, 'request_data' => $request->request->all()]);
+                $request->getSession()->getFlashBag()->add('dev_meta_form', $request->request->all());
+
+                return $this->redirectToRoute('app_core_projetos', ['view' => 'metas', 'open_nova_meta' => 1]);
             }
 
             $projetoId = (int) $request->request->get('projeto_id', 0);
@@ -149,7 +159,7 @@ class DevProjetosController extends AbstractController
             return $this->redirectToRoute('app_core_projetos', ['view' => 'metas']);
         }
 
-        return $this->render(self::T . 'meta_form.html.twig', ['projetos' => $projetos, 'request_data' => []]);
+        return $this->redirectToRoute('app_core_projetos', ['view' => 'metas', 'open_nova_meta' => 1]);
     }
 
     #[Route('/tarefas/{id}/mover', name: 'app_core_tarefa_mover', requirements: ['id' => '\d+'], methods: ['POST'])]

@@ -1,28 +1,11 @@
+{# Legado: redireciona para index com offcanvas de meta aberto #}
 {% extends 'layout/page_list.html.twig' %}
 {% block title %}Nova meta{% endblock %}
 {% set page_list_title = 'Nova meta' %}
-{% set rd = request_data|default({}) %}
-
-{% block page_list_toolbar_actions %}
-{% include 'components/page_back_link.html.twig' with { href: path('app_core_projetos', { view: 'metas' }) } %}
-{% endblock %}
 
 {% block page_list_content %}
-{% set projeto_options = [{ value: '', label: 'Meta da plataforma (sem projeto)' }] %}
-{% for p in projetos %}
-    {% set projeto_options = projeto_options|merge([{ value: p.id, label: p.nome }]) %}
-{% endfor %}
-{% embed 'components/huplex_form_panel.html.twig' with { submit_label: 'Criar meta' } %}
-    {% block form_panel_fields %}
-        {% include 'components/huplex_form_field.html.twig' with { id: 'titulo', name: 'titulo', label: 'Título', value: rd.titulo|default(''), required: true } %}
-        {% include 'components/huplex_form_field.html.twig' with { id: 'projeto_id', name: 'projeto_id', label: 'Projeto', type: 'select', value: rd.projeto_id|default(''), options: projeto_options } %}
-        {% include 'components/huplex_form_field.html.twig' with { id: 'descricao', name: 'descricao', label: 'Descrição', type: 'textarea', value: rd.descricao|default('') } %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'prioridade', name: 'prioridade', label: 'Prioridade', type: 'select', value: rd.prioridade|default('MEDIA'),
-            options: [{ value: 'ALTA', label: 'Alta' }, { value: 'MEDIA', label: 'Média' }, { value: 'BAIXA', label: 'Baixa' }]
-        } %}
-        {% include 'components/huplex_form_field.html.twig' with { id: 'progresso', name: 'progresso', label: 'Progresso %', value: rd.progresso|default('0') } %}
-        {% include 'components/huplex_form_field.html.twig' with { id: 'data_alvo', name: 'data_alvo', label: 'Data alvo', type: 'date', value: rd.data_alvo|default('') } %}
-    {% endblock %}
-{% endembed %}
+<div class="huplex-card">
+    <p class="mb-3">Use o botão <strong>Nova meta</strong> na aba Metas para abrir o painel lateral.</p>
+    <a href="{{ path('app_core_projetos', { view: 'metas', open_nova_meta: 1 }) }}" class="btn-huplex">Ir para Projetos e Metas</a>
+</div>
 {% endblock %}

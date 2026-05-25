@@ -7,7 +7,7 @@
     btn_label          (string, opt)
     btn_href           (string, opt)
     btn_icon           (string, opt)
-    btn_opens          (string, opt)  ex.: 'dev-projeto' → botão abre offcanvas (data-*-open)
+    btn_opens          (string, opt)  id do huplex_offcanvas (ex.: dev-projeto)
     btn_ghost          (bool, opt)
     btn_align          (string, opt)  'left' | 'right'. Default: 'left'
     search_in_section  (bool, opt)  busca à direita, junto aos filtros
@@ -35,6 +35,7 @@
                 {% if btn_opens is defined and btn_opens %}
                 <button type="button"
                         class="section-toolbar-action {{ btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex' }}"
+                        data-huplex-offcanvas-open="{{ btn_opens }}"
                         data-{{ btn_opens }}-open>
                     {% if btn_icon is defined and btn_icon %}
                         <i class="fas {{ btn_icon }} mr-1"></i>
@@ -65,6 +66,7 @@
             {% if btn_opens is defined and btn_opens %}
             <button type="button"
                     class="section-toolbar-action {{ btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex' }}"
+                    data-huplex-offcanvas-open="{{ btn_opens }}"
                     data-{{ btn_opens }}-open>
                 {% if btn_icon is defined and btn_icon %}
                     <i class="fas {{ btn_icon }} mr-1"></i>

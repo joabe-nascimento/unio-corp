@@ -51,7 +51,7 @@
 <div class="core-projetos-toolbar" data-core-toolbar-for="metas"{% if active_view|default('kanban') != 'metas' %} hidden{% endif %}>
     {% include 'components/section_toolbar.html.twig' with {
         btn_label: 'Nova meta',
-        btn_href: path('app_core_metas_nova'),
+        btn_opens: 'dev-meta',
         btn_icon: 'fa-bullseye',
         search_in_section: false
     } %}
@@ -129,7 +129,7 @@
             title: 'Nenhuma meta',
             text: 'Defina metas vinculadas aos seus projetos de desenvolvimento.',
             btn_label: 'Nova meta',
-            btn_href: path('app_core_metas_nova')
+            btn_opens: 'dev-meta'
         } %}
     {% else %}
         {% include 'components/dev_meta_list.html.twig' with { metas: metas } %}
@@ -137,15 +137,15 @@
 </div>
 {% endblock %}
 
-{% block core_projetos_offcanvas %}
+{% block page_overlays %}
 {% include 'components/dev_projeto_offcanvas.html.twig' with {
     rd: projeto_form_rd|default({}),
     open: open_projeto_offcanvas|default(false),
     active_view: active_view|default('kanban')
 } %}
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
-<script src="{{ asset('js/dev-projeto-offcanvas.js') }}?v=1"></script>
+{% include 'components/dev_meta_offcanvas.html.twig' with {
+    rd: meta_form_rd|default({}),
+    open: open_meta_offcanvas|default(false),
+    projetos: projetos
+} %}
 {% endblock %}

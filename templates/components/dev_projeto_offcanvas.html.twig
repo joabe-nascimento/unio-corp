@@ -1,32 +1,25 @@
 {#
-  dev_projeto_offcanvas — criar projeto sem sair da listagem
-
-  Props: rd (array, opt), open (bool, opt)
+  dev_projeto_offcanvas — formulário de novo projeto (usa huplex_offcanvas)
 #}
-<div class="huplex-offcanvas{% if open|default(false) %} is-open{% endif %}"
-     data-dev-projeto-offcanvas
-     aria-hidden="{{ open|default(false) ? 'false' : 'true' }}">
-    <div class="huplex-offcanvas-backdrop" data-dev-projeto-close tabindex="-1"></div>
-    <aside class="huplex-offcanvas-drawer" role="dialog" aria-modal="true" aria-labelledby="devProjetoOffcanvasTitle">
-        <header class="huplex-offcanvas-header">
-            <div>
-                <h2 class="huplex-offcanvas-title" id="devProjetoOffcanvasTitle">Novo projeto</h2>
-                <p class="huplex-offcanvas-subtitle">Cadastre o que você está desenvolvendo na Unio.</p>
+{% embed 'components/huplex_offcanvas.html.twig' with {
+    id: 'dev-projeto',
+    title: 'Novo projeto',
+    subtitle: 'Cadastre o que você está desenvolvendo na Unio.',
+    icon: 'fa-diagram-project',
+    open: open is defined and open,
+    size: 'md'
+} %}
+    {% block offcanvas_body %}
+        <form method="post" action="{{ path('app_core_projetos_nova') }}" class="huplex-form huplex-offcanvas-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('dev_projeto_create') }}">
+            <input type="hidden" name="redirect_view" value="{{ active_view|default('kanban') }}">
+            {% include 'modules/core/projetos/_form_fields.html.twig' with { rd: rd|default({}) } %}
+            <div class="huplex-form-actions huplex-offcanvas-form-actions">
+                <button type="submit" class="btn-huplex">
+                    <i class="fas fa-check mr-1" aria-hidden="true"></i> Criar projeto
+                </button>
+                <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
             </div>
-            <button type="button" class="huplex-offcanvas-close" data-dev-projeto-close aria-label="Fechar">
-                <i class="fas fa-times"></i>
-            </button>
-        </header>
-        <div class="huplex-offcanvas-body">
-            <form method="post" action="{{ path('app_core_projetos_nova') }}" class="huplex-form">
-                <input type="hidden" name="_token" value="{{ csrf_token('dev_projeto_create') }}">
-                <input type="hidden" name="redirect_view" value="{{ active_view|default('kanban') }}">
-                {% include 'modules/core/projetos/_form_fields.html.twig' with { rd: rd|default({}) } %}
-                <div class="huplex-form-actions mt-3">
-                    <button type="submit" class="btn-huplex">Criar projeto</button>
-                    <button type="button" class="btn-huplex-ghost" data-dev-projeto-close>Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </aside>
-</div>
+        </form>
+    {% endblock %}
+{% endembed %}

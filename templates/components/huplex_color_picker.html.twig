@@ -1,0 +1,47 @@
+{#
+  huplex_color_picker — seleção visual de cor (presets + picker nativo)
+
+  Props: id, name, label, value (hex), required (bool, opt)
+#}
+{% set _value = value|default('#4F7FFF')|upper %}
+{% set _presets = presets|default([
+    '#4F7FFF', '#3D6FFF', '#22C55E', '#10B981', '#F59E0B',
+    '#EF4444', '#F97316', '#EC4899', '#A855F7', '#06B6D4', '#64748B'
+]) %}
+<div class="huplex-form-group huplex-color-picker" data-huplex-color-picker>
+    <label class="huplex-form-label" for="{{ id }}_native">
+        {{ label|default('Cor') }}
+        {% if required is defined and required %}<span class="huplex-form-required">*</span>{% endif %}
+    </label>
+    <input type="hidden"
+           id="{{ id }}"
+           name="{{ name }}"
+           value="{{ _value }}"
+           data-color-value
+           {% if required is defined and required %}required{% endif %}>
+    <div class="huplex-color-picker-presets" role="listbox" aria-label="Cores sugeridas">
+        {% for hex in _presets %}
+        <button type="button"
+                class="huplex-color-picker-swatch{% if hex|upper == _value %} is-selected{% endif %}"
+                data-color-swatch
+                data-color="{{ hex|upper }}"
+                style="--swatch-color: {{ hex }}"
+                title="{{ hex|upper }}"
+                aria-label="Cor {{ hex|upper }}"
+                role="option"
+                aria-selected="{{ hex|upper == _value ? 'true' : 'false' }}"></button>
+        {% endfor %}
+    </div>
+    <div class="huplex-color-picker-custom">
+        <label class="huplex-color-picker-native-wrap" for="{{ id }}_native" title="Escolher outra cor">
+            <input type="color"
+                   class="huplex-color-picker-native"
+                   id="{{ id }}_native"
+                   value="{{ _value }}"
+                   data-color-native
+                   aria-label="Seletor de cor personalizada">
+        </label>
+        <div class="huplex-color-picker-preview" data-color-preview style="background: {{ _value }};" aria-hidden="true"></div>
+        <span class="huplex-color-picker-hex" data-color-hex>{{ _value }}</span>
+    </div>
+</div>

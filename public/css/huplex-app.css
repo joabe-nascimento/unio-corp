@@ -1688,6 +1688,84 @@
             filter: none;
             opacity: 1;
         }
+
+        /* Color picker */
+        .huplex-color-picker-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .huplex-color-picker-swatch {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            background: var(--swatch-color);
+            cursor: pointer;
+            transition: transform 0.12s ease, border-color 0.15s, box-shadow 0.15s;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+        }
+        .huplex-color-picker-swatch:hover {
+            transform: scale(1.08);
+            border-color: var(--border-2);
+        }
+        .huplex-color-picker-swatch.is-selected {
+            border-color: var(--text-1);
+            box-shadow: 0 0 0 2px var(--accent-dim), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+            transform: scale(1.05);
+        }
+        .huplex-color-picker-swatch:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+        .huplex-color-picker-custom {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .huplex-color-picker-native-wrap {
+            display: inline-flex;
+            margin: 0;
+            cursor: pointer;
+        }
+        .huplex-color-picker-native {
+            width: 40px;
+            height: 32px;
+            padding: 2px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            cursor: pointer;
+        }
+        .huplex-color-picker-native::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .huplex-color-picker-native::-webkit-color-swatch {
+            border: none;
+            border-radius: 5px;
+        }
+        .huplex-color-picker-preview {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+        }
+        .huplex-color-picker-hex {
+            font-size: 12px;
+            font-weight: 600;
+            font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+            color: var(--text-2);
+            letter-spacing: 0.04em;
+        }
+
         .huplex-form-actions { margin-top: 1.25rem; padding-top: 0.25rem; }
         .huplex-divider { border-color: var(--border); margin: 1.25rem 0; }
 
@@ -1815,9 +1893,31 @@
         .kanban-board {
             display: flex;
             gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
             align-items: flex-start;
+        }
+        /* Kanban dev — colunas em grid, sem scroll horizontal */
+        .dev-kanban-board.kanban-board {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            overflow: visible;
+            padding-bottom: 0;
+        }
+        .dev-kanban-board .kanban-column {
+            flex: none;
+            max-width: none;
+            min-width: 0;
+            width: 100%;
+        }
+        @media (max-width: 1199.98px) {
+            .dev-kanban-board.kanban-board {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 575.98px) {
+            .dev-kanban-board.kanban-board {
+                grid-template-columns: 1fr;
+            }
         }
         .kanban-column {
             flex: 0 0 260px;
@@ -1916,14 +2016,14 @@
 
         .dev-projetos-lead { padding: 0 2px; }
 
-        /* ── Offcanvas (direita) — reutilizável ── */
+        /* ── Offcanvas Huplex — componente lateral reutilizável ── */
         body.huplex-offcanvas-open {
             overflow: hidden;
         }
         .huplex-offcanvas {
             position: fixed;
             inset: 0;
-            z-index: 1055;
+            z-index: 1070;
             pointer-events: none;
             visibility: hidden;
         }
@@ -1934,10 +2034,14 @@
         .huplex-offcanvas-backdrop {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(2px);
+            background: rgba(4, 6, 14, 0.58);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             opacity: 0;
-            transition: opacity 0.22s ease;
+            transition: opacity 0.24s ease;
+        }
+        [data-theme="light"] .huplex-offcanvas-backdrop {
+            background: rgba(8, 12, 28, 0.42);
         }
         .huplex-offcanvas.is-open .huplex-offcanvas-backdrop {
             opacity: 1;
@@ -1945,68 +2049,208 @@
         .huplex-offcanvas-drawer {
             position: absolute;
             top: 0;
-            right: 0;
-            width: min(440px, 100vw);
             height: 100%;
             max-height: 100dvh;
-            background: var(--surface);
-            border-left: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
-            box-shadow: -8px 0 32px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(165deg, var(--surface-2) 0%, var(--surface) 42%);
+            border: 1px solid var(--border);
+            box-shadow: -12px 0 40px rgba(0, 0, 0, 0.32);
+            transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
         }
+        [data-theme="light"] .huplex-offcanvas-drawer {
+            box-shadow: -8px 0 28px rgba(15, 23, 42, 0.12);
+        }
+        .huplex-offcanvas--end .huplex-offcanvas-drawer {
+            right: 0;
+            border-right: none;
+            transform: translateX(100%);
+        }
+        .huplex-offcanvas--start .huplex-offcanvas-drawer {
+            left: 0;
+            border-left: none;
+            transform: translateX(-100%);
+            box-shadow: 12px 0 40px rgba(0, 0, 0, 0.32);
+        }
+        .huplex-offcanvas--sm .huplex-offcanvas-drawer { width: min(360px, 100vw); }
+        .huplex-offcanvas--md .huplex-offcanvas-drawer { width: min(440px, 100vw); }
+        .huplex-offcanvas--lg .huplex-offcanvas-drawer { width: min(520px, 100vw); }
+        .huplex-offcanvas--xl .huplex-offcanvas-drawer { width: min(680px, 100vw); }
         .huplex-offcanvas.is-open .huplex-offcanvas-drawer {
             transform: translateX(0);
         }
+        .huplex-offcanvas--accent .huplex-offcanvas-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent) 0%, rgba(79, 127, 255, 0.15) 72%, transparent 100%);
+            pointer-events: none;
+        }
+        [data-theme="light"] .huplex-offcanvas--accent .huplex-offcanvas-header::before {
+            background: linear-gradient(90deg, var(--accent) 0%, rgba(61, 111, 255, 0.12) 72%, transparent 100%);
+        }
         .huplex-offcanvas-header {
+            position: relative;
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            gap: 12px;
-            padding: 18px 20px 14px;
+            gap: 14px;
+            padding: 20px 20px 16px;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
+            background: linear-gradient(180deg, rgba(79, 127, 255, 0.06) 0%, transparent 100%);
+        }
+        [data-theme="light"] .huplex-offcanvas-header {
+            background: linear-gradient(180deg, rgba(61, 111, 255, 0.05) 0%, transparent 100%);
+        }
+        .huplex-offcanvas-header-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 0;
+            flex: 1;
+        }
+        .huplex-offcanvas-icon {
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--accent-line);
+            font-size: 16px;
+        }
+        .huplex-offcanvas-heading {
+            min-width: 0;
+            flex: 1;
         }
         .huplex-offcanvas-title {
             font-size: 18px;
             font-weight: 700;
             color: var(--text-1);
             margin: 0 0 4px;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
         }
         .huplex-offcanvas-subtitle {
             font-size: 12px;
-            color: var(--text-3);
+            color: var(--text-2);
             margin: 0;
+            line-height: 1.45;
         }
         .huplex-offcanvas-close {
             flex-shrink: 0;
             width: 36px;
             height: 36px;
             border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--surface-2);
+            border-radius: 9px;
+            background: var(--surface);
             color: var(--text-2);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
         }
         .huplex-offcanvas-close:hover {
-            background: var(--nav-hover-bg);
-            color: var(--text-1);
+            background: var(--accent-dim);
+            border-color: var(--accent-line);
+            color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 127, 255, 0.08);
         }
+        /* Scrollbar temático — offcanvas e painéis laterais */
+        .huplex-scroll,
+        .huplex-offcanvas-body,
+        .perm-offcanvas-body {
+            scrollbar-gutter: stable;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+        }
+        .huplex-scroll::-webkit-scrollbar,
+        .huplex-offcanvas-body::-webkit-scrollbar,
+        .perm-offcanvas-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .huplex-scroll::-webkit-scrollbar-track,
+        .huplex-offcanvas-body::-webkit-scrollbar-track,
+        .perm-offcanvas-body::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 4px 0;
+        }
+        .huplex-scroll::-webkit-scrollbar-thumb,
+        .huplex-offcanvas-body::-webkit-scrollbar-thumb,
+        .perm-offcanvas-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 100px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        .huplex-scroll::-webkit-scrollbar-thumb:hover,
+        .huplex-offcanvas-body::-webkit-scrollbar-thumb:hover,
+        .perm-offcanvas-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(79, 127, 255, 0.45);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        .huplex-scroll::-webkit-scrollbar-corner,
+        .huplex-offcanvas-body::-webkit-scrollbar-corner,
+        .perm-offcanvas-body::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+        [data-theme="light"] .huplex-scroll,
+        [data-theme="light"] .huplex-offcanvas-body,
+        [data-theme="light"] .perm-offcanvas-body {
+            scrollbar-color: rgba(15, 23, 42, 0.18) transparent;
+        }
+        [data-theme="light"] .huplex-scroll::-webkit-scrollbar-thumb,
+        [data-theme="light"] .huplex-offcanvas-body::-webkit-scrollbar-thumb,
+        [data-theme="light"] .perm-offcanvas-body::-webkit-scrollbar-thumb {
+            background: rgba(15, 23, 42, 0.14);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        [data-theme="light"] .huplex-scroll::-webkit-scrollbar-thumb:hover,
+        [data-theme="light"] .huplex-offcanvas-body::-webkit-scrollbar-thumb:hover,
+        [data-theme="light"] .perm-offcanvas-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(61, 111, 255, 0.4);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
         .huplex-offcanvas-body {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 18px 20px 24px;
         }
+        .huplex-offcanvas-footer {
+            flex-shrink: 0;
+            padding: 14px 20px 18px;
+            border-top: 1px solid var(--border);
+            background: var(--surface-2);
+        }
+        .huplex-offcanvas-form-actions,
         .huplex-offcanvas-body .huplex-form-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        @media (max-width: 767.98px) {
+            .huplex-offcanvas--sm .huplex-offcanvas-drawer,
+            .huplex-offcanvas--md .huplex-offcanvas-drawer,
+            .huplex-offcanvas--lg .huplex-offcanvas-drawer,
+            .huplex-offcanvas--xl .huplex-offcanvas-drawer {
+                width: 100vw;
+            }
         }
 
         /* ── Buttons ── */
@@ -5125,6 +5369,7 @@
         .perm-offcanvas-body {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 0 18px 24px;
         }
         .perm-offcanvas-body > [data-perm-drawer-body] {
