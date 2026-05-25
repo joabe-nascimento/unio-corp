@@ -147,8 +147,16 @@
                 panel.classList.toggle('hub-tab-panel--active', active);
             });
             document.querySelectorAll('[data-core-toolbar-for]').forEach(function (el) {
-                el.hidden = el.getAttribute('data-core-toolbar-for') !== name;
+                var show = el.getAttribute('data-core-toolbar-for') === name;
+                el.hidden = !show;
+                el.style.display = show ? '' : 'none';
             });
+            if (name === 'permissions') {
+                document.querySelectorAll('.core-projetos-toolbar').forEach(function (el) {
+                    el.hidden = true;
+                    el.style.display = 'none';
+                });
+            }
             try {
                 var url = new URL(window.location.href);
                 url.searchParams.set('view', name);

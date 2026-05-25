@@ -14,16 +14,16 @@
 {% endblock %}
 
 {% block core_projetos_section_toolbar %}
-{% embed 'components/section_toolbar.html.twig' with {
-    btn_label: 'Novo projeto',
-    btn_href: path('app_core_projetos_nova'),
-    btn_icon: 'fa-plus',
-    search_in_section: true,
-    search_placeholder: 'Buscar…',
-    search_disabled: true
-} %}
-    {% block section_toolbar_filters %}
-        <div data-core-toolbar-for="kanban" class="d-flex align-items-center gap-2 mb-0"{% if active_view|default('kanban') != 'kanban' %} hidden{% endif %}>
+{# Kanban: filtro à esquerda, Novo projeto à direita #}
+<div class="core-projetos-toolbar" data-core-toolbar-for="kanban"{% if active_view|default('kanban') != 'kanban' %} hidden{% endif %}>
+    {% embed 'components/section_toolbar.html.twig' with {
+        btn_label: 'Novo projeto',
+        btn_href: path('app_core_projetos_nova'),
+        btn_icon: 'fa-plus',
+        btn_align: 'right',
+        search_in_section: false
+    } %}
+        {% block section_toolbar_filters %}
             <form method="get" class="d-flex align-items-center gap-2 mb-0" id="kanban-projeto-filter">
                 <input type="hidden" name="view" value="kanban">
                 <label class="huplex-form-label mb-0 mr-2" for="projeto">Projeto</label>
@@ -34,19 +34,38 @@
                     {% endfor %}
                 </select>
             </form>
-        </div>
-        <div data-core-toolbar-for="metas"{% if active_view|default('kanban') != 'metas' %} hidden{% endif %}>
-            <a href="{{ path('app_core_metas_nova') }}" class="btn-huplex-ghost btn-sm ml-2"><i class="fas fa-bullseye"></i> Nova meta</a>
-        </div>
-    {% endblock %}
-{% endembed %}
+        {% endblock %}
+    {% endembed %}
+</div>
+
+{# Lista de projetos: só Novo projeto à direita #}
+<div class="core-projetos-toolbar" data-core-toolbar-for="lista"{% if active_view|default('kanban') != 'lista' %} hidden{% endif %}>
+    {% include 'components/section_toolbar.html.twig' with {
+        btn_label: 'Novo projeto',
+        btn_href: path('app_core_projetos_nova'),
+        btn_icon: 'fa-plus',
+        btn_align: 'right',
+        search_in_section: false
+    } %}
+</div>
+
+{# Metas: só Nova meta à direita (sem Novo projeto nem filtro de projeto) #}
+<div class="core-projetos-toolbar" data-core-toolbar-for="metas"{% if active_view|default('kanban') != 'metas' %} hidden{% endif %}>
+    {% include 'components/section_toolbar.html.twig' with {
+        btn_label: 'Nova meta',
+        btn_href: path('app_core_metas_nova'),
+        btn_icon: 'fa-bullseye',
+        btn_align: 'right',
+        search_in_section: false
+    } %}
+</div>
 {% endblock %}
 
 {% block core_panel_kanban %}
 <div class="dev-projetos-lead mb-3">
     <p class="person-cell-sub mb-0">
         <i class="fas fa-circle-info"></i>
-        Organize o que você está desenvolvendo na Unio. Use o <strong>ícone de arrastar</strong> nos cards para mover entre Backlog, A fazer, Em andamento e Feito.
+        Organize o que você está desenvolvendo na Unio. Arraste os cards entre Backlog, A fazer, Em andamento e Feito.
     </p>
 </div>
 {% if not has_kanban_tasks %}
@@ -111,6 +130,7 @@
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-bullseye',
             title: 'Nenhuma meta',
+            text: 'Defina metas vinculadas aos seus projetos de desenvolvimento.',
             btn_label: 'Nova meta',
             btn_href: path('app_core_metas_nova')
         } %}
