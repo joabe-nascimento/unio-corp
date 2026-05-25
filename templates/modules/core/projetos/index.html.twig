@@ -14,13 +14,12 @@
 {% endblock %}
 
 {% block core_projetos_section_toolbar %}
-{# Kanban: filtro à esquerda, Novo projeto à direita #}
+{# Kanban: Novo projeto à esquerda (padrão); filtro Projeto à direita #}
 <div class="core-projetos-toolbar" data-core-toolbar-for="kanban"{% if active_view|default('kanban') != 'kanban' %} hidden{% endif %}>
     {% embed 'components/section_toolbar.html.twig' with {
         btn_label: 'Novo projeto',
         btn_href: path('app_core_projetos_nova'),
         btn_icon: 'fa-plus',
-        btn_align: 'right',
         search_in_section: false
     } %}
         {% block section_toolbar_filters %}
@@ -38,24 +37,22 @@
     {% endembed %}
 </div>
 
-{# Lista de projetos: só Novo projeto à direita #}
+{# Lista de projetos: Novo projeto à esquerda (padrão) #}
 <div class="core-projetos-toolbar" data-core-toolbar-for="lista"{% if active_view|default('kanban') != 'lista' %} hidden{% endif %}>
     {% include 'components/section_toolbar.html.twig' with {
         btn_label: 'Novo projeto',
         btn_href: path('app_core_projetos_nova'),
         btn_icon: 'fa-plus',
-        btn_align: 'right',
         search_in_section: false
     } %}
 </div>
 
-{# Metas: só Nova meta à direita (sem Novo projeto nem filtro de projeto) #}
+{# Metas: Nova meta à esquerda (padrão) #}
 <div class="core-projetos-toolbar" data-core-toolbar-for="metas"{% if active_view|default('kanban') != 'metas' %} hidden{% endif %}>
     {% include 'components/section_toolbar.html.twig' with {
         btn_label: 'Nova meta',
         btn_href: path('app_core_metas_nova'),
         btn_icon: 'fa-bullseye',
-        btn_align: 'right',
         search_in_section: false
     } %}
 </div>
