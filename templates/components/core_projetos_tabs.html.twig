@@ -1,0 +1,40 @@
+{# Abas Projetos e Metas — navegação via Turbo Frame (sem reload da página) #}
+{% set _view = active_view|default('kanban') %}
+{% set _base = path('app_core_projetos') %}
+{% set _projeto = projeto_filter|default(null) %}
+<div class="hub-overview-tabs" data-hub-tabs role="tablist" aria-label="Projetos e Metas">
+    <a href="{{ _base ~ '?view=kanban' ~ (_projeto ? '&projeto=' ~ _projeto : '') }}"
+       class="hub-overview-tab{{ _view == 'kanban' ? ' hub-overview-tab--active' : '' }}"
+       data-turbo-frame="core-projetos-frame"
+       data-hub-tab="kanban"
+       role="tab"
+       aria-selected="{{ _view == 'kanban' ? 'true' : 'false' }}">
+        <i class="fas fa-columns mr-1"></i> Kanban
+    </a>
+    <a href="{{ _base ~ '?view=lista' }}"
+       class="hub-overview-tab{{ _view == 'lista' ? ' hub-overview-tab--active' : '' }}"
+       data-turbo-frame="core-projetos-frame"
+       data-hub-tab="lista"
+       role="tab"
+       aria-selected="{{ _view == 'lista' ? 'true' : 'false' }}">
+        <i class="fas fa-diagram-project mr-1"></i> Projetos
+    </a>
+    <a href="{{ _base ~ '?view=metas' }}"
+       class="hub-overview-tab{{ _view == 'metas' ? ' hub-overview-tab--active' : '' }}"
+       data-turbo-frame="core-projetos-frame"
+       data-hub-tab="metas"
+       role="tab"
+       aria-selected="{{ _view == 'metas' ? 'true' : 'false' }}">
+        <i class="fas fa-bullseye mr-1"></i> Metas
+    </a>
+    {% if perm_scope|default('') and can_manage_permissions(perm_scope) %}
+    <a href="{{ _base ~ '?view=permissions' }}"
+       class="hub-overview-tab{{ _view == 'permissions' ? ' hub-overview-tab--active' : '' }}"
+       data-turbo-frame="core-projetos-frame"
+       data-hub-tab="permissions"
+       role="tab"
+       aria-selected="{{ _view == 'permissions' ? 'true' : 'false' }}">
+        <i class="fas fa-shield-halved mr-1"></i> Permissões
+    </a>
+    {% endif %}
+</div>

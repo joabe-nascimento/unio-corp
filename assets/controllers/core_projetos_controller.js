@@ -1,7 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 
 /**
- * Projetos e Metas — abas hub + offcanvas de tarefas (integra com dev-kanban-board).
+ * Projetos e Metas — offcanvas de tarefas + integração com dev-kanban-board.
+ * Abas navegam via Turbo Frame (links em core_projetos_tabs.html.twig).
  */
 export default class extends Controller {
     static outlets = ['kanbanBoard'];
@@ -13,74 +14,17 @@ export default class extends Controller {
     connect() {
         this.boundKanbanEdit = this.onKanbanEdit.bind(this);
         this.boundOpenTarefa = this.openTarefaOffcanvas.bind(this);
-        this.boundTabClick = this.onHubTabClick.bind(this);
         this.element.addEventListener('dev-kanban:edit', this.boundKanbanEdit);
         document.addEventListener('click', this.boundOpenTarefa, true);
-        document.addEventListener('click', this.boundTabClick);
         this.initOffcanvasMetaFilters();
-        this.activateTab(this.initialViewValue);
+        if (this.initialViewValue === 'kanban') {
+            this.kanbanBoardOutlets.forEach((outlet) => outlet.refresh());
+        }
     }
 
     disconnect() {
         this.element.removeEventListener('dev-kanban:edit', this.boundKanbanEdit);
         document.removeEventListener('click', this.boundOpenTarefa, true);
-        document.removeEventListener('click', this.boundTabClick);
-    }
-
-    onHubTabClick(event) {
-        const btn = event.target.closest('[data-hub-tab]');
-        if (!btn || !btn.closest('[data-hub-tabs]')) {
-            return;
-        }
-        if (!document.getElementById('core-projetos-root')) {
-            return;
-        }
-        const name = btn.getAttribute('data-hub-tab');
-        if (name) {
-            this.activateTab(name);
-        }
-    }
-
-    activateTab(name) {
-        const tabs = this.element.querySelector('[data-hub-tabs]');
-        if (tabs) {
-            tabs.querySelectorAll('[data-hub-tab]').forEach((btn) => {
-                const active = btn.getAttribute('data-hub-tab') === name;
-                btn.classList.toggle('hub-overview-tab--active', active);
-                btn.setAttribute('aria-selected', active ? 'true' : 'false');
-            });
-        }
-
-        this.element.querySelectorAll('[data-hub-panel]').forEach((panel) => {
-            const active = panel.getAttribute('data-hub-panel') === name;
-            panel.hidden = !active;
-            panel.classList.toggle('hub-tab-panel--active', active);
-        });
-
-        this.element.querySelectorAll('[data-core-toolbar-for]').forEach((el) => {
-            const show = el.getAttribute('data-core-toolbar-for') === name;
-            el.hidden = !show;
-            el.style.display = show ? '' : 'none';
-        });
-
-        if (name === 'permissions') {
-            document.querySelectorAll('.core-projetos-toolbar').forEach((el) => {
-                el.hidden = true;
-                el.style.display = 'none';
-            });
-        }
-
-        try {
-            const url = new URL(window.location.href);
-            url.searchParams.set('view', name);
-            window.history.replaceState({}, '', url.pathname + url.search);
-        } catch {
-            /* ignore */
-        }
-
-        if (name === 'kanban') {
-            this.kanbanBoardOutlets.forEach((outlet) => outlet.refresh());
-        }
     }
 
     openTarefaOffcanvas(event) {
@@ -96,14 +40,6 @@ export default class extends Controller {
         this.applyTarefaOffcanvasContext(trigger);
         window.HuplexOffcanvas?.open('dev-tarefa');
         this.focusTarefaTitulo();
-    }
-
-    onProjetoIdChange(event) {
-        const sel = event.target.closest('[name="projeto_id"]');
-        if (!sel || !sel.closest('[data-dev-tarefa-form], [data-dev-tarefa-edit-form]')) {
-            return;
-        }
-        this.filterTarefaMetas(sel.value);
     }
 
     onKanbanEdit(event) {

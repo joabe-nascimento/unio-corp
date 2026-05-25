@@ -24,4 +24,8 @@ return [
         'path' => './assets/lib/stimulus.js',
         'type' => 'js',
     ],
+    '@hotwired/turbo' => [
+        'path' => './assets/lib/turbo.js',
+        'type' => 'js',
+    ],
 ];
