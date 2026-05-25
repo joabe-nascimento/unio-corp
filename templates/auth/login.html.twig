@@ -363,6 +363,20 @@
                 <div class="alert alert-success">{{ msg }}</div>
             {% endfor %}
 
+            {% for msg in app.flashes('auth_info') %}
+                <div class="alert alert-success">{{ msg }}</div>
+            {% endfor %}
+
+            {% for msg in app.flashes('auth_error') %}
+                <div class="alert alert-danger">{{ msg }}</div>
+            {% endfor %}
+
+            {% if app.debug %}
+                {% for msg in app.flashes('auth_dev_reset_link') %}
+                    <div class="alert alert-danger" style="word-break: break-all;">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+
             {% if error %}
                 <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
             {% endif %}
@@ -374,7 +388,7 @@
                     <label class="form-label" for="email">E-mail</label>
                     <input class="form-control" id="email" type="email" name="email"
                            value="{{ last_username }}" placeholder="seu@email.com"
-                           autocomplete="email" autofocus required>
+                           autocomplete="email"{% if active_tab == 'login' %} autofocus{% endif %} required>
                 </div>
 
                 <div class="form-group">
@@ -388,7 +402,7 @@
                         <input type="checkbox" name="_remember_me">
                         Lembrar-me por 7 dias
                     </label>
-                    <a href="#">Esqueci a senha</a>
+                    <a href="{{ path('app_forgot_password') }}">Esqueci a senha</a>
                 </div>
 
                 <button type="submit" class="btn-primary">Entrar na plataforma</button>
@@ -417,7 +431,7 @@
 
                 <div class="form-group">
                     <label class="form-label" for="{{ registrationForm.nome.vars.id }}">Nome completo</label>
-                    {{ form_widget(registrationForm.nome, {'attr': {'class': 'form-control' ~ (registrationForm.nome.vars.errors|length ? ' is-invalid' : '')}}) }}
+                    {{ form_widget(registrationForm.nome, {'attr': (active_tab == 'register' ? {'class': 'form-control' ~ (registrationForm.nome.vars.errors|length ? ' is-invalid' : ''), 'autofocus': 'autofocus'} : {'class': 'form-control' ~ (registrationForm.nome.vars.errors|length ? ' is-invalid' : '')})}) }}
                     {% if registrationForm.nome.vars.errors|length %}
                         <span class="invalid-feedback">{{ registrationForm.nome.vars.errors[0].message }}</span>
                     {% endif %}

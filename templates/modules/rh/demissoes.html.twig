@@ -1,3 +1,66 @@
-﻿{% extends 'layout/stub.html.twig' %}
+﻿{% extends 'layout/page_list.html.twig' %}
 {% block title %}Demissões{% endblock %}
-{% set stub_page_title = 'Demissões' %}
+{% set page_list_title = 'Demissões (Offboarding)' %}
+
+{% block page_list_section_toolbar %}
+{% include 'components/section_toolbar.html.twig' with {
+    btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova demissão' : '',
+    btn_href: path('app_rh_demissoes_nova'),
+    btn_icon: 'fa-user-minus',
+    show_search: true,
+    search_placeholder: 'Buscar funcionário…',
+    search_disabled: true
+} %}
+{% endblock %}
+
+{% block page_list_content %}
+<div class="huplex-card">
+    {% if processos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-user-minus',
+            title: 'Nenhum processo de demissão',
+            text: 'Inicie o offboarding para desligar colaboradores com checklist de TI, acessos e documentação.',
+            btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova demissão' : '',
+            btn_href: path('app_rh_demissoes_nova')
+        } %}
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Funcionário</th>
+                        <th>Motivo</th>
+                        <th>Previsto</th>
+                        <th>Progresso</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in processos %}
+                    {% set f = p.funcionario %}
+                    <tr>
+                        <td>
+                            <strong>{{ f.nome }}</strong><br>
+                            <small class="text-muted">{{ f.email|default('') }}</small>
+                        </td>
+                        <td>{{ p.motivo|default('—') }}</td>
+                        <td>{{ p.dataPrevista ? p.dataPrevista|date('d/m/Y') : '—' }}</td>
+                        <td>
+                            <div class="progress" style="min-width: 80px; height: 6px;">
+                                <div class="progress-bar bg-warning" style="width: {{ p.checklistProgress }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ p.checklistProgress }}%</small>
+                        </td>
+                        <td><span class="badge badge-{{ p.statusClass }}">{{ p.statusLabel }}</span></td>
+                        <td class="text-right">
+                            <a href="{{ path('app_rh_demissoes_show', { id: p.id }) }}" class="btn-huplex-ghost btn-sm">Abrir</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

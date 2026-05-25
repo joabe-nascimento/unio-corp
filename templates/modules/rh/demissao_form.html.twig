@@ -1,0 +1,48 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Nova demissão{% endblock %}
+{% set page_list_title = 'Nova demissão' %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_rh_demissoes') }}" class="btn-huplex-ghost btn-sm">
+    <i class="fas fa-arrow-left"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="huplex-card" style="max-width: 640px;">
+    {% if funcionarios is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-user-tie',
+            title: 'Nenhum funcionário ativo',
+            text: 'Cadastre funcionários ativos antes de iniciar um offboarding.',
+            btn_label: 'Ver funcionários',
+            btn_href: path('app_rh_funcionarios')
+        } %}
+    {% else %}
+    <form method="post">
+        <div class="form-group">
+            <label for="funcionario_id">Funcionário <span class="text-danger">*</span></label>
+            <select class="form-control" id="funcionario_id" name="funcionario_id" required>
+                <option value="">Selecione…</option>
+                {% for f in funcionarios %}
+                    <option value="{{ f.id }}">{{ f.nome }}{% if f.cargo %} — {{ f.cargo }}{% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="data_prevista">Data prevista de desligamento</label>
+            <input type="date" class="form-control" id="data_prevista" name="data_prevista">
+        </div>
+        <div class="form-group">
+            <label for="motivo">Motivo</label>
+            <input type="text" class="form-control" id="motivo" name="motivo" placeholder="Ex.: pedido de demissão, término de contrato">
+        </div>
+        <div class="form-group">
+            <label for="observacoes">Observações</label>
+            <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn-huplex">Iniciar offboarding</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

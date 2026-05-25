@@ -7,13 +7,13 @@
 <div class="page-lead-kpis">
     {% set kpi_items = [] %}
     {% if product_grant('product_rh', 'admissoes') %}
-        {% set kpi_items = kpi_items|merge([{ value: '3', label: 'Admissões', sub: 'Novas contratações', route: 'app_rh_admissoes' }]) %}
+        {% set kpi_items = kpi_items|merge([{ value: onboarding_open|default(0), label: 'Admissões', sub: 'Onboarding em aberto', route: 'app_rh_admissoes' }]) %}
     {% endif %}
     {% if product_grant('product_rh', 'ferias') %}
         {% set kpi_items = kpi_items|merge([{ value: '8', label: 'Férias', sub: 'Em férias agora', route: 'app_rh_ferias' }]) %}
     {% endif %}
     {% if product_grant('product_rh', 'admissoes') %}
-        {% set kpi_items = kpi_items|merge([{ value: '1', label: 'Demissões', sub: 'Em andamento', route: 'app_rh_demissoes' }]) %}
+        {% set kpi_items = kpi_items|merge([{ value: offboarding_open|default(0), label: 'Demissões', sub: 'Offboarding em aberto', route: 'app_rh_demissoes' }]) %}
     {% endif %}
     {% if product_grant('product_rh', 'folha') %}
         {% set kpi_items = kpi_items|merge([{ value: 'OK', label: 'Folha', sub: 'Mês atual', route: 'app_rh_folha' }]) %}

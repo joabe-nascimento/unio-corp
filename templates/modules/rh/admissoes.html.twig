@@ -1,3 +1,65 @@
-﻿{% extends 'layout/stub.html.twig' %}
+﻿{% extends 'layout/page_list.html.twig' %}
 {% block title %}Admissões{% endblock %}
-{% set stub_page_title = 'Admissões' %}
+{% set page_list_title = 'Admissões (Onboarding)' %}
+
+{% block page_list_section_toolbar %}
+{% include 'components/section_toolbar.html.twig' with {
+    btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova admissão' : '',
+    btn_href: path('app_rh_admissoes_nova'),
+    btn_icon: 'fa-user-plus',
+    show_search: true,
+    search_placeholder: 'Buscar por nome ou e-mail…',
+    search_disabled: true
+} %}
+{% endblock %}
+
+{% block page_list_content %}
+<div class="huplex-card">
+    {% if processos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-user-plus',
+            title: 'Nenhum processo de admissão',
+            text: 'Inicie o onboarding de um novo colaborador para acompanhar documentação, TI e integração.',
+            btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova admissão' : '',
+            btn_href: path('app_rh_admissoes_nova')
+        } %}
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Colaborador</th>
+                        <th>Cargo</th>
+                        <th>Previsto</th>
+                        <th>Progresso</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in processos %}
+                    <tr>
+                        <td>
+                            <strong>{{ p.nome }}</strong><br>
+                            <small class="text-muted">{{ p.email }}</small>
+                        </td>
+                        <td>{{ p.cargo|default('—') }}</td>
+                        <td>{{ p.dataPrevista ? p.dataPrevista|date('d/m/Y') : '—' }}</td>
+                        <td>
+                            <div class="progress" style="min-width: 80px; height: 6px;">
+                                <div class="progress-bar bg-info" style="width: {{ p.checklistProgress }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ p.checklistProgress }}%</small>
+                        </td>
+                        <td><span class="badge badge-{{ p.statusClass }}">{{ p.statusLabel }}</span></td>
+                        <td class="text-right">
+                            <a href="{{ path('app_rh_admissoes_show', { id: p.id }) }}" class="btn-huplex-ghost btn-sm">Abrir</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

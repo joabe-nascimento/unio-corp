@@ -28,6 +28,9 @@ class Funcionario
     #[ORM\Column(type: 'date', nullable: true)]
     private ?\DateTimeInterface $dataAdmissao = null;
 
+    #[ORM\Column(type: 'date', nullable: true)]
+    private ?\DateTimeInterface $dataDemissao = null;
+
     #[ORM\Column(length: 20)]
     private string $status = 'ATIVO'; // ATIVO, INATIVO, FERIAS, AFASTADO
 
@@ -53,6 +56,10 @@ class Funcionario
     #[ORM\ManyToOne(targetEntity: Departamento::class, inversedBy: 'funcionarios')]
     private ?Departamento $departamento = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $user = null;
+
     public function __construct()
     {
         $this->criadoEm = new \DateTimeImmutable();
@@ -69,6 +76,8 @@ class Funcionario
     public function setCargo(?string $c): static { $this->cargo = $c; return $this; }
     public function getDataAdmissao(): ?\DateTimeInterface { return $this->dataAdmissao; }
     public function setDataAdmissao(?\DateTimeInterface $d): static { $this->dataAdmissao = $d; return $this; }
+    public function getDataDemissao(): ?\DateTimeInterface { return $this->dataDemissao; }
+    public function setDataDemissao(?\DateTimeInterface $d): static { $this->dataDemissao = $d; return $this; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $s): static { $this->status = $s; return $this; }
     public function getSalario(): ?string { return $this->salario; }
@@ -84,6 +93,8 @@ class Funcionario
     public function setEmpresa(?Empresa $e): static { $this->empresa = $e; return $this; }
     public function getDepartamento(): ?Departamento { return $this->departamento; }
     public function setDepartamento(?Departamento $d): static { $this->departamento = $d; return $this; }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 
     public function getStatusLabel(): string
     {

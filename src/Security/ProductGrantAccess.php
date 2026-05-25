@@ -28,7 +28,8 @@ final class ProductGrantAccess
         // Pessoas
         'app_pessoas_membro_novo' => ['scope' => 'product_pessoas', 'product' => 'membros', 'min' => 'GESTOR_EQUIPE'],
         'app_pessoas_equipe_nova' => ['scope' => 'product_pessoas', 'product' => 'equipes', 'min' => 'GESTOR_EQUIPE'],
-        // RH — botões de cadastro usam grant_at_least; incluir aqui quando existir rota dedicada
+        'app_rh_admissoes_nova' => ['scope' => 'product_rh', 'product' => 'admissoes', 'min' => 'GESTOR_EQUIPE'],
+        'app_rh_demissoes_nova' => ['scope' => 'product_rh', 'product' => 'admissoes', 'min' => 'GESTOR_EQUIPE'],
         // Engenharia / Publicidade — idem
     ];
 

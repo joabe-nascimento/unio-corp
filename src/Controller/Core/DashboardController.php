@@ -37,15 +37,16 @@ class DashboardController extends AbstractController
         };
 
         return $this->render('core/dashboard/index.html.twig', [
-            'stats'      => $stats,
-            'layout'     => $layout,
-            'user'       => $user,
-            'empresa'    => $empresa,
-            'empresas'   => $empresas,
-            'greeting'   => $welcome->getGreeting(),
-            'date_label' => $dt['date_label'],
-            'time_label' => $dt['time_label'],
-            'weekday'    => $dt['weekday'],
+            'stats'           => $stats,
+            'layout'          => $layout,
+            'user'            => $user,
+            'empresa'         => $empresa,
+            'empresas'        => $empresas,
+            'account_pending' => empty($empresas) && !$user->isTenant(),
+            'greeting'        => $welcome->getGreeting(),
+            'date_label'      => $dt['date_label'],
+            'time_label'      => $dt['time_label'],
+            'weekday'         => $dt['weekday'],
         ]);
     }
 }

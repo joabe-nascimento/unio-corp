@@ -1,0 +1,37 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Nova admissão{% endblock %}
+{% set page_list_title = 'Nova admissão' %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_rh_admissoes') }}" class="btn-huplex-ghost btn-sm">
+    <i class="fas fa-arrow-left"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="huplex-card" style="max-width: 640px;">
+    <form method="post">
+        <div class="form-group">
+            <label for="nome">Nome completo <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="nome" name="nome" required value="{{ nome|default('') }}">
+        </div>
+        <div class="form-group">
+            <label for="email">E-mail <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="email" name="email" required value="{{ email|default('') }}">
+        </div>
+        <div class="form-group">
+            <label for="cargo">Cargo</label>
+            <input type="text" class="form-control" id="cargo" name="cargo" value="{{ cargo|default('') }}">
+        </div>
+        <div class="form-group">
+            <label for="data_prevista">Data prevista de início</label>
+            <input type="date" class="form-control" id="data_prevista" name="data_prevista" value="{{ data_prevista|default('') }}">
+        </div>
+        <div class="form-group">
+            <label for="observacoes">Observações</label>
+            <textarea class="form-control" id="observacoes" name="observacoes" rows="3">{{ observacoes|default('') }}</textarea>
+        </div>
+        <button type="submit" class="btn-huplex">Iniciar onboarding</button>
+    </form>
+</div>
+{% endblock %}

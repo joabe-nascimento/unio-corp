@@ -1,0 +1,29 @@
+{#
+  rh_process_checklist — checklist de onboarding/offboarding
+  Props: process (RhOnboardingProcess|RhOffboardingProcess), post_route (string route name)
+#}
+<ul class="list-unstyled mb-0 rh-process-checklist">
+    {% for item in process.checklist %}
+    <li class="d-flex align-items-start mb-3">
+        {% if process.status == 'CONCLUIDO' %}
+            <span class="mr-2 mt-1"><i class="fas {{ item.done ? 'fa-check-circle text-success' : 'fa-circle text-muted' }}"></i></span>
+            <span class="{{ item.done ? '' : 'text-muted' }}">{{ item.label }}</span>
+        {% else %}
+            <form method="post" class="d-flex align-items-start flex-grow-1 mb-0">
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <input type="hidden" name="done" value="0">
+                <label class="d-flex align-items-start mb-0 cursor-pointer">
+                    <input type="checkbox"
+                           class="mr-2 mt-1"
+                           name="done"
+                           value="1"
+                           {{ item.done ? 'checked' : '' }}
+                           onchange="this.form.submit()">
+                    <span>{{ item.label }}</span>
+                </label>
+            </form>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>

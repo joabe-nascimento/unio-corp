@@ -1,0 +1,64 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Demissão — {{ process.funcionario.nome }}{% endblock %}
+{% set page_list_title = process.funcionario.nome %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_rh_demissoes') }}" class="btn-huplex-ghost btn-sm">
+    <i class="fas fa-arrow-left"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: process.statusLabel, label: 'Status', sub: 'Processo de offboarding' },
+        { value: process.checklistProgress ~ '%', label: 'Checklist', sub: 'Itens concluídos' },
+        { value: process.dataPrevista ? process.dataPrevista|date('d/m/Y') : '—', label: 'Desligamento previsto', sub: 'Data planejada' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row">
+    <div class="col-lg-7 mb-3">
+        <div class="huplex-card">
+            <div class="section-title mb-3">Checklist de offboarding</div>
+            {% include 'components/rh_process_checklist.html.twig' with { process: process } %}
+            {% if process.status != 'CONCLUIDO' and grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
+                <hr>
+                <form method="post" onsubmit="return confirm('Concluir offboarding? O funcionário será inativado e o usuário da plataforma desativado, se existir.');">
+                    <input type="hidden" name="action" value="complete">
+                    <button type="submit" class="btn-huplex" {{ process.checklistProgress < 100 ? 'disabled title=\"Marque todos os itens do checklist\"' : '' }}>
+                        Concluir offboarding
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-5 mb-3">
+        <div class="huplex-card">
+            <div class="section-title mb-3">Dados</div>
+            <dl class="mb-0">
+                <dt class="text-muted small">E-mail</dt>
+                <dd>{{ process.funcionario.email|default('—') }}</dd>
+                <dt class="text-muted small">Cargo</dt>
+                <dd>{{ process.funcionario.cargo|default('—') }}</dd>
+                <dt class="text-muted small">Motivo</dt>
+                <dd>{{ process.motivo|default('—') }}</dd>
+                {% if process.observacoes %}
+                <dt class="text-muted small">Observações</dt>
+                <dd>{{ process.observacoes }}</dd>
+                {% endif %}
+                {% if process.dataConclusao %}
+                <dt class="text-muted small">Concluído em</dt>
+                <dd>{{ process.dataConclusao|date('d/m/Y') }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+        <p class="text-muted small mt-2 mb-0">
+            <i class="fas fa-map-marker-alt"></i>
+            Hub <strong>Operações</strong> → RH → Demissões. A conclusão inativa o funcionário e desativa o login na plataforma.
+        </p>
+    </div>
+</div>
+{% endblock %}

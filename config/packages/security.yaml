@@ -24,6 +24,7 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\AppUserChecker
             form_login:
                 login_path: app_login
                 check_path: app_login
@@ -39,8 +40,10 @@ security:
                 lifetime: 604800
 
     access_control:
-        - { path: ^/login,       roles: PUBLIC_ACCESS }
-        - { path: ^/register,    roles: PUBLIC_ACCESS }
+        - { path: ^/login,              roles: PUBLIC_ACCESS }
+        - { path: ^/register,           roles: PUBLIC_ACCESS }
+        - { path: ^/forgot-password,    roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password,     roles: PUBLIC_ACCESS }
         - { path: ^/dashboard,   roles: ROLE_USER }
         - { path: ^/hub/operacoes, roles: ROLE_USER }
         - { path: ^/rh,            roles: ROLE_USER }
