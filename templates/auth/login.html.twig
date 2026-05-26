@@ -8,35 +8,51 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             background: #07080F;
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin: 0;
         }
 
         .auth-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
             width: 100%;
-            max-width: 960px;
-            min-height: 600px;
-            border-radius: 16px;
+            height: 100vh;
+            height: 100dvh;
+            min-height: 100vh;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.07);
         }
 
         /* ── Lado esquerdo ──────────────────────────────── */
         .auth-left {
             background: linear-gradient(145deg, #0C0D18 0%, #0f1435 100%);
-            padding: 36px 48px 60px;
+            padding: 56px 64px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
             overflow: hidden;
+            min-height: 0;
+        }
+
+        .auth-left-inner {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 28px;
+            min-height: 0;
+        }
+
+        .auth-left-footer {
+            flex-shrink: 0;
+            padding-top: 32px;
         }
 
         .auth-left::before {
@@ -61,76 +77,42 @@
 
         .auth-left > * { position: relative; z-index: 1; }
 
-        .auth-brand-logo {
+        .auth-hero-logo {
             display: block;
-            height: 180px;
-            width: auto;
+            width: 100%;
+            max-width: 420px;
+            height: auto;
+            max-height: min(52vh, 380px);
             object-fit: contain;
-            margin: 0;
+            object-position: left center;
         }
-        [data-theme="light"] .auth-brand-logo {
+        [data-theme="light"] .auth-hero-logo {
             filter: invert(1) hue-rotate(180deg);
         }
 
-        .auth-tagline-wrap {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            margin: 32px 0 24px;
-        }
-
-        .auth-tagline h2 {
-            color: #fff;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            line-height: 1.25;
-            margin-bottom: 10px;
-        }
-
-        .auth-tagline h2 span {
-            background: linear-gradient(90deg, #8BB0FF, #3D72FF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .auth-tagline p {
-            color: rgba(255,255,255,0.36);
-            font-size: 14px;
-            line-height: 1.65;
-            max-width: 300px;
-        }
-
-        .auth-features {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .auth-feature-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: rgba(255,255,255,0.38);
-            font-size: 12px;
-        }
-
-        .auth-feature-item span {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: #3D72FF;
-            flex-shrink: 0;
+        .auth-left-tagline {
+            color: rgba(255,255,255,0.42);
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 380px;
+            font-weight: 400;
         }
 
         /* ── Lado direito ───────────────────────────────── */
         .auth-right {
             background: #0C0D18;
-            padding: 52px 48px;
+            padding: 48px 56px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .auth-right-inner {
+            width: 100%;
+            max-width: 400px;
         }
 
         /* ── Tabs ───────────────────────────────────────── */
@@ -310,8 +292,24 @@
         .auth-divider a:hover { color: #8BB0FF; }
 
         /* ── Responsive ─────────────────────────────────── */
+        @media (max-width: 900px) {
+            .auth-wrapper {
+                grid-template-columns: 1fr;
+                height: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
+                overflow-y: auto;
+            }
+            html, body { overflow: auto; }
+            .auth-left {
+                min-height: 280px;
+                padding: 32px 28px;
+            }
+            .auth-hero-logo { max-height: 200px; max-width: 320px; }
+            .auth-left { display: flex; }
+        }
+
         @media (max-width: 640px) {
-            .auth-wrapper { grid-template-columns: 1fr; margin: 16px; }
             .auth-left { display: none; }
             .auth-right { padding: 36px 24px; }
         }
@@ -326,23 +324,25 @@
 
     {# ── Lado esquerdo ── #}
     <div class="auth-left">
-        <img src="{{ asset('images/logos/unio-logotipo.png') }}"
-             alt="Unio"
-             class="auth-brand-logo">
+        <div class="auth-left-inner">
+            <img src="{{ asset('images/logos/logotipo-unio.png') }}"
+                 alt="Unio — Pessoas. Processos. Resultados."
+                 class="auth-hero-logo">
 
-        <div class="auth-tagline-wrap">
-            <div class="auth-tagline">
-                <h2>Pessoas. Processos.<br><span>Resultados.</span></h2>
-                <p>Tudo conectado. Toda gestão em um só lugar.</p>
-            </div>
+            {% set _auth_tagline = platform_config.plataforma_tagline|default('')|trim %}
+            {% if _auth_tagline %}
+            <p class="auth-left-tagline">{{ _auth_tagline }}</p>
+            {% endif %}
         </div>
 
-
-        {% include 'components/platform_support.html.twig' with { extra_class: ' platform-support--auth' } %}
+        <div class="auth-left-footer">
+            {% include 'components/platform_support.html.twig' with { extra_class: ' platform-support--auth' } %}
+        </div>
     </div>
 
     {# ── Lado direito ── #}
     <div class="auth-right">
+    <div class="auth-right-inner">
 
         {# ── Tabs ── #}
         <div class="auth-tabs">
@@ -477,6 +477,7 @@
         </div>
         {% endif %}
 
+    </div>{# /auth-right-inner #}
     </div>{# /auth-right #}
 </div>{# /auth-wrapper #}
 </body>

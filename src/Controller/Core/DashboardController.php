@@ -2,7 +2,9 @@
 
 namespace App\Controller\Core;
 
+use App\Service\DashboardStatsService;
 use App\Service\NavigationService;
+use App\Service\WelcomeAnalyticsService;
 use App\Service\WelcomeService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,8 +22,13 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/dashboard', name: 'app_dashboard')]
-    public function index(WorkspaceService $workspaceService, NavigationService $navigation, WelcomeService $welcome): Response
-    {
+    public function index(
+        WorkspaceService $workspaceService,
+        NavigationService $navigation,
+        WelcomeService $welcome,
+        DashboardStatsService $dashboardStats,
+        WelcomeAnalyticsService $analytics,
+    ): Response {
         /** @var \App\Entity\User $user */
         $user     = $this->getUser();
         $empresa  = $workspaceService->getActiveEmpresa($user);
@@ -29,17 +36,11 @@ class DashboardController extends AbstractController
         $layout   = $navigation->getLayout($user);
         $dt       = $welcome->getDateTimeInfo();
 
-        $stats = match ($layout) {
-            'tenant' => ['funcionarios' => 128, 'departamentos' => 12, 'vagas_abertas' => 7, 'treinamentos' => 23, 'usuarios' => 34, 'empresas' => count($empresas)],
-            'gestor' => ['funcionarios' => 64, 'departamentos' => 6, 'vagas_abertas' => 4, 'treinamentos' => 11],
-            'supervisor' => ['funcionarios' => 28, 'departamentos' => 3, 'vagas_abertas' => 2, 'treinamentos' => 5],
-            default => ['treinamentos' => 3, 'avaliacoes' => 1],
-        };
-
         return $this->render('core/dashboard/index.html.twig', [
-            'stats'           => $stats,
             'layout'          => $layout,
-            'user'            => $user,
+            'layout_headline' => $dashboardStats->getLayoutHeadline($layout, $empresa),
+            'kpis'            => $dashboardStats->getKpis($user, $empresa, $layout, \count($empresas)),
+            'chart_sections'  => $analytics->getChartSections($user, $empresa),
             'empresa'         => $empresa,
             'empresas'        => $empresas,
             'account_pending' => empty($empresas) && !$user->isTenant(),

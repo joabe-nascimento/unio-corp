@@ -164,6 +164,11 @@ class NavigationService
             return true;
         }
 
+        if ($this->grants->usesGranularGrants($user)) {
+            return $this->grants->canView($user, 'product_core', 'projetos')
+                || $this->grants->canView($user, 'product_core', 'metas');
+        }
+
         return \in_array($user->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE', 'SUPERVISOR'], true);
     }
 

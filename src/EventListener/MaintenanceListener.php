@@ -23,6 +23,7 @@ class MaintenanceListener
     private const ALLOWED_ROUTES = [
         'app_login',
         'app_logout',
+        'app_sessao_encerrar',
         'app_manutencao',
         'app_register',
         'app_forgot_password',
@@ -66,7 +67,7 @@ class MaintenanceListener
                 return;
             }
         }
-        foreach (['/manutencao', '/login', '/logout', '/register', '/forgot-password', '/reset-password'] as $prefix) {
+        foreach (['/manutencao', '/login', '/logout', '/encerrar-sessao', '/register', '/forgot-password', '/reset-password'] as $prefix) {
             if (str_starts_with($path, $prefix)) {
                 return;
             }

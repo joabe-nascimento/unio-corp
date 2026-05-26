@@ -21,6 +21,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
     private const SKIP_ROUTES = [
         'app_login',
         'app_logout',
+        'app_sessao_encerrar',
         'app_register',
         'app_forgot_password',
         'app_reset_password',

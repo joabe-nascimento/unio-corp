@@ -164,6 +164,18 @@
             transition: all 0.15s;
         }
         .theme-float:hover { color: var(--text-1); border-color: rgba(255,255,255,0.15); }
+        .ws-flash {
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+        }
+        .ws-flash--warning {
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            color: var(--text-1);
+        }
     </style>
 </head>
 <body>
@@ -181,6 +193,10 @@
         <h2>Selecione a área de trabalho</h2>
         <p>Escolha a empresa que deseja acessar agora</p>
     </div>
+
+    {% for msg in app.flashes('warning') %}
+    <div class="ws-flash ws-flash--warning" role="alert">{{ msg }}</div>
+    {% endfor %}
 
     <div class="text-center">
         <div class="user-chip d-inline-flex">

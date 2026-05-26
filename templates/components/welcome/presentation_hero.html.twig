@@ -1,0 +1,56 @@
+{# Hero de apresentação — props: presentation, greeting, perfil_*, weekday, date_label, time_label, empresas_count #}
+{% set p = presentation %}
+
+<section class="welcome-present-hero">
+    <div class="welcome-present-hero-bg" aria-hidden="true"></div>
+    <div class="welcome-present-hero-grid">
+        <div class="welcome-present-hero-copy">
+            <p class="welcome-present-eyebrow">
+                <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                {{ p.eyebrow }}
+            </p>
+            <h1 class="welcome-present-title">{{ greeting }}, {{ app.user.nome|split(' ')|first }}!</h1>
+            <p class="welcome-present-pitch">{{ p.pitch }}</p>
+            <p class="welcome-present-intro">{{ p.intro }}</p>
+
+            {% if empresas_count > 1 %}
+            <a href="{{ path('app_workspace_select', {force: 1}) }}" class="welcome-present-workspace-switch">
+                <span class="welcome-present-workspace-switch-icon" aria-hidden="true">
+                    <i class="fas fa-building"></i>
+                </span>
+                <span class="welcome-present-workspace-switch-text">
+                    <strong>Trocar área de trabalho</strong>
+                    <small>Selecione outra empresa ou ambiente</small>
+                </span>
+                <i class="fas fa-arrow-right welcome-present-workspace-switch-arrow" aria-hidden="true"></i>
+            </a>
+            {% endif %}
+
+            <div class="welcome-present-cta">
+                {% if p.first_hub %}
+                <a href="{{ path(p.first_hub.route) }}" class="btn btn-primary btn-lg">
+                    <i class="fas {{ p.first_hub.icon|default('fa-rocket') }} mr-2" aria-hidden="true"></i>
+                    Começar em {{ p.first_hub.title }}
+                </a>
+                {% endif %}
+                <a href="{{ path('app_dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-gauge-high mr-2" aria-hidden="true"></i>
+                    Central do dashboard
+                </a>
+            </div>
+        </div>
+
+        <aside class="welcome-present-hero-aside" aria-label="Resumo da sessão">
+            <div class="welcome-profile-panel" id="welcomeDateTime">
+                <div class="welcome-profile-panel__surface welcome-present-status-bar welcome-present-status-bar--aside">
+                    {% include 'components/welcome/_status_aside_inner.html.twig' %}
+                </div>
+                <div class="welcome-profile-panel__reflect" aria-hidden="true">
+                    <div class="welcome-present-status-bar welcome-present-status-bar--aside welcome-present-status-bar--mirror">
+                        {% include 'components/welcome/_status_aside_inner.html.twig' %}
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>

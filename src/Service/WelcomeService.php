@@ -139,6 +139,59 @@ class WelcomeService
         return $items;
     }
 
+    /** @return list<array{id: string, label: string, icon: string, route: string, primary?: bool}> */
+    public function getQuickActionsForUser(User $user): array
+    {
+        $actions = [
+            [
+                'id' => 'dashboard',
+                'label' => 'Dashboard',
+                'icon' => 'fa-gauge-high',
+                'route' => 'app_dashboard',
+                'primary' => true,
+            ],
+        ];
+
+        if ($this->navigation->showHubOperacoes($user)) {
+            $actions[] = [
+                'id' => 'operacoes',
+                'label' => 'Operações',
+                'icon' => 'fa-briefcase',
+                'route' => 'app_hub_operacoes',
+            ];
+        }
+
+        if ($this->navigation->showHubTalentos($user)) {
+            $actions[] = [
+                'id' => 'talentos',
+                'label' => 'Talentos',
+                'icon' => 'fa-gem',
+                'route' => 'app_talentos',
+            ];
+        }
+
+        $actions[] = [
+            'id' => 'profile',
+            'label' => 'Meu perfil',
+            'icon' => 'fa-user-circle',
+            'route' => 'app_profile',
+        ];
+
+        return \array_slice($actions, 0, 5);
+    }
+
+    /** @return array{hub_count: int, novidade_count: int} */
+    public function getWelcomeSnapshot(User $user): array
+    {
+        $hubs = $this->getHubsForUser($user);
+        $novidades = $this->getNovidadesForUser($user);
+
+        return [
+            'hub_count' => \count($hubs),
+            'novidade_count' => \count($novidades),
+        ];
+    }
+
     private function canShowNovidade(User $user, string $check): bool
     {
         return match ($check) {

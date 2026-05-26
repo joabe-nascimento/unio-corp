@@ -1,0 +1,31 @@
+{#
+  Macros para gráficos Huplex / Chart.js
+
+  {% import 'macros/charts.html.twig' as charts %}
+
+  {{ charts.panel(chart_sections, { panel_id: 'rh', title: 'RH' }) }}
+  {{ charts.assets(chart_sections) }}
+
+  {{ charts.section(section, 'main') }}
+  {{ charts.card(chartDef, 'main') }}
+#}
+
+{% macro panel(sections, options = {}) %}
+    {% include 'components/charts/panel.html.twig' with options|merge({ sections: sections }) %}
+{% endmacro %}
+
+{% macro assets(sections, version = 1) %}
+    {% include 'components/charts/assets.html.twig' with { sections: sections, version: version } only %}
+{% endmacro %}
+
+{% macro section(section, panel_id = 'main') %}
+    {% include 'components/charts/section.html.twig' with { section: section, panel_id: panel_id } only %}
+{% endmacro %}
+
+{% macro card(chart, panel_id = 'main', wide = null) %}
+    {% include 'components/charts/card.html.twig' with {
+        chart: chart,
+        panel_id: panel_id,
+        wide: wide
+    } only %}
+{% endmacro %}

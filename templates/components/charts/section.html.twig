@@ -1,0 +1,29 @@
+{#
+  charts/section — grupo de gráficos dentro de um painel
+
+  Props:
+    section     (array)   id, title, subtitle, icon, charts[]
+    panel_id    (string)
+#}
+{% set _section = section %}
+{% set _panel = panel_id|default('default') %}
+
+<section class="huplex-chart-section huplex-card" data-huplex-chart-section="{{ _section.id }}">
+    <header class="huplex-chart-section-head">
+        <div class="huplex-chart-section-icon" aria-hidden="true">
+            <i class="fas {{ _section.icon }}"></i>
+        </div>
+        <div>
+            <h3 class="huplex-chart-section-title">{{ _section.title }}</h3>
+            <p class="huplex-chart-section-sub">{{ _section.subtitle }}</p>
+        </div>
+    </header>
+    <div class="huplex-charts-grid">
+        {% for chart in _section.charts %}
+            {% include 'components/charts/card.html.twig' with {
+                chart: chart,
+                panel_id: _panel
+            } only %}
+        {% endfor %}
+    </div>
+</section>

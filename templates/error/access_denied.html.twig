@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} | {{ platform_config.plataforma_nome|default('Unio') }}</title>
+    <title>{{ title }} | Unio</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Sora:wght@700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=93">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=105">
     <style>
         body { background: var(--layout-bg,#161C24); display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; padding:24px; }
         .err-box { text-align:center; max-width:420px; }
@@ -14,6 +14,7 @@
         .err-code { font-size:13px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3,#8A96A3); margin-bottom:8px; }
         .err-title { font-family:'Sora',sans-serif; font-size:26px; font-weight:800; color:var(--text-1,#E8EDF5); margin:0 0 12px; }
         .err-msg { font-size:15px; color:var(--text-3,#8A96A3); line-height:1.6; margin-bottom:28px; }
+        .err-actions { display:flex; flex-direction:column; gap:10px; align-items:center; }
         .err-back { display:inline-block; padding:10px 24px; background:var(--accent,#4F7FFF); color:#fff; border-radius:8px; font-weight:600; font-size:14px; text-decoration:none; }
         .err-back:hover { opacity:.9; color:#fff; }
     </style>
@@ -24,9 +25,16 @@
     <div class="err-code">403</div>
     <h1 class="err-title">{{ title }}</h1>
     <p class="err-msg">{{ message }}</p>
-    <a href="{{ back_url }}" class="err-back">
-        <i class="fas fa-arrow-left mr-2"></i> {{ back_label }}
-    </a>
+    <div class="err-actions">
+        <a href="{{ back_url }}" class="err-back">
+            {% if back_label starts with 'Sair' %}
+            <i class="fas fa-right-from-bracket mr-2" aria-hidden="true"></i>
+            {% else %}
+            <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>
+            {% endif %}
+            {{ back_label }}
+        </a>
+    </div>
 </div>
 </body>
 </html>

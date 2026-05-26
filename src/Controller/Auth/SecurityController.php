@@ -17,16 +17,24 @@ class SecurityController extends AbstractController
     public function login(Request $request, AuthenticationUtils $authenticationUtils, PlatformConfigService $config): Response
     {
         if ($this->getUser()) {
+            if (!$this->isGranted('ROLE_USER')) {
+                return $this->redirectToRoute('app_sessao_encerrar');
+            }
+
             $user = $this->getUser();
             if ($config->isMaintenanceMode() && $user instanceof User && !$user->isTenant()) {
                 return $this->redirectToRoute('app_logout');
             }
 
-            return $this->redirectToRoute('app_dashboard');
+            return $this->redirectToRoute('app_workspace_select');
         }
 
         if ($request->query->getBoolean('timeout')) {
             $this->addFlash('auth_info', 'Sua sessão expirou por inatividade. Faça login novamente.');
+        }
+
+        if ($request->query->getBoolean('relogin')) {
+            $this->addFlash('auth_info', 'Sua sessão foi encerrada. Faça login novamente.');
         }
 
         $registroPublico = $config->isRegistroPublico();

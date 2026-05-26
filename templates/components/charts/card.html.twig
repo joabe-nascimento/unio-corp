@@ -1,0 +1,29 @@
+{#
+  charts/card — um gráfico Chart.js (canvas)
+
+  Props obrigatórias:
+    chart       (array)   definição do gráfico (id, type, title, labels, data…)
+    panel_id    (string)  id único do painel pai (evita colisão de canvas)
+
+  Props opcionais:
+    wide        (bool)    card em largura total (linha)
+#}
+{% set _panel = panel_id|default('default') %}
+{% set _chart = chart %}
+{% set _wide = wide|default(_chart.type|default('bar') == 'line') %}
+
+<article class="huplex-chart-card{% if _wide %} huplex-chart-card--wide{% endif %}"
+         data-huplex-chart-card="{{ _chart.id }}">
+    <div class="huplex-chart-card-head">
+        <h4 class="huplex-chart-card-title">{{ _chart.title }}</h4>
+        {% if _chart.description is defined and _chart.description %}
+        <p class="huplex-chart-card-desc">{{ _chart.description }}</p>
+        {% endif %}
+    </div>
+    <div class="huplex-chart-canvas-wrap">
+        <canvas id="huplex-chart-{{ _panel }}-{{ _chart.id }}"
+                data-huplex-chart-canvas="{{ _chart.id }}"
+                role="img"
+                aria-label="Gráfico: {{ _chart.title }}"></canvas>
+    </div>
+</article>

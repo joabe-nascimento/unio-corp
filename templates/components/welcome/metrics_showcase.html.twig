@@ -1,0 +1,32 @@
+{# Faixa de métricas reais — props: metrics (list) #}
+{% if metrics|length > 0 %}
+<section class="welcome-present-metrics" data-welcome-section="metrics" aria-label="Panorama da área de trabalho">
+    <header class="welcome-present-section-head welcome-present-section-head--compact">
+        <div>
+            <h2 class="welcome-present-section-title">Panorama em números</h2>
+            <p class="welcome-present-section-sub">O que já está registrado e disponível para você agora</p>
+        </div>
+    </header>
+    <div class="welcome-present-metrics-track">
+        {% for m in metrics %}
+            {% if m.route is defined and m.route %}
+            <a href="{{ path(m.route) }}" class="welcome-present-metric welcome-present-metric--link">
+            {% else %}
+            <div class="welcome-present-metric">
+            {% endif %}
+                <div class="welcome-present-metric-icon" aria-hidden="true">
+                    <i class="fas {{ m.icon }}"></i>
+                </div>
+                <div class="welcome-present-metric-body">
+                    <span class="welcome-present-metric-value">{{ m.value }}</span>
+                    <span class="welcome-present-metric-label">{{ m.label }}</span>
+                </div>
+            {% if m.route is defined and m.route %}
+            </a>
+            {% else %}
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

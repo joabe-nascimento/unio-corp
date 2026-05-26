@@ -57,8 +57,9 @@ class AccessDeniedListener
         }
 
         if ($request->isXmlHttpRequest()) {
+            $detail = $this->extractDeniedMessage($exception);
             $event->setResponse(new Response(
-                json_encode(['error' => 'access_denied', 'message' => 'Sem permissão para esta ação.']),
+                json_encode(['error' => 'access_denied', 'message' => $detail ?: 'Sem permissão para esta ação.']),
                 Response::HTTP_FORBIDDEN,
                 ['Content-Type' => 'application/json']
             ));
@@ -67,17 +68,122 @@ class AccessDeniedListener
         }
 
         $isAdmin = str_starts_with($request->getPathInfo(), '/admin');
+        $detail  = $this->extractDeniedMessage($exception);
+
+        if (!$isAdmin && $this->shouldRedirectToWorkspace($detail)) {
+            $this->addFlash($request, 'warning', $detail !== '' ? $detail : 'Selecione uma área de trabalho para continuar.');
+            $event->setResponse(new RedirectResponse(
+                $this->router->generate('app_workspace_select'),
+                Response::HTTP_FOUND
+            ));
+
+            return;
+        }
+
+        if (!$isAdmin && str_contains(mb_strtolower($detail), 'projetos e metas')) {
+            $this->addFlash($request, 'warning', $detail);
+            $event->setResponse(new RedirectResponse(
+                $this->router->generate('app_dashboard'),
+                Response::HTTP_FOUND
+            ));
+
+            return;
+        }
+
+        if ($this->shouldForceLogout($detail)) {
+            $event->setResponse(new RedirectResponse(
+                $this->router->generate('app_sessao_encerrar'),
+                Response::HTTP_FOUND
+            ));
+
+            return;
+        }
+
+        $back = $this->resolveBackLink($isAdmin);
+        $message = $isAdmin
+            ? 'Esta área é exclusiva para administradores da plataforma (tenant).'
+            : ($detail !== '' ? $detail : 'Você não tem permissão para acessar este recurso.');
+
+        if (!$isAdmin && !$this->security->isGranted('ROLE_USER')) {
+            $message = 'Sua sessão expirou ou é inválida. Saia e faça login novamente.';
+        }
+
         $event->setResponse(new Response(
             $this->twig->render('error/access_denied.html.twig', [
-                'title'   => $isAdmin ? 'Área restrita' : 'Acesso negado',
-                'message' => $isAdmin
-                    ? 'Esta área é exclusiva para administradores da plataforma (tenant).'
-                    : 'Você não tem permissão para acessar este recurso.',
-                'back_url'  => $this->router->generate('app_dashboard'),
-                'back_label'=> 'Voltar ao início',
+                'title'      => $isAdmin ? 'Área restrita' : 'Acesso negado',
+                'message'    => $message,
+                'back_url'   => $back['url'],
+                'back_label' => $back['label'],
             ]),
             Response::HTTP_FORBIDDEN
         ));
+    }
+
+    private function extractDeniedMessage(\Throwable $exception): string
+    {
+        $messages = [];
+        $current  = $exception;
+        while ($current !== null) {
+            $msg = trim($current->getMessage());
+            if ($msg !== '' && !preg_match('/^access denied\.?$/i', $msg)) {
+                $messages[] = $msg;
+            }
+            $current = $current->getPrevious();
+        }
+
+        return $messages[0] ?? '';
+    }
+
+    private function shouldForceLogout(string $detail): bool
+    {
+        if (!$this->security->getUser()) {
+            return false;
+        }
+
+        if ($this->security->isGranted('ROLE_USER')) {
+            return false;
+        }
+
+        if (str_contains($detail, 'ROLE_USER')) {
+            return true;
+        }
+
+        return true;
+    }
+
+    /** @return array{url: string, label: string} */
+    private function resolveBackLink(bool $isAdmin): array
+    {
+        if ($isAdmin) {
+            return [
+                'url'   => $this->router->generate('app_dashboard'),
+                'label' => 'Voltar ao início',
+            ];
+        }
+
+        if ($this->security->isGranted('ROLE_USER')) {
+            return [
+                'url'   => $this->router->generate('app_dashboard'),
+                'label' => 'Voltar ao início',
+            ];
+        }
+
+        return [
+            'url'   => $this->router->generate('app_sessao_encerrar'),
+            'label' => 'Sair e entrar de novo',
+        ];
+    }
+
+    private function shouldRedirectToWorkspace(string $detail): bool
+    {
+        if ($detail === '') {
+            return false;
+        }
+
+        $lower = mb_strtolower($detail);
+
+        return str_contains($lower, 'área de trabalho')
+            || str_contains($lower, 'area de trabalho');
     }
 
     private function isTenant(): bool
@@ -85,5 +191,14 @@ class AccessDeniedListener
         $user = $this->security->getUser();
 
         return $user instanceof User && $user->isTenant();
+    }
+
+    private function addFlash(Request $request, string $type, string $message): void
+    {
+        if (!$request->hasSession()) {
+            return;
+        }
+
+        $request->getSession()->getFlashBag()->add($type, $message);
     }
 }

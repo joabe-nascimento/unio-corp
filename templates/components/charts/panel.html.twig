@@ -1,0 +1,62 @@
+{#
+  charts/panel — painel completo de gráficos Chart.js (reutilizável em qualquer tela)
+
+  Props obrigatórias:
+    sections    (list)    seções retornadas por ChartPanelBuilder ou WelcomeAnalyticsService
+
+  Props opcionais:
+    panel_id            (string)  default 'main' — único por página se houver vários painéis
+    title               (string)  título do painel
+    subtitle            (string)  subtítulo
+    title_icon          (string)  classe FA do título
+    show_chartjs_badge  (bool)    default false
+    class               (string)  classes CSS extras no wrapper
+    border_top          (bool)    separador superior (boas-vindas)
+    data_section_attr   (string)  ex. 'graficos' — integração com welcome-home.js
+    empresa             (object)  exibe nome da empresa no subtítulo
+
+  Uso:
+    {% include 'components/charts/panel.html.twig' with { sections: chart_sections } %}
+    {% include 'components/charts/assets.html.twig' with { sections: chart_sections } only %}
+#}
+{% if sections|length > 0 %}
+{% set _panel_id = panel_id|default('main') %}
+{% set _title = title|default('Indicadores e gráficos') %}
+{% set _subtitle = subtitle|default('Dados consolidados do que está registrado na plataforma') %}
+{% set _title_icon = title_icon|default('fa-chart-pie') %}
+
+<div class="huplex-charts-panel {{ class|default('') }}{% if border_top|default(false) %} huplex-charts-panel--border-top{% endif %}"
+     data-huplex-charts-panel="{{ _panel_id }}"
+     {% if data_section_attr is defined and data_section_attr %}data-welcome-section="{{ data_section_attr }}"{% endif %}>
+
+    {% block charts_panel_header %}
+    <header class="huplex-charts-panel-header">
+        <div>
+            <h2 class="huplex-charts-panel-title">
+                <i class="fas {{ _title_icon }}" aria-hidden="true"></i>
+                {{ _title }}
+            </h2>
+            <p class="huplex-charts-panel-sub">
+                {{ _subtitle }}{% if empresa is defined and empresa %} · {{ empresa.nome }}{% endif %}
+            </p>
+        </div>
+        {% if show_chartjs_badge|default(false) %}
+        <span class="huplex-charts-badge">
+            <i class="fas fa-chart-column" aria-hidden="true"></i> Chart.js
+        </span>
+        {% endif %}
+    </header>
+    {% endblock %}
+
+    {% block charts_panel_body %}
+    {% for section in sections %}
+        {% include 'components/charts/section.html.twig' with {
+            section: section,
+            panel_id: _panel_id
+        } only %}
+    {% endfor %}
+    {% endblock %}
+
+    <script type="application/json" class="huplex-charts-data">{{ sections|json_encode|raw }}</script>
+</div>
+{% endif %}

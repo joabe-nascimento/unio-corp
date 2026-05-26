@@ -1,0 +1,32 @@
+{# Jornada sugerida — props: journey #}
+<section class="welcome-present-journey huplex-card" data-welcome-section="journey">
+    <header class="welcome-present-section-head">
+        <div>
+            <h2 class="welcome-present-section-title">Sua jornada começa aqui</h2>
+            <p class="welcome-present-section-sub">Passos recomendados para o primeiro acesso com impacto</p>
+        </div>
+    </header>
+    <ol class="welcome-present-journey-list">
+        {% for step in journey %}
+        <li class="welcome-present-journey-step">
+            <span class="welcome-present-journey-num" aria-hidden="true">{{ step.step }}</span>
+            <div class="welcome-present-journey-body">
+                <h3 class="welcome-present-journey-title">
+                    <i class="fas {{ step.icon }} mr-2" aria-hidden="true"></i>{{ step.title }}
+                </h3>
+                <p class="welcome-present-journey-text">{{ step.text }}</p>
+            </div>
+            {% if step.route starts with '#' %}
+            <a href="{{ step.route }}" class="btn btn-sm btn-outline-primary welcome-present-journey-cta"
+               data-welcome-journey-anchor="{{ step.route }}">
+                {{ step.cta }}
+            </a>
+            {% else %}
+            <a href="{{ path(step.route) }}" class="btn btn-sm btn-outline-primary welcome-present-journey-cta">
+                {{ step.cta }}
+            </a>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+</section>

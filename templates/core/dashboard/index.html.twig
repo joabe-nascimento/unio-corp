@@ -5,100 +5,78 @@
 
 {% block content %}
 
+<div class="dashboard-page" id="dashboardPage">
+
 {% if account_pending|default(false) %}
     {% include 'components/account_pending_banner.html.twig' %}
 {% endif %}
 
 {% include 'components/dashboard_welcome.html.twig' %}
 
-{# ── Banner por perfil ── #}
-{% if layout == 'tenant' %}
-    {% include 'components/page_banner.html.twig' with {
-        icon: 'fa-shield-halved',
-        title: 'Gestão da Plataforma · Multi-empresa',
-        subtitle: 'Acesso total — hubs operacionais e configuração' ~ (empresa ? ' · ' ~ empresa.nome : ''),
-        use_huplex_mark: true
-    } %}
-{% elseif layout == 'gestor' %}
-    {% include 'components/page_banner.html.twig' with {
-        icon: 'fa-chart-pie',
-        title: 'Visão do Gestor' ~ (empresa ? ' — ' ~ empresa.nome : ''),
-        subtitle: 'Dados consolidados da empresa'
-    } %}
-{% elseif layout == 'supervisor' %}
-    {% include 'components/page_banner.html.twig' with {
-        icon: 'fa-user-group',
-        title: 'Sua Equipe' ~ (empresa ? ' — ' ~ empresa.nome : ''),
-        subtitle: 'Colaboradores sob sua supervisão'
-    } %}
-{% endif %}
-
 {% set dashboard_modules = platform_modules|default([]) %}
 
-{# ── Stats (tenant / gestor / supervisor) — linha própria ── #}
-{% if layout != 'membro' %}
-<div class="row stats-row mb-2">
-    {% if layout == 'tenant' %}
-        {% set cards = [
-            {icon:'fa-users',          v: stats.funcionarios,  l:'Funcionários'},
-            {icon:'fa-sitemap',        v: stats.departamentos, l:'Departamentos'},
-            {icon:'fa-briefcase',      v: stats.vagas_abertas, l:'Vagas Abertas'},
-            {icon:'fa-graduation-cap', v: stats.treinamentos,  l:'Treinamentos'},
-            {icon:'fa-user-shield',    v: stats.usuarios,      l:'Usuários'},
-            {icon:'fa-building',       v: stats.empresas,      l:'Empresas'},
-        ] %}
-        {% for c in cards %}
-        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
-            {% include 'components/stat_card.html.twig' with { icon: c.icon, value: c.v, label: c.l } %}
-        </div>
+{% if kpis|length > 0 %}
+<section class="dashboard-kpis-section mb-4" aria-label="Indicadores">
+    <div class="dashboard-kpis-grid">
+        {% for kpi in kpis %}
+            {% if kpi.route is defined and kpi.route %}
+            <a href="{{ path(kpi.route) }}" class="dashboard-kpi-card dashboard-kpi-card--link">
+                <div class="dashboard-kpi-icon" aria-hidden="true"><i class="fas {{ kpi.icon }}"></i></div>
+                <div class="dashboard-kpi-body">
+                    <span class="dashboard-kpi-value">{{ kpi.value }}</span>
+                    <span class="dashboard-kpi-label">{{ kpi.label }}</span>
+                </div>
+                <i class="fas fa-chevron-right dashboard-kpi-arrow" aria-hidden="true"></i>
+            </a>
+            {% else %}
+            <div class="dashboard-kpi-card">
+                <div class="dashboard-kpi-icon" aria-hidden="true"><i class="fas {{ kpi.icon }}"></i></div>
+                <div class="dashboard-kpi-body">
+                    <span class="dashboard-kpi-value">{{ kpi.value }}</span>
+                    <span class="dashboard-kpi-label">{{ kpi.label }}</span>
+                </div>
+            </div>
+            {% endif %}
         {% endfor %}
-    {% else %}
-        {% set cards = [
-            {icon:'fa-users',          v: stats.funcionarios,  l:'Funcionários'},
-            {icon:'fa-sitemap',        v: stats.departamentos, l:'Departamentos'},
-            {icon:'fa-briefcase',      v: stats.vagas_abertas, l:'Vagas Abertas'},
-            {icon:'fa-graduation-cap', v: stats.treinamentos,  l:'Treinamentos'},
-        ] %}
-        {% for c in cards %}
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            {% include 'components/stat_card.html.twig' with { icon: c.icon, value: c.v, label: c.l } %}
-        </div>
-        {% endfor %}
-    {% endif %}
-</div>
+    </div>
+</section>
 {% endif %}
 
-{# ── KPIs + módulos (membro: bloco único; demais: só módulos) ── #}
-<div class="row dashboard-main-row">
-    <div class="col-12 mb-4">
-        <div class="huplex-card dashboard-modules-card">
-            {% if layout == 'membro' %}
-                {% include 'components/kpi_row.html.twig' with {
-                    items: [
-                        { value: stats.treinamentos, label: 'Treinamentos' },
-                        { value: stats.avaliacoes, label: 'Avaliações' },
-                    ],
-                    mb: 'mb-4'
-                } %}
-            {% endif %}
-
-            {% if account_pending|default(false) and dashboard_modules|length == 0 %}
-                <div class="text-muted" style="font-size: 13px;">
-                    Nenhum módulo disponível até que sua conta seja vinculada a uma empresa.
-                </div>
-            {% elseif dashboard_modules|length > 0 %}
-                <div class="{% if layout == 'membro' %}dashboard-modules-section{% else %}mb-0{% endif %}">
-                    <div class="section-title">Módulos da Plataforma</div>
-                    <div class="section-subtitle mb-3">Acesso rápido às funcionalidades</div>
-                    <div class="dashboard-module-grid">
-                        {% for m in dashboard_modules %}
-                            {% include 'components/module_tile.html.twig' with m %}
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
+{% if dashboard_modules|length > 0 %}
+<section class="dashboard-modules-section huplex-card mb-4">
+    {% if account_pending|default(false) and dashboard_modules|length == 0 %}
+    <p class="dashboard-modules-empty text-muted mb-0">
+        Nenhum módulo disponível até que sua conta seja vinculada a uma empresa.
+    </p>
+    {% elseif dashboard_modules|length > 0 %}
+    <header class="dashboard-modules-head">
+        <div>
+            <h2 class="dashboard-modules-title">Módulos da plataforma</h2>
+            <p class="dashboard-modules-sub">Acesso rápido às funcionalidades</p>
         </div>
+        <a href="{{ path('app_welcome') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-house-chimney mr-1" aria-hidden="true"></i> Início
+        </a>
+    </header>
+    <div class="dashboard-module-grid">
+        {% for m in dashboard_modules %}
+            {% include 'components/module_tile.html.twig' with m %}
+        {% endfor %}
     </div>
+    {% endif %}
+</section>
+{% endif %}
+
+{% include 'components/charts/panel.html.twig' with {
+    sections: chart_sections|default([]),
+    class: 'dashboard-analytics'
+} %}
+
 </div>
 
+{% endblock %}
+
+{% block javascripts %}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 2 } only %}
+<script src="{{ asset('js/dashboard-home.js') }}?v=1"></script>
 {% endblock %}
