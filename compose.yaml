@@ -1,29 +1,27 @@
 # Huplex usa MariaDB/MySQL externo (ex.: container mariadb na porta 3308).
 # Configure DATABASE_URL no .env.local — este projeto não usa PostgreSQL.
 #
-# Serviço PostgreSQL removido (era padrão do Symfony Flex / doctrine-bundle).
+# Mercure (tempo real no kanban): docker compose up -d mercure
+# Hub em http://localhost:3000 — variáveis MERCURE_* no .env
 
-services: {}
+services:
+###> symfony/mercure-bundle ###
+    mercure:
+        image: dunglas/mercure
+        restart: unless-stopped
+        environment:
+            SERVER_NAME: ':3000'
+            MERCURE_PUBLISHER_JWT_KEY: '${MERCURE_JWT_SECRET:-changeme}'
+            MERCURE_SUBSCRIBER_JWT_KEY: '${MERCURE_JWT_SECRET:-changeme}'
+            MERCURE_EXTRA_DIRECTIVES: |
+                cors_origins http://127.0.0.1:8000 http://localhost:8000
+        ports:
+            - '3000:3000'
+###< symfony/mercure-bundle ###
 
-# --- PostgreSQL (desativado) ---
+# --- PostgreSQL (desativado — era padrão Symfony Flex) ---
 # services:
 # ###> doctrine/doctrine-bundle ###
 #   database:
 #     image: postgres:${POSTGRES_VERSION:-16}-alpine
-#     environment:
-#       POSTGRES_DB: ${POSTGRES_DB:-app}
-#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-#       POSTGRES_USER: ${POSTGRES_USER:-app}
-#     healthcheck:
-#       test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
-#       timeout: 5s
-#       retries: 5
-#       start_period: 60s
-#     volumes:
-#       - database_data:/var/lib/postgresql/data:rw
-# ###< doctrine/doctrine-bundle ###
-#
-# volumes:
-# ###> doctrine/doctrine-bundle ###
-#   database_data:
-# ###< doctrine/doctrine-bundle ###
+#     ...
