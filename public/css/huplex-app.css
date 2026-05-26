@@ -647,6 +647,163 @@
         .module-item .mi-sub   { color: var(--text-3); font-size: 11px; margin-top: 1px; }
         .module-item .mi-arrow { color: var(--text-3); font-size: 10px; margin-left: auto; flex-shrink: 0; }
 
+        /* Dashboard — grid de módulos (horizontal, compacto) */
+        .dashboard-module-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        @media (min-width: 992px) {
+            .dashboard-module-grid {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            }
+        }
+        .dashboard-module-grid .module-item {
+            width: 100%;
+            padding: 16px 18px;
+            min-height: 76px;
+            gap: 14px;
+            border-radius: 10px;
+        }
+        .dashboard-module-grid .module-item .mi-icon {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            font-size: 18px;
+            border-radius: 10px;
+        }
+        .dashboard-module-grid .module-item .mi-title {
+            font-size: 14px;
+        }
+        .dashboard-module-grid .module-item .mi-sub {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .dashboard-module-grid .module-item .mi-arrow {
+            font-size: 11px;
+        }
+
+        /* Dashboard — módulos em dock (ícone + nome, animado) */
+        .dashboard-module-dock {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 28px;
+            justify-content: flex-start;
+        }
+        .module-item--dock {
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            gap: 10px;
+            padding: 0;
+            min-height: 0;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            position: relative;
+            transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+            animation: moduleDockIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+            animation-delay: calc(var(--module-i, 0) * 0.07s);
+        }
+        .module-item--dock:hover,
+        .module-item--dock:focus-visible {
+            transform: translateY(-4px);
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            text-decoration: none;
+        }
+        .module-item--dock .mi-icon {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 14px;
+            font-size: 22px;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-line);
+            transition:
+                transform 0.4s cubic-bezier(0.34, 1.5, 0.64, 1),
+                box-shadow 0.35s ease,
+                background 0.25s ease,
+                border-color 0.25s ease;
+        }
+        .module-item--dock:hover .mi-icon,
+        .module-item--dock:focus-visible .mi-icon {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 40%, transparent);
+            background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
+            border-color: var(--accent);
+        }
+        .module-item--dock .mi-title {
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            color: var(--text-2);
+            transition: color 0.2s ease;
+            max-width: 96px;
+        }
+        .module-item--dock:hover .mi-title,
+        .module-item--dock:focus-visible .mi-title {
+            color: var(--text-1);
+        }
+        @keyframes moduleDockIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.92);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .module-item--dock {
+                animation: none;
+            }
+            .module-item--dock,
+            .module-item--dock .mi-icon {
+                transition: border-color 0.15s, background 0.15s;
+            }
+            .module-item--dock:hover,
+            .module-item--dock:focus-visible {
+                transform: none;
+            }
+            .module-item--dock:hover .mi-icon {
+                transform: none;
+            }
+        }
+
+        /* Hub — atalhos em dock dentro do module_card */
+        .module-card-actions {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .module-card-dock {
+            flex: 1;
+            min-width: 0;
+            gap: 16px 20px;
+        }
+        .module-card-dock .module-item--dock .mi-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            font-size: 18px;
+            border-radius: 12px;
+        }
+        .module-card-dock .module-item--dock .mi-title {
+            font-size: 11px;
+            max-width: 88px;
+        }
+        .module-card-actions__primary {
+            flex-shrink: 0;
+            align-self: center;
+        }
+
         .empty-state--compact { padding: 40px 20px; }
 
         .perm-row {
@@ -3457,12 +3614,43 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* ?????? Sidebar mini: ?cone logo no topo, ED embaixo ?????? */
+        /* Sidebar — logos marca/logotipo */
+        .sidebar-logo {
+            display: block;
+            object-fit: contain;
+            flex-shrink: 0;
+            transition: opacity 0.2s;
+        }
+        .sidebar-logo-mark {
+            width: 32px;
+            height: 32px;
+            display: none;
+        }
+        .sidebar-logo-full {
+            height: 32px;
+            max-width: 148px;
+            width: auto;
+        }
+        /* Sidebar fechada: mostra mark, esconde logotipo */
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-logo-mark { display: block; }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-logo-full { display: none; }
+        /* Sidebar aberta: mantém logotipo */
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-top .brand-link {
             justify-content: center !important;
             padding: 0 6px !important;
             gap: 0 !important;
         }
+
+        /* Collapsed: esconde label "Hub Selecionado" e separador */
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-separator { display: none !important; }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-heading { display: none !important; }
+        /* Hover/open: restaura */
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-separator,
+        .sidebar-mini.sidebar-open .sidebar-hub-separator { display: block !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-heading,
+        .sidebar-mini.sidebar-open .sidebar-hub-heading { display: flex !important; }
+
+        /* ?????? Sidebar mini: ?cone logo no topo, ED embaixo ?????? */
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-text { display: none !important; }
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .huplex-brand-mark {
             width: 30px; height: 30px;
@@ -3526,7 +3714,7 @@
             margin-right: auto !important;
         }
 
-        /* Hover expande ??? layout completo */
+        /* Hover expande — layout completo */
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-bottom .sidebar-empresa .se-info,
         .sidebar-mini.sidebar-open .sidebar-bottom .sidebar-empresa .se-info { display: block !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-bottom .sidebar-empresa,
@@ -3534,6 +3722,11 @@
             justify-content: flex-start !important;
             padding: 10px 14px !important;
         }
+        /* Logo: hover mostra logotipo completo */
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-logo-mark,
+        .sidebar-mini.sidebar-open .sidebar-logo-mark { display: none !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-logo-full,
+        .sidebar-mini.sidebar-open .sidebar-logo-full { display: block !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-text,
         .sidebar-mini.sidebar-open .brand-text { display: inline !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-top .brand-link,
@@ -3699,9 +3892,6 @@
             padding-top: 16px;
             margin-top: 4px;
             border-top: 1px solid var(--border);
-        }
-        .dashboard-module-grid > [class*="col"] {
-            display: flex;
         }
 
         /* ?????? Tela de boas-vindas ?????? */
@@ -4893,6 +5083,114 @@
         .helix-trigger .helix-face--xs {
             width: 20px;
             height: 20px;
+        }
+
+        /* Cluster perfil + apps (canto direito do header) */
+        .header-user-cluster { margin-left: 4px; }
+        .header-user-cluster__inner {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            gap: 8px;
+            position: relative;
+        }
+        .header-user-cluster__profile { position: static; }
+        .header-user-cluster__profile .user-menu-btn {
+            margin: 0 !important;
+        }
+
+        /* Apps launcher (header) */
+        .apps-launcher-wrap { position: relative; flex-shrink: 0; }
+        .apps-launcher-btn {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: var(--surface-2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-2);
+            font-size: 14px;
+            transition: border-color 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .apps-launcher-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent-line);
+            background: var(--accent-dim);
+        }
+        .apps-launcher-btn.is-open {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--accent-dim);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+        .apps-launcher-panel {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            z-index: 1060;
+            width: 272px;
+            max-width: calc(100vw - 20px);
+            padding: 12px 14px 14px;
+            background: var(--card-bg, #1a2332);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+            transform-origin: top right;
+            animation: appsPanelIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .apps-launcher-panel[hidden] {
+            display: none !important;
+        }
+        .apps-launcher-panel__head {
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .apps-launcher-panel__title {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-1);
+            line-height: 1.3;
+        }
+        .apps-launcher-panel__sub {
+            display: block;
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+        .apps-launcher-dock {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px 12px;
+            justify-items: center;
+        }
+        .apps-launcher-dock .module-item--dock .mi-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            font-size: 20px;
+        }
+        .apps-launcher-dock .module-item--dock .mi-title {
+            font-size: 11px;
+            max-width: 88px;
+        }
+        @keyframes appsPanelIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .apps-launcher-panel { animation: none; }
         }
 
         body.helix-open { overflow: hidden; }
@@ -6397,6 +6695,23 @@
 .admin-password-mismatch { font-size: 12.5px; color: #f07070; margin-top: 6px; }
 .admin-none { color: var(--text-muted,#8A96A3); font-style: italic; font-size: 12.5px; }
 .d-contents { display: contents; } input.filter-select { padding-right: 12px; cursor: text; font-weight: 400; } input.filter-select::-webkit-search-cancel-button { opacity: .5; cursor: pointer; }
+/* Barra de progresso — navegação entre páginas (cor = --accent da plataforma) */
+.huplex-nav-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: var(--accent, #4F7FFF);
+    z-index: 2147483647;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent, #4F7FFF) 55%, transparent);
+    transition: width 0.25s ease-out, opacity 0.2s ease;
+}
+.huplex-nav-progress--active { opacity: 1; }
+.huplex-nav-progress--done { opacity: 0; transition: width 0.15s ease-out, opacity 0.25s ease 0.1s; }
+
 /* Maintenance tenant banner */
 .manut-tenant-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; background: #d97706; color: #fff; text-align: center; padding: 10px 16px; font-size: 13.5px; font-weight: 500; box-shadow: 0 -2px 8px rgba(0,0,0,.25); }
 .manut-tenant-banner a { color: #fff; }

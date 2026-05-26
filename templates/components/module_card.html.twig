@@ -1,35 +1,37 @@
 {#
-  module_card — card de submódulo com título, descrição e links de ação
-  Props:
-    title     (string)         título do card
-    subtitle  (string, opt)    descrição curta
-    links     (array, opt)     lista de ações: { label, route, primary? }
-                               primary: true → btn-huplex | false/omit → btn-huplex-ghost
+  module_card — card de submódulo com título, descrição e atalhos (estilo apps: ícone + nome)
 
-  Uso:
-    {% include 'components/module_card.html.twig' with {
-        title: 'Recursos Humanos',
-        subtitle: 'Funcionários, admissões e folha',
-        links: [
-            { label: 'Funcionários', route: 'app_rh_funcionarios' },
-            { label: 'Admissões',    route: 'app_rh_admissoes' },
-            { label: 'Demissões',    route: 'app_rh_demissoes' },
-            { label: 'Abrir RH',     route: 'app_rh', primary: true },
-        ]
-    } %}
+  Props:
+    title     (string)
+    subtitle  (string, opt)
+    links     (array)  { label, route, icon, primary? }
 #}
-<div class="huplex-card flex-fill">
+<div class="huplex-card flex-fill module-card">
     <div class="section-title mb-1">{{ title }}</div>
     {% if subtitle is defined and subtitle %}
-        <div class="section-subtitle {% if links is defined and links %}mb-4{% else %}mb-0{% endif %}">{{ subtitle }}</div>
+        <div class="section-subtitle {% if links is defined and links %}mb-3{% else %}mb-0{% endif %}">{{ subtitle }}</div>
     {% endif %}
-    {% if links is defined and links %}
-        <div class="d-flex flex-wrap gap-2">
-            {% for link in links %}
-                <a href="{{ path(link.route) }}"
-                   class="{{ link.primary|default(false) ? 'btn-huplex' : 'btn-huplex-ghost' }} btn-sm">
-                    {{ link.label }}
-                </a>
+    {% if links is defined and links|length > 0 %}
+        {% set dock_links = links|filter(l => not l.primary|default(false)) %}
+        {% set primary_links = links|filter(l => l.primary|default(false)) %}
+        <div class="module-card-actions">
+            {% if dock_links|length > 0 %}
+            <div class="dashboard-module-dock module-card-dock" role="list">
+                {% for link in dock_links %}
+                    {% include 'components/module_tile.html.twig' with {
+                        icon: link.icon|default('fa-circle'),
+                        title: link.label,
+                        route: link.route,
+                        variant: 'dock',
+                        index: loop.index0
+                    } %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% for link in primary_links %}
+            <a href="{{ path(link.route) }}" class="btn-huplex btn-sm module-card-actions__primary">
+                <i class="fas {{ link.icon|default('fa-arrow-right') }} mr-1" aria-hidden="true"></i>{{ link.label }}
+            </a>
             {% endfor %}
         </div>
     {% endif %}

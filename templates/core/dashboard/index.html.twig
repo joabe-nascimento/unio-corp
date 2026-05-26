@@ -33,39 +33,7 @@
     } %}
 {% endif %}
 
-{% set dashboard_modules = [] %}
-{% if nav_show_hub_operacoes|default(false) %}
-    {% set dashboard_modules = dashboard_modules|merge([{
-        icon: 'fa-briefcase',
-        title: 'Hub Operações',
-        subtitle: 'RH e Gestão de Pessoas',
-        route: 'app_hub_operacoes'
-    }]) %}
-{% endif %}
-{% if nav_show_hub_talentos|default(false) %}
-    {% set dashboard_modules = dashboard_modules|merge([{
-        icon: 'fa-gem',
-        title: 'Hub de Talentos',
-        subtitle: 'Banco, vagas e trilhas',
-        route: 'app_talentos'
-    }]) %}
-{% endif %}
-{% if nav_show_hub_maturidade|default(false) %}
-    {% set dashboard_modules = dashboard_modules|merge([{
-        icon: 'fa-gauge-high',
-        title: 'Hub de Maturidade',
-        subtitle: 'Radar e plano de ação',
-        route: 'app_maturidade'
-    }]) %}
-{% endif %}
-{% if nav_show_plataforma|default(false) %}
-    {% set dashboard_modules = dashboard_modules|merge([{
-        icon: 'fa-shield-halved',
-        title: 'Plataforma',
-        subtitle: 'Usuários, empresas e configurações',
-        route: 'app_admin'
-    }]) %}
-{% endif %}
+{% set dashboard_modules = platform_modules|default([]) %}
 
 {# ── Stats (tenant / gestor / supervisor) — linha própria ── #}
 {% if layout != 'membro' %}
@@ -122,11 +90,9 @@
                 <div class="{% if layout == 'membro' %}dashboard-modules-section{% else %}mb-0{% endif %}">
                     <div class="section-title">Módulos da Plataforma</div>
                     <div class="section-subtitle mb-3">Acesso rápido às funcionalidades</div>
-                    <div class="row dashboard-module-grid">
+                    <div class="dashboard-module-grid">
                         {% for m in dashboard_modules %}
-                        <div class="col-sm-6 col-lg-4 mb-3 d-flex">
                             {% include 'components/module_tile.html.twig' with m %}
-                        </div>
                         {% endfor %}
                     </div>
                 </div>

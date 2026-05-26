@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||localStorage.getItem('huplex-theme')||'{{ _tema }}')}catch(e){}</script>
 
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=93">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=102">
     <style>:root { --accent: {{ _cor }}; }</style>
 
     {% block stylesheets %}{% endblock %}
@@ -54,7 +54,9 @@
                     <i class="fas fa-sun" id="themeIcon"></i>
                 </button>
             </li>
-            <li class="nav-item dropdown">
+            <li class="nav-item header-user-cluster">
+                <div class="header-user-cluster__inner">
+                    <div class="header-user-cluster__profile dropdown">
                 <a class="nav-link user-menu-btn d-flex align-items-center" data-toggle="dropdown" href="#" style="gap:8px;padding:4px 8px!important">
                     <span class="avatar-circle">{{ app.user.initials }}</span>
                     <span class="d-none d-sm-inline" style="color:var(--text-2);font-size:13px;font-weight:500">{{ app.user.nome|split(' ')|first }}</span>
@@ -86,6 +88,9 @@
                         <i class="fas fa-sign-out-alt"></i> Sair
                     </a>
                 </div>
+                    </div>
+                    {% include 'components/platform_apps_launcher.html.twig' %}
+                </div>
             </li>
         </ul>
     </nav>
@@ -94,16 +99,12 @@
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <div class="sidebar-top">
             <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0" title="{{ _pnome }}">
-                <span class="brand-text">
-                    {% if platform_config.logo_url|default('') %}
-                    {% set _logo_sidebar = platform_config.logo_url starts with 'http' ? platform_config.logo_url : asset(platform_config.logo_url) %}
-                    <img src="{{ _logo_sidebar }}" alt="{{ _pnome }}" style="max-height:32px;max-width:140px;object-fit:contain;"
-                         onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='')">
-                    <span class="unio-brand-name" style="display:none">{{ _pnome }}</span>
-                    {% else %}
-                    <span class="unio-brand-name">{{ _pnome }}</span>
-                    {% endif %}
-                </span>
+                <img src="{{ asset('images/logos/u-logo.png') }}"
+                     alt="{{ _pnome }}"
+                     class="sidebar-logo sidebar-logo-mark">
+                <img src="{{ asset('images/logos/unio-logotipo.png') }}"
+                     alt="{{ _pnome }}"
+                     class="sidebar-logo sidebar-logo-full">
             </a>
         </div>
 
@@ -316,6 +317,8 @@ window.addEventListener('load', function () {
 <script src="{{ asset('js/huplex-toast.js') }}?v=1"></script>
 <script src="{{ asset('js/global-search.js') }}?v=1"></script>
 <script src="{{ asset('js/sidebar-hubs.js') }}?v=2"></script>
+<script src="{{ asset('js/huplex-nav-progress.js') }}?v=1"></script>
+<script src="{{ asset('js/huplex-apps-launcher.js') }}?v=1"></script>
 {% block javascripts %}{% endblock %}
 
 {# ── View Toggle — JS genérico, carregado uma vez no base ── #}

@@ -288,4 +288,49 @@ class NavigationService
             'nav_has_hubs' => $this->hasAnyHub($user),
         ];
     }
+
+    /**
+     * Módulos principais para dashboard e launcher de apps no header.
+     *
+     * @return list<array{icon: string, title: string, route: string}>
+     */
+    public function getPlatformModules(User $user): array
+    {
+        $modules = [];
+
+        if ($this->showHubOperacoes($user)) {
+            $modules[] = [
+                'icon' => 'fa-briefcase',
+                'title' => 'Hub Operações',
+                'subtitle' => 'RH e Gestão de Pessoas',
+                'route' => 'app_hub_operacoes',
+            ];
+        }
+        if ($this->showHubTalentos($user)) {
+            $modules[] = [
+                'icon' => 'fa-gem',
+                'title' => 'Hub de Talentos',
+                'subtitle' => 'Banco, vagas e trilhas',
+                'route' => 'app_talentos',
+            ];
+        }
+        if ($this->showHubMaturidade($user)) {
+            $modules[] = [
+                'icon' => 'fa-gauge-high',
+                'title' => 'Hub de Maturidade',
+                'subtitle' => 'Radar e plano de ação',
+                'route' => 'app_maturidade',
+            ];
+        }
+        if ($this->showPlataforma($user)) {
+            $modules[] = [
+                'icon' => 'fa-shield-halved',
+                'title' => 'Plataforma',
+                'subtitle' => 'Usuários, empresas e configurações',
+                'route' => 'app_admin',
+            ];
+        }
+
+        return $modules;
+    }
 }

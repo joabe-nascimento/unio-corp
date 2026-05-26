@@ -1,0 +1,33 @@
+{# Launcher de apps — ao lado do menu de perfil (dentro de .header-user-cluster) #}
+{% if platform_modules|default([])|length > 0 %}
+<div class="apps-launcher-wrap">
+    <button type="button"
+            class="apps-launcher-btn"
+            id="appsLauncherBtn"
+            aria-expanded="false"
+            aria-controls="appsLauncherPanel"
+            aria-haspopup="true"
+            title="Apps — módulos da plataforma">
+        <i class="fas fa-grip" aria-hidden="true"></i>
+        <span class="sr-only">Apps</span>
+    </button>
+    <div id="appsLauncherPanel"
+         class="apps-launcher-panel"
+         role="dialog"
+         aria-label="Módulos da plataforma"
+         hidden>
+        <div class="apps-launcher-panel__head">
+            <span class="apps-launcher-panel__title">Apps</span>
+            <span class="apps-launcher-panel__sub">Acesso rápido</span>
+        </div>
+        <div class="dashboard-module-dock apps-launcher-dock" role="list">
+            {% for m in platform_modules %}
+                {% include 'components/module_tile.html.twig' with m|merge({
+                    variant: 'dock',
+                    index: loop.index0
+                }) %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}

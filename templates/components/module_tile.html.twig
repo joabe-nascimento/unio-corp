@@ -1,9 +1,18 @@
-{# Tile de módulo no dashboard #}
-<a href="{{ path(route) }}" class="module-item">
-    <div class="mi-icon"><i class="fas {{ icon }}"></i></div>
-    <div class="module-item-body">
+{# Tile de módulo — variant: horizontal (padrão) | dock (ícone + nome, dashboard) #}
+{% set _variant = variant|default('horizontal') %}
+<a href="{{ path(route) }}"
+   class="module-item{% if _variant == 'dock' %} module-item--dock{% endif %}"
+   {% if _variant == 'dock' %}style="--module-i: {{ index|default(0) }}"{% endif %}>
+    <div class="mi-icon" aria-hidden="true"><i class="fas {{ icon }}"></i></div>
+    {% if _variant == 'dock' %}
         <div class="mi-title">{{ title }}</div>
-        <div class="mi-sub">{{ subtitle }}</div>
-    </div>
-    <i class="fas fa-chevron-right mi-arrow"></i>
+    {% else %}
+        <div class="module-item-body">
+            <div class="mi-title">{{ title }}</div>
+            {% if subtitle is defined and subtitle %}
+            <div class="mi-sub">{{ subtitle }}</div>
+            {% endif %}
+        </div>
+        <i class="fas fa-chevron-right mi-arrow" aria-hidden="true"></i>
+    {% endif %}
 </a>
