@@ -2,11 +2,12 @@
   filter_group — select de filtro (toolbar / listagem)
 
   Props:
-    label     (string)  usado em aria-label do select (ex.: Área)
-    options   (array)   lista de opções (string ou { value, label })
-    name      (string, opt)
-    disabled  (bool, opt)
-    min_width (string, opt)  ex.: '130px'
+    label      (string)  usado em aria-label do select (ex.: Área)
+    options    (array)   lista de opções (string ou { value, label })
+    name       (string, opt)
+    value      (string, opt)  valor selecionado atual
+    disabled   (bool, opt)
+    min_width  (string, opt)  ex.: '130px'
 #}
 <div class="filter-group">
     <select class="filter-select"
@@ -16,9 +17,14 @@
             {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
         {% for opt in options|default([]) %}
             {% if opt is iterable and opt.label is defined %}
-                <option value="{{ opt.value|default(opt.label) }}">{{ opt.label }}</option>
+                <option value="{{ opt.value|default(opt.label) }}"
+                        {% if value is defined and value is not null and value|length > 0 and (value == opt.value|default(opt.label)) %}selected{% endif %}>
+                    {{ opt.label }}
+                </option>
             {% else %}
-                <option>{{ opt }}</option>
+                <option {% if value is defined and value is not null and value|length > 0 and value == opt %}selected{% endif %}>
+                    {{ opt }}
+                </option>
             {% endif %}
         {% endfor %}
     </select>

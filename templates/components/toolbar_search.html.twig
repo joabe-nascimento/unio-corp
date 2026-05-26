@@ -4,10 +4,13 @@
   Props:
     search_placeholder (string)
     search_disabled    (bool)
+    search_name        (string, opt)  name do input para form GET (ex.: 'q')
+    search_value       (string, opt)  valor pré-preenchido (vindo de query param)
 #}
+{% set _has_value = search_value is defined and search_value %}
 <div class="filter-group filter-group--search">
-    <div class="list-search-expand" data-search-expand>
-        <button type="button" class="list-search-toggle" aria-label="Buscar" aria-expanded="false">
+    <div class="list-search-expand{{ _has_value ? ' is-expanded' : '' }}" data-search-expand>
+        <button type="button" class="list-search-toggle" aria-label="Buscar" aria-expanded="{{ _has_value ? 'true' : 'false' }}">
             <i class="fas fa-magnifying-glass"></i>
         </button>
         <div class="list-search-field">
@@ -15,6 +18,8 @@
             <input type="search"
                    class="list-search-input"
                    placeholder="{{ search_placeholder|default('Buscar…') }}"
+                   {% if search_name is defined and search_name %}name="{{ search_name }}"{% endif %}
+                   {% if _has_value %}value="{{ search_value }}"{% endif %}
                    {% if search_disabled|default(false) %}disabled{% endif %}
                    autocomplete="off">
             <button type="button" class="list-search-close" aria-label="Fechar busca">

@@ -1,0 +1,22 @@
+{#
+  toolbar_filter_actions — botão de submit e link de limpar filtros (form GET)
+
+  Deve ser incluído dentro do bloco section_toolbar_filters de um embed de
+  section_toolbar.html.twig que esteja dentro de um <form method="get">.
+
+  Props:
+    clear_href    (string)           URL para limpar todos os filtros (ex.: path('app_admin_usuarios'))
+    has_filters   (bool, opt)        true quando há algum filtro ativo; exibe o link limpar
+    submit_label  (string, opt)      label do botão; default: 'Filtrar'
+    submit_icon   (string, opt)      ícone FA; default: 'fa-search'
+#}
+{% set _label = submit_label|default('Filtrar') %}
+{% set _icon  = submit_icon|default('fa-search') %}
+<button type="submit" class="btn-huplex btn-sm ml-1" title="{{ _label }}">
+    <i class="fas {{ _icon }} mr-1" aria-hidden="true"></i> {{ _label }}
+</button>
+{% if has_filters|default(false) %}
+<a href="{{ clear_href }}" class="btn-huplex-ghost btn-sm ml-1" title="Limpar filtros">
+    <i class="fas fa-xmark" aria-hidden="true"></i>
+</a>
+{% endif %}
