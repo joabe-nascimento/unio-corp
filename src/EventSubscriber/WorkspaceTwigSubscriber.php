@@ -75,6 +75,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
                 \JSON_UNESCAPED_UNICODE,
             ) ?: '[]',
         );
+        $this->twig->addGlobal('platform_modules', $this->navigation->getPlatformModules($user));
     }
 
     private function shouldSkip(?string $route): bool

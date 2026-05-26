@@ -433,7 +433,7 @@ class AdminController extends AbstractController
             }
 
             $fields = [
-                'plataforma_nome', 'plataforma_tagline', 'logo_url', 'favicon_url',
+                'plataforma_nome', 'plataforma_tagline', 'logo_url', 'logo_mark_url', 'logo_full_url', 'favicon_url',
                 'cor_primaria', 'tema',
                 'suporte_email', 'suporte_telefone', 'website', 'rodape_texto',
                 'msg_manutencao',
@@ -448,7 +448,7 @@ class AdminController extends AbstractController
             @mkdir($uploadDir, 0777, true);
             $slugger = new AsciiSlugger();
 
-            foreach (['logo_file' => 'logo_url', 'favicon_file' => 'favicon_url'] as $inputName => $cfgKey) {
+            foreach (['logo_file' => 'logo_url', 'favicon_file' => 'favicon_url', 'logo_mark_file' => 'logo_mark_url', 'logo_full_file' => 'logo_full_url'] as $inputName => $cfgKey) {
                 $file = $request->files->get($inputName);
                 if (!$file instanceof UploadedFile) {
                     continue;
@@ -456,7 +456,13 @@ class AdminController extends AbstractController
 
                 if (!$file->isValid()) {
                     if (\in_array($file->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
-                        $label = $inputName === 'logo_file' ? 'do logotipo' : 'do favicon';
+                    $label = match($inputName) {
+                        'logo_file'      => 'do logotipo',
+                        'favicon_file'   => 'do favicon',
+                        'logo_mark_file' => 'do ícone da sidebar',
+                        'logo_full_file' => 'do logotipo completo da sidebar',
+                        default          => 'do arquivo',
+                    };
                         $this->addFlash('error', sprintf(
                             'Arquivo %s excede o limite de upload do PHP (%s).',
                             $label,
@@ -470,14 +476,26 @@ class AdminController extends AbstractController
                 if ($file->getSize() > $maxBytes) {
                     $this->addFlash('error', sprintf(
                         'Arquivo %s excede o limite de upload do PHP (%s).',
-                        $inputName === 'logo_file' ? 'do logotipo' : 'do favicon',
+                        match($inputName) {
+                            'logo_file'      => 'do logotipo',
+                            'favicon_file'   => 'do favicon',
+                            'logo_mark_file' => 'do ícone da sidebar',
+                            'logo_full_file' => 'do logotipo completo da sidebar',
+                            default          => 'do arquivo',
+                        },
                         ini_get('upload_max_filesize') ?: '2M'
                     ));
                     continue;
                 }
 
                 $ext      = $this->resolveUploadExtension($file);
-                $baseName = $cfgKey === 'logo_url' ? 'logo' : 'favicon';
+                $baseName = match($cfgKey) {
+                    'logo_url'      => 'logo',
+                    'favicon_url'   => 'favicon',
+                    'logo_mark_url' => 'logo-mark',
+                    'logo_full_url' => 'logo-full',
+                    default         => 'upload',
+                };
                 $safeName = $baseName . '-' . uniqid() . '.' . $ext;
                 try {
                     $file->move($uploadDir, $safeName);

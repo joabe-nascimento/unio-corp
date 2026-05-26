@@ -192,6 +192,121 @@
                     </div>
                 </div>
 
+                {# ── Logos da sidebar ── #}
+                <div class="cfg-form-section-label">Logos da barra lateral</div>
+                <p class="cfg-section-sub mb-3" style="margin-top:-4px;">
+                    Sidebar fechada: ícone/marca. Sidebar aberta ou ao passar o mouse: logotipo completo. Deixe em branco para o padrão do sistema.
+                </p>
+                <div class="cfg-row-2 mb-3">
+                        {# ── Logo marca (sidebar fechada) ── #}
+                        <div class="huplex-form-group mb-0">
+                            <label class="huplex-form-label" style="font-size:11px;">Ícone / Marca <span style="opacity:.5">(sidebar fechada)</span></label>
+                            <div class="cfg-img-picker" id="logoMarkPicker"
+                                 data-input-id="cfg_logo_mark_url"
+                                 data-file-input-id="cfg_logo_mark_file">
+
+                                <div class="cfg-img-preview cfg-img-preview--sm">
+                                    {% if config.logo_mark_url|default('') %}
+                                    {% set _mark_src = config.logo_mark_url starts with 'http' ? config.logo_mark_url : asset(config.logo_mark_url) %}
+                                    <img src="{{ _mark_src }}" alt="Ícone atual"
+                                         data-initial-src="{{ _mark_src }}"
+                                         onerror="this.hidden=true;this.nextElementSibling&&(this.nextElementSibling.hidden=false)">
+                                    <span class="cfg-img-placeholder" hidden><i class="fas fa-image"></i></span>
+                                    {% else %}
+                                    <span class="cfg-img-placeholder"><i class="fas fa-image"></i></span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="cfg-img-controls">
+                                    <div class="cfg-img-tabs">
+                                        <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="logoMarkPicker">
+                                            <i class="fas fa-link fa-xs mr-1"></i> URL
+                                        </button>
+                                        <button type="button" class="cfg-img-tab" data-tab="file" data-picker="logoMarkPicker">
+                                            <i class="fas fa-upload fa-xs mr-1"></i> Upload
+                                        </button>
+                                    </div>
+                                    <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                                        <input type="text" id="cfg_logo_mark_url" name="logo_mark_url"
+                                               value="{{ config.logo_mark_url|default('') }}"
+                                               class="huplex-form-control"
+                                               placeholder="/uploads/… ou https://…/mark.png"
+                                               autocomplete="off">
+                                    </div>
+                                    <div class="cfg-img-panel" data-panel="file">
+                                        <label class="cfg-file-drop" for="cfg_logo_mark_file">
+                                            <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                            <span class="cfg-file-drop-label">Clique ou arraste</span>
+                                            <span class="cfg-file-drop-hint">PNG, SVG — máx. 2 MB</span>
+                                        </label>
+                                        <input type="file" id="cfg_logo_mark_file" name="logo_mark_file"
+                                               accept="image/*,.svg" class="cfg-file-input">
+                                    </div>
+                                    {% if config.logo_mark_url|default('') %}
+                                    <button type="button" class="cfg-img-remove" data-picker="logoMarkPicker"
+                                            data-url-input="cfg_logo_mark_url" data-file-input="cfg_logo_mark_file">
+                                        <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# ── Logo completo (sidebar aberta) ── #}
+                        <div class="huplex-form-group mb-0">
+                            <label class="huplex-form-label" style="font-size:11px;">Logotipo completo <span style="opacity:.5">(sidebar aberta)</span></label>
+                            <div class="cfg-img-picker" id="logoFullPicker"
+                                 data-input-id="cfg_logo_full_url"
+                                 data-file-input-id="cfg_logo_full_file">
+
+                                <div class="cfg-img-preview">
+                                    {% if config.logo_full_url|default('') %}
+                                    {% set _full_src = config.logo_full_url starts with 'http' ? config.logo_full_url : asset(config.logo_full_url) %}
+                                    <img src="{{ _full_src }}" alt="Logotipo atual"
+                                         data-initial-src="{{ _full_src }}"
+                                         onerror="this.hidden=true;this.nextElementSibling&&(this.nextElementSibling.hidden=false)">
+                                    <span class="cfg-img-placeholder" hidden><i class="fas fa-image"></i></span>
+                                    {% else %}
+                                    <span class="cfg-img-placeholder"><i class="fas fa-image"></i></span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="cfg-img-controls">
+                                    <div class="cfg-img-tabs">
+                                        <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="logoFullPicker">
+                                            <i class="fas fa-link fa-xs mr-1"></i> URL
+                                        </button>
+                                        <button type="button" class="cfg-img-tab" data-tab="file" data-picker="logoFullPicker">
+                                            <i class="fas fa-upload fa-xs mr-1"></i> Upload
+                                        </button>
+                                    </div>
+                                    <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                                        <input type="text" id="cfg_logo_full_url" name="logo_full_url"
+                                               value="{{ config.logo_full_url|default('') }}"
+                                               class="huplex-form-control"
+                                               placeholder="/uploads/… ou https://…/logotipo.png"
+                                               autocomplete="off">
+                                    </div>
+                                    <div class="cfg-img-panel" data-panel="file">
+                                        <label class="cfg-file-drop" for="cfg_logo_full_file">
+                                            <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                            <span class="cfg-file-drop-label">Clique ou arraste</span>
+                                            <span class="cfg-file-drop-hint">PNG, SVG — máx. 2 MB</span>
+                                        </label>
+                                        <input type="file" id="cfg_logo_full_file" name="logo_full_file"
+                                               accept="image/*,.svg" class="cfg-file-input">
+                                    </div>
+                                    {% if config.logo_full_url|default('') %}
+                                    <button type="button" class="cfg-img-remove" data-picker="logoFullPicker"
+                                            data-url-input="cfg_logo_full_url" data-file-input="cfg_logo_full_file">
+                                        <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
                 <div class="cfg-row-2">
                     <div class="huplex-form-group">
                         <label class="huplex-form-label" for="cfg_cor_primaria">Cor de destaque (accent)</label>

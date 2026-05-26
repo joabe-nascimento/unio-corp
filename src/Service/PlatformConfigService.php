@@ -31,6 +31,8 @@ class PlatformConfigService
         'plataforma_nome'     => 'Unio',
         'plataforma_tagline'  => 'Plataforma de Gestão de Pessoas',
         'logo_url'            => '',
+        'logo_mark_url'       => '',
+        'logo_full_url'       => '',
         'favicon_url'         => '',
         'cor_primaria'        => '#4F7FFF',
         'tema'                => 'dark',

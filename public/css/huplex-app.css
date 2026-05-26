@@ -3631,6 +3631,10 @@
             max-width: 148px;
             width: auto;
         }
+        /* Tema claro: inverte texto branco → preto, mantém ícone azul (~) */
+        [data-theme="light"] .sidebar-logo-full {
+            filter: invert(1) hue-rotate(180deg);
+        }
         /* Sidebar fechada: mostra mark, esconde logotipo */
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-logo-mark { display: block; }
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-logo-full { display: none; }
@@ -3643,12 +3647,67 @@
 
         /* Collapsed: esconde label "Hub Selecionado" e separador */
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-separator { display: none !important; }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-heading-item { padding: 0 !important; }
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-heading { display: none !important; }
-        /* Hover/open: restaura */
+
+        /* Collapsed: centraliza itens do hub panel */
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-panel-root {
+            display: block;
+            width: 100%;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-panel-list > .nav-item {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-panel-list > .nav-item > .nav-link {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 36px !important;
+            height: 36px !important;
+            margin: 2px auto !important;
+            padding: 0 !important;
+            border-radius: 8px !important;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-panel-list > .nav-item > .nav-link p,
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-panel-list > .nav-item > .nav-link .right {
+            display: none !important;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-panel-list > .nav-item > .nav-link .nav-icon {
+            margin: 0 !important;
+            width: auto !important;
+            min-width: 0 !important;
+            font-size: 14px !important;
+            text-align: center !important;
+            float: none !important;
+        }
+        .sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-panel-list .nav-treeview { display: none !important; }
+
+        /* Hover/open: restaura hub panel */
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-separator,
         .sidebar-mini.sidebar-open .sidebar-hub-separator { display: block !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-heading,
         .sidebar-mini.sidebar-open .sidebar-hub-heading { display: flex !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-panel-list > .nav-item,
+        .sidebar-mini.sidebar-open .sidebar-hub-panel-list > .nav-item { display: block !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-panel-list > .nav-item > .nav-link,
+        .sidebar-mini.sidebar-open .sidebar-hub-panel-list > .nav-item > .nav-link {
+            display: flex !important;
+            justify-content: flex-start !important;
+            width: calc(100% - 10px) !important;
+            height: auto !important;
+            margin: 1px 6px 1px 4px !important;
+            padding: 8px 12px 8px 10px !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-panel-list > .nav-item > .nav-link p,
+        .sidebar-mini.sidebar-open .sidebar-hub-panel-list > .nav-item > .nav-link p { display: block !important; }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-panel-list > .nav-item > .nav-link .nav-icon,
+        .sidebar-mini.sidebar-open .sidebar-hub-panel-list > .nav-item > .nav-link .nav-icon {
+            margin-right: 8px !important;
+            width: 1.6rem !important;
+            float: none !important;
+        }
 
         /* ?????? Sidebar mini: ?cone logo no topo, ED embaixo ?????? */
         .sidebar-mini.sidebar-collapse:not(.sidebar-open) .brand-text { display: none !important; }
@@ -3726,7 +3785,7 @@
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-logo-mark,
         .sidebar-mini.sidebar-open .sidebar-logo-mark { display: none !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-logo-full,
-        .sidebar-mini.sidebar-open .sidebar-logo-full { display: block !important; }
+        .sidebar-mini.sidebar-open .sidebar-logo-full { display: flex !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-text,
         .sidebar-mini.sidebar-open .brand-text { display: inline !important; }
         .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-top .brand-link,
