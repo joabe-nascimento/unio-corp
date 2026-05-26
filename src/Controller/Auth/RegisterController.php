@@ -5,6 +5,7 @@ namespace App\Controller\Auth;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Service\PasswordResetService;
+use App\Service\PlatformConfigService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,9 +22,15 @@ class RegisterController extends AbstractController
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
         PasswordResetService $passwordReset,
+        PlatformConfigService $platformConfig,
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('app_dashboard');
+        }
+
+        if (!$platformConfig->isRegistroPublico()) {
+            $this->addFlash('error', 'O registro público está desativado.');
+            return $this->redirectToRoute('app_login');
         }
 
         $user = new User();
@@ -38,7 +45,7 @@ class RegisterController extends AbstractController
             if ($existingUser) {
                 $this->addFlash('register_error', 'Este e-mail já está cadastrado.');
 
-                return $this->renderRegisterView($form);
+                return $this->renderRegisterView($form, true);
             }
 
             $plain = $form->get('plainPassword')->getData();
@@ -54,7 +61,7 @@ class RegisterController extends AbstractController
             } catch (UniqueConstraintViolationException) {
                 $this->addFlash('register_error', 'Este e-mail já está cadastrado.');
 
-                return $this->renderRegisterView($form);
+                return $this->renderRegisterView($form, true);
             }
 
             $this->addFlash(
@@ -65,16 +72,17 @@ class RegisterController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        return $this->renderRegisterView($form);
+        return $this->renderRegisterView($form, true);
     }
 
-    private function renderRegisterView(\Symfony\Component\Form\FormInterface $form): Response
+    private function renderRegisterView(\Symfony\Component\Form\FormInterface $form, bool $registroPublico = true): Response
     {
         return $this->render('auth/login.html.twig', [
             'registrationForm' => $form,
             'error'            => null,
             'last_username'    => '',
             'active_tab'       => 'register',
+            'registro_publico' => $registroPublico,
         ]);
     }
 }

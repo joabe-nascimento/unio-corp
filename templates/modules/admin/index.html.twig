@@ -2,6 +2,17 @@
 {% block title %}Administração{% endblock %}
 {% block permissions_scope %}hub_admin{% endblock %}
 {% set hub_page_title = 'Administração' %}
+
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: total_usuarios, label: 'Usuários', sub: 'Total cadastrado' },
+        { value: total_ativos,   label: 'Ativos',   sub: 'Com acesso' },
+        { value: total_empresas, label: 'Empresas', sub: 'Cadastradas' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
 {% block hub_content %}
 <div class="row stats-row">
     <div class="col-md-4 mb-2 d-flex">

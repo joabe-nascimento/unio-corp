@@ -1,3 +1,214 @@
-﻿{% extends 'layout/stub.html.twig' %}
-{% block title %}Empresas{% endblock %}
-{% set stub_page_title = 'Empresas' %}
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Empresas — Administração{% endblock %}
+{% set page_list_title = 'Empresas' %}
+{% set page_list_actions_in_top = true %}
+{% set page_list_actions_before_title = true %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_admin') }}" class="btn-huplex-ghost btn-sm">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> Admin
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_admin_empresas') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: 'Nova empresa',
+    btn_icon: 'fa-plus',
+    btn_opens: 'admin-nova-empresa',
+    search_in_section: true,
+    search_placeholder: 'Buscar por nome, CNPJ ou setor…',
+    search_name: 'q',
+    search_value: busca
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_admin_empresas'),
+            has_filters: busca is not empty
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+{% if empresas is empty %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-building-slash',
+        title: 'Nenhuma empresa encontrada',
+        text: 'Ajuste o filtro ou cadastre uma nova empresa.'
+    } %}
+{% else %}
+<div class="huplex-card p-0">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Empresa</th>
+                <th>CNPJ</th>
+                <th>Setor</th>
+                <th>Usuários</th>
+                <th>Status</th>
+                <th>Cadastro</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for e in empresas %}
+        <tr class="admin-table-row{{ not e.ativo ? ' admin-table-row--inactive' : '' }}">
+            <td><div class="admin-user-name">{{ e.nome }}</div></td>
+            <td class="admin-table-mono">{{ e.cnpj }}</td>
+            <td>{{ e.setor|default('—') }}</td>
+            <td>{{ e.usuarios|length }}</td>
+            <td>
+                {% if e.ativo %}
+                    <span class="admin-badge admin-badge--success">Ativa</span>
+                {% else %}
+                    <span class="admin-badge admin-badge--muted">Inativa</span>
+                {% endif %}
+            </td>
+            <td class="admin-table-date">{{ e.criadoEm|date('d/m/Y') }}</td>
+            <td class="admin-table-actions">
+                <button type="button"
+                        class="btn-huplex-ghost btn-xs"
+                        data-admin-edit-empresa="{{ e.id }}"
+                        data-nome="{{ e.nome|e('html_attr') }}"
+                        data-cnpj="{{ e.cnpj|e('html_attr') }}"
+                        data-setor="{{ e.setor|default('')|e('html_attr') }}"
+                        data-ativo="{{ e.ativo ? '1' : '0' }}"
+                        title="Editar">
+                    <i class="fas fa-pen" aria-hidden="true"></i>
+                </button>
+                <form method="post" action="{{ path('app_admin_empresa_acao', { id: e.id }) }}" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_acao }}">
+                    <input type="hidden" name="acao" value="{{ e.ativo ? 'desativar' : 'ativar' }}">
+                    <button type="submit"
+                            class="btn-huplex-ghost btn-xs {{ e.ativo ? 'btn-danger-ghost' : '' }}"
+                            title="{{ e.ativo ? 'Desativar' : 'Ativar' }}"
+                            onclick="return confirm('{{ e.ativo ? 'Desativar' : 'Ativar' }} empresa {{ e.nome|e('js') }}?')">
+                        <i class="fas {{ e.ativo ? 'fa-ban' : 'fa-check-circle' }}" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+<p class="admin-list-count">{{ empresas|length }} empresa{{ empresas|length != 1 ? 's' : '' }} encontrada{{ empresas|length != 1 ? 's' : '' }}</p>
+{% endblock %}
+
+{% block page_overlays %}
+{# ── Offcanvas: Nova empresa ── #}
+{% embed 'components/huplex_offcanvas.html.twig' with {
+    id: 'admin-nova-empresa',
+    title: 'Nova Empresa',
+    subtitle: 'Cadastre um tenant ou empresa',
+    icon: 'fa-building-circle-check',
+    size: 'md',
+    open: app.request.query.getBoolean('open_novo')
+} %}
+    {% block offcanvas_body %}
+    <form method="post" action="{{ path('app_admin_empresa_nova') }}" class="huplex-form" id="adminNovaEmpresaForm">
+        <input type="hidden" name="_token" value="{{ csrf_form }}">
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'nova_empresa_nome', name: 'nome', label: 'Nome da empresa',
+            placeholder: 'Ex.: Huplex Corp', required: true
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'nova_empresa_cnpj', name: 'cnpj', label: 'CNPJ',
+            placeholder: '00.000.000/0001-00', required: true
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'nova_empresa_setor', name: 'setor', label: 'Setor',
+            placeholder: 'Ex.: Tecnologia'
+        } %}
+        <div class="huplex-form-group">
+            <label class="huplex-form-label" for="nova_empresa_logo">Logo (URL)</label>
+            <input type="text" id="nova_empresa_logo" name="logo" class="huplex-form-control"
+                   placeholder="https://…/logo.png">
+        </div>
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="huplex-offcanvas-footer">
+        <button type="submit" form="adminNovaEmpresaForm" class="btn-huplex">
+            <i class="fas fa-check mr-1"></i> Cadastrar
+        </button>
+        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}
+
+{# ── Offcanvas: Editar empresa ── #}
+{% embed 'components/huplex_offcanvas.html.twig' with {
+    id: 'admin-editar-empresa',
+    title: 'Editar Empresa',
+    icon: 'fa-pen-to-square',
+    size: 'md'
+} %}
+    {% block offcanvas_body %}
+    <form method="post"
+          action="{{ path('app_admin_empresa_editar', { id: 0 }) }}"
+          class="huplex-form"
+          id="adminEditarEmpresaForm">
+        <input type="hidden" name="_token" value="{{ csrf_form }}">
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'edit_empresa_nome', name: 'nome', label: 'Nome da empresa', required: true
+        } %}
+        <div class="huplex-form-group">
+            <label class="huplex-form-label" for="edit_empresa_cnpj">CNPJ</label>
+            <input type="text" id="edit_empresa_cnpj" name="cnpj" class="huplex-form-control"
+                   placeholder="Deixe em branco para manter">
+        </div>
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'edit_empresa_setor', name: 'setor', label: 'Setor',
+            placeholder: 'Ex.: Tecnologia'
+        } %}
+        <div class="huplex-form-group">
+            <label class="huplex-form-label" for="edit_empresa_logo">Logo (URL)</label>
+            <input type="text" id="edit_empresa_logo" name="logo" class="huplex-form-control"
+                   placeholder="https://…/logo.png">
+        </div>
+        <div class="huplex-form-group">
+            <label class="huplex-form-check d-flex align-items-center gap-2" for="edit_empresa_ativo">
+                <input type="checkbox" id="edit_empresa_ativo" name="ativo" value="1" class="huplex-checkbox">
+                <span>Empresa ativa</span>
+            </label>
+        </div>
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="huplex-offcanvas-footer">
+        <button type="submit" form="adminEditarEmpresaForm" class="btn-huplex">
+            <i class="fas fa-check mr-1"></i> Salvar alterações
+        </button>
+        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    'use strict';
+    var editForm   = document.getElementById('adminEditarEmpresaForm');
+    var baseAction = editForm ? editForm.action : '';
+    document.querySelectorAll('[data-admin-edit-empresa]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (!editForm) { return; }
+            editForm.action = baseAction.replace('/0/', '/' + btn.dataset.adminEditEmpresa + '/');
+            editForm.querySelector('[name="nome"]').value  = btn.dataset.nome;
+            editForm.querySelector('[name="cnpj"]').value  = '';
+            editForm.querySelector('[name="setor"]').value = btn.dataset.setor || '';
+            editForm.querySelector('[name="logo"]').value  = btn.dataset.logo || '';
+            var chk = editForm.querySelector('[name="ativo"]');
+            if (chk) { chk.checked = btn.dataset.ativo === '1'; }
+            window.HuplexOffcanvas && window.HuplexOffcanvas.open('admin-editar-empresa');
+        });
+    });
+}());
+</script>
+{% endblock %}

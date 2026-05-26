@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Service\PlatformConfigService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -13,25 +14,26 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Regex;
 
 class RegistrationFormType extends AbstractType
 {
+    public function __construct(private PlatformConfigService $platformConfig) {}
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('nome', TextType::class, [
                 'attr' => ['placeholder' => 'Seu nome completo', 'autocomplete' => 'name'],
                 'constraints' => [
-                    new NotBlank(['message' => 'Informe seu nome.']),
-                    new Length(['min' => 2, 'minMessage' => 'Nome muito curto.', 'max' => 100]),
+                    new NotBlank(message: 'Informe seu nome.'),
+                    new Length(min: 2, minMessage: 'Nome muito curto.', max: 100),
                 ],
             ])
             ->add('email', EmailType::class, [
                 'attr' => ['placeholder' => 'seu@email.com', 'autocomplete' => 'email'],
                 'constraints' => [
-                    new NotBlank(['message' => 'Informe seu e-mail.']),
-                    new Email(['message' => 'E-mail inválido.']),
+                    new NotBlank(message: 'Informe seu e-mail.'),
+                    new Email(message: 'E-mail inválido.'),
                 ],
             ])
             ->add('plainPassword', RepeatedType::class, [
@@ -44,18 +46,7 @@ class RegistrationFormType extends AbstractType
                     'attr' => ['placeholder' => '••••••••', 'autocomplete' => 'new-password'],
                 ],
                 'invalid_message' => 'As senhas não conferem.',
-                'constraints' => [
-                    new NotBlank(['message' => 'Informe uma senha.']),
-                    new Length([
-                        'min'        => 6,
-                        'minMessage' => 'A senha deve ter no mínimo {{ limit }} caracteres.',
-                        'max'        => 72,
-                    ]),
-                    new Regex([
-                        'pattern' => '/[A-Za-z]/',
-                        'message' => 'A senha deve conter ao menos uma letra.',
-                    ]),
-                ],
+                'constraints'     => $this->platformConfig->getPasswordConstraints(),
             ]);
     }
 

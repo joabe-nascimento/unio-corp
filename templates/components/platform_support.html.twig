@@ -1,0 +1,28 @@
+{#
+  Contato de suporte da plataforma (Configurações → Contato & Suporte).
+  Exibe apenas campos preenchidos em platform_config.
+#}
+{% set _email = platform_config.suporte_email|default('')|trim %}
+{% set _fone  = platform_config.suporte_telefone|default('')|trim %}
+{% set _site  = platform_config.website|default('')|trim %}
+
+{% if _email or _fone or _site %}
+<div class="platform-support{{ extra_class|default('') }}">
+    {% if _email %}
+    <a href="mailto:{{ _email }}" class="platform-support__item" title="E-mail de suporte">
+        <i class="fas fa-envelope" aria-hidden="true"></i> {{ _email }}
+    </a>
+    {% endif %}
+    {% if _fone %}
+    <span class="platform-support__item" title="Telefone de suporte">
+        <i class="fas fa-phone" aria-hidden="true"></i> {{ _fone }}
+    </span>
+    {% endif %}
+    {% if _site %}
+    {% set _href = _site starts with 'http' ? _site : 'https://' ~ _site %}
+    <a href="{{ _href }}" class="platform-support__item" target="_blank" rel="noopener noreferrer" title="Website">
+        <i class="fas fa-globe" aria-hidden="true"></i> {{ _site|replace({'https://': '', 'http://': ''})|trim('/') }}
+    </a>
+    {% endif %}
+</div>
+{% endif %}

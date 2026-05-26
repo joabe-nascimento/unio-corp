@@ -1,3 +1,437 @@
-﻿{% extends 'layout/stub.html.twig' %}
-{% block title %}Usuários{% endblock %}
-{% set stub_page_title = 'Usuários' %}
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Usuários — Administração{% endblock %}
+{% set page_list_title = 'Usuários' %}
+{% set page_list_actions_in_top = true %}
+{% set page_list_actions_before_title = true %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_admin') }}" class="btn-huplex-ghost btn-sm">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> Admin
+</a>
+{% endblock %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: kpi.total,    label: 'Total',    sub: 'Cadastrados' },
+        { value: kpi.ativos,   label: 'Ativos',   sub: 'Com acesso' },
+        { value: kpi.inativos, label: 'Inativos', sub: 'Sem acesso' },
+        { value: kpi.tenants,  label: 'Tenants',  sub: 'Administradores' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_admin_usuarios') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: 'Novo usuário',
+    btn_icon: 'fa-user-plus',
+    btn_opens: 'admin-novo-usuario',
+    search_in_section: true,
+    search_placeholder: 'Buscar por nome ou e-mail…',
+    search_name: 'q',
+    search_value: busca
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Perfil',
+            name: 'perfil',
+            value: filtro_perfil,
+            options: [{ value: '', label: 'Todos os perfis' }]|merge(
+                perfis|keys|map(code => { value: code, label: perfis[code] })
+            )
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Empresa',
+            name: 'empresa_id',
+            value: filtro_empresa,
+            options: [{ value: '', label: 'Todas as empresas' }]|merge(
+                empresas|map(e => { value: e.id ~ '', label: e.nome })
+            )
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filtro_status,
+            options: [
+                { value: '',        label: 'Todos' },
+                { value: 'ativo',   label: 'Ativos' },
+                { value: 'inativo', label: 'Inativos' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_admin_usuarios'),
+            has_filters: (busca or filtro_perfil or filtro_status or filtro_empresa)
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+{% if usuarios is empty %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-user-slash',
+        title: 'Nenhum usuário encontrado',
+        text: 'Ajuste os filtros ou crie um novo usuário.'
+    } %}
+{% else %}
+<div class="huplex-card p-0">
+    <table class="admin-table" id="adminUsuariosTable">
+        <thead>
+            <tr>
+                <th>Usuário</th>
+                <th>Perfil</th>
+                <th>Empresa</th>
+                <th>Módulos</th>
+                <th>Status</th>
+                <th>Desde</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for u in usuarios %}
+        <tr class="admin-table-row{{ not u.ativo ? ' admin-table-row--inactive' : '' }}">
+            <td>
+                <div class="admin-user-cell">
+                    {% include 'components/member_avatar.html.twig' with { nome: u.nome, foto: u.avatar, size: 'sm' } %}
+                    <div>
+                        <div class="admin-user-name">{{ u.nome }}</div>
+                        <div class="admin-user-email">{{ u.email }}</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span class="badge-perfil {{ u.perfilClass }}">{{ u.perfilLabel }}</span>
+            </td>
+            <td>{{ u.empresa ? u.empresa.nome : '<span class="admin-none">—</span>'|raw }}</td>
+            <td>
+                {% set grants = u.productGrants %}
+                {% if grants|length > 0 %}
+                    <span class="admin-badge admin-badge--info">
+                        {{ grants|length }} módulo{{ grants|length != 1 ? 's' : '' }}
+                    </span>
+                {% else %}
+                    <span class="admin-none">Padrão</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if u.ativo %}
+                    <span class="admin-badge admin-badge--success">Ativo</span>
+                {% else %}
+                    <span class="admin-badge admin-badge--muted">Inativo</span>
+                {% endif %}
+            </td>
+            <td class="admin-table-date">{{ u.criadoEm|date('d/m/Y') }}</td>
+            <td class="admin-table-actions">
+                <button type="button"
+                        class="btn-huplex btn-xs"
+                        data-admin-edit-usuario="{{ u.id }}"
+                        data-nome="{{ u.nome|e('html_attr') }}"
+                        data-email="{{ u.email|e('html_attr') }}"
+                        data-perfil="{{ u.perfil }}"
+                        data-empresa-id="{{ u.empresa ? u.empresa.id : '' }}"
+                        data-empresa-nome="{{ u.empresa ? u.empresa.nome|e('html_attr') : '' }}"
+                        data-ativo="{{ u.ativo ? '1' : '0' }}"
+                        title="Editar usuário">
+                    <i class="fas fa-pen mr-1" aria-hidden="true"></i> Editar
+                </button>
+                <form method="post"
+                      action="{{ path('app_admin_usuario_acao', { id: u.id }) }}"
+                      class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_acao }}">
+                    <input type="hidden" name="acao" value="{{ u.ativo ? 'desativar' : 'ativar' }}">
+                    <button type="submit"
+                            class="btn-huplex-ghost btn-xs {{ u.ativo ? 'btn-danger-ghost' : '' }}"
+                            title="{{ u.ativo ? 'Desativar' : 'Ativar' }}"
+                            {% if app.user.id == u.id %}disabled{% endif %}
+                            {% if u.ativo %}onclick="return confirm('Desativar acesso de {{ u.nome|e('js') }}?')"{% endif %}>
+                        <i class="fas {{ u.ativo ? 'fa-user-slash' : 'fa-user-check' }}" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+<p class="admin-list-count">{{ usuarios|length }} usuário{{ usuarios|length != 1 ? 's' : '' }} encontrado{{ usuarios|length != 1 ? 's' : '' }}</p>
+{% endblock %}
+
+{% block page_overlays %}
+{# ── Offcanvas: Novo Usuário ── #}
+{% embed 'components/huplex_offcanvas.html.twig' with {
+    id: 'admin-novo-usuario',
+    title: 'Novo Usuário',
+    subtitle: 'Crie um acesso à plataforma',
+    icon: 'fa-user-plus',
+    size: 'md',
+    open: app.request.query.getBoolean('open_novo')
+} %}
+    {% block offcanvas_body %}
+    <form method="post"
+          action="{{ path('app_admin_usuario_novo') }}"
+          class="huplex-form"
+          id="adminNovoUsuarioForm">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_usuario_form') }}">
+
+        <div class="cfg-form-section-label">Dados pessoais</div>
+
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'novo_nome', name: 'nome', label: 'Nome completo',
+            placeholder: 'Ex.: Ana Carolina Silva', required: true
+        } %}
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'novo_email', name: 'email', label: 'E-mail',
+            type: 'email', placeholder: 'usuario@empresa.com', required: true
+        } %}
+
+        <div class="cfg-form-section-label mt-3">Acesso &amp; permissões</div>
+
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'novo_senha', name: 'senha', label: 'Senha inicial',
+            type: 'password', placeholder: 'Mínimo ' ~ platform_config.senha_min|default(8) ~ ' caracteres', required: true
+        } %}
+
+        <div class="huplex-form-group">
+            <label class="huplex-form-label" for="novo_perfil">Perfil de acesso</label>
+            <select id="novo_perfil" name="perfil" class="huplex-form-control">
+                {% for code, label in perfis %}
+                    <option value="{{ code }}" {{ code == 'MEMBRO' ? 'selected' : '' }}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="huplex-form-group">
+            <label class="huplex-form-label" for="novo_empresa">Empresa vinculada</label>
+            <select id="novo_empresa" name="empresa_id" class="huplex-form-control">
+                <option value="">— Nenhuma —</option>
+                {% for emp in empresas %}
+                    <option value="{{ emp.id }}">{{ emp.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="huplex-offcanvas-footer">
+        <button type="submit" form="adminNovoUsuarioForm" class="btn-huplex">
+            <i class="fas fa-check mr-1"></i> Criar usuário
+        </button>
+        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}
+
+{# ── Offcanvas: Editar Usuário ── #}
+{% embed 'components/huplex_offcanvas.html.twig' with {
+    id: 'admin-editar-usuario',
+    title: 'Editar Usuário',
+    icon: 'fa-user-pen',
+    size: 'lg'
+} %}
+    {% block offcanvas_body %}
+    <div class="admin-edit-user-header" id="adminEditHeader">
+        <div class="member-avatar member-avatar--lg" id="adminEditAvatar">?</div>
+        <div>
+            <div class="admin-edit-user-name" id="adminEditNomeHeader">—</div>
+            <div class="admin-edit-user-email-header" id="adminEditEmailHeader">—</div>
+            <div id="adminEditEmpresaHeader" class="admin-edit-user-empresa">—</div>
+        </div>
+    </div>
+
+    <div class="admin-edit-tabs" role="tablist">
+        <button type="button" class="admin-edit-tab admin-edit-tab--active" data-admin-tab="geral" role="tab" aria-selected="true">Perfil</button>
+        <button type="button" class="admin-edit-tab" data-admin-tab="acesso" role="tab" aria-selected="false">Acesso</button>
+        <button type="button" class="admin-edit-tab" data-admin-tab="senha" role="tab" aria-selected="false">Senha</button>
+    </div>
+
+    <form method="post"
+          action="{{ path('app_admin_usuario_editar', { id: 0 }) }}"
+          class="huplex-form"
+          id="adminEditarUsuarioForm">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_usuario_form') }}">
+
+        <div class="admin-edit-panel admin-edit-panel--active" data-admin-panel="geral">
+            {% include 'components/huplex_form_field.html.twig' with {
+                id: 'edit_nome', name: 'nome', label: 'Nome completo', required: true
+            } %}
+            <div class="huplex-form-group">
+                <label class="huplex-form-label">E-mail</label>
+                <p class="admin-edit-readonly" id="adminEditarUsuarioEmail">—</p>
+            </div>
+            <div class="huplex-form-group">
+                <label class="huplex-form-label" for="edit_empresa">Empresa</label>
+                <select id="edit_empresa" name="empresa_id" class="huplex-form-control">
+                    <option value="">— Nenhuma —</option>
+                    {% for emp in empresas %}
+                        <option value="{{ emp.id }}">{{ emp.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="huplex-form-group">
+                <label class="huplex-form-check d-flex align-items-center gap-2" for="edit_ativo">
+                    <input type="checkbox" id="edit_ativo" name="ativo" value="1" class="huplex-checkbox">
+                    <span>Usuário ativo</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="admin-edit-panel" data-admin-panel="acesso" hidden>
+            <div class="huplex-form-group">
+                <label class="huplex-form-label" for="edit_perfil">Perfil global</label>
+                <select id="edit_perfil" name="perfil" class="huplex-form-control">
+                    {% for code, label in perfis %}
+                        <option value="{{ code }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="cfg-form-section-label mt-2">Permissões por hub</div>
+            <div class="admin-grants-grid">
+                {% for scopeId, scope in scopes %}
+                <div class="admin-grant-scope">
+                    <div class="admin-grant-scope-title">{{ scope.label }}</div>
+                    {% for product in scope.products %}
+                    <div class="admin-grant-row">
+                        <span class="admin-grant-product">{{ product.label }}</span>
+                        <select name="grant[{{ scopeId }}][{{ product.id }}]"
+                                class="huplex-form-control huplex-form-control--xs admin-grant-select"
+                                data-grant-scope="{{ scopeId }}"
+                                data-grant-product="{{ product.id }}">
+                            <option value="">— Padrão —</option>
+                            {% for p in grant_profiles %}
+                                <option value="{{ p.id }}">{{ p.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="admin-edit-panel" data-admin-panel="senha" hidden>
+            <div class="admin-password-info">
+                <i class="fas fa-lock-open fa-2x mb-2 text-muted"></i>
+                <p>Deixe em branco para não alterar a senha.</p>
+            </div>
+            {% include 'components/huplex_form_field.html.twig' with {
+                id: 'edit_senha', name: 'senha', label: 'Nova senha',
+                type: 'password', placeholder: 'Mínimo ' ~ platform_config.senha_min|default(8) ~ ' caracteres'
+            } %}
+            {% include 'components/huplex_form_field.html.twig' with {
+                id: 'edit_senha2', name: 'senha2', label: 'Confirmar senha',
+                type: 'password', placeholder: 'Repita a nova senha'
+            } %}
+            <div class="admin-password-match" id="adminPasswordMatch" hidden>
+                <i class="fas fa-check-circle mr-1 text-success"></i> Senhas conferem
+            </div>
+            <div class="admin-password-mismatch" id="adminPasswordMismatch" hidden>
+                <i class="fas fa-times-circle mr-1"></i> Senhas não conferem
+            </div>
+        </div>
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="huplex-offcanvas-footer">
+        <button type="submit" form="adminEditarUsuarioForm" class="btn-huplex">
+            <i class="fas fa-check mr-1"></i> Salvar alterações
+        </button>
+        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    'use strict';
+    var editForm   = document.getElementById('adminEditarUsuarioForm');
+    var baseAction = editForm ? editForm.action : '';
+    function getInitials(name) {
+        var p = name.trim().split(/\s+/);
+        return ((p[0]||'').charAt(0) + (p.length > 1 ? p[p.length-1].charAt(0) : '')).toUpperCase() || '?';
+    }
+    document.querySelectorAll('[data-admin-edit-usuario]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (!editForm) { return; }
+            var id = btn.dataset.adminEditUsuario;
+            editForm.action = baseAction.replace('/0/', '/' + id + '/');
+            editForm.querySelector('[name="nome"]').value       = btn.dataset.nome;
+            editForm.querySelector('[name="perfil"]').value     = btn.dataset.perfil;
+            editForm.querySelector('[name="empresa_id"]').value = btn.dataset.empresaId || '';
+            editForm.querySelector('[name="senha"]').value      = '';
+            editForm.querySelector('[name="senha2"]').value     = '';
+            var chk = editForm.querySelector('[name="ativo"]');
+            if (chk) { chk.checked = btn.dataset.ativo === '1'; }
+            var av = document.getElementById('adminEditAvatar');
+            if (av) { av.textContent = getInitials(btn.dataset.nome); }
+            var nh = document.getElementById('adminEditNomeHeader');
+            if (nh) { nh.textContent = btn.dataset.nome; }
+            var eh = document.getElementById('adminEditEmailHeader');
+            if (eh) { eh.textContent = btn.dataset.email; }
+            var emh = document.getElementById('adminEditEmpresaHeader');
+            if (emh) { emh.textContent = btn.dataset.empresaNome || '—'; }
+            var ef = document.getElementById('adminEditarUsuarioEmail');
+            if (ef) { ef.textContent = btn.dataset.email; }
+            activateEditTab('geral');
+            loadUserGrants(id);
+            window.HuplexOffcanvas && window.HuplexOffcanvas.open('admin-editar-usuario');
+        });
+    });
+    function activateEditTab(id) {
+        document.querySelectorAll('[data-admin-tab]').forEach(function (b) {
+            var a = b.dataset.adminTab === id;
+            b.classList.toggle('admin-edit-tab--active', a);
+            b.setAttribute('aria-selected', a ? 'true' : 'false');
+        });
+        document.querySelectorAll('[data-admin-panel]').forEach(function (p) {
+            p.hidden = p.dataset.adminPanel !== id;
+        });
+    }
+    document.querySelectorAll('[data-admin-tab]').forEach(function (b) {
+        b.addEventListener('click', function () { activateEditTab(b.dataset.adminTab); });
+    });
+    function loadUserGrants(userId) {
+        var sels = document.querySelectorAll('.admin-grant-select');
+        sels.forEach(function (s) { s.value = ''; s.disabled = true; });
+        fetch('/admin/usuarios/' + userId + '/grants')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                sels.forEach(function (s) {
+                    s.disabled = false;
+                    s.value = data[s.dataset.grantScope + ':' + s.dataset.grantProduct] || '';
+                });
+            })
+            .catch(function () { sels.forEach(function (s) { s.disabled = false; }); });
+    }
+    var s1 = document.getElementById('edit_senha');
+    var s2 = document.getElementById('edit_senha2');
+    var mOk  = document.getElementById('adminPasswordMatch');
+    var mErr = document.getElementById('adminPasswordMismatch');
+    function checkPw() {
+        if (!s1 || (!s1.value && !s2.value)) { if(mOk) mOk.hidden=true; if(mErr) mErr.hidden=true; return; }
+        var ok = s1.value === s2.value && s1.value.length >= 6;
+        var diff = s1.value !== s2.value && s2.value.length > 0;
+        if (mOk)  { mOk.hidden  = !ok; }
+        if (mErr) { mErr.hidden = !diff; }
+    }
+    if (s1) s1.addEventListener('input', checkPw);
+    if (s2) s2.addEventListener('input', checkPw);
+    if (editForm) {
+        editForm.addEventListener('submit', function (e) {
+            var pw1 = editForm.querySelector('[name="senha"]').value;
+            var pw2 = editForm.querySelector('[name="senha2"]').value;
+            if (pw1 && pw2 && pw1 !== pw2) {
+                e.preventDefault();
+                alert('As senhas não conferem.');
+                activateEditTab('senha');
+            }
+        });
+    }
+}());
+</script>
+{% endblock %}
