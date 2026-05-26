@@ -1,0 +1,15 @@
+{# Lista de toggles de seções — props: sections (array de { id, label, checked? }), group_label, group_class #}
+{% include 'components/welcome/prefs_group_label.html.twig' with {
+    label: group_label|default('Seções visíveis'),
+    class: group_class|default('mt-4')
+} only %}
+
+<div class="welcome-prefs-sections" role="group" aria-label="{{ group_label|default('Seções visíveis') }}">
+    {% for section in sections %}
+        {% include 'components/welcome/prefs_section_toggle.html.twig' with {
+            section_id: section.id,
+            label: section.label,
+            checked: section.checked|default(true)
+        } only %}
+    {% endfor %}
+</div>

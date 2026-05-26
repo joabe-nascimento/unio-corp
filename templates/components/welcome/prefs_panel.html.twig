@@ -1,0 +1,35 @@
+{# Painel de personalização da tela de boas-vindas — props: chart_sections (opcional) #}
+{% set welcome_layout_options = [
+    { value: 'comfortable', label: 'Confortável', icon: 'fa-table-columns', checked: true },
+    { value: 'compact', label: 'Compacto', icon: 'fa-compress' },
+] %}
+
+{% set welcome_pref_sections = [
+    { id: 'metrics', label: 'Panorama em números' },
+    { id: 'highlights', label: 'Por que usar a plataforma' },
+    { id: 'journey', label: 'Sua jornada' },
+    { id: 'novidades', label: 'Em destaque' },
+    { id: 'hubs', label: 'Hubs' },
+] %}
+
+{% if chart_sections|default([])|length > 0 %}
+    {% set welcome_pref_sections = welcome_pref_sections|merge([
+        { id: 'graficos', label: 'Visão analítica' }
+    ]) %}
+{% endif %}
+
+<div class="welcome-prefs">
+    {% include 'components/welcome/prefs_layout_group.html.twig' with {
+        options: welcome_layout_options
+    } only %}
+
+    {% include 'components/welcome/prefs_sections_group.html.twig' with {
+        sections: welcome_pref_sections
+    } only %}
+
+    {% include 'components/welcome/prefs_hint.html.twig' with {
+        text: 'Use a estrela nos hubs para fixar favoritos no topo.',
+        icon: 'fa-thumbtack',
+        class: 'mt-3'
+    } only %}
+</div>

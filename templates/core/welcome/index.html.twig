@@ -148,58 +148,9 @@
     size: 'sm'
 } %}
     {% block offcanvas_body %}
-    <div class="welcome-prefs">
-        <p class="welcome-prefs-group-label">Layout</p>
-        <div class="welcome-prefs-layout" role="radiogroup" aria-label="Densidade do layout">
-            <label class="welcome-prefs-layout-opt">
-                <input type="radio" name="welcome_layout" value="comfortable" checked data-welcome-pref="layout">
-                <span><i class="fas fa-table-columns" aria-hidden="true"></i> Confortável</span>
-            </label>
-            <label class="welcome-prefs-layout-opt">
-                <input type="radio" name="welcome_layout" value="compact" data-welcome-pref="layout">
-                <span><i class="fas fa-compress" aria-hidden="true"></i> Compacto</span>
-            </label>
-        </div>
-
-        <p class="welcome-prefs-group-label mt-4">Seções visíveis</p>
-        <label class="welcome-prefs-toggle">
-            <input type="checkbox" checked data-welcome-pref-section="metrics">
-            <span class="welcome-prefs-toggle-ui"></span>
-            <span>Panorama em números</span>
-        </label>
-        <label class="welcome-prefs-toggle">
-            <input type="checkbox" checked data-welcome-pref-section="highlights">
-            <span class="welcome-prefs-toggle-ui"></span>
-            <span>Por que usar a plataforma</span>
-        </label>
-        <label class="welcome-prefs-toggle">
-            <input type="checkbox" checked data-welcome-pref-section="journey">
-            <span class="welcome-prefs-toggle-ui"></span>
-            <span>Sua jornada</span>
-        </label>
-        <label class="welcome-prefs-toggle">
-            <input type="checkbox" checked data-welcome-pref-section="novidades">
-            <span class="welcome-prefs-toggle-ui"></span>
-            <span>Em destaque</span>
-        </label>
-        <label class="welcome-prefs-toggle">
-            <input type="checkbox" checked data-welcome-pref-section="hubs">
-            <span class="welcome-prefs-toggle-ui"></span>
-            <span>Hubs</span>
-        </label>
-        {% if chart_sections|default([])|length > 0 %}
-        <label class="welcome-prefs-toggle">
-            <input type="checkbox" checked data-welcome-pref-section="graficos">
-            <span class="welcome-prefs-toggle-ui"></span>
-            <span>Visão analítica</span>
-        </label>
-        {% endif %}
-
-        <p class="welcome-prefs-hint mt-3">
-            <i class="fas fa-thumbtack mr-1" aria-hidden="true"></i>
-            Use a estrela nos hubs para fixar favoritos no topo.
-        </p>
-    </div>
+        {% include 'components/welcome/prefs_panel.html.twig' with {
+            chart_sections: chart_sections|default([])
+        } only %}
     {% endblock %}
     {% block offcanvas_footer %}
     <div class="huplex-offcanvas-footer">

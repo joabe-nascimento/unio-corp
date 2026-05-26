@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||localStorage.getItem('huplex-theme')||'{{ _tema }}')}catch(e){}</script>
 
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=116">
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=124">
     <style>:root { --accent: {{ _cor }}; }</style>
 
     {% block stylesheets %}{% endblock %}
@@ -127,8 +127,12 @@
             </nav>
         </div>
 
-        {% if empresa is defined and empresa %}
+        {% if app.user %}
         <div class="sidebar-bottom">
+            {% include 'components/sidebar_ambient_sound.html.twig' with {
+                user_id: app.user.id
+            } only %}
+        {% if empresa is defined and empresa %}
             <a href="{{ path('app_workspace_select', {force: 1}) }}"
                class="sidebar-empresa sidebar-empresa-link"
                title="Trocar área de trabalho — {{ empresa.nome }}">
@@ -141,6 +145,7 @@
                 <i class="fas fa-chevron-right se-chevron"></i>
                 {% endif %}
             </a>
+        {% endif %}
         </div>
         {% endif %}
     </aside>
@@ -323,6 +328,7 @@ window.addEventListener('load', function () {
 <script src="{{ asset('js/sidebar-hubs.js') }}?v=2"></script>
 <script src="{{ asset('js/huplex-nav-progress.js') }}?v=1"></script>
 <script src="{{ asset('js/huplex-apps-launcher.js') }}?v=1"></script>
+<script src="{{ asset('js/huplex-ambient-sound.js') }}?v=3"></script>
 {% block javascripts %}{% endblock %}
 
 {# ── View Toggle — JS genérico, carregado uma vez no base ── #}
