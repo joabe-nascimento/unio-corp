@@ -8,6 +8,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.mailer_from: '%env(MAILER_FROM_ADDRESS)%'
+    mercure_url_default: 'http://localhost:3000/.well-known/mercure'
+    mercure_jwt_default: 'changeme'
 
 services:
     # default configuration for services in *this* file
@@ -25,6 +27,23 @@ services:
             $mailerFrom: '%app.mailer_from%'
             $mailerDsn: '%env(MAILER_DSN)%'
             $kernelDebug: '%kernel.debug%'
+
+    App\Service\Core\KanbanMercurePublisher:
+        arguments:
+            $mercureUrl: '%env(default::MERCURE_URL)%'
+            $topicBase: '%env(trim:string:DEFAULT_URI)%'
+
+    App\Controller\Core\KanbanMercureController:
+        arguments:
+            $mercurePublicUrl: '%env(default::MERCURE_PUBLIC_URL)%'
+
+    App\Service\PlatformConfigService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    App\Controller\Module\Admin\AdminController:
+        arguments:
+            $passwordHasher: '@security.user_password_hasher'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

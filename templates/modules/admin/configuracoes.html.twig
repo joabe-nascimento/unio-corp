@@ -1,3 +1,636 @@
-﻿{% extends 'layout/stub.html.twig' %}
-{% block title %}Configurações{% endblock %}
-{% set stub_page_title = 'Configurações' %}
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Configurações — Administração{% endblock %}
+{% block permissions_scope %}hub_admin{% endblock %}
+{% set hub_page_title = 'Configurações' %}
+{% set hub_actions_before_title = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_admin') }}" class="btn-huplex-ghost btn-sm">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> Admin
+</a>
+{% endblock %}
+
+{% block hub_content %}
+<div class="cfg-layout">
+
+    {# ── Sidebar de navegação ── #}
+    <nav class="cfg-sidebar" id="cfgSidebar" aria-label="Seções de configuração">
+        <a href="#cfg-plataforma"  class="cfg-sidebar-item cfg-sidebar-item--active" data-cfg-nav="plataforma">
+            <i class="fas fa-paint-brush" aria-hidden="true"></i> Identidade
+        </a>
+        <a href="#cfg-contato"     class="cfg-sidebar-item" data-cfg-nav="contato">
+            <i class="fas fa-headset" aria-hidden="true"></i> Contato &amp; Suporte
+        </a>
+        <a href="#cfg-seguranca"   class="cfg-sidebar-item" data-cfg-nav="seguranca">
+            <i class="fas fa-shield-halved" aria-hidden="true"></i> Segurança
+        </a>
+        <a href="#cfg-manutencao"  class="cfg-sidebar-item" data-cfg-nav="manutencao">
+            <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Manutenção
+        </a>
+        <a href="#cfg-sistema"     class="cfg-sidebar-item" data-cfg-nav="sistema">
+            <i class="fas fa-server" aria-hidden="true"></i> Sistema
+        </a>
+    </nav>
+
+    {# ── Conteúdo das seções ── #}
+    <div class="cfg-content">
+
+        <form method="post" action="{{ path('app_admin_configuracoes') }}" class="huplex-form" id="cfgForm"
+              enctype="multipart/form-data">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_config') }}">
+
+        {# ── 1. Identidade da Plataforma ── #}
+        <section class="cfg-section" id="cfg-plataforma" data-cfg-section="plataforma">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fas fa-paint-brush" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Identidade da plataforma</h2>
+                    <p class="cfg-section-sub">Nome, marca e aparência exibidos na interface.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                {% include 'components/huplex_form_field.html.twig' with {
+                    id: 'cfg_plataforma_nome',
+                    name: 'plataforma_nome',
+                    label: 'Nome da plataforma',
+                    value: config.plataforma_nome|default('Unio'),
+                    placeholder: 'Ex.: Unio'
+                } %}
+
+                {% include 'components/huplex_form_field.html.twig' with {
+                    id: 'cfg_plataforma_tagline',
+                    name: 'plataforma_tagline',
+                    label: 'Tagline',
+                    value: config.plataforma_tagline|default(''),
+                    placeholder: 'Ex.: Plataforma de Gestão de Pessoas'
+                } %}
+
+                <div class="cfg-row-2">
+                    {# ── Logo picker ── #}
+                    <div class="huplex-form-group">
+                        <label class="huplex-form-label">Logotipo</label>
+                        <div class="cfg-img-picker" id="logoPicker"
+                             data-input-id="cfg_logo_url"
+                             data-file-input-id="cfg_logo_file">
+
+                            <div class="cfg-img-preview" id="logoPreview">
+                                {% if config.logo_url|default('') %}
+                                {% set _logo_src = config.logo_url starts with 'http' ? config.logo_url : asset(config.logo_url) %}
+                                <img src="{{ _logo_src }}" alt="Logo atual" id="logoPreviewImg"
+                                     data-initial-src="{{ _logo_src }}"
+                                     onerror="this.hidden=true;this.nextElementSibling&&(this.nextElementSibling.hidden=false)">
+                                <span class="cfg-img-placeholder" id="logoPreviewPlaceholder" hidden>
+                                    <i class="fas fa-image"></i>
+                                </span>
+                                {% else %}
+                                <span class="cfg-img-placeholder" id="logoPreviewPlaceholder">
+                                    <i class="fas fa-image"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="cfg-img-controls">
+                                <div class="cfg-img-tabs">
+                                    <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="logoPicker">
+                                        <i class="fas fa-link fa-xs mr-1"></i> URL
+                                    </button>
+                                    <button type="button" class="cfg-img-tab" data-tab="file" data-picker="logoPicker">
+                                        <i class="fas fa-upload fa-xs mr-1"></i> Upload
+                                    </button>
+                                </div>
+
+                                <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                                    <input type="text" id="cfg_logo_url" name="logo_url"
+                                           value="{{ config.logo_url|default('') }}"
+                                           class="huplex-form-control"
+                                           placeholder="/uploads/… ou https://…/logo.svg"
+                                           autocomplete="off">
+                                </div>
+
+                                <div class="cfg-img-panel" data-panel="file">
+                                    <label class="cfg-file-drop" id="logoDropZone" for="cfg_logo_file">
+                                        <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                        <span class="cfg-file-drop-label">Clique ou arraste um arquivo</span>
+                                        <span class="cfg-file-drop-hint">PNG, SVG, JPG, ICO — máx. 2 MB</span>
+                                    </label>
+                                    <input type="file" id="cfg_logo_file" name="logo_file"
+                                           accept="image/*,.ico,.svg"
+                                           class="cfg-file-input">
+                                </div>
+
+                                {% if config.logo_url|default('') %}
+                                <button type="button" class="cfg-img-remove" data-picker="logoPicker"
+                                        data-url-input="cfg_logo_url" data-file-input="cfg_logo_file">
+                                    <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ── Favicon picker ── #}
+                    <div class="huplex-form-group">
+                        <label class="huplex-form-label">Favicon</label>
+                        <div class="cfg-img-picker" id="faviconPicker"
+                             data-input-id="cfg_favicon_url"
+                             data-file-input-id="cfg_favicon_file">
+
+                            <div class="cfg-img-preview cfg-img-preview--sm" id="faviconPreview">
+                                {% if config.favicon_url|default('') %}
+                                {% set _fav_src = config.favicon_url starts with 'http' ? config.favicon_url : asset(config.favicon_url) %}
+                                <img src="{{ _fav_src }}" alt="Favicon atual" id="faviconPreviewImg"
+                                     data-initial-src="{{ _fav_src }}"
+                                     onerror="this.hidden=true;this.nextElementSibling&&(this.nextElementSibling.hidden=false)">
+                                <span class="cfg-img-placeholder" id="faviconPreviewPlaceholder" hidden>
+                                    <i class="fas fa-globe"></i>
+                                </span>
+                                {% else %}
+                                <span class="cfg-img-placeholder" id="faviconPreviewPlaceholder">
+                                    <i class="fas fa-globe"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="cfg-img-controls">
+                                <div class="cfg-img-tabs">
+                                    <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="faviconPicker">
+                                        <i class="fas fa-link fa-xs mr-1"></i> URL
+                                    </button>
+                                    <button type="button" class="cfg-img-tab" data-tab="file" data-picker="faviconPicker">
+                                        <i class="fas fa-upload fa-xs mr-1"></i> Upload
+                                    </button>
+                                </div>
+
+                                <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                                    <input type="text" id="cfg_favicon_url" name="favicon_url"
+                                           value="{{ config.favicon_url|default('') }}"
+                                           class="huplex-form-control"
+                                           placeholder="/uploads/… ou https://…/favicon.ico"
+                                           autocomplete="off">
+                                </div>
+
+                                <div class="cfg-img-panel" data-panel="file">
+                                    <label class="cfg-file-drop" id="faviconDropZone" for="cfg_favicon_file">
+                                        <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                        <span class="cfg-file-drop-label">Clique ou arraste um arquivo</span>
+                                        <span class="cfg-file-drop-hint">ICO, PNG, SVG — máx. 512 KB</span>
+                                    </label>
+                                    <input type="file" id="cfg_favicon_file" name="favicon_file"
+                                           accept="image/*,.ico"
+                                           class="cfg-file-input">
+                                </div>
+
+                                {% if config.favicon_url|default('') %}
+                                <button type="button" class="cfg-img-remove" data-picker="faviconPicker"
+                                        data-url-input="cfg_favicon_url" data-file-input="cfg_favicon_file">
+                                    <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cfg-row-2">
+                    <div class="huplex-form-group">
+                        <label class="huplex-form-label" for="cfg_cor_primaria">Cor de destaque (accent)</label>
+                        <div class="cfg-color-row">
+                            <input type="color" id="cfg_cor_primaria" name="cor_primaria"
+                                   value="{{ config.cor_primaria|default('#4F7FFF') }}"
+                                   class="cfg-color-input">
+                            <input type="text" name="cor_primaria_hex"
+                                   value="{{ config.cor_primaria|default('#4F7FFF') }}"
+                                   class="huplex-form-control cfg-color-hex"
+                                   placeholder="#4F7FFF" maxlength="7">
+                        </div>
+                    </div>
+                    <div class="huplex-form-group">
+                        <label class="huplex-form-label" for="cfg_tema">Tema padrão</label>
+                        <select id="cfg_tema" name="tema" class="huplex-form-control">
+                            <option value="dark"  {{ config.tema|default('dark')  == 'dark'  ? 'selected' : '' }}>Escuro (padrão)</option>
+                            <option value="light" {{ config.tema|default('dark')  == 'light' ? 'selected' : '' }}>Claro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# ── 2. Contato & Suporte ── #}
+        <section class="cfg-section" id="cfg-contato" data-cfg-section="contato">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fas fa-headset" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Contato &amp; Suporte</h2>
+                    <p class="cfg-section-sub">Dados de contato exibidos nos rodapés e e-mails automáticos.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="cfg-row-2">
+                    {% include 'components/huplex_form_field.html.twig' with {
+                        id: 'cfg_suporte_email',
+                        name: 'suporte_email',
+                        label: 'E-mail de suporte',
+                        type: 'email',
+                        value: config.suporte_email|default(''),
+                        placeholder: 'suporte@empresa.com'
+                    } %}
+                    {% include 'components/huplex_form_field.html.twig' with {
+                        id: 'cfg_suporte_telefone',
+                        name: 'suporte_telefone',
+                        label: 'Telefone de suporte',
+                        value: config.suporte_telefone|default(''),
+                        placeholder: '(00) 0000-0000'
+                    } %}
+                </div>
+                {% include 'components/huplex_form_field.html.twig' with {
+                    id: 'cfg_website',
+                    name: 'website',
+                    label: 'Website',
+                    value: config.website|default(''),
+                    placeholder: 'https://empresa.com.br'
+                } %}
+                {% include 'components/huplex_form_field.html.twig' with {
+                    id: 'cfg_rodape_texto',
+                    name: 'rodape_texto',
+                    label: 'Texto do rodapé',
+                    value: config.rodape_texto|default(''),
+                    placeholder: 'Ex.: © 2026 Huplex Corp — Todos os direitos reservados.'
+                } %}
+            </div>
+        </section>
+
+        {# ── 3. Segurança ── #}
+        <section class="cfg-section" id="cfg-seguranca" data-cfg-section="seguranca">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Segurança &amp; Acesso</h2>
+                    <p class="cfg-section-sub">Política de senhas, sessões e restrições de acesso.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="cfg-row-2">
+                    <div class="huplex-form-group">
+                        <label class="huplex-form-label" for="cfg_senha_min">Tamanho mínimo da senha</label>
+                        <input type="number" id="cfg_senha_min" name="senha_min"
+                               value="{{ config.senha_min|default(8) }}"
+                               min="6" max="32"
+                               class="huplex-form-control">
+                    </div>
+                    <div class="huplex-form-group">
+                        <label class="huplex-form-label" for="cfg_sessao_timeout">Tempo de sessão (minutos)</label>
+                        <input type="number" id="cfg_sessao_timeout" name="sessao_timeout"
+                               value="{{ config.sessao_timeout|default(120) }}"
+                               min="15" max="1440"
+                               class="huplex-form-control">
+                        <p class="form-text text-muted mt-1 mb-0" style="font-size:11.5px;">Inatividade antes do logout automático (aplicado a todos os usuários logados).</p>
+                    </div>
+                </div>
+
+                <div class="cfg-toggles">
+                    <div class="cfg-toggle-row">
+                        <div class="cfg-toggle-info">
+                            <span class="cfg-toggle-label">Exigir letra maiúscula na senha</span>
+                            <span class="cfg-toggle-sub">Força pelo menos uma letra maiúscula nas senhas de novos usuários.</span>
+                        </div>
+                        <label class="cfg-switch">
+                            <input type="checkbox" name="senha_maiuscula" value="1"
+                                   {{ config.senha_maiuscula|default(false) ? 'checked' : '' }}>
+                            <span class="cfg-switch-track"></span>
+                        </label>
+                    </div>
+                    <div class="cfg-toggle-row">
+                        <div class="cfg-toggle-info">
+                            <span class="cfg-toggle-label">Exigir número na senha</span>
+                            <span class="cfg-toggle-sub">Força pelo menos um número nas senhas de novos usuários.</span>
+                        </div>
+                        <label class="cfg-switch">
+                            <input type="checkbox" name="senha_numero" value="1"
+                                   {{ config.senha_numero|default(false) ? 'checked' : '' }}>
+                            <span class="cfg-switch-track"></span>
+                        </label>
+                    </div>
+                    <div class="cfg-toggle-row">
+                        <div class="cfg-toggle-info">
+                            <span class="cfg-toggle-label">Permitir autorregistro</span>
+                            <span class="cfg-toggle-sub">Exibe o link "Criar conta" na tela de login.</span>
+                        </div>
+                        <label class="cfg-switch">
+                            <input type="checkbox" name="registro_publico" value="1"
+                                   {{ (config.registro_publico ?? true) ? 'checked' : '' }}>
+                            <span class="cfg-switch-track"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# ── 4. Manutenção ── #}
+        <section class="cfg-section" id="cfg-manutencao" data-cfg-section="manutencao">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon cfg-section-icon--warning"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Modo Manutenção</h2>
+                    <p class="cfg-section-sub">Quando ativo, apenas tenants conseguem acessar a plataforma. Clique em <strong>Salvar configurações</strong> para aplicar — os demais usuários são bloqueados na próxima página que abrirem.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="cfg-toggle-row cfg-toggle-row--card {{ (config.manutencao ?? false) ? 'cfg-toggle-row--danger-active' : '' }}" id="cfgManutencaoToggleRow">
+                    <div class="cfg-toggle-info">
+                        <span class="cfg-toggle-label">Ativar modo de manutenção</span>
+                        <span class="cfg-toggle-sub">Usuários verão apenas a mensagem abaixo e não poderão navegar.</span>
+                    </div>
+                    <label class="cfg-switch">
+                        <input type="checkbox" name="manutencao" value="1" id="cfgManutencaoChk"
+                               {{ (config.manutencao ?? false) ? 'checked' : '' }}>
+                        <span class="cfg-switch-track cfg-switch-track--danger"></span>
+                    </label>
+                </div>
+
+                {% include 'components/huplex_form_field.html.twig' with {
+                    id: 'cfg_msg_manutencao',
+                    name: 'msg_manutencao',
+                    label: 'Mensagem exibida aos usuários',
+                    type: 'textarea',
+                    rows: 3,
+                    value: config.msg_manutencao|default('Estamos realizando melhorias. Voltamos em breve!'),
+                    placeholder: 'Estamos realizando melhorias. Voltamos em breve!'
+                } %}
+
+                <div class="cfg-preview-banner {{ (config.manutencao ?? false) ? '' : 'hidden' }}" id="cfgManutencaoPreview">
+                    <i class="fas fa-triangle-exclamation mr-2" aria-hidden="true"></i>
+                    <strong>Prévia:</strong>
+                    <span id="cfgManutencaoPreviewMsg">{{ config.msg_manutencao|default('Estamos realizando melhorias. Voltamos em breve!') }}</span>
+                </div>
+
+                <div class="cfg-form-actions">
+                    <span class="cfg-save-hint" id="cfgSaveHint" hidden>
+                        <i class="fas fa-circle-check mr-1 text-success" aria-hidden="true"></i> Salvo com sucesso
+                    </span>
+                    <button type="submit" class="btn-huplex">
+                        <i class="fas fa-save mr-1" aria-hidden="true"></i> Salvar configurações
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        </form>{# /form #}
+
+        {# ── 5. Sistema (somente leitura — fora do formulário) ── #}
+        <section class="cfg-section cfg-section--sistema" id="cfg-sistema" data-cfg-section="sistema">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fas fa-server" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Informações do sistema</h2>
+                    <p class="cfg-section-sub">Dados técnicos do ambiente de execução.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="cfg-info-grid">
+                    {% set info_items = [
+                        { label: 'Ambiente',         value: app.environment|upper, badge: app.environment == 'prod' ? 'success' : 'info' },
+                        { label: 'Debug mode',        value: app.debug ? 'Ativado' : 'Desativado', badge: app.debug ? 'warning' : 'success' },
+                        { label: 'PHP',               value: constant('PHP_VERSION') },
+                        { label: 'Servidor',          value: constant('PHP_OS') },
+                        { label: 'Memória máxima',    value: config.mem_limit|default('—') },
+                        { label: 'Upload máximo',     value: config.upload_max|default('—') },
+                    ] %}
+                    {% for item in info_items %}
+                    <div class="cfg-info-item">
+                        <span class="cfg-info-label">{{ item.label }}</span>
+                        <span class="cfg-info-value">
+                            {% if item.badge is defined %}
+                                <span class="admin-badge admin-badge--{{ item.badge }}">{{ item.value }}</span>
+                            {% else %}
+                                {{ item.value }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <p class="cfg-system-hint mb-2">
+                    <i class="fas fa-circle-info mr-1" aria-hidden="true"></i>
+                    Upload de logo/favicon respeita o limite <strong>{{ config.upload_max|default('—') }}</strong> do PHP.
+                </p>
+
+                <div class="cfg-section-actions mt-2">
+                    <form method="post" action="{{ path('app_admin_configuracoes_clear_cache') }}"
+                          onsubmit="return confirm('Limpar o cache do Symfony? A página pode demorar alguns segundos.')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('admin_clear_cache') }}">
+                        <button type="submit" class="btn-huplex-ghost btn-sm">
+                            <i class="fas fa-broom mr-1" aria-hidden="true"></i> Limpar cache
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </div>{# /cfg-content #}
+</div>{# /cfg-layout #}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    'use strict';
+
+    /* ── Sidebar navigation ── */
+    var sidebarItems = document.querySelectorAll('[data-cfg-nav]');
+    var sections     = document.querySelectorAll('[data-cfg-section]');
+
+    function setActive(navId) {
+        sidebarItems.forEach(function (el) {
+            el.classList.toggle('cfg-sidebar-item--active', el.dataset.cfgNav === navId);
+        });
+    }
+
+    sidebarItems.forEach(function (item) {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            var target = document.querySelector('[data-cfg-section="' + item.dataset.cfgNav + '"]');
+            if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            setActive(item.dataset.cfgNav);
+        });
+    });
+
+    /* Intersection observer to highlight sidebar on scroll */
+    if (typeof IntersectionObserver !== 'undefined') {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    setActive(entry.target.dataset.cfgSection);
+                }
+            });
+        }, { threshold: 0.3 });
+        sections.forEach(function (s) { observer.observe(s); });
+    }
+
+    /* ── Color picker sync ── */
+    var colorInput = document.getElementById('cfg_cor_primaria');
+    var colorHex   = document.querySelector('.cfg-color-hex');
+    if (colorInput && colorHex) {
+        colorInput.addEventListener('input', function () { colorHex.value = colorInput.value; });
+        colorHex.addEventListener('input', function () {
+            if (/^#[0-9A-Fa-f]{6}$/.test(colorHex.value)) {
+                colorInput.value = colorHex.value;
+            }
+        });
+    }
+
+    /* ── Maintenance toggle ── */
+    var manutChk    = document.getElementById('cfgManutencaoChk');
+    var manutRow    = document.getElementById('cfgManutencaoToggleRow');
+    var manutPreview = document.getElementById('cfgManutencaoPreview');
+    var manutMsg    = document.querySelector('[name="msg_manutencao"]');
+    var previewMsg  = document.getElementById('cfgManutencaoPreviewMsg');
+
+    function syncManutencao() {
+        if (!manutChk) { return; }
+        var on = manutChk.checked;
+        if (manutRow) { manutRow.classList.toggle('cfg-toggle-row--danger-active', on); }
+        if (manutPreview) { manutPreview.classList.toggle('hidden', !on); }
+    }
+    if (manutChk) { manutChk.addEventListener('change', syncManutencao); }
+    if (manutMsg && previewMsg) {
+        manutMsg.addEventListener('input', function () { previewMsg.textContent = manutMsg.value; });
+    }
+
+    /* ── Image pickers (logo + favicon) ── */
+    document.querySelectorAll('.cfg-img-picker').forEach(function (picker) {
+        var pickerId   = picker.id;
+        var urlInputId = picker.dataset.inputId;
+        var fileInputId = picker.dataset.fileInputId;
+        var urlInput   = document.getElementById(urlInputId);
+        var fileInput  = document.getElementById(fileInputId);
+        var preview    = picker.querySelector('.cfg-img-preview img') ||
+                         picker.querySelector('.cfg-img-preview');
+
+        // Tab switching
+        picker.querySelectorAll('.cfg-img-tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                var targetPanel = tab.dataset.tab;
+                picker.querySelectorAll('.cfg-img-tab').forEach(function (t) {
+                    t.classList.toggle('cfg-img-tab--active', t.dataset.tab === targetPanel);
+                });
+                picker.querySelectorAll('.cfg-img-panel').forEach(function (p) {
+                    p.classList.toggle('cfg-img-panel--active', p.dataset.panel === targetPanel);
+                });
+                // Clear opposite field when switching
+                if (targetPanel === 'file' && urlInput) {
+                    // keep URL but mark file as primary
+                } else if (targetPanel === 'url' && fileInput) {
+                    fileInput.value = '';
+                }
+            });
+        });
+
+        // URL input: live preview
+        if (urlInput) {
+            urlInput.addEventListener('input', function () {
+                refreshPreview(picker, urlInput.value);
+            });
+        }
+
+        // File input: preview + highlight drop zone
+        if (fileInput) {
+            fileInput.addEventListener('change', function () {
+                if (!fileInput.files || !fileInput.files[0]) { return; }
+                var file = fileInput.files[0];
+                var label = picker.querySelector('.cfg-file-drop-label');
+                if (label) { label.textContent = file.name; }
+                var reader = new FileReader();
+                reader.onload = function (e) { refreshPreview(picker, e.target.result); };
+                reader.readAsDataURL(file);
+                // Clear the URL field so file takes precedence
+                if (urlInput) { urlInput.value = ''; }
+            });
+
+            // Drag & drop styling
+            var dropZone = picker.querySelector('.cfg-file-drop');
+            if (dropZone) {
+                ['dragover','dragenter'].forEach(function (ev) {
+                    dropZone.addEventListener(ev, function (e) { e.preventDefault(); dropZone.classList.add('cfg-file-drop--over'); });
+                });
+                ['dragleave','drop'].forEach(function (ev) {
+                    dropZone.addEventListener(ev, function () { dropZone.classList.remove('cfg-file-drop--over'); });
+                });
+            }
+        }
+
+        // Remove button
+        picker.querySelectorAll('.cfg-img-remove').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var ui = document.getElementById(btn.dataset.urlInput);
+                var fi = document.getElementById(btn.dataset.fileInput);
+                if (ui) { ui.value = ''; }
+                if (fi) { fi.value = ''; }
+                refreshPreview(picker, '');
+                btn.remove();
+            });
+        });
+    });
+
+    function resolvePreviewSrc(src) {
+        if (!src) { return ''; }
+        if (/^https?:\/\//i.test(src)) { return src; }
+        if (src.charAt(0) === '/') { return src; }
+        return '/' + src.replace(/^\.\//, '');
+    }
+
+    function refreshPreview(picker, src) {
+        var previewEl = picker.querySelector('.cfg-img-preview');
+        if (!previewEl) { return; }
+        var img = previewEl.querySelector('img');
+        var placeholder = previewEl.querySelector('.cfg-img-placeholder');
+        if (src) {
+            if (!img) {
+                img = document.createElement('img');
+                img.alt = 'Preview';
+                img.onerror = function () {
+                    img.hidden = true;
+                    if (placeholder) { placeholder.hidden = false; }
+                };
+                previewEl.appendChild(img);
+            }
+            img.hidden = false;
+            img.onerror = function () {
+                img.hidden = true;
+                if (placeholder) { placeholder.hidden = false; }
+            };
+            img.src = resolvePreviewSrc(src);
+            if (placeholder) { placeholder.hidden = true; }
+            img.addEventListener('load', function onLoad() {
+                img.removeEventListener('load', onLoad);
+                img.hidden = false;
+                if (placeholder) { placeholder.hidden = true; }
+            }, { once: true });
+        } else {
+            if (img) { img.hidden = true; img.removeAttribute('src'); }
+            if (placeholder) { placeholder.hidden = false; }
+        }
+    }
+
+    document.querySelectorAll('.cfg-img-preview img[data-initial-src]').forEach(function (img) {
+        img.addEventListener('error', function () {
+            img.hidden = true;
+            var ph = img.parentElement && img.parentElement.querySelector('.cfg-img-placeholder');
+            if (ph) { ph.hidden = false; }
+        });
+    });
+
+    /* ── Flash "saved" hint ── */
+    var hint = document.getElementById('cfgSaveHint');
+    if (hint && window.location.search.indexOf('saved=1') !== -1) {
+        hint.hidden = false;
+        setTimeout(function () { hint.hidden = true; }, 4000);
+    }
+}());
+</script>
+{% endblock %}
