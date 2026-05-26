@@ -4,6 +4,7 @@ namespace App\Controller\Core;
 
 use App\Service\DashboardStatsService;
 use App\Service\NavigationService;
+use App\Service\OnboardingProgressService;
 use App\Service\WelcomeAnalyticsService;
 use App\Service\WelcomeService;
 use App\Service\WorkspaceService;
@@ -28,6 +29,7 @@ class DashboardController extends AbstractController
         WelcomeService $welcome,
         DashboardStatsService $dashboardStats,
         WelcomeAnalyticsService $analytics,
+        OnboardingProgressService $onboardingProgress,
     ): Response {
         /** @var \App\Entity\User $user */
         $user     = $this->getUser();
@@ -48,6 +50,7 @@ class DashboardController extends AbstractController
             'date_label'      => $dt['date_label'],
             'time_label'      => $dt['time_label'],
             'weekday'         => $dt['weekday'],
+            'onboarding'      => $onboardingProgress->build($user, $empresa, \count($empresas)),
         ]);
     }
 }

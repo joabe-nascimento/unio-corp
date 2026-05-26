@@ -1,0 +1,62 @@
+{# Checklist de primeiros passos — props: onboarding, dismissible (default true) #}
+{% if onboarding.visible|default(false) %}
+<section class="onboarding-checklist huplex-card"
+         id="onboardingChecklist"
+         data-onboarding-checklist
+         data-user-id="{{ app.user.id }}"
+         {% if dismissible|default(true) %}data-onboarding-dismissible{% endif %}
+         aria-label="Primeiros passos na plataforma">
+    <header class="onboarding-checklist__head">
+        <div>
+            <p class="onboarding-checklist__eyebrow">Primeiros passos</p>
+            <h2 class="onboarding-checklist__title">Deixe sua área pronta para usar</h2>
+            <p class="onboarding-checklist__sub">
+                {{ onboarding.completed }} de {{ onboarding.total }} concluídos
+            </p>
+        </div>
+        {% if dismissible|default(true) %}
+        <button type="button"
+                class="onboarding-checklist__dismiss"
+                data-onboarding-dismiss
+                title="Ocultar checklist"
+                aria-label="Não mostrar checklist de primeiros passos">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        {% endif %}
+    </header>
+
+    <div class="onboarding-checklist__progress" role="progressbar"
+         aria-valuenow="{{ onboarding.percent }}"
+         aria-valuemin="0"
+         aria-valuemax="100"
+         aria-label="Progresso dos primeiros passos">
+        <span class="onboarding-checklist__progress-bar" style="width: {{ onboarding.percent }}%"></span>
+    </div>
+
+    <ul class="onboarding-checklist__steps">
+        {% for step in onboarding.steps %}
+        <li class="onboarding-checklist__step{% if step.done %} is-done{% endif %}">
+            <span class="onboarding-checklist__check" aria-hidden="true">
+                {% if step.done %}
+                    <i class="fas fa-check"></i>
+                {% else %}
+                    <span class="onboarding-checklist__check-dot"></span>
+                {% endif %}
+            </span>
+            <div class="onboarding-checklist__body">
+                <span class="onboarding-checklist__label">{{ step.label }}</span>
+                <span class="onboarding-checklist__hint">{{ step.hint }}</span>
+            </div>
+            {% if not step.done %}
+            <a href="{{ path(step.route, step.route_params|default({})) }}"
+               class="onboarding-checklist__cta">
+                Ir <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+            {% else %}
+            <span class="onboarding-checklist__done-badge">Feito</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}

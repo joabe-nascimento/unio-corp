@@ -13,6 +13,10 @@
 
 {% include 'components/dashboard_welcome.html.twig' %}
 
+{% include 'components/welcome/onboarding_checklist.html.twig' with {
+    onboarding: onboarding|default({ visible: false })
+} only %}
+
 {% set dashboard_modules = platform_modules|default([]) %}
 
 {% if kpis|length > 0 %}
@@ -79,4 +83,5 @@
 {% block javascripts %}
 {% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 2 } only %}
 <script src="{{ asset('js/dashboard-home.js') }}?v=1"></script>
+<script src="{{ asset('js/onboarding-checklist.js') }}?v=1"></script>
 {% endblock %}

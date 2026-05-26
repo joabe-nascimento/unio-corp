@@ -3,6 +3,7 @@
 namespace App\Controller\Core;
 
 use App\Service\NavigationService;
+use App\Service\OnboardingProgressService;
 use App\Service\WelcomeAnalyticsService;
 use App\Service\WelcomePresentationService;
 use App\Service\WelcomeService;
@@ -20,6 +21,7 @@ class WelcomeController extends AbstractController
         WelcomeService $welcome,
         WelcomePresentationService $presentation,
         WelcomeAnalyticsService $analytics,
+        OnboardingProgressService $onboardingProgress,
         WorkspaceService $workspace,
         NavigationService $navigation,
     ): Response {
@@ -45,6 +47,7 @@ class WelcomeController extends AbstractController
             'chart_sections' => $analytics->getChartSections($user, $empresa),
             'perfil_label' => $user->getPerfilLabel(),
             'perfil_class' => $user->getPerfilClass(),
+            'onboarding' => $onboardingProgress->build($user, $empresa, $empresasCount),
         ]);
     }
 }
