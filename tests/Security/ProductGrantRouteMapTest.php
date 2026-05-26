@@ -3,10 +3,24 @@
 namespace App\Tests\Security;
 
 use App\Security\ProductGrantRouteMap;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Routing\RouterInterface;
 
-class ProductGrantRouteMapTest extends TestCase
+class ProductGrantRouteMapTest extends KernelTestCase
 {
+    public function testAllMappedRoutesExistInRouter(): void
+    {
+        self::bootKernel();
+        $router = static::getContainer()->get(RouterInterface::class);
+
+        foreach (array_keys(ProductGrantRouteMap::MAP) as $routeName) {
+            self::assertTrue(
+                $router->getRouteCollection()->get($routeName) !== null,
+                sprintf('Rota %s está em ProductGrantRouteMap mas não existe no router', $routeName),
+            );
+        }
+    }
+
     public function testCoreProjetosRoutesAreMapped(): void
     {
         $routes = [
@@ -27,5 +41,10 @@ class ProductGrantRouteMapTest extends TestCase
             self::assertSame('product_core', ProductGrantRouteMap::MAP[$route]['scope']);
             self::assertSame('projetos', ProductGrantRouteMap::MAP[$route]['product']);
         }
+    }
+
+    public function testRemovedMercureTokenRouteIsNotMapped(): void
+    {
+        self::assertArrayNotHasKey('app_core_kanban_mercure_token', ProductGrantRouteMap::MAP);
     }
 }

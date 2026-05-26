@@ -25,6 +25,8 @@ class MaintenanceListener
         'app_logout',
         'app_manutencao',
         'app_register',
+        'app_forgot_password',
+        'app_reset_password',
         '_wdt',
         '_profiler',
         '_profiler_home',
@@ -64,7 +66,7 @@ class MaintenanceListener
                 return;
             }
         }
-        foreach (['/manutencao', '/login', '/logout', '/register'] as $prefix) {
+        foreach (['/manutencao', '/login', '/logout', '/register', '/forgot-password', '/reset-password'] as $prefix) {
             if (str_starts_with($path, $prefix)) {
                 return;
             }
