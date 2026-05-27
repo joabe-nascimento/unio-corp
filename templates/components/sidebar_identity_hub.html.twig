@@ -1,0 +1,91 @@
+{# Hub de identidade — topo da sidebar: conta e atalhos de gerenciamento #}
+{% set _pnome = platform_config.plataforma_nome|default('Unio') %}
+{% set _logo_full = platform_config.logo_full_url|default('') %}
+{% set _sidebar_full_src = _logo_full ? (_logo_full starts with 'http' ? _logo_full : asset(_logo_full)) : asset('images/logos/unio-logotipo.png') %}
+{% set _first_name = app.user.nome|split(' ')|first %}
+
+<div class="sidebar-identity">
+    <button type="button"
+            class="sidebar-identity__trigger"
+            id="sidebarIdentityBtn"
+            aria-expanded="false"
+            aria-controls="sidebarIdentityPanel"
+            aria-haspopup="dialog"
+            title="{{ app.user.nome }}">
+        <span class="avatar-circle sidebar-identity__avatar" aria-hidden="true">{{ app.user.initials }}</span>
+        <span class="sidebar-identity__text">
+            <span class="sidebar-identity__name">{{ _first_name }}</span>
+            {% if empresa is defined and empresa %}
+            <span class="sidebar-identity__workspace">{{ empresa.nome }}</span>
+            {% endif %}
+        </span>
+        <i class="fas fa-chevron-down sidebar-identity__chevron" aria-hidden="true"></i>
+    </button>
+
+    <div id="sidebarIdentityPanel"
+         class="sidebar-identity-panel"
+         role="dialog"
+         aria-label="Conta e gerenciamento"
+         hidden>
+        <div class="sidebar-identity-panel__platform">
+            <a href="{{ path('app_dashboard') }}" class="sidebar-identity-panel__brand" title="{{ _pnome }}">
+                <img src="{{ _sidebar_full_src }}" alt="{{ _pnome }}" class="sidebar-identity-panel__logo">
+            </a>
+        </div>
+
+        <div class="sidebar-identity-panel__user">
+            <span class="avatar-circle sidebar-identity-panel__avatar">{{ app.user.initials }}</span>
+            <div class="sidebar-identity-panel__user-meta">
+                <div class="sidebar-identity-panel__user-name">{{ app.user.nome }}</div>
+                <div class="sidebar-identity-panel__user-email">{{ app.user.email }}</div>
+                {% if empresa is defined and empresa %}
+                <div class="sidebar-identity-panel__user-org">{{ empresa.nome }}{% if empresa.setor %} · {{ empresa.setor }}{% endif %}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if nav_show_plataforma|default(false) %}
+        <nav class="sidebar-identity-panel__nav" aria-label="Gerenciamento">
+            <div class="sidebar-identity-panel__section-label">Gerenciamento</div>
+            <a class="sidebar-identity-panel__link" href="{{ path('app_admin_usuarios') }}">
+                <i class="fas fa-users" aria-hidden="true"></i> Gerenciar perfis
+            </a>
+            <a class="sidebar-identity-panel__link" href="{{ path('app_admin_empresas') }}">
+                <i class="fas fa-building" aria-hidden="true"></i> Empresas
+            </a>
+            <a class="sidebar-identity-panel__link" href="{{ path('app_admin_configuracoes') }}">
+                <i class="fas fa-sliders" aria-hidden="true"></i> Configurações
+            </a>
+            <a class="sidebar-identity-panel__link" href="{{ path('app_admin') }}">
+                <i class="fas fa-gauge-high" aria-hidden="true"></i> Painel da plataforma
+            </a>
+        </nav>
+        {% endif %}
+
+        <nav class="sidebar-identity-panel__nav" aria-label="Conta">
+            <div class="sidebar-identity-panel__section-label">Conta</div>
+            <a class="sidebar-identity-panel__link" href="{{ path('app_profile') }}">
+                <i class="fas fa-user" aria-hidden="true"></i> Meu perfil
+            </a>
+            {% if empresas is defined and empresas|length > 1 %}
+            <a class="sidebar-identity-panel__link" href="{{ path('app_workspace_select', {force: 1}) }}">
+                <i class="fas fa-right-left" aria-hidden="true"></i> Trocar área de trabalho
+            </a>
+            {% elseif empresa is defined and empresa and not nav_show_plataforma|default(false) %}
+            <a class="sidebar-identity-panel__link" href="{{ path('app_profile') }}">
+                <i class="fas fa-building" aria-hidden="true"></i> Minha empresa
+            </a>
+            {% endif %}
+            <a class="sidebar-identity-panel__link" href="{{ path('app_notifications') }}">
+                <i class="fas fa-bell" aria-hidden="true"></i> Notificações
+            </a>
+            <button type="button" class="sidebar-identity-panel__link sidebar-identity-panel__link--btn" onclick="toggleTheme()">
+                <i class="fas fa-adjust" id="themeMenuIcon" aria-hidden="true"></i>
+                <span id="themeMenuLabel">Tema claro</span>
+            </button>
+            <a class="sidebar-identity-panel__link sidebar-identity-panel__link--danger" href="{{ path('app_logout') }}">
+                <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Sair
+            </a>
+        </nav>
+    </div>
+</div>

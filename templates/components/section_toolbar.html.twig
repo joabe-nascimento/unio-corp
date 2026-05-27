@@ -9,6 +9,8 @@
     btn_icon           (string, opt)
     btn_opens          (string, opt)  id do huplex_offcanvas (ex.: dev-projeto)
     btn_ghost          (bool, opt)
+    btn_submit         (bool, opt)  type="submit" (form POST/GET que envolve o toolbar)
+    btn_sm             (bool, opt)
     btn_align          (string, opt)  'left' | 'right'. Default: 'left'
     search_in_section  (bool, opt)  busca à direita, junto aos filtros
     show_search        (bool, opt)  alias legado de search_in_section
@@ -19,22 +21,28 @@
     section_toolbar_filters
 #}
 {% set has_title = title is defined and title %}
+{% set has_subtitle = subtitle is defined and subtitle %}
 {% set _search_in_section = search_in_section|default(show_search|default(false)) %}
+{% set _btn_class = 'section-toolbar-action ' ~ (btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex') ~ (btn_sm|default(false) ? ' btn-sm' : '') %}
 <div class="section-toolbar{% if not has_title %} section-toolbar--compact{% endif %}">
     <div class="section-toolbar-start">
         {% if has_title %}
             <div class="section-toolbar-text">
                 <h2 class="section-toolbar-title">{{ title }}</h2>
-                {% if subtitle is defined and subtitle %}
+                {% if has_subtitle %}
                     <p class="section-toolbar-subtitle">{{ subtitle }}</p>
                 {% endif %}
+            </div>
+        {% elseif has_subtitle %}
+            <div class="section-toolbar-text">
+                <p class="section-toolbar-subtitle">{{ subtitle }}</p>
             </div>
         {% endif %}
         {% if btn_label is defined and btn_label and btn_align|default('left') == 'left' %}
             <div class="section-toolbar-actions">
                 {% if btn_opens is defined and btn_opens %}
                 <button type="button"
-                        class="section-toolbar-action {{ btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex' }}"
+                        class="{{ _btn_class }}"
                         data-huplex-offcanvas-open="{{ btn_opens }}"
                         data-{{ btn_opens }}-open>
                     {% if btn_icon is defined and btn_icon %}
@@ -42,9 +50,16 @@
                     {% endif %}
                     {{ btn_label }}
                 </button>
+                {% elseif btn_submit|default(false) %}
+                <button type="submit" class="{{ _btn_class }}">
+                    {% if btn_icon is defined and btn_icon %}
+                        <i class="fas {{ btn_icon }} mr-1"></i>
+                    {% endif %}
+                    {{ btn_label }}
+                </button>
                 {% else %}
                 <a href="{{ btn_href|default('#') }}"
-                   class="section-toolbar-action {{ btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex' }}">
+                   class="{{ _btn_class }}">
                     {% if btn_icon is defined and btn_icon %}
                         <i class="fas {{ btn_icon }} mr-1"></i>
                     {% endif %}
@@ -67,7 +82,7 @@
         {% if btn_label is defined and btn_label and btn_align|default('left') == 'right' %}
             {% if btn_opens is defined and btn_opens %}
             <button type="button"
-                    class="section-toolbar-action {{ btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex' }}"
+                    class="{{ _btn_class }}"
                     data-huplex-offcanvas-open="{{ btn_opens }}"
                     data-{{ btn_opens }}-open>
                 {% if btn_icon is defined and btn_icon %}
@@ -75,9 +90,16 @@
                 {% endif %}
                 {{ btn_label }}
             </button>
+            {% elseif btn_submit|default(false) %}
+            <button type="submit" class="{{ _btn_class }}">
+                {% if btn_icon is defined and btn_icon %}
+                    <i class="fas {{ btn_icon }} mr-1"></i>
+                {% endif %}
+                {{ btn_label }}
+            </button>
             {% else %}
             <a href="{{ btn_href|default('#') }}"
-               class="section-toolbar-action {{ btn_ghost|default(false) ? 'btn-huplex-ghost' : 'btn-huplex' }}">
+               class="{{ _btn_class }}">
                 {% if btn_icon is defined and btn_icon %}
                     <i class="fas {{ btn_icon }} mr-1"></i>
                 {% endif %}

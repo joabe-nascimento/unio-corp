@@ -1,31 +1,59 @@
 {#
-  filter_group — select de filtro (toolbar / listagem)
+  filter_group — filtro de toolbar / listagem (select, month, text)
 
   Props:
-    label      (string)  usado em aria-label do select (ex.: Área)
-    options    (array)   lista de opções (string ou { value, label })
-    name       (string, opt)
-    value      (string, opt)  valor selecionado atual
-    disabled   (bool, opt)
-    min_width  (string, opt)  ex.: '130px'
+    label        (string)  aria-label; visível se show_label=true
+    type         (string, opt)  select | month | text  (default: select)
+    show_label   (bool, opt)  label acima do controle
+    options      (array, opt)  opções do select
+    name         (string, opt)
+    id           (string, opt)  id do controle (default: filter-{name})
+    value        (string, opt)
+    disabled     (bool, opt)
+    min_width    (string, opt)  ex.: '150px'
 #}
+{% set _type = type|default('select') %}
+{% set _id = id|default(name is defined and name ? 'filter-' ~ name : '') %}
 <div class="filter-group">
-    <select class="filter-select"
-            aria-label="{{ label|default('Filtrar') }}"
-            {% if name is defined and name %}id="filter-{{ name }}" name="{{ name }}"{% endif %}
-            {% if disabled|default(false) %}disabled{% endif %}
-            {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
-        {% for opt in options|default([]) %}
-            {% if opt is iterable and opt.label is defined %}
-                <option value="{{ opt.value|default(opt.label) }}"
-                        {% if value is defined and value is not null and value|length > 0 and (value == opt.value|default(opt.label)) %}selected{% endif %}>
-                    {{ opt.label }}
-                </option>
-            {% else %}
-                <option {% if value is defined and value is not null and value|length > 0 and value == opt %}selected{% endif %}>
-                    {{ opt }}
-                </option>
-            {% endif %}
-        {% endfor %}
-    </select>
+    {% if show_label|default(false) and label is defined and label %}
+        <label class="filter-label"{% if _id %} for="{{ _id }}"{% endif %}>{{ label }}</label>
+    {% endif %}
+    {% if _type == 'month' %}
+        <input type="month"
+               class="filter-select"
+               {% if _id %}id="{{ _id }}"{% endif %}
+               {% if name is defined and name %}name="{{ name }}"{% endif %}
+               {% if value is defined and value %}value="{{ value }}"{% endif %}
+               {% if disabled|default(false) %}disabled{% endif %}
+               aria-label="{{ label|default('Filtrar') }}"
+               {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
+    {% elseif _type == 'text' %}
+        <input type="text"
+               class="filter-select"
+               {% if _id %}id="{{ _id }}"{% endif %}
+               {% if name is defined and name %}name="{{ name }}"{% endif %}
+               {% if value is defined and value %}value="{{ value }}"{% endif %}
+               {% if disabled|default(false) %}disabled{% endif %}
+               aria-label="{{ label|default('Filtrar') }}"
+               {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
+    {% else %}
+        <select class="filter-select"
+                aria-label="{{ label|default('Filtrar') }}"
+                {% if name is defined and name %}{% if _id %}id="{{ _id }}"{% endif %} name="{{ name }}"{% endif %}
+                {% if disabled|default(false) %}disabled{% endif %}
+                {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
+            {% for opt in options|default([]) %}
+                {% if opt is iterable and opt.label is defined %}
+                    <option value="{{ opt.value|default(opt.label) }}"
+                            {% if value is defined and value is not null and value|length > 0 and (value == opt.value|default(opt.label)) %}selected{% endif %}>
+                        {{ opt.label }}
+                    </option>
+                {% else %}
+                    <option {% if value is defined and value is not null and value|length > 0 and value == opt %}selected{% endif %}>
+                        {{ opt }}
+                    </option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    {% endif %}
 </div>

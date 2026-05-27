@@ -7,21 +7,20 @@
 <form method="post" action="{{ path('app_rh_folha_gerar') }}" class="section-toolbar-form-generate" style="display:contents;">
     <input type="hidden" name="_token" value="{{ csrf_token('rh_folha_form') }}">
 {% embed 'components/section_toolbar.html.twig' with {
-    subtitle: 'Gera lançamentos de salário base dos ativos com salário cadastrado'
+    btn_label: 'Gerar folha',
+    btn_icon: 'fa-file-invoice-dollar',
+    btn_submit: true,
+    btn_sm: true
 } %}
     {% block section_toolbar_filters %}
-        <div class="filter-group">
-            <label class="filter-label" for="folha-referencia">Competência</label>
-            <input type="month"
-                   id="folha-referencia"
-                   name="referencia"
-                   class="filter-select"
-                   value="{{ referencia_sugerida }}"
-                   style="min-width: 150px;">
-        </div>
-        <button type="submit" class="btn-huplex btn-sm">
-            <i class="fas fa-file-invoice-dollar mr-1" aria-hidden="true"></i> Gerar folha
-        </button>
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Competência',
+            name: 'referencia',
+            id: 'folha-referencia',
+            type: 'month',
+            value: referencia_sugerida,
+            min_width: '150px'
+        } %}
     {% endblock %}
 {% endembed %}
 </form>

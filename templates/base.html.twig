@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 {% set _pnome = platform_config.plataforma_nome|default('Unio') %}
-{% set _cor   = platform_config.cor_primaria|default('#4F7FFF') %}
 {% set _tema  = platform_config.tema|default('dark') %}
 <html lang="pt-BR" data-theme="{{ _tema }}">
 <head>
@@ -20,17 +19,16 @@
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||localStorage.getItem('huplex-theme')||'{{ _tema }}')}catch(e){}</script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap4.min.css">
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=169">
-    <style>:root { --accent: {{ _cor }}; }</style>
+    {% include 'components/huplex_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=189">
 
     {% block stylesheets %}{% endblock %}
 </head>
-{% import 'macros/empresa.html.twig' as empresa_macro %}
 {% import 'macros/helix.html.twig' as helix %}
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
-    {# ── Top Navbar (sem workspace — só toggle + usuário) ── #}
+    {# ── Top Navbar (Helix, apps) ── #}
     <nav class="main-header navbar navbar-expand navbar-dark">
         <a class="nav-link nav-toggle-btn" data-widget="pushmenu" href="#" role="button" aria-label="Alternar menu lateral">
             <span class="nav-toggle-icon" aria-hidden="true">
@@ -47,70 +45,27 @@
         <ul class="navbar-nav ml-auto align-items-center mb-0">
             <li class="nav-item d-flex align-items-center">
                 <button type="button" class="helix-trigger" id="helixOpenBtn" aria-expanded="false" aria-controls="helixPanel" title="Helix — Assistente virtual">
-                    {{ helix.face('xs') }}
+                    {{ helix.avatar('sm') }}
                 </button>
             </li>
+            {% if platform_modules|default([])|length > 0 %}
             <li class="nav-item d-flex align-items-center">
-                <button type="button" class="theme-btn" id="themeToggle" title="Alternar tema" onclick="toggleTheme()">
-                    <i class="fas fa-sun" id="themeIcon"></i>
-                </button>
+                {% include 'components/platform_apps_launcher.html.twig' %}
             </li>
-            <li class="nav-item header-user-cluster">
-                <div class="header-user-cluster__inner">
-                    <div class="header-user-cluster__profile dropdown">
-                <a class="nav-link user-menu-btn d-flex align-items-center" data-toggle="dropdown" href="#" style="gap:8px;padding:4px 8px!important">
-                    <span class="avatar-circle">{{ app.user.initials }}</span>
-                    <span class="d-none d-sm-inline" style="color:var(--text-2);font-size:13px;font-weight:500">{{ app.user.nome|split(' ')|first }}</span>
-                    <i class="fas fa-chevron-down d-none d-sm-inline" style="font-size:9px;color:var(--text-3)"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right huplex-dropdown">
-                    <div class="dd-head">
-                        <div style="color:var(--text-1);font-size:13px;font-weight:600">{{ app.user.nome }}</div>
-                        <div style="color:var(--text-3);font-size:11px">{{ app.user.email }}</div>
-                        <div class="mt-1">
-                            {% set access_badge = user_access_badge() %}
-                            <span class="badge-perfil {{ access_badge.class }}"{% if access_badge.elevated %} title="Conta global: {{ access_badge.global_label }}"{% endif %}>{{ access_badge.label }}</span>
-                        </div>
-                    </div>
-                    <a class="dropdown-item" href="{{ path('app_profile') }}">
-                        <i class="fas fa-user"></i> Meu Perfil
-                    </a>
-                    {% if empresas is defined and empresas|length > 0 %}
-                    <a class="dropdown-item" href="{{ path('app_workspace_select', {force: 1}) }}">
-                        <i class="fas fa-building"></i> Trocar área de trabalho
-                    </a>
-                    {% endif %}
-                    <a class="dropdown-item" href="#" onclick="toggleTheme();return false;">
-                        <i class="fas fa-adjust" id="themeMenuIcon"></i>
-                        <span id="themeMenuLabel">Tema claro</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item dropdown-item-danger" href="{{ path('app_logout') }}">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </a>
-                </div>
-                    </div>
-                    {% include 'components/platform_apps_launcher.html.twig' %}
-                </div>
-            </li>
+            {% endif %}
         </ul>
     </nav>
 
     {# ── Sidebar ── #}
-    {% set _logo_mark = platform_config.logo_mark_url|default('') %}
-    {% set _logo_full = platform_config.logo_full_url|default('') %}
-    {% set _sidebar_mark_src = _logo_mark ? (_logo_mark starts with 'http' ? _logo_mark : asset(_logo_mark)) : asset('images/logos/u-logo.png') %}
-    {% set _sidebar_full_src = _logo_full ? (_logo_full starts with 'http' ? _logo_full : asset(_logo_full)) : asset('images/logos/unio-logotipo.png') %}
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <div class="sidebar-top">
-            <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0" title="{{ _pnome }}">
-                <img src="{{ _sidebar_mark_src }}"
-                     alt="{{ _pnome }}"
-                     class="sidebar-logo sidebar-logo-mark">
-                <img src="{{ _sidebar_full_src }}"
-                     alt="{{ _pnome }}"
-                     class="sidebar-logo sidebar-logo-full">
-            </a>
+            {% if app.user %}
+                {% include 'components/sidebar_identity_hub.html.twig' %}
+            {% else %}
+                <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0" title="{{ _pnome }}">
+                    <img src="{{ asset('images/logos/unio-logotipo.png') }}" alt="{{ _pnome }}" class="sidebar-logo sidebar-logo-full">
+                </a>
+            {% endif %}
         </div>
 
         <div class="sidebar">
@@ -133,20 +88,6 @@
             {% include 'components/sidebar_ambient_sound.html.twig' with {
                 user_id: app.user.id
             } only %}
-        {% if empresa is defined and empresa %}
-            <a href="{{ path('app_workspace_select', {force: 1}) }}"
-               class="sidebar-empresa sidebar-empresa-link"
-               title="Trocar área de trabalho — {{ empresa.nome }}">
-                {{ empresa_macro.logo(empresa, 'empresa-logo se-logo') }}
-                <div class="se-info">
-                    <div class="se-name">{{ empresa.nome }}</div>
-                    {% if empresa.setor %}<div class="se-setor">{{ empresa.setor }}</div>{% endif %}
-                </div>
-                {% if empresas is defined and empresas|length > 1 %}
-                <i class="fas fa-chevron-right se-chevron"></i>
-                {% endif %}
-            </a>
-        {% endif %}
         </div>
         {% endif %}
     </aside>
@@ -300,16 +241,13 @@ window.addEventListener('load', function () {
 
     function applyTheme(t) {
         document.documentElement.setAttribute('data-theme', t);
-        var icon = document.getElementById('themeIcon');
         var mIcon = document.getElementById('themeMenuIcon');
         var mLabel = document.getElementById('themeMenuLabel');
         if (t === 'dark') {
-            if (icon) icon.className = 'fas fa-sun';
-            if (mIcon) mIcon.className = 'fas fa-sun mr-2';
+            if (mIcon) mIcon.className = 'fas fa-sun';
             if (mLabel) mLabel.textContent = 'Tema claro';
         } else {
-            if (icon) icon.className = 'fas fa-moon';
-            if (mIcon) mIcon.className = 'fas fa-moon mr-2';
+            if (mIcon) mIcon.className = 'fas fa-moon';
             if (mLabel) mLabel.textContent = 'Tema escuro';
         }
     }
@@ -330,6 +268,7 @@ window.addEventListener('load', function () {
 <script src="{{ asset('js/sidebar-hubs.js') }}?v=3"></script>
 <script src="{{ asset('js/huplex-nav-progress.js') }}?v=1"></script>
 <script src="{{ asset('js/huplex-apps-launcher.js') }}?v=1"></script>
+<script src="{{ asset('js/huplex-sidebar-identity.js') }}?v=1"></script>
 <script src="{{ asset('js/huplex-ambient-sound.js') }}?v=3"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
