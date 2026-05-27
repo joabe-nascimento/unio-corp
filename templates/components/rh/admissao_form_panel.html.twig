@@ -4,22 +4,17 @@
 <div class="rh-admissao-page">
     <div class="rh-admissao-layout">
         <div class="rh-admissao-main huplex-card">
-            <div class="rh-admissao-steps" aria-label="Etapas do processo">
-                <div class="rh-admissao-step rh-admissao-step--active">
-                    <span class="rh-admissao-step-num">1</span>
-                    <span class="rh-admissao-step-text">
-                        <strong>Dados do colaborador</strong>
-                        <small>Informações iniciais</small>
-                    </span>
-                </div>
-                <div class="rh-admissao-step rh-admissao-step--next" aria-hidden="true">
-                    <span class="rh-admissao-step-num">2</span>
-                    <span class="rh-admissao-step-text">
-                        <strong>Checklist de onboarding</strong>
-                        <small>Após salvar</small>
-                    </span>
-                </div>
+            <div class="rh-admissao-offcanvas-progress rh-admissao-offcanvas-progress--page">
+                {% include 'components/progress_inline.html.twig' with {
+                    percent: 50,
+                    variant: 'accent',
+                    min_width: 120,
+                    show_label: true
+                } %}
+                <span class="rh-admissao-offcanvas-progress-label">Etapa 1 de 2</span>
             </div>
+
+            {% include 'components/rh/admissao_steps.html.twig' with { active_step: 1 } %}
 
             <header class="rh-admissao-main-head">
                 <h2 class="rh-admissao-main-title">Dados para admissão</h2>
@@ -30,62 +25,7 @@
 
             <form method="post" class="huplex-form rh-admissao-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('rh_admissao_form') }}">
-                <div class="rh-admissao-fields">
-                    <div class="rh-admissao-field rh-admissao-field--full">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'nome',
-                            name: 'nome',
-                            label: 'Nome completo',
-                            value: nome|default(''),
-                            placeholder: 'Ex.: Maria Silva Santos',
-                            required: true
-                        } %}
-                    </div>
-                    <div class="rh-admissao-field rh-admissao-field--full">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'email',
-                            name: 'email',
-                            label: 'E-mail corporativo ou pessoal',
-                            type: 'email',
-                            value: email|default(''),
-                            placeholder: 'colaborador@empresa.com',
-                            required: true
-                        } %}
-                    </div>
-                    <div class="rh-admissao-field">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'cargo',
-                            name: 'cargo',
-                            label: 'Cargo / função',
-                            value: cargo|default(''),
-                            placeholder: 'Ex.: Analista de RH'
-                        } %}
-                    </div>
-                    <div class="rh-admissao-field">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'data_prevista',
-                            name: 'data_prevista',
-                            label: 'Previsão de início',
-                            type: 'date',
-                            value: data_prevista|default('')
-                        } %}
-                    </div>
-                    <div class="rh-admissao-field rh-admissao-field--full">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'observacoes',
-                            name: 'observacoes',
-                            label: 'Observações',
-                            type: 'textarea',
-                            value: observacoes|default(''),
-                            placeholder: 'Informações úteis para RH, gestor ou TI (opcional)',
-                            rows: 4
-                        } %}
-                    </div>
-                </div>
-
-                <p class="rh-admissao-required-note">
-                    <span class="huplex-form-required">*</span> Campos obrigatórios
-                </p>
+                {% include 'components/rh/admissao_form_fields.html.twig' %}
 
                 <div class="huplex-form-actions rh-admissao-actions">
                     <a href="{{ path('app_rh_admissoes') }}" class="btn-huplex-ghost">Cancelar</a>

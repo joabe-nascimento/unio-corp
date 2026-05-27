@@ -16,7 +16,15 @@
         {% if field_required %}<span class="huplex-form-required">*</span>{% endif %}
     </label>
     {% if field_type == 'select' %}
-        <select class="huplex-form-control" id="{{ id }}" name="{{ name }}"{% if field_required %} required{% endif %}{% if attrs is defined %}{% for attr_name, attr_value in attrs %} {{ attr_name }}="{{ attr_value }}"{% endfor %}{% endif %}>
+        <select class="huplex-form-control{% if searchable|default(false) %} huplex-tomselect{% endif %}"
+                id="{{ id }}"
+                name="{{ name }}"
+                {% if searchable|default(false) %}
+                    data-controller="tom-select"
+                    data-tom-select-placeholder-value="{{ search_placeholder|default('Buscar…') }}"
+                {% endif %}
+                {% if field_required %} required{% endif %}
+                {% if attrs is defined %}{% for attr_name, attr_value in attrs %} {{ attr_name }}="{{ attr_value }}"{% endfor %}{% endif %}>
             {% for opt in field_options %}
                 <option value="{{ opt.value }}"{% if opt.value == field_value %} selected{% endif %}>{{ opt.label }}</option>
             {% endfor %}

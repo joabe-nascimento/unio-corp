@@ -1,0 +1,56 @@
+{# Campos do formulário de nova demissão #}
+{% set funcionario_options = [{ value: '', label: 'Selecione o colaborador…' }] %}
+{% for f in funcionarios|default([]) %}
+    {% set funcionario_options = funcionario_options|merge([{
+        value: f.id,
+        label: f.nome ~ (f.cargo ? ' — ' ~ f.cargo : '')
+    }]) %}
+{% endfor %}
+
+<div class="rh-admissao-fields">
+    <div class="rh-admissao-field rh-admissao-field--full">
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'funcionario_id',
+            name: 'funcionario_id',
+            label: 'Colaborador',
+            type: 'select',
+            required: true,
+            searchable: true,
+            search_placeholder: 'Buscar colaborador…',
+            value: funcionario_id|default(''),
+            options: funcionario_options
+        } %}
+    </div>
+    <div class="rh-admissao-field">
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'data_prevista',
+            name: 'data_prevista',
+            label: 'Data prevista de desligamento',
+            type: 'date',
+            value: data_prevista|default('')
+        } %}
+    </div>
+    <div class="rh-admissao-field">
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'motivo',
+            name: 'motivo',
+            label: 'Motivo do desligamento',
+            value: motivo|default(''),
+            placeholder: 'Ex.: pedido de demissão, término de contrato'
+        } %}
+    </div>
+    <div class="rh-admissao-field rh-admissao-field--full">
+        {% include 'components/huplex_form_field.html.twig' with {
+            id: 'observacoes',
+            name: 'observacoes',
+            label: 'Observações',
+            type: 'textarea',
+            value: observacoes|default(''),
+            placeholder: 'Informações para RH, gestor ou TI (opcional)',
+            rows: 4
+        } %}
+    </div>
+</div>
+<p class="rh-admissao-required-note">
+    <span class="huplex-form-required">*</span> Campos obrigatórios
+</p>

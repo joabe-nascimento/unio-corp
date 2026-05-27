@@ -1,0 +1,18 @@
+{# Etapas do fluxo de demissão — props: active_step (1|2, default 1) #}
+{% set _active = active_step|default(1) %}
+<div class="rh-admissao-steps" aria-label="Etapas do processo">
+    <div class="rh-admissao-step{% if _active == 1 %} rh-admissao-step--active{% else %} rh-admissao-step--done{% endif %}">
+        <span class="rh-admissao-step-num">1</span>
+        <span class="rh-admissao-step-text">
+            <strong>Dados do desligamento</strong>
+            <small>Colaborador e prazos</small>
+        </span>
+    </div>
+    <div class="rh-admissao-step{% if _active == 2 %} rh-admissao-step--active{% else %} rh-admissao-step--next{% endif %}"{% if _active == 1 %} aria-hidden="true"{% endif %}>
+        <span class="rh-admissao-step-num">2</span>
+        <span class="rh-admissao-step-text">
+            <strong>Checklist de offboarding</strong>
+            <small>Após salvar</small>
+        </span>
+    </div>
+</div>

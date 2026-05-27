@@ -40,6 +40,15 @@
         processos_abertos_total: processos_abertos_total
     } %}
 
+    {% if product_grant('product_rh', 'funcionarios') %}
+    <div class="rh-hub-row rh-hub-row--chart">
+        {% include 'components/rh/hub_headcount_chart.html.twig' with {
+            headcount_trend: headcount_trend|default(null),
+            ativos: ativos|default(0)
+        } %}
+    </div>
+    {% endif %}
+
     {% if hub_modules is defined and hub_modules|length > 0 %}
         {% set hub_modules_visible = hub_modules|filter(m => product_grant('product_rh', m.grant)) %}
         {% if hub_modules_visible|length > 0 %}

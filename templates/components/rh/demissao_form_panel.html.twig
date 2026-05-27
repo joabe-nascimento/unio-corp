@@ -1,32 +1,20 @@
 {# Formulário de nova demissão (offboarding) #}
 {% set checklist = checklist_preview|default([]) %}
-{% set funcionario_options = [{ value: '', label: 'Selecione o colaborador…' }] %}
-{% for f in funcionarios %}
-    {% set funcionario_options = funcionario_options|merge([{
-        value: f.id,
-        label: f.nome ~ (f.cargo ? ' — ' ~ f.cargo : '')
-    }]) %}
-{% endfor %}
 
 <div class="rh-admissao-page rh-offboard-page">
     <div class="rh-admissao-layout">
         <div class="rh-admissao-main huplex-card">
-            <div class="rh-admissao-steps" aria-label="Etapas do processo">
-                <div class="rh-admissao-step rh-admissao-step--active">
-                    <span class="rh-admissao-step-num">1</span>
-                    <span class="rh-admissao-step-text">
-                        <strong>Dados do desligamento</strong>
-                        <small>Colaborador e prazos</small>
-                    </span>
-                </div>
-                <div class="rh-admissao-step rh-admissao-step--next" aria-hidden="true">
-                    <span class="rh-admissao-step-num">2</span>
-                    <span class="rh-admissao-step-text">
-                        <strong>Checklist de offboarding</strong>
-                        <small>Após salvar</small>
-                    </span>
-                </div>
+            <div class="rh-admissao-offcanvas-progress rh-admissao-offcanvas-progress--page">
+                {% include 'components/progress_inline.html.twig' with {
+                    percent: 50,
+                    variant: 'warning',
+                    min_width: 120,
+                    show_label: true
+                } %}
+                <span class="rh-admissao-offcanvas-progress-label">Etapa 1 de 2</span>
             </div>
+
+            {% include 'components/rh/demissao_steps.html.twig' with { active_step: 1 } %}
 
             <header class="rh-admissao-main-head">
                 <h2 class="rh-admissao-main-title">Iniciar offboarding</h2>
@@ -37,52 +25,7 @@
 
             <form method="post" class="huplex-form rh-admissao-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('rh_demissao_form') }}">
-                <div class="rh-admissao-fields">
-                    <div class="rh-admissao-field rh-admissao-field--full">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'funcionario_id',
-                            name: 'funcionario_id',
-                            label: 'Colaborador',
-                            type: 'select',
-                            required: true,
-                            value: funcionario_id|default(''),
-                            options: funcionario_options
-                        } %}
-                    </div>
-                    <div class="rh-admissao-field">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'data_prevista',
-                            name: 'data_prevista',
-                            label: 'Data prevista de desligamento',
-                            type: 'date',
-                            value: data_prevista|default('')
-                        } %}
-                    </div>
-                    <div class="rh-admissao-field">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'motivo',
-                            name: 'motivo',
-                            label: 'Motivo do desligamento',
-                            value: motivo|default(''),
-                            placeholder: 'Ex.: pedido de demissão, término de contrato'
-                        } %}
-                    </div>
-                    <div class="rh-admissao-field rh-admissao-field--full">
-                        {% include 'components/huplex_form_field.html.twig' with {
-                            id: 'observacoes',
-                            name: 'observacoes',
-                            label: 'Observações',
-                            type: 'textarea',
-                            value: observacoes|default(''),
-                            placeholder: 'Informações para RH, gestor ou TI (opcional)',
-                            rows: 4
-                        } %}
-                    </div>
-                </div>
-
-                <p class="rh-admissao-required-note">
-                    <span class="huplex-form-required">*</span> Campos obrigatórios
-                </p>
+                {% include 'components/rh/demissao_form_fields.html.twig' %}
 
                 <div class="huplex-form-actions rh-admissao-actions">
                     <a href="{{ path('app_rh_demissoes') }}" class="btn-huplex-ghost">Cancelar</a>

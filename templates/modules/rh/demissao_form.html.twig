@@ -1,52 +1,7 @@
 {% extends 'layout/page_list.html.twig' %}
+{# Legado: redireciona para listagem com offcanvas aberto #}
 {% block title %}Nova demissão{% endblock %}
-{% set page_list_title = 'Nova demissão' %}
-
-{% block page_list_toolbar_actions %}
-{% include 'components/page_back_link.html.twig' with {
-    href: path('app_rh_demissoes'),
-    label: 'Voltar às demissões'
-} %}
-{% endblock %}
-
 {% block page_list_content %}
-{% if funcionarios is empty %}
-<div class="rh-admissao-page">
-    <div class="huplex-card rh-offboard-empty">
-        {% include 'components/empty_state.html.twig' with {
-            icon: all_active_blocked|default(false) ? 'fa-hourglass-half' : 'fa-user-tie',
-            title: all_active_blocked|default(false) ? 'Offboarding em andamento' : 'Nenhum funcionário ativo',
-            text: all_active_blocked|default(false)
-                ? 'Todos os funcionários ativos já possuem um processo de offboarding aberto. Conclua ou aguarde a finalização antes de abrir outro.'
-                : 'Cadastre funcionários ativos ou conclua admissões antes de iniciar um offboarding.',
-            btn_label: all_active_blocked|default(false) ? 'Ver demissões' : 'Ver funcionários',
-            btn_href: all_active_blocked|default(false) ? path('app_rh_demissoes') : path('app_rh_funcionarios')
-        } %}
-    </div>
-</div>
-{% else %}
-{% include 'components/rh/demissao_form_panel.html.twig' with {
-    empresa: empresa,
-    funcionarios: funcionarios,
-    checklist_preview: checklist_preview,
-    funcionario_id: funcionario_id|default(''),
-    data_prevista: data_prevista|default(''),
-    motivo: motivo|default(''),
-    observacoes: observacoes|default('')
-} only %}
-{% endif %}
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
-{% if funcionarios is not empty %}
-<script>
-(function () {
-    var dateInput = document.getElementById('data_prevista');
-    if (dateInput && !dateInput.min) {
-        dateInput.min = '{{ "now"|date("Y-m-d") }}';
-    }
-})();
-</script>
-{% endif %}
+<script>window.location.replace('{{ path('app_rh_demissoes', { open_nova: 1, funcionario_id: app.request.query.get('funcionario_id') })|e('js') }}');</script>
+<p class="text-muted">Redirecionando… <a href="{{ path('app_rh_demissoes', { open_nova: 1 }) }}">Abrir nova demissão</a></p>
 {% endblock %}

@@ -6,7 +6,7 @@
 <form method="get" action="{{ path('app_rh_funcionarios') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
     btn_label: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'Novo funcionário' : '',
-    btn_href: path('app_rh_funcionario_novo'),
+    btn_opens: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'rh-funcionario-novo' : '',
     btn_icon: 'fa-plus',
     search_in_section: true,
     search_placeholder: 'Buscar nome, e-mail ou cargo…',
@@ -44,7 +44,7 @@
             title: 'Nenhum funcionário encontrado',
             text: filter_q|default('') or filter_status|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre colaboradores ou conclua uma admissão.',
             btn_label: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'Novo funcionário' : '',
-            btn_href: path('app_rh_funcionario_novo')
+            btn_opens: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'rh-funcionario-novo' : ''
         } %}
     {% else %}
     <div class="table-responsive">
@@ -73,4 +73,27 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block page_overlays %}
+{% if grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') %}
+{% include 'components/rh/funcionario_offcanvas.html.twig' with {
+    open: open_funcionario_offcanvas|default(app.request.query.getBoolean('open_novo')),
+    empresa: empresa|default(null),
+    departamentos: departamentos|default([]),
+    gestores: gestores|default([]),
+    form_data: form_data|default({})
+} %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    {% if open_funcionario_offcanvas|default(app.request.query.getBoolean('open_novo')) %}
+    window.HuplexOffcanvas && window.HuplexOffcanvas.open('rh-funcionario-novo');
+    {% endif %}
+})();
+</script>
 {% endblock %}

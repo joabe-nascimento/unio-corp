@@ -2729,6 +2729,7 @@
         .huplex-offcanvas--md .huplex-offcanvas-drawer { width: min(440px, 100vw); }
         .huplex-offcanvas--lg .huplex-offcanvas-drawer { width: min(520px, 100vw); }
         .huplex-offcanvas--xl .huplex-offcanvas-drawer { width: min(680px, 100vw); }
+        .huplex-offcanvas--2xl .huplex-offcanvas-drawer { width: min(920px, 100vw); }
         .huplex-offcanvas.is-open .huplex-offcanvas-drawer {
             transform: translateX(0);
         }
@@ -2878,9 +2879,13 @@
 
         .huplex-offcanvas-body {
             flex: 1;
+            min-height: 0;
             overflow-y: auto;
             overflow-x: hidden;
             padding: 18px 20px 24px;
+        }
+        .huplex-offcanvas--wizard .huplex-offcanvas-body {
+            padding-bottom: 16px;
         }
         .huplex-offcanvas-footer {
             flex-shrink: 0;
@@ -2901,7 +2906,8 @@
             .huplex-offcanvas--sm .huplex-offcanvas-drawer,
             .huplex-offcanvas--md .huplex-offcanvas-drawer,
             .huplex-offcanvas--lg .huplex-offcanvas-drawer,
-            .huplex-offcanvas--xl .huplex-offcanvas-drawer {
+            .huplex-offcanvas--xl .huplex-offcanvas-drawer,
+            .huplex-offcanvas--2xl .huplex-offcanvas-drawer {
                 width: 100vw;
             }
         }
@@ -8301,6 +8307,15 @@
     background: color-mix(in srgb, var(--accent, #4F7FFF) 8%, var(--surface-2));
 }
 .rh-admissao-step--next { opacity: 0.55; }
+.rh-admissao-step--done {
+    opacity: 0.75;
+    border-color: color-mix(in srgb, var(--success, #3ecf8e) 35%, var(--border));
+}
+.rh-admissao-step--done .rh-admissao-step-num {
+    background: color-mix(in srgb, var(--success, #3ecf8e) 18%, var(--surface-2));
+    border-color: color-mix(in srgb, var(--success, #3ecf8e) 40%, var(--border));
+    color: var(--success, #3ecf8e);
+}
 .rh-admissao-step-num {
     display: inline-flex;
     align-items: center;
@@ -8414,6 +8429,293 @@
     color: var(--text-3);
     flex-shrink: 0;
 }
+
+/* RH — Nova admissão no offcanvas */
+.rh-admissao-offcanvas {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.rh-admissao-offcanvas-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.rh-admissao-offcanvas-progress-track {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.rh-admissao-offcanvas-progress .progress-huplex {
+    flex: 1;
+    min-width: 0;
+}
+.rh-admissao-offcanvas-progress-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    line-height: 1.35;
+}
+.rh-admissao-offcanvas-progress--page {
+    margin-bottom: 4px;
+}
+.rh-admissao-offcanvas .rh-admissao-steps {
+    flex-direction: column;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+.rh-admissao-offcanvas-intro {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-3);
+}
+.rh-admissao-offcanvas .rh-admissao-fields {
+    grid-template-columns: 1fr;
+}
+.rh-admissao-offcanvas-meta {
+    padding: 14px 16px;
+}
+
+.rh-offboard-offcanvas .rh-admissao-step--active {
+    border-color: color-mix(in srgb, #c97840 45%, var(--border));
+    background: color-mix(in srgb, #c97840 10%, var(--surface-2));
+}
+.rh-offboard-offcanvas .rh-admissao-step--active .rh-admissao-step-num {
+    background: #c97840;
+    border-color: transparent;
+    color: #fff;
+}
+
+.rh-funcionario-wizard-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+.rh-funcionario-wizard .rh-funcionario-form-layout--wizard {
+    display: block;
+}
+.rh-funcionario-form--wizard .rh-funcionario-form-panels {
+    min-height: 0;
+}
+.rh-funcionario-form--wizard .rh-funcionario-panel[hidden] {
+    display: none !important;
+}
+.rh-funcionario-form--wizard .rh-funcionario-panel.is-active {
+    display: block;
+}
+.rh-funcionario-form--wizard .rh-admissao-fields {
+    grid-template-columns: 1fr;
+}
+.rh-funcionario-form--wizard .rh-admissao-required-note {
+    margin-bottom: 0;
+}
+.rh-funcionario-form--wizard .rh-funcionario-section-title {
+    display: none;
+}
+.rh-funcionario-form--wizard .rh-admissao-field .huplex-form-group {
+    margin-bottom: 0.9rem;
+}
+.rh-funcionario-form--wizard .rh-admissao-required-note {
+    margin-bottom: 0;
+    margin-top: 4px;
+}
+.rh-funcionario-form--wizard .rh-admissao-required-note[hidden] {
+    display: none !important;
+}
+.rh-funcionario-wizard-photo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+.rh-funcionario-wizard-photo[hidden] {
+    display: none !important;
+}
+.rh-funcionario-wizard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.rh-funcionario-wizard-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+.huplex-offcanvas--wizard.huplex-offcanvas--lg .huplex-offcanvas-drawer {
+    width: min(480px, calc(100vw - 24px));
+}
+.huplex-offcanvas--wizard .huplex-avatar-upload-hint {
+    max-width: none;
+    padding: 0 8px;
+}
+.huplex-offcanvas--wizard .huplex-offcanvas-header {
+    padding: 16px 20px 14px;
+}
+.huplex-offcanvas--wizard .huplex-offcanvas-body {
+    padding-top: 14px;
+}
+.huplex-offcanvas--wizard.huplex-offcanvas--md .huplex-offcanvas-drawer {
+    width: min(400px, calc(100vw - 24px));
+}
+.huplex-offcanvas--wizard .ts-dropdown {
+    z-index: 1085;
+}
+
+/* RH process wizard — onboarding/offboarding no offcanvas */
+.rh-process-wizard-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+.rh-process-wizard-panels {
+    min-width: 0;
+}
+.rh-process-wizard-panel[hidden] {
+    display: none !important;
+}
+.rh-process-wizard-panel.is-active {
+    display: block;
+}
+.rh-process-wizard-panel .rh-admissao-fields {
+    grid-template-columns: 1fr;
+}
+.rh-process-wizard-summary {
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-2);
+}
+.rh-process-wizard-complete-hint {
+    margin: 10px 0 0;
+    font-size: 11.5px;
+    color: var(--text-3);
+}
+.rh-process-wizard-complete-hint[hidden] {
+    display: none !important;
+}
+.rh-process-wizard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.rh-process-wizard-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+/* Tom Select — tema Huplex (POC UX Autocomplete) */
+.huplex-tomselect-ready + .ts-wrapper,
+.huplex-form-control.ts-wrapper {
+    width: 100%;
+}
+.ts-wrapper.huplex-tomselect,
+.huplex-form-group .ts-wrapper {
+    width: 100%;
+}
+.ts-wrapper.single .ts-control,
+.ts-wrapper.multi .ts-control {
+    background: var(--layout-bg, #161c24) !important;
+    border: 1px solid var(--border-subtle, rgba(255,255,255,0.14)) !important;
+    border-radius: 10px !important;
+    color: var(--text-1, #e8edf5) !important;
+    min-height: 42px;
+    padding: 8px 12px !important;
+    box-shadow: none !important;
+}
+.ts-wrapper.single .ts-control:focus,
+.ts-wrapper.focus .ts-control {
+    border-color: var(--accent, #4F7FFF) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #4F7FFF) 18%, transparent) !important;
+}
+.ts-dropdown {
+    background: var(--surface-2, #1a2230) !important;
+    border: 1px solid var(--border-subtle, rgba(255,255,255,0.12)) !important;
+    border-radius: 10px !important;
+    color: var(--text-1) !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.35) !important;
+}
+.ts-dropdown .option,
+.huplex-tomselect-option {
+    padding: 10px 12px !important;
+    color: var(--text-2) !important;
+}
+.ts-dropdown .active,
+.ts-dropdown .option:hover {
+    background: color-mix(in srgb, var(--accent, #4F7FFF) 14%, transparent) !important;
+    color: var(--text-1) !important;
+}
+.ts-wrapper .ts-control input {
+    color: var(--text-1) !important;
+}
+[data-theme="light"] .ts-wrapper.single .ts-control,
+[data-theme="light"] .ts-wrapper.multi .ts-control {
+    background: #fff !important;
+    border-color: rgba(0,0,0,0.12) !important;
+    color: #1a2230 !important;
+}
+[data-theme="light"] .ts-dropdown {
+    background: #fff !important;
+    border-color: rgba(0,0,0,0.1) !important;
+}
+
+/* Hub RH — gráfico Chart.js */
+.rh-hub-row--chart {
+    grid-template-columns: 1fr;
+}
+.rh-hub-chart-card {
+    padding: 18px 20px;
+}
+.rh-hub-chart-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.rh-hub-chart-label {
+    margin: 0 0 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-3);
+}
+.rh-hub-chart-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-1);
+}
+.rh-hub-chart-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent, #4F7FFF) 12%, var(--surface-2));
+    color: var(--accent, #4F7FFF);
+    white-space: nowrap;
+}
+.rh-hub-chart-canvas-wrap {
+    height: 220px;
+    position: relative;
+}
+
 @media (max-width: 900px) {
     .rh-admissao-layout { grid-template-columns: 1fr; }
     .rh-admissao-steps { flex-direction: column; }

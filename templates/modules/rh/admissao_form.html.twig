@@ -1,34 +1,7 @@
 {% extends 'layout/page_list.html.twig' %}
+{# Legado: redireciona para listagem com offcanvas aberto #}
 {% block title %}Nova admissão{% endblock %}
-{% set page_list_title = 'Nova admissão' %}
-
-{% block page_list_toolbar_actions %}
-{% include 'components/page_back_link.html.twig' with {
-    href: path('app_rh_admissoes'),
-    label: 'Voltar às admissões'
-} %}
-{% endblock %}
-
 {% block page_list_content %}
-{% include 'components/rh/admissao_form_panel.html.twig' with {
-    empresa: empresa,
-    checklist_preview: checklist_preview,
-    nome: nome|default(''),
-    email: email|default(''),
-    cargo: cargo|default(''),
-    data_prevista: data_prevista|default(''),
-    observacoes: observacoes|default('')
-} only %}
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
-<script>
-(function () {
-    var dateInput = document.getElementById('data_prevista');
-    if (dateInput && !dateInput.min) {
-        dateInput.min = '{{ "now"|date("Y-m-d") }}';
-    }
-})();
-</script>
+<script>window.location.replace('{{ path('app_rh_admissoes', { open_nova: 1 })|e('js') }}');</script>
+<p class="text-muted">Redirecionando… <a href="{{ path('app_rh_admissoes', { open_nova: 1 }) }}">Abrir nova admissão</a></p>
 {% endblock %}

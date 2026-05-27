@@ -91,14 +91,8 @@ class RhController extends AbstractController
     public function admissoes(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
-        $q = trim((string) $request->query->get('q', ''));
-        $status = (string) $request->query->get('status', '');
 
-        return $this->render(self::T . 'admissoes.html.twig', [
-            'processos' => $this->onboarding->listForEmpresa($empresa, $q !== '' ? $q : null, $status !== '' ? $status : null),
-            'filter_q' => $q,
-            'filter_status' => $status,
-        ]);
+        return $this->renderAdmissoesList($empresa, $request);
     }
 
     #[Route('/admissoes/nova', name: 'app_rh_admissoes_nova', methods: ['GET', 'POST'])]
@@ -106,43 +100,59 @@ class RhController extends AbstractController
     {
         $empresa = $this->requireEmpresa();
 
-        if ($request->isMethod('POST')) {
-            try {
-                $this->requireCsrf($request, 'rh_admissao_form');
-                $nome = trim((string) $request->request->get('nome', ''));
-                $email = trim((string) $request->request->get('email', ''));
-                if ($nome === '' || $email === '') {
-                    throw new RhProcessException('Nome e e-mail são obrigatórios.');
-                }
-                if (!filter_var($email, \FILTER_VALIDATE_EMAIL)) {
-                    throw new RhProcessException('Informe um e-mail válido.');
-                }
-                $process = $this->onboarding->create(
-                    $empresa,
-                    $nome,
-                    $email,
-                    $request->request->get('cargo') ?: null,
-                    $this->parseDate($request->request->get('data_prevista')),
-                    $request->request->get('observacoes') ?: null,
-                );
-                $onboarding->markStepComplete('funcionario');
-                $this->addFlash('success', 'Processo de onboarding iniciado.');
-
-                return $this->redirectToRoute('app_rh_admissoes_show', ['id' => $process->getId()]);
-            } catch (RhProcessException $e) {
-                $this->addFlash('error', $e->getMessage());
-
-                return $this->renderAdmissaoForm($empresa, [
-                    'nome' => $request->request->get('nome'),
-                    'email' => $request->request->get('email'),
-                    'cargo' => $request->request->get('cargo'),
-                    'data_prevista' => $request->request->get('data_prevista'),
-                    'observacoes' => $request->request->get('observacoes'),
-                ]);
-            }
+        if ($request->isMethod('GET')) {
+            return $this->redirectToRoute('app_rh_admissoes', ['open_nova' => 1]);
         }
 
-        return $this->renderAdmissaoForm($empresa);
+        try {
+            if ($csrf = $this->validateCsrfOrJson($request, 'rh_admissao_form')) {
+                return $csrf;
+            }
+            $nome = trim((string) $request->request->get('nome', ''));
+            $email = trim((string) $request->request->get('email', ''));
+            if ($nome === '' || $email === '') {
+                throw new RhProcessException('Nome e e-mail são obrigatórios.');
+            }
+            if (!filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+                throw new RhProcessException('Informe um e-mail válido.');
+            }
+            $process = $this->onboarding->create(
+                $empresa,
+                $nome,
+                $email,
+                $request->request->get('cargo') ?: null,
+                $this->parseDate($request->request->get('data_prevista')),
+                $request->request->get('observacoes') ?: null,
+            );
+            $onboarding->markStepComplete('funcionario');
+            $message = 'Processo de onboarding iniciado.';
+            $this->addFlash('success', $message);
+
+            if ($this->wantsJson($request)) {
+                return $this->json([
+                    'ok' => true,
+                    'message' => $message,
+                    'process' => $this->onboardingProcessPayload($process),
+                ]);
+            }
+
+            return $this->redirectToRoute('app_rh_admissoes_show', ['id' => $process->getId()]);
+        } catch (RhProcessException $e) {
+            if ($this->wantsJson($request)) {
+                return $this->json(['ok' => false, 'error' => $e->getMessage()], 400);
+            }
+
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->renderAdmissoesList($empresa, $request, [
+                'open_admissao_offcanvas' => true,
+                'nome' => $request->request->get('nome'),
+                'email' => $request->request->get('email'),
+                'cargo' => $request->request->get('cargo'),
+                'data_prevista' => $request->request->get('data_prevista'),
+                'observacoes' => $request->request->get('observacoes'),
+            ]);
+        }
     }
 
     #[Route('/admissoes/{id}', name: 'app_rh_admissoes_show', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
@@ -151,9 +161,12 @@ class RhController extends AbstractController
         $process = $this->loadOnboarding($id);
 
         if ($request->isMethod('POST')) {
+            if ($csrf = $this->validateCsrfOrJson($request, 'rh_process_action')) {
+                return $csrf;
+            }
+
+            $action = (string) $request->request->get('action');
             try {
-                $this->requireCsrf($request, 'rh_process_action');
-                $action = $request->request->get('action');
                 match ($action) {
                     'toggle' => $this->onboarding->toggleChecklistItem(
                         $process,
@@ -200,7 +213,21 @@ class RhController extends AbstractController
                     default => throw new RhProcessException('Ação inválida.'),
                 };
             } catch (RhProcessException $e) {
+                if ($this->wantsJson($request)) {
+                    return $this->json(['ok' => false, 'error' => $e->getMessage()], 400);
+                }
+
                 $this->addFlash('error', $e->getMessage());
+
+                return $this->redirectToRoute('app_rh_admissoes_show', ['id' => $id]);
+            }
+
+            if ($this->wantsJson($request)) {
+                return $this->json([
+                    'ok' => true,
+                    'message' => $this->processActionMessage($action, 'onboarding'),
+                    'process' => $this->onboardingProcessPayload($process),
+                ]);
             }
 
             return $this->redirectToRoute('app_rh_admissoes_show', ['id' => $id]);
@@ -216,14 +243,8 @@ class RhController extends AbstractController
     public function demissoes(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
-        $q = trim((string) $request->query->get('q', ''));
-        $status = (string) $request->query->get('status', '');
 
-        return $this->render(self::T . 'demissoes.html.twig', [
-            'processos' => $this->offboarding->listForEmpresa($empresa, $q !== '' ? $q : null, $status !== '' ? $status : null),
-            'filter_q' => $q,
-            'filter_status' => $status,
-        ]);
+        return $this->renderDemissoesList($empresa, $request);
     }
 
     #[Route('/demissoes/nova', name: 'app_rh_demissoes_nova', methods: ['GET', 'POST'])]
@@ -231,56 +252,77 @@ class RhController extends AbstractController
     {
         $empresa = $this->requireEmpresa();
         $funcionarios = $this->offboarding->listActiveFuncionariosForOffboarding($empresa);
-
-        if ($request->isMethod('POST')) {
-            $funcionarioId = (int) $request->request->get('funcionario_id', 0);
-            $funcionario = $funcionarioId > 0
-                ? $this->funcionarioRepo->findOneBy(['id' => $funcionarioId, 'empresa' => $empresa])
-                : null;
-
-            if (!$funcionario) {
-                $this->addFlash('error', 'Selecione um funcionário ativo.');
-
-                return $this->renderDemissaoForm($empresa, $funcionarios, [
-                    'funcionario_id' => $funcionarioId > 0 ? $funcionarioId : '',
-                    'data_prevista' => $request->request->get('data_prevista'),
-                    'motivo' => $request->request->get('motivo'),
-                    'observacoes' => $request->request->get('observacoes'),
-                ]);
-            }
-
-            try {
-                $this->requireCsrf($request, 'rh_demissao_form');
-                $process = $this->offboarding->create(
-                    $empresa,
-                    $funcionario,
-                    $this->parseDate($request->request->get('data_prevista')),
-                    $request->request->get('motivo') ?: null,
-                    $request->request->get('observacoes') ?: null,
-                );
-                $this->addFlash('success', 'Processo de offboarding iniciado.');
-
-                return $this->redirectToRoute('app_rh_demissoes_show', ['id' => $process->getId()]);
-            } catch (RhProcessException $e) {
-                $this->addFlash('error', $e->getMessage());
-
-                return $this->renderDemissaoForm($empresa, $funcionarios, [
-                    'funcionario_id' => $funcionarioId,
-                    'data_prevista' => $request->request->get('data_prevista'),
-                    'motivo' => $request->request->get('motivo'),
-                    'observacoes' => $request->request->get('observacoes'),
-                ]);
-            }
-        }
-
         $allActive = $this->offboarding->listActiveFuncionarios($empresa);
 
-        $preselect = (int) $request->query->get('funcionario_id', 0);
+        if ($request->isMethod('GET')) {
+            $params = ['open_nova' => 1];
+            $preselect = (int) $request->query->get('funcionario_id', 0);
+            if ($preselect > 0) {
+                $params['funcionario_id'] = $preselect;
+            }
 
-        return $this->renderDemissaoForm($empresa, $funcionarios, [
-            'all_active_blocked' => \count($allActive) > 0 && \count($funcionarios) === 0,
-            'funcionario_id' => $preselect > 0 ? $preselect : '',
-        ]);
+            return $this->redirectToRoute('app_rh_demissoes', $params);
+        }
+
+        $funcionarioId = (int) $request->request->get('funcionario_id', 0);
+        $funcionario = $funcionarioId > 0
+            ? $this->funcionarioRepo->findOneBy(['id' => $funcionarioId, 'empresa' => $empresa])
+            : null;
+
+        if (!$funcionario) {
+            if ($this->wantsJson($request)) {
+                return $this->json(['ok' => false, 'error' => 'Selecione um funcionário ativo.'], 400);
+            }
+
+            $this->addFlash('error', 'Selecione um funcionário ativo.');
+
+            return $this->renderDemissoesList($empresa, $request, [
+                'open_demissao_offcanvas' => true,
+                'funcionario_id' => $funcionarioId > 0 ? $funcionarioId : '',
+                'data_prevista' => $request->request->get('data_prevista'),
+                'motivo' => $request->request->get('motivo'),
+                'observacoes' => $request->request->get('observacoes'),
+            ]);
+        }
+
+        try {
+            if ($csrf = $this->validateCsrfOrJson($request, 'rh_demissao_form')) {
+                return $csrf;
+            }
+            $process = $this->offboarding->create(
+                $empresa,
+                $funcionario,
+                $this->parseDate($request->request->get('data_prevista')),
+                $request->request->get('motivo') ?: null,
+                $request->request->get('observacoes') ?: null,
+            );
+            $message = 'Processo de offboarding iniciado.';
+            $this->addFlash('success', $message);
+
+            if ($this->wantsJson($request)) {
+                return $this->json([
+                    'ok' => true,
+                    'message' => $message,
+                    'process' => $this->offboardingProcessPayload($process),
+                ]);
+            }
+
+            return $this->redirectToRoute('app_rh_demissoes_show', ['id' => $process->getId()]);
+        } catch (RhProcessException $e) {
+            if ($this->wantsJson($request)) {
+                return $this->json(['ok' => false, 'error' => $e->getMessage()], 400);
+            }
+
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->renderDemissoesList($empresa, $request, [
+                'open_demissao_offcanvas' => true,
+                'funcionario_id' => $funcionarioId,
+                'data_prevista' => $request->request->get('data_prevista'),
+                'motivo' => $request->request->get('motivo'),
+                'observacoes' => $request->request->get('observacoes'),
+            ]);
+        }
     }
 
     #[Route('/demissoes/{id}', name: 'app_rh_demissoes_show', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
@@ -289,9 +331,12 @@ class RhController extends AbstractController
         $process = $this->loadOffboarding($id);
 
         if ($request->isMethod('POST')) {
+            if ($csrf = $this->validateCsrfOrJson($request, 'rh_process_action')) {
+                return $csrf;
+            }
+
+            $action = (string) $request->request->get('action');
             try {
-                $this->requireCsrf($request, 'rh_process_action');
-                $action = $request->request->get('action');
                 match ($action) {
                     'toggle' => $this->offboarding->toggleChecklistItem(
                         $process,
@@ -319,7 +364,21 @@ class RhController extends AbstractController
                     default => throw new RhProcessException('Ação inválida.'),
                 };
             } catch (RhProcessException $e) {
+                if ($this->wantsJson($request)) {
+                    return $this->json(['ok' => false, 'error' => $e->getMessage()], 400);
+                }
+
                 $this->addFlash('error', $e->getMessage());
+
+                return $this->redirectToRoute('app_rh_demissoes_show', ['id' => $id]);
+            }
+
+            if ($this->wantsJson($request)) {
+                return $this->json([
+                    'ok' => true,
+                    'message' => $this->processActionMessage($action, 'offboarding'),
+                    'process' => $this->offboardingProcessPayload($process),
+                ]);
             }
 
             return $this->redirectToRoute('app_rh_demissoes_show', ['id' => $id]);
@@ -331,11 +390,46 @@ class RhController extends AbstractController
         ]);
     }
 
+    private function renderAdmissoesList(\App\Entity\Empresa $empresa, Request $request, array $formData = []): Response
+    {
+        $q = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', '');
+
+        return $this->render(self::T . 'admissoes.html.twig', array_merge([
+            'processos' => $this->onboarding->listForEmpresa($empresa, $q !== '' ? $q : null, $status !== '' ? $status : null),
+            'filter_q' => $q,
+            'filter_status' => $status,
+            'empresa' => $empresa,
+            'checklist_preview' => RhOnboardingProcess::defaultChecklist(),
+            'open_admissao_offcanvas' => $request->query->getBoolean('open_nova'),
+        ], $formData));
+    }
+
     private function renderAdmissaoForm(\App\Entity\Empresa $empresa, array $formData = []): Response
     {
         return $this->render(self::T . 'admissao_form.html.twig', array_merge([
             'empresa' => $empresa,
             'checklist_preview' => RhOnboardingProcess::defaultChecklist(),
+        ], $formData));
+    }
+
+    private function renderDemissoesList(\App\Entity\Empresa $empresa, Request $request, array $formData = []): Response
+    {
+        $q = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', '');
+        $funcionarios = $this->offboarding->listActiveFuncionariosForOffboarding($empresa);
+        $allActive = $this->offboarding->listActiveFuncionarios($empresa);
+
+        return $this->render(self::T . 'demissoes.html.twig', array_merge([
+            'processos' => $this->offboarding->listForEmpresa($empresa, $q !== '' ? $q : null, $status !== '' ? $status : null),
+            'filter_q' => $q,
+            'filter_status' => $status,
+            'empresa' => $empresa,
+            'funcionarios_offboarding' => $funcionarios,
+            'checklist_preview' => RhOffboardingProcess::defaultChecklist(),
+            'all_active_blocked' => \count($allActive) > 0 && \count($funcionarios) === 0,
+            'open_demissao_offcanvas' => $request->query->getBoolean('open_nova'),
+            'funcionario_id' => $request->query->get('funcionario_id', ''),
         ], $formData));
     }
 
@@ -370,5 +464,80 @@ class RhController extends AbstractController
         }
 
         return $process;
+    }
+
+    private function wantsJson(Request $request): bool
+    {
+        $accept = $request->headers->get('Accept', '');
+
+        return str_contains($accept, 'application/json')
+            || $request->headers->get('X-Requested-With') === 'XMLHttpRequest';
+    }
+
+    private function validateCsrfOrJson(Request $request, string $tokenId): ?JsonResponse
+    {
+        if ($this->isCsrfTokenValid($tokenId, (string) $request->request->get('_token'))) {
+            return null;
+        }
+
+        if ($this->wantsJson($request)) {
+            return $this->json(['ok' => false, 'error' => 'Token de segurança inválido.'], 403);
+        }
+
+        throw $this->createAccessDeniedException('Token de segurança inválido.');
+    }
+
+    /** @return array<string, mixed> */
+    private function onboardingProcessPayload(RhOnboardingProcess $process): array
+    {
+        return [
+            'id' => $process->getId(),
+            'nome' => $process->getNome(),
+            'email' => $process->getEmail(),
+            'cargo' => $process->getCargo(),
+            'checklist' => $process->getChecklist(),
+            'progress' => $process->checklistProgress(),
+            'doneCount' => $process->checklistDoneCount(),
+            'totalCount' => \count($process->getChecklist()),
+            'status' => $process->getStatus(),
+            'complete' => $process->isChecklistComplete(),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function offboardingProcessPayload(RhOffboardingProcess $process): array
+    {
+        $funcionario = $process->getFuncionario();
+
+        return [
+            'id' => $process->getId(),
+            'nome' => $funcionario->getNome(),
+            'funcionarioNome' => $funcionario->getNome(),
+            'cargo' => $funcionario->getCargo(),
+            'motivo' => $process->getMotivo(),
+            'checklist' => $process->getChecklist(),
+            'progress' => $process->checklistProgress(),
+            'doneCount' => $process->checklistDoneCount(),
+            'totalCount' => \count($process->getChecklist()),
+            'status' => $process->getStatus(),
+            'complete' => $process->isChecklistComplete(),
+        ];
+    }
+
+    private function processActionMessage(string $action, string $variant): string
+    {
+        return match ($action) {
+            'toggle' => 'Item atualizado.',
+            'complete' => $variant === 'offboarding'
+                ? 'Offboarding concluído. Funcionário desativado.'
+                : 'Onboarding concluído. Funcionário cadastrado.',
+            'cancel' => $variant === 'offboarding'
+                ? 'Offboarding cancelado.'
+                : 'Onboarding cancelado.',
+            'update' => 'Dados atualizados.',
+            'provision_user' => 'Usuário da plataforma criado e checklist atualizado.',
+            'upload_doc' => 'Documento anexado.',
+            default => 'Ação concluída.',
+        };
     }
 }

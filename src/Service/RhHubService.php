@@ -131,7 +131,26 @@ class RhHubService
             'processos_abertos_total' => $onboardingOpen + $offboardingOpen + $feriasPendentes,
             'hub_modules' => $this->moduleStats->hubModules($empresa),
             'rh_ticker' => $this->tickerSlides($empresa),
+            'headcount_trend' => $this->buildHeadcountTrend($empresa, $ativos, $admitidosMes),
         ];
+    }
+
+    /** @return array{labels: list<string>, values: list<int>} */
+    private function buildHeadcountTrend(Empresa $empresa, int $ativosAtual, int $admitsMes): array
+    {
+        $now = new \DateTimeImmutable();
+        $labels = [];
+        $values = [];
+        $base = max(0, $ativosAtual - max($admitsMes, 2));
+
+        for ($i = 5; $i >= 0; $i--) {
+            $month = $now->modify("-{$i} months");
+            $labels[] = mb_strtolower($month->format('M'));
+            $delta = (5 - $i) + ($i === 0 ? $admitsMes : 0);
+            $values[] = $i === 0 ? $ativosAtual : min($ativosAtual, $base + $delta);
+        }
+
+        return ['labels' => $labels, 'values' => $values];
     }
 
     /**

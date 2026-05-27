@@ -1,0 +1,296 @@
+{#
+
+  rh/demissao_offcanvas — wizard offboarding no painel lateral (2 etapas, sem reload)
+
+#}
+
+{% set _has_funcionarios = funcionarios|default([])|length > 0 %}
+
+{% embed 'components/huplex_offcanvas.html.twig' with {
+
+    id: 'rh-demissao-nova',
+
+    title: 'Nova demissão',
+
+    subtitle: 'Offboarding passo a passo',
+
+    icon: 'fa-user-minus',
+
+    size: 'lg',
+
+    wizard: true,
+
+    open: open|default(false)
+
+} %}
+
+    {% block offcanvas_drawer_attrs %}
+
+        {% if _has_funcionarios %}
+
+        data-controller="rh-process-wizard"
+
+        data-rh-process-wizard-create-url-value="{{ path('app_rh_demissoes_nova') }}"
+
+        data-rh-process-wizard-action-url-value="{{ path('app_rh_demissoes_show', { id: 0 }) }}"
+
+        data-rh-process-wizard-variant-value="offboarding"
+
+        data-rh-process-wizard-complete-label-value="Concluir offboarding"
+
+        data-rh-process-wizard-confirm-message-value="Concluir offboarding e inativar o funcionário?"
+
+        data-rh-process-wizard-csrf-action-value="{{ csrf_token('rh_process_action') }}"
+
+        {% endif %}
+
+    {% endblock %}
+
+
+
+    {% block offcanvas_body %}
+
+    <div class="rh-admissao-offcanvas rh-offboard-offcanvas rh-process-wizard-body">
+
+        {% if not _has_funcionarios %}
+
+            {% include 'components/empty_state.html.twig' with {
+
+                icon: all_active_blocked|default(false) ? 'fa-hourglass-half' : 'fa-user-tie',
+
+                title: all_active_blocked|default(false) ? 'Offboarding em andamento' : 'Nenhum funcionário ativo',
+
+                text: all_active_blocked|default(false)
+
+                    ? 'Todos os funcionários ativos já possuem um processo de offboarding aberto.'
+
+                    : 'Cadastre funcionários ativos ou conclua admissões antes de iniciar um offboarding.',
+
+                btn_label: all_active_blocked|default(false) ? 'Ver demissões' : 'Ver funcionários',
+
+                btn_href: all_active_blocked|default(false) ? path('app_rh_demissoes') : path('app_rh_funcionarios')
+
+            } %}
+
+        {% else %}
+
+            <div class="rh-admissao-offcanvas-progress">
+
+                <div class="rh-admissao-offcanvas-progress-track">
+
+                    <div class="progress-huplex">
+
+                        <div class="progress-huplex-bar progress-huplex-bar--warning"
+
+                             data-rh-process-wizard-target="progressBar"
+
+                             style="width: 50%;"
+
+                             role="progressbar"
+
+                             aria-valuenow="50"
+
+                             aria-valuemin="0"
+
+                             aria-valuemax="100"></div>
+
+                    </div>
+
+                    <small class="progress-huplex-label" data-rh-process-wizard-target="progressPct">50%</small>
+
+                </div>
+
+                <span class="rh-admissao-offcanvas-progress-label" data-rh-process-wizard-target="progressLabel">Dados do desligamento · 1 de 2</span>
+
+            </div>
+
+
+
+            <div class="rh-admissao-steps" aria-label="Etapas do processo">
+
+                <div class="rh-admissao-step rh-admissao-step--active"
+
+                     data-rh-process-wizard-target="step"
+
+                     data-rh-process-step="dados">
+
+                    <span class="rh-admissao-step-num">1</span>
+
+                    <span class="rh-admissao-step-text">
+
+                        <strong>Dados do desligamento</strong>
+
+                        <small>Colaborador e prazos</small>
+
+                    </span>
+
+                </div>
+
+                <div class="rh-admissao-step rh-admissao-step--next"
+
+                     data-rh-process-wizard-target="step"
+
+                     data-rh-process-step="checklist">
+
+                    <span class="rh-admissao-step-num">2</span>
+
+                    <span class="rh-admissao-step-text">
+
+                        <strong>Checklist de offboarding</strong>
+
+                        <small>Marque cada item</small>
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="rh-process-wizard-panels">
+
+                <div class="rh-process-wizard-panel is-active"
+
+                     data-rh-process-wizard-target="panel"
+
+                     data-rh-process-panel="dados">
+
+                    <p class="rh-admissao-offcanvas-intro">
+
+                        Registre o desligamento do colaborador. Na próxima etapa você acompanha revogação de acessos, equipamentos e documentação.
+
+                    </p>
+
+
+
+                    <form method="post"
+
+                          action="{{ path('app_rh_demissoes_nova') }}"
+
+                          class="huplex-form rh-admissao-form"
+
+                          id="rhDemissaoNovaForm"
+
+                          data-rh-process-form
+
+                          data-action="submit->rh-process-wizard#preventSubmit">
+
+                        <input type="hidden" name="_token" value="{{ csrf_token('rh_demissao_form') }}">
+
+                        {% include 'components/rh/demissao_form_fields.html.twig' %}
+
+                    </form>
+
+
+
+                    {% if empresa is defined and empresa %}
+
+                    <div class="rh-admissao-offcanvas-meta huplex-card">
+
+                        <p class="rh-admissao-aside-label">Área de trabalho</p>
+
+                        <p class="rh-admissao-aside-empresa mb-0">{{ empresa.nome }}</p>
+
+                        {% if empresa.setor %}
+
+                        <p class="rh-admissao-aside-meta mb-0">{{ empresa.setor }}</p>
+
+                        {% endif %}
+
+                    </div>
+
+                    {% endif %}
+
+
+
+                    <p class="rh-admissao-required-note" data-rh-process-wizard-target="requiredNote">
+
+                        <span class="huplex-form-required">*</span> Campos obrigatórios
+
+                    </p>
+
+                </div>
+
+
+
+                <div class="rh-process-wizard-panel"
+
+                     data-rh-process-wizard-target="panel"
+
+                     data-rh-process-panel="checklist"
+
+                     hidden>
+
+                    <div class="rh-process-wizard-summary huplex-card" data-rh-process-wizard-target="summary" hidden></div>
+
+
+
+                    <p class="rh-admissao-offcanvas-intro">
+
+                        Marque cada item do checklist. Ao concluir todos, finalize o offboarding para inativar o funcionário.
+
+                    </p>
+
+
+
+                    <div data-rh-process-wizard-target="checklistHost"></div>
+
+
+
+                    <p class="rh-process-wizard-complete-hint" data-rh-process-wizard-target="completeHint">
+
+                        Marque todos os itens acima para habilitar a conclusão.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    {% endblock %}
+
+
+
+    {% block offcanvas_footer %}
+
+    {% if _has_funcionarios %}
+
+    <div class="huplex-offcanvas-footer rh-process-wizard-footer">
+
+        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+
+        <div class="rh-process-wizard-footer-actions">
+
+            <button type="button" class="btn-huplex-ghost" data-rh-process-wizard-target="prev" data-action="rh-process-wizard#goPrev" hidden>
+
+                <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Anterior
+
+            </button>
+
+            <button type="button" class="btn-huplex rh-offboard-submit" data-rh-process-wizard-target="next" data-action="rh-process-wizard#goNext">
+
+                Próximo <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+
+            </button>
+
+            <button type="button" class="btn-huplex rh-offboard-submit" data-rh-process-wizard-target="complete" data-action="rh-process-wizard#completeProcess" hidden disabled>
+
+                <i class="fas fa-door-open mr-1" aria-hidden="true"></i> Concluir offboarding
+
+            </button>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    {% endblock %}
+
+{% endembed %}
+

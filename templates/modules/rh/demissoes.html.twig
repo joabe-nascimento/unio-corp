@@ -6,7 +6,7 @@
 <form method="get" action="{{ path('app_rh_demissoes') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
     btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova demissão' : '',
-    btn_href: path('app_rh_demissoes_nova'),
+    btn_opens: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'rh-demissao-nova' : '',
     btn_icon: 'fa-user-minus',
     search_in_section: true,
     search_placeholder: 'Buscar funcionário ou motivo…',
@@ -42,6 +42,37 @@
     empty_title: 'Nenhum processo de demissão',
     empty_text: filter_q|default('') or filter_status|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Inicie o offboarding para desligar colaboradores com checklist de TI, acessos e documentação.',
     empty_btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova demissão' : '',
-    empty_btn_href: path('app_rh_demissoes_nova')
+    empty_btn_opens: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'rh-demissao-nova' : ''
 } %}
+{% endblock %}
+
+{% block page_overlays %}
+{% if grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
+{% include 'components/rh/demissao_offcanvas.html.twig' with {
+    open: open_demissao_offcanvas|default(app.request.query.getBoolean('open_nova')),
+    empresa: empresa|default(null),
+    funcionarios: funcionarios_offboarding|default([]),
+    checklist_preview: checklist_preview|default([]),
+    all_active_blocked: all_active_blocked|default(false),
+    funcionario_id: funcionario_id|default(app.request.query.get('funcionario_id', '')),
+    data_prevista: data_prevista|default(''),
+    motivo: motivo|default(''),
+    observacoes: observacoes|default('')
+} %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    var dateInput = document.getElementById('data_prevista');
+    if (dateInput && !dateInput.min) {
+        dateInput.min = '{{ "now"|date("Y-m-d") }}';
+    }
+    {% if open_demissao_offcanvas|default(app.request.query.getBoolean('open_nova')) %}
+    window.HuplexOffcanvas && window.HuplexOffcanvas.open('rh-demissao-nova');
+    {% endif %}
+})();
+</script>
 {% endblock %}
