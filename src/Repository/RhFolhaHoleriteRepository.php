@@ -19,16 +19,36 @@ class RhFolhaHoleriteRepository extends ServiceEntityRepository
     }
 
     /** @return list<RhFolhaHolerite> */
-    public function findByFuncionario(Funcionario $funcionario, int $limit = 12): array
+    public function findByFuncionario(Funcionario $funcionario, int $limit = 12, bool $somenteFechadas = true): array
     {
-        return $this->createQueryBuilder('h')
+        $qb = $this->createQueryBuilder('h')
             ->join('h.competencia', 'c')
+            ->addSelect('c')
             ->andWhere('h.funcionario = :funcionario')
             ->setParameter('funcionario', $funcionario)
             ->orderBy('c.referencia', 'DESC')
-            ->setMaxResults($limit)
+            ->setMaxResults($limit);
+
+        if ($somenteFechadas) {
+            $qb->andWhere('c.status = :fechada')->setParameter('fechada', 'FECHADA');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findOneForFuncionario(int $holeriteId, Funcionario $funcionario): ?RhFolhaHolerite
+    {
+        return $this->createQueryBuilder('h')
+            ->join('h.competencia', 'c')
+            ->addSelect('c')
+            ->andWhere('h.id = :id')
+            ->andWhere('h.funcionario = :funcionario')
+            ->andWhere('c.status = :fechada')
+            ->setParameter('id', $holeriteId)
+            ->setParameter('funcionario', $funcionario)
+            ->setParameter('fechada', 'FECHADA')
             ->getQuery()
-            ->getResult();
+            ->getOneOrNullResult();
     }
 
     public function findOneByCompetenciaAndFuncionario(RhFolhaCompetencia $competencia, Funcionario $funcionario): ?RhFolhaHolerite

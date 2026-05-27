@@ -10,7 +10,7 @@ Documento de acompanhamento do roadmap RH na branch `product/rh`. Base operacion
 | Admissões / Demissões | `/rh/admissoes`, `/rh/demissoes` | ✅ Produção | Onboarding/offboarding |
 | Férias | `/rh/ferias` | ✅ Produção | Fluxo completo |
 | Folha operacional | `/rh/folha` | ✅ Produção | Competência simplificada |
-| Portal do colaborador | `/rh/portal` | ✅ MVP | Holerites, perfil |
+| Portal do colaborador | `/rh/portal` | ✅ Completo | Dashboard, férias, holerites, comunicados, auto-vínculo por e-mail |
 | Recrutamento | `/rh/recrutamento` | ✅ MVP | Vagas, candidatos |
 | Ponto | `/rh/ponto` | ✅ MVP | Batidas web |
 | Comunicação | `/rh/comunicacao` | ✅ MVP | Comunicados, fila e-mail |

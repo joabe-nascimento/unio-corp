@@ -1,0 +1,40 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Comunicados{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Comunicados' %}
+
+{% block hub_content %}
+{% include 'components/rh/portal_nav.html.twig' with { active: 'comunicados' } %}
+
+<div class="rh-portal-comunicados">
+    {% if comunicados is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-bullhorn',
+            title: 'Nenhum comunicado',
+            text: 'Quando o RH publicar avisos, eles aparecerão aqui.'
+        } %}
+    {% else %}
+        {% for item in comunicados %}
+        <article id="com-{{ item.comunicado.id }}" class="huplex-card p-4 mb-3 rh-portal-comunicado{% if not item.lido %} rh-portal-comunicado--unread{% endif %}">
+            <header class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div>
+                    {% if not item.lido %}<span class="rh-portal-badge-new mb-1 d-inline-block">Novo</span>{% endif %}
+                    <h3 class="h6 mb-1">{{ item.comunicado.titulo }}</h3>
+                    <p class="text-muted small mb-0">{{ item.comunicado.publicadoEm|date('d/m/Y H:i') }}</p>
+                </div>
+                {% if not item.lido %}
+                <form method="post" action="{{ path('app_rh_portal_comunicados') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('rh_portal_comunicado') }}">
+                    <input type="hidden" name="comunicado_id" value="{{ item.comunicado.id }}">
+                    <button type="submit" class="btn-huplex-ghost btn-sm">Marcar como lido</button>
+                </form>
+                {% else %}
+                <span class="rh-portal-pill rh-portal-pill--concluida"><i class="fas fa-check"></i> Lido</span>
+                {% endif %}
+            </header>
+            <div class="rh-portal-comunicado-body">{{ item.comunicado.corpo|nl2br }}</div>
+        </article>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

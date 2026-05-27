@@ -8,49 +8,114 @@
     {% include 'components/empty_state.html.twig' with {
         icon: 'fa-id-badge',
         title: 'Sem vínculo de colaborador',
-        text: 'Seu usuário ainda não está vinculado a um cadastro de funcionário nesta empresa.'
+        text: 'Seu usuário ainda não está vinculado a um cadastro nesta empresa. Se o RH já cadastrou você, confira se o e-mail da conta é o mesmo do cadastro — o sistema tenta vincular automaticamente.',
+        btn_label: 'Voltar ao RH',
+        btn_href: path('app_rh')
     } %}
 {% else %}
-<div class="huplex-card p-4 mb-3">
-    <h3 class="h5 mb-3">{{ funcionario.nome }}</h3>
-    <p class="text-muted mb-0">{{ funcionario.email }} · {{ funcionario.cargo|default('Sem cargo') }}</p>
-</div>
+    {% include 'components/rh/portal_nav.html.twig' with { active: 'inicio' } %}
 
-<div class="row g-3">
-    <div class="col-lg-6">
-        <div class="huplex-card p-4">
-            <h4 class="h6 mb-3">Meus dados</h4>
-            <form method="post" action="{{ path('app_rh_portal') }}">
-                <input type="hidden" name="_token" value="{{ csrf_token('rh_portal_profile') }}">
-                <div class="mb-3">
-                    <label class="form-label">Telefone</label>
-                    <input type="text" name="telefone" class="form-control" value="{{ funcionario.telefone|default('') }}">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Cargo</label>
-                    <input type="text" name="cargo" class="form-control" value="{{ funcionario.cargo|default('') }}">
-                </div>
-                <button type="submit" class="btn-huplex btn-sm">Salvar</button>
-            </form>
+    <div class="rh-portal-hero huplex-card mb-3">
+        <div class="rh-portal-hero-main">
+            <p class="rh-portal-eyebrow">Olá, {{ funcionario.nome|split(' ')|first }}</p>
+            <h2 class="rh-portal-title">{{ funcionario.cargo|default('Colaborador') }}</h2>
+            <p class="rh-portal-meta mb-0">
+                {{ funcionario.email }}
+                {% if funcionario.departamento %} · {{ funcionario.departamento.nome }}{% endif %}
+                · <span class="rh-portal-status rh-portal-status--{{ funcionario.status|lower }}">{{ funcionario.status }}</span>
+            </p>
         </div>
     </div>
-    <div class="col-lg-6">
-        <div class="huplex-card p-4">
-            <h4 class="h6 mb-3">Holerites</h4>
-            {% if holerites is empty %}
-                <p class="text-muted mb-0">Nenhum holerite disponível.</p>
-            {% else %}
-            <ul class="list-unstyled mb-0">
-                {% for h in holerites %}
-                <li class="mb-2">
-                    <strong>{{ h.competencia.referencia }}</strong>
-                    — líquido R$ {{ h.liquido|number_format(2, ',', '.') }}
-                </li>
-                {% endfor %}
-            </ul>
-            {% endif %}
+
+    <div class="rh-portal-kpis mb-3">
+        <a href="{{ path('app_rh_portal_ferias') }}" class="rh-portal-kpi huplex-card">
+            <span class="rh-portal-kpi-value">{{ summary.ferias_pendentes }}</span>
+            <span class="rh-portal-kpi-label">Férias pendentes</span>
+        </a>
+        <a href="{{ path('app_rh_portal_holerites') }}" class="rh-portal-kpi huplex-card">
+            <span class="rh-portal-kpi-value">{{ summary.holerites_count }}</span>
+            <span class="rh-portal-kpi-label">Holerites</span>
+        </a>
+        <a href="{{ path('app_rh_portal_comunicados') }}" class="rh-portal-kpi huplex-card">
+            <span class="rh-portal-kpi-value">{{ summary.comunicados_nao_lidos }}</span>
+            <span class="rh-portal-kpi-label">Comunicados novos</span>
+        </a>
+    </div>
+
+    {% if summary.ferias_proximas %}
+    <div class="huplex-card p-3 mb-3 rh-portal-alert rh-portal-alert--info">
+        <i class="fas fa-calendar-check mr-2"></i>
+        Próximas férias: <strong>{{ summary.ferias_proximas.dataInicio|date('d/m/Y') }}</strong>
+        até <strong>{{ summary.ferias_proximas.dataFim|date('d/m/Y') }}</strong>
+        ({{ summary.ferias_proximas.dias }} dias)
+    </div>
+    {% endif %}
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="huplex-card p-4 h-100">
+                <h3 class="h6 mb-3">Meus dados</h3>
+                <form method="post" action="{{ path('app_rh_portal') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('rh_portal_profile') }}">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Nome</label>
+                        <p class="mb-0">{{ funcionario.nome }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">E-mail</label>
+                        <p class="mb-0">{{ funcionario.email }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="telefone">Telefone para contato</label>
+                        <input type="text" id="telefone" name="telefone" class="form-control" value="{{ funcionario.telefone|default('') }}">
+                    </div>
+                    <button type="submit" class="btn-huplex btn-sm">Salvar telefone</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="huplex-card p-4 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="h6 mb-0">Últimos holerites</h3>
+                    <a href="{{ path('app_rh_portal_holerites') }}" class="small">Ver todos</a>
+                </div>
+                {% if holerites_recentes is empty %}
+                    <p class="text-muted mb-0 small">Nenhum holerite disponível (competências fechadas).</p>
+                {% else %}
+                <ul class="list-unstyled mb-0 rh-portal-list">
+                    {% for h in holerites_recentes %}
+                    <li>
+                        <a href="{{ path('app_rh_portal_holerite', { id: h.id }) }}">
+                            <span>{{ h.competencia.referencia }}</span>
+                            <strong>R$ {{ h.liquido|number_format(2, ',', '.') }}</strong>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="huplex-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="h6 mb-0">Comunicados</h3>
+                    <a href="{{ path('app_rh_portal_comunicados') }}" class="small">Ver todos</a>
+                </div>
+                {% if comunicados_preview is empty %}
+                    <p class="text-muted mb-0 small">Nenhum comunicado publicado.</p>
+                {% else %}
+                <ul class="list-unstyled mb-0 rh-portal-list">
+                    {% for item in comunicados_preview %}
+                    <li>
+                        <a href="{{ path('app_rh_portal_comunicados') }}#com-{{ item.comunicado.id }}">
+                            {% if not item.lido %}<span class="rh-portal-badge-new">Novo</span>{% endif %}
+                            <span>{{ item.comunicado.titulo }}</span>
+                            <small>{{ item.comunicado.publicadoEm|date('d/m/Y') }}</small>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
         </div>
     </div>
-</div>
 {% endif %}
 {% endblock %}

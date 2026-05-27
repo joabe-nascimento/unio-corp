@@ -159,6 +159,23 @@ class FuncionarioRepository extends ServiceEntityRepository
         return $this->findOneBy(['empresa' => $empresa, 'user' => $user]);
     }
 
+    public function findOneByEmail(Empresa $empresa, string $email): ?Funcionario
+    {
+        $normalized = mb_strtolower(trim($email));
+        if ($normalized === '') {
+            return null;
+        }
+
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('LOWER(f.email) = :email')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('email', $normalized)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     /** @return list<Funcionario> */
     public function findAtivosForOrganograma(Empresa $empresa): array
     {

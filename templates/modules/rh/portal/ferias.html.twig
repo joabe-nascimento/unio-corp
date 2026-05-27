@@ -1,0 +1,80 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Minhas férias{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Minhas férias' %}
+
+{% set ferias_status_labels = {
+    'SOLICITADA': 'Pendente',
+    'APROVADA': 'Aprovada',
+    'REJEITADA': 'Rejeitada',
+    'EM_GOZO': 'Em gozo',
+    'CONCLUIDA': 'Concluída'
+} %}
+
+{% block hub_content %}
+{% include 'components/rh/portal_nav.html.twig' with { active: 'ferias' } %}
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="huplex-card p-4">
+            <h3 class="h6 mb-3">Nova solicitação</h3>
+            {% if funcionario.status != 'ATIVO' %}
+                <p class="text-muted mb-0">Somente colaboradores ativos podem solicitar férias.</p>
+            {% else %}
+            <form method="post" action="{{ path('app_rh_portal_ferias') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('rh_portal_ferias') }}">
+                <div class="mb-3">
+                    <label class="form-label" for="data_inicio">Data início</label>
+                    <input type="date" id="data_inicio" name="data_inicio" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="data_fim">Data fim</label>
+                    <input type="date" id="data_fim" name="data_fim" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="observacoes">Observações</label>
+                    <textarea id="observacoes" name="observacoes" class="form-control" rows="3" placeholder="Opcional"></textarea>
+                </div>
+                <button type="submit" class="btn-huplex">Enviar solicitação</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="huplex-card p-4">
+            <h3 class="h6 mb-3">Histórico</h3>
+            {% if ferias is empty %}
+                <p class="text-muted mb-0">Você ainda não possui solicitações de férias.</p>
+            {% else %}
+            <div class="table-responsive">
+                <table class="table table-sm mb-0 rh-portal-table">
+                    <thead>
+                        <tr>
+                            <th>Período</th>
+                            <th>Dias</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in ferias %}
+                        <tr>
+                            <td>{{ f.dataInicio|date('d/m/Y') }} — {{ f.dataFim|date('d/m/Y') }}</td>
+                            <td>{{ f.dias }}</td>
+                            <td>
+                                <span class="rh-portal-pill rh-portal-pill--{{ f.status|lower }}">
+                                    {{ ferias_status_labels[f.status]|default(f.status) }}
+                                </span>
+                                {% if f.status == 'REJEITADA' and f.motivoRejeicao %}
+                                    <br><small class="text-muted">{{ f.motivoRejeicao }}</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

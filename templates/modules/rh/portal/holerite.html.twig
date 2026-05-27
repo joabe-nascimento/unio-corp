@@ -1,0 +1,46 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Holerite {{ holerite.competencia.referencia }}{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Holerite — ' ~ holerite.competencia.referencia %}
+
+{% block hub_content %}
+{% include 'components/rh/portal_nav.html.twig' with { active: 'holerites' } %}
+
+<div class="huplex-card p-4 mb-3">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div>
+            <h2 class="h5 mb-1">Holerite {{ holerite.competencia.referencia }}</h2>
+            <p class="text-muted mb-0">{{ funcionario.nome }} · {{ funcionario.cargo|default('—') }}</p>
+        </div>
+        <a href="{{ path('app_rh_portal_holerites') }}" class="btn-huplex-ghost btn-sm">← Voltar</a>
+    </div>
+
+    <div class="rh-portal-holerite-grid">
+        <div class="rh-portal-holerite-row">
+            <span>Salário bruto</span>
+            <strong>R$ {{ holerite.salarioBruto|number_format(2, ',', '.') }}</strong>
+        </div>
+        <div class="rh-portal-holerite-row rh-portal-holerite-row--deduct">
+            <span>INSS</span>
+            <strong>− R$ {{ holerite.inss|number_format(2, ',', '.') }}</strong>
+        </div>
+        <div class="rh-portal-holerite-row rh-portal-holerite-row--deduct">
+            <span>IRRF</span>
+            <strong>− R$ {{ holerite.irrf|number_format(2, ',', '.') }}</strong>
+        </div>
+        <div class="rh-portal-holerite-row rh-portal-holerite-row--info">
+            <span>FGTS (referência)</span>
+            <strong>R$ {{ holerite.fgts|number_format(2, ',', '.') }}</strong>
+        </div>
+        <div class="rh-portal-holerite-row rh-portal-holerite-row--total">
+            <span>Valor líquido</span>
+            <strong>R$ {{ holerite.liquido|number_format(2, ',', '.') }}</strong>
+        </div>
+    </div>
+
+    <p class="text-muted small mt-3 mb-0">
+        Gerado em {{ holerite.geradoEm|date('d/m/Y H:i') }}.
+        {% if holerite.pdfPath %} <a href="{{ asset(holerite.pdfPath) }}" target="_blank" rel="noopener">Baixar PDF</a>{% endif %}
+    </p>
+</div>
+{% endblock %}

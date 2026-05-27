@@ -38,6 +38,18 @@ class RhFeriasRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /** @return list<RhFerias> */
+    public function findByFuncionario(Funcionario $funcionario, int $limit = 24): array
+    {
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.funcionario = :funcionario')
+            ->setParameter('funcionario', $funcionario)
+            ->orderBy('f.criadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countByStatus(Empresa $empresa, string $status): int
     {
         return (int) $this->createQueryBuilder('f')
