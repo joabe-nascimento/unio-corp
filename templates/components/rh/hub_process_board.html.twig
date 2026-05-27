@@ -1,0 +1,40 @@
+{# rh/hub_process_board — processos em andamento com progresso #}
+<section class="rh-hub-board huplex-card" aria-label="Processos em andamento">
+    <header class="rh-hub-section-head rh-hub-section-head--row">
+        <div>
+            <h3 class="rh-hub-section-title">Processos em andamento</h3>
+            <p class="rh-hub-section-sub">Admissões e demissões com checklist</p>
+        </div>
+        <span class="rh-hub-focus-badge">{{ items|length }}</span>
+    </header>
+    {% if items|length > 0 %}
+    <div class="rh-hub-board-grid">
+        {% for item in items %}
+        <a href="{{ path(item.route, item.route_params) }}" class="rh-hub-board-card rh-hub-board-card--{{ item.tone }}">
+            <div class="rh-hub-board-card-head">
+                <span class="rh-hub-board-type">{{ item.type == 'onboarding' ? 'Admissão' : 'Demissão' }}</span>
+                <span class="rh-hub-board-progress">{{ item.progress }}%</span>
+            </div>
+            <h4 class="rh-hub-board-title">{{ item.title }}</h4>
+            <p class="rh-hub-board-sub">{{ item.subtitle }}</p>
+            <div class="rh-hub-board-bar" role="progressbar" aria-valuenow="{{ item.progress }}" aria-valuemin="0" aria-valuemax="100">
+                <span class="rh-hub-board-bar-fill" style="width: {{ item.progress }}%;"></span>
+            </div>
+            <p class="rh-hub-board-meta">{{ item.meta }}</p>
+            {% if item.pending_items|length > 0 %}
+            <ul class="rh-hub-board-pending">
+                {% for label in item.pending_items %}
+                <li><i class="fas fa-circle" style="font-size:6px;vertical-align:middle;"></i> {{ label }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="rh-hub-focus-clear">
+        <i class="fas fa-clipboard-check"></i>
+        <p>Nenhum processo de admissão ou demissão em aberto.</p>
+    </div>
+    {% endif %}
+</section>

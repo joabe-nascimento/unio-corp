@@ -1,0 +1,173 @@
+{# Painel lateral: documentos, ações extras (onboarding/offboarding) #}
+
+{% set can_manage = grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
+
+{% set is_open = process.status not in ['CONCLUIDO', 'CANCELADO'] %}
+
+{% set upload_id = 'rh_doc_upload_' ~ process.id %}
+
+
+
+{% if documentos is defined and documentos|length > 0 or is_open %}
+
+<div class="rh-process-show-section huplex-card">
+
+    <h3 class="huplex-detail-section-title">Documentos</h3>
+
+    {% if documentos|length > 0 %}
+
+    <ul class="rh-doc-list">
+
+        {% for doc in documentos %}
+
+        {% set ext = doc.nomeOriginal|split('.')|last|lower %}
+
+        {% set doc_icon = ext == 'pdf' ? 'fa-file-pdf' : (ext in ['jpg','jpeg','png','webp'] ? 'fa-file-image' : (ext in ['doc','docx'] ? 'fa-file-word' : 'fa-file-lines')) %}
+
+        <li class="rh-doc-item">
+
+            <span class="rh-doc-item-icon" aria-hidden="true"><i class="fas {{ doc_icon }}"></i></span>
+
+            <span class="rh-doc-item-body">
+
+                <a href="{{ asset(doc.caminho) }}" target="_blank" rel="noopener" class="rh-doc-item-name" title="{{ doc.nomeOriginal }}">
+
+                    {{ doc.nomeOriginal }}
+
+                </a>
+
+                <span class="rh-doc-item-meta">{{ doc.tamanhoLabel }}</span>
+
+            </span>
+
+        </li>
+
+        {% endfor %}
+
+    </ul>
+
+    {% else %}
+
+    <p class="rh-doc-empty text-muted small mb-3">Nenhum documento anexado ainda.</p>
+
+    {% endif %}
+
+    {% if is_open and can_manage %}
+
+    <form method="post" enctype="multipart/form-data" class="rh-doc-upload-form mb-0">
+
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_process_action') }}">
+
+        <input type="hidden" name="action" value="upload_doc">
+
+        {% include 'components/huplex/file_upload.html.twig' with {
+
+            id: upload_id,
+
+            name: 'documento',
+
+            accept: '.pdf,.jpg,.jpeg,.png,.doc,.docx,application/pdf,image/jpeg,image/png',
+
+            hint: 'PDF, JPG, PNG ou DOC — máx. 10 MB',
+
+            required: true,
+
+            compact: true
+
+        } %}
+
+        <button type="submit" class="btn-huplex btn-sm rh-doc-upload-submit">
+
+            <i class="fas fa-paperclip mr-1" aria-hidden="true"></i> Anexar documento
+
+        </button>
+
+    </form>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+
+{% if variant|default('onboarding') == 'onboarding' and is_open and can_manage %}
+
+<div class="rh-process-show-section huplex-card">
+
+    <h3 class="huplex-detail-section-title">Conta na plataforma</h3>
+
+    <form method="post" class="huplex-form">
+
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_process_action') }}">
+
+        <input type="hidden" name="action" value="provision_user">
+
+        {% include 'components/huplex_form_field.html.twig' with { id: 'senha', name: 'senha', label: 'Senha inicial', type: 'password', required: true } %}
+
+        {% include 'components/huplex_form_field.html.twig' with { id: 'perfil', name: 'perfil', label: 'Perfil', type: 'select', value: 'MEMBRO', options: [
+
+            { value: 'MEMBRO', label: 'Membro' },
+
+            { value: 'SUPERVISOR_EQUIPE', label: 'Supervisor equipe' },
+
+            { value: 'GESTOR_EQUIPE', label: 'Gestor equipe' },
+
+        ]} %}
+
+        <button type="submit" class="btn-huplex btn-sm mt-2">Criar usuário</button>
+
+    </form>
+
+</div>
+
+<div class="rh-process-show-section huplex-card rh-process-show-actions">
+
+    <h3 class="huplex-detail-section-title">Ações</h3>
+
+    <form method="post" class="mb-0">
+
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_process_action') }}">
+
+        <input type="hidden" name="action" value="cancel">
+
+        <button type="submit" class="btn-huplex-ghost btn-sm w-100" onclick="return confirm('Cancelar este onboarding?')">
+
+            <i class="fas fa-ban mr-1" aria-hidden="true"></i> Cancelar processo
+
+        </button>
+
+    </form>
+
+</div>
+
+{% endif %}
+
+
+
+{% if variant|default('onboarding') == 'offboarding' and is_open and can_manage %}
+
+<div class="rh-process-show-section huplex-card rh-process-show-actions">
+
+    <h3 class="huplex-detail-section-title">Ações</h3>
+
+    <form method="post" class="mb-0">
+
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_process_action') }}">
+
+        <input type="hidden" name="action" value="cancel">
+
+        <button type="submit" class="btn-huplex-ghost btn-sm w-100" onclick="return confirm('Cancelar offboarding?')">
+
+            <i class="fas fa-ban mr-1" aria-hidden="true"></i> Cancelar processo
+
+        </button>
+
+    </form>
+
+</div>
+
+{% endif %}
+
+

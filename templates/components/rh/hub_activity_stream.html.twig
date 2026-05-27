@@ -1,0 +1,25 @@
+{# rh/hub_activity_stream — feed unificado de atividade #}
+<section class="rh-hub-stream huplex-card" aria-label="Atividade recente">
+    <header class="rh-hub-section-head">
+        <h3 class="rh-hub-section-title">Atividade recente</h3>
+        <p class="rh-hub-section-sub">Últimas movimentações de pessoas</p>
+    </header>
+    {% if items|length > 0 %}
+    <ul class="rh-hub-stream-list">
+        {% for item in items %}
+        <li>
+            <a href="{{ path(item.route, item.route_params) }}" class="rh-hub-stream-item">
+                <span class="rh-hub-stream-icon rh-hub-stream-icon--{{ item.tone }}"><i class="fas {{ item.icon }}"></i></span>
+                <span class="rh-hub-stream-body">
+                    <span class="rh-hub-stream-title">{{ item.title }}</span>
+                    <span class="rh-hub-stream-sub">{{ item.subtitle }}</span>
+                </span>
+                <span class="rh-hub-stream-time">{{ item.time_label }}</span>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="rh-hub-empty text-muted small mb-0">Sem atividade registrada recentemente.</p>
+    {% endif %}
+</section>

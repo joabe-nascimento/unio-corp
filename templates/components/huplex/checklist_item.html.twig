@@ -1,0 +1,47 @@
+{#
+  checklist_item — item de checklist interativo ou somente leitura
+
+  Props:
+    id (string)          identificador do item (toggle)
+    label (string)
+    done (bool)
+    readonly (bool, opt) processo concluído
+    disabled (bool, opt)
+#}
+{% set _readonly = readonly|default(false) %}
+{% set _done = done|default(false) %}
+{% set _disabled = disabled|default(false) %}
+
+<li class="huplex-checklist-item{% if _done %} is-done{% endif %}{% if _disabled %} is-disabled{% endif %}" role="listitem">
+    {% if _readonly %}
+        <div class="huplex-checklist-item-inner huplex-checklist-item-inner--readonly">
+            <span class="huplex-checklist-box" aria-hidden="true">
+                <i class="fas {{ _done ? 'fa-check' : 'fa-minus' }}"></i>
+            </span>
+            <span class="huplex-checklist-text{% if not _done %} is-pending{% endif %}">{{ label }}</span>
+        </div>
+    {% else %}
+        <form method="post" class="huplex-checklist-item-form">
+                {% if csrf_token_id|default(false) %}
+                <input type="hidden" name="_token" value="{{ csrf_token(csrf_token_id) }}">
+                {% endif %}
+                <input type="hidden" name="action" value="toggle">
+            <input type="hidden" name="item_id" value="{{ id }}">
+            <input type="hidden" name="done" value="0">
+            <label class="huplex-checklist-item-inner">
+                <input type="checkbox"
+                       class="huplex-checklist-input"
+                       name="done"
+                       value="1"
+                       {{ _done ? 'checked' : '' }}
+                       {% if _disabled %}disabled{% endif %}
+                       onchange="this.form.submit()"
+                       aria-label="{{ label }}">
+                <span class="huplex-checklist-box" aria-hidden="true">
+                    <i class="fas fa-check"></i>
+                </span>
+                <span class="huplex-checklist-text">{{ label }}</span>
+            </label>
+        </form>
+    {% endif %}
+</li>

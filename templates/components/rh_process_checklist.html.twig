@@ -1,29 +1,10 @@
 {#
-  rh_process_checklist — checklist de onboarding/offboarding
-  Props: process (RhOnboardingProcess|RhOffboardingProcess)
+  rh_process_checklist — checklist de onboarding/offboarding (usa huplex/checklist)
+  Props: process
 #}
-<ul class="list-unstyled mb-0 rh-process-checklist">
-    {% for item in process.checklist %}
-    <li class="d-flex align-items-start mb-3">
-        {% if process.status == 'CONCLUIDO' %}
-            <span class="mr-2 mt-1"><i class="fas {{ item.done ? 'fa-check-circle' : 'fa-circle' }}"></i></span>
-            <span class="{{ item.done ? 'rh-check-done' : 'rh-check-pending' }}">{{ item.label }}</span>
-        {% else %}
-            <form method="post" class="d-flex align-items-start flex-grow-1 mb-0">
-                <input type="hidden" name="action" value="toggle">
-                <input type="hidden" name="item_id" value="{{ item.id }}">
-                <input type="hidden" name="done" value="0">
-                <label class="d-flex align-items-start mb-0">
-                    <input type="checkbox"
-                           class="mr-2 mt-1"
-                           name="done"
-                           value="1"
-                           {{ item.done ? 'checked' : '' }}
-                           onchange="this.form.submit()">
-                    <span>{{ item.label }}</span>
-                </label>
-            </form>
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
+{% include 'components/huplex/checklist.html.twig' with {
+    items: process.checklist,
+    readonly: process.status in ['CONCLUIDO', 'CANCELADO'],
+    disabled: false,
+    csrf_token_id: process.status not in ['CONCLUIDO', 'CANCELADO'] ? 'rh_process_action' : null
+} %}

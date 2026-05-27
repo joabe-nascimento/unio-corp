@@ -1,0 +1,28 @@
+{# Barra de ações rápidas do hub RH #}
+<div class="rh-hub-action-rail">
+    {% if grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') %}
+    <a href="{{ path('app_rh_funcionario_novo') }}" class="btn-huplex btn-sm rh-hub-action-rail-primary">
+        <i class="fas fa-user-plus mr-1" aria-hidden="true"></i> Novo funcionário
+    </a>
+    {% endif %}
+    <div class="rh-hub-action-rail-group">
+        {% if grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
+        <a href="{{ path('app_rh_admissoes_nova') }}" class="rh-hub-action-pill">
+            <i class="fas fa-clipboard-check"></i> Admissão
+        </a>
+        <a href="{{ path('app_rh_demissoes_nova') }}" class="rh-hub-action-pill">
+            <i class="fas fa-door-open"></i> Demissão
+        </a>
+        {% endif %}
+        {% if grant_at_least('product_rh', 'ferias', 'GESTOR_EQUIPE') %}
+        <a href="{{ path('app_rh_ferias_nova') }}" class="rh-hub-action-pill">
+            <i class="fas fa-umbrella-beach"></i> Férias
+        </a>
+        {% endif %}
+        {% if grant_at_least('product_rh', 'folha', 'GESTOR') %}
+        <a href="{{ path('app_rh_folha') }}" class="rh-hub-action-pill">
+            <i class="fas fa-file-invoice-dollar"></i> Folha
+        </a>
+        {% endif %}
+    </div>
+</div>

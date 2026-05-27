@@ -1,0 +1,27 @@
+{# rh/hub_pulse_panel — pulse + fatores que compõem o score #}
+<section class="rh-hub-pulse-panel huplex-card" aria-label="RH Pulse">
+    <header class="rh-hub-section-head rh-hub-section-head--row">
+        <div>
+            <h3 class="rh-hub-section-title">RH Pulse</h3>
+            <p class="rh-hub-section-sub">Saúde operacional da equipe</p>
+        </div>
+        {% include 'components/rh/hub_pulse_widget.html.twig' with { rh_pulse: rh_pulse, variant: 'compact' } %}
+    </header>
+    <p class="rh-hub-pulse-panel-status rh-hub-pulse-label--{{ rh_pulse.tone }}">
+        <strong>{{ rh_pulse.label }}</strong> — {{ rh_pulse.hint }}
+    </p>
+    <ul class="rh-hub-pulse-factors">
+        {% for f in rh_pulse.factors %}
+        <li class="rh-hub-pulse-factor rh-hub-pulse-factor--{{ f.tone }}">
+            <span class="rh-hub-pulse-factor-icon"><i class="fas {{ f.icon }}"></i></span>
+            <span class="rh-hub-pulse-factor-text">
+                <span class="rh-hub-pulse-factor-label">{{ f.label }}</span>
+                <span class="rh-hub-pulse-factor-detail">{{ f.detail }}</span>
+            </span>
+            <span class="rh-hub-pulse-factor-impact">
+                {% if f.impact > 0 %}+{% endif %}{{ f.impact }}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+</section>

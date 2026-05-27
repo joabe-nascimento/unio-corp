@@ -8,6 +8,7 @@ use App\Entity\UserProductGrant;
 use App\Repository\EmpresaRepository;
 use App\Repository\UserProductGrantRepository;
 use App\Repository\UserRepository;
+use App\Service\OnboardingProgressService;
 use App\Service\PermissionService;
 use App\Service\PlatformConfigService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -133,7 +134,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/usuarios/novo', name: 'app_admin_usuario_novo', methods: ['POST'])]
-    public function novoUsuario(Request $request): Response
+    public function novoUsuario(Request $request, OnboardingProgressService $onboarding): Response
     {
         if (!$this->isCsrfTokenValid('admin_usuario_form', (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Token inválido.');
@@ -178,6 +179,8 @@ class AdminController extends AbstractController
         $user->setPassword($this->passwordHasher->hashPassword($user, $senha));
         $this->em->persist($user);
         $this->em->flush();
+
+        $onboarding->markStepComplete('invite_user');
 
         $this->addFlash('success', "Usu\u{00E1}rio \"{$nome}\" criado com sucesso.");
         return $this->redirectToRoute('app_admin_usuarios');

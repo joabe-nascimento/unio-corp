@@ -1,0 +1,35 @@
+{#
+  rh/hub_launcher — grade de módulos RH com contadores
+
+  Props: modules — { icon, title, subtitle, route, count, count_label, tone, manage_route?, manage_label? }
+#}
+<section class="rh-hub-launcher" aria-label="Módulos de RH">
+    <header class="rh-hub-section-head mb-2">
+        <h3 class="rh-hub-section-title">Módulos</h3>
+        <p class="rh-hub-section-sub">Acesso rápido às áreas do hub</p>
+    </header>
+    <div class="rh-hub-launcher-grid">
+        {% for mod in modules %}
+        <a href="{{ path(mod.route) }}" class="rh-hub-launcher-tile rh-hub-launcher-tile--{{ mod.tone }}">
+            <span class="rh-hub-launcher-icon" aria-hidden="true"><i class="fas {{ mod.icon }}"></i></span>
+            <span class="rh-hub-launcher-body">
+                <span class="rh-hub-launcher-title">{{ mod.title }}</span>
+                <span class="rh-hub-launcher-sub">{{ mod.subtitle }}</span>
+            </span>
+            <span class="rh-hub-launcher-stat">
+                <strong>{{ mod.count }}</strong>
+                <small>{{ mod.count_label }}</small>
+            </span>
+            {% if mod.manage_route is defined and mod.manage_route and grant_at_least(mod.grant_scope|default('product_rh'), mod.grant_product|default(''), 'GESTOR_EQUIPE') %}
+            <span class="rh-hub-launcher-action"
+                  onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{{ path(mod.manage_route) }}';"
+                  role="button"
+                  tabindex="0"
+                  title="{{ mod.manage_label|default('Novo') }}">
+                <i class="fas fa-plus"></i>
+            </span>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+</section>

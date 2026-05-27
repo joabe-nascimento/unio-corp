@@ -1,0 +1,34 @@
+{#
+  rh/hub_headcount — composição da equipe (barra segmentada + legenda)
+
+  Props: segments, headcount_total
+#}
+<section class="rh-hub-headcount huplex-card" aria-label="Composição da equipe">
+    <header class="rh-hub-section-head">
+        <h3 class="rh-hub-section-title">Composição da equipe</h3>
+        <p class="rh-hub-section-sub">{{ headcount_total }} colaboradores no cadastro</p>
+    </header>
+    {% if headcount_total > 0 %}
+    <div class="rh-hub-headcount-bar" role="img" aria-label="Distribuição por status">
+        {% for seg in segments %}
+        {% if seg.count > 0 %}
+        <span class="rh-hub-headcount-seg rh-hub-headcount-seg--{{ seg.tone }}"
+              style="flex-grow: {{ seg.count }};"
+              title="{{ seg.label }}: {{ seg.count }} ({{ seg.pct }}%)"></span>
+        {% endif %}
+        {% endfor %}
+    </div>
+    <ul class="rh-hub-headcount-legend">
+        {% for seg in segments %}
+        <li class="rh-hub-headcount-legend-item">
+            <span class="rh-hub-headcount-dot rh-hub-headcount-dot--{{ seg.tone }}"></span>
+            <span class="rh-hub-headcount-legend-label">{{ seg.label }}</span>
+            <span class="rh-hub-headcount-legend-val">{{ seg.count }}</span>
+            <span class="rh-hub-headcount-legend-pct">{{ seg.pct }}%</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="rh-hub-empty text-muted small mb-0">Nenhum funcionário cadastrado. Inicie uma admissão ou cadastro manual.</p>
+    {% endif %}
+</section>

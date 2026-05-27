@@ -6,6 +6,7 @@ use App\Repository\FuncionarioRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FuncionarioRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_FUNCIONARIO_EMPRESA_EMAIL', fields: ['empresa', 'email'])]
 class Funcionario
 {
     #[ORM\Id]
@@ -16,7 +17,7 @@ class Funcionario
     #[ORM\Column(length: 150)]
     private ?string $nome = null;
 
-    #[ORM\Column(length: 180, unique: true)]
+    #[ORM\Column(length: 180)]
     private ?string $email = null;
 
     #[ORM\Column(length: 20, nullable: true)]

@@ -3,14 +3,36 @@
 {% set page_list_title = 'Admissões (Onboarding)' %}
 
 {% block page_list_section_toolbar %}
-{% include 'components/section_toolbar.html.twig' with {
+<form method="get" action="{{ path('app_rh_admissoes') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
     btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova admissão' : '',
     btn_href: path('app_rh_admissoes_nova'),
     btn_icon: 'fa-user-plus',
-    show_search: true,
+    search_in_section: true,
     search_placeholder: 'Buscar por nome ou e-mail…',
-    search_disabled: true
+    search_name: 'q',
+    search_value: filter_q|default('')
 } %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filter_status|default(''),
+            min_width: '150px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'EM_ANDAMENTO', label: 'Em andamento' },
+                { value: 'CONCLUIDO', label: 'Concluído' },
+                { value: 'CANCELADO', label: 'Cancelado' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_rh_admissoes'),
+            has_filters: filter_q|default('') or filter_status|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
 {% endblock %}
 
 {% block page_list_content %}
@@ -18,7 +40,7 @@
     type: 'onboarding',
     processos: processos,
     empty_title: 'Nenhum processo de admissão',
-    empty_text: 'Inicie o onboarding de um novo colaborador para acompanhar documentação, TI e integração.',
+    empty_text: filter_q|default('') or filter_status|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Inicie o onboarding de um novo colaborador para acompanhar documentação, TI e integração.',
     empty_btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova admissão' : '',
     empty_btn_href: path('app_rh_admissoes_nova')
 } %}

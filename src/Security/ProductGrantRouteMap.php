@@ -16,6 +16,9 @@ final class ProductGrantRouteMap
         // RH
         'app_rh' => ['scope' => 'hub_operacoes', 'product' => 'rh'],
         'app_rh_funcionarios' => ['scope' => 'product_rh', 'product' => 'funcionarios'],
+        'app_rh_funcionario_novo' => ['scope' => 'product_rh', 'product' => 'funcionarios'],
+        'app_rh_funcionario_show' => ['scope' => 'product_rh', 'product' => 'funcionarios'],
+        'app_rh_funcionario_editar' => ['scope' => 'product_rh', 'product' => 'funcionarios'],
         'app_rh_admissoes' => ['scope' => 'product_rh', 'product' => 'admissoes'],
         'app_rh_admissoes_nova' => ['scope' => 'product_rh', 'product' => 'admissoes'],
         'app_rh_admissoes_show' => ['scope' => 'product_rh', 'product' => 'admissoes'],
@@ -23,7 +26,12 @@ final class ProductGrantRouteMap
         'app_rh_demissoes_nova' => ['scope' => 'product_rh', 'product' => 'admissoes'],
         'app_rh_demissoes_show' => ['scope' => 'product_rh', 'product' => 'admissoes'],
         'app_rh_ferias' => ['scope' => 'product_rh', 'product' => 'ferias'],
+        'app_rh_ferias_nova' => ['scope' => 'product_rh', 'product' => 'ferias'],
+        'app_rh_ferias_show' => ['scope' => 'product_rh', 'product' => 'ferias'],
         'app_rh_folha' => ['scope' => 'product_rh', 'product' => 'folha'],
+        'app_rh_folha_gerar' => ['scope' => 'product_rh', 'product' => 'folha'],
+        'app_rh_folha_show' => ['scope' => 'product_rh', 'product' => 'folha'],
+        'app_rh_folha_export' => ['scope' => 'product_rh', 'product' => 'folha'],
 
         // Pessoas
         'app_pessoas' => ['scope' => 'hub_operacoes', 'product' => 'pessoas'],

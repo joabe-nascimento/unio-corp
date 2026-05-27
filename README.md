@@ -20,7 +20,8 @@ Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Mat
 
 ## Módulos
 
-- **RH** — Funcionários, admissões, demissões, férias, folha de pagamento
+- **RH** — Funcionários, admissões, demissões, férias, folha de pagamento  
+  → Documentação completa: **[docs/RH.md](docs/RH.md)** (implementado, pendências e roadmap)
 - **Gestão de Pessoas** — Equipes, cargos, organograma, avaliação de desempenho
 - **Hub de Talentos** — Banco de talentos, vagas, trilhas de carreira, mentoria
 - **Hub de Maturidade** — Avaliação, radar por dimensão, plano de ação, histórico

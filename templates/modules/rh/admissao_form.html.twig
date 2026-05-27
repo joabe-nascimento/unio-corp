@@ -3,30 +3,32 @@
 {% set page_list_title = 'Nova admissão' %}
 
 {% block page_list_toolbar_actions %}
-{% include 'components/page_back_link.html.twig' with { href: path('app_rh_admissoes') } %}
+{% include 'components/page_back_link.html.twig' with {
+    href: path('app_rh_admissoes'),
+    label: 'Voltar às admissões'
+} %}
 {% endblock %}
 
 {% block page_list_content %}
-{% embed 'components/huplex_form_panel.html.twig' with {
-    subtitle: 'Preencha os dados do colaborador. Um checklist de onboarding será aberto em seguida.',
-    submit_label: 'Iniciar onboarding'
-} %}
-    {% block form_panel_fields %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'nome', name: 'nome', label: 'Nome completo', value: nome|default(''), required: true
-        } %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'email', name: 'email', label: 'E-mail', type: 'email', value: email|default(''), required: true
-        } %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'cargo', name: 'cargo', label: 'Cargo', value: cargo|default('')
-        } %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'data_prevista', name: 'data_prevista', label: 'Data prevista de início', type: 'date', value: data_prevista|default('')
-        } %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'observacoes', name: 'observacoes', label: 'Observações', type: 'textarea', value: observacoes|default('')
-        } %}
-    {% endblock %}
-{% endembed %}
+{% include 'components/rh/admissao_form_panel.html.twig' with {
+    empresa: empresa,
+    checklist_preview: checklist_preview,
+    nome: nome|default(''),
+    email: email|default(''),
+    cargo: cargo|default(''),
+    data_prevista: data_prevista|default(''),
+    observacoes: observacoes|default('')
+} only %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    var dateInput = document.getElementById('data_prevista');
+    if (dateInput && !dateInput.min) {
+        dateInput.min = '{{ "now"|date("Y-m-d") }}';
+    }
+})();
+</script>
 {% endblock %}

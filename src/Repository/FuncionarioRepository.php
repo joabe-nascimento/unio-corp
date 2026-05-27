@@ -26,4 +26,130 @@ class FuncionarioRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function existsByEmail(Empresa $empresa, string $email, ?int $excludeId = null): bool
+    {
+        $normalized = mb_strtolower(trim($email));
+        if ($normalized === '') {
+            return false;
+        }
+
+        $qb = $this->createQueryBuilder('f')
+            ->select('COUNT(f.id)')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('LOWER(f.email) = :email')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('email', $normalized);
+
+        if ($excludeId !== null) {
+            $qb->andWhere('f.id != :excludeId')
+                ->setParameter('excludeId', $excludeId);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /** @return list<Funcionario> */
+    public function findForEmpresa(Empresa $empresa, ?string $status = null, ?string $q = null): array
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->andWhere('f.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('f.nome', 'ASC');
+
+        if ($status !== null && $status !== '') {
+            $qb->andWhere('f.status = :status')->setParameter('status', $status);
+        }
+
+        if ($q !== null && trim($q) !== '') {
+            $qb->andWhere('f.nome LIKE :q OR f.email LIKE :q OR f.cargo LIKE :q')
+                ->setParameter('q', '%' . trim($q) . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function countByEmpresaAndStatus(Empresa $empresa, string $status): int
+    {
+        return (int) $this->createQueryBuilder('f')
+            ->select('COUNT(f.id)')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.status = :status')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return array<string, int> status => quantidade
+     */
+    public function countByStatusGrouped(Empresa $empresa): array
+    {
+        $defaults = ['ATIVO' => 0, 'INATIVO' => 0, 'FERIAS' => 0, 'AFASTADO' => 0];
+        $rows = $this->createQueryBuilder('f')
+            ->select('f.status AS status', 'COUNT(f.id) AS cnt')
+            ->andWhere('f.empresa = :empresa')
+            ->groupBy('f.status')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getArrayResult();
+
+        foreach ($rows as $row) {
+            $status = (string) ($row['status'] ?? '');
+            if ($status !== '') {
+                $defaults[$status] = (int) ($row['cnt'] ?? 0);
+            }
+        }
+
+        return $defaults;
+    }
+
+    /** @return list<Funcionario> */
+    public function findRecentByEmpresa(Empresa $empresa, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('f.criadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countActiveWithoutSalary(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('f')
+            ->select('COUNT(f.id)')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.status = :status')
+            ->andWhere('f.salario IS NULL OR f.salario <= 0')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('status', 'ATIVO')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countWithPlatformUser(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('f')
+            ->select('COUNT(f.id)')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.user IS NOT NULL')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countAdmittedSince(Empresa $empresa, \DateTimeImmutable $since): int
+    {
+        return (int) $this->createQueryBuilder('f')
+            ->select('COUNT(f.id)')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.dataAdmissao >= :since')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

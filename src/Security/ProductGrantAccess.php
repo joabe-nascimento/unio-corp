@@ -28,8 +28,12 @@ final class ProductGrantAccess
         // Pessoas
         'app_pessoas_membro_novo' => ['scope' => 'product_pessoas', 'product' => 'membros', 'min' => 'GESTOR_EQUIPE'],
         'app_pessoas_equipe_nova' => ['scope' => 'product_pessoas', 'product' => 'equipes', 'min' => 'GESTOR_EQUIPE'],
+        'app_rh_funcionario_novo' => ['scope' => 'product_rh', 'product' => 'funcionarios', 'min' => 'GESTOR_EQUIPE'],
+        'app_rh_funcionario_editar' => ['scope' => 'product_rh', 'product' => 'funcionarios', 'min' => 'GESTOR_EQUIPE'],
         'app_rh_admissoes_nova' => ['scope' => 'product_rh', 'product' => 'admissoes', 'min' => 'GESTOR_EQUIPE'],
         'app_rh_demissoes_nova' => ['scope' => 'product_rh', 'product' => 'admissoes', 'min' => 'GESTOR_EQUIPE'],
+        'app_rh_ferias_nova' => ['scope' => 'product_rh', 'product' => 'ferias', 'min' => 'GESTOR_EQUIPE'],
+        'app_rh_folha_gerar' => ['scope' => 'product_rh', 'product' => 'folha', 'min' => 'GESTOR'],
         // Engenharia / Publicidade — idem
     ];
 

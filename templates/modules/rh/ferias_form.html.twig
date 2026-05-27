@@ -1,0 +1,23 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Nova solicitação de férias{% endblock %}
+{% set page_list_title = 'Nova solicitação de férias' %}
+
+{% block page_list_content %}
+<div class="huplex-card" style="max-width:640px;margin:0 auto;padding:24px;">
+    <form method="post" class="huplex-form">
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_ferias_form') }}">
+        {% set func_options = [{ value: '', label: 'Selecione…' }] %}
+        {% for f in funcionarios %}
+            {% set func_options = func_options|merge([{ value: f.id, label: f.nome }]) %}
+        {% endfor %}
+        {% include 'components/huplex_form_field.html.twig' with { id: 'funcionario_id', name: 'funcionario_id', label: 'Colaborador', type: 'select', required: true, options: func_options } %}
+        {% include 'components/huplex_form_field.html.twig' with { id: 'data_inicio', name: 'data_inicio', label: 'Início', type: 'date', required: true } %}
+        {% include 'components/huplex_form_field.html.twig' with { id: 'data_fim', name: 'data_fim', label: 'Fim', type: 'date', required: true } %}
+        {% include 'components/huplex_form_field.html.twig' with { id: 'observacoes', name: 'observacoes', label: 'Observações', type: 'textarea', rows: 3 } %}
+        <div class="huplex-form-actions mt-3">
+            <a href="{{ path('app_rh_ferias') }}" class="btn-huplex-ghost">Cancelar</a>
+            <button type="submit" class="btn-huplex">Solicitar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

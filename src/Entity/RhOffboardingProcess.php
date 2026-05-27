@@ -118,13 +118,22 @@ class RhOffboardingProcess
         };
     }
 
+    public function checklistDoneCount(): int
+    {
+        return count(array_filter($this->checklist, static fn (array $i) => !empty($i['done'])));
+    }
+
     public function checklistProgress(): int
     {
         if ($this->checklist === []) {
             return 0;
         }
-        $done = count(array_filter($this->checklist, static fn (array $i) => !empty($i['done'])));
 
-        return (int) round(($done / count($this->checklist)) * 100);
+        return (int) round(($this->checklistDoneCount() / count($this->checklist)) * 100);
+    }
+
+    public function isChecklistComplete(): bool
+    {
+        return $this->checklist !== [] && $this->checklistDoneCount() === \count($this->checklist);
     }
 }

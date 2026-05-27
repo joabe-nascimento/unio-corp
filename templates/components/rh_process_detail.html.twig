@@ -1,37 +1,108 @@
 {#
-  rh_process_detail — layout de detalhe (checklist + dados)
+  rh_process_detail — detalhe de onboarding/offboarding (checklist + ficha)
 
   Props:
-    process, checklist_title, complete_label, confirm_message,
-    detail_items (array for detail_fields), hint (string)
+    process, variant (onboarding|offboarding), checklist_title,
+    complete_label, confirm_message, detail_sections (array of {title, items}),
+    hint (string), profile { name, subtitle, badge? }
 #}
-<div class="row rh-process-detail">
-    <div class="col-lg-7 mb-3">
-        <div class="huplex-card">
-            <div class="section-title mb-3">{{ checklist_title }}</div>
+{% set variant = variant|default('onboarding') %}
+{% set progress = process.checklistProgress %}
+{% set done_count = process.checklistDoneCount %}
+{% set total_count = process.checklist|length %}
+{% set is_complete = process.status == 'CONCLUIDO' %}
+
+<div class="rh-process-show rh-process-show--{{ variant }}">
+    <div class="rh-process-show-layout">
+        <section class="rh-process-show-main huplex-card" aria-labelledby="rh-checklist-heading">
+            <header class="rh-process-show-checklist-head">
+                <div class="rh-process-show-checklist-title-wrap">
+                    <h2 id="rh-checklist-heading" class="rh-process-show-checklist-title">{{ checklist_title }}</h2>
+                    <p class="rh-process-show-checklist-meta">
+                        {% if is_complete %}
+                            Processo concluído
+                        {% else %}
+                            {{ done_count }} de {{ total_count }} itens concluídos
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="rh-process-show-progress-wrap" role="progressbar"
+                     aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"
+                     aria-label="Progresso do checklist">
+                    <span class="rh-process-show-progress-pct">{{ progress }}%</span>
+                    <div class="rh-process-show-progress-bar">
+                        <div class="rh-process-show-progress-fill" style="width: {{ progress }}%"></div>
+                    </div>
+                </div>
+            </header>
+
             {% include 'components/rh_process_checklist.html.twig' with { process: process } %}
-            {% if process.status != 'CONCLUIDO' and grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
-                <hr class="huplex-divider">
+
+            {% if not is_complete and grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
+            <footer class="rh-process-show-checklist-foot">
                 <form method="post" class="rh-process-complete-form" data-confirm="{{ confirm_message }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('rh_process_action') }}">
                     <input type="hidden" name="action" value="complete">
                     <button type="submit"
-                            class="btn-huplex"
-                            {% if process.checklistProgress < 100 %}disabled title="Marque todos os itens do checklist"{% endif %}>
+                            class="btn-huplex rh-process-show-complete-btn"
+                            {% if progress < 100 %}disabled{% endif %}>
+                        <i class="fas fa-flag-checkered mr-2" aria-hidden="true"></i>
                         {{ complete_label }}
                     </button>
+                    {% if progress < 100 %}
+                    <p class="rh-process-show-complete-hint">
+                        Marque todos os itens acima para habilitar a conclusão.
+                    </p>
+                    {% endif %}
                 </form>
+            </footer>
             {% endif %}
-        </div>
-    </div>
-    <div class="col-lg-5 mb-3">
-        <div class="huplex-card">
-            <div class="section-title mb-3">Dados</div>
-            {% include 'components/detail_fields.html.twig' with { items: detail_items } %}
-        </div>
-        {% if hint is defined and hint %}
-            <p class="rh-process-hint">
-                <i class="fas fa-map-marker-alt"></i> {{ hint|raw }}
-            </p>
-        {% endif %}
+        </section>
+
+        <aside class="rh-process-show-aside">
+            {% if profile is defined and profile %}
+            <div class="rh-process-show-profile huplex-card">
+                <div class="rh-process-show-avatar" aria-hidden="true">
+                    {{ profile.name|slice(0, 1)|upper }}
+                </div>
+                <div class="rh-process-show-profile-body">
+                    <p class="rh-process-show-profile-name">{{ profile.name }}</p>
+                    {% if profile.subtitle is defined and profile.subtitle %}
+                    <p class="rh-process-show-profile-sub">{{ profile.subtitle }}</p>
+                    {% endif %}
+                    {% if profile.badge is defined and profile.badge %}
+                    <span class="status-badge status-badge--{{ profile.badge_tone|default('info') }}">{{ profile.badge }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% for section in detail_sections|default([]) %}
+            <div class="rh-process-show-section huplex-card">
+                {% include 'components/huplex/detail_field_section.html.twig' with {
+                    title: section.title,
+                    items: section.items
+                } only %}
+            </div>
+            {% endfor %}
+
+            {% if hint is defined and hint %}
+            <div class="rh-process-show-hint huplex-card">
+                <p class="rh-process-show-hint-label">
+                    <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    Como funciona
+                </p>
+                <p class="rh-process-show-hint-text">{{ hint|raw }}</p>
+            </div>
+            {% endif %}
+
+            {% if show_process_extras|default(true) %}
+                {% include 'components/rh/process_extras_panel.html.twig' with {
+                    process: process,
+                    documentos: documentos|default([]),
+                    variant: variant
+                } %}
+            {% endif %}
+        </aside>
     </div>
 </div>

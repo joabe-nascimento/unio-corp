@@ -3,52 +3,50 @@
 {% set page_list_title = 'Nova demissão' %}
 
 {% block page_list_toolbar_actions %}
-{% include 'components/page_back_link.html.twig' with { href: path('app_rh_demissoes') } %}
+{% include 'components/page_back_link.html.twig' with {
+    href: path('app_rh_demissoes'),
+    label: 'Voltar às demissões'
+} %}
 {% endblock %}
 
 {% block page_list_content %}
 {% if funcionarios is empty %}
-<div class="huplex-card huplex-form-panel" style="max-width: 640px;">
-    {% include 'components/empty_state.html.twig' with {
-        icon: 'fa-user-tie',
-        title: 'Nenhum funcionário ativo',
-        text: 'Cadastre funcionários ativos antes de iniciar um offboarding.',
-        btn_label: 'Ver funcionários',
-        btn_href: path('app_rh_funcionarios')
-    } %}
+<div class="rh-admissao-page">
+    <div class="huplex-card rh-offboard-empty">
+        {% include 'components/empty_state.html.twig' with {
+            icon: all_active_blocked|default(false) ? 'fa-hourglass-half' : 'fa-user-tie',
+            title: all_active_blocked|default(false) ? 'Offboarding em andamento' : 'Nenhum funcionário ativo',
+            text: all_active_blocked|default(false)
+                ? 'Todos os funcionários ativos já possuem um processo de offboarding aberto. Conclua ou aguarde a finalização antes de abrir outro.'
+                : 'Cadastre funcionários ativos ou conclua admissões antes de iniciar um offboarding.',
+            btn_label: all_active_blocked|default(false) ? 'Ver demissões' : 'Ver funcionários',
+            btn_href: all_active_blocked|default(false) ? path('app_rh_demissoes') : path('app_rh_funcionarios')
+        } %}
+    </div>
 </div>
 {% else %}
-{% set funcionario_options = [{ value: '', label: 'Selecione…' }] %}
-{% for f in funcionarios %}
-    {% set funcionario_options = funcionario_options|merge([{
-        value: f.id,
-        label: f.nome ~ (f.cargo ? ' — ' ~ f.cargo : '')
-    }]) %}
-{% endfor %}
-{% embed 'components/huplex_form_panel.html.twig' with {
-    subtitle: 'Selecione o funcionário e a data prevista de desligamento. O checklist de offboarding será aberto em seguida.',
-    submit_label: 'Iniciar offboarding'
-} %}
-    {% block form_panel_fields %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'funcionario_id',
-            name: 'funcionario_id',
-            label: 'Funcionário',
-            type: 'select',
-            required: true,
-            options: funcionario_options
-        } %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'data_prevista', name: 'data_prevista', label: 'Data prevista de desligamento', type: 'date'
-        } %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'motivo', name: 'motivo', label: 'Motivo',
-            placeholder: 'Ex.: pedido de demissão, término de contrato'
-        } %}
-        {% include 'components/huplex_form_field.html.twig' with {
-            id: 'observacoes', name: 'observacoes', label: 'Observações', type: 'textarea'
-        } %}
-    {% endblock %}
-{% endembed %}
+{% include 'components/rh/demissao_form_panel.html.twig' with {
+    empresa: empresa,
+    funcionarios: funcionarios,
+    checklist_preview: checklist_preview,
+    funcionario_id: funcionario_id|default(''),
+    data_prevista: data_prevista|default(''),
+    motivo: motivo|default(''),
+    observacoes: observacoes|default('')
+} only %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% if funcionarios is not empty %}
+<script>
+(function () {
+    var dateInput = document.getElementById('data_prevista');
+    if (dateInput && !dateInput.min) {
+        dateInput.min = '{{ "now"|date("Y-m-d") }}';
+    }
+})();
+</script>
 {% endif %}
 {% endblock %}

@@ -3,7 +3,10 @@
 {% set page_list_title = process.funcionario.nome %}
 
 {% block page_list_toolbar_actions %}
-{% include 'components/page_back_link.html.twig' with { href: path('app_rh_demissoes') } %}
+{% include 'components/page_back_link.html.twig' with {
+    href: path('app_rh_demissoes'),
+    label: 'Voltar às demissões'
+} %}
 {% endblock %}
 
 {% block page_list_kpis %}
@@ -17,25 +20,50 @@
 {% endblock %}
 
 {% block page_list_content %}
-{% set detail_items = [
-    { label: 'E-mail', value: process.funcionario.email|default('—') },
-    { label: 'Cargo', value: process.funcionario.cargo|default('—') },
-    { label: 'Motivo', value: process.motivo|default('—') },
+{% set colaborador_items = [
+    { label: 'E-mail', value: process.funcionario.email|default('—'), icon: 'fa-envelope' },
+    { label: 'Cargo', value: process.funcionario.cargo|default('—'), icon: 'fa-briefcase' },
+    { label: 'Motivo', value: process.motivo|default('—'), icon: 'fa-file-lines' },
 ] %}
 {% if process.observacoes %}
-    {% set detail_items = detail_items|merge([{ label: 'Observações', value: process.observacoes }]) %}
+    {% set colaborador_items = colaborador_items|merge([{
+        label: 'Observações',
+        value: process.observacoes,
+        icon: 'fa-note-sticky',
+        multiline: true
+    }]) %}
 {% endif %}
+
+{% set processo_items = [
+    { label: 'Desligamento previsto', value: process.dataPrevista ? process.dataPrevista|date('d/m/Y') : '—', icon: 'fa-calendar' },
+    { label: 'Aberto em', value: process.criadoEm|date('d/m/Y'), icon: 'fa-clock' },
+] %}
 {% if process.dataConclusao %}
-    {% set detail_items = detail_items|merge([{ label: 'Concluído em', value: process.dataConclusao|date('d/m/Y') }]) %}
+    {% set processo_items = processo_items|merge([{
+        label: 'Concluído em',
+        value: process.dataConclusao|date('d/m/Y'),
+        icon: 'fa-flag-checkered'
+    }]) %}
 {% endif %}
 
 {% include 'components/rh_process_detail.html.twig' with {
     process: process,
+    variant: 'offboarding',
     checklist_title: 'Checklist de offboarding',
     complete_label: 'Concluir offboarding',
     confirm_message: 'Concluir offboarding? O funcionário será inativado e o usuário da plataforma desativado, se existir.',
-    detail_items: detail_items,
-    hint: 'Hub <strong>Operações</strong> → RH → Demissões. A conclusão inativa o funcionário e desativa o login na plataforma.'
+    profile: {
+        name: process.funcionario.nome,
+        subtitle: process.funcionario.email|default(''),
+        badge: process.statusLabel,
+        badge_tone: process.status == 'CONCLUIDO' ? 'success' : 'warning'
+    },
+    detail_sections: [
+        { title: 'Colaborador', items: colaborador_items },
+        { title: 'Processo', items: processo_items }
+    ],
+    hint: 'Hub <strong>Operações</strong> → RH → Demissões. A conclusão inativa o funcionário e revoga o acesso na plataforma, quando houver login vinculado.',
+    documentos: documentos|default([])
 } %}
 {% endblock %}
 

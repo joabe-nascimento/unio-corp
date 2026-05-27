@@ -1,0 +1,63 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Folha {{ competencia.referenciaLabel }}{% endblock %}
+{% set page_list_title = 'Folha — ' ~ competencia.referenciaLabel %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: 'R$ ' ~ competencia.totalProventos|number_format(2, ',', '.'), label: 'Proventos', sub: 'Total' },
+        { value: 'R$ ' ~ competencia.totalDescontos|number_format(2, ',', '.'), label: 'Descontos', sub: 'Total' },
+        { value: 'R$ ' ~ competencia.totalLiquido|number_format(2, ',', '.'), label: 'Líquido', sub: competencia.status },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="huplex-card mb-3">
+    <table class="table table-huplex mb-0">
+        <thead><tr><th>Funcionário</th><th>Proventos</th><th>Descontos</th><th>Líquido</th></tr></thead>
+        <tbody>
+        {% for row in resumo %}
+        <tr>
+            <td>{{ row.funcionario.nome }}</td>
+            <td>R$ {{ row.proventos|number_format(2, ',', '.') }}</td>
+            <td>R$ {{ row.descontos|number_format(2, ',', '.') }}</td>
+            <td>R$ {{ row.liquido|number_format(2, ',', '.') }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% if not competencia.isFechada and grant_at_least('product_rh', 'folha', 'GESTOR') %}
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="huplex-card p-3">
+            <h3 class="h6">Novo lançamento</h3>
+            <form method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('rh_folha_action') }}">
+                <input type="hidden" name="action" value="lancamento">
+                {% set fo = [{ value: '', label: '—' }] %}
+                {% for f in funcionarios %}{% set fo = fo|merge([{ value: f.id, label: f.nome }]) %}{% endfor %}
+                {% include 'components/huplex_form_field.html.twig' with { id: 'funcionario_id', name: 'funcionario_id', label: 'Funcionário', type: 'select', options: fo, required: true } %}
+                {% include 'components/huplex_form_field.html.twig' with { id: 'tipo', name: 'tipo', label: 'Tipo', type: 'select', options: [{ value: 'PROVENTO', label: 'Provento' }, { value: 'DESCONTO', label: 'Desconto' }], required: true } %}
+                {% include 'components/huplex_form_field.html.twig' with { id: 'codigo', name: 'codigo', label: 'Código', value: 'EXTRA' } %}
+                {% include 'components/huplex_form_field.html.twig' with { id: 'descricao', name: 'descricao', label: 'Descrição', required: true } %}
+                {% include 'components/huplex_form_field.html.twig' with { id: 'valor', name: 'valor', label: 'Valor', required: true } %}
+                <button type="submit" class="btn-huplex mt-2">Adicionar</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="huplex-card p-3">
+            <h3 class="h6">Fechar competência</h3>
+            <form method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('rh_folha_action') }}">
+                <input type="hidden" name="action" value="fechar">
+                <p class="small text-muted">Após fechar, não será possível alterar lançamentos.</p>
+                <button type="submit" class="btn-huplex">Fechar folha</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

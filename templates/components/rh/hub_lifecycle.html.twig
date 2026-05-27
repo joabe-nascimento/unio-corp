@@ -1,0 +1,35 @@
+{#
+  rh/hub_lifecycle — linha do tempo do ciclo de vida do colaborador
+
+  Props: stages — list { key, label, count, icon, tone, route }
+#}
+<section class="rh-hub-lifecycle huplex-card" aria-label="Ciclo de vida do colaborador">
+    <header class="rh-hub-section-head">
+        <h3 class="rh-hub-section-title">Ciclo de vida</h3>
+        <p class="rh-hub-section-sub">Da entrada ao desligamento na empresa ativa</p>
+    </header>
+
+    <div class="rh-hub-lifecycle-timeline" data-lifecycle-timeline>
+        <div class="rh-hub-lifecycle-rail" aria-hidden="true">
+            <span class="rh-hub-lifecycle-rail-line"></span>
+            <span class="rh-hub-lifecycle-rail-progress"></span>
+        </div>
+
+        <ol class="rh-hub-lifecycle-steps">
+            {% for stage in stages %}
+            <li class="rh-hub-lifecycle-step" style="--step-index: {{ loop.index0 }};">
+                <a href="{{ path(stage.route) }}"
+                   class="rh-hub-lifecycle-node rh-hub-lifecycle-node--{{ stage.tone }}"
+                   title="{{ stage.label }}: {{ stage.count }}">
+                    <span class="rh-hub-lifecycle-node-marker">
+                        <span class="rh-hub-lifecycle-node-pulse" aria-hidden="true"></span>
+                        <i class="fas {{ stage.icon }} rh-hub-lifecycle-node-icon" aria-hidden="true"></i>
+                    </span>
+                    <span class="rh-hub-lifecycle-count" data-lifecycle-count="{{ stage.count }}">0</span>
+                    <span class="rh-hub-lifecycle-label">{{ stage.label }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>

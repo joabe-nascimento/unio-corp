@@ -2,21 +2,25 @@
 {% block title %}RH{% endblock %}
 {% block permissions_scope %}product_rh{% endblock %}
 {% set hub_page_title = 'Recursos Humanos' %}
+
 {% block hub_kpis %}
 {% if scope_has_products('product_rh') %}
 <div class="page-lead-kpis">
     {% set kpi_items = [] %}
+    {% if product_grant('product_rh', 'funcionarios') %}
+        {% set kpi_items = kpi_items|merge([{ value: ativos|default(0), label: 'Ativos', sub: total_funcionarios ~ ' no cadastro', route: 'app_rh_funcionarios' }]) %}
+    {% endif %}
     {% if product_grant('product_rh', 'admissoes') %}
         {% set kpi_items = kpi_items|merge([{ value: onboarding_open|default(0), label: 'Admissões', sub: 'Onboarding em aberto', route: 'app_rh_admissoes' }]) %}
     {% endif %}
     {% if product_grant('product_rh', 'ferias') %}
-        {% set kpi_items = kpi_items|merge([{ value: '8', label: 'Férias', sub: 'Em férias agora', route: 'app_rh_ferias' }]) %}
+        {% set kpi_items = kpi_items|merge([{ value: ferias_pendentes|default(0), label: 'Férias', sub: ferias_em_gozo ~ ' em gozo', route: 'app_rh_ferias' }]) %}
     {% endif %}
     {% if product_grant('product_rh', 'admissoes') %}
         {% set kpi_items = kpi_items|merge([{ value: offboarding_open|default(0), label: 'Demissões', sub: 'Offboarding em aberto', route: 'app_rh_demissoes' }]) %}
     {% endif %}
     {% if product_grant('product_rh', 'folha') %}
-        {% set kpi_items = kpi_items|merge([{ value: 'OK', label: 'Folha', sub: 'Mês atual', route: 'app_rh_folha' }]) %}
+        {% set kpi_items = kpi_items|merge([{ value: folha_status|default('—'), label: 'Folha', sub: folha_ref_label|default('Competência'), route: 'app_rh_folha' }]) %}
     {% endif %}
     {% if kpi_items|length > 0 %}
         {% include 'components/kpi_row.html.twig' with { items: kpi_items, mb: 'mb-0' } %}
@@ -24,34 +28,49 @@
 </div>
 {% endif %}
 {% endblock %}
+
 {% block hub_section_toolbar %}
-{% if scope_has_products('product_rh') and grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') %}
-{% include 'components/section_toolbar.html.twig' with {
-    btn_label: 'Novo Funcionário',
-    btn_href: path('app_rh_funcionarios'),
-    btn_icon: 'fa-plus',
-    show_search: true,
-    search_placeholder: 'Buscar funcionários…',
-    search_disabled: true
-} %}
+{% if scope_has_products('product_rh') %}
+    {% include 'components/rh/hub_action_rail.html.twig' %}
 {% endif %}
 {% endblock %}
+
 {% block hub_content %}
 {% if scope_has_products('product_rh') %}
-<div class="huplex-card">
-    {% include 'components/empty_state.html.twig' with {
-        icon: 'fa-users',
-        title: 'Nenhum funcionário cadastrado',
-        text: 'Comece cadastrando o primeiro funcionário da empresa.',
-        btn_label: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'Cadastrar Funcionário' : '',
-        btn_href: path('app_rh_funcionarios')
+<div class="rh-hub" data-rh-hub-dashboard>
+
+    {% include 'components/rh/hub_hero.html.twig' with {
+        empresa: empresa,
+        rh_pulse: rh_pulse,
+        folha_ref_label: folha_ref_label,
+        ativos: ativos,
+        onboarding_open: onboarding_open,
+        ferias_pendentes: ferias_pendentes,
+        processos_abertos_total: processos_abertos_total
     } %}
+
+    {% include 'components/rh/hub_focus_queue.html.twig' with { items: focus_queue } %}
+
+    {% if product_grant('product_rh', 'admissoes') %}
+        {% include 'components/rh/hub_process_board.html.twig' with { items: process_board } %}
+    {% endif %}
+
+    <div class="rh-hub-row rh-hub-row--split">
+        <div class="rh-hub-col">
+            {% include 'components/rh/hub_agenda.html.twig' with { events: agenda_events } %}
+        </div>
+        <div class="rh-hub-col">
+            {% include 'components/rh/hub_activity_stream.html.twig' with { items: activity_stream } %}
+        </div>
+    </div>
+
 </div>
 {% else %}
-    {% include 'components/hub_scope_empty.html.twig' with {
-        icon: 'fa-id-card',
-        title: 'Nenhuma área disponível em RH',
-        text: 'Você ainda não tem permissão para acessar Funcionários, Admissões ou outras áreas de RH. Solicite ao gestor da equipe.'
-    } %}
+    {% include 'components/hub_scope_empty.html.twig' with { icon: 'fa-id-card', title: 'Nenhuma área disponível em RH', text: 'Solicite permissão ao gestor.' } %}
 {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/rh-hub-dashboard.js') }}?v=6"></script>
 {% endblock %}

@@ -1,3 +1,63 @@
-﻿{% extends 'layout/stub.html.twig' %}
-{% block title %}Folha de Pagamento{% endblock %}
-{% set stub_page_title = 'Folha de Pagamento' %}
+﻿{% extends 'layout/page_list.html.twig' %}
+{% block title %}Folha de pagamento{% endblock %}
+{% set page_list_title = 'Folha de pagamento' %}
+
+{% block page_list_section_toolbar %}
+{% if grant_at_least('product_rh', 'folha', 'GESTOR') %}
+<form method="post" action="{{ path('app_rh_folha_gerar') }}" class="section-toolbar-form-generate" style="display:contents;">
+    <input type="hidden" name="_token" value="{{ csrf_token('rh_folha_form') }}">
+{% embed 'components/section_toolbar.html.twig' with {
+    subtitle: 'Gera lançamentos de salário base dos ativos com salário cadastrado'
+} %}
+    {% block section_toolbar_filters %}
+        <div class="filter-group">
+            <label class="filter-label" for="folha-referencia">Competência</label>
+            <input type="month"
+                   id="folha-referencia"
+                   name="referencia"
+                   class="filter-select"
+                   value="{{ referencia_sugerida }}"
+                   style="min-width: 150px;">
+        </div>
+        <button type="submit" class="btn-huplex btn-sm">
+            <i class="fas fa-file-invoice-dollar mr-1" aria-hidden="true"></i> Gerar folha
+        </button>
+    {% endblock %}
+{% endembed %}
+</form>
+{% endif %}
+{% endblock %}
+
+{% block page_list_content %}
+<div class="huplex-card">
+    {% if competencias is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-file-invoice-dollar',
+            title: 'Nenhuma competência',
+            text: 'Use o botão acima para gerar a folha do mês.'
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-huplex mb-0">
+            <thead><tr><th>Competência</th><th>Status</th><th>Líquido</th><th class="text-right">Ação</th></tr></thead>
+            <tbody>
+            {% for c in competencias %}
+            <tr>
+                <td>{{ c.referenciaLabel }}</td>
+                <td>{% include 'components/status_badge.html.twig' with {
+                    label: c.status == 'FECHADA' ? 'Fechada' : 'Aberta',
+                    variant: c.status == 'FECHADA' ? 'success' : 'info'
+                } %}</td>
+                <td>R$ {{ c.totalLiquido|number_format(2, ',', '.') }}</td>
+                <td class="text-right">
+                    <a href="{{ path('app_rh_folha_show', { id: c.id }) }}" class="btn-huplex-ghost btn-sm">Abrir</a>
+                    <a href="{{ path('app_rh_folha_export', { id: c.id }) }}" class="btn-huplex-ghost btn-sm">CSV</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

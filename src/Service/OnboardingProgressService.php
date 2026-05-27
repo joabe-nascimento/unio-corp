@@ -4,23 +4,22 @@ namespace App\Service;
 
 use App\Entity\Empresa;
 use App\Entity\User;
-use App\Repository\FuncionarioRepository;
-use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * Checklist de primeiros passos pós-login (workspace, RH, convite, hub).
+ * Checklist de primeiros passos — conclusão por ação do usuário (sessão), não por dados do seed.
  */
 class OnboardingProgressService
 {
-    public const SESSION_HUB_VISITED = 'onboarding.hub_visited';
+    public const SESSION_COMPLETED = 'onboarding.completed_steps';
+
+    /** @var list<string> */
+    public const STEP_IDS = ['workspace', 'funcionario', 'invite_user', 'hub'];
 
     public function __construct(
         private RequestStack $requestStack,
         private NavigationService $navigation,
         private WelcomeService $welcome,
-        private FuncionarioRepository $funcionarioRepository,
-        private UserRepository $userRepository,
     ) {}
 
     /**
@@ -52,14 +51,36 @@ class OnboardingProgressService
         ];
     }
 
-    public function markHubVisited(): void
+    public function markStepComplete(string $stepId): void
     {
-        $this->requestStack->getSession()->set(self::SESSION_HUB_VISITED, true);
+        if (!\in_array($stepId, self::STEP_IDS, true)) {
+            return;
+        }
+
+        $session = $this->requestStack->getSession();
+        /** @var list<string> $completed */
+        $completed = $session->get(self::SESSION_COMPLETED, []);
+        if (!\is_array($completed)) {
+            $completed = [];
+        }
+
+        if (!\in_array($stepId, $completed, true)) {
+            $completed[] = $stepId;
+            $session->set(self::SESSION_COMPLETED, $completed);
+        }
     }
 
-    private function hasVisitedHub(): bool
+    public function isStepComplete(string $stepId): bool
     {
-        return (bool) $this->requestStack->getSession()->get(self::SESSION_HUB_VISITED, false);
+        /** @var mixed $completed */
+        $completed = $this->requestStack->getSession()->get(self::SESSION_COMPLETED, []);
+
+        return \is_array($completed) && \in_array($stepId, $completed, true);
+    }
+
+    public function markHubVisited(): void
+    {
+        $this->markStepComplete('hub');
     }
 
     /**
@@ -69,61 +90,65 @@ class OnboardingProgressService
     {
         $steps = [];
 
+        $workspaceDone = $this->isStepComplete('workspace');
         $steps[] = [
             'id' => 'workspace',
             'label' => 'Confirmar área de trabalho',
-            'hint' => $empresa
-                ? ($empresasCount > 1 ? 'Você pode trocar de empresa quando precisar.' : 'Empresa ativa nesta sessão.')
-                : 'Selecione a empresa em que vai trabalhar.',
+            'hint' => $workspaceDone
+                ? 'Área de trabalho confirmada por você.'
+                : ($empresa
+                    ? 'Clique em Ir e confirme a empresa ativa (ou troque se houver mais de uma).'
+                    : 'Selecione a empresa em que vai trabalhar.'),
             'icon' => 'fa-building',
             'route' => 'app_workspace_select',
             'route_params' => $empresa && $empresasCount > 1 ? ['force' => 1] : [],
-            'done' => $empresa !== null,
+            'done' => $workspaceDone,
         ];
 
         if ($empresa !== null && $this->navigation->showModuloRh($user)) {
-            $funcCount = $this->funcionarioRepository->countByEmpresa($empresa);
+            $funcDone = $this->isStepComplete('funcionario');
             $steps[] = [
                 'id' => 'funcionario',
                 'label' => 'Cadastrar primeiro colaborador',
-                'hint' => $funcCount > 0
-                    ? 'Colaboradores já registrados no RH.'
-                    : 'Adicione alguém da equipe no módulo de RH.',
+                'hint' => $funcDone
+                    ? 'Você iniciou ou concluiu um cadastro no RH.'
+                    : 'Inicie uma admissão no RH para registrar o primeiro colaborador.',
                 'icon' => 'fa-user-plus',
-                'route' => $funcCount > 0 ? 'app_rh_funcionarios' : 'app_rh_admissoes_nova',
+                'route' => 'app_rh_admissoes_nova',
                 'route_params' => [],
-                'done' => $funcCount > 0,
+                'done' => $funcDone,
             ];
         }
 
         if ($empresa !== null && $this->navigation->showPlataforma($user)) {
-            $userCount = $this->userRepository->countByEmpresa($empresa);
+            $inviteDone = $this->isStepComplete('invite_user');
             $steps[] = [
                 'id' => 'invite_user',
                 'label' => 'Convidar outro usuário',
-                'hint' => $userCount >= 2
-                    ? 'Sua empresa já tem mais de um usuário ativo.'
-                    : 'Crie acesso para um colega na administração.',
+                'hint' => $inviteDone
+                    ? 'Você criou um novo usuário na administração.'
+                    : 'Cadastre um colega em Usuários (botão novo usuário).',
                 'icon' => 'fa-user-group',
                 'route' => 'app_admin_usuarios',
-                'route_params' => $userCount < 2 ? ['open_novo' => 1] : [],
-                'done' => $userCount >= 2,
+                'route_params' => ['open_novo' => 1],
+                'done' => $inviteDone,
             ];
         }
 
         $hubs = $this->welcome->getHubsForUser($user);
         if ($hubs !== []) {
             $firstHub = $hubs[0];
+            $hubDone = $this->isStepComplete('hub');
             $steps[] = [
                 'id' => 'hub',
                 'label' => 'Explorar um hub',
-                'hint' => $this->hasVisitedHub()
-                    ? 'Você já visitou um hub da plataforma.'
-                    : sprintf('Comece pelo %s ou outro hub disponível.', $firstHub['title']),
+                'hint' => $hubDone
+                    ? 'Você já entrou em um hub da plataforma.'
+                    : sprintf('Abra o %s ou outro hub disponível.', $firstHub['title']),
                 'icon' => $firstHub['icon'] ?? 'fa-layer-group',
                 'route' => $firstHub['route'],
                 'route_params' => [],
-                'done' => $this->hasVisitedHub(),
+                'done' => $hubDone,
             ];
         }
 

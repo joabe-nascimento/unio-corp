@@ -1,24 +1,76 @@
-{% extends 'layout/hub.html.twig' %}
+{% extends 'layout/page_list.html.twig' %}
 {% block title %}Funcionários{% endblock %}
-{% set hub_page_title = 'Funcionários' %}
-{% block hub_section_toolbar %}
-{% include 'components/section_toolbar.html.twig' with {
-    btn_label: 'Novo Funcionário',
-    btn_href: path('app_rh_funcionarios'),
+{% set page_list_title = 'Funcionários' %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_rh_funcionarios') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'Novo funcionário' : '',
+    btn_href: path('app_rh_funcionario_novo'),
     btn_icon: 'fa-plus',
-    show_search: true,
-    search_placeholder: 'Buscar funcionários…',
-    search_disabled: true
+    search_in_section: true,
+    search_placeholder: 'Buscar nome, e-mail ou cargo…',
+    search_name: 'q',
+    search_value: filter_q|default('')
 } %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filter_status|default(''),
+            min_width: '140px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'ATIVO', label: 'Ativo' },
+                { value: 'INATIVO', label: 'Inativo' },
+                { value: 'FERIAS', label: 'Férias' },
+                { value: 'AFASTADO', label: 'Afastado' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_rh_funcionarios'),
+            has_filters: filter_q|default('') or filter_status|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
 {% endblock %}
-{% block hub_content %}
+
+{% block page_list_content %}
 <div class="huplex-card">
-    {% include 'components/empty_state.html.twig' with {
-        icon: 'fa-id-card',
-        title: 'Nenhum funcionário encontrado',
-        text: 'Adicione funcionários para visualizá-los aqui.',
-        btn_label: 'Cadastrar Funcionário',
-        btn_href: path('app_rh_funcionarios')
-    } %}
+    {% if funcionarios is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-id-card',
+            title: 'Nenhum funcionário encontrado',
+            text: filter_q|default('') or filter_status|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre colaboradores ou conclua uma admissão.',
+            btn_label: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'Novo funcionário' : '',
+            btn_href: path('app_rh_funcionario_novo')
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-huplex mb-0">
+            <thead>
+                <tr>
+                    <th>Colaborador</th>
+                    <th>Cargo</th>
+                    <th>Status</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in funcionarios %}
+                <tr>
+                    <td>{% include 'components/person_cell.html.twig' with { name: f.nome, subtitle: f.email } %}</td>
+                    <td>{{ f.cargo|default('—') }}</td>
+                    <td>{% include 'components/status_badge.html.twig' with { label: f.statusLabel, variant: f.statusClass } %}</td>
+                    <td class="text-right">
+                        <a href="{{ path('app_rh_funcionario_show', { id: f.id }) }}" class="btn-huplex-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

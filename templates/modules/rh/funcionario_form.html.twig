@@ -1,0 +1,74 @@
+{% extends 'layout/page_list.html.twig' %}
+{% set is_edit = funcionario is defined and funcionario %}
+{% block title %}{{ is_edit ? 'Editar funcionário' : 'Novo funcionário' }}{% endblock %}
+{% set page_list_title = is_edit ? 'Editar — ' ~ funcionario.nome : 'Novo funcionário' %}
+
+{% block page_list_content %}
+<div class="rh-admissao-page">
+    <div class="huplex-card rh-admissao-main" style="max-width:720px;margin:0 auto;padding:24px;">
+        <form method="post" enctype="multipart/form-data" class="huplex-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('rh_funcionario_form') }}">
+            <div class="rh-admissao-fields">
+                <div class="rh-admissao-field rh-admissao-field--full">
+                    {% include 'components/huplex_form_field.html.twig' with { id: 'nome', name: 'nome', label: 'Nome completo', value: funcionario.nome|default(''), required: true } %}
+                </div>
+                <div class="rh-admissao-field rh-admissao-field--full">
+                    {% include 'components/huplex_form_field.html.twig' with { id: 'email', name: 'email', label: 'E-mail', type: 'email', value: funcionario.email|default(''), required: true } %}
+                </div>
+                <div class="rh-admissao-field">
+                    {% include 'components/huplex_form_field.html.twig' with { id: 'telefone', name: 'telefone', label: 'Telefone', value: funcionario.telefone|default('') } %}
+                </div>
+                <div class="rh-admissao-field">
+                    {% include 'components/huplex_form_field.html.twig' with { id: 'cargo', name: 'cargo', label: 'Cargo', value: funcionario.cargo|default('') } %}
+                </div>
+                <div class="rh-admissao-field">
+                    {% set dept_options = [{ value: '', label: '—' }] %}
+                    {% for d in departamentos|default([]) %}
+                        {% set dept_options = dept_options|merge([{ value: d.id, label: d.nome }]) %}
+                    {% endfor %}
+                    {% include 'components/huplex_form_field.html.twig' with {
+                        id: 'departamento_id', name: 'departamento_id', label: 'Departamento', type: 'select',
+                        value: funcionario.departamento is defined and funcionario.departamento ? funcionario.departamento.id : '',
+                        options: dept_options
+                    } %}
+                </div>
+                <div class="rh-admissao-field">
+                    {% include 'components/huplex_form_field.html.twig' with { id: 'salario', name: 'salario', label: 'Salário base', value: funcionario.salario|default(''), placeholder: '0,00' } %}
+                </div>
+                <div class="rh-admissao-field">
+                    {% include 'components/huplex_form_field.html.twig' with {
+                        id: 'status', name: 'status', label: 'Status', type: 'select',
+                        value: funcionario.status|default('ATIVO'),
+                        options: [
+                            { value: 'ATIVO', label: 'Ativo' },
+                            { value: 'INATIVO', label: 'Inativo' },
+                            { value: 'FERIAS', label: 'Férias' },
+                            { value: 'AFASTADO', label: 'Afastado' }
+                        ]
+                    } %}
+                </div>
+                <div class="rh-admissao-field">
+                    {% include 'components/huplex_form_field.html.twig' with { id: 'data_admissao', name: 'data_admissao', label: 'Data admissão', type: 'date', value: funcionario.dataAdmissao ? funcionario.dataAdmissao|date('Y-m-d') : '' } %}
+                </div>
+                {% if is_edit %}
+                <div class="rh-admissao-field">
+                    {% include 'components/huplex_form_field.html.twig' with { id: 'data_demissao', name: 'data_demissao', label: 'Data demissão', type: 'date', value: funcionario.dataDemissao ? funcionario.dataDemissao|date('Y-m-d') : '' } %}
+                </div>
+                {% endif %}
+                <div class="rh-admissao-field rh-admissao-field--full">
+                    <label class="huplex-form-label">Foto</label>
+                    {% if is_edit and funcionario.foto %}
+                    <p class="mb-2"><img src="{{ asset(funcionario.foto) }}" alt="" style="max-height:64px;border-radius:8px;"></p>
+                    <label class="d-flex align-items-center gap-2 mb-2"><input type="checkbox" name="remove_foto" value="1"> Remover foto</label>
+                    {% endif %}
+                    <input type="file" name="foto" accept="image/jpeg,image/png,image/webp" class="huplex-form-control">
+                </div>
+            </div>
+            <div class="huplex-form-actions rh-admissao-actions">
+                <a href="{{ is_edit ? path('app_rh_funcionario_show', { id: funcionario.id }) : path('app_rh_funcionarios') }}" class="btn-huplex-ghost">Cancelar</a>
+                <button type="submit" class="btn-huplex">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

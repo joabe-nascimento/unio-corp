@@ -1,0 +1,25 @@
+{#
+  detail_field_row — linha label + valor (ficha / detalhe RH)
+
+  Props:
+    label (string)
+    value (string)
+    icon (string, opt)  classe Font Awesome sem prefixo fas
+    html (bool, opt)
+    multiline (bool, opt)  textos longos (observações)
+#}
+<div class="huplex-detail-row{% if multiline|default(full|default(false)) %} huplex-detail-row--multiline{% endif %}">
+    <div class="huplex-detail-label">
+        {% if icon|default(false) %}
+        <i class="fas {{ icon }}" aria-hidden="true"></i>
+        {% endif %}
+        <span>{{ label }}</span>
+    </div>
+    <div class="huplex-detail-value">
+        {% if html|default(false) %}
+            {{ value|raw }}
+        {% else %}
+            {{ value|default('—') }}
+        {% endif %}
+    </div>
+</div>

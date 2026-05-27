@@ -1,0 +1,14 @@
+{# rh/hub_pulse_widget — indicador circular RH Pulse (animado via rh-hub-dashboard.js)
+   Props: rh_pulse, variant: hero | compact (default hero)
+#}
+{% set _variant = variant|default('hero') %}
+<div class="rh-hub-pulse rh-hub-pulse--{{ _variant }}" data-pulse-score="{{ rh_pulse.score }}" aria-label="RH Pulse">
+    <div class="rh-hub-pulse-ring{% if _variant == 'compact' %} rh-hub-pulse-ring--compact{% endif %}" data-pulse-ring style="--pulse-pct: 0;">
+        <div class="rh-hub-pulse-core{% if _variant == 'compact' %} rh-hub-pulse-core--compact{% endif %}">
+            <span class="rh-hub-pulse-value" data-pulse-value>0</span>
+            <span class="rh-hub-pulse-unit">pulse</span>
+        </div>
+    </div>
+    <p class="rh-hub-pulse-label rh-hub-pulse-label--{{ rh_pulse.tone }}">{{ rh_pulse.label }}</p>
+    <p class="rh-hub-pulse-hint">{{ rh_pulse.hint }}</p>
+</div>

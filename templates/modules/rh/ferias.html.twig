@@ -1,3 +1,69 @@
-﻿{% extends 'layout/stub.html.twig' %}
+﻿{% extends 'layout/page_list.html.twig' %}
 {% block title %}Férias{% endblock %}
-{% set stub_page_title = 'Férias' %}
+{% set page_list_title = 'Férias' %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_rh_ferias') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: grant_at_least('product_rh', 'ferias', 'GESTOR_EQUIPE') ? 'Nova solicitação' : '',
+    btn_href: path('app_rh_ferias_nova'),
+    btn_icon: 'fa-plus',
+    search_in_section: true,
+    search_placeholder: 'Buscar colaborador…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filter_status|default(''),
+            min_width: '150px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'SOLICITADA', label: 'Solicitada' },
+                { value: 'APROVADA', label: 'Aprovada' },
+                { value: 'EM_GOZO', label: 'Em gozo' },
+                { value: 'CONCLUIDA', label: 'Concluída' },
+                { value: 'REJEITADA', label: 'Rejeitada' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_rh_ferias'),
+            has_filters: filter_q|default('') or filter_status|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="huplex-card">
+    {% if solicitacoes is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-umbrella-beach',
+            title: 'Nenhuma solicitação',
+            text: filter_q|default('') or filter_status|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Registre períodos de férias dos colaboradores.',
+            btn_label: grant_at_least('product_rh', 'ferias', 'GESTOR_EQUIPE') ? 'Nova solicitação' : '',
+            btn_href: path('app_rh_ferias_nova')
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-huplex mb-0">
+            <thead><tr><th>Colaborador</th><th>Período</th><th>Dias</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            {% for f in solicitacoes %}
+            <tr>
+                <td>{% include 'components/person_cell.html.twig' with { name: f.funcionario.nome, subtitle: f.funcionario.email|default('') } %}</td>
+                <td>{{ f.dataInicio|date('d/m/Y') }} — {{ f.dataFim|date('d/m/Y') }}</td>
+                <td>{{ f.dias }}</td>
+                <td>{% include 'components/status_badge.html.twig' with { label: f.statusLabel, variant: f.statusClass } %}</td>
+                <td class="text-right"><a href="{{ path('app_rh_ferias_show', { id: f.id }) }}" class="btn-huplex-ghost btn-sm">Abrir</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{#
+  rh/hub_focus_queue — fila de prioridades do gestor de RH
+
+  Props: items — { urgency, icon, title, subtitle, route, route_params, meta?, progress? }
+#}
+<section class="rh-hub-focus huplex-card" aria-label="Prioridades">
+    <header class="rh-hub-section-head rh-hub-section-head--row">
+        <div>
+            <h3 class="rh-hub-section-title">Na sua fila</h3>
+            <p class="rh-hub-section-sub">O que pede atenção agora</p>
+        </div>
+        <span class="rh-hub-focus-badge">{{ items|length }}</span>
+    </header>
+    {% if items|length > 0 %}
+    <ul class="rh-hub-focus-list">
+        {% for item in items %}
+        <li>
+            <a href="{{ path(item.route, item.route_params|default({})) }}" class="rh-hub-focus-item rh-hub-focus-item--{{ item.urgency }}">
+                <span class="rh-hub-focus-icon" aria-hidden="true"><i class="fas {{ item.icon }}"></i></span>
+                <span class="rh-hub-focus-body">
+                    <span class="rh-hub-focus-title">{{ item.title }}</span>
+                    <span class="rh-hub-focus-sub">{{ item.subtitle }}</span>
+                    {% if item.meta is defined and item.meta %}
+                    <span class="rh-hub-focus-meta">{{ item.meta }}</span>
+                    {% endif %}
+                </span>
+                {% if item.progress is defined %}
+                <span class="rh-hub-focus-progress">
+                    <span class="rh-hub-focus-progress-bar" style="width: {{ item.progress }}%;"></span>
+                    <span class="rh-hub-focus-progress-label">{{ item.progress }}%</span>
+                </span>
+                {% else %}
+                <i class="fas fa-chevron-right rh-hub-focus-chevron" aria-hidden="true"></i>
+                {% endif %}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="rh-hub-focus-clear">
+        <i class="fas fa-circle-check" aria-hidden="true"></i>
+        <p>Tudo em dia por aqui. Nenhuma pendência crítica no momento.</p>
+    </div>
+    {% endif %}
+</section>

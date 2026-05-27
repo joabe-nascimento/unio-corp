@@ -1,0 +1,142 @@
+{# Formulário de nova admissão — props: empresa, checklist_preview, form values #}
+{% set checklist = checklist_preview|default([]) %}
+
+<div class="rh-admissao-page">
+    <div class="rh-admissao-layout">
+        <div class="rh-admissao-main huplex-card">
+            <div class="rh-admissao-steps" aria-label="Etapas do processo">
+                <div class="rh-admissao-step rh-admissao-step--active">
+                    <span class="rh-admissao-step-num">1</span>
+                    <span class="rh-admissao-step-text">
+                        <strong>Dados do colaborador</strong>
+                        <small>Informações iniciais</small>
+                    </span>
+                </div>
+                <div class="rh-admissao-step rh-admissao-step--next" aria-hidden="true">
+                    <span class="rh-admissao-step-num">2</span>
+                    <span class="rh-admissao-step-text">
+                        <strong>Checklist de onboarding</strong>
+                        <small>Após salvar</small>
+                    </span>
+                </div>
+            </div>
+
+            <header class="rh-admissao-main-head">
+                <h2 class="rh-admissao-main-title">Dados para admissão</h2>
+                <p class="rh-admissao-main-sub">
+                    Cadastre quem está entrando na empresa. Em seguida você acompanha documentação, TI e integração em um único fluxo.
+                </p>
+            </header>
+
+            <form method="post" class="huplex-form rh-admissao-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('rh_admissao_form') }}">
+                <div class="rh-admissao-fields">
+                    <div class="rh-admissao-field rh-admissao-field--full">
+                        {% include 'components/huplex_form_field.html.twig' with {
+                            id: 'nome',
+                            name: 'nome',
+                            label: 'Nome completo',
+                            value: nome|default(''),
+                            placeholder: 'Ex.: Maria Silva Santos',
+                            required: true
+                        } %}
+                    </div>
+                    <div class="rh-admissao-field rh-admissao-field--full">
+                        {% include 'components/huplex_form_field.html.twig' with {
+                            id: 'email',
+                            name: 'email',
+                            label: 'E-mail corporativo ou pessoal',
+                            type: 'email',
+                            value: email|default(''),
+                            placeholder: 'colaborador@empresa.com',
+                            required: true
+                        } %}
+                    </div>
+                    <div class="rh-admissao-field">
+                        {% include 'components/huplex_form_field.html.twig' with {
+                            id: 'cargo',
+                            name: 'cargo',
+                            label: 'Cargo / função',
+                            value: cargo|default(''),
+                            placeholder: 'Ex.: Analista de RH'
+                        } %}
+                    </div>
+                    <div class="rh-admissao-field">
+                        {% include 'components/huplex_form_field.html.twig' with {
+                            id: 'data_prevista',
+                            name: 'data_prevista',
+                            label: 'Previsão de início',
+                            type: 'date',
+                            value: data_prevista|default('')
+                        } %}
+                    </div>
+                    <div class="rh-admissao-field rh-admissao-field--full">
+                        {% include 'components/huplex_form_field.html.twig' with {
+                            id: 'observacoes',
+                            name: 'observacoes',
+                            label: 'Observações',
+                            type: 'textarea',
+                            value: observacoes|default(''),
+                            placeholder: 'Informações úteis para RH, gestor ou TI (opcional)',
+                            rows: 4
+                        } %}
+                    </div>
+                </div>
+
+                <p class="rh-admissao-required-note">
+                    <span class="huplex-form-required">*</span> Campos obrigatórios
+                </p>
+
+                <div class="huplex-form-actions rh-admissao-actions">
+                    <a href="{{ path('app_rh_admissoes') }}" class="btn-huplex-ghost">Cancelar</a>
+                    <button type="submit" class="btn-huplex">
+                        <i class="fas fa-user-plus mr-2" aria-hidden="true"></i>
+                        Iniciar onboarding
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <aside class="rh-admissao-aside">
+            {% if empresa is defined and empresa %}
+            <div class="rh-admissao-aside-card huplex-card">
+                <p class="rh-admissao-aside-label">Área de trabalho</p>
+                <p class="rh-admissao-aside-empresa">{{ empresa.nome }}</p>
+                {% if empresa.setor %}
+                <p class="rh-admissao-aside-meta">{{ empresa.setor }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if checklist|length > 0 %}
+            <div class="rh-admissao-aside-card huplex-card">
+                <p class="rh-admissao-aside-label">
+                    <i class="fas fa-list-check" aria-hidden="true"></i>
+                    Próxima etapa
+                </p>
+                <p class="rh-admissao-aside-hint">
+                    Após iniciar, você marcará cada item até concluir e gerar o cadastro do funcionário.
+                </p>
+                <ul class="rh-admissao-checklist-preview">
+                    {% for item in checklist %}
+                    <li>
+                        <i class="far fa-circle" aria-hidden="true"></i>
+                        <span>{{ item.label }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="rh-admissao-aside-card rh-admissao-aside-card--tip huplex-card">
+                <p class="rh-admissao-aside-label">
+                    <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                    Dica
+                </p>
+                <p class="rh-admissao-aside-hint mb-0">
+                    Use o e-mail que será usado na plataforma. Você pode concluir o checklist aos poucos antes de finalizar a admissão.
+                </p>
+            </div>
+        </aside>
+    </div>
+</div>

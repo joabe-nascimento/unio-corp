@@ -1,0 +1,28 @@
+{# rh/hub_agenda — agenda dos próximos eventos de RH #}
+<section class="rh-hub-agenda huplex-card" aria-label="Agenda de RH">
+    <header class="rh-hub-section-head">
+        <h3 class="rh-hub-section-title">Agenda</h3>
+        <p class="rh-hub-section-sub">Próximos 21 dias — entradas, férias e folha</p>
+    </header>
+    {% if events|length > 0 %}
+    <ol class="rh-hub-agenda-list">
+        {% for e in events %}
+        <li class="rh-hub-agenda-item{% if e.is_today %} rh-hub-agenda-item--today{% endif %}">
+            <div class="rh-hub-agenda-date">
+                <span class="rh-hub-agenda-day">{{ e.date_label }}</span>
+                <span class="rh-hub-agenda-weekday">{{ e.weekday }}</span>
+            </div>
+            <a href="{{ path(e.route, e.route_params) }}" class="rh-hub-agenda-body">
+                <span class="rh-hub-agenda-icon rh-hub-agenda-icon--{{ e.tone }}"><i class="fas {{ e.icon }}"></i></span>
+                <span class="rh-hub-agenda-text">
+                    <span class="rh-hub-agenda-title">{{ e.title }}</span>
+                    <span class="rh-hub-agenda-sub">{{ e.subtitle }}</span>
+                </span>
+            </a>
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="rh-hub-empty text-muted small mb-0">Nenhum evento previsto para as próximas semanas.</p>
+    {% endif %}
+</section>

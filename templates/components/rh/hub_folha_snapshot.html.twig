@@ -1,0 +1,35 @@
+{# rh/hub_folha_snapshot — resumo da competência atual #}
+<section class="rh-hub-folha huplex-card" aria-label="Folha de pagamento">
+    <header class="rh-hub-section-head rh-hub-section-head--row">
+        <div>
+            <h3 class="rh-hub-section-title">Folha — {{ snapshot.referencia_label }}</h3>
+            <p class="rh-hub-section-sub">Competência do mês</p>
+        </div>
+        <span class="rh-hub-folha-status rh-hub-folha-status--{{ snapshot.status_tone }}">{{ snapshot.status }}</span>
+    </header>
+    {% if snapshot.has_folha %}
+    <div class="rh-hub-folha-metrics">
+        <div class="rh-hub-folha-metric rh-hub-folha-metric--highlight">
+            <span class="rh-hub-folha-metric-label">Líquido</span>
+            <span class="rh-hub-folha-metric-value">R$ {{ snapshot.liquido|number_format(2, ',', '.') }}</span>
+        </div>
+        <div class="rh-hub-folha-metric">
+            <span class="rh-hub-folha-metric-label">Proventos</span>
+            <span class="rh-hub-folha-metric-value">R$ {{ snapshot.proventos|number_format(2, ',', '.') }}</span>
+        </div>
+        <div class="rh-hub-folha-metric">
+            <span class="rh-hub-folha-metric-label">Descontos</span>
+            <span class="rh-hub-folha-metric-value">R$ {{ snapshot.descontos|number_format(2, ',', '.') }}</span>
+        </div>
+        <div class="rh-hub-folha-metric">
+            <span class="rh-hub-folha-metric-label">Lançamentos</span>
+            <span class="rh-hub-folha-metric-value">{{ snapshot.lancamentos }}</span>
+        </div>
+    </div>
+    {% else %}
+    <p class="rh-hub-empty text-muted small">Nenhuma folha gerada para este mês. Gere a competência para consolidar salários.</p>
+    {% endif %}
+    <a href="{{ path(snapshot.route, snapshot.route_params) }}" class="btn-huplex-ghost btn-sm mt-2 w-100 text-center d-block">
+        {% if snapshot.has_folha %}Abrir competência{% else %}Gerar folha{% endif %}
+    </a>
+</section>
