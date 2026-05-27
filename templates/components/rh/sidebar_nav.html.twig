@@ -1,0 +1,36 @@
+{#
+  Menu lateral RH — catálogo com subgrupos (Operação / Folha)
+  Requer: route
+#}
+{% import 'macros/sidebar_nav.html.twig' as nav %}
+
+{{ nav.submenu('Visão geral', path('app_rh'), route == 'app_rh', 'rh-sidebar-link') }}
+
+{% set rh_groups = {
+    'operacao': 'Operação',
+    'folha': 'Folha & compliance'
+} %}
+
+{% for group_key, group_label in rh_groups %}
+    {% set group_visible = false %}
+    {% for mod in rh_module_catalog() %}
+        {% if mod.group|default('operacao') == group_key and product_grant('product_rh', mod.grant) %}
+            {% set group_visible = true %}
+        {% endif %}
+    {% endfor %}
+    {% if group_visible %}
+    <li class="nav-item nav-subheader">
+        <span>{{ group_label }}</span>
+    </li>
+    {% for mod in rh_module_catalog() %}
+        {% if mod.group|default('operacao') == group_key and product_grant('product_rh', mod.grant) %}
+            {{ nav.submenu(
+                rh_module_sidebar_label(mod),
+                path(mod.route),
+                rh_module_route_active(route, mod.route),
+                'rh-sidebar-link'
+            ) }}
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+{% endfor %}

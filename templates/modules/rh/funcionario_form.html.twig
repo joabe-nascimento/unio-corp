@@ -5,71 +5,252 @@
 {% set page_list_title = is_edit ? 'Editar — ' ~ f.nome : 'Novo funcionário' %}
 
 {% block page_list_content %}
-<div class="rh-admissao-page">
-    <div class="huplex-card rh-admissao-main" style="max-width:720px;margin:0 auto;padding:24px;">
-        <form method="post" enctype="multipart/form-data" class="huplex-form">
-            <input type="hidden" name="_token" value="{{ csrf_token('rh_funcionario_form') }}">
-            <div class="rh-admissao-fields">
-                <div class="rh-admissao-field rh-admissao-field--full">
-                    {% include 'components/huplex_form_field.html.twig' with { id: 'nome', name: 'nome', label: 'Nome completo', value: f ? f.nome : '', required: true } %}
+{% set dept_options = [{ value: '', label: '—' }] %}
+{% for d in departamentos|default([]) %}
+    {% set dept_options = dept_options|merge([{ value: d.id, label: d.nome }]) %}
+{% endfor %}
+{% set gestor_options = [{ value: '', label: '—' }] %}
+{% for g in gestores|default([]) %}
+    {% set gestor_options = gestor_options|merge([{ value: g.id, label: g.nome ~ (g.cargo ? ' · ' ~ g.cargo : '') }]) %}
+{% endfor %}
+{% set uf_options = [{ value: '', label: '—' }] %}
+{% for uf in ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] %}
+    {% set uf_options = uf_options|merge([{ value: uf, label: uf }]) %}
+{% endfor %}
+
+<div class="rh-admissao-page rh-funcionario-form-page">
+    <div class="rh-admissao-main huplex-card">
+            <header class="rh-admissao-main-head">
+                <h2 class="rh-admissao-main-title">{{ is_edit ? 'Atualizar cadastro' : 'Cadastro completo' }}</h2>
+                <p class="rh-admissao-main-sub">
+                    Preencha os dados do colaborador para folha, portal e processos de RH.
+                </p>
+            </header>
+
+            <form method="post" enctype="multipart/form-data" class="huplex-form rh-funcionario-form" id="rh-funcionario-form" data-rh-funcionario-form novalidate>
+                <input type="hidden" name="_token" value="{{ csrf_token('rh_funcionario_form') }}">
+                <div class="rh-admissao-layout rh-funcionario-form-layout">
+                <div class="rh-funcionario-form-main-col">
+                <div class="rh-funcionario-form-inner">
+                <nav class="rh-funcionario-form-nav" aria-label="Seções do cadastro" data-rh-form-nav>
+                    <button type="button" class="rh-funcionario-form-nav-item is-active" data-rh-section-trigger="ident">
+                        <span class="rh-funcionario-form-nav-label">Identificação</span>
+                    </button>
+                    <button type="button" class="rh-funcionario-form-nav-item" data-rh-section-trigger="contrato">
+                        <span class="rh-funcionario-form-nav-label">Contrato e cargo</span>
+                    </button>
+                    <button type="button" class="rh-funcionario-form-nav-item" data-rh-section-trigger="endereco">
+                        <span class="rh-funcionario-form-nav-label">Endereço</span>
+                    </button>
+                    <button type="button" class="rh-funcionario-form-nav-item" data-rh-section-trigger="banco">
+                        <span class="rh-funcionario-form-nav-label">Dados bancários</span>
+                    </button>
+                    <button type="button" class="rh-funcionario-form-nav-item" data-rh-section-trigger="obs">
+                        <span class="rh-funcionario-form-nav-label">Observações</span>
+                    </button>
+                </nav>
+
+                <div class="rh-funcionario-form-panels">
+                <section class="rh-funcionario-section rh-funcionario-panel is-active" data-rh-section-panel="ident" aria-labelledby="rh-sec-ident">
+                    <h3 class="rh-funcionario-section-title" id="rh-sec-ident">
+                        <i class="fas fa-id-card" aria-hidden="true"></i> Identificação
+                    </h3>
+                    <div class="rh-admissao-fields">
+                        <div class="rh-admissao-field rh-admissao-field--full">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'nome', name: 'nome', label: 'Nome completo', value: f ? f.nome : '', required: true, autocomplete: 'name' } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'email', name: 'email', label: 'E-mail', type: 'email', value: f ? f.email : '', required: true, autocomplete: 'email' } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'telefone', name: 'telefone', label: 'Telefone / WhatsApp', value: f ? f.telefone : '', placeholder: '(00) 00000-0000', inputmode: 'tel', attrs: { 'data-mask': 'phone' } } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'cpf', name: 'cpf', label: 'CPF', value: f ? f.cpf : '', placeholder: '000.000.000-00', inputmode: 'numeric', attrs: { 'data-mask': 'cpf' } } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'rg', name: 'rg', label: 'RG', value: f ? f.rg : '', placeholder: 'Documento de identidade' } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'data_nascimento', name: 'data_nascimento', label: 'Data de nascimento', type: 'date', value: f and f.dataNascimento ? f.dataNascimento|date('Y-m-d') : '' } %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="rh-funcionario-section rh-funcionario-panel" data-rh-section-panel="contrato" aria-labelledby="rh-sec-contrato" hidden>
+                    <h3 class="rh-funcionario-section-title" id="rh-sec-contrato">
+                        <i class="fas fa-briefcase" aria-hidden="true"></i> Contrato e cargo
+                    </h3>
+                    <div class="rh-admissao-fields">
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'cargo', name: 'cargo', label: 'Cargo', value: f ? f.cargo : '', autocomplete: 'organization-title' } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'departamento_id', name: 'departamento_id', label: 'Departamento', type: 'select', value: f and f.departamento ? f.departamento.id : '', options: dept_options } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'gestor_id', name: 'gestor_id', label: 'Gestor imediato', type: 'select', value: f and f.gestor ? f.gestor.id : '', options: gestor_options } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'tipo_contrato', name: 'tipo_contrato', label: 'Tipo de contrato', type: 'select', value: f ? f.tipoContrato : '', options: [
+                                { value: '', label: '—' },
+                                { value: 'CLT', label: 'CLT' },
+                                { value: 'PJ', label: 'PJ' },
+                                { value: 'ESTAGIO', label: 'Estágio' },
+                                { value: 'APRENDIZ', label: 'Aprendiz' },
+                                { value: 'TEMPORARIO', label: 'Temporário' },
+                            ]} %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'nivel_maturidade', name: 'nivel_maturidade', label: 'Nível', type: 'select', value: f ? f.nivelMaturidade : '', options: [
+                                { value: '', label: '—' },
+                                { value: 'INICIANTE', label: 'Iniciante' },
+                                { value: 'JUNIOR', label: 'Júnior' },
+                                { value: 'PLENO', label: 'Pleno' },
+                                { value: 'SENIOR', label: 'Sênior' },
+                                { value: 'ESPECIALISTA', label: 'Especialista' },
+                            ]} %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'salario', name: 'salario', label: 'Salário base', value: f and f.salario ? f.salario|number_format(2, ',', '.') : '', placeholder: 'R$ 0,00', inputmode: 'decimal', attrs: { 'data-mask': 'money' } } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'status', name: 'status', label: 'Status', type: 'select', value: f ? f.status : 'ATIVO', options: [
+                                { value: 'ATIVO', label: 'Ativo' },
+                                { value: 'INATIVO', label: 'Inativo' },
+                                { value: 'FERIAS', label: 'Férias' },
+                                { value: 'AFASTADO', label: 'Afastado' },
+                            ]} %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'data_admissao', name: 'data_admissao', label: 'Data admissão', type: 'date', value: f and f.dataAdmissao ? f.dataAdmissao|date('Y-m-d') : '' } %}
+                        </div>
+                        {% if is_edit %}
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'data_demissao', name: 'data_demissao', label: 'Data demissão', type: 'date', value: f.dataDemissao ? f.dataDemissao|date('Y-m-d') : '' } %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <section class="rh-funcionario-section rh-funcionario-panel" data-rh-section-panel="endereco" aria-labelledby="rh-sec-endereco" hidden>
+                    <h3 class="rh-funcionario-section-title" id="rh-sec-endereco">
+                        <i class="fas fa-location-dot" aria-hidden="true"></i> Endereço
+                    </h3>
+                    <div class="rh-admissao-fields">
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'cep', name: 'cep', label: 'CEP', value: f ? f.cep : '', placeholder: '00000-000', inputmode: 'numeric', attrs: { 'data-mask': 'cep', 'data-cep-lookup': '1' } } %}
+                        </div>
+                        <div class="rh-admissao-field rh-admissao-field--full">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'logradouro', name: 'logradouro', label: 'Logradouro', value: f ? f.logradouro : '', attrs: { 'data-cep-field': 'logradouro' } } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'numero', name: 'numero', label: 'Número', value: f ? f.numero : '' } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'complemento', name: 'complemento', label: 'Complemento', value: f ? f.complemento : '' } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'bairro', name: 'bairro', label: 'Bairro', value: f ? f.bairro : '', attrs: { 'data-cep-field': 'bairro' } } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'cidade', name: 'cidade', label: 'Cidade', value: f ? f.cidade : '', attrs: { 'data-cep-field': 'cidade' } } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'uf', name: 'uf', label: 'UF', type: 'select', value: f ? f.uf : '', options: uf_options, attrs: { 'data-cep-field': 'uf' } } %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="rh-funcionario-section rh-funcionario-panel" data-rh-section-panel="banco" aria-labelledby="rh-sec-banco" hidden>
+                    <h3 class="rh-funcionario-section-title" id="rh-sec-banco">
+                        <i class="fas fa-building-columns" aria-hidden="true"></i> Dados bancários
+                    </h3>
+                    <div class="rh-admissao-fields">
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'banco', name: 'banco', label: 'Banco', value: f ? f.banco : '', placeholder: 'Ex.: Itaú, Nubank' } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'agencia', name: 'agencia', label: 'Agência', value: f ? f.agencia : '', attrs: { 'data-mask': 'agency' } } %}
+                        </div>
+                        <div class="rh-admissao-field">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'conta', name: 'conta', label: 'Conta', value: f ? f.conta : '', placeholder: '000000-0' } %}
+                        </div>
+                        <div class="rh-admissao-field rh-admissao-field--full">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'pix', name: 'pix', label: 'Chave PIX', value: f ? f.pix : '', placeholder: 'CPF, e-mail, telefone ou aleatória' } %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="rh-funcionario-section rh-funcionario-panel" data-rh-section-panel="obs" aria-labelledby="rh-sec-obs" hidden>
+                    <h3 class="rh-funcionario-section-title" id="rh-sec-obs">
+                        <i class="fas fa-note-sticky" aria-hidden="true"></i> Observações
+                    </h3>
+                    <div class="rh-admissao-fields">
+                        <div class="rh-admissao-field rh-admissao-field--full">
+                            {% include 'components/huplex_form_field.html.twig' with { id: 'observacoes', name: 'observacoes', label: 'Notas internas', type: 'textarea', rows: 4, value: f ? f.observacoes : '', placeholder: 'Informações relevantes para RH (não visível ao colaborador).' } %}
+                        </div>
+                    </div>
+                </section>
                 </div>
-                <div class="rh-admissao-field rh-admissao-field--full">
-                    {% include 'components/huplex_form_field.html.twig' with { id: 'email', name: 'email', label: 'E-mail', type: 'email', value: f ? f.email : '', required: true } %}
                 </div>
-                <div class="rh-admissao-field">
-                    {% include 'components/huplex_form_field.html.twig' with { id: 'telefone', name: 'telefone', label: 'Telefone', value: f ? f.telefone : '' } %}
+
+                <p class="rh-admissao-required-note">
+                    <span class="huplex-form-required">*</span> Campos obrigatórios
+                </p>
+
+                <div class="rh-funcionario-form-step-actions">
+                    <button type="button" class="btn-huplex-ghost btn-sm" data-rh-section-prev hidden>
+                        <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Anterior
+                    </button>
+                    <button type="button" class="btn-huplex-ghost btn-sm" data-rh-section-next>
+                        Próximo <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <div class="rh-admissao-field">
-                    {% include 'components/huplex_form_field.html.twig' with { id: 'cargo', name: 'cargo', label: 'Cargo', value: f ? f.cargo : '' } %}
                 </div>
-                <div class="rh-admissao-field">
-                    {% set dept_options = [{ value: '', label: '—' }] %}
-                    {% for d in departamentos|default([]) %}
-                        {% set dept_options = dept_options|merge([{ value: d.id, label: d.nome }]) %}
-                    {% endfor %}
-                    {% include 'components/huplex_form_field.html.twig' with {
-                        id: 'departamento_id', name: 'departamento_id', label: 'Departamento', type: 'select',
-                        value: f and f.departamento ? f.departamento.id : '',
-                        options: dept_options
-                    } %}
+
+                <aside class="rh-admissao-aside">
+                    <div class="rh-funcionario-photo-card huplex-card">
+                        <p class="rh-admissao-aside-label">Foto do colaborador</p>
+                        {% include 'components/huplex/avatar_upload.html.twig' with {
+                            id: 'foto',
+                            name: 'foto',
+                            accept: 'image/jpeg,image/png,image/webp',
+                            hint: 'Clique ou arraste — JPG, PNG ou WebP, máx. 2 MB',
+                            current_url: is_edit and f.foto ? f.foto : null,
+                            show_remove: is_edit and f.foto
+                        } %}
+                    </div>
+
+                    <div class="rh-admissao-aside-card huplex-card">
+                        <p class="rh-admissao-aside-label">Área de trabalho</p>
+                        <p class="rh-admissao-aside-empresa">{{ empresa.nome }}</p>
+                        {% if empresa.setor %}
+                        <p class="rh-admissao-aside-meta">{{ empresa.setor }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="rh-admissao-aside-card rh-admissao-aside-card--tip huplex-card">
+                        <p class="rh-admissao-aside-label"><i class="fas fa-lightbulb"></i> Dica</p>
+                        <p class="rh-admissao-aside-hint mb-0">
+                            CPF e salário base alimentam folha e eSocial. O CEP preenche o endereço automaticamente.
+                        </p>
+                    </div>
+                </aside>
                 </div>
-                <div class="rh-admissao-field">
-                    {% include 'components/huplex_form_field.html.twig' with { id: 'salario', name: 'salario', label: 'Salário base', value: f ? f.salario : '', placeholder: '0,00' } %}
+
+                <div class="huplex-form-actions rh-admissao-actions">
+                    <a href="{{ is_edit ? path('app_rh_funcionario_show', { id: f.id }) : path('app_rh_funcionarios') }}" class="btn-huplex-ghost">Cancelar</a>
+                    <button type="submit" class="btn-huplex">
+                        <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar funcionário
+                    </button>
                 </div>
-                <div class="rh-admissao-field">
-                    {% include 'components/huplex_form_field.html.twig' with {
-                        id: 'status', name: 'status', label: 'Status', type: 'select',
-                        value: f ? f.status : 'ATIVO',
-                        options: [
-                            { value: 'ATIVO', label: 'Ativo' },
-                            { value: 'INATIVO', label: 'Inativo' },
-                            { value: 'FERIAS', label: 'Férias' },
-                            { value: 'AFASTADO', label: 'Afastado' }
-                        ]
-                    } %}
-                </div>
-                <div class="rh-admissao-field">
-                    {% include 'components/huplex_form_field.html.twig' with { id: 'data_admissao', name: 'data_admissao', label: 'Data admissão', type: 'date', value: f and f.dataAdmissao ? f.dataAdmissao|date('Y-m-d') : '' } %}
-                </div>
-                {% if is_edit %}
-                <div class="rh-admissao-field">
-                    {% include 'components/huplex_form_field.html.twig' with { id: 'data_demissao', name: 'data_demissao', label: 'Data demissão', type: 'date', value: f.dataDemissao ? f.dataDemissao|date('Y-m-d') : '' } %}
-                </div>
-                {% endif %}
-                <div class="rh-admissao-field rh-admissao-field--full">
-                    <label class="huplex-form-label">Foto</label>
-                    {% if is_edit and f.foto %}
-                    <p class="mb-2"><img src="{{ asset(f.foto) }}" alt="" style="max-height:64px;border-radius:8px;"></p>
-                    <label class="d-flex align-items-center gap-2 mb-2"><input type="checkbox" name="remove_foto" value="1"> Remover foto</label>
-                    {% endif %}
-                    <input type="file" name="foto" accept="image/jpeg,image/png,image/webp" class="huplex-form-control">
-                </div>
-            </div>
-            <div class="huplex-form-actions rh-admissao-actions">
-                <a href="{{ is_edit ? path('app_rh_funcionario_show', { id: f.id }) : path('app_rh_funcionarios') }}" class="btn-huplex-ghost">Cancelar</a>
-                <button type="submit" class="btn-huplex">Salvar</button>
-            </div>
-        </form>
+            </form>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/rh-funcionario-form.js') }}?v=2"></script>
 {% endblock %}

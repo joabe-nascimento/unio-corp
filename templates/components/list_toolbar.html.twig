@@ -37,6 +37,16 @@
             {% endif %}
             <div class="list-toolbar-heading">
                 {% if _is_page %}
+                    {% if page_back_route|default(null) and not page_back_hide|default(false) %}
+                        {% include 'components/page_back_link.html.twig' with {
+                            href: path(page_back_route, page_back_route_params|default({})),
+                            label: 'Voltar',
+                            icon_only: true,
+                            small: true,
+                            inline: true,
+                            bare: true
+                        } %}
+                    {% endif %}
                     <h1 class="list-toolbar-title">{{ page_title }}</h1>
                 {% endif %}
             </div>

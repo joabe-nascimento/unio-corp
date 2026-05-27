@@ -50,6 +50,46 @@ class FuncionarioRepository extends ServiceEntityRepository
         return (int) $qb->getQuery()->getSingleScalarResult() > 0;
     }
 
+    public function existsByCpf(Empresa $empresa, string $cpf, ?int $excludeId = null): bool
+    {
+        $digits = preg_replace('/\D+/', '', $cpf);
+        if ($digits === '') {
+            return false;
+        }
+
+        $qb = $this->createQueryBuilder('f')
+            ->select('COUNT(f.id)')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.cpf = :cpf')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('cpf', $digits);
+
+        if ($excludeId !== null) {
+            $qb->andWhere('f.id != :excludeId')
+                ->setParameter('excludeId', $excludeId);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /** @return list<Funcionario> */
+    public function findGestoresForSelect(Empresa $empresa, ?int $excludeId = null): array
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('statuses', ['ATIVO', 'FERIAS', 'AFASTADO'])
+            ->orderBy('f.nome', 'ASC');
+
+        if ($excludeId !== null) {
+            $qb->andWhere('f.id != :excludeId')
+                ->setParameter('excludeId', $excludeId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     /** @return list<Funcionario> */
     public function findForEmpresa(Empresa $empresa, ?string $status = null, ?string $q = null): array
     {

@@ -18,6 +18,7 @@ use App\Service\RhOnboardingService;
 use App\Service\RhUserProvisioningService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -57,6 +58,33 @@ class RhController extends AbstractController
             ['empresa' => $empresa],
             $this->hub->dashboard($empresa)
         ));
+    }
+
+    #[Route('/hub/ticker', name: 'app_rh_hub_ticker', methods: ['GET'])]
+    public function hubTicker(): JsonResponse
+    {
+        $empresa = $this->requireEmpresa();
+        $slides = [];
+
+        foreach ($this->hub->tickerSlides($empresa) as $slide) {
+            $item = [
+                'tag' => $slide['tag'],
+                'title' => $slide['title'],
+                'text' => $slide['text'],
+                'icon' => $slide['icon'],
+                'tone' => $slide['tone'],
+            ];
+            if (isset($slide['route'])) {
+                $item['url'] = $this->generateUrl($slide['route'], $slide['route_params'] ?? []);
+                $item['route_label'] = $slide['route_label'] ?? 'Ver mais';
+            }
+            $slides[] = $item;
+        }
+
+        return $this->json([
+            'slides' => $slides,
+            'updated_at' => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
+        ]);
     }
 
     #[Route('/admissoes', name: 'app_rh_admissoes')]

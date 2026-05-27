@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Service\ChatMockService;
 use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
+use App\Service\PageBackResolver;
 use App\Service\NotificationMockService;
 use App\Service\WorkspaceService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -35,6 +36,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private NotificationMockService $notifications,
         private ChatMockService $chat,
         private GlobalSearchService $globalSearch,
+        private PageBackResolver $pageBackResolver,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -77,6 +79,10 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             ) ?: '[]',
         );
         $this->twig->addGlobal('platform_modules', $this->navigation->getPlatformModules($user));
+
+        $pageBack = $this->pageBackResolver->resolve(\is_string($route) ? $route : null);
+        $this->twig->addGlobal('page_back_route', $pageBack['route'] ?? null);
+        $this->twig->addGlobal('page_back_route_params', $pageBack['params'] ?? []);
     }
 
     private function shouldSkip(?string $route): bool

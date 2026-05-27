@@ -1,5 +1,5 @@
 /**
- * huplex-file-upload — drop zone + preview do arquivo selecionado
+ * huplex-file-upload — drop zone + preview (arquivos e avatar)
  */
 (function () {
     'use strict';
@@ -79,8 +79,60 @@
         });
     }
 
+    function initAvatar(root) {
+        if (root.dataset.huplexAvatarUploadInit) return;
+        root.dataset.huplexAvatarUploadInit = '1';
+
+        var input = root.querySelector('.huplex-avatar-upload-input');
+        var zone = root.querySelector('.huplex-avatar-upload-zone');
+        var img = root.querySelector('[data-avatar-img]');
+        var placeholder = root.querySelector('[data-avatar-placeholder]');
+
+        if (!input || !zone || !img) return;
+
+        if (img.src && img.src !== window.location.href && !img.hidden) {
+            root.classList.add('huplex-avatar-upload--has-image');
+        }
+
+        function showImage(file) {
+            if (!file || !file.type.match(/^image\//)) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                img.src = e.target.result;
+                img.hidden = false;
+                if (placeholder) placeholder.hidden = true;
+                root.classList.add('huplex-avatar-upload--has-image');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        input.addEventListener('change', function () {
+            if (input.files && input.files[0]) showImage(input.files[0]);
+        });
+
+        ['dragenter', 'dragover'].forEach(function (ev) {
+            zone.addEventListener(ev, function (e) {
+                e.preventDefault();
+                root.classList.add('huplex-avatar-upload--over');
+            });
+        });
+        ['dragleave', 'drop'].forEach(function (ev) {
+            zone.addEventListener(ev, function (e) {
+                e.preventDefault();
+                root.classList.remove('huplex-avatar-upload--over');
+            });
+        });
+        zone.addEventListener('drop', function (e) {
+            var files = e.dataTransfer && e.dataTransfer.files;
+            if (!files || !files.length) return;
+            input.files = files;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    }
+
     function boot() {
         document.querySelectorAll('[data-huplex-file-upload]').forEach(init);
+        document.querySelectorAll('[data-huplex-avatar-upload]').forEach(initAvatar);
     }
 
     if (document.readyState === 'loading') {

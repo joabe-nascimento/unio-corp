@@ -26,7 +26,7 @@ Documento de acompanhamento do roadmap RH na branch `product/rh`. Base operacion
 |--------|------|--------|------------|
 | Folha legal | `/rh/folha-legal` | 🟡 Stub | Rubricas, holerite INSS/IRRF/FGTS simplificado |
 | Provisões | `/rh/contabilidade` | 🟡 Stub | Cálculo percentual sobre folha |
-| eSocial | `/rh/esocial` | 🟡 Stub | Lotes pendentes, sem envio real |
+| eSocial | `/rh/esocial` | 🟡 Fila MVP | Fila PENDENTE→PROCESSANDO→ENVIADO/ERRO, gateway sandbox, `app:rh-esocial-process-queue` |
 | Assinatura digital | `/rh/assinatura` | 🟡 Stub | Envelopes sem provedor externo |
 
 ## Fase 3 — Analytics

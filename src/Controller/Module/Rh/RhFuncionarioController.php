@@ -104,6 +104,7 @@ class RhFuncionarioController extends AbstractController
             'empresa' => $empresa,
             'funcionario' => $f,
             'departamentos' => $this->funcionarios->listDepartamentos($empresa),
+            'gestores' => $this->funcionarios->listGestores($empresa, $f?->getId()),
         ]);
     }
 }

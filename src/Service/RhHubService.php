@@ -9,6 +9,7 @@ use App\Entity\RhOffboardingProcess;
 use App\Entity\RhOnboardingProcess;
 use App\Repository\FuncionarioRepository;
 use App\Repository\RhFeriasRepository;
+use App\Repository\RhEsocialLoteRepository;
 use App\Repository\RhFolhaCompetenciaRepository;
 use App\Repository\RhOffboardingProcessRepository;
 use App\Repository\RhOnboardingProcessRepository;
@@ -26,6 +27,7 @@ class RhHubService
         private RhFolhaCompetenciaRepository $folhaRepo,
         private RhFeriasService $feriasService,
         private RhModuleStatsService $moduleStats,
+        private RhEsocialLoteRepository $esocialRepo,
     ) {}
 
     /** @return array<string, mixed> */
@@ -128,6 +130,75 @@ class RhHubService
             'activity_stream' => $activityStream,
             'processos_abertos_total' => $onboardingOpen + $offboardingOpen + $feriasPendentes,
             'hub_modules' => $this->moduleStats->hubModules($empresa),
+            'rh_ticker' => $this->tickerSlides($empresa),
+        ];
+    }
+
+    /**
+     * @return list<array{tag: string, title: string, text: string, icon: string, tone: string, route?: string, route_label?: string, route_params?: array<string, int|string>}>
+     */
+    public function tickerSlides(Empresa $empresa): array
+    {
+        $ctx = $this->collectTickerContext($empresa);
+
+        return $this->buildTickerSlides(
+            $ctx['ativos'],
+            $ctx['onboarding_open'],
+            $ctx['offboarding_open'],
+            $ctx['ferias_pendentes'],
+            $ctx['ferias_em_gozo'],
+            $ctx['sem_salario'],
+            $ctx['com_usuario'],
+            $ctx['admitidos_mes'],
+            $ctx['concluidos_mes'],
+            $ctx['folha'],
+            $ctx['ref'],
+            $ctx['ref_label'],
+            $ctx['pulse'],
+            $ctx['esocial_pending'],
+        );
+    }
+
+    /** @return array<string, mixed> */
+    private function collectTickerContext(Empresa $empresa): array
+    {
+        $this->feriasService->syncStatusByDate($empresa);
+
+        $now = new \DateTimeImmutable();
+        $ref = $now->format('Y-m');
+        $monthStart = $now->modify('first day of this month')->setTime(0, 0);
+        $folha = $this->folhaRepo->findOneByReferencia($empresa, $ref);
+        $headcount = $this->funcionarioRepo->countByStatusGrouped($empresa);
+        $ativos = $headcount['ATIVO'] ?? 0;
+        $onboardingOpen = $this->onboarding->countOpen($empresa);
+        $offboardingOpen = $this->offboarding->countOpen($empresa);
+        $feriasPendentes = $this->feriasRepo->countByStatus($empresa, RhFerias::STATUS_SOLICITADA);
+        $feriasEmGozo = $this->feriasRepo->countByStatus($empresa, RhFerias::STATUS_EM_GOZO);
+        $openOnboarding = $this->onboardingRepo->findOpenRecent($empresa, 8);
+        $semSalario = $this->funcionarioRepo->countActiveWithoutSalary($empresa);
+
+        return [
+            'ativos' => $ativos,
+            'onboarding_open' => $onboardingOpen,
+            'offboarding_open' => $offboardingOpen,
+            'ferias_pendentes' => $feriasPendentes,
+            'ferias_em_gozo' => $feriasEmGozo,
+            'sem_salario' => $semSalario,
+            'com_usuario' => $this->funcionarioRepo->countWithPlatformUser($empresa),
+            'admitidos_mes' => $this->funcionarioRepo->countAdmittedSince($empresa, $monthStart),
+            'concluidos_mes' => $this->onboardingRepo->countConcludedSince($empresa, $monthStart),
+            'folha' => $folha,
+            'ref' => $ref,
+            'ref_label' => $this->formatCompetencia($ref),
+            'pulse' => $this->computePulseScore(
+                $feriasPendentes,
+                $onboardingOpen,
+                $offboardingOpen,
+                $folha,
+                $openOnboarding,
+                $semSalario,
+            ),
+            'esocial_pending' => $this->esocialRepo->countPendingByEmpresa($empresa),
         ];
     }
 
@@ -715,6 +786,243 @@ class RhHubService
         usort($items, static fn (array $a, array $b) => ($order[$a['urgency']] ?? 9) <=> ($order[$b['urgency']] ?? 9));
 
         return \array_slice($items, 0, 8);
+    }
+
+    /**
+     * @param array{score: int, label: string, tone: string, hint: string} $pulse
+     *
+     * @return list<array{tag: string, title: string, text: string, icon: string, tone: string, route?: string, route_label?: string}>
+     */
+    private function buildTickerSlides(
+        int $ativos,
+        int $onboardingOpen,
+        int $offboardingOpen,
+        int $feriasPendentes,
+        int $feriasEmGozo,
+        int $semSalario,
+        int $comUsuario,
+        int $admitidosMes,
+        int $concluidosMes,
+        ?RhFolhaCompetencia $folha,
+        string $ref,
+        string $refLabel,
+        array $pulse,
+        int $esocialPending,
+    ): array {
+        $slides = [];
+
+        if ($feriasPendentes > 0) {
+            $slides[] = [
+                'tag' => 'Operação',
+                'title' => $feriasPendentes === 1
+                    ? '1 férias aguardando aprovação'
+                    : $feriasPendentes . ' férias aguardando aprovação',
+                'text' => 'Responda solicitações antes do próximo fechamento para evitar atrasos na escala.',
+                'icon' => 'fa-umbrella-beach',
+                'tone' => 'amber',
+                'route' => 'app_rh_ferias',
+                'route_label' => 'Ver férias',
+            ];
+        }
+
+        if ($onboardingOpen > 0) {
+            $slides[] = [
+                'tag' => 'Admissões',
+                'title' => $onboardingOpen === 1
+                    ? '1 admissão em andamento'
+                    : $onboardingOpen . ' admissões em andamento',
+                'text' => 'Complete checklists e documentos para liberar cadastro e folha do colaborador.',
+                'icon' => 'fa-user-plus',
+                'tone' => 'blue',
+                'route' => 'app_rh_admissoes',
+                'route_label' => 'Abrir admissões',
+            ];
+        }
+
+        if ($offboardingOpen > 0) {
+            $slides[] = [
+                'tag' => 'Desligamentos',
+                'title' => $offboardingOpen === 1
+                    ? '1 desligamento ativo'
+                    : $offboardingOpen . ' desligamentos ativos',
+                'text' => 'Revise rescisão, entrega de equipamentos e eventos de saída no eSocial.',
+                'icon' => 'fa-door-open',
+                'tone' => 'rose',
+                'route' => 'app_rh_demissoes',
+                'route_label' => 'Ver desligamentos',
+            ];
+        }
+
+        if ($esocialPending > 0) {
+            $slides[] = [
+                'tag' => 'Compliance',
+                'title' => $esocialPending === 1
+                    ? '1 lote eSocial na fila'
+                    : $esocialPending . ' lotes eSocial na fila',
+                'text' => 'Processe ou reenvie lotes pendentes para manter a folha em dia com o governo.',
+                'icon' => 'fa-landmark',
+                'tone' => 'amber',
+                'route' => 'app_rh_esocial',
+                'route_label' => 'Fila eSocial',
+            ];
+        }
+
+        if (!$folha) {
+            $slides[] = [
+                'tag' => 'Folha',
+                'title' => 'Folha de ' . $refLabel . ' ainda não gerada',
+                'text' => 'Gere a competência atual para calcular proventos, descontos e encargos.',
+                'icon' => 'fa-file-invoice-dollar',
+                'tone' => 'warning',
+                'route' => 'app_rh_folha',
+                'route_label' => 'Ir para folha',
+            ];
+        } elseif (!$folha->isFechada()) {
+            $slides[] = [
+                'tag' => 'Folha',
+                'title' => 'Competência ' . $refLabel . ' aberta',
+                'text' => 'Revise lançamentos e feche a folha após conferir totais e holerites.',
+                'icon' => 'fa-lock-open',
+                'tone' => 'blue',
+                'route' => 'app_rh_folha_show',
+                'route_label' => 'Revisar folha',
+                'route_params' => ['id' => $folha->getId()],
+            ];
+        }
+
+        if ($semSalario > 0) {
+            $slides[] = [
+                'tag' => 'Cadastro',
+                'title' => $semSalario === 1
+                    ? '1 colaborador sem salário cadastrado'
+                    : $semSalario . ' colaboradores sem salário cadastrado',
+                'text' => 'Salário base é obrigatório para gerar folha e calcular encargos corretamente.',
+                'icon' => 'fa-coins',
+                'tone' => 'warning',
+                'route' => 'app_rh_funcionarios',
+                'route_label' => 'Ver cadastros',
+            ];
+        }
+
+        if ($admitidosMes > 0) {
+            $slides[] = [
+                'tag' => 'Movimento',
+                'title' => $admitidosMes === 1
+                    ? '1 admissão concluída este mês'
+                    : $admitidosMes . ' admissões concluídas este mês',
+                'text' => $concluidosMes > 0
+                    ? $concluidosMes . ' processo(s) finalizado(s) no fluxo de onboarding.'
+                    : 'Time em expansão — acompanhe integração e documentação.',
+                'icon' => 'fa-chart-line',
+                'tone' => 'green',
+                'route' => 'app_rh_funcionarios',
+                'route_label' => 'Ver colaboradores',
+            ];
+        }
+
+        if ($feriasEmGozo > 0) {
+            $slides[] = [
+                'tag' => 'Operação',
+                'title' => $feriasEmGozo === 1
+                    ? '1 colaborador em férias agora'
+                    : $feriasEmGozo . ' colaboradores em férias agora',
+                'text' => 'Planeje cobertura de turnos e retorno conforme calendário da equipe.',
+                'icon' => 'fa-sun',
+                'tone' => 'green',
+                'route' => 'app_rh_ferias',
+                'route_label' => 'Calendário',
+            ];
+        }
+
+        $slides[] = [
+            'tag' => 'Headcount',
+            'title' => $ativos === 1 ? '1 colaborador ativo' : $ativos . ' colaboradores ativos',
+            'text' => $comUsuario > 0
+                ? $comUsuario . ' com acesso ao portal — holerite, férias e dados pessoais.'
+                : 'Cadastre usuários no portal para self-service de holerite e férias.',
+            'icon' => 'fa-users',
+            'tone' => 'blue',
+            'route' => 'app_rh_funcionarios',
+            'route_label' => 'Ver equipe',
+        ];
+
+        if ($pulse['score'] >= 85) {
+            $slides[] = [
+                'tag' => 'RH Pulse',
+                'title' => 'Saúde operacional: ' . $pulse['label'],
+                'text' => $pulse['hint'],
+                'icon' => 'fa-heart-pulse',
+                'tone' => 'green',
+            ];
+        }
+
+        $tips = $this->buildTickerTips($refLabel);
+        $dayIndex = (int) (new \DateTimeImmutable())->format('j') % \count($tips);
+        $rotatedTips = array_merge(
+            \array_slice($tips, $dayIndex),
+            \array_slice($tips, 0, $dayIndex),
+        );
+
+        foreach ($rotatedTips as $tip) {
+            if (\count($slides) >= 8) {
+                break;
+            }
+            $slides[] = $tip;
+        }
+
+        return \array_slice($slides, 0, 8);
+    }
+
+    /** @return list<array{tag: string, title: string, text: string, icon: string, tone: string, route?: string, route_label?: string}> */
+    private function buildTickerTips(string $refLabel): array
+    {
+        return [
+            [
+                'tag' => 'Dica RH',
+                'title' => 'Portal do colaborador',
+                'text' => 'Holerites, solicitação de férias e atualização de dados em um só lugar.',
+                'icon' => 'fa-id-badge',
+                'tone' => 'violet',
+                'route' => 'app_rh_portal',
+                'route_label' => 'Abrir portal',
+            ],
+            [
+                'tag' => 'CLT',
+                'title' => 'Prazo de férias',
+                'text' => 'Boas práticas: analise pedidos em até 5 dias úteis e registre gozo com antecedência.',
+                'icon' => 'fa-scale-balanced',
+                'tone' => 'amber',
+                'route' => 'app_rh_ferias',
+                'route_label' => 'Fluxo de férias',
+            ],
+            [
+                'tag' => 'Compliance',
+                'title' => 'eSocial em dia',
+                'text' => 'Enfileire eventos de admissão, alteração e desligamento antes de fechar ' . $refLabel . '.',
+                'icon' => 'fa-shield-halved',
+                'tone' => 'amber',
+                'route' => 'app_rh_esocial',
+                'route_label' => 'Enviar lotes',
+            ],
+            [
+                'tag' => 'Onboarding',
+                'title' => 'Checklist de admissão',
+                'text' => 'Documentos, contrato e dados bancários completos evitam retrabalho na folha.',
+                'icon' => 'fa-clipboard-check',
+                'tone' => 'blue',
+                'route' => 'app_rh_admissoes',
+                'route_label' => 'Ver processos',
+            ],
+            [
+                'tag' => 'Folha',
+                'title' => 'Fechamento mensal',
+                'text' => 'Confira totais, INSS e FGTS antes de liberar holerites para a equipe.',
+                'icon' => 'fa-calculator',
+                'tone' => 'blue',
+                'route' => 'app_rh_folha',
+                'route_label' => 'Competências',
+            ],
+        ];
     }
 
     private function formatCompetencia(string $ref): string

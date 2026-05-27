@@ -67,7 +67,7 @@ class RhModuleStatsService
             'workflows' => ['count' => $this->workflowRepo->countAtivosByEmpresa($empresa), 'label' => 'templates'],
             'folha_legal' => ['count' => $this->rubricaRepo->countByEmpresa($empresa), 'label' => 'rubricas'],
             'contabilidade' => ['count' => $this->provisaoRepo->countByEmpresa($empresa), 'label' => 'provisões'],
-            'esocial' => ['count' => $this->esocialRepo->countByEmpresa($empresa), 'label' => 'lotes'],
+            'esocial' => ['count' => $this->esocialRepo->countPendingByEmpresa($empresa), 'label' => 'na fila'],
             'assinatura' => ['count' => $this->assinaturaRepo->countByEmpresa($empresa), 'label' => 'envelopes'],
             'analytics' => ['count' => $ativos + $this->onboarding->countOpen($empresa), 'label' => 'indicadores'],
         ];
@@ -76,13 +76,27 @@ class RhModuleStatsService
         foreach (RhModuleCatalog::all() as $mod) {
             $id = $mod['id'];
             $stat = $counts[$id] ?? ['count' => 0, 'label' => '—'];
+            $count = (int) ($stat['count'] ?? 0);
+            $pulse = (bool) ($mod['activity_pulse'] ?? false);
             $modules[] = array_merge($mod, [
-                'count' => $stat['count'],
+                'count' => $count,
                 'count_label' => $stat['label'],
+                'has_activity' => $pulse && $count > 0,
                 'grant_scope' => 'product_rh',
                 'grant_product' => $mod['grant'],
+                'group' => $mod['group'] ?? RhModuleCatalog::GROUP_OPERACAO,
+                'short' => $mod['short'] ?? $mod['title'],
             ]);
         }
+
+        usort($modules, static function (array $a, array $b): int {
+            $active = ($b['has_activity'] ?? false) <=> ($a['has_activity'] ?? false);
+            if ($active !== 0) {
+                return $active;
+            }
+
+            return strcmp((string) ($a['short'] ?? ''), (string) ($b['short'] ?? ''));
+        });
 
         return $modules;
     }

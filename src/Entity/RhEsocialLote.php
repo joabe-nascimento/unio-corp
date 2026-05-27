@@ -9,6 +9,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'rh_esocial_lote')]
 class RhEsocialLote
 {
+    public const STATUS_PENDENTE = 'PENDENTE';
+    public const STATUS_PROCESSANDO = 'PROCESSANDO';
+    public const STATUS_ENVIADO = 'ENVIADO';
+    public const STATUS_ERRO = 'ERRO';
+
+    public const MAX_TENTATIVAS = 5;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -39,6 +46,12 @@ class RhEsocialLote
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $enviadoEm = null;
 
+    #[ORM\Column(options: ['default' => 0])]
+    private int $tentativas = 0;
+
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $ultimoErro = null;
+
     public function __construct()
     {
         $this->criadoEm = new \DateTimeImmutable();
@@ -67,5 +80,19 @@ class RhEsocialLote
     public function getCriadoEm(): \DateTimeImmutable { return $this->criadoEm; }
 
     public function getEnviadoEm(): ?\DateTimeImmutable { return $this->enviadoEm; }
+
     public function setEnviadoEm(?\DateTimeImmutable $enviadoEm): static { $this->enviadoEm = $enviadoEm; return $this; }
+
+    public function getTentativas(): int { return $this->tentativas; }
+
+    public function setTentativas(int $tentativas): static { $this->tentativas = $tentativas; return $this; }
+
+    public function getUltimoErro(): ?string { return $this->ultimoErro; }
+
+    public function setUltimoErro(?string $ultimoErro): static { $this->ultimoErro = $ultimoErro; return $this; }
+
+    public function canRetry(): bool
+    {
+        return $this->status === self::STATUS_ERRO && $this->tentativas < self::MAX_TENTATIVAS;
+    }
 }

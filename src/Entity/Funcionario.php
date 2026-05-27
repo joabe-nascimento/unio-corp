@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FuncionarioRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_FUNCIONARIO_EMPRESA_EMAIL', fields: ['empresa', 'email'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_FUNCIONARIO_EMPRESA_CPF', fields: ['empresa', 'cpf'])]
 class Funcionario
 {
     #[ORM\Id]
@@ -42,6 +43,54 @@ class Funcionario
 
     #[ORM\Column(nullable: true)]
     private ?string $foto = null;
+
+    #[ORM\Column(length: 11, nullable: true)]
+    private ?string $cpf = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $rg = null;
+
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dataNascimento = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $tipoContrato = null;
+
+    #[ORM\Column(length: 8, nullable: true)]
+    private ?string $cep = null;
+
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $logradouro = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $numero = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $complemento = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $bairro = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $cidade = null;
+
+    #[ORM\Column(length: 2, nullable: true)]
+    private ?string $uf = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $banco = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $agencia = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $conta = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $pix = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $observacoes = null;
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $nivelMaturidade = null; // INICIANTE, JUNIOR, PLENO, SENIOR, ESPECIALISTA
@@ -141,4 +190,37 @@ class Funcionario
         $parts = explode(' ', $this->nome ?? '');
         return strtoupper(substr($parts[0] ?? '', 0, 1) . substr($parts[1] ?? '', 0, 1)) ?: 'FN';
     }
+
+    public function getCpf(): ?string { return $this->cpf; }
+    public function setCpf(?string $v): static { $this->cpf = $v; return $this; }
+    public function getRg(): ?string { return $this->rg; }
+    public function setRg(?string $v): static { $this->rg = $v; return $this; }
+    public function getDataNascimento(): ?\DateTimeImmutable { return $this->dataNascimento; }
+    public function setDataNascimento(?\DateTimeImmutable $v): static { $this->dataNascimento = $v; return $this; }
+    public function getTipoContrato(): ?string { return $this->tipoContrato; }
+    public function setTipoContrato(?string $v): static { $this->tipoContrato = $v; return $this; }
+    public function getCep(): ?string { return $this->cep; }
+    public function setCep(?string $v): static { $this->cep = $v; return $this; }
+    public function getLogradouro(): ?string { return $this->logradouro; }
+    public function setLogradouro(?string $v): static { $this->logradouro = $v; return $this; }
+    public function getNumero(): ?string { return $this->numero; }
+    public function setNumero(?string $v): static { $this->numero = $v; return $this; }
+    public function getComplemento(): ?string { return $this->complemento; }
+    public function setComplemento(?string $v): static { $this->complemento = $v; return $this; }
+    public function getBairro(): ?string { return $this->bairro; }
+    public function setBairro(?string $v): static { $this->bairro = $v; return $this; }
+    public function getCidade(): ?string { return $this->cidade; }
+    public function setCidade(?string $v): static { $this->cidade = $v; return $this; }
+    public function getUf(): ?string { return $this->uf; }
+    public function setUf(?string $v): static { $this->uf = $v; return $this; }
+    public function getBanco(): ?string { return $this->banco; }
+    public function setBanco(?string $v): static { $this->banco = $v; return $this; }
+    public function getAgencia(): ?string { return $this->agencia; }
+    public function setAgencia(?string $v): static { $this->agencia = $v; return $this; }
+    public function getConta(): ?string { return $this->conta; }
+    public function setConta(?string $v): static { $this->conta = $v; return $this; }
+    public function getPix(): ?string { return $this->pix; }
+    public function setPix(?string $v): static { $this->pix = $v; return $this; }
+    public function getObservacoes(): ?string { return $this->observacoes; }
+    public function setObservacoes(?string $v): static { $this->observacoes = $v; return $this; }
 }

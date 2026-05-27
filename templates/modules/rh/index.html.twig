@@ -16,9 +16,6 @@
     {% if product_grant('product_rh', 'ferias') %}
         {% set kpi_items = kpi_items|merge([{ value: ferias_pendentes|default(0), label: 'Férias', sub: ferias_em_gozo ~ ' em gozo', route: 'app_rh_ferias' }]) %}
     {% endif %}
-    {% if product_grant('product_rh', 'admissoes') %}
-        {% set kpi_items = kpi_items|merge([{ value: offboarding_open|default(0), label: 'Demissões', sub: 'Offboarding em aberto', route: 'app_rh_demissoes' }]) %}
-    {% endif %}
     {% if product_grant('product_rh', 'folha') %}
         {% set kpi_items = kpi_items|merge([{ value: folha_status|default('—'), label: 'Folha', sub: folha_ref_label|default('Competência'), route: 'app_rh_folha' }]) %}
     {% endif %}
@@ -26,12 +23,6 @@
         {% include 'components/kpi_row.html.twig' with { items: kpi_items, mb: 'mb-0' } %}
     {% endif %}
 </div>
-{% endif %}
-{% endblock %}
-
-{% block hub_section_toolbar %}
-{% if scope_has_products('product_rh') %}
-    {% include 'components/rh/hub_action_rail.html.twig' %}
 {% endif %}
 {% endblock %}
 
@@ -79,5 +70,5 @@
 
 {% block javascripts %}
 {{ parent() }}
-<script src="{{ asset('js/rh-hub-dashboard.js') }}?v=6"></script>
+<script src="{{ asset('js/rh-hub-dashboard.js') }}?v=8"></script>
 {% endblock %}

@@ -16,7 +16,7 @@
         {% if field_required %}<span class="huplex-form-required">*</span>{% endif %}
     </label>
     {% if field_type == 'select' %}
-        <select class="huplex-form-control" id="{{ id }}" name="{{ name }}"{% if field_required %} required{% endif %}>
+        <select class="huplex-form-control" id="{{ id }}" name="{{ name }}"{% if field_required %} required{% endif %}{% if attrs is defined %}{% for attr_name, attr_value in attrs %} {{ attr_name }}="{{ attr_value }}"{% endfor %}{% endif %}>
             {% for opt in field_options %}
                 <option value="{{ opt.value }}"{% if opt.value == field_value %} selected{% endif %}>{{ opt.label }}</option>
             {% endfor %}
@@ -25,11 +25,19 @@
         <textarea class="huplex-form-control" id="{{ id }}" name="{{ name }}" rows="{{ field_rows }}"{% if placeholder is defined and placeholder %} placeholder="{{ placeholder }}"{% endif %}>{{ field_value }}</textarea>
     {% else %}
         <input type="{{ field_type }}"
-               class="huplex-form-control"
+               class="huplex-form-control{% if input_class is defined %} {{ input_class }}{% endif %}"
                id="{{ id }}"
                name="{{ name }}"
                value="{{ field_value }}"
                {% if placeholder is defined and placeholder %}placeholder="{{ placeholder }}"{% endif %}
+               {% if inputmode is defined and inputmode %}inputmode="{{ inputmode }}"{% endif %}
+               {% if maxlength is defined and maxlength %}maxlength="{{ maxlength }}"{% endif %}
+               {% if autocomplete is defined and autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+               {% if attrs is defined %}
+                   {% for attr_name, attr_value in attrs %}
+                       {{ attr_name }}="{{ attr_value }}"
+                   {% endfor %}
+               {% endif %}
                {% if field_required %}required{% endif %}>
     {% endif %}
 </div>

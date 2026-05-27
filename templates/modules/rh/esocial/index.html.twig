@@ -4,41 +4,101 @@
 {% set hub_page_title = 'eSocial' %}
 
 {% block hub_content %}
+<div class="rh-esocial-summary">
+    <div class="rh-esocial-stat">
+        <span class="rh-esocial-stat-value">{{ queue.pendente }}</span>
+        <span class="rh-esocial-stat-label">Na fila</span>
+    </div>
+    <div class="rh-esocial-stat">
+        <span class="rh-esocial-stat-value">{{ queue.processando }}</span>
+        <span class="rh-esocial-stat-label">Processando</span>
+    </div>
+    <div class="rh-esocial-stat">
+        <span class="rh-esocial-stat-value">{{ queue.enviado }}</span>
+        <span class="rh-esocial-stat-label">Enviados</span>
+    </div>
+    <div class="rh-esocial-stat">
+        <span class="rh-esocial-stat-value">{{ queue.erro }}</span>
+        <span class="rh-esocial-stat-label">Com erro</span>
+    </div>
+</div>
+
 {% if grant_at_least('product_rh', 'esocial', 'GESTOR') %}
 <div class="huplex-card p-4 mb-3">
-    <form method="post" action="{{ path('app_rh_esocial') }}">
-        <input type="hidden" name="_token" value="{{ csrf_token('rh_esocial_lote') }}">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-3"><input type="month" name="referencia" class="form-control" value="{{ 'now'|date('Y-m') }}"></div>
-            <div class="col-md-3">
-                <select name="tipo_evento" class="form-select">
-                    <option value="S1200">S-1200</option>
-                    <option value="S1210">S-1210</option>
+    <div class="d-flex flex-wrap gap-2 align-items-end justify-content-between">
+        <form method="post" action="{{ path('app_rh_esocial') }}" class="d-flex flex-wrap gap-2 align-items-end flex-grow-1">
+            <input type="hidden" name="_token" value="{{ csrf_token('rh_esocial_lote') }}">
+            <input type="hidden" name="action" value="criar">
+            <div>
+                <label class="form-label small text-muted mb-1">Competência</label>
+                <input type="month" name="referencia" class="form-control form-control-sm" value="{{ 'now'|date('Y-m') }}">
+            </div>
+            <div>
+                <label class="form-label small text-muted mb-1">Evento</label>
+                <select name="tipo_evento" class="form-select form-select-sm">
+                    <option value="S1200">S-1200 — Remuneração</option>
+                    <option value="S1210">S-1210 — Pagamentos</option>
+                    <option value="S1299">S-1299 — Fechamento</option>
                 </select>
             </div>
-            <div class="col-md-3"><button type="submit" class="btn-huplex btn-sm">Criar lote (stub)</button></div>
-        </div>
-    </form>
+            <div><button type="submit" class="btn-huplex btn-sm">Enfileirar lote</button></div>
+        </form>
+        {% if queue.pendente > 0 or queue.erro > 0 %}
+        <form method="post" action="{{ path('app_rh_esocial') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('rh_esocial_processar') }}">
+            <input type="hidden" name="action" value="processar">
+            <button type="submit" class="btn-huplex btn-sm btn-huplex-primary">Processar fila</button>
+        </form>
+        {% endif %}
+    </div>
+    <p class="text-muted small mb-0 mt-2">Ambiente de homologação: gera protocolo simulado. Em produção, substitua <code>RhEsocialGateway</code> pelo webservice oficial.</p>
 </div>
 {% endif %}
 
 <div class="huplex-card p-4">
     {% if lotes is empty %}
-        <p class="text-muted mb-0">Nenhum lote eSocial.</p>
+        <p class="text-muted mb-0">Nenhum lote na fila.</p>
     {% else %}
-    <table class="table table-huplex mb-0">
-        <thead><tr><th>Ref.</th><th>Evento</th><th>Status</th><th>Criado</th></tr></thead>
-        <tbody>
-        {% for l in lotes %}
-        <tr>
-            <td>{{ l.referencia }}</td>
-            <td>{{ l.tipoEvento }}</td>
-            <td>{{ l.status }}</td>
-            <td>{{ l.criadoEm|date('d/m/Y') }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-huplex mb-0">
+            <thead>
+                <tr>
+                    <th>Competência</th>
+                    <th>Evento</th>
+                    <th>Status</th>
+                    <th>Protocolo</th>
+                    <th>Tentativas</th>
+                    <th>Criado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for l in lotes %}
+            <tr>
+                <td>{{ l.referencia }}</td>
+                <td>{{ l.tipoEvento }}</td>
+                <td>
+                    <span class="rh-esocial-status rh-esocial-status--{{ l.status|lower }}">{{ l.status }}</span>
+                    {% if l.ultimoErro %}
+                        <div class="small text-danger mt-1">{{ l.ultimoErro }}</div>
+                    {% endif %}
+                </td>
+                <td class="text-muted small">{{ l.protocolo|default('—') }}</td>
+                <td>{{ l.tentativas }}</td>
+                <td>{{ l.criadoEm|date('d/m/Y H:i') }}</td>
+                <td class="text-end">
+                    {% if grant_at_least('product_rh', 'esocial', 'GESTOR') and l.canRetry %}
+                    <form method="post" action="{{ path('app_rh_esocial_retry', { id: l.id }) }}" class="d-inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token('rh_esocial_retry_' ~ l.id) }}">
+                        <button type="submit" class="btn btn-link btn-sm p-0">Reenviar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

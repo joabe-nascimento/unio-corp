@@ -1,0 +1,52 @@
+{#
+  huplex/avatar_upload — foto de perfil com preview integrado (clique ou arraste)
+
+  Props:
+    id              (string, obrig.)   id do input file
+    name            (string, obrig.)   name do input
+    accept          (string, opt)      tipos MIME aceitos
+    hint            (string, opt)      texto de formatos/tamanho
+    required        (bool, opt)
+    current_url     (string, opt)      URL da foto atual (edição)
+    show_remove     (bool, opt)        exibe checkbox "Remover foto atual"
+    remove_name     (string, opt)      name do checkbox (default: remove_foto)
+    size            (string, opt)      sm | md (default: md)
+#}
+{% set _id = id %}
+{% set _hint = hint|default('JPG, PNG ou WebP — máx. 2 MB') %}
+{% set _size = size|default('md') %}
+<div class="huplex-avatar-upload huplex-avatar-upload--{{ _size }}"
+     data-huplex-avatar-upload>
+    <input type="file"
+           id="{{ _id }}"
+           name="{{ name }}"
+           class="huplex-avatar-upload-input"
+           {% if accept is defined and accept %}accept="{{ accept }}"{% endif %}
+           {% if required|default(false) %}required{% endif %}>
+    <label class="huplex-avatar-upload-zone" for="{{ _id }}">
+        <span class="huplex-avatar-upload-frame">
+            {% if current_url|default('') %}
+                <img src="{{ asset(current_url) }}" alt="" class="huplex-avatar-upload-img" data-avatar-img>
+                <span class="huplex-avatar-upload-placeholder" hidden data-avatar-placeholder aria-hidden="true">
+                    <i class="fas fa-user"></i>
+                </span>
+            {% else %}
+                <span class="huplex-avatar-upload-placeholder" data-avatar-placeholder aria-hidden="true">
+                    <i class="fas fa-user"></i>
+                </span>
+                <img src="" alt="" class="huplex-avatar-upload-img" hidden data-avatar-img>
+            {% endif %}
+            <span class="huplex-avatar-upload-overlay">
+                <i class="fas fa-camera" aria-hidden="true"></i>
+                <span class="huplex-avatar-upload-overlay-text">Alterar foto</span>
+            </span>
+        </span>
+        <span class="huplex-avatar-upload-hint">{{ _hint }}</span>
+    </label>
+    {% if show_remove|default(false) %}
+    <label class="huplex-avatar-upload-remove">
+        <input type="checkbox" name="{{ remove_name|default('remove_foto') }}" value="1">
+        Remover foto atual
+    </label>
+    {% endif %}
+</div>

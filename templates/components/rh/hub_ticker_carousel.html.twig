@@ -1,0 +1,61 @@
+{# rh/hub_ticker_carousel — faixa rotativa de insights RH no hero #}
+{% set slides = rh_ticker|default([]) %}
+{% if slides|length > 0 %}
+<div
+    class="rh-hub-ticker"
+    data-rh-ticker
+    data-rh-ticker-interval="6000"
+    data-rh-ticker-url="{{ path('app_rh_hub_ticker') }}"
+    data-rh-ticker-poll="45000"
+    aria-live="polite"
+    aria-atomic="true"
+>
+    <div class="rh-hub-ticker-viewport" data-rh-ticker-viewport>
+        {% for slide in slides %}
+            <article
+                class="rh-hub-ticker-slide{% if loop.first %} is-active{% endif %}"
+                data-rh-ticker-slide
+                data-tone="{{ slide.tone|default('blue') }}"
+                data-slide-title="{{ slide.title }}"
+                {% if not loop.first %}hidden{% endif %}
+            >
+                <div class="rh-hub-ticker-slide-head">
+                    <span class="rh-hub-ticker-tag rh-hub-ticker-tag--{{ slide.tone|default('blue') }}">
+                        <i class="fas {{ slide.icon|default('fa-circle-info') }}" aria-hidden="true"></i>
+                        {{ slide.tag|default('RH') }}
+                    </span>
+                    {% if slide.route is defined and slide.route %}
+                        <a href="{{ path(slide.route, slide.route_params|default({})) }}" class="rh-hub-ticker-link">
+                            {{ slide.route_label|default('Ver mais') }}
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <h3 class="rh-hub-ticker-title">{{ slide.title }}</h3>
+                <p class="rh-hub-ticker-text">{{ slide.text }}</p>
+            </article>
+        {% endfor %}
+    </div>
+    <div class="rh-hub-ticker-foot" data-rh-ticker-foot{% if slides|length <= 1 %} hidden{% endif %}>
+        <div class="rh-hub-ticker-dots" role="tablist" aria-label="Destaques do hub" data-rh-ticker-dots>
+            {% for slide in slides %}
+                <button
+                    type="button"
+                    class="rh-hub-ticker-dot{% if loop.first %} is-active{% endif %}"
+                    data-rh-ticker-dot
+                    role="tab"
+                    aria-selected="{{ loop.first ? 'true' : 'false' }}"
+                    aria-label="Destaque {{ loop.index }}: {{ slide.title|striptags }}"
+                ></button>
+            {% endfor %}
+        </div>
+        <div class="rh-hub-ticker-progress" aria-hidden="true">
+            <span class="rh-hub-ticker-progress-bar" data-rh-ticker-progress></span>
+        </div>
+        <span class="rh-hub-ticker-live" data-rh-ticker-live aria-hidden="true">
+            <span class="rh-hub-ticker-live-dot"></span>
+            Atualizado
+        </span>
+    </div>
+</div>
+{% endif %}
