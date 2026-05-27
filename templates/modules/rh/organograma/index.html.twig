@@ -1,0 +1,27 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Organograma{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Organograma' %}
+
+{% macro render_node(node) %}
+<li>
+    <strong>{{ node.nome }}</strong>
+    {% if node.cargo %}<span class="text-muted"> — {{ node.cargo }}</span>{% endif %}
+    {% if node.children|length > 0 %}
+    <ul>{% for child in node.children %}{{ _self.render_node(child) }}{% endfor %}</ul>
+    {% endif %}
+</li>
+{% endmacro %}
+
+{% block hub_content %}
+<div class="huplex-card p-4">
+    <p class="text-muted mb-3">{{ total_nodes }} colaborador(es) na hierarquia.</p>
+    {% if tree is empty %}
+        <p class="mb-0">Cadastre gestores nos funcionários para montar a árvore.</p>
+    {% else %}
+    <ul class="organograma-tree mb-0">
+        {% for root in tree %}{{ _self.render_node(root) }}{% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

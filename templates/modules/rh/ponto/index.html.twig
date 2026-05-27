@@ -1,0 +1,48 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Ponto{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Ponto eletrônico' %}
+
+{% block hub_content %}
+<div class="huplex-card p-4 mb-3">
+    <form method="get" class="d-flex align-items-end gap-2 mb-3">
+        <div>
+            <label class="form-label">Data</label>
+            <input type="date" name="data" class="form-control" value="{{ data_filtro|date('Y-m-d') }}">
+        </div>
+        <button type="submit" class="btn-huplex-ghost btn-sm">Filtrar</button>
+    </form>
+
+    <form method="post" action="{{ path('app_rh_ponto', { data: data_filtro|date('Y-m-d') }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_ponto_batida') }}">
+        {% if grant_at_least('product_rh', 'ponto', 'GESTOR_EQUIPE') and not funcionario %}
+        <div class="mb-2">
+            <select name="funcionario_id" class="form-select form-select-sm" required>
+                <option value="">Colaborador</option>
+                {% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome }}</option>{% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2 flex-wrap">
+            <select name="tipo" class="form-select form-select-sm" style="max-width:140px">
+                <option value="ENTRADA">Entrada</option>
+                <option value="SAIDA">Saída</option>
+            </select>
+            <button type="submit" class="btn-huplex btn-sm">Registrar batida</button>
+        </div>
+    </form>
+</div>
+
+<div class="huplex-card p-4">
+    <h4 class="h6 mb-3">Espelho — {{ data_filtro|date('d/m/Y') }}</h4>
+    {% if registros is empty %}
+        <p class="text-muted mb-0">Nenhuma batida nesta data.</p>
+    {% else %}
+    <ul class="list-unstyled mb-0">
+        {% for r in registros %}
+        <li class="mb-1"><strong>{{ r.tipo }}</strong> — {{ r.registradoEm|date('H:i') }} ({{ r.origem }})</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

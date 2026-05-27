@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\FuncionarioRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FuncionarioRepository::class)]
@@ -61,9 +63,18 @@ class Funcionario
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
 
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'subordinados')]
+    #[ORM\JoinColumn(name: 'gestor_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Funcionario $gestor = null;
+
+    /** @var Collection<int, Funcionario> */
+    #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'gestor')]
+    private Collection $subordinados;
+
     public function __construct()
     {
         $this->criadoEm = new \DateTimeImmutable();
+        $this->subordinados = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -96,6 +107,12 @@ class Funcionario
     public function setDepartamento(?Departamento $d): static { $this->departamento = $d; return $this; }
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): static { $this->user = $user; return $this; }
+
+    public function getGestor(): ?Funcionario { return $this->gestor; }
+    public function setGestor(?Funcionario $gestor): static { $this->gestor = $gestor; return $this; }
+
+    /** @return Collection<int, Funcionario> */
+    public function getSubordinados(): Collection { return $this->subordinados; }
 
     public function getStatusLabel(): string
     {

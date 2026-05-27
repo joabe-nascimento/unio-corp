@@ -1,0 +1,56 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Portal do colaborador{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Portal do colaborador' %}
+
+{% block hub_content %}
+{% if not funcionario %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-id-badge',
+        title: 'Sem vínculo de colaborador',
+        text: 'Seu usuário ainda não está vinculado a um cadastro de funcionário nesta empresa.'
+    } %}
+{% else %}
+<div class="huplex-card p-4 mb-3">
+    <h3 class="h5 mb-3">{{ funcionario.nome }}</h3>
+    <p class="text-muted mb-0">{{ funcionario.email }} · {{ funcionario.cargo|default('Sem cargo') }}</p>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="huplex-card p-4">
+            <h4 class="h6 mb-3">Meus dados</h4>
+            <form method="post" action="{{ path('app_rh_portal') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('rh_portal_profile') }}">
+                <div class="mb-3">
+                    <label class="form-label">Telefone</label>
+                    <input type="text" name="telefone" class="form-control" value="{{ funcionario.telefone|default('') }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cargo</label>
+                    <input type="text" name="cargo" class="form-control" value="{{ funcionario.cargo|default('') }}">
+                </div>
+                <button type="submit" class="btn-huplex btn-sm">Salvar</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="huplex-card p-4">
+            <h4 class="h6 mb-3">Holerites</h4>
+            {% if holerites is empty %}
+                <p class="text-muted mb-0">Nenhum holerite disponível.</p>
+            {% else %}
+            <ul class="list-unstyled mb-0">
+                {% for h in holerites %}
+                <li class="mb-2">
+                    <strong>{{ h.competencia.referencia }}</strong>
+                    — líquido R$ {{ h.liquido|number_format(2, ',', '.') }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

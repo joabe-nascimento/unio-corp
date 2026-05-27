@@ -49,6 +49,13 @@
         processos_abertos_total: processos_abertos_total
     } %}
 
+    {% if hub_modules is defined and hub_modules|length > 0 %}
+        {% set hub_modules_visible = hub_modules|filter(m => product_grant('product_rh', m.grant)) %}
+        {% if hub_modules_visible|length > 0 %}
+            {% include 'components/rh/hub_launcher.html.twig' with { modules: hub_modules_visible } %}
+        {% endif %}
+    {% endif %}
+
     {% include 'components/rh/hub_focus_queue.html.twig' with { items: focus_queue } %}
 
     {% if product_grant('product_rh', 'admissoes') %}

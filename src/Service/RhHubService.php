@@ -12,6 +12,7 @@ use App\Repository\RhFeriasRepository;
 use App\Repository\RhFolhaCompetenciaRepository;
 use App\Repository\RhOffboardingProcessRepository;
 use App\Repository\RhOnboardingProcessRepository;
+use App\Service\Rh\RhModuleStatsService;
 
 class RhHubService
 {
@@ -24,6 +25,7 @@ class RhHubService
         private RhFeriasRepository $feriasRepo,
         private RhFolhaCompetenciaRepository $folhaRepo,
         private RhFeriasService $feriasService,
+        private RhModuleStatsService $moduleStats,
     ) {}
 
     /** @return array<string, mixed> */
@@ -125,6 +127,7 @@ class RhHubService
             'agenda_events' => $agenda,
             'activity_stream' => $activityStream,
             'processos_abertos_total' => $onboardingOpen + $offboardingOpen + $feriasPendentes,
+            'hub_modules' => $this->moduleStats->hubModules($empresa),
         ];
     }
 

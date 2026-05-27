@@ -1,0 +1,44 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}eSocial{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'eSocial' %}
+
+{% block hub_content %}
+{% if grant_at_least('product_rh', 'esocial', 'GESTOR') %}
+<div class="huplex-card p-4 mb-3">
+    <form method="post" action="{{ path('app_rh_esocial') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_esocial_lote') }}">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3"><input type="month" name="referencia" class="form-control" value="{{ 'now'|date('Y-m') }}"></div>
+            <div class="col-md-3">
+                <select name="tipo_evento" class="form-select">
+                    <option value="S1200">S-1200</option>
+                    <option value="S1210">S-1210</option>
+                </select>
+            </div>
+            <div class="col-md-3"><button type="submit" class="btn-huplex btn-sm">Criar lote (stub)</button></div>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<div class="huplex-card p-4">
+    {% if lotes is empty %}
+        <p class="text-muted mb-0">Nenhum lote eSocial.</p>
+    {% else %}
+    <table class="table table-huplex mb-0">
+        <thead><tr><th>Ref.</th><th>Evento</th><th>Status</th><th>Criado</th></tr></thead>
+        <tbody>
+        {% for l in lotes %}
+        <tr>
+            <td>{{ l.referencia }}</td>
+            <td>{{ l.tipoEvento }}</td>
+            <td>{{ l.status }}</td>
+            <td>{{ l.criadoEm|date('d/m/Y') }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Empresa;
 use App\Entity\Funcionario;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -149,6 +150,35 @@ class FuncionarioRepository extends ServiceEntityRepository
             ->andWhere('f.dataAdmissao >= :since')
             ->setParameter('empresa', $empresa)
             ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function findOneByUser(Empresa $empresa, User $user): ?Funcionario
+    {
+        return $this->findOneBy(['empresa' => $empresa, 'user' => $user]);
+    }
+
+    /** @return list<Funcionario> */
+    public function findAtivosForOrganograma(Empresa $empresa): array
+    {
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('statuses', ['ATIVO', 'FERIAS', 'AFASTADO'])
+            ->orderBy('f.nome', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countWithGestor(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('f')
+            ->select('COUNT(f.id)')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.gestor IS NOT NULL')
+            ->setParameter('empresa', $empresa)
             ->getQuery()
             ->getSingleScalarResult();
     }

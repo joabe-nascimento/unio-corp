@@ -1,0 +1,28 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Assinatura digital{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Assinatura digital' %}
+
+{% block hub_content %}
+{% if grant_at_least('product_rh', 'assinatura', 'GESTOR_EQUIPE') %}
+<div class="huplex-card p-4 mb-3">
+    <form method="post" action="{{ path('app_rh_assinatura') }}" class="d-flex gap-2">
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_assinatura_envelope') }}">
+        <input type="text" name="titulo" class="form-control" placeholder="Título do documento" required>
+        <button type="submit" class="btn-huplex btn-sm">Criar envelope</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="huplex-card p-4">
+    {% if envelopes is empty %}
+        <p class="text-muted mb-0">Nenhum envelope de assinatura.</p>
+    {% else %}
+    <ul class="list-unstyled mb-0">
+        {% for e in envelopes %}
+        <li class="mb-2"><strong>{{ e.titulo }}</strong> — {{ e.status }} ({{ e.criadoEm|date('d/m/Y') }})</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

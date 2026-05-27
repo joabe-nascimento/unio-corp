@@ -1,0 +1,42 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Provisões contábeis{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Provisões' %}
+
+{% block hub_content %}
+<div class="huplex-card p-4 mb-3">
+    <form method="get" class="d-flex gap-2 align-items-end mb-3">
+        <div>
+            <label class="form-label">Competência</label>
+            <input type="month" name="ref" class="form-control" value="{{ referencia }}">
+        </div>
+        <button type="submit" class="btn-huplex-ghost btn-sm">Filtrar</button>
+    </form>
+    {% if grant_at_least('product_rh', 'contabilidade', 'GESTOR') %}
+    <form method="post" action="{{ path('app_rh_contabilidade', { ref: referencia }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_contabilidade_calc') }}">
+        <input type="hidden" name="referencia" value="{{ referencia }}">
+        <button type="submit" class="btn-huplex btn-sm">Calcular provisões</button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="huplex-card p-4">
+    {% if provisoes is empty %}
+        <p class="text-muted mb-0">Nenhuma provisão para esta competência.</p>
+    {% else %}
+    <table class="table table-huplex mb-0">
+        <thead><tr><th>Tipo</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for p in provisoes %}
+        <tr>
+            <td>{{ p.tipoLabel }}</td>
+            <td>R$ {{ p.valor|number_format(2, ',', '.') }}</td>
+            <td>{{ p.status }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

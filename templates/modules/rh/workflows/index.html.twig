@@ -1,0 +1,42 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Workflows RH{% endblock %}
+{% block permissions_scope %}product_rh{% endblock %}
+{% set hub_page_title = 'Workflows' %}
+
+{% block hub_content %}
+{% if grant_at_least('product_rh', 'workflows', 'GESTOR_EQUIPE') %}
+<div class="huplex-card p-4 mb-3">
+    <h4 class="h6 mb-3">Novo template</h4>
+    <form method="post" action="{{ path('app_rh_workflows') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('rh_workflow_form') }}">
+        <div class="row g-2 mb-2">
+            <div class="col-md-3"><input type="text" name="codigo" class="form-control" placeholder="Código" required></div>
+            <div class="col-md-4"><input type="text" name="nome" class="form-control" placeholder="Nome" required></div>
+            <div class="col-md-3">
+                <select name="tipo_processo" class="form-select">
+                    <option value="onboarding">Onboarding</option>
+                    <option value="offboarding">Offboarding</option>
+                </select>
+            </div>
+        </div>
+        <textarea name="checklist" class="form-control mb-2" rows="4" placeholder="Itens do checklist (um por linha)" required></textarea>
+        <button type="submit" class="btn-huplex btn-sm">Salvar template</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="huplex-card p-4">
+    {% if templates is empty %}
+        <p class="text-muted mb-0">Nenhum template configurado.</p>
+    {% else %}
+    <ul class="list-unstyled mb-0">
+        {% for t in templates %}
+        <li class="mb-3">
+            <strong>{{ t.nome }}</strong> <code>{{ t.codigo }}</code>
+            <br><small class="text-muted">{{ t.tipoProcesso }} · {{ t.checklist|length }} itens</small>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}
