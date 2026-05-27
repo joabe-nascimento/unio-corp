@@ -1,0 +1,37 @@
+{# Alternador de tema para páginas públicas (login, workspace select, etc.) #}
+<button type="button" class="theme-float" id="guestThemeToggle" title="Alternar tema" aria-label="Alternar tema">
+    <i class="fas fa-sun" id="guestThemeIcon" aria-hidden="true"></i>
+</button>
+<script>
+(function () {
+    function applyTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        var icon = document.getElementById('guestThemeIcon');
+        if (icon) {
+            icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        var btn = document.getElementById('guestThemeToggle');
+        if (btn) {
+            btn.title = t === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro';
+            btn.setAttribute('aria-label', btn.title);
+        }
+    }
+
+    var saved = localStorage.getItem('unio-theme')
+        || localStorage.getItem('huplex-theme')
+        || document.documentElement.getAttribute('data-theme')
+        || 'dark';
+    applyTheme(saved);
+
+    var toggle = document.getElementById('guestThemeToggle');
+    if (toggle) {
+        toggle.addEventListener('click', function () {
+            var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+            var next = cur === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('unio-theme', next);
+            localStorage.setItem('huplex-theme', next);
+            applyTheme(next);
+        });
+    }
+})();
+</script>

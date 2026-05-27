@@ -67,8 +67,6 @@ class ConfiguracoesControllerTest extends WebTestCase
             '_token'             => $token,
             'plataforma_nome'    => $uniqueName,
             'plataforma_tagline' => 'Tagline de teste',
-            'logo_url'           => '',
-            'favicon_url'        => '',
             'cor_primaria'       => '#FF5500',
             'tema'               => 'dark',
             'suporte_email'      => 'suporte@teste.dev',
@@ -154,10 +152,14 @@ class ConfiguracoesControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/admin/configuracoes');
         $token   = $crawler->filter('#cfgForm input[name="_token"]')->attr('value');
 
+        $projectDir = static::getContainer()->getParameter('kernel.project_dir');
+        $fixture    = $projectDir . '/assets/unio-logotipo.png';
+        if (!is_file($fixture)) {
+            self::markTestSkipped('Fixture de logo não encontrado.');
+        }
+
         $tmp = tempnam(sys_get_temp_dir(), 'logo');
-        file_put_contents($tmp, base64_decode(
-            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
-        ));
+        copy($fixture, $tmp);
         $upload = new UploadedFile($tmp, 'logo-test.png', 'image/png', null, true);
 
         $this->client->request('POST', '/admin/configuracoes', [
@@ -176,9 +178,43 @@ class ConfiguracoesControllerTest extends WebTestCase
 
         $logoUrl = static::getContainer()->get(PlatformConfigService::class)->get('logo_url');
         self::assertStringStartsWith('/uploads/config/', $logoUrl);
-        self::assertFileExists(
-            static::getContainer()->getParameter('kernel.project_dir') . '/public' . $logoUrl
-        );
+        self::assertFileExists($projectDir . '/public' . $logoUrl);
+    }
+
+    public function testImageUrlsPreservedWhenFormLeavesThemEmpty(): void
+    {
+        $projectDir = static::getContainer()->getParameter('kernel.project_dir');
+        $uploadDir  = $projectDir . '/public/uploads/config';
+        @mkdir($uploadDir, 0777, true);
+
+        $logoPath = $uploadDir . '/existing-logo-test.png';
+        copy($projectDir . '/assets/unio-logotipo.png', $logoPath);
+
+        static::getContainer()->get(PlatformConfigService::class)->save([
+            'logo_url' => '/uploads/config/existing-logo-test.png',
+        ]);
+
+        $this->loginAsTenant();
+        $crawler = $this->client->request('GET', '/admin/configuracoes');
+        $token   = $crawler->filter('#cfgForm input[name="_token"]')->attr('value');
+
+        $this->client->request('POST', '/admin/configuracoes', [
+            '_token'          => $token,
+            'plataforma_nome' => 'Unio Preservado',
+            'logo_url'        => '',
+            'cor_primaria'    => '#4F7FFF',
+            'tema'            => 'dark',
+            'senha_min'       => '8',
+            'sessao_timeout'  => '120',
+        ]);
+
+        self::assertResponseRedirects();
+
+        static::ensureKernelShutdown();
+        self::bootKernel();
+        $config = static::getContainer()->get(PlatformConfigService::class);
+        self::assertSame('/uploads/config/existing-logo-test.png', $config->get('logo_url'));
+        self::assertSame('Unio Preservado', $config->get('plataforma_nome'));
     }
 
     public function testInvalidCsrfRejected(): void

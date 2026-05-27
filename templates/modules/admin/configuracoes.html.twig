@@ -101,6 +101,7 @@
                                 </div>
 
                                 <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                                    <input type="hidden" name="logo_url_clear" id="cfg_logo_url_clear" value="0">
                                     <input type="text" id="cfg_logo_url" name="logo_url"
                                            value="{{ config.logo_url|default('') }}"
                                            class="huplex-form-control"
@@ -121,7 +122,8 @@
 
                                 {% if config.logo_url|default('') %}
                                 <button type="button" class="cfg-img-remove" data-picker="logoPicker"
-                                        data-url-input="cfg_logo_url" data-file-input="cfg_logo_file">
+                                        data-url-input="cfg_logo_url" data-file-input="cfg_logo_file"
+                                        data-clear-input="cfg_logo_url_clear">
                                     <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
                                 </button>
                                 {% endif %}
@@ -163,6 +165,7 @@
                                 </div>
 
                                 <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                                    <input type="hidden" name="favicon_url_clear" id="cfg_favicon_url_clear" value="0">
                                     <input type="text" id="cfg_favicon_url" name="favicon_url"
                                            value="{{ config.favicon_url|default('') }}"
                                            class="huplex-form-control"
@@ -183,7 +186,8 @@
 
                                 {% if config.favicon_url|default('') %}
                                 <button type="button" class="cfg-img-remove" data-picker="faviconPicker"
-                                        data-url-input="cfg_favicon_url" data-file-input="cfg_favicon_file">
+                                        data-url-input="cfg_favicon_url" data-file-input="cfg_favicon_file"
+                                        data-clear-input="cfg_favicon_url_clear">
                                     <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
                                 </button>
                                 {% endif %}
@@ -227,6 +231,7 @@
                                         </button>
                                     </div>
                                     <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                                        <input type="hidden" name="logo_mark_url_clear" id="cfg_logo_mark_url_clear" value="0">
                                         <input type="text" id="cfg_logo_mark_url" name="logo_mark_url"
                                                value="{{ config.logo_mark_url|default('') }}"
                                                class="huplex-form-control"
@@ -244,7 +249,8 @@
                                     </div>
                                     {% if config.logo_mark_url|default('') %}
                                     <button type="button" class="cfg-img-remove" data-picker="logoMarkPicker"
-                                            data-url-input="cfg_logo_mark_url" data-file-input="cfg_logo_mark_file">
+                                            data-url-input="cfg_logo_mark_url" data-file-input="cfg_logo_mark_file"
+                                            data-clear-input="cfg_logo_mark_url_clear">
                                         <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
                                     </button>
                                     {% endif %}
@@ -281,6 +287,7 @@
                                         </button>
                                     </div>
                                     <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                                        <input type="hidden" name="logo_full_url_clear" id="cfg_logo_full_url_clear" value="0">
                                         <input type="text" id="cfg_logo_full_url" name="logo_full_url"
                                                value="{{ config.logo_full_url|default('') }}"
                                                class="huplex-form-control"
@@ -298,7 +305,8 @@
                                     </div>
                                     {% if config.logo_full_url|default('') %}
                                     <button type="button" class="cfg-img-remove" data-picker="logoFullPicker"
-                                            data-url-input="cfg_logo_full_url" data-file-input="cfg_logo_full_file">
+                                            data-url-input="cfg_logo_full_url" data-file-input="cfg_logo_full_file"
+                                            data-clear-input="cfg_logo_full_url_clear">
                                         <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
                                     </button>
                                     {% endif %}
@@ -663,8 +671,6 @@
                 var reader = new FileReader();
                 reader.onload = function (e) { refreshPreview(picker, e.target.result); };
                 reader.readAsDataURL(file);
-                // Clear the URL field so file takes precedence
-                if (urlInput) { urlInput.value = ''; }
             });
 
             // Drag & drop styling
@@ -684,8 +690,10 @@
             btn.addEventListener('click', function () {
                 var ui = document.getElementById(btn.dataset.urlInput);
                 var fi = document.getElementById(btn.dataset.fileInput);
+                var clearInput = btn.dataset.clearInput && document.getElementById(btn.dataset.clearInput);
                 if (ui) { ui.value = ''; }
                 if (fi) { fi.value = ''; }
+                if (clearInput) { clearInput.value = '1'; }
                 refreshPreview(picker, '');
                 btn.remove();
             });
@@ -699,6 +707,50 @@
         return '/' + src.replace(/^\.\//, '');
     }
 
+    function isBrokenPreviewImage(img) {
+        return !img || img.naturalWidth <= 2 || img.naturalHeight <= 2;
+    }
+
+    function showPreviewPlaceholder(previewEl) {
+        if (!previewEl) { return; }
+        var img = previewEl.querySelector('img');
+        var placeholder = previewEl.querySelector('.cfg-img-placeholder');
+        if (img) {
+            img.hidden = true;
+            img.removeAttribute('src');
+        }
+        if (placeholder) { placeholder.hidden = false; }
+    }
+
+    function bindPreviewImage(img) {
+        if (!img || img.dataset.previewBound === '1') { return; }
+        img.dataset.previewBound = '1';
+        var previewEl = img.parentElement;
+        var placeholder = previewEl && previewEl.querySelector('.cfg-img-placeholder');
+
+        img.addEventListener('error', function () {
+            showPreviewPlaceholder(previewEl);
+        });
+
+        img.addEventListener('load', function () {
+            if (isBrokenPreviewImage(img)) {
+                showPreviewPlaceholder(previewEl);
+                return;
+            }
+            img.hidden = false;
+            if (placeholder) { placeholder.hidden = true; }
+        }, { once: true });
+
+        if (img.complete) {
+            if (isBrokenPreviewImage(img)) {
+                showPreviewPlaceholder(previewEl);
+            } else {
+                img.hidden = false;
+                if (placeholder) { placeholder.hidden = true; }
+            }
+        }
+    }
+
     function refreshPreview(picker, src) {
         var previewEl = picker.querySelector('.cfg-img-preview');
         if (!previewEl) { return; }
@@ -708,36 +760,17 @@
             if (!img) {
                 img = document.createElement('img');
                 img.alt = 'Preview';
-                img.onerror = function () {
-                    img.hidden = true;
-                    if (placeholder) { placeholder.hidden = false; }
-                };
                 previewEl.appendChild(img);
             }
-            img.hidden = false;
-            img.onerror = function () {
-                img.hidden = true;
-                if (placeholder) { placeholder.hidden = false; }
-            };
+            bindPreviewImage(img);
             img.src = resolvePreviewSrc(src);
-            if (placeholder) { placeholder.hidden = true; }
-            img.addEventListener('load', function onLoad() {
-                img.removeEventListener('load', onLoad);
-                img.hidden = false;
-                if (placeholder) { placeholder.hidden = true; }
-            }, { once: true });
         } else {
-            if (img) { img.hidden = true; img.removeAttribute('src'); }
-            if (placeholder) { placeholder.hidden = false; }
+            showPreviewPlaceholder(previewEl);
         }
     }
 
     document.querySelectorAll('.cfg-img-preview img[data-initial-src]').forEach(function (img) {
-        img.addEventListener('error', function () {
-            img.hidden = true;
-            var ph = img.parentElement && img.parentElement.querySelector('.cfg-img-placeholder');
-            if (ph) { ph.hidden = false; }
-        });
+        bindPreviewImage(img);
     });
 
     /* ── Flash "saved" hint ── */

@@ -13,6 +13,8 @@ use Symfony\Component\Validator\Constraints\Regex;
  */
 class PlatformConfigService
 {
+    private string $projectDir;
+
     private string $cfgFile;
 
     /** @var array<string,mixed>|null */
@@ -20,9 +22,15 @@ class PlatformConfigService
 
     private ?int $cacheMtime = null;
 
+    /** @var list<string> */
+    private const ASSET_URL_KEYS = ['logo_url', 'logo_mark_url', 'logo_full_url', 'favicon_url'];
+
+    private const MIN_ASSET_BYTES = 200;
+
     public function __construct(string $projectDir)
     {
-        $this->cfgFile = $projectDir . '/var/admin_config.json';
+        $this->projectDir = $projectDir;
+        $this->cfgFile    = $projectDir . '/var/admin_config.json';
     }
 
     // ── Defaults ──────────────────────────────────────────────────────
@@ -65,13 +73,8 @@ class PlatformConfigService
             return $this->cache;
         }
 
-        $data = [];
-        if (is_file($this->cfgFile)) {
-            $data = json_decode(file_get_contents($this->cfgFile) ?: '{}', true) ?? [];
-        }
-
         $this->cacheMtime = $mtime;
-        $this->cache      = array_merge(self::DEFAULTS, $data);
+        $this->cache      = $this->sanitizeAssetUrls(array_merge(self::DEFAULTS, $this->loadRaw()));
 
         return $this->cache;
     }
@@ -174,8 +177,7 @@ class PlatformConfigService
     /** @param array<string,mixed> $config */
     public function save(array $config): void
     {
-        $current = $this->all();
-        $merged  = array_merge($current, $config);
+        $merged = $this->sanitizeAssetUrls(array_merge(self::DEFAULTS, $this->loadRaw(), $config));
 
         @mkdir(dirname($this->cfgFile), 0777, true);
         file_put_contents(
@@ -185,5 +187,48 @@ class PlatformConfigService
 
         $this->cache      = $merged;
         $this->cacheMtime = is_file($this->cfgFile) ? (int) filemtime($this->cfgFile) : 0;
+    }
+
+    /** @return array<string,mixed> */
+    private function loadRaw(): array
+    {
+        if (!is_file($this->cfgFile)) {
+            return [];
+        }
+
+        return json_decode(file_get_contents($this->cfgFile) ?: '{}', true) ?? [];
+    }
+
+    /** @param array<string,mixed> $config */
+    private function sanitizeAssetUrls(array $config): array
+    {
+        foreach (self::ASSET_URL_KEYS as $key) {
+            $config[$key] = $this->sanitizeAssetUrl((string) ($config[$key] ?? ''));
+        }
+
+        return $config;
+    }
+
+    private function sanitizeAssetUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return '';
+        }
+
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            return $url;
+        }
+
+        if (!str_starts_with($url, '/')) {
+            $url = '/' . ltrim($url, '/');
+        }
+
+        $path = $this->projectDir . '/public' . $url;
+        if (!is_file($path) || filesize($path) < self::MIN_ASSET_BYTES) {
+            return '';
+        }
+
+        return $url;
     }
 }

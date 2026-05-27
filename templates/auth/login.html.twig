@@ -1,10 +1,15 @@
+{% set _tema = platform_config.tema|default('dark') %}
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="{{ _tema }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if active_tab == 'register' %}Criar Conta{% else %}Entrar{% endif %} | Unio</title>
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||localStorage.getItem('huplex-theme')||'{{ _tema }}')}catch(e){}</script>
+    {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% include 'components/huplex_theme_vars.html.twig' %}
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -14,9 +19,11 @@
         }
 
         body {
-            background: #07080F;
+            background: var(--bg);
             font-family: 'Inter', sans-serif;
             margin: 0;
+            color: var(--text-1);
+            transition: background 0.2s ease, color 0.2s ease;
         }
 
         .auth-wrapper {
@@ -31,7 +38,7 @@
 
         /* ── Lado esquerdo ──────────────────────────────── */
         .auth-left {
-            background: linear-gradient(145deg, #0C0D18 0%, #0f1435 100%);
+            background: linear-gradient(155deg, #0a0c16 0%, #0f1435 48%, #121a42 100%);
             padding: 56px 64px;
             display: flex;
             flex-direction: column;
@@ -39,6 +46,118 @@
             position: relative;
             overflow: hidden;
             min-height: 0;
+            transition: background 0.2s ease;
+        }
+
+        [data-theme="light"] .auth-left {
+            background: linear-gradient(155deg, #0a4a54 0%, var(--accent) 38%, #12616E 62%, #0D3B44 100%);
+        }
+
+        .auth-left-bg {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .auth-left-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: radial-gradient(ellipse 80% 60% at 20% 50%, rgba(255,255,255,0.07) 0%, transparent 55%);
+            pointer-events: none;
+        }
+
+        [data-theme="light"] .auth-left-bg::after {
+            background: radial-gradient(ellipse 70% 55% at 25% 45%, rgba(255,255,255,0.10) 0%, transparent 58%);
+        }
+
+        .auth-deco {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+            filter: brightness(0);
+        }
+
+        .auth-deco--mesh {
+            inset: -8% -12%;
+            width: 124%;
+            height: 116%;
+            object-fit: cover;
+            opacity: 0.28;
+        }
+
+        [data-theme="light"] .auth-deco--mesh {
+            opacity: 0.34;
+        }
+
+        .auth-deco--orbit {
+            top: 8%;
+            right: 6%;
+            width: min(28vw, 200px);
+            height: auto;
+            opacity: 0.42;
+            animation: authDecoFloat 14s ease-in-out infinite;
+        }
+
+        .auth-deco--chip {
+            top: 22%;
+            right: 18%;
+            width: min(18vw, 130px);
+            height: auto;
+            opacity: 0.36;
+            animation: authDecoFloat 11s ease-in-out infinite reverse;
+        }
+
+        .auth-deco--nodes {
+            bottom: 14%;
+            left: 4%;
+            width: min(32vw, 220px);
+            height: auto;
+            opacity: 0.48;
+            animation: authDecoDrift 16s ease-in-out infinite;
+        }
+
+        .auth-deco--circuit {
+            bottom: 28%;
+            right: 2%;
+            width: min(22vw, 160px);
+            height: auto;
+            opacity: 0.32;
+            animation: authDecoFloat 13s ease-in-out infinite 1.5s;
+        }
+
+        [data-theme="dark"] .auth-deco--orbit,
+        [data-theme="dark"] .auth-deco--chip,
+        [data-theme="dark"] .auth-deco--nodes,
+        [data-theme="dark"] .auth-deco--circuit {
+            opacity: 0.38;
+        }
+
+        [data-theme="dark"] .auth-deco--mesh {
+            opacity: 0.22;
+        }
+
+        @keyframes authDecoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(1.5deg); }
+        }
+
+        @keyframes authDecoDrift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(8px, -10px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .auth-deco { animation: none !important; }
+        }
+
+        .auth-left-inner,
+        .auth-left-footer {
+            position: relative;
+            z-index: 1;
         }
 
         .auth-left-inner {
@@ -55,28 +174,6 @@
             padding-top: 32px;
         }
 
-        .auth-left::before {
-            content: '';
-            position: absolute;
-            top: -120px; right: -80px;
-            width: 360px; height: 360px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(61,114,255,0.14) 0%, transparent 68%);
-            pointer-events: none;
-        }
-
-        .auth-left::after {
-            content: '';
-            position: absolute;
-            bottom: -60px; left: -40px;
-            width: 200px; height: 200px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(107,154,255,0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .auth-left > * { position: relative; z-index: 1; }
-
         .auth-hero-logo {
             display: block;
             width: 100%;
@@ -85,17 +182,24 @@
             max-height: min(52vh, 380px);
             object-fit: contain;
             object-position: left center;
-        }
-        [data-theme="light"] .auth-hero-logo {
-            filter: invert(1) hue-rotate(180deg);
+            /* PNG com fundo preto: fundo some, texto branco e ícone colorido permanecem */
+            mix-blend-mode: screen;
         }
 
         .auth-left-tagline {
-            color: rgba(255,255,255,0.42);
+            color: rgba(255, 255, 255, 0.58);
             font-size: 15px;
             line-height: 1.6;
             max-width: 380px;
             font-weight: 400;
+        }
+
+        .auth-left .platform-support__item {
+            color: rgba(255, 255, 255, 0.48);
+        }
+
+        .auth-left .platform-support__item:hover {
+            color: rgba(255, 255, 255, 0.78);
         }
 
         /* ── Lado direito ───────────────────────────────── */
@@ -108,6 +212,11 @@
             align-items: center;
             min-height: 0;
             overflow-y: auto;
+            transition: background 0.2s ease;
+        }
+
+        [data-theme="light"] .auth-right {
+            background: var(--layout-bg);
         }
 
         .auth-right-inner {
@@ -120,14 +229,14 @@
             display: flex;
             gap: 0;
             margin-bottom: 32px;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            border-bottom: 1px solid var(--border);
         }
 
         .auth-tab {
             padding: 10px 20px;
             font-size: 13px;
             font-weight: 600;
-            color: rgba(255,255,255,0.3);
+            color: var(--text-3);
             cursor: pointer;
             border: none;
             background: none;
@@ -138,11 +247,11 @@
             display: inline-block;
         }
 
-        .auth-tab:hover { color: rgba(255,255,255,0.65); }
+        .auth-tab:hover { color: var(--text-2); }
 
         .auth-tab.active {
-            color: #fff;
-            border-bottom-color: #3D72FF;
+            color: var(--text-1);
+            border-bottom-color: var(--accent);
         }
 
         /* ── Formulário ─────────────────────────────────── */
@@ -150,7 +259,7 @@
         .auth-panel.active { display: block; }
 
         .auth-panel h3 {
-            color: #fff;
+            color: var(--text-1);
             font-size: 20px;
             font-weight: 700;
             letter-spacing: -0.02em;
@@ -158,7 +267,7 @@
         }
 
         .auth-panel .sub {
-            color: rgba(255,255,255,0.32);
+            color: var(--text-2);
             font-size: 12px;
             margin-bottom: 24px;
         }
@@ -166,7 +275,7 @@
         .form-group { margin-bottom: 14px; }
 
         .form-label {
-            color: rgba(255,255,255,0.38);
+            color: var(--text-2);
             font-size: 10px;
             font-weight: 600;
             letter-spacing: 0.08em;
@@ -177,23 +286,28 @@
 
         .form-control {
             background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid var(--border);
             border-radius: 7px;
-            color: #fff;
+            color: var(--text-1);
             padding: 10px 13px;
             font-size: 13px;
             font-family: inherit;
             width: 100%;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        [data-theme="light"] .form-control {
+            background: var(--input-bg);
+            border-color: var(--border-2);
         }
 
         .form-control:focus {
-            border-color: rgba(61,114,255,0.5);
-            box-shadow: 0 0 0 3px rgba(61,114,255,0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
         }
 
-        .form-control::placeholder { color: rgba(255,255,255,0.18); }
+        .form-control::placeholder { color: var(--text-3); }
         .form-control.is-invalid { border-color: rgba(239,68,68,0.45); }
 
         .invalid-feedback {
@@ -214,24 +328,25 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            color: rgba(255,255,255,0.32);
+            color: var(--text-2);
             font-size: 12px;
             cursor: pointer;
         }
 
-        .form-row label input { accent-color: #3D72FF; }
+        .form-row label input { accent-color: var(--accent); }
 
         .form-row a {
-            color: rgba(61,114,255,0.75);
+            color: var(--accent);
             font-size: 12px;
             text-decoration: none;
+            opacity: 0.85;
         }
 
-        .form-row a:hover { color: #6B9AFF; }
+        .form-row a:hover { opacity: 1; }
 
         .btn-primary {
             width: 100%;
-            background: #3D72FF;
+            background: var(--accent);
             color: #fff;
             border: none;
             border-radius: 7px;
@@ -245,7 +360,7 @@
         }
 
         .btn-primary:hover {
-            background: #5585ff;
+            background: var(--action-hover);
             transform: translateY(-1px);
         }
 
@@ -269,6 +384,10 @@
             color: #4ade80;
         }
 
+        [data-theme="light"] .alert-success {
+            color: #15803d;
+        }
+
         .form-row-cols {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -280,16 +399,50 @@
             text-align: center;
             margin: 14px 0 0;
             font-size: 12px;
-            color: rgba(255,255,255,0.25);
+            color: var(--text-3);
         }
 
         .auth-divider a {
-            color: #6B9AFF;
+            color: var(--accent);
             text-decoration: none;
             font-weight: 500;
         }
 
-        .auth-divider a:hover { color: #8BB0FF; }
+        /* ── Suporte (rodapé do painel esquerdo) ─────────── */
+        .platform-support { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 20px; }
+        .platform-support__item {
+            font-size: 12.5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ── Alternador de tema ─────────────────────────── */
+        .theme-float {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 100;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-2);
+            font-size: 14px;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
+        }
+
+        .theme-float:hover {
+            color: var(--text-1);
+            border-color: var(--border-2);
+            background: var(--surface-2);
+        }
 
         /* ── Responsive ─────────────────────────────────── */
         @media (max-width: 900px) {
@@ -313,17 +466,29 @@
             .auth-left { display: none; }
             .auth-right { padding: 36px 24px; }
         }
-
-        .platform-support { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 20px; }
-        .platform-support__item { font-size: 12.5px; color: rgba(255,255,255,0.45); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-        .platform-support__item:hover { color: rgba(255,255,255,0.75); }
     </style>
 </head>
 <body>
+
+{% include 'components/guest_theme_toggle.html.twig' %}
+
 <div class="auth-wrapper">
 
     {# ── Lado esquerdo ── #}
     <div class="auth-left">
+        <div class="auth-left-bg" aria-hidden="true">
+            <img class="auth-deco auth-deco--mesh"
+                 src="{{ asset('images/auth/mesh-network.svg') }}" alt="">
+            <img class="auth-deco auth-deco--orbit"
+                 src="{{ asset('images/auth/deco-orbit.svg') }}" alt="">
+            <img class="auth-deco auth-deco--chip"
+                 src="{{ asset('images/auth/deco-chip.svg') }}" alt="">
+            <img class="auth-deco auth-deco--nodes"
+                 src="{{ asset('images/auth/deco-nodes-cluster.svg') }}" alt="">
+            <img class="auth-deco auth-deco--circuit"
+                 src="{{ asset('images/auth/deco-circuit.svg') }}" alt="">
+        </div>
+
         <div class="auth-left-inner">
             <img src="{{ asset('images/logos/logotipo-unio.png') }}"
                  alt="Unio — Pessoas. Processos. Resultados."

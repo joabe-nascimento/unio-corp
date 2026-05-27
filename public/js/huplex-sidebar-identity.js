@@ -1,5 +1,5 @@
 /**
- * Painel de conta / área de trabalho no topo da sidebar.
+ * Painel de conta — dropdown no topo da sidebar (mesma largura).
  */
 (function () {
     'use strict';
@@ -14,12 +14,14 @@
         panel.hidden = false;
         btn.classList.add('is-open');
         btn.setAttribute('aria-expanded', 'true');
+        document.body.classList.add('sidebar-identity-open');
     }
 
     function close() {
         panel.hidden = true;
         btn.classList.remove('is-open');
         btn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('sidebar-identity-open');
     }
 
     function toggle() {

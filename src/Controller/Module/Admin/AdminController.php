@@ -22,7 +22,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\AsciiSlugger;
 
 #[Route('/admin')]
 #[IsGranted('ROLE_TENANT')]
@@ -38,6 +37,9 @@ class AdminController extends AbstractController
         'GESTOR'            => 'Gestor',
         'TENANT'            => 'Tenant',
     ];
+
+    /** @var list<string> */
+    private const IMAGE_URL_FIELDS = ['logo_url', 'logo_mark_url', 'logo_full_url', 'favicon_url'];
 
     public function __construct(
         private UserRepository $userRepo,
@@ -442,14 +444,10 @@ class AdminController extends AbstractController
                 'msg_manutencao',
             ];
             $newConfig = [];
-            foreach ($fields as $f) {
-                $newConfig[$f] = trim((string) $request->request->get($f, ''));
-            }
 
-            // ── File uploads (logo, favicon) ──
+            // ── File uploads (logo, favicon, sidebar logos) ──
             $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/config';
             @mkdir($uploadDir, 0777, true);
-            $slugger = new AsciiSlugger();
 
             foreach (['logo_file' => 'logo_url', 'favicon_file' => 'favicon_url', 'logo_mark_file' => 'logo_mark_url', 'logo_full_file' => 'logo_full_url'] as $inputName => $cfgKey) {
                 $file = $request->files->get($inputName);
@@ -502,9 +500,24 @@ class AdminController extends AbstractController
                 $safeName = $baseName . '-' . uniqid() . '.' . $ext;
                 try {
                     $file->move($uploadDir, $safeName);
-                    // Remove old uploaded file for this slot if it exists
+                    $movedPath = $uploadDir . '/' . $safeName;
+                    if (!$this->isValidAssetFile($movedPath)) {
+                        @unlink($movedPath);
+                        $this->addFlash('error', sprintf(
+                            'Arquivo %s inválido ou muito pequeno. Envie uma imagem real (mín. 8×8 px).',
+                            match($inputName) {
+                                'logo_file'      => 'do logotipo',
+                                'favicon_file'   => 'do favicon',
+                                'logo_mark_file' => 'do ícone da sidebar',
+                                'logo_full_file' => 'do logotipo completo da sidebar',
+                                default          => 'enviado',
+                            }
+                        ));
+                        continue;
+                    }
+
                     $old = $this->platformConfig->get($cfgKey, '');
-                    if (str_starts_with($old, '/uploads/config/')) {
+                    if (str_starts_with((string) $old, '/uploads/config/')) {
                         $oldPath = $this->getParameter('kernel.project_dir') . '/public' . $old;
                         if (is_file($oldPath)) {
                             @unlink($oldPath);
@@ -514,6 +527,26 @@ class AdminController extends AbstractController
                 } catch (FileException) {
                     $this->addFlash('warning', "Não foi possível salvar o arquivo {$inputName}.");
                 }
+            }
+
+            foreach ($fields as $f) {
+                $value = trim((string) $request->request->get($f, ''));
+
+                if (\in_array($f, self::IMAGE_URL_FIELDS, true)) {
+                    if ($request->request->getBoolean($f . '_clear')) {
+                        $newConfig[$f] = '';
+                        continue;
+                    }
+                    if (isset($newConfig[$f])) {
+                        continue;
+                    }
+                    if ($value !== '') {
+                        $newConfig[$f] = $value;
+                    }
+                    continue;
+                }
+
+                $newConfig[$f] = $value;
             }
 
             $bools = ['manutencao', 'senha_maiuscula', 'senha_numero', 'registro_publico'];
@@ -618,6 +651,25 @@ class AdminController extends AbstractController
         }
 
         return preg_match('/^[a-z0-9]{2,5}$/', $ext) ? $ext : 'png';
+    }
+
+    private function isValidAssetFile(string $path): bool
+    {
+        if (!is_file($path) || filesize($path) < 200) {
+            return false;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if ($ext === 'svg') {
+            return true;
+        }
+
+        $info = @getimagesize($path);
+        if ($info === false) {
+            return $ext === 'ico';
+        }
+
+        return $info[0] >= 8 && $info[1] >= 8;
     }
 
     private function clearAppCache(): void
