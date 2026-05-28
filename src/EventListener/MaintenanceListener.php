@@ -21,6 +21,7 @@ class MaintenanceListener
 {
     /** Rotas públicas que permanecem acessíveis durante a manutenção */
     private const ALLOWED_ROUTES = [
+        'app_home',
         'app_login',
         'app_logout',
         'app_sessao_encerrar',
@@ -71,6 +72,9 @@ class MaintenanceListener
             if (str_starts_with($path, $prefix)) {
                 return;
             }
+        }
+        if ($path === '/') {
+            return;
         }
 
         // Tenants continuam com acesso total

@@ -1,0 +1,538 @@
+{% set _tema = platform_config.tema|default('dark') %}
+{% set _pnome = platform_config.plataforma_nome|default('Unio') %}
+{% set _tagline = platform_config.plataforma_tagline|default('Plataforma de Gestão de Pessoas') %}
+{% set _logo_full = platform_config.logo_full_url|default('') %}
+{% set _logo_src = _logo_full ? (_logo_full starts with 'http' ? _logo_full : asset(_logo_full)) : asset('images/logos/unio-logotipo.png') %}
+{% set _logo_default = _logo_full is empty %}
+{% import 'macros/helix.html.twig' as helia %}
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ _tema }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ _pnome }} — {{ _tagline }}</title>
+    <meta name="description" content="{{ _pnome }}: gestão de pessoas, RH operacional, hubs integrados e assistente inteligente Helia.">
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||localStorage.getItem('huplex-theme')||'{{ _tema }}')}catch(e){}</script>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% include 'components/huplex_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=3">
+</head>
+<body class="marketing-home">
+
+<header class="mkt-header">
+    <div class="mkt-header-inner">
+        <a href="{{ path('app_home') }}" class="mkt-brand" title="{{ _pnome }}">
+            <img src="{{ _logo_src }}" alt="{{ _pnome }}" class="mkt-logo {{ _logo_default ? 'mkt-logo--default' : 'mkt-logo--custom' }}">
+        </a>
+        <nav class="mkt-nav" aria-label="Navegação principal">
+            <a href="#recursos">Recursos</a>
+            <a href="#hubs">Hubs</a>
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#helia">Helia</a>
+            <a href="#faq">FAQ</a>
+            <a href="#comecar">Começar</a>
+        </nav>
+        <div class="mkt-header-actions">
+            <button type="button" class="mkt-theme-btn" id="guestThemeToggle" title="Alternar tema" aria-label="Alternar tema">
+                <i class="fas fa-sun" id="guestThemeIcon" aria-hidden="true"></i>
+            </button>
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--ghost">Entrar</a>
+            {% if platform_config.registro_publico ?? true %}
+            <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--primary">Criar conta</a>
+            {% else %}
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--primary">Acessar plataforma</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main>
+    {# ── Hero ── #}
+    <section class="mkt-hero" aria-labelledby="mkt-hero-title">
+        <div class="mkt-hero-bg" aria-hidden="true">
+            <img class="mkt-hero-deco mkt-hero-deco--mesh" src="{{ asset('images/auth/mesh-network.svg') }}" alt="">
+            <img class="mkt-hero-deco mkt-hero-deco--orbit" src="{{ asset('images/auth/deco-orbit.svg') }}" alt="">
+            <img class="mkt-hero-deco mkt-hero-deco--chip" src="{{ asset('images/auth/deco-chip.svg') }}" alt="">
+            <img class="mkt-hero-deco mkt-hero-deco--nodes" src="{{ asset('images/auth/deco-nodes-cluster.svg') }}" alt="">
+        </div>
+        <div class="mkt-hero-inner">
+            <div class="mkt-hero-copy">
+                <p class="mkt-hero-eyebrow">
+                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                    Gestão de pessoas unificada
+                </p>
+                <h1 class="mkt-hero-title" id="mkt-hero-title">
+                    Pessoas, processos e resultados em um só lugar
+                </h1>
+                <p class="mkt-hero-lead">
+                    {{ _pnome }} centraliza RH, hubs de operação e indicadores com segurança,
+                    multi-empresa e a assistente inteligente Helia — pronta para escalar com sua organização.
+                </p>
+                <div class="mkt-hero-cta">
+                    <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--white">
+                        <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                        Entrar na plataforma
+                    </a>
+                    {% if platform_config.registro_publico ?? true %}
+                    <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--outline-light">
+                        Criar conta gratuita
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="mkt-hero-stats">
+                    <div class="mkt-hero-stat">
+                        <strong>Multi-empresa</strong>
+                        <span>Áreas de trabalho isoladas</span>
+                    </div>
+                    <div class="mkt-hero-stat">
+                        <strong>RH operacional</strong>
+                        <span>Admissão, férias e folha</span>
+                    </div>
+                    <div class="mkt-hero-stat">
+                        <strong>Helia IA</strong>
+                        <span>Assistente integrada</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mkt-hero-visual" aria-hidden="true">
+                <div class="mkt-hero-card">
+                    <div class="mkt-hero-card-head">
+                        <span class="mkt-hero-card-dot"></span>
+                        <span class="mkt-hero-card-label">Painel {{ _pnome }} — visão geral</span>
+                    </div>
+                    <div class="mkt-hero-card-rows">
+                        <div class="mkt-hero-card-row">
+                            <span class="mkt-hero-card-icon"><i class="fas fa-users"></i></span>
+                            <span class="mkt-hero-card-text">
+                                <strong>Equipe e permissões</strong>
+                                <span>Perfis granulares por módulo</span>
+                            </span>
+                        </div>
+                        <div class="mkt-hero-card-row">
+                            <span class="mkt-hero-card-icon"><i class="fas fa-building"></i></span>
+                            <span class="mkt-hero-card-text">
+                                <strong>Multi-empresa</strong>
+                                <span>Troca de workspace em um clique</span>
+                            </span>
+                        </div>
+                        <div class="mkt-hero-card-row">
+                            <span class="mkt-hero-card-icon"><i class="fas fa-chart-line"></i></span>
+                            <span class="mkt-hero-card-text">
+                                <strong>Indicadores e hubs</strong>
+                                <span>Operação, pessoas e maturidade</span>
+                            </span>
+                        </div>
+                        <div class="mkt-hero-card-row">
+                            <span class="mkt-hero-card-icon"><i class="fas fa-sparkles"></i></span>
+                            <span class="mkt-hero-card-text">
+                                <strong>Helia — assistente IA</strong>
+                                <span>Copiloto contextual na plataforma</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── Faixa de confiança ── #}
+    <section class="mkt-strip" aria-label="Destaques da plataforma">
+        <div class="mkt-strip-inner">
+            <div class="mkt-strip-item">
+                <i class="fas fa-building" aria-hidden="true"></i>
+                <span><strong>Multi-empresa</strong> workspaces isolados</span>
+            </div>
+            <div class="mkt-strip-item">
+                <i class="fas fa-user-shield" aria-hidden="true"></i>
+                <span><strong>Permissões</strong> granulares por módulo</span>
+            </div>
+            <div class="mkt-strip-item">
+                <i class="fas fa-file-contract" aria-hidden="true"></i>
+                <span><strong>RH completo</strong> admissão ao desligamento</span>
+            </div>
+            <div class="mkt-strip-item">
+                <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                <span><strong>Helia</strong> assistente inteligente</span>
+            </div>
+        </div>
+    </section>
+
+    {# ── Recursos ── #}
+    <section class="mkt-section" id="recursos" aria-labelledby="mkt-features-title">
+        <div class="mkt-section-head">
+            <p class="mkt-section-eyebrow">Recursos</p>
+            <h2 class="mkt-section-title" id="mkt-features-title">Tudo que sua operação de pessoas precisa</h2>
+            <p class="mkt-section-sub">Módulos pensados para gestores, RH e equipes — com governança, clareza e escala.</p>
+        </div>
+        <div class="mkt-features">
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-id-card" aria-hidden="true"></i></div>
+                <h3>RH de ponta a ponta</h3>
+                <p>Funcionários, admissão, demissão, férias, folha e documentos — com trilha de auditoria e fluxos operacionais.</p>
+            </article>
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></div>
+                <h3>Segurança e permissões</h3>
+                <p>Controle fino por perfil e produto. Cada usuário vê apenas o que precisa, em cada hub e módulo.</p>
+            </article>
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-palette" aria-hidden="true"></i></div>
+                <h3>White-label</h3>
+                <p>Logo, cores, tema claro ou escuro e identidade da plataforma configuráveis pelo administrador.</p>
+            </article>
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-sitemap" aria-hidden="true"></i></div>
+                <h3>Organograma e estrutura</h3>
+                <p>Departamentos, equipes e hierarquia organizacional integrados ao dia a dia do RH.</p>
+            </article>
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-bell" aria-hidden="true"></i></div>
+                <h3>Central unificada</h3>
+                <p>Dashboard, notificações, busca global e navegação por hubs — experiência coesa em toda a plataforma.</p>
+            </article>
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-mobile-screen" aria-hidden="true"></i></div>
+                <h3>Responsivo e moderno</h3>
+                <p>Interface profissional, adaptada a desktop e mobile, com componentes consistentes em todos os módulos.</p>
+            </article>
+        </div>
+    </section>
+
+    {# ── Como funciona ── #}
+    <div class="mkt-section-wrap mkt-section-wrap--alt">
+        <section class="mkt-section" id="como-funciona" aria-labelledby="mkt-steps-title">
+            <div class="mkt-section-head">
+                <p class="mkt-section-eyebrow">Como funciona</p>
+                <h2 class="mkt-section-title" id="mkt-steps-title">Do acesso ao resultado em quatro passos</h2>
+                <p class="mkt-section-sub">Uma jornada clara para equipes, gestores e administradores — sem fricção.</p>
+            </div>
+            <ol class="mkt-steps">
+                <li class="mkt-step">
+                    <span class="mkt-step-num">1</span>
+                    <div class="mkt-step-body">
+                        <h3>Crie sua conta</h3>
+                        <p>Cadastre-se ou receba convite do administrador da sua organização na {{ _pnome }}.</p>
+                    </div>
+                </li>
+                <li class="mkt-step">
+                    <span class="mkt-step-num">2</span>
+                    <div class="mkt-step-body">
+                        <h3>Escolha a área de trabalho</h3>
+                        <p>Selecione a empresa ou ambiente correto — cada workspace mantém dados e permissões isolados.</p>
+                    </div>
+                </li>
+                <li class="mkt-step">
+                    <span class="mkt-step-num">3</span>
+                    <div class="mkt-step-body">
+                        <h3>Navegue pelos hubs</h3>
+                        <p>Acesse RH, Operações, Pessoas e demais módulos liberados para o seu perfil.</p>
+                    </div>
+                </li>
+                <li class="mkt-step">
+                    <span class="mkt-step-num">4</span>
+                    <div class="mkt-step-body">
+                        <h3>Execute com a Helia</h3>
+                        <p>Use dashboards, fluxos operacionais e a assistente Helia para decidir com mais agilidade.</p>
+                    </div>
+                </li>
+            </ol>
+        </section>
+    </div>
+
+    {# ── Para quem é ── #}
+    <section class="mkt-section" id="publico" aria-labelledby="mkt-personas-title">
+        <div class="mkt-section-head">
+            <p class="mkt-section-eyebrow">Para quem é</p>
+            <h2 class="mkt-section-title" id="mkt-personas-title">Feito para cada papel na organização</h2>
+            <p class="mkt-section-sub">Experiências distintas, mesma plataforma — do operador ao gestor estratégico.</p>
+        </div>
+        <div class="mkt-personas">
+            <article class="mkt-persona">
+                <div class="mkt-persona-icon"><i class="fas fa-user-tie" aria-hidden="true"></i></div>
+                <h3>Gestores e líderes</h3>
+                <p>Visão de equipe, indicadores, aprovações e acompanhamento de metas em tempo real.</p>
+                <ul>
+                    <li>Dashboard por layout</li>
+                    <li>Permissões por equipe</li>
+                    <li>Hubs de maturidade</li>
+                </ul>
+            </article>
+            <article class="mkt-persona">
+                <div class="mkt-persona-icon"><i class="fas fa-id-badge" aria-hidden="true"></i></div>
+                <h3>RH e People Ops</h3>
+                <p>Ciclo completo do colaborador: admissão, férias, documentos, folha e auditoria.</p>
+                <ul>
+                    <li>Onboarding estruturado</li>
+                    <li>Trilha de auditoria</li>
+                    <li>Organograma integrado</li>
+                </ul>
+            </article>
+            <article class="mkt-persona">
+                <div class="mkt-persona-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
+                <h3>Equipes operacionais</h3>
+                <p>Ferramentas do dia a dia com interface clara, busca global e navegação por hubs.</p>
+                <ul>
+                    <li>Portal e comunicação</li>
+                    <li>Bate-papo integrado</li>
+                    <li>Notificações centralizadas</li>
+                </ul>
+            </article>
+            <article class="mkt-persona">
+                <div class="mkt-persona-icon"><i class="fas fa-crown" aria-hidden="true"></i></div>
+                <h3>Administradores</h3>
+                <p>Governança da plataforma: empresas, usuários, identidade visual e configurações globais.</p>
+                <ul>
+                    <li>Multi-empresa</li>
+                    <li>White-label</li>
+                    <li>Controle de acesso</li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    {# ── Hubs ── #}
+    <section class="mkt-section mkt-section--alt" id="hubs" aria-labelledby="mkt-hubs-title">
+        <div class="mkt-section-head">
+            <p class="mkt-section-eyebrow">Hubs</p>
+            <h2 class="mkt-section-title" id="mkt-hubs-title">Uma plataforma, vários centros de excelência</h2>
+            <p class="mkt-section-sub">Navegue entre hubs especializados sem perder contexto da sua área de trabalho.</p>
+        </div>
+        <div class="mkt-hubs">
+            <article class="mkt-hub">
+                <div class="mkt-hub-icon"><i class="fas fa-briefcase" aria-hidden="true"></i></div>
+                <h3>Operações</h3>
+                <p>Execução, projetos e rotina do dia a dia</p>
+            </article>
+            <article class="mkt-hub">
+                <div class="mkt-hub-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
+                <h3>Pessoas</h3>
+                <p>Membros, cargos e desenvolvimento</p>
+            </article>
+            <article class="mkt-hub">
+                <div class="mkt-hub-icon"><i class="fas fa-star" aria-hidden="true"></i></div>
+                <h3>Talentos</h3>
+                <p>Atração, seleção e PDIs</p>
+            </article>
+            <article class="mkt-hub">
+                <div class="mkt-hub-icon"><i class="fas fa-chart-pie" aria-hidden="true"></i></div>
+                <h3>Maturidade</h3>
+                <p>Radar, avaliações e evolução</p>
+            </article>
+        </div>
+    </section>
+
+    {# ── RH em destaque ── #}
+    <section class="mkt-section" id="rh" aria-labelledby="mkt-rh-title">
+        <div class="mkt-rh-banner">
+            <div class="mkt-rh-banner-bg" aria-hidden="true"></div>
+            <div class="mkt-rh-banner-grid">
+                <div class="mkt-rh-banner-copy">
+                    <p class="mkt-section-eyebrow">Módulo RH</p>
+                    <h2 class="mkt-section-title" id="mkt-rh-title">RH operacional, do admissional ao desligamento</h2>
+                    <p class="mkt-section-sub mkt-section-sub--left">
+                        Centralize a gestão de pessoas com fluxos estruturados, documentos, folha simplificada
+                        e trilha de auditoria — tudo dentro do workspace da sua empresa.
+                    </p>
+                    <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--primary">
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        Explorar módulo RH
+                    </a>
+                </div>
+                <ul class="mkt-rh-modules">
+                    <li><i class="fas fa-user-plus" aria-hidden="true"></i> Admissão e onboarding</li>
+                    <li><i class="fas fa-umbrella-beach" aria-hidden="true"></i> Férias e afastamentos</li>
+                    <li><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i> Folha e holerites</li>
+                    <li><i class="fas fa-folder-open" aria-hidden="true"></i> Documentos e contratos</li>
+                    <li><i class="fas fa-user-minus" aria-hidden="true"></i> Demissão e offboarding</li>
+                    <li><i class="fas fa-clipboard-check" aria-hidden="true"></i> Auditoria e workflows</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    {# ── Helia ── #}
+    <section class="mkt-section" id="helia" aria-labelledby="mkt-helia-title">
+        <div class="mkt-helia-banner">
+            <div class="mkt-helia-banner-bg" aria-hidden="true"></div>
+            <div class="mkt-helia-avatar">
+                {{ helia.avatar('lg') }}
+            </div>
+            <div class="mkt-helia-copy">
+                <p class="mkt-section-eyebrow">Assistente inteligente</p>
+                <h3 id="mkt-helia-title">Conheça a Helia</h3>
+                <p>
+                    Sua copiloto na {{ _pnome }}: responde dúvidas, sugere próximos passos e ajuda você
+                    a navegar módulos, hubs e indicadores com mais agilidade — sempre no contexto da sua empresa.
+                </p>
+                <div class="mkt-helia-chips">
+                    <span class="mkt-helia-chip"><i class="fas fa-bolt" aria-hidden="true"></i> Respostas rápidas</span>
+                    <span class="mkt-helia-chip"><i class="fas fa-building" aria-hidden="true"></i> Contexto do workspace</span>
+                    <span class="mkt-helia-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> Governança</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── Experiência ── #}
+    <div class="mkt-section-wrap mkt-section-wrap--alt">
+        <section class="mkt-section" id="experiencia" aria-labelledby="mkt-exp-title">
+            <div class="mkt-section-head">
+                <p class="mkt-section-eyebrow">Experiência</p>
+                <h2 class="mkt-section-title" id="mkt-exp-title">Interface pensada para o dia a dia</h2>
+                <p class="mkt-section-sub">Dashboard, busca global, sidebar inteligente e componentes consistentes em toda a jornada.</p>
+            </div>
+            <div class="mkt-showcase">
+                <article class="mkt-showcase-card">
+                    <div class="mkt-showcase-icon"><i class="fas fa-gauge-high" aria-hidden="true"></i></div>
+                    <h3>Dashboard adaptável</h3>
+                    <p>KPIs, gráficos e atalhos conforme o layout e o perfil do usuário logado.</p>
+                </article>
+                <article class="mkt-showcase-card">
+                    <div class="mkt-showcase-icon"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
+                    <h3>Busca global</h3>
+                    <p>Encontre hubs, apps e membros da equipe em segundos — sem perder o contexto.</p>
+                </article>
+                <article class="mkt-showcase-card">
+                    <div class="mkt-showcase-icon"><i class="fas fa-sliders" aria-hidden="true"></i></div>
+                    <h3>Tema claro e escuro</h3>
+                    <p>Conforto visual em qualquer ambiente, com identidade configurável pelo admin.</p>
+                </article>
+                <article class="mkt-showcase-card">
+                    <div class="mkt-showcase-icon"><i class="fas fa-hand-sparkles" aria-hidden="true"></i></div>
+                    <h3>Boas-vindas guiadas</h3>
+                    <p>Onboarding, checklist de primeiros passos e spotlight da Helia na entrada.</p>
+                </article>
+            </div>
+        </section>
+    </div>
+
+    {# ── Segurança ── #}
+    <section class="mkt-section" id="seguranca" aria-labelledby="mkt-sec-title">
+        <div class="mkt-section-head">
+            <p class="mkt-section-eyebrow">Segurança</p>
+            <h2 class="mkt-section-title" id="mkt-sec-title">Governança em cada camada</h2>
+            <p class="mkt-section-sub">Controle de acesso, isolamento por empresa e auditoria para operar com confiança.</p>
+        </div>
+        <div class="mkt-security-grid">
+            <article class="mkt-security-card">
+                <div class="mkt-security-icon"><i class="fas fa-lock" aria-hidden="true"></i></div>
+                <h3>Autenticação segura</h3>
+                <p>Login com CSRF, sessão configurável e opção de lembrar dispositivo com segurança.</p>
+            </article>
+            <article class="mkt-security-card">
+                <div class="mkt-security-icon"><i class="fas fa-key" aria-hidden="true"></i></div>
+                <h3>Grants por produto</h3>
+                <p>Cada usuário acessa somente os módulos e hubs liberados para o seu perfil.</p>
+            </article>
+            <article class="mkt-security-card">
+                <div class="mkt-security-icon"><i class="fas fa-eye" aria-hidden="true"></i></div>
+                <h3>Auditoria de ações</h3>
+                <p>Trilha de eventos no RH e registros operacionais para rastreabilidade completa.</p>
+            </article>
+        </div>
+    </section>
+
+    {# ── FAQ ── #}
+    <div class="mkt-section-wrap mkt-section-wrap--alt">
+        <section class="mkt-section" id="faq" aria-labelledby="mkt-faq-title">
+            <div class="mkt-section-head">
+                <p class="mkt-section-eyebrow">Perguntas frequentes</p>
+                <h2 class="mkt-section-title" id="mkt-faq-title">Tire suas dúvidas</h2>
+                <p class="mkt-section-sub">Respostas rápidas sobre a {{ _pnome }} antes de começar.</p>
+            </div>
+            <div class="mkt-faq">
+                <details class="mkt-faq-item">
+                    <summary>O que é a {{ _pnome }}?</summary>
+                    <p>É uma plataforma de gestão de pessoas que unifica RH operacional, hubs especializados, dashboards e a assistente Helia em um ambiente multi-empresa.</p>
+                </details>
+                <details class="mkt-faq-item">
+                    <summary>Preciso escolher uma área de trabalho?</summary>
+                    <p>Sim. Após o login, você seleciona a empresa ou ambiente em que vai operar. Usuários com acesso a várias empresas podem trocar a qualquer momento.</p>
+                </details>
+                <details class="mkt-faq-item">
+                    <summary>Quem pode usar a plataforma?</summary>
+                    <p>Gestores, equipes de RH, colaboradores e administradores — cada um com permissões e módulos adequados ao seu perfil.</p>
+                </details>
+                <details class="mkt-faq-item">
+                    <summary>A Helia já responde automaticamente?</summary>
+                    <p>A Helia está integrada à interface e em evolução contínua. Em breve, respostas automáticas contextualizadas ao seu workspace.</p>
+                </details>
+                <details class="mkt-faq-item">
+                    <summary>Posso personalizar a identidade visual?</summary>
+                    <p>Administradores configuram logo, cores, tema padrão e informações de suporte diretamente nas configurações da plataforma.</p>
+                </details>
+            </div>
+        </section>
+    </div>
+
+    {# ── CTA final ── #}
+    <section class="mkt-section" id="comecar" aria-labelledby="mkt-cta-title">
+        <div class="mkt-cta-banner">
+            <div class="mkt-cta-banner-inner">
+                <h2 id="mkt-cta-title">Pronto para transformar a gestão de pessoas?</h2>
+                <p>Acesse a {{ _pnome }}, escolha sua área de trabalho e comece com RH, hubs e a Helia ao seu lado.</p>
+                <div class="mkt-cta-banner-actions">
+                    <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--white">
+                        <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                        Entrar agora
+                    </a>
+                    {% if platform_config.registro_publico ?? true %}
+                    <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--outline-light">
+                        Criar minha conta
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="mkt-footer">
+    <div class="mkt-footer-inner">
+        <img src="{{ _logo_src }}" alt="{{ _pnome }}" class="mkt-footer-logo mkt-logo {{ _logo_default ? 'mkt-logo--default' : 'mkt-logo--custom' }}">
+        <p class="mkt-footer-text">
+            © {{ "now"|date("Y") }} {{ _pnome }}. {{ platform_config.rodape_texto|default(_tagline) }}
+        </p>
+        {% include 'components/platform_support.html.twig' %}
+    </div>
+</footer>
+
+<script>
+(function () {
+    function applyTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        var icon = document.getElementById('guestThemeIcon');
+        if (icon) {
+            icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        var btn = document.getElementById('guestThemeToggle');
+        if (btn) {
+            btn.title = t === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro';
+            btn.setAttribute('aria-label', btn.title);
+        }
+    }
+
+    var saved = localStorage.getItem('unio-theme')
+        || localStorage.getItem('huplex-theme')
+        || document.documentElement.getAttribute('data-theme')
+        || 'dark';
+    applyTheme(saved);
+
+    var toggle = document.getElementById('guestThemeToggle');
+    if (toggle) {
+        toggle.addEventListener('click', function () {
+            var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+            var next = cur === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('unio-theme', next);
+            localStorage.setItem('huplex-theme', next);
+            applyTheme(next);
+        });
+    }
+})();
+</script>
+
+</body>
+</html>

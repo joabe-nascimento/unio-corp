@@ -20,6 +20,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
     private const SKIP_ROUTE_PREFIXES = ['_profiler', '_wdt'];
 
     private const SKIP_ROUTES = [
+        'app_home',
         'app_login',
         'app_logout',
         'app_sessao_encerrar',

@@ -444,6 +444,56 @@
             background: var(--surface-2);
         }
 
+        .auth-back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
+            z-index: 2;
+        }
+
+        .auth-back-home--banner {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            color: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .auth-back-home--banner:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.52);
+            background: rgba(255, 255, 255, 0.16);
+            text-decoration: none;
+        }
+
+        .auth-back-home--form {
+            display: none;
+            margin-bottom: 20px;
+            color: var(--text-3);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+        }
+
+        .auth-back-home--form:hover {
+            color: var(--accent);
+            border-color: var(--accent-line);
+            background: var(--accent-dim);
+            text-decoration: none;
+        }
+
+        .auth-back-home i {
+            font-size: 11px;
+        }
+
         /* ── Responsive ─────────────────────────────────── */
         @media (max-width: 900px) {
             .auth-wrapper {
@@ -465,6 +515,8 @@
         @media (max-width: 640px) {
             .auth-left { display: none; }
             .auth-right { padding: 36px 24px; }
+            .auth-back-home--banner { display: none; }
+            .auth-back-home--form { display: inline-flex; }
         }
     </style>
 </head>
@@ -489,6 +541,11 @@
                  src="{{ asset('images/auth/deco-circuit.svg') }}" alt="">
         </div>
 
+        <a href="{{ path('app_home') }}" class="auth-back-home auth-back-home--banner">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            Voltar para a página inicial
+        </a>
+
         <div class="auth-left-inner">
             <img src="{{ asset('images/logos/logotipo-unio.png') }}"
                  alt="Unio — Pessoas. Processos. Resultados."
@@ -508,6 +565,11 @@
     {# ── Lado direito ── #}
     <div class="auth-right">
     <div class="auth-right-inner">
+
+        <a href="{{ path('app_home') }}" class="auth-back-home auth-back-home--form">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            Voltar para a página inicial
+        </a>
 
         {# ── Tabs ── #}
         <div class="auth-tabs">
