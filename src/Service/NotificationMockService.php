@@ -65,8 +65,8 @@ class NotificationMockService
             ],
             [
                 'id' => 'n6',
-                'title' => 'Helix em breve',
-                'body' => 'O assistente virtual Helix ganhará respostas automáticas em breve.',
+                'title' => 'Helia em breve',
+                'body' => 'A assistente virtual Helia ganhará respostas automáticas em breve.',
                 'type' => 'info',
                 'icon' => 'fa-robot',
                 'read' => true,
