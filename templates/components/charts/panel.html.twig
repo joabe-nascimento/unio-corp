@@ -25,28 +25,32 @@
 {% set _subtitle = subtitle|default('Dados consolidados do que está registrado na plataforma') %}
 {% set _title_icon = title_icon|default('fa-chart-pie') %}
 
-<div class="huplex-charts-panel {{ class|default('') }}{% if border_top|default(false) %} huplex-charts-panel--border-top{% endif %}"
-     data-huplex-charts-panel="{{ _panel_id }}"
+<div class="unio-charts-panel {{ class|default('') }}{% if border_top|default(false) %} unio-charts-panel--border-top{% endif %}"
+     data-unio-charts-panel="{{ _panel_id }}"
      {% if data_section_attr is defined and data_section_attr %}data-welcome-section="{{ data_section_attr }}"{% endif %}>
 
     {% block charts_panel_header %}
-    <header class="huplex-charts-panel-header">
+    <header class="unio-charts-panel-header">
         <div>
-            <h2 class="huplex-charts-panel-title">
+            <h2 class="unio-charts-panel-title">
                 <i class="fas {{ _title_icon }}" aria-hidden="true"></i>
                 {{ _title }}
             </h2>
-            <p class="huplex-charts-panel-sub">
+            <p class="unio-charts-panel-sub">
                 {{ _subtitle }}{% if empresa is defined and empresa %} · {{ empresa.nome }}{% endif %}
             </p>
         </div>
         {% if show_chartjs_badge|default(false) %}
-        <span class="huplex-charts-badge">
+        <span class="unio-charts-badge">
             <i class="fas fa-chart-column" aria-hidden="true"></i> Chart.js
         </span>
         {% endif %}
     </header>
     {% endblock %}
+
+    {% if chart_executive is defined and chart_executive.kpis|default([])|length > 0 %}
+        {% include 'components/charts/executive_strip.html.twig' with { executive: chart_executive } only %}
+    {% endif %}
 
     {% block charts_panel_body %}
     {% for section in sections %}
@@ -57,6 +61,9 @@
     {% endfor %}
     {% endblock %}
 
-    <script type="application/json" class="huplex-charts-data">{{ sections|json_encode|raw }}</script>
+    <script type="application/json" class="unio-charts-data">{{ sections|json_encode|raw }}</script>
+    {% if chart_executive is defined %}
+    <script type="application/json" class="unio-charts-executive-data">{{ chart_executive|json_encode|raw }}</script>
+    {% endif %}
 </div>
 {% endif %}

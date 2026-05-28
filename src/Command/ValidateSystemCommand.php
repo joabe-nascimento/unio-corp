@@ -24,7 +24,7 @@ class ValidateSystemCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $io->title('Validação do sistema Unio/Huplex');
+        $io->title('Validação do sistema Unio');
 
         $result = $this->validation->validate();
 

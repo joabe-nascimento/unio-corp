@@ -21,7 +21,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:seed-rh-processes',
-    description: 'Cria processos de admissão e demissão de demonstração (Huplex Corp)',
+    description: 'Cria processos de admissão e demissão de demonstração (Unio Demo)',
 )]
 class SeedRhProcessesCommand extends Command
 {
@@ -44,7 +44,7 @@ class SeedRhProcessesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $empresa = $this->empresaRepo->findOneBy(['nome' => 'Huplex Corp'])
+        $empresa = $this->empresaRepo->findOneBy(['nome' => SeedUsersCommand::DEMO_EMPRESA_NOME])
             ?? $this->empresaRepo->findOneBy([], ['id' => 'ASC']);
 
         if (!$empresa) {
@@ -56,7 +56,7 @@ class SeedRhProcessesCommand extends Command
         if ($input->getOption('fresh')) {
             $this->clearRhData($empresa);
             $io->text('Processos RH anteriores removidos.');
-        } elseif ($this->onboardingRepo->findOneBy(['email' => 'maria.fernandes.demo@huplex.dev', 'empresa' => $empresa])) {
+        } elseif ($this->onboardingRepo->findOneBy(['email' => 'maria.fernandes.demo@unio.dev', 'empresa' => $empresa])) {
             $io->warning(sprintf(
                 'Dados demo RH já existem para "%s". Use --fresh para recriar.',
                 $empresa->getNome()
@@ -70,7 +70,7 @@ class SeedRhProcessesCommand extends Command
         $maria = $this->onboarding->create(
             $empresa,
             'Maria Fernandes',
-            'maria.fernandes.demo@huplex.dev',
+            'maria.fernandes.demo@unio.dev',
             'Analista de RH',
             $inicio,
             'Onboarding de demonstração — documentação em andamento.',
@@ -81,7 +81,7 @@ class SeedRhProcessesCommand extends Command
         $this->onboarding->create(
             $empresa,
             'Lucas Pereira',
-            'lucas.pereira.demo@huplex.dev',
+            'lucas.pereira.demo@unio.dev',
             'Desenvolvedor Back-end',
             $inicio->modify('+14 days'),
             'Aguardando início — processo recém-aberto.',
@@ -91,7 +91,7 @@ class SeedRhProcessesCommand extends Command
         $carlos = $this->onboarding->create(
             $empresa,
             'Carlos Mendes',
-            'carlos.mendes.demo@huplex.dev',
+            'carlos.mendes.demo@unio.dev',
             'Coordenador de Operações',
             new \DateTimeImmutable('-30 days'),
             'Concluído para servir de base ao offboarding demo.',
@@ -105,7 +105,7 @@ class SeedRhProcessesCommand extends Command
         $ana = new Funcionario();
         $ana->setEmpresa($empresa);
         $ana->setNome('Ana Costa');
-        $ana->setEmail('ana.costa.demo@huplex.dev');
+        $ana->setEmail('ana.costa.demo@unio.dev');
         $ana->setCargo('Designer UX');
         $ana->setDataAdmissao(new \DateTimeImmutable('-180 days'));
         $ana->setStatus('ATIVO');
@@ -143,7 +143,7 @@ class SeedRhProcessesCommand extends Command
             'DELETE FROM App\Entity\Funcionario f WHERE f.empresa = :e AND f.email LIKE :demo'
         )
             ->setParameter('e', $empresa)
-            ->setParameter('demo', '%.demo@huplex.dev')
+            ->setParameter('demo', '%.demo@unio.dev')
             ->execute();
     }
 

@@ -1,4 +1,4 @@
-# Organização de branches — Huplex Corp
+# Organização de branches — Unio
 
 ## Ambientes (deploy)
 

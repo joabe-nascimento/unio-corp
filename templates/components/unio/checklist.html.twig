@@ -1,0 +1,21 @@
+{#
+  checklist — lista de itens (onboarding, offboarding, etc.)
+
+    Props:
+    items (array)     { id, label, done }
+    readonly (bool)   somente leitura
+    disabled (bool)   desabilita interação
+    csrf_token_id (string, opt)
+#}
+<ul class="unio-checklist" role="list">
+    {% for item in items|default([]) %}
+        {% include 'components/unio/checklist_item.html.twig' with {
+            id: item.id,
+            label: item.label,
+            done: item.done|default(false),
+            readonly: readonly|default(false),
+            disabled: disabled|default(false),
+            csrf_token_id: csrf_token_id|default(null)
+        } only %}
+    {% endfor %}
+</ul>

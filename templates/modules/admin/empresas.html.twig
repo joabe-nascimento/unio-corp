@@ -5,7 +5,7 @@
 {% set page_list_actions_before_title = true %}
 
 {% block page_list_toolbar_actions %}
-<a href="{{ path('app_admin') }}" class="btn-huplex-ghost btn-sm">
+<a href="{{ path('app_admin') }}" class="btn-unio-ghost btn-sm">
     <i class="fas fa-arrow-left" aria-hidden="true"></i> Admin
 </a>
 {% endblock %}
@@ -39,7 +39,7 @@
         text: 'Ajuste o filtro ou cadastre uma nova empresa.'
     } %}
 {% else %}
-<div class="huplex-card p-0">
+<div class="unio-card p-0">
     <table class="admin-table">
         <thead>
             <tr>
@@ -69,7 +69,7 @@
             <td class="admin-table-date">{{ e.criadoEm|date('d/m/Y') }}</td>
             <td class="admin-table-actions">
                 <button type="button"
-                        class="btn-huplex-ghost btn-xs"
+                        class="btn-unio-ghost btn-xs"
                         data-admin-edit-empresa="{{ e.id }}"
                         data-nome="{{ e.nome|e('html_attr') }}"
                         data-cnpj="{{ e.cnpj|e('html_attr') }}"
@@ -82,7 +82,7 @@
                     <input type="hidden" name="_token" value="{{ csrf_acao }}">
                     <input type="hidden" name="acao" value="{{ e.ativo ? 'desativar' : 'ativar' }}">
                     <button type="submit"
-                            class="btn-huplex-ghost btn-xs {{ e.ativo ? 'btn-danger-ghost' : '' }}"
+                            class="btn-unio-ghost btn-xs {{ e.ativo ? 'btn-danger-ghost' : '' }}"
                             title="{{ e.ativo ? 'Desativar' : 'Ativar' }}"
                             onclick="return confirm('{{ e.ativo ? 'Desativar' : 'Ativar' }} empresa {{ e.nome|e('js') }}?')">
                         <i class="fas {{ e.ativo ? 'fa-ban' : 'fa-check-circle' }}" aria-hidden="true"></i>
@@ -100,7 +100,7 @@
 
 {% block page_overlays %}
 {# ── Offcanvas: Nova empresa ── #}
-{% embed 'components/huplex_offcanvas.html.twig' with {
+{% embed 'components/unio_offcanvas.html.twig' with {
     id: 'admin-nova-empresa',
     title: 'Nova Empresa',
     subtitle: 'Cadastre um tenant ou empresa',
@@ -109,39 +109,39 @@
     open: app.request.query.getBoolean('open_novo')
 } %}
     {% block offcanvas_body %}
-    <form method="post" action="{{ path('app_admin_empresa_nova') }}" class="huplex-form" id="adminNovaEmpresaForm">
+    <form method="post" action="{{ path('app_admin_empresa_nova') }}" class="unio-form" id="adminNovaEmpresaForm">
         <input type="hidden" name="_token" value="{{ csrf_form }}">
-        {% include 'components/huplex_form_field.html.twig' with {
+        {% include 'components/unio_form_field.html.twig' with {
             id: 'nova_empresa_nome', name: 'nome', label: 'Nome da empresa',
-            placeholder: 'Ex.: Huplex Corp', required: true
+            placeholder: 'Ex.: Unio Demo', required: true
         } %}
-        {% include 'components/huplex_form_field.html.twig' with {
+        {% include 'components/unio_form_field.html.twig' with {
             id: 'nova_empresa_cnpj', name: 'cnpj', label: 'CNPJ',
             placeholder: '00.000.000/0001-00', required: true
         } %}
-        {% include 'components/huplex_form_field.html.twig' with {
+        {% include 'components/unio_form_field.html.twig' with {
             id: 'nova_empresa_setor', name: 'setor', label: 'Setor',
             placeholder: 'Ex.: Tecnologia'
         } %}
-        <div class="huplex-form-group">
-            <label class="huplex-form-label" for="nova_empresa_logo">Logo (URL)</label>
-            <input type="text" id="nova_empresa_logo" name="logo" class="huplex-form-control"
+        <div class="unio-form-group">
+            <label class="unio-form-label" for="nova_empresa_logo">Logo (URL)</label>
+            <input type="text" id="nova_empresa_logo" name="logo" class="unio-form-control"
                    placeholder="https://…/logo.png">
         </div>
     </form>
     {% endblock %}
     {% block offcanvas_footer %}
-    <div class="huplex-offcanvas-footer">
-        <button type="submit" form="adminNovaEmpresaForm" class="btn-huplex">
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="adminNovaEmpresaForm" class="btn-unio">
             <i class="fas fa-check mr-1"></i> Cadastrar
         </button>
-        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
     </div>
     {% endblock %}
 {% endembed %}
 
 {# ── Offcanvas: Editar empresa ── #}
-{% embed 'components/huplex_offcanvas.html.twig' with {
+{% embed 'components/unio_offcanvas.html.twig' with {
     id: 'admin-editar-empresa',
     title: 'Editar Empresa',
     icon: 'fa-pen-to-square',
@@ -150,40 +150,40 @@
     {% block offcanvas_body %}
     <form method="post"
           action="{{ path('app_admin_empresa_editar', { id: 0 }) }}"
-          class="huplex-form"
+          class="unio-form"
           id="adminEditarEmpresaForm">
         <input type="hidden" name="_token" value="{{ csrf_form }}">
-        {% include 'components/huplex_form_field.html.twig' with {
+        {% include 'components/unio_form_field.html.twig' with {
             id: 'edit_empresa_nome', name: 'nome', label: 'Nome da empresa', required: true
         } %}
-        <div class="huplex-form-group">
-            <label class="huplex-form-label" for="edit_empresa_cnpj">CNPJ</label>
-            <input type="text" id="edit_empresa_cnpj" name="cnpj" class="huplex-form-control"
+        <div class="unio-form-group">
+            <label class="unio-form-label" for="edit_empresa_cnpj">CNPJ</label>
+            <input type="text" id="edit_empresa_cnpj" name="cnpj" class="unio-form-control"
                    placeholder="Deixe em branco para manter">
         </div>
-        {% include 'components/huplex_form_field.html.twig' with {
+        {% include 'components/unio_form_field.html.twig' with {
             id: 'edit_empresa_setor', name: 'setor', label: 'Setor',
             placeholder: 'Ex.: Tecnologia'
         } %}
-        <div class="huplex-form-group">
-            <label class="huplex-form-label" for="edit_empresa_logo">Logo (URL)</label>
-            <input type="text" id="edit_empresa_logo" name="logo" class="huplex-form-control"
+        <div class="unio-form-group">
+            <label class="unio-form-label" for="edit_empresa_logo">Logo (URL)</label>
+            <input type="text" id="edit_empresa_logo" name="logo" class="unio-form-control"
                    placeholder="https://…/logo.png">
         </div>
-        <div class="huplex-form-group">
-            <label class="huplex-form-check d-flex align-items-center gap-2" for="edit_empresa_ativo">
-                <input type="checkbox" id="edit_empresa_ativo" name="ativo" value="1" class="huplex-checkbox">
+        <div class="unio-form-group">
+            <label class="unio-form-check d-flex align-items-center gap-2" for="edit_empresa_ativo">
+                <input type="checkbox" id="edit_empresa_ativo" name="ativo" value="1" class="unio-checkbox">
                 <span>Empresa ativa</span>
             </label>
         </div>
     </form>
     {% endblock %}
     {% block offcanvas_footer %}
-    <div class="huplex-offcanvas-footer">
-        <button type="submit" form="adminEditarEmpresaForm" class="btn-huplex">
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="adminEditarEmpresaForm" class="btn-unio">
             <i class="fas fa-check mr-1"></i> Salvar alterações
         </button>
-        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
     </div>
     {% endblock %}
 {% endembed %}
@@ -206,7 +206,7 @@
             editForm.querySelector('[name="logo"]').value  = btn.dataset.logo || '';
             var chk = editForm.querySelector('[name="ativo"]');
             if (chk) { chk.checked = btn.dataset.ativo === '1'; }
-            window.HuplexOffcanvas && window.HuplexOffcanvas.open('admin-editar-empresa');
+            window.UnioOffcanvas && window.UnioOffcanvas.open('admin-editar-empresa');
         });
     });
 }());

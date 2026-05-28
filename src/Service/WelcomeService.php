@@ -17,6 +17,15 @@ class WelcomeService
     /** Destaques exibidos na tela de boas-vindas (is_new = true aparece na seção Novidades). */
     private const NOVIDADES = [
         [
+            'id' => 'cortex',
+            'title' => 'Unio Cortex',
+            'description' => 'Cérebro neural da plataforma — grafo 3D, mapa 2D e insights acionáveis.',
+            'route' => 'app_cortex',
+            'icon' => 'fa-brain',
+            'is_new' => true,
+            'check' => 'cortex',
+        ],
+        [
             'id' => 'membros_equipes',
             'title' => 'Membros e Equipes',
             'description' => 'Ficha técnica, fotos e gestão de equipes no Hub Operações.',
@@ -110,6 +119,17 @@ class WelcomeService
             ];
         }
 
+        foreach ($this->navigation->getVisiblePlannedHubs($user) as $hub) {
+            $hubs[] = [
+                'id' => $hub['id'],
+                'title' => $hub['label'],
+                'subtitle' => $hub['subtitle'],
+                'icon' => $hub['icon'],
+                'route' => $hub['route'],
+                'is_new' => true,
+            ];
+        }
+
         if ($this->navigation->showPlataforma($user)) {
             $hubs[] = [
                 'id' => 'plataforma',
@@ -195,6 +215,7 @@ class WelcomeService
     private function canShowNovidade(User $user, string $check): bool
     {
         return match ($check) {
+            'cortex' => $this->navigation->showCortex($user),
             'hub_operacoes' => $this->navigation->showHubOperacoes($user),
             'modulo_engenharia' => $this->navigation->showModuloEngenharia($user),
             'modulo_publicidade' => $this->navigation->showModuloPublicidade($user),

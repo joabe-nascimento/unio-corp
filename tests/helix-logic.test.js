@@ -11,7 +11,7 @@ const localStorage = {
     clear: () => { store = {}; },
 };
 
-const STORAGE_KEY = 'huplex-helix-sessions';
+const STORAGE_KEY = 'unio-helix-sessions';
 let currentSessionId = null;
 
 function escapeHtml(str) {

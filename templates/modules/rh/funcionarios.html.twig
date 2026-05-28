@@ -37,7 +37,7 @@
 {% endblock %}
 
 {% block page_list_content %}
-<div class="huplex-card">
+<div class="unio-card">
     {% if funcionarios is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-id-card',
@@ -48,7 +48,7 @@
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="table table-huplex mb-0">
+        <table class="table table-unio mb-0">
             <thead>
                 <tr>
                     <th>Colaborador</th>
@@ -64,7 +64,7 @@
                     <td>{{ f.cargo|default('—') }}</td>
                     <td>{% include 'components/status_badge.html.twig' with { label: f.statusLabel, variant: f.statusClass } %}</td>
                     <td class="text-right">
-                        <a href="{{ path('app_rh_funcionario_show', { id: f.id }) }}" class="btn-huplex-ghost btn-sm">Abrir</a>
+                        <a href="{{ path('app_rh_funcionario_show', { id: f.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -92,7 +92,7 @@
 <script>
 (function () {
     {% if open_funcionario_offcanvas|default(app.request.query.getBoolean('open_novo')) %}
-    window.HuplexOffcanvas && window.HuplexOffcanvas.open('rh-funcionario-novo');
+    window.UnioOffcanvas && window.UnioOffcanvas.open('rh-funcionario-novo');
     {% endif %}
 })();
 </script>

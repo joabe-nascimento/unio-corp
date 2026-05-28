@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:seed-product-grants',
-    description: 'Popula user_product_grant a partir do template DEFAULT_GRANTS (usuários seed huplex.dev)',
+    description: 'Popula user_product_grant a partir do template DEFAULT_GRANTS (usuários seed unio.dev)',
 )]
 class SeedProductGrantsCommand extends Command
 {

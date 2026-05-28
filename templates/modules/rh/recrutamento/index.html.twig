@@ -5,7 +5,7 @@
 
 {% block hub_content %}
 {% if grant_at_least('product_rh', 'recrutamento', 'GESTOR_EQUIPE') %}
-<div class="huplex-card p-4 mb-3">
+<div class="unio-card p-4 mb-3">
     <h4 class="h6 mb-3">Nova vaga</h4>
     <form method="post" action="{{ path('app_rh_recrutamento') }}">
         <input type="hidden" name="_token" value="{{ csrf_token('rh_recrutamento_vaga') }}">
@@ -13,18 +13,18 @@
             <div class="col-md-4"><input type="text" name="titulo" class="form-control" placeholder="Título" required></div>
             <div class="col-md-3"><input type="text" name="departamento" class="form-control" placeholder="Departamento"></div>
             <div class="col-md-3"><input type="text" name="descricao" class="form-control" placeholder="Descrição breve"></div>
-            <div class="col-md-2"><button type="submit" class="btn-huplex btn-sm w-100">Criar</button></div>
+            <div class="col-md-2"><button type="submit" class="btn-unio btn-sm w-100">Criar</button></div>
         </div>
     </form>
 </div>
 {% endif %}
 
-<div class="huplex-card">
+<div class="unio-card">
     {% if vagas is empty %}
         {% include 'components/empty_state.html.twig' with { icon: 'fa-briefcase', title: 'Nenhuma vaga', text: 'Cadastre vagas para receber candidatos.' } %}
     {% else %}
     <div class="table-responsive p-3">
-        <table class="table table-huplex mb-0">
+        <table class="table table-unio mb-0">
             <thead><tr><th>Vaga</th><th>Status</th><th>Candidato</th></tr></thead>
             <tbody>
             {% for v in vagas %}
@@ -37,7 +37,7 @@
                         <input type="hidden" name="_token" value="{{ csrf_token('rh_recrutamento_candidato') }}">
                         <input type="text" name="nome" class="form-control form-control-sm" placeholder="Nome" required style="max-width:120px">
                         <input type="email" name="email" class="form-control form-control-sm" placeholder="E-mail" required style="max-width:140px">
-                        <button type="submit" class="btn-huplex-ghost btn-sm">+</button>
+                        <button type="submit" class="btn-unio-ghost btn-sm">+</button>
                     </form>
                     {% endif %}
                 </td>

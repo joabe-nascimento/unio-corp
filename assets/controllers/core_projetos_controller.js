@@ -120,7 +120,7 @@ export default class extends Controller {
     }
 
     openTarefaOffcanvas(event) {
-        const trigger = event.target.closest('[data-kanban-add], [data-huplex-offcanvas-open="dev-tarefa"]');
+        const trigger = event.target.closest('[data-kanban-add], [data-unio-offcanvas-open="dev-tarefa"]');
         if (!trigger) {
             return;
         }
@@ -130,7 +130,7 @@ export default class extends Controller {
         event.preventDefault();
         event.stopImmediatePropagation();
         this.applyTarefaOffcanvasContext(trigger);
-        window.HuplexOffcanvas?.open('dev-tarefa');
+        window.UnioOffcanvas?.open('dev-tarefa');
         this.focusTarefaTitulo();
     }
 
@@ -140,17 +140,17 @@ export default class extends Controller {
             return;
         }
         this.applyTarefaEditFromCard(card);
-        window.HuplexOffcanvas?.open('dev-tarefa-edit');
+        window.UnioOffcanvas?.open('dev-tarefa-edit');
         this.focusTarefaEditTitulo();
     }
 
     getTarefaOffcanvasForm() {
-        const root = document.querySelector('[data-huplex-offcanvas="dev-tarefa"]');
+        const root = document.querySelector('[data-unio-offcanvas="dev-tarefa"]');
         return root ? root.querySelector('[data-dev-tarefa-form]') : null;
     }
 
     getTarefaEditOffcanvasForm() {
-        const root = document.querySelector('[data-huplex-offcanvas="dev-tarefa-edit"]');
+        const root = document.querySelector('[data-unio-offcanvas="dev-tarefa-edit"]');
         return root ? root.querySelector('[data-dev-tarefa-edit-form]') : null;
     }
 

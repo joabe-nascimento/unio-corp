@@ -1,6 +1,6 @@
-# Módulo RH — Huplex
+﻿# Módulo RH — Unio
 
-Documentação do **pacote operacional de RH** na plataforma Huplex: o que está pronto, o que é opcional (polimento) e o que ainda **não foi implementado** (roadmap / mercado avançado).
+Documentação do **pacote operacional de RH** na plataforma Unio: o que está pronto, o que é opcional (polimento) e o que ainda **não foi implementado** (roadmap / mercado avançado).
 
 > **Resumo:** a base operacional de RH por empresa está **funcional** para uso interno (gestores/RH). Itens como eSocial, ponto ou portal do colaborador são **fases futuras**, não bugs do módulo atual.
 
@@ -232,13 +232,13 @@ Referência: `templates/modules/admin/usuarios.html.twig`.
 |------------|-----|
 | `components/rh_process_table.html.twig` | Tabela de processos admissão/demissão |
 | `components/rh_process_detail.html.twig` | Detalhe do processo + checklist |
-| `components/huplex/checklist.html.twig` | Checklist genérico |
-| `components/huplex/detail_field_*.html.twig` | Campos de detalhe (evita HTML inválido em `<dl>`) |
+| `components/unio/checklist.html.twig` | Checklist genérico |
+| `components/unio/detail_field_*.html.twig` | Campos de detalhe (evita HTML inválido em `<dl>`) |
 | `components/rh/admissao_form_panel.html.twig` | Form nova admissão |
 | `components/rh/demissao_form_panel.html.twig` | Form nova demissão |
 | `components/rh/process_extras_panel.html.twig` | Documentos, usuário, cancelar |
 
-Estilos: `public/css/huplex-app.css` (classes `rh-*`, `huplex-checklist`, etc.).
+Estilos: `public/css/unio-app.css` (classes `rh-*`, `unio-checklist`, etc.).
 
 ### Estrutura de código
 
@@ -279,7 +279,7 @@ php bin/console app:seed-rh-processes --fresh  # recria processos demo
 
 Credenciais típicas de dev (ver `SeedUsersCommand`):
 
-- `tenant@huplex.dev` / `huplex123`
+- `tenant@unio.dev` / `unio123`
 
 ### Testes
 

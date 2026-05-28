@@ -1,4 +1,4 @@
-﻿{% extends 'layout/page_list.html.twig' %}
+{% extends 'layout/page_list.html.twig' %}
 {% block title %}Férias{% endblock %}
 {% set page_list_title = 'Férias' %}
 
@@ -38,7 +38,7 @@
 {% endblock %}
 
 {% block page_list_content %}
-<div class="huplex-card">
+<div class="unio-card">
     {% if solicitacoes is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-umbrella-beach',
@@ -49,7 +49,7 @@
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="table table-huplex mb-0">
+        <table class="table table-unio mb-0">
             <thead><tr><th>Colaborador</th><th>Período</th><th>Dias</th><th>Status</th><th></th></tr></thead>
             <tbody>
             {% for f in solicitacoes %}
@@ -58,7 +58,7 @@
                 <td>{{ f.dataInicio|date('d/m/Y') }} — {{ f.dataFim|date('d/m/Y') }}</td>
                 <td>{{ f.dias }}</td>
                 <td>{% include 'components/status_badge.html.twig' with { label: f.statusLabel, variant: f.statusClass } %}</td>
-                <td class="text-right"><a href="{{ path('app_rh_ferias_show', { id: f.id }) }}" class="btn-huplex-ghost btn-sm">Abrir</a></td>
+                <td class="text-right"><a href="{{ path('app_rh_ferias_show', { id: f.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a></td>
             </tr>
             {% endfor %}
             </tbody>

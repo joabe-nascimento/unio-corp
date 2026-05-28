@@ -2,23 +2,29 @@
   charts/section — grupo de gráficos dentro de um painel
 
   Props:
-    section     (array)   id, title, subtitle, icon, charts[]
+    section     (array)   id, title, subtitle, icon, tier, badge, charts[]
     panel_id    (string)
 #}
 {% set _section = section %}
 {% set _panel = panel_id|default('default') %}
+{% set _tier = _section.tier|default('operational') %}
 
-<section class="huplex-chart-section huplex-card" data-huplex-chart-section="{{ _section.id }}">
-    <header class="huplex-chart-section-head">
-        <div class="huplex-chart-section-icon" aria-hidden="true">
+<section class="unio-chart-section unio-card unio-chart-section--{{ _tier }}"
+         data-unio-chart-section="{{ _section.id }}">
+    <header class="unio-chart-section-head">
+        <div class="unio-chart-section-icon" aria-hidden="true">
             <i class="fas {{ _section.icon }}"></i>
         </div>
-        <div>
-            <h3 class="huplex-chart-section-title">{{ _section.title }}</h3>
-            <p class="huplex-chart-section-sub">{{ _section.subtitle }}</p>
+        <div class="unio-chart-section-head-text">
+            {% if _section.badge|default('') %}
+            <span class="unio-chart-section-badge">{{ _section.badge }}</span>
+            {% endif %}
+            <h3 class="unio-chart-section-title">{{ _section.title }}</h3>
+            <p class="unio-chart-section-sub">{{ _section.subtitle }}</p>
         </div>
+        <span class="unio-chart-section-count">{{ _section.charts|length }} visuais</span>
     </header>
-    <div class="huplex-charts-grid">
+    <div class="unio-charts-grid unio-charts-grid--enterprise">
         {% for chart in _section.charts %}
             {% include 'components/charts/card.html.twig' with {
                 chart: chart,

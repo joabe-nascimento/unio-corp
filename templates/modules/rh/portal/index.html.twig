@@ -15,7 +15,7 @@
 {% else %}
     {% include 'components/rh/portal_nav.html.twig' with { active: 'inicio' } %}
 
-    <div class="rh-portal-hero huplex-card mb-3">
+    <div class="rh-portal-hero unio-card mb-3">
         <div class="rh-portal-hero-main">
             <p class="rh-portal-eyebrow">Olá, {{ funcionario.nome|split(' ')|first }}</p>
             <h2 class="rh-portal-title">{{ funcionario.cargo|default('Colaborador') }}</h2>
@@ -28,22 +28,22 @@
     </div>
 
     <div class="rh-portal-kpis mb-3">
-        <a href="{{ path('app_rh_portal_ferias') }}" class="rh-portal-kpi huplex-card">
+        <a href="{{ path('app_rh_portal_ferias') }}" class="rh-portal-kpi unio-card">
             <span class="rh-portal-kpi-value">{{ summary.ferias_pendentes }}</span>
             <span class="rh-portal-kpi-label">Férias pendentes</span>
         </a>
-        <a href="{{ path('app_rh_portal_holerites') }}" class="rh-portal-kpi huplex-card">
+        <a href="{{ path('app_rh_portal_holerites') }}" class="rh-portal-kpi unio-card">
             <span class="rh-portal-kpi-value">{{ summary.holerites_count }}</span>
             <span class="rh-portal-kpi-label">Holerites</span>
         </a>
-        <a href="{{ path('app_rh_portal_comunicados') }}" class="rh-portal-kpi huplex-card">
+        <a href="{{ path('app_rh_portal_comunicados') }}" class="rh-portal-kpi unio-card">
             <span class="rh-portal-kpi-value">{{ summary.comunicados_nao_lidos }}</span>
             <span class="rh-portal-kpi-label">Comunicados novos</span>
         </a>
     </div>
 
     {% if summary.ferias_proximas %}
-    <div class="huplex-card p-3 mb-3 rh-portal-alert rh-portal-alert--info">
+    <div class="unio-card p-3 mb-3 rh-portal-alert rh-portal-alert--info">
         <i class="fas fa-calendar-check mr-2"></i>
         Próximas férias: <strong>{{ summary.ferias_proximas.dataInicio|date('d/m/Y') }}</strong>
         até <strong>{{ summary.ferias_proximas.dataFim|date('d/m/Y') }}</strong>
@@ -53,7 +53,7 @@
 
     <div class="row g-3">
         <div class="col-lg-5">
-            <div class="huplex-card p-4 h-100">
+            <div class="unio-card p-4 h-100">
                 <h3 class="h6 mb-3">Meus dados</h3>
                 <form method="post" action="{{ path('app_rh_portal') }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('rh_portal_profile') }}">
@@ -69,12 +69,12 @@
                         <label class="form-label" for="telefone">Telefone para contato</label>
                         <input type="text" id="telefone" name="telefone" class="form-control" value="{{ funcionario.telefone|default('') }}">
                     </div>
-                    <button type="submit" class="btn-huplex btn-sm">Salvar telefone</button>
+                    <button type="submit" class="btn-unio btn-sm">Salvar telefone</button>
                 </form>
             </div>
         </div>
         <div class="col-lg-7">
-            <div class="huplex-card p-4 mb-3">
+            <div class="unio-card p-4 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h3 class="h6 mb-0">Últimos holerites</h3>
                     <a href="{{ path('app_rh_portal_holerites') }}" class="small">Ver todos</a>
@@ -94,7 +94,7 @@
                 </ul>
                 {% endif %}
             </div>
-            <div class="huplex-card p-4">
+            <div class="unio-card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h3 class="h6 mb-0">Comunicados</h3>
                     <a href="{{ path('app_rh_portal_comunicados') }}" class="small">Ver todos</a>

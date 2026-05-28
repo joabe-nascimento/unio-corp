@@ -14,7 +14,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class PatchEmpresaLogosCommand extends Command
 {
     private const MAP = [
-        '11.111.111/0001-11' => 'images/logos/huplex-corp.svg',
+        '11.111.111/0001-11' => 'images/logos/unio-demo.svg',
         '22.222.222/0001-22' => 'images/logos/nexus-saude.svg',
         '33.333.333/0001-33' => 'images/logos/edu360.svg',
     ];

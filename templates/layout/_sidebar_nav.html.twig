@@ -16,7 +16,7 @@
 <li class="nav-item sidebar-hub-heading-item">
     <div class="sidebar-hub-heading" data-sidebar-hub-heading>
         <span class="sidebar-hub-heading-label">Hub Selecionado</span>
-        <a href="{{ path('app_dashboard') }}"
+        <a href="#"
            class="sidebar-hub-back{% if not _in_hub %} is-hidden{% endif %}"
            data-sidebar-hub-back
            aria-label="Voltar para lista de hubs"
@@ -26,13 +26,11 @@
     </div>
 </li>
 
-{% if not _in_hub %}
-    {% include 'layout/_sidebar_hub_picker.html.twig' %}
-{% endif %}
+{% include 'layout/_sidebar_hub_picker.html.twig' with { hub_picker_hidden: _in_hub } %}
 
 {% if nav_show_hub_operacoes|default(false) %}
 <li class="sidebar-hub-panel-root{% if _active_hub != 'operacoes' %} is-hidden{% endif %}" data-sidebar-hub-panel="operacoes">
-    <ul class="nav nav-pills flex-column sidebar-hub-panel-list" data-widget="treeview" data-accordion="false" data-animation-speed="0">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list">
         {% include 'layout/_sidebar_hub_operacoes.html.twig' %}
     </ul>
 </li>
@@ -40,7 +38,7 @@
 
 {% if nav_show_hub_talentos|default(false) %}
 <li class="sidebar-hub-panel-root{% if _active_hub != 'talentos' %} is-hidden{% endif %}" data-sidebar-hub-panel="talentos">
-    <ul class="nav nav-pills flex-column sidebar-hub-panel-list" data-widget="treeview" data-accordion="false" data-animation-speed="0">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list">
         {% include 'layout/_sidebar_hub_talentos.html.twig' %}
     </ul>
 </li>
@@ -48,7 +46,7 @@
 
 {% if nav_show_hub_maturidade|default(false) %}
 <li class="sidebar-hub-panel-root{% if _active_hub != 'maturidade' %} is-hidden{% endif %}" data-sidebar-hub-panel="maturidade">
-    <ul class="nav nav-pills flex-column sidebar-hub-panel-list" data-widget="treeview" data-accordion="false" data-animation-speed="0">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list">
         {% include 'layout/_sidebar_hub_maturidade.html.twig' %}
     </ul>
 </li>
@@ -56,9 +54,17 @@
 
 {% if nav_show_plataforma|default(false) %}
 <li class="sidebar-hub-panel-root{% if _active_hub != 'admin' %} is-hidden{% endif %}" data-sidebar-hub-panel="admin">
-    <ul class="nav nav-pills flex-column sidebar-hub-panel-list" data-widget="treeview" data-accordion="false" data-animation-speed="0">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list">
         {% include 'layout/_sidebar_hub_admin.html.twig' %}
     </ul>
 </li>
 {% endif %}
+
+{% for hub in nav_planned_hubs|default([]) %}
+<li class="sidebar-hub-panel-root{% if _active_hub != hub.id %} is-hidden{% endif %}" data-sidebar-hub-panel="{{ hub.id }}">
+    <ul class="nav nav-pills flex-column sidebar-hub-panel-list">
+        {% include 'layout/_sidebar_hub_planned_panel.html.twig' with { hub: hub } %}
+    </ul>
+</li>
+{% endfor %}
 {% endif %}

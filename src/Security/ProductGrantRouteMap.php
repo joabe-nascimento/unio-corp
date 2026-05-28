@@ -109,5 +109,18 @@ final class ProductGrantRouteMap
         'app_admin_usuarios' => ['scope' => 'hub_admin', 'product' => 'usuarios'],
         'app_admin_empresas' => ['scope' => 'hub_admin', 'product' => 'empresas'],
         'app_admin_configuracoes' => ['scope' => 'hub_admin', 'product' => 'configuracoes'],
+
+        // Hubs em desenvolvimento (sem produtos)
+        'app_comercial' => ['scope' => 'hub_comercial', 'product' => '_hub'],
+        'app_beneficios' => ['scope' => 'hub_beneficios', 'product' => '_hub'],
+        'app_academy' => ['scope' => 'hub_academy', 'product' => '_hub'],
+        'app_parceiros' => ['scope' => 'hub_parceiros', 'product' => '_hub'],
+        'app_financeiro' => ['scope' => 'hub_financeiro', 'product' => '_hub'],
+        'app_compliance' => ['scope' => 'hub_compliance', 'product' => '_hub'],
+        'app_analytics' => ['scope' => 'hub_analytics', 'product' => '_hub'],
+        'app_juridico' => ['scope' => 'hub_juridico', 'product' => '_hub'],
+        'app_clima' => ['scope' => 'hub_clima', 'product' => '_hub'],
+        'app_sst' => ['scope' => 'hub_sst', 'product' => '_hub'],
+        'app_comunicacao' => ['scope' => 'hub_comunicacao', 'product' => '_hub'],
     ];
 }

@@ -26,7 +26,7 @@ class SystemValidationServiceTest extends KernelTestCase
             self::markTestSkipped('Banco indisponível para testes de integração — configure .env.test.local ou .env.local.');
         }
 
-        if (!$this->users->findOneBy(['email' => 'gestor@huplex.dev'])) {
+        if (!$this->users->findOneBy(['email' => 'gestor@unio.dev'])) {
             self::markTestSkipped('Seed ausente — execute app:seed-users antes dos testes de integração.');
         }
     }
@@ -46,7 +46,7 @@ class SystemValidationServiceTest extends KernelTestCase
 
     public function testMembroCannotCreateMemberRoute(): void
     {
-        $user = $this->users->findOneBy(['email' => 'membro@huplex.dev']);
+        $user = $this->users->findOneBy(['email' => 'membro@unio.dev']);
         self::assertNotNull($user);
 
         $grants = static::getContainer()->get(ProductGrantAccess::class);
@@ -55,7 +55,7 @@ class SystemValidationServiceTest extends KernelTestCase
 
     public function testGestorCanManagePessoasPermissions(): void
     {
-        $user = $this->users->findOneBy(['email' => 'gestor@huplex.dev']);
+        $user = $this->users->findOneBy(['email' => 'gestor@unio.dev']);
         self::assertNotNull($user);
 
         $permissions = static::getContainer()->get(\App\Service\PermissionService::class);
@@ -64,9 +64,9 @@ class SystemValidationServiceTest extends KernelTestCase
 
     public function testTenantSeesMultipleWorkspaces(): void
     {
-        $user = $this->users->findOneBy(['email' => 'tenant@huplex.dev']);
+        $user = $this->users->findOneBy(['email' => 'tenant@unio.dev']);
         if (!$user) {
-            self::markTestSkipped('tenant@huplex.dev não encontrado no seed.');
+            self::markTestSkipped('tenant@unio.dev não encontrado no seed.');
         }
 
         $workspace = static::getContainer()->get(\App\Service\WorkspaceService::class);

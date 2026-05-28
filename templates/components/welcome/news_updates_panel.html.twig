@@ -1,0 +1,265 @@
+{# Notícias e atualizações — props: news, updates, news_meta, updates_meta #}
+
+{% if news|length > 0 or updates|length > 0 %}
+
+<div class="welcome-pro-feed-row">
+
+    {% if news|length > 0 or news_meta is defined %}
+
+    <section class="welcome-pro-feed unio-card welcome-pro-feed--news"
+
+             data-welcome-section="noticias"
+
+             data-welcome-news-feed
+
+             data-news-feed-url="{{ path('app_welcome_news_api_feed') }}"
+
+             data-news-filter="{{ news_meta.filter|default('unread') }}"
+
+             aria-labelledby="welcome-news-title">
+
+        <header class="welcome-section-header">
+
+            <div>
+
+                <p class="welcome-pro-feed-eyebrow">Radar profissional</p>
+
+                <h2 class="welcome-section-title" id="welcome-news-title">Notícias e tendências</h2>
+
+                <p class="welcome-section-sub">Leituras com pulso ao vivo, alertas da sua área e registro de leitura</p>
+
+            </div>
+
+            <div class="welcome-section-header-meta" data-welcome-news-header-meta>
+                {% if news_meta is defined and news_meta.unread_count > 0 %}
+                <span class="welcome-section-count" data-welcome-news-unread>{{ news_meta.unread_count }} não lida{{ news_meta.unread_count > 1 ? 's' : '' }}</span>
+                {% endif %}
+                <span class="welcome-pro-feed-status" data-welcome-news-loading-status hidden>Atualizando…</span>
+            </div>
+        </header>
+
+
+
+        <div class="welcome-pro-news-filter" role="tablist" aria-label="Filtrar notícias" data-welcome-news-filter-bar>
+
+            <button type="button"
+
+                    role="tab"
+
+                    class="welcome-pro-news-filter__btn{% if news_meta.filter|default('unread') == 'unread' %} is-active{% endif %}"
+
+                    data-welcome-news-filter="unread"
+
+                    aria-selected="{{ news_meta.filter|default('unread') == 'unread' ? 'true' : 'false' }}">
+
+                Não lidas
+
+                <span class="welcome-pro-news-filter__count" data-welcome-news-unread-count>{{ news_meta.unread_count|default(0) }}</span>
+
+            </button>
+
+            <button type="button"
+
+                    role="tab"
+
+                    class="welcome-pro-news-filter__btn{% if news_meta.filter|default('unread') == 'read' %} is-active{% endif %}"
+
+                    data-welcome-news-filter="read"
+
+                    aria-selected="{{ news_meta.filter|default('unread') == 'read' ? 'true' : 'false' }}">
+
+                Lidas
+
+                <span class="welcome-pro-news-filter__count" data-welcome-news-read-count>{{ news_meta.read_count|default(0) }}</span>
+
+            </button>
+
+        </div>
+
+
+
+        <ul class="welcome-pro-news-list" data-welcome-news-list>
+
+            {% for article in news %}
+
+            <li data-article-slug="{{ article.slug }}">
+
+                <article class="welcome-pro-news-item{% if article.is_read|default(false) %} is-read{% endif %}{% if article.is_insight|default(false) %} is-insight{% endif %}">
+
+                    <a href="{{ path('app_welcome_news_show', { slug: article.slug }) }}" class="welcome-pro-news-link">
+
+                        <div class="welcome-pro-news-icon" aria-hidden="true">
+
+                            <i class="fas {{ article.icon }}"></i>
+
+                        </div>
+
+                        <div class="welcome-pro-news-body">
+
+                            <span class="welcome-pro-news-category">{{ article.category }}</span>
+
+                            <h3 class="welcome-pro-news-title">{{ article.title }}</h3>
+
+                            <p class="welcome-pro-news-summary">{{ article.summary }}</p>
+
+                            <div class="welcome-pro-news-meta">
+
+                                {% if article.is_read|default(false) %}
+
+                                <span class="welcome-badge-read">Lido</span>
+
+                                <span class="welcome-pro-news-meta-sep" aria-hidden="true">·</span>
+
+                                {% elseif article.is_live|default(false) %}
+
+                                <span class="welcome-badge-new">Ao vivo</span>
+
+                                <span class="welcome-pro-news-meta-sep" aria-hidden="true">·</span>
+
+                                {% elseif article.is_insight|default(false) %}
+
+                                <span class="welcome-badge-insight">Sua área</span>
+
+                                <span class="welcome-pro-news-meta-sep" aria-hidden="true">·</span>
+
+                                {% elseif article.is_new|default(false) %}
+
+                                <span class="welcome-badge-new">Novo</span>
+
+                                <span class="welcome-pro-news-meta-sep" aria-hidden="true">·</span>
+
+                                {% endif %}
+
+                                <time datetime="{{ article.published_at }}">{{ article.date_label }}</time>
+
+                                <span class="welcome-pro-news-meta-sep" aria-hidden="true">·</span>
+
+                                <span>{{ article.read_min }} min · Ler artigo</span>
+
+                            </div>
+
+                        </div>
+
+                        <i class="fas fa-arrow-right welcome-pro-news-arrow" aria-hidden="true"></i>
+
+                    </a>
+
+                </article>
+
+            </li>
+
+            {% else %}
+
+            <li class="welcome-pro-news-empty" data-welcome-news-empty>
+
+                <p data-welcome-news-empty-text>
+
+                    {% if news_meta.filter|default('unread') == 'read' %}
+
+                        Nenhuma notícia lida ainda. Abra um artigo para registrá-lo aqui.
+
+                    {% else %}
+
+                        Tudo lido por aqui. Buscando novas leituras na plataforma…
+
+                    {% endif %}
+
+                </p>
+
+            </li>
+
+            {% endfor %}
+
+        </ul>
+
+    </section>
+
+    {% endif %}
+
+
+
+    {% if updates|length > 0 %}
+
+    <section class="welcome-pro-feed unio-card welcome-pro-feed--updates"
+
+             data-welcome-section="atualizacoes"
+
+             data-welcome-updates-feed
+
+             data-updates-feed-url="{{ path('app_welcome_updates_api_feed') }}"
+
+             aria-labelledby="welcome-updates-title">
+
+        <header class="welcome-section-header">
+
+            <div>
+
+                <p class="welcome-pro-feed-eyebrow">Plataforma</p>
+
+                <h2 class="welcome-section-title" id="welcome-updates-title">Atualizações recentes</h2>
+
+                <p class="welcome-section-sub">O que mudou na Unio nos últimos lançamentos</p>
+
+            </div>
+
+            {% if updates_meta.dynamic_count|default(0) > 0 %}
+
+            <span class="welcome-section-count welcome-section-count--live" data-welcome-updates-live>{{ updates_meta.dynamic_count }} ao vivo</span>
+
+            {% endif %}
+
+        </header>
+
+        <ol class="welcome-pro-updates-list" data-welcome-updates-list>
+
+            {% for u in updates %}
+
+            <li class="welcome-pro-update{% if u.is_dynamic|default(false) %} welcome-pro-update--dynamic{% endif %}" data-update-id="{{ u.id }}">
+
+                <div class="welcome-pro-update-marker" aria-hidden="true"></div>
+
+                <div class="welcome-pro-update-body">
+
+                    <div class="welcome-pro-update-head">
+
+                        <span class="welcome-pro-update-tag welcome-pro-update-tag--{{ u.type }}">{{ u.tag }}</span>
+
+                        <time class="welcome-pro-update-date" datetime="{{ u.date }}">{{ u.date_label }}</time>
+
+                    </div>
+
+                    <h3 class="welcome-pro-update-title">{{ u.title }}</h3>
+
+                    <p class="welcome-pro-update-summary">{{ u.summary }}</p>
+
+                    {% if u.items|default([])|length > 0 %}
+
+                    <ul class="welcome-pro-update-items">
+
+                        {% for point in u.items %}
+
+                        <li>{{ point }}</li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                    {% endif %}
+
+                </div>
+
+            </li>
+
+            {% endfor %}
+
+        </ol>
+
+    </section>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Config\PlannedHubRegistry;
 use App\Entity\User;
 use App\Security\ProductGrantAccess;
 
@@ -110,6 +111,100 @@ class NavigationService
         return \in_array($user->getPerfil(), self::PROFILES_GESTOR_HUBS, true);
     }
 
+    public function showHubComercial(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_comercial');
+    }
+
+    public function showHubBeneficios(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_beneficios');
+    }
+
+    public function showHubAcademy(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_academy');
+    }
+
+    public function showHubParceiros(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_parceiros');
+    }
+
+    public function showHubFinanceiro(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_financeiro');
+    }
+
+    public function showHubCompliance(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_compliance');
+    }
+
+    public function showHubAnalytics(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_analytics');
+    }
+
+    public function showHubJuridico(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_juridico');
+    }
+
+    public function showHubClima(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_clima');
+    }
+
+    public function showHubSst(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_sst');
+    }
+
+    public function showHubComunicacao(User $user): bool
+    {
+        return $this->showFutureHub($user, 'hub_comunicacao');
+    }
+
+    public function showAnyPlannedHub(User $user): bool
+    {
+        foreach (PlannedHubRegistry::scopes() as $scope) {
+            if ($this->showFutureHub($user, $scope)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return list<array<string, string>>
+     */
+    public function getVisiblePlannedHubs(User $user): array
+    {
+        $visible = [];
+        foreach (PlannedHubRegistry::HUBS as $hub) {
+            if ($this->showFutureHub($user, $hub['scope'])) {
+                $visible[] = $hub;
+            }
+        }
+
+        return $visible;
+    }
+
+    private function showFutureHub(User $user, string $scope): bool
+    {
+        if ($this->isTenant($user)) {
+            return true;
+        }
+
+        if ($this->grants->usesConfiguredMatrix($user)) {
+            return $this->grants->canViewAnyProductInScope($user, $scope);
+        }
+
+        return \in_array($user->getPerfil(), self::PROFILES_GESTOR_HUBS, true);
+    }
+
     public function showModuloEngenharia(User $user): bool
     {
         if ($this->isTenant($user)) {
@@ -153,7 +248,8 @@ class NavigationService
     {
         return $this->showHubOperacoes($user)
             || $this->showHubTalentos($user)
-            || $this->showHubMaturidade($user);
+            || $this->showHubMaturidade($user)
+            || $this->showAnyPlannedHub($user);
     }
 
     /** Seção Plataforma (usuários, empresas, configurações) — somente TENANT */
@@ -170,6 +266,12 @@ class NavigationService
         }
 
         return \in_array($user->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE', 'SUPERVISOR'], true);
+    }
+
+    /** Unio Cortex — disponível para qualquer usuário autenticado. */
+    public function showCortex(User $user): bool
+    {
+        return $user->getUserIdentifier() !== '';
     }
 
     public function showPlataforma(User $user): bool
@@ -225,6 +327,10 @@ class NavigationService
         if ($this->isHubMaturidadeActive($route)) {
             return 'maturidade';
         }
+        $planned = PlannedHubRegistry::findByRoute($route);
+        if ($planned !== null) {
+            return $planned['id'];
+        }
         if (str_starts_with($route, 'app_admin')) {
             return 'admin';
         }
@@ -237,6 +343,10 @@ class NavigationService
         return $this->showHubOperacoes($user)
             || $this->showHubTalentos($user)
             || $this->showHubMaturidade($user)
+            || $this->showHubComercial($user)
+            || $this->showHubBeneficios($user)
+            || $this->showHubAcademy($user)
+            || $this->showHubParceiros($user)
             || $this->showPlataforma($user);
     }
 
@@ -271,10 +381,12 @@ class NavigationService
 
         return [
             'nav_layout' => $this->getLayout($user),
+            'nav_show_cortex' => $this->showCortex($user),
             'nav_show_projetos_metas' => $this->showProjetosMetas($user),
             'nav_show_hub_operacoes' => $this->showHubOperacoes($user),
             'nav_show_hub_talentos' => $this->showHubTalentos($user),
             'nav_show_hub_maturidade' => $this->showHubMaturidade($user),
+            'nav_planned_hubs' => $this->getVisiblePlannedHubs($user),
             'nav_show_modulo_rh' => $this->showModuloRh($user),
             'nav_show_modulo_pessoas' => $this->showModuloPessoas($user),
             'nav_show_modulo_engenharia' => $this->showModuloEngenharia($user),
@@ -297,14 +409,25 @@ class NavigationService
     /**
      * Módulos principais para dashboard e launcher de apps no header.
      *
-     * @return list<array{icon: string, title: string, route: string}>
+     * @return list<array{id: string, icon: string, title: string, subtitle: string, route: string}>
      */
     public function getPlatformModules(User $user): array
     {
         $modules = [];
 
+        if ($this->showCortex($user)) {
+            $modules[] = [
+                'id' => 'cortex',
+                'icon' => 'fa-brain',
+                'title' => 'Unio Cortex',
+                'subtitle' => 'Malha neural e insights',
+                'route' => 'app_cortex',
+            ];
+        }
+
         if ($this->showHubOperacoes($user)) {
             $modules[] = [
+                'id' => 'operacoes',
                 'icon' => 'fa-briefcase',
                 'title' => 'Hub Operações',
                 'subtitle' => 'RH e Gestão de Pessoas',
@@ -313,6 +436,7 @@ class NavigationService
         }
         if ($this->showHubTalentos($user)) {
             $modules[] = [
+                'id' => 'talentos',
                 'icon' => 'fa-gem',
                 'title' => 'Hub de Talentos',
                 'subtitle' => 'Banco, vagas e trilhas',
@@ -321,14 +445,25 @@ class NavigationService
         }
         if ($this->showHubMaturidade($user)) {
             $modules[] = [
+                'id' => 'maturidade',
                 'icon' => 'fa-gauge-high',
                 'title' => 'Hub de Maturidade',
                 'subtitle' => 'Radar e plano de ação',
                 'route' => 'app_maturidade',
             ];
         }
+        foreach ($this->getVisiblePlannedHubs($user) as $hub) {
+            $modules[] = [
+                'id' => $hub['id'],
+                'icon' => $hub['icon'],
+                'title' => $hub['label'],
+                'subtitle' => $hub['subtitle'],
+                'route' => $hub['route'],
+            ];
+        }
         if ($this->showPlataforma($user)) {
             $modules[] = [
+                'id' => 'admin',
                 'icon' => 'fa-shield-halved',
                 'title' => 'Plataforma',
                 'subtitle' => 'Usuários, empresas e configurações',

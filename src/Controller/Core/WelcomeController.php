@@ -5,8 +5,11 @@ namespace App\Controller\Core;
 use App\Service\NavigationService;
 use App\Service\OnboardingProgressService;
 use App\Service\WelcomeAnalyticsService;
+use App\Service\WelcomeContentService;
+use App\Service\WelcomeNewsFeedService;
 use App\Service\WelcomePresentationService;
 use App\Service\WelcomeService;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +23,7 @@ class WelcomeController extends AbstractController
     public function index(
         WelcomeService $welcome,
         WelcomePresentationService $presentation,
+        WelcomeContentService $welcomeContent,
         WelcomeAnalyticsService $analytics,
         OnboardingProgressService $onboardingProgress,
         WorkspaceService $workspace,
@@ -32,6 +36,8 @@ class WelcomeController extends AbstractController
         $empresas = $workspace->getAvailableEmpresas($user);
         $empresa = $workspace->getActiveEmpresa($user);
         $empresasCount = \count($empresas);
+        $layout = $navigation->getLayout($user);
+        $chartPayload = $analytics->getChartPayload($user, $empresa);
 
         return $this->render('core/welcome/index.html.twig', [
             'greeting' => $welcome->getGreeting(),
@@ -41,13 +47,42 @@ class WelcomeController extends AbstractController
             'hubs' => $welcome->getHubsForUser($user),
             'novidades' => $welcome->getNovidadesForUser($user),
             'presentation' => $presentation->build($user, $empresa, $empresasCount),
-            'layout' => $navigation->getLayout($user),
+            'welcome_content' => $welcomeContent->build($user, $empresa, $layout, $empresasCount),
+            'layout' => $layout,
             'empresa' => $empresa,
             'empresas_count' => $empresasCount,
-            'chart_sections' => $analytics->getChartSections($user, $empresa),
+            'chart_sections' => $chartPayload['sections'],
+            'chart_executive' => $chartPayload['executive'],
             'perfil_label' => $user->getPerfilLabel(),
             'perfil_class' => $user->getPerfilClass(),
             'onboarding' => $onboardingProgress->build($user, $empresa, $empresasCount),
+        ]);
+    }
+
+    #[Route('/bem-vindo/noticias/{slug}', name: 'app_welcome_news_show', requirements: ['slug' => '[a-z0-9\-]+'])]
+    public function newsShow(
+        string $slug,
+        WelcomeNewsFeedService $newsFeed,
+        WorkspaceService $workspace,
+        NavigationService $navigation,
+    ): Response {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $empresa = $workspace->getActiveEmpresa($user);
+        $layout = $navigation->getLayout($user);
+
+        $article = $newsFeed->findArticleForUser($user, $slug, $layout, $empresa);
+        if ($article === null) {
+            throw new NotFoundHttpException('Artigo não encontrado.');
+        }
+
+        $newsFeed->markArticleRead($user, $slug, $empresa);
+        $article['is_read'] = true;
+
+        return $this->render('core/welcome/news_show.html.twig', [
+            'article' => $article,
+            'layout' => $layout,
+            'news_read_api_url' => $this->generateUrl('app_welcome_news_api_read', ['slug' => $slug]),
         ]);
     }
 }

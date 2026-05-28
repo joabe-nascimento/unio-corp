@@ -1,4 +1,4 @@
-{# Assistente virtual Helia — avatar feminino ilustrado #}
+{# Assistente virtual Vitória — avatar feminino ilustrado #}
 {% macro face(size) %}
 {% set s = size|default('md') %}
 {% set uid = 'hf' ~ random(100000, 999999) %}
@@ -7,10 +7,11 @@
 </span>
 {% endmacro %}
 
-{% macro avatar(size) %}
+{% macro avatar(size, wave) %}
 {% set s = size|default('sm') %}
 {% set uid = 'ha' ~ random(100000, 999999) %}
-<span class="helix-avatar helix-avatar--{{ s }}" aria-hidden="true">
+{% set _wave = wave|default(false) %}
+<span class="helix-avatar helix-avatar--{{ s }}{{ _wave ? ' helix-avatar--wave' : '' }}" aria-hidden="true">
     {% include 'components/helix/woman_avatar_svg.html.twig' with { uid: uid } only %}
 </span>
 {% endmacro %}

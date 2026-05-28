@@ -68,7 +68,7 @@
         form.dataset.rhFuncionarioFormInit = '1';
 
         var isWizard = form.hasAttribute('data-rh-funcionario-wizard');
-        var offcanvasRoot = form.closest('[data-huplex-offcanvas]');
+        var offcanvasRoot = form.closest('[data-unio-offcanvas]');
 
         form.querySelectorAll('[data-mask]').forEach(function (input) {
             if (input.getAttribute('data-mask') === 'money') {

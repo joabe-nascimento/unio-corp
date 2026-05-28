@@ -7,7 +7,7 @@
 {% set can_edit = can_manage_permissions(permission_data.scope) %}
 {% set perm_tags_modal_id = 'perm-tags-modal-' ~ permission_data.scope %}
 <div class="permissions-panel" data-perm-panel data-perm-scope="{{ permission_data.scope }}" data-perm-api-url="{{ path('app_permissions_api_grants', {memberId: 'MEMBER'}) }}" data-perm-csrf="{{ csrf_token('perm_grants') }}">
-    <div class="huplex-card permissions-panel-card">
+    <div class="unio-card permissions-panel-card">
         {% include 'components/section_header.html.twig' with {
             title: 'Permissões',
             subtitle: permission_data.subtitle
@@ -41,11 +41,11 @@
                             <span class="permissions-member-name">{{ member.nome }}</span>
                             <span class="permissions-member-email">{{ member.email }}</span>
                         </div>
-                        <span class="huplex-tooltip badge-perfil perm-scope-tag {{ scope_summary.class }}"
+                        <span class="unio-tooltip badge-perfil perm-scope-tag {{ scope_summary.class }}"
                               data-perm-scope-badge="{{ member.id }}"
                               tabindex="0">
                             <span class="perm-scope-badge-label">{{ scope_summary.label }}</span>
-                            <span class="huplex-tooltip-bubble" data-perm-scope-badge-tip="{{ member.id }}">{{ scope_summary.description }}</span>
+                            <span class="unio-tooltip-bubble" data-perm-scope-badge-tip="{{ member.id }}">{{ scope_summary.description }}</span>
                         </span>
                     </div>
                     <div class="perm-row-actions">
@@ -85,7 +85,7 @@
                 <div class="view-grid-only perm-member-grid-card">
                     <span class="permissions-avatar permissions-avatar--grid">{{ member.initials }}</span>
                     <div class="perm-member-grid-name">{{ member.nome }}</div>
-                    <span class="huplex-tooltip badge-perfil perm-scope-tag {{ scope_summary.class }} perm-member-grid-tag"
+                    <span class="unio-tooltip badge-perfil perm-scope-tag {{ scope_summary.class }} perm-member-grid-tag"
                           data-perm-scope-badge="{{ member.id }}"
                           tabindex="0">
                         <span class="perm-scope-badge-label">{{ scope_summary.label }}</span>
@@ -364,7 +364,7 @@
     function updateScopeBadge(memberId) {
         var meta = scopeGrantSummary(memberId);
         panel.querySelectorAll('[data-perm-scope-badge="' + memberId + '"]').forEach(function (el) {
-            el.className = 'huplex-tooltip badge-perfil perm-scope-tag ' + meta.class;
+            el.className = 'unio-tooltip badge-perfil perm-scope-tag ' + meta.class;
             var labelEl = el.querySelector('.perm-scope-badge-label');
             if (labelEl) labelEl.textContent = meta.label;
             var tip = el.querySelector('[data-perm-scope-badge-tip]');
@@ -521,7 +521,7 @@
         var grants = loadMemberGrants(member.id);
         var grantCount = countGrants(member.id);
         var viewMemberHtml = member.ficha_id
-            ? '<a href="' + esc(fichaUrl(member.ficha_id)) + '" class="perm-profile-view-btn btn-huplex-ghost btn-sm">' +
+            ? '<a href="' + esc(fichaUrl(member.ficha_id)) + '" class="perm-profile-view-btn btn-unio-ghost btn-sm">' +
                 '<i class="fas fa-user"></i> Ver membro' +
               '</a>'
             : '';

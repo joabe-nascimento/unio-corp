@@ -178,6 +178,16 @@ final class ProductGrantAccess
             return true;
         }
 
+        $primary = ProductGrantRouteMap::MAP[$routeName];
+        $productIds = self::productIdsForScope($primary['scope']);
+        if ($productIds === []) {
+            if ($this->usesGranularGrants($user)) {
+                return false;
+            }
+
+            return $this->roleAllowsRoute($user, $routeName);
+        }
+
         $moduleScopes = self::MODULE_PRODUCT_SCOPES[$routeName] ?? null;
 
         if ($this->usesConfiguredMatrix($user) && \is_array($moduleScopes)) {
@@ -232,7 +242,7 @@ final class ProductGrantAccess
             return false;
         }
 
-        if (preg_match('/^app_(talentos|maturidade|engenharia|publicidade)/', $routeName) === 1) {
+        if (preg_match('/^app_(talentos|maturidade|engenharia|publicidade|comercial|beneficios|academy|parceiros|financeiro|compliance|analytics|juridico|clima|sst|comunicacao)/', $routeName) === 1) {
             return $this->security->isGranted('ROLE_GESTOR_EQUIPE');
         }
 

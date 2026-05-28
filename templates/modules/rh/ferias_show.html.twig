@@ -4,8 +4,8 @@
 
 {% block page_list_content %}
 <div class="rh-process-show">
-    <div class="huplex-card p-4 mb-3">
-        {% include 'components/huplex/detail_field_section.html.twig' with { title: 'Solicitação', items: [
+    <div class="unio-card p-4 mb-3">
+        {% include 'components/unio/detail_field_section.html.twig' with { title: 'Solicitação', items: [
             { label: 'Status', value: ferias.statusLabel, icon: 'fa-flag' },
             { label: 'Período', value: ferias.dataInicio|date('d/m/Y') ~ ' a ' ~ ferias.dataFim|date('d/m/Y'), icon: 'fa-calendar' },
             { label: 'Dias', value: ferias.dias, icon: 'fa-clock' },
@@ -13,12 +13,12 @@
         ]} only %}
     </div>
     {% if ferias.status == 'SOLICITADA' and grant_at_least('product_rh', 'ferias', 'SUPERVISOR_EQUIPE') %}
-    <div class="huplex-card p-4">
+    <div class="unio-card p-4">
         <form method="post" class="d-flex flex-wrap gap-2 align-items-end">
             <input type="hidden" name="_token" value="{{ csrf_token('rh_ferias_action') }}">
-            <button name="action" value="aprovar" class="btn-huplex">Aprovar</button>
-            <button name="action" value="rejeitar" class="btn-huplex-ghost">Rejeitar</button>
-            <input type="text" name="motivo" class="huplex-form-control" placeholder="Motivo (se rejeitar)" style="max-width:240px;">
+            <button name="action" value="aprovar" class="btn-unio">Aprovar</button>
+            <button name="action" value="rejeitar" class="btn-unio-ghost">Rejeitar</button>
+            <input type="text" name="motivo" class="unio-form-control" placeholder="Motivo (se rejeitar)" style="max-width:240px;">
         </form>
     </div>
     {% endif %}

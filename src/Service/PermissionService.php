@@ -139,11 +139,11 @@ class PermissionService
 
     /** @var array<string, array{equipe: string, cargo: string}> */
     private const MEMBER_META = [
-        'gestor@huplex.dev' => ['equipe' => 'PMO', 'cargo' => 'Gestor de Operações'],
-        'gestor.eq@huplex.dev' => ['equipe' => 'Squad Backend', 'cargo' => 'Gestor de Equipe'],
-        'supervisor@huplex.dev' => ['equipe' => '—', 'cargo' => 'Supervisor Geral'],
-        'sup.eq@huplex.dev' => ['equipe' => 'Obras e Projetos', 'cargo' => 'Supervisor de Campo'],
-        'membro@huplex.dev' => ['equipe' => 'Design & Marca', 'cargo' => 'Analista'],
+        'gestor@unio.dev' => ['equipe' => 'PMO', 'cargo' => 'Gestor de Operações'],
+        'gestor.eq@unio.dev' => ['equipe' => 'Squad Backend', 'cargo' => 'Gestor de Equipe'],
+        'supervisor@unio.dev' => ['equipe' => '—', 'cargo' => 'Supervisor Geral'],
+        'sup.eq@unio.dev' => ['equipe' => 'Obras e Projetos', 'cargo' => 'Supervisor de Campo'],
+        'membro@unio.dev' => ['equipe' => 'Design & Marca', 'cargo' => 'Analista'],
     ];
 
     /** @var array<string, array{label: string, subtitle: string, products: list<array{id: string, label: string}>}> */
@@ -185,6 +185,61 @@ class PermissionService
                 ['id' => 'empresas', 'label' => 'Empresas'],
                 ['id' => 'configuracoes', 'label' => 'Configurações'],
             ],
+        ],
+        'hub_comercial' => [
+            'label' => 'Hub Comercial',
+            'subtitle' => 'CRM e pipeline comercial',
+            'products' => [],
+        ],
+        'hub_beneficios' => [
+            'label' => 'Hub Benefícios',
+            'subtitle' => 'Marketplace de benefícios',
+            'products' => [],
+        ],
+        'hub_academy' => [
+            'label' => 'Hub Academy',
+            'subtitle' => 'Educação e trilhas de aprendizado',
+            'products' => [],
+        ],
+        'hub_parceiros' => [
+            'label' => 'Hub Parceiros',
+            'subtitle' => 'Rede de parceiros e revenda',
+            'products' => [],
+        ],
+        'hub_financeiro' => [
+            'label' => 'Hub Financeiro',
+            'subtitle' => 'Tesouraria e orçamento de pessoal',
+            'products' => [],
+        ],
+        'hub_compliance' => [
+            'label' => 'Hub Compliance',
+            'subtitle' => 'Normas, LGPD e auditorias',
+            'products' => [],
+        ],
+        'hub_analytics' => [
+            'label' => 'Hub Analytics',
+            'subtitle' => 'BI e indicadores',
+            'products' => [],
+        ],
+        'hub_juridico' => [
+            'label' => 'Hub Jurídico',
+            'subtitle' => 'Trabalhista e contratos',
+            'products' => [],
+        ],
+        'hub_clima' => [
+            'label' => 'Hub Clima',
+            'subtitle' => 'Engajamento e eNPS',
+            'products' => [],
+        ],
+        'hub_sst' => [
+            'label' => 'Hub SST',
+            'subtitle' => 'Saúde e segurança do trabalho',
+            'products' => [],
+        ],
+        'hub_comunicacao' => [
+            'label' => 'Hub Comunicação',
+            'subtitle' => 'Mural e cultura interna',
+            'products' => [],
         ],
         'product_rh' => [
             'label' => 'Recursos Humanos',
@@ -291,6 +346,72 @@ class PermissionService
                 ['id' => 'empresas', 'label' => 'Empresas'],
                 ['id' => 'configuracoes', 'label' => 'Configurações'],
             ],
+        ],
+        [
+            'id' => 'hub_comercial',
+            'label' => 'Hub Comercial',
+            'scope' => 'hub_comercial',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_beneficios',
+            'label' => 'Hub Benefícios',
+            'scope' => 'hub_beneficios',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_academy',
+            'label' => 'Hub Academy',
+            'scope' => 'hub_academy',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_parceiros',
+            'label' => 'Hub Parceiros',
+            'scope' => 'hub_parceiros',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_financeiro',
+            'label' => 'Hub Financeiro',
+            'scope' => 'hub_financeiro',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_compliance',
+            'label' => 'Hub Compliance',
+            'scope' => 'hub_compliance',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_analytics',
+            'label' => 'Hub Analytics',
+            'scope' => 'hub_analytics',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_juridico',
+            'label' => 'Hub Jurídico',
+            'scope' => 'hub_juridico',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_clima',
+            'label' => 'Hub Clima',
+            'scope' => 'hub_clima',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_sst',
+            'label' => 'Hub SST',
+            'scope' => 'hub_sst',
+            'products' => [],
+        ],
+        [
+            'id' => 'hub_comunicacao',
+            'label' => 'Hub Comunicação',
+            'scope' => 'hub_comunicacao',
+            'products' => [],
         ],
         [
             'id' => 'product_rh',
@@ -740,11 +861,11 @@ class PermissionService
     private function getFallbackMembers(): array
     {
         return [
-            $this->member('gestor', 'Gestor Oliveira', 'gestor@huplex.dev', 'GESTOR', 'PMO', 'Gestor de Operações', null),
-            $this->member('gestor-eq', 'Gestor Costa', 'gestor.eq@huplex.dev', 'GESTOR_EQUIPE', 'Squad Backend', 'Gestor de Equipe', null),
-            $this->member('supervisor', 'Supervisor Geral', 'supervisor@huplex.dev', 'SUPERVISOR', '—', 'Supervisor Geral', null),
-            $this->member('sup-eq', 'Supervisor Equipe', 'sup.eq@huplex.dev', 'SUPERVISOR_EQUIPE', 'Obras e Projetos', 'Supervisor de Campo', null),
-            $this->member('membro', 'Membro Santos', 'membro@huplex.dev', 'MEMBRO', 'Design & Marca', 'Analista', null),
+            $this->member('gestor', 'Gestor Oliveira', 'gestor@unio.dev', 'GESTOR', 'PMO', 'Gestor de Operações', null),
+            $this->member('gestor-eq', 'Gestor Costa', 'gestor.eq@unio.dev', 'GESTOR_EQUIPE', 'Squad Backend', 'Gestor de Equipe', null),
+            $this->member('supervisor', 'Supervisor Geral', 'supervisor@unio.dev', 'SUPERVISOR', '—', 'Supervisor Geral', null),
+            $this->member('sup-eq', 'Supervisor Equipe', 'sup.eq@unio.dev', 'SUPERVISOR_EQUIPE', 'Obras e Projetos', 'Supervisor de Campo', null),
+            $this->member('membro', 'Membro Santos', 'membro@unio.dev', 'MEMBRO', 'Design & Marca', 'Analista', null),
         ];
     }
 

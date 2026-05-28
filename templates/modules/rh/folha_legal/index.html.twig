@@ -9,14 +9,14 @@
     <form method="post" action="{{ path('app_rh_folha_legal') }}">
         <input type="hidden" name="_token" value="{{ csrf_token('rh_folha_legal_seed') }}">
         <input type="hidden" name="action" value="seed_rubricas">
-        <button type="submit" class="btn-huplex-ghost btn-sm">Rubricas padrão</button>
+        <button type="submit" class="btn-unio-ghost btn-sm">Rubricas padrão</button>
     </form>
     {% endif %}
 </div>
 
 <div class="row g-3">
     <div class="col-lg-5">
-        <div class="huplex-card p-4">
+        <div class="unio-card p-4">
             <h4 class="h6 mb-3">Rubricas</h4>
             {% if rubricas is empty %}
                 <p class="text-muted mb-0">Nenhuma rubrica cadastrada.</p>
@@ -30,7 +30,7 @@
         </div>
     </div>
     <div class="col-lg-7">
-        <div class="huplex-card p-4">
+        <div class="unio-card p-4">
             <h4 class="h6 mb-3">Gerar holerites (INSS/IRRF/FGTS stub)</h4>
             {% if grant_at_least('product_rh', 'folha_legal', 'GESTOR') and competencias is not empty %}
             <form method="post" action="{{ path('app_rh_folha_legal') }}">
@@ -39,7 +39,7 @@
                 <select name="competencia_id" class="form-select form-select-sm mb-2" required>
                     {% for c in competencias %}<option value="{{ c.id }}">{{ c.referencia }}</option>{% endfor %}
                 </select>
-                <button type="submit" class="btn-huplex btn-sm">Gerar holerites</button>
+                <button type="submit" class="btn-unio btn-sm">Gerar holerites</button>
             </form>
             {% else %}
             <p class="text-muted mb-0">Gere uma competência em Folha operacional primeiro.</p>

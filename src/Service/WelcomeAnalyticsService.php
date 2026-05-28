@@ -13,6 +13,7 @@ use App\Repository\DevProjetoRepository;
 use App\Repository\DevTarefaRepository;
 use App\Repository\EmpresaRepository;
 use App\Repository\FuncionarioRepository;
+use App\Repository\RhFeriasRepository;
 use App\Repository\RhOffboardingProcessRepository;
 use App\Repository\RhOnboardingProcessRepository;
 use App\Repository\UserRepository;
@@ -58,6 +59,7 @@ final class WelcomeAnalyticsService
         private DevProjetoRepository $projetoRepo,
         private RhOnboardingProcessRepository $onboardingRepo,
         private RhOffboardingProcessRepository $offboardingRepo,
+        private RhFeriasRepository $feriasRepo,
         private NavigationService $navigation,
     ) {}
 
@@ -72,223 +74,1159 @@ final class WelcomeAnalyticsService
      */
     public function getChartSections(User $user, ?Empresa $empresa): array
     {
-        $sections = [];
         $isTenant = $this->navigation->isTenant($user);
-
-        $access = $this->buildAccessSection($user, $empresa, $isTenant);
-        if ($access !== null) {
-            $sections[] = $access;
-        }
+        $sections = [];
 
         if ($empresa !== null && ($this->navigation->showModuloRh($user) || $this->navigation->showModuloPessoas($user))) {
-            $people = $this->buildPeopleSection($empresa);
-            if ($people !== null) {
-                $sections[] = $people;
+            $workforce = array_values(array_filter([
+                $this->buildPeopleSankey($empresa),
+                $this->buildPeopleHeatmap($empresa),
+                $this->buildWorkforceStackedBar($empresa),
+                $this->buildWorkforceTreemap($empresa),
+                $this->buildHeadcountByDeptBar($empresa),
+                $this->buildWorkforceStatusRing($empresa),
+                $this->buildOperationalRadar($user, $empresa),
+            ]));
+            if ($workforce !== []) {
+                $sections[] = $this->makeSection(
+                    'workforce-intelligence',
+                    'Workforce Intelligence',
+                    'Composição, distribuição e saúde do capital humano em tempo real',
+                    'fa-users-viewfinder',
+                    'executive',
+                    'People Analytics',
+                    $workforce,
+                );
             }
         }
 
         if ($empresa !== null && $this->navigation->showModuloRh($user)) {
-            $rh = $this->buildRhSection($empresa);
-            if ($rh !== null) {
-                $sections[] = $rh;
+            $rh = array_values(array_filter([
+                $this->buildRhSankey($empresa),
+                $this->buildRhFunnel($empresa),
+                $this->buildRhHealthGauge($empresa),
+                $this->buildFeriasPipeline($empresa),
+                $this->buildRhThroughputBar($empresa),
+            ]));
+            if ($rh !== []) {
+                $sections[] = $this->makeSection(
+                    'rh-operations',
+                    'RH Operations',
+                    'Pipeline de admissões, desligamentos e ciclo de férias',
+                    'fa-user-tie',
+                    'operational',
+                    'Human Resources',
+                    $rh,
+                );
             }
         }
 
         if ($empresa !== null && $this->navigation->showProjetosMetas($user)) {
-            $dev = $this->buildProjectsSection($empresa);
-            if ($dev !== null) {
-                $sections[] = $dev;
+            $delivery = array_values(array_filter([
+                $this->buildDeliveryGauge($empresa),
+                $this->buildKanbanPipelineBar($empresa),
+                $this->buildKanbanStackedByProject($empresa),
+                $this->buildProjectsTreemap($empresa),
+                $this->buildProjectsBubble($empresa),
+                $this->buildProjectStatusRing($empresa),
+            ]));
+            if ($delivery !== []) {
+                $sections[] = $this->makeSection(
+                    'project-delivery',
+                    'Project Delivery',
+                    'Portfólio, throughput de tarefas e maturidade de entregas',
+                    'fa-rocket',
+                    'operational',
+                    'Delivery Office',
+                    $delivery,
+                );
             }
         }
 
-        $evolution = $this->buildEvolutionSection($user, $empresa, $isTenant);
-        if ($evolution !== null) {
-            $sections[] = $evolution;
+        $governance = array_values(array_filter([
+            !($empresa !== null && ($this->navigation->showModuloRh($user) || $this->navigation->showModuloPessoas($user)))
+                ? $this->buildAccessSankey($user, $empresa, $isTenant)
+                : null,
+            $empresa !== null ? $this->buildProfileRing($empresa) : null,
+            $empresa !== null ? $this->buildUserActivityGauge($empresa) : null,
+            ($isTenant && $empresa === null) ? $this->buildTenantSankey() : null,
+            ($isTenant && $empresa === null) ? $this->buildTenantEmpresaTreemap() : null,
+        ]));
+        if ($governance !== []) {
+            $sections[] = $this->makeSection(
+                'platform-governance',
+                'Platform Governance',
+                'Acessos, perfis e governança multi-empresa',
+                'fa-shield-halved',
+                'governance',
+                'Identity & Access',
+                $governance,
+            );
+        }
+
+        $growthCharts = array_values(array_filter([
+            $this->buildEvolutionChart($user, $empresa, $isTenant),
+            $empresa !== null ? $this->buildTaskVelocityChart($empresa) : null,
+            $empresa !== null ? $this->buildRhActivityChart($empresa) : null,
+        ]));
+        if ($growthCharts !== []) {
+            $sections[] = $this->makeSection(
+                'growth-trends',
+                'Growth & Trends',
+                'Séries temporais de cadastros, entregas e movimentações RH',
+                'fa-chart-line',
+                'executive',
+                'Executive Trends',
+                $growthCharts,
+            );
         }
 
         return $sections;
     }
 
-  /**
-     * @return ?array{id: string, title: string, subtitle: string, icon: string, charts: list<array<string, mixed>>}
+    /**
+     * @return array{
+     *     sections: list<array<string, mixed>>,
+     *     meta: array{chart_count: int, section_count: int, generated_at: string}
+     * }
      */
-    private function buildAccessSection(User $user, ?Empresa $empresa, bool $isTenant): ?array
+    public function getChartPayload(User $user, ?Empresa $empresa): array
     {
-        $charts = [];
-
-        $byPerfil = $this->countUsersByPerfil($empresa, $isTenant);
-        if ($this->hasValues($byPerfil['values'])) {
-            $charts[] = ChartConfig::doughnut(
-                'users-perfil',
-                'Usuários por perfil',
-                $byPerfil['labels'],
-                $byPerfil['values'],
-                'Distribuição dos perfis de acesso registrados',
-            )->toArray();
+        $sections = $this->getChartSections($user, $empresa);
+        $chartCount = 0;
+        foreach ($sections as $section) {
+            $chartCount += \count($section['charts'] ?? []);
         }
 
-        $byAtivo = $this->countUsersByAtivo($empresa, $isTenant);
-        if ($this->hasValues($byAtivo['values'])) {
-            $charts[] = ChartConfig::bar(
-                'users-ativo',
-                'Situação dos usuários',
-                $byAtivo['labels'],
-                $byAtivo['values'],
-                'Contas ativas e inativas no cadastro',
-            )->toArray();
-        }
+        return [
+            'sections' => $sections,
+            'executive' => $this->buildExecutiveSummary($user, $empresa),
+            'meta' => [
+                'chart_count' => $chartCount,
+                'section_count' => \count($sections),
+                'generated_at' => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
+            ],
+        ];
+    }
 
-        if ($isTenant) {
+    /**
+     * @param list<array<string, mixed>> $charts
+     *
+     * @return array<string, mixed>
+     */
+    private function makeSection(
+        string $id,
+        string $title,
+        string $subtitle,
+        string $icon,
+        string $tier,
+        string $badge,
+        array $charts,
+    ): array {
+        return [
+            'id' => $id,
+            'title' => $title,
+            'subtitle' => $subtitle,
+            'icon' => $icon,
+            'tier' => $tier,
+            'badge' => $badge,
+            'charts' => $charts,
+        ];
+    }
+
+    /**
+     * @return array{kpis: list<array<string, mixed>>}
+     */
+    public function buildExecutiveSummary(User $user, ?Empresa $empresa): array
+    {
+        $isTenant = $this->navigation->isTenant($user);
+        $kpis = [];
+
+        if ($empresa !== null) {
+            $headcount = (int) $this->funcionarioRepo->count(['empresa' => $empresa]);
+            $ativos = (int) $this->funcionarioRepo->count(['empresa' => $empresa, 'status' => 'ATIVO']);
+            $users = (int) $this->userRepo->count(['empresa' => $empresa]);
+            $projects = (int) $this->projetoRepo->count(['empresa' => $empresa]);
+            $projectsActive = (int) $this->projetoRepo->count([
+                'empresa' => $empresa,
+                'status' => DevProjeto::STATUS_EM_ANDAMENTO,
+            ]);
+            $tasksTotal = (int) $this->tarefaRepo->count(['empresa' => $empresa]);
+            $tasksDone = (int) $this->tarefaRepo->count([
+                'empresa' => $empresa,
+                'status' => DevTarefa::STATUS_CONCLUIDO,
+            ]);
+            $rhOpen = $this->countOpenRhProcesses($empresa);
+            $deliveryRate = $tasksTotal > 0 ? (int) round(($tasksDone / $tasksTotal) * 100) : 0;
+
+            $kpis = array_values(array_filter([
+                $headcount > 0 ? $this->executiveKpi('headcount', 'Colaboradores', $headcount, 'fa-users', 'Cadastro total') : null,
+                $ativos > 0 ? $this->executiveKpi('active-people', 'Pessoas ativas', $ativos, 'fa-user-check', 'Status operacional') : null,
+                $users > 0 ? $this->executiveKpi('users', 'Usuários', $users, 'fa-id-badge', 'Contas na plataforma') : null,
+                $projects > 0 ? $this->executiveKpi('projects', 'Projetos', $projects, 'fa-folder-tree', $projectsActive . ' em andamento') : null,
+                $tasksTotal > 0 ? $this->executiveKpi('delivery', 'Entrega', $deliveryRate, 'fa-gauge-high', $tasksDone . ' de ' . $tasksTotal . ' tarefas', '%') : null,
+                $rhOpen > 0 ? $this->executiveKpi('rh-open', 'RH em aberto', $rhOpen, 'fa-user-clock', 'Admissões e desligamentos') : null,
+            ]));
+        } elseif ($isTenant) {
             $empresas = $this->countEmpresasAtivas();
-            if ($empresas['total'] > 0) {
-                $charts[] = ChartConfig::doughnut(
-                    'empresas-ativas',
-                    'Empresas na plataforma',
-                    $empresas['labels'],
-                    $empresas['values'],
-                    'Tenants e áreas de trabalho cadastradas',
-                )->toArray();
+            $users = (int) $this->userRepo->count([]);
+            $kpis = [
+                $this->executiveKpi('companies', 'Empresas', $empresas['values'][0], 'fa-building', 'Ativas na plataforma'),
+                $this->executiveKpi('users-global', 'Usuários', $users, 'fa-globe', 'Contas globais'),
+            ];
+        }
+
+        return ['kpis' => $kpis];
+    }
+
+    /** @return array<string, mixed> */
+    private function executiveKpi(
+        string $id,
+        string $label,
+        int|float $value,
+        string $icon,
+        string $hint,
+        ?string $suffix = null,
+    ): array {
+        return [
+            'id' => $id,
+            'label' => $label,
+            'value' => $value,
+            'icon' => $icon,
+            'hint' => $hint,
+            'suffix' => $suffix,
+        ];
+    }
+
+    /** @param array<string, mixed> $chart @return array<string, mixed> */
+    private function withKpi(array $chart, string $label, int|float $value): array
+    {
+        $chart['kpi'] = ['label' => $label, 'value' => $value];
+
+        return $chart;
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildPeopleSankey(Empresa $empresa): ?array
+    {
+        $rows = $this->funcionarioRepo->createQueryBuilder('f')
+            ->select('COALESCE(d.nome, :sem) AS dept, f.status AS status, COUNT(f.id) AS total')
+            ->leftJoin('f.departamento', 'd')
+            ->andWhere('f.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('sem', 'Sem departamento')
+            ->groupBy('dept, status')
+            ->getQuery()
+            ->getArrayResult();
+
+        if ($rows === []) {
+            return null;
+        }
+
+        $root = 'Colaboradores';
+        $nodes = [['name' => $root]];
+        $links = [];
+        $deptTotals = [];
+
+        foreach ($rows as $row) {
+            $dept = (string) $row['dept'];
+            $status = self::FUNC_STATUS_LABELS[(string) $row['status']] ?? (string) $row['status'];
+            $total = (int) $row['total'];
+            if ($total <= 0) {
+                continue;
+            }
+
+            $deptNode = 'Dept · ' . $dept;
+            $statusNode = $dept . ' · ' . $status;
+
+            $this->ensureSankeyNode($nodes, $deptNode);
+            $this->ensureSankeyNode($nodes, $statusNode);
+
+            $deptTotals[$deptNode] = ($deptTotals[$deptNode] ?? 0) + $total;
+            $links[] = ['source' => $deptNode, 'target' => $statusNode, 'value' => $total];
+        }
+
+        foreach ($deptTotals as $deptNode => $total) {
+            $links[] = ['source' => $root, 'target' => $deptNode, 'value' => $total];
+        }
+
+        if ($links === []) {
+            return null;
+        }
+
+        $total = array_sum($deptTotals);
+
+        $chart = ChartConfig::sankey(
+            'people-sankey',
+            'Fluxo de colaboradores',
+            $nodes,
+            $links,
+            'Sankey departamento → situação cadastral (dados reais)',
+        )->toArray();
+        $chart['kpi'] = ['label' => 'Colaboradores', 'value' => $total];
+
+        return $chart;
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildPeopleHeatmap(Empresa $empresa): ?array
+    {
+        $rows = $this->funcionarioRepo->createQueryBuilder('f')
+            ->select('COALESCE(d.nome, :sem) AS dept, f.status AS status, COUNT(f.id) AS total')
+            ->leftJoin('f.departamento', 'd')
+            ->andWhere('f.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('sem', 'Sem departamento')
+            ->groupBy('dept, status')
+            ->getQuery()
+            ->getArrayResult();
+
+        if ($rows === []) {
+            return null;
+        }
+
+        $xLabels = [];
+        $yLabels = [];
+        $map = [];
+
+        foreach ($rows as $row) {
+            $dept = (string) $row['dept'];
+            $status = self::FUNC_STATUS_LABELS[(string) $row['status']] ?? (string) $row['status'];
+            $total = (int) $row['total'];
+
+            if (!\in_array($status, $xLabels, true)) {
+                $xLabels[] = $status;
+            }
+            if (!\in_array($dept, $yLabels, true)) {
+                $yLabels[] = $dept;
+            }
+            $map[$dept . '|' . $status] = $total;
+        }
+
+        $matrix = [];
+        foreach ($yLabels as $yIdx => $dept) {
+            foreach ($xLabels as $xIdx => $status) {
+                $value = $map[$dept . '|' . $status] ?? 0;
+                if ($value > 0) {
+                    $matrix[] = [$xIdx, $yIdx, $value];
+                }
             }
         }
 
-        if ($charts === []) {
+        if ($matrix === []) {
             return null;
         }
 
-        return [
-            'id' => 'access',
-            'title' => 'Cadastros e acessos',
-            'subtitle' => $empresa
-                ? 'Usuários e registros em ' . $empresa->getNome()
-                : 'Visão consolidada da plataforma',
-            'icon' => 'fa-user-shield',
-            'charts' => $charts,
-        ];
+        $cellTotal = array_sum(array_column($matrix, 2));
+
+        $chart = ChartConfig::heatmap(
+            'people-heatmap',
+            'Matriz departamento × situação',
+            $xLabels,
+            $yLabels,
+            $matrix,
+            'Heatmap bidimensional da distribuição de pessoas',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Colaboradores', $cellTotal);
     }
 
-    /** @return ?array{id: string, title: string, subtitle: string, icon: string, charts: list<array<string, mixed>>} */
-    private function buildPeopleSection(Empresa $empresa): ?array
+    /** @return ?array<string, mixed> */
+    private function buildWorkforceStackedBar(Empresa $empresa): ?array
     {
-        $charts = [];
-
-        $byStatus = $this->countFuncionariosByStatus($empresa);
-        if ($this->hasValues($byStatus['values'])) {
-            $charts[] = ChartConfig::doughnut(
-                'func-status',
-                'Colaboradores por situação',
-                $byStatus['labels'],
-                $byStatus['values'],
-                'Funcionários registrados no hub de pessoas',
-            )->toArray();
+        $matrix = $this->fetchPeopleMatrix($empresa);
+        if ($matrix === null) {
+            return null;
         }
 
+        $datasets = [];
+        foreach ($matrix['statuses'] as $status) {
+            $data = [];
+            foreach ($matrix['depts'] as $dept) {
+                $data[] = $matrix['map'][$dept . '|' . $status] ?? 0;
+            }
+            $datasets[] = ['label' => $status, 'data' => $data];
+        }
+
+        $chart = ChartConfig::stackedBar(
+            'workforce-stacked',
+            'Headcount por departamento e situação',
+            $matrix['depts'],
+            $datasets,
+            'Barras empilhadas — visão comparativa entre áreas',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Colaboradores', $matrix['total']);
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildWorkforceTreemap(Empresa $empresa): ?array
+    {
+        $matrix = $this->fetchPeopleMatrix($empresa);
+        if ($matrix === null) {
+            return null;
+        }
+
+        $tree = [];
+        foreach ($matrix['depts'] as $dept) {
+            $children = [];
+            foreach ($matrix['statuses'] as $status) {
+                $value = $matrix['map'][$dept . '|' . $status] ?? 0;
+                if ($value > 0) {
+                    $children[] = ['name' => $status, 'value' => $value];
+                }
+            }
+            if ($children !== []) {
+                $tree[] = ['name' => $dept, 'children' => $children];
+            }
+        }
+
+        if ($tree === []) {
+            return null;
+        }
+
+        $chart = ChartConfig::treemap(
+            'workforce-treemap',
+            'Mapa proporcional do workforce',
+            $tree,
+            'Treemap hierárquico departamento → situação cadastral',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Áreas', \count($tree));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildHeadcountByDeptBar(Empresa $empresa): ?array
+    {
         $byDept = $this->countFuncionariosByDepartamento($empresa);
-        if ($this->hasValues($byDept['values'])) {
-            $charts[] = ChartConfig::bar(
-                'func-depto',
-                'Colaboradores por departamento',
-                $byDept['labels'],
-                $byDept['values'],
-                'Distribuição da equipe nas áreas cadastradas',
-                true,
-            )->toArray();
-        }
-
-        if ($charts === []) {
+        if (!$this->hasValues($byDept['values'])) {
             return null;
         }
 
-        return [
-            'id' => 'people',
-            'title' => 'Pessoas e equipe',
-            'subtitle' => 'Dados de colaboradores e departamentos',
-            'icon' => 'fa-users',
-            'charts' => $charts,
-        ];
+        $chart = ChartConfig::barPro(
+            'headcount-dept',
+            'Headcount por departamento',
+            $byDept['labels'],
+            $byDept['values'],
+            'Ranking das áreas com maior concentração de pessoas',
+            true,
+        )->toArray();
+
+        return $this->withKpi($chart, 'Maior área', max($byDept['values']));
     }
 
-    /** @return ?array{id: string, title: string, subtitle: string, icon: string, charts: list<array<string, mixed>>} */
-    private function buildRhSection(Empresa $empresa): ?array
+    /** @return ?array<string, mixed> */
+    private function buildWorkforceStatusRing(Empresa $empresa): ?array
     {
-        $charts = [];
+        $byStatus = $this->countFuncionariosByStatus($empresa);
+        if (!$this->hasValues($byStatus['values'])) {
+            return null;
+        }
 
+        $chart = ChartConfig::ring(
+            'workforce-status-ring',
+            'Composição por situação',
+            $byStatus['labels'],
+            $byStatus['values'],
+            'Distribuição percentual do quadro de colaboradores',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Total', array_sum($byStatus['values']));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildRhFunnel(Empresa $empresa): ?array
+    {
         $adm = $this->countRhByStatus(RhOnboardingProcess::class, $empresa);
-        if ($this->hasValues($adm['values'])) {
-            $charts[] = ChartConfig::bar(
-                'rh-admissoes',
-                'Processos de admissão',
-                $adm['labels'],
-                $adm['values'],
-                'Onboarding registrados no RH',
-            )->toArray();
-        }
-
         $dem = $this->countRhByStatus(RhOffboardingProcess::class, $empresa);
-        if ($this->hasValues($dem['values'])) {
-            $charts[] = ChartConfig::bar(
-                'rh-demissao',
-                'Processos de demissão',
-                $dem['labels'],
-                $dem['values'],
-                'Offboarding registrados no RH',
-            )->toArray();
+        $merged = ['Rascunho' => 0, 'Em andamento' => 0, 'Concluído' => 0, 'Cancelado' => 0];
+
+        foreach ([$adm, $dem] as $block) {
+            foreach ($block['labels'] as $idx => $label) {
+                $merged[$label] = ($merged[$label] ?? 0) + (int) ($block['values'][$idx] ?? 0);
+            }
         }
 
-        if ($charts === []) {
+        $steps = [];
+        foreach ($merged as $name => $value) {
+            if ($value > 0) {
+                $steps[] = ['name' => $name, 'value' => $value];
+            }
+        }
+
+        if ($steps === []) {
             return null;
         }
 
-        return [
-            'id' => 'rh',
-            'title' => 'Recursos humanos',
-            'subtitle' => 'Admissões e desligamentos em andamento',
-            'icon' => 'fa-id-card',
-            'charts' => $charts,
-        ];
+        $chart = ChartConfig::funnel(
+            'rh-funnel',
+            'Funil de processos RH',
+            $steps,
+            'Conversão agregada de admissões e desligamentos por estágio',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Processos', array_sum($merged));
     }
 
-    /** @return ?array{id: string, title: string, subtitle: string, icon: string, charts: list<array<string, mixed>>} */
-    private function buildProjectsSection(Empresa $empresa): ?array
+    /** @return ?array<string, mixed> */
+    private function buildRhHealthGauge(Empresa $empresa): ?array
     {
-        $charts = [];
-
-        $tarefas = $this->countTarefasByStatus($empresa);
-        if ($this->hasValues($tarefas['values'])) {
-            $charts[] = ChartConfig::bar(
-                'dev-tarefas',
-                'Tarefas por status',
-                $tarefas['labels'],
-                $tarefas['values'],
-                'Quadro de projetos e metas (Kanban)',
-            )->toArray();
-        }
-
-        $projetos = $this->countProjetosByStatus($empresa);
-        if ($this->hasValues($projetos['values'])) {
-            $charts[] = ChartConfig::doughnut(
-                'dev-projetos',
-                'Projetos por status',
-                $projetos['labels'],
-                $projetos['values'],
-                'Portfólio de projetos registrados',
-            )->toArray();
-        }
-
-        if ($charts === []) {
+        $adm = $this->countRhByStatus(RhOnboardingProcess::class, $empresa);
+        $dem = $this->countRhByStatus(RhOffboardingProcess::class, $empresa);
+        $total = array_sum($adm['values']) + array_sum($dem['values']);
+        if ($total <= 0) {
             return null;
         }
 
-        return [
-            'id' => 'projects',
-            'title' => 'Projetos e metas',
-            'subtitle' => 'Entregas e portfólio de desenvolvimento',
-            'icon' => 'fa-diagram-project',
-            'charts' => $charts,
-        ];
+        $concluded = 0;
+        foreach ([$adm, $dem] as $block) {
+            foreach ($block['labels'] as $idx => $label) {
+                if ($label === 'Concluído') {
+                    $concluded += (int) ($block['values'][$idx] ?? 0);
+                }
+            }
+        }
+
+        $rate = (int) round(($concluded / $total) * 100);
+
+        $chart = ChartConfig::gauge(
+            'rh-health-gauge',
+            'Índice de conclusão RH',
+            $rate,
+            100,
+            'Percentual de processos concluídos sobre o total registrado',
+            '%',
+        )->toArray();
+        $chart['size'] = 'compact';
+
+        return $this->withKpi($chart, 'Concluídos', $concluded);
     }
 
-    /** @return ?array{id: string, title: string, subtitle: string, icon: string, charts: list<array<string, mixed>>} */
-    private function buildEvolutionSection(User $user, ?Empresa $empresa, bool $isTenant): ?array
+    /** @return ?array<string, mixed> */
+    private function buildFeriasPipeline(Empresa $empresa): ?array
+    {
+        $rows = $this->feriasRepo->createQueryBuilder('f')
+            ->select('f.status AS status, COUNT(f.id) AS total')
+            ->andWhere('f.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->groupBy('f.status')
+            ->orderBy('total', 'DESC')
+            ->getQuery()
+            ->getArrayResult();
+
+        if ($rows === []) {
+            return null;
+        }
+
+        $labelsMap = [
+            'SOLICITADA' => 'Solicitada',
+            'APROVADA' => 'Aprovada',
+            'REJEITADA' => 'Rejeitada',
+            'EM_GOZO' => 'Em gozo',
+            'CONCLUIDA' => 'Concluída',
+        ];
+
+        $labels = [];
+        $values = [];
+        foreach ($rows as $row) {
+            $key = (string) $row['status'];
+            $labels[] = $labelsMap[$key] ?? $key;
+            $values[] = (int) $row['total'];
+        }
+
+        $chart = ChartConfig::barPro(
+            'ferias-pipeline',
+            'Pipeline de férias',
+            $labels,
+            $values,
+            'Volume de solicitações por status no ciclo de férias',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Solicitações', array_sum($values));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildRhThroughputBar(Empresa $empresa): ?array
+    {
+        $adm = array_sum($this->countRhByStatus(RhOnboardingProcess::class, $empresa)['values']);
+        $dem = array_sum($this->countRhByStatus(RhOffboardingProcess::class, $empresa)['values']);
+        if ($adm + $dem <= 0) {
+            return null;
+        }
+
+        $chart = ChartConfig::barPro(
+            'rh-throughput',
+            'Throughput RH',
+            ['Admissões', 'Desligamentos'],
+            [$adm, $dem],
+            'Comparativo de volume entre fluxos de entrada e saída',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Total RH', $adm + $dem);
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildRhSankey(Empresa $empresa): ?array
+    {
+        $adm = $this->countRhByStatus(RhOnboardingProcess::class, $empresa);
+        $dem = $this->countRhByStatus(RhOffboardingProcess::class, $empresa);
+
+        if (!$this->hasValues($adm['values']) && !$this->hasValues($dem['values'])) {
+            return null;
+        }
+
+        $root = 'Processos RH';
+        $nodes = [['name' => $root], ['name' => 'Admissões'], ['name' => 'Desligamentos']];
+        $links = [];
+        $admTotal = array_sum($adm['values']);
+        $demTotal = array_sum($dem['values']);
+
+        if ($admTotal > 0) {
+            $links[] = ['source' => $root, 'target' => 'Admissões', 'value' => $admTotal];
+            foreach ($adm['labels'] as $idx => $label) {
+                $value = (int) ($adm['values'][$idx] ?? 0);
+                if ($value <= 0) {
+                    continue;
+                }
+                $target = 'Adm · ' . $label;
+                $this->ensureSankeyNode($nodes, $target);
+                $links[] = ['source' => 'Admissões', 'target' => $target, 'value' => $value];
+            }
+        }
+
+        if ($demTotal > 0) {
+            $links[] = ['source' => $root, 'target' => 'Desligamentos', 'value' => $demTotal];
+            foreach ($dem['labels'] as $idx => $label) {
+                $value = (int) ($dem['values'][$idx] ?? 0);
+                if ($value <= 0) {
+                    continue;
+                }
+                $target = 'Off · ' . $label;
+                $this->ensureSankeyNode($nodes, $target);
+                $links[] = ['source' => 'Desligamentos', 'target' => $target, 'value' => $value];
+            }
+        }
+
+        if ($links === []) {
+            return null;
+        }
+
+        $links = $this->mergeSankeyLinks($links);
+
+        $chart = ChartConfig::sankey(
+            'rh-sankey',
+            'Pipeline de admissões e desligamentos',
+            $nodes,
+            $links,
+            'Fluxo operacional do RH com status reais',
+        )->toArray();
+        $chart['kpi'] = ['label' => 'Processos', 'value' => $admTotal + $demTotal];
+
+        return $chart;
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildDeliveryGauge(Empresa $empresa): ?array
+    {
+        $total = (int) $this->tarefaRepo->count(['empresa' => $empresa]);
+        if ($total <= 0) {
+            return null;
+        }
+
+        $done = (int) $this->tarefaRepo->count(['empresa' => $empresa, 'status' => DevTarefa::STATUS_CONCLUIDO]);
+        $rate = (int) round(($done / $total) * 100);
+
+        $chart = ChartConfig::gauge(
+            'delivery-gauge',
+            'Taxa de entrega',
+            $rate,
+            100,
+            'Percentual de tarefas concluídas no portfólio',
+            '%',
+        )->toArray();
+        $chart['size'] = 'compact';
+
+        return $this->withKpi($chart, 'Concluídas', $done);
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildKanbanPipelineBar(Empresa $empresa): ?array
+    {
+        $byStatus = $this->countTarefasByStatus($empresa);
+        if (!$this->hasValues($byStatus['values'])) {
+            return null;
+        }
+
+        $chart = ChartConfig::barPro(
+            'kanban-pipeline',
+            'Pipeline Kanban',
+            $byStatus['labels'],
+            $byStatus['values'],
+            'Distribuição de tarefas por coluna do fluxo',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Tarefas', array_sum($byStatus['values']));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildKanbanStackedByProject(Empresa $empresa): ?array
+    {
+        $projects = $this->projetoRepo->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('p.nome', 'ASC')
+            ->setMaxResults(6)
+            ->getQuery()
+            ->getResult();
+
+        if ($projects === []) {
+            return null;
+        }
+
+        $labels = [];
+        $statusKeys = array_keys(DevTarefa::KANBAN_COLUMNS);
+        $datasets = [];
+        foreach ($statusKeys as $status) {
+            $datasets[] = ['label' => DevTarefa::KANBAN_COLUMNS[$status], 'data' => []];
+        }
+
+        foreach ($projects as $project) {
+            $labels[] = mb_strlen($project->getNome()) > 18
+                ? mb_substr($project->getNome(), 0, 16) . '…'
+                : $project->getNome();
+            foreach ($statusKeys as $idx => $status) {
+                $datasets[$idx]['data'][] = (int) $this->tarefaRepo->count([
+                    'projeto' => $project,
+                    'status' => $status,
+                ]);
+            }
+        }
+
+        if (array_sum(array_map(static fn (array $ds): int => array_sum($ds['data']), $datasets)) === 0) {
+            return null;
+        }
+
+        $chart = ChartConfig::stackedBar(
+            'kanban-by-project',
+            'Kanban por projeto (top 6)',
+            $labels,
+            $datasets,
+            'Throughput de entregas desagregado por iniciativa',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Projetos', \count($labels));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildProjectsTreemap(Empresa $empresa): ?array
+    {
+        $projects = $this->projetoRepo->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getResult();
+
+        if ($projects === []) {
+            return null;
+        }
+
+        $statusLabels = [
+            DevProjeto::STATUS_IDEIA => 'Ideia',
+            DevProjeto::STATUS_EM_ANDAMENTO => 'Em andamento',
+            DevProjeto::STATUS_PAUSADO => 'Pausado',
+            DevProjeto::STATUS_FEITO => 'Concluído',
+        ];
+        $buckets = [];
+        foreach ($projects as $project) {
+            $status = $statusLabels[$project->getStatus()] ?? $project->getStatus();
+            $tasks = (int) $this->tarefaRepo->count(['projeto' => $project]);
+            $buckets[$status][] = [
+                'name' => $project->getNome(),
+                'value' => max(1, $tasks),
+            ];
+        }
+
+        $tree = [];
+        foreach ($buckets as $status => $children) {
+            $tree[] = ['name' => $status, 'children' => $children];
+        }
+
+        $chart = ChartConfig::treemap(
+            'projects-treemap',
+            'Mapa de portfólio',
+            $tree,
+            'Tamanho proporcional ao volume de tarefas por projeto',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Projetos', \count($projects));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildProjectStatusRing(Empresa $empresa): ?array
+    {
+        $byStatus = $this->countProjetosByStatus($empresa);
+        if (!$this->hasValues($byStatus['values'])) {
+            return null;
+        }
+
+        $chart = ChartConfig::ring(
+            'project-status-ring',
+            'Mix de maturidade',
+            $byStatus['labels'],
+            $byStatus['values'],
+            'Composição do portfólio por estágio de maturidade',
+        )->toArray();
+        $chart['size'] = 'compact';
+
+        return $this->withKpi($chart, 'Portfólio', array_sum($byStatus['values']));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildProjectsBubble(Empresa $empresa): ?array
+    {
+        $projects = $this->projetoRepo->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getResult();
+
+        if ($projects === []) {
+            return null;
+        }
+
+        $statusLabels = [
+            DevProjeto::STATUS_IDEIA => 'Ideia',
+            DevProjeto::STATUS_EM_ANDAMENTO => 'Em andamento',
+            DevProjeto::STATUS_PAUSADO => 'Pausado',
+            DevProjeto::STATUS_FEITO => 'Concluído',
+        ];
+
+        $points = [];
+        foreach ($projects as $project) {
+            $taskCount = (int) $this->tarefaRepo->count(['projeto' => $project]);
+            $status = $statusLabels[$project->getStatus()] ?? $project->getStatus();
+            $points[] = [
+                'x' => $taskCount,
+                'y' => match ($project->getStatus()) {
+                    DevProjeto::STATUS_FEITO => 4,
+                    DevProjeto::STATUS_EM_ANDAMENTO => 3,
+                    DevProjeto::STATUS_PAUSADO => 2,
+                    default => 1,
+                },
+                'r' => max(8, min(40, 8 + $taskCount * 2)),
+                'label' => $project->getNome() . ' (' . $status . ')',
+            ];
+        }
+
+        if ($points === []) {
+            return null;
+        }
+
+        $chart = ChartConfig::bubble(
+            'projects-bubble',
+            'Portfólio · tarefas × maturidade',
+            $points,
+            'Cada bolha é um projeto: eixo X = tarefas, tamanho = volume de entregas',
+            'Tarefas',
+            'Maturidade',
+        )->toArray();
+        $chart['kpi'] = ['label' => 'Projetos', 'value' => \count($points)];
+
+        return $chart;
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildAccessSankey(User $user, ?Empresa $empresa, bool $isTenant): ?array
+    {
+        if ($isTenant && $empresa === null) {
+            return $this->buildTenantSankey();
+        }
+
+        $qb = $this->userRepo->createQueryBuilder('u')
+            ->select('u.ativo AS ativo, u.perfil AS perfil, COUNT(u.id) AS total')
+            ->groupBy('u.ativo, u.perfil')
+            ->orderBy('total', 'DESC');
+
+        if ($empresa !== null) {
+            $qb->andWhere('u.empresa = :empresa')->setParameter('empresa', $empresa);
+        }
+
+        $rows = $qb->getQuery()->getArrayResult();
+        if ($rows === []) {
+            return null;
+        }
+
+        $root = $empresa?->getNome() ?? 'Acesso';
+        $nodes = [['name' => $root]];
+        $links = [];
+
+        foreach ($rows as $row) {
+            $value = (int) ($row['total'] ?? 0);
+            if ($value <= 0) {
+                continue;
+            }
+            $bucket = ($row['ativo'] ?? false) ? 'Contas ativas' : 'Contas inativas';
+            $perfil = self::PERFIL_LABELS[(string) ($row['perfil'] ?? '')] ?? (string) ($row['perfil'] ?? 'Perfil');
+            $perfilNode = 'Perfil · ' . $perfil;
+
+            $this->ensureSankeyNode($nodes, $bucket);
+            $this->ensureSankeyNode($nodes, $perfilNode);
+            $links[] = ['source' => $root, 'target' => $bucket, 'value' => $value];
+            $links[] = ['source' => $bucket, 'target' => $perfilNode, 'value' => $value];
+        }
+
+        $links = $this->mergeSankeyLinks($links);
+        $total = (int) $this->userRepo->count($empresa !== null ? ['empresa' => $empresa] : []);
+
+        $chart = ChartConfig::sankey(
+            'access-sankey',
+            'Mapa de acessos',
+            $nodes,
+            $links,
+            'Hierarquia empresa → status da conta → perfil de permissão',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Contas', $total);
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildTenantSankey(): ?array
+    {
+        $empresas = $this->empresaRepo->findBy(['ativo' => true], ['nome' => 'ASC'], 8);
+        if ($empresas === []) {
+            return null;
+        }
+
+        $root = 'Plataforma Unio';
+        $nodes = [['name' => $root]];
+        $links = [];
+
+        foreach ($empresas as $emp) {
+            $userCount = (int) $this->userRepo->count(['empresa' => $emp]);
+            if ($userCount <= 0) {
+                continue;
+            }
+            $node = (string) $emp->getNome();
+            $this->ensureSankeyNode($nodes, $node);
+            $links[] = ['source' => $root, 'target' => $node, 'value' => $userCount];
+
+            $byPerfil = $this->countUsersByPerfil($emp, false);
+            foreach ($byPerfil['labels'] as $idx => $label) {
+                $value = (int) ($byPerfil['values'][$idx] ?? 0);
+                if ($value <= 0) {
+                    continue;
+                }
+                $perfilNode = $node . ' · ' . $label;
+                $this->ensureSankeyNode($nodes, $perfilNode);
+                $links[] = ['source' => $node, 'target' => $perfilNode, 'value' => $value];
+            }
+        }
+
+        if ($links === []) {
+            return null;
+        }
+
+        return ChartConfig::sankey(
+            'tenant-sankey',
+            'Fluxo multi-empresa',
+            $nodes,
+            $this->mergeSankeyLinks($links),
+            'Empresas ativas e perfis de usuário na plataforma',
+        )->toArray();
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildProfileRing(Empresa $empresa): ?array
+    {
+        $byPerfil = $this->countUsersByPerfil($empresa, false);
+        if (!$this->hasValues($byPerfil['values'])) {
+            return null;
+        }
+
+        $chart = ChartConfig::ring(
+            'profile-ring',
+            'Mix de perfis de acesso',
+            $byPerfil['labels'],
+            $byPerfil['values'],
+            'Distribuição de papéis e permissões na empresa',
+        )->toArray();
+        $chart['size'] = 'compact';
+
+        return $this->withKpi($chart, 'Contas', array_sum($byPerfil['values']));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildUserActivityGauge(Empresa $empresa): ?array
+    {
+        $byAtivo = $this->countUsersByAtivo($empresa, false);
+        $total = array_sum($byAtivo['values']);
+        if ($total <= 0) {
+            return null;
+        }
+
+        $active = (int) ($byAtivo['values'][0] ?? 0);
+        $rate = (int) round(($active / $total) * 100);
+
+        $chart = ChartConfig::gauge(
+            'user-activity-gauge',
+            'Contas ativas',
+            $rate,
+            100,
+            'Percentual de usuários com acesso ativo',
+            '%',
+        )->toArray();
+        $chart['size'] = 'compact';
+
+        return $this->withKpi($chart, 'Ativas', $active);
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildTenantEmpresaTreemap(): ?array
+    {
+        $empresas = $this->empresaRepo->findBy(['ativo' => true], ['nome' => 'ASC'], 12);
+        if ($empresas === []) {
+            return null;
+        }
+
+        $tree = [];
+        foreach ($empresas as $emp) {
+            $users = (int) $this->userRepo->count(['empresa' => $emp]);
+            $people = (int) $this->funcionarioRepo->count(['empresa' => $emp]);
+            if ($users + $people <= 0) {
+                continue;
+            }
+            $tree[] = [
+                'name' => (string) $emp->getNome(),
+                'value' => max(1, $users + $people),
+            ];
+        }
+
+        if ($tree === []) {
+            return null;
+        }
+
+        $chart = ChartConfig::treemap(
+            'tenant-empresa-treemap',
+            'Mapa multi-empresa',
+            $tree,
+            'Peso relativo de usuários + colaboradores por empresa ativa',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Empresas', \count($tree));
+    }
+
+    /** @param list<array{name: string}> $nodes */
+    private function ensureSankeyNode(array &$nodes, string $name): void
+    {
+        foreach ($nodes as $node) {
+            if (($node['name'] ?? '') === $name) {
+                return;
+            }
+        }
+        $nodes[] = ['name' => $name];
+    }
+
+    /**
+     * @param list<array{source: string, target: string, value: int|float}> $links
+     *
+     * @return list<array{source: string, target: string, value: int|float}>
+     */
+    private function mergeSankeyLinks(array $links): array
+    {
+        $merged = [];
+        foreach ($links as $link) {
+            $key = $link['source'] . '→' . $link['target'];
+            if (!isset($merged[$key])) {
+                $merged[$key] = $link;
+                continue;
+            }
+            $merged[$key]['value'] += $link['value'];
+        }
+
+        return array_values($merged);
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildOperationalRadar(User $user, Empresa $empresa): ?array
+    {
+        $headcount = (int) $this->funcionarioRepo->count(['empresa' => $empresa, 'status' => 'ATIVO']);
+        $rhOpen = $this->countOpenRhProcesses($empresa);
+        $projectsActive = (int) $this->projetoRepo->count([
+            'empresa' => $empresa,
+            'status' => DevProjeto::STATUS_EM_ANDAMENTO,
+        ]);
+        $taskCount = (int) $this->tarefaRepo->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->join('t.projeto', 'p')
+            ->andWhere('p.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getSingleScalarResult();
+        $users = (int) $this->userRepo->count(['empresa' => $empresa]);
+
+        $metrics = [
+            ['name' => 'Pessoas ativas', 'raw' => $headcount, 'max' => max(10, $headcount)],
+            ['name' => 'RH em aberto', 'raw' => $rhOpen, 'max' => max(5, $rhOpen)],
+            ['name' => 'Projetos ativos', 'raw' => $projectsActive, 'max' => max(5, $projectsActive)],
+            ['name' => 'Tarefas', 'raw' => $taskCount, 'max' => max(20, $taskCount)],
+            ['name' => 'Usuários', 'raw' => $users, 'max' => max(10, $users)],
+        ];
+
+        if (array_sum(array_column($metrics, 'raw')) === 0) {
+            return null;
+        }
+
+        $indicators = array_map(
+            static fn (array $m): array => ['name' => $m['name'], 'max' => 100],
+            $metrics,
+        );
+        $values = array_map(
+            static fn (array $m): int => (int) round(min(100, ($m['raw'] / max(1, $m['max'])) * 100)),
+            $metrics,
+        );
+
+        $chart = ChartConfig::radar(
+            'operational-radar',
+            'Radar operacional',
+            $indicators,
+            [['name' => 'Índice relativo', 'value' => $values]],
+            'KPIs normalizados: pessoas, RH, projetos e entregas',
+        )->toArray();
+        $chart['kpi'] = ['label' => 'Pessoas ativas', 'value' => $headcount];
+
+        return $chart;
+    }
+
+    private function countOpenRhProcesses(Empresa $empresa): int
+    {
+        $openStatuses = [
+            RhOnboardingProcess::STATUS_RASCUNHO,
+            RhOnboardingProcess::STATUS_EM_ANDAMENTO,
+        ];
+
+        $onboarding = (int) $this->onboardingRepo->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->andWhere('o.empresa = :empresa')
+            ->andWhere('o.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('statuses', $openStatuses)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $offboarding = (int) $this->offboardingRepo->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->andWhere('o.empresa = :empresa')
+            ->andWhere('o.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('statuses', $openStatuses)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $onboarding + $offboarding;
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildEvolutionChart(User $user, ?Empresa $empresa, bool $isTenant): ?array
     {
         $evolution = $this->countRegistrationsLastMonths($empresa, $isTenant, 6);
         if (!$this->hasValues($evolution['users']) && !$this->hasValues($evolution['funcionarios'])) {
@@ -304,23 +1242,159 @@ final class WelcomeAnalyticsService
                 : null,
         ]));
 
-        $charts = [
-            ChartConfig::line(
-                'evolution-registrations',
-                'Novos registros (últimos 6 meses)',
-                $evolution['labels'],
-                $datasets,
-                'Usuários e colaboradores cadastrados por mês',
-            )->toArray(),
-        ];
+        $chart = ChartConfig::areaLine(
+            'evolution-registrations',
+            'Novos cadastros (6 meses)',
+            $evolution['labels'],
+            $datasets,
+            'Série temporal executiva de crescimento de contas e colaboradores',
+        )->toArray();
+        $chart['size'] = 'hero';
 
-        return [
-            'id' => 'evolution',
-            'title' => 'Evolução',
-            'subtitle' => 'Crescimento dos cadastros ao longo do tempo',
-            'icon' => 'fa-chart-line',
-            'charts' => $charts,
-        ];
+        return $this->withKpi(
+            $chart,
+            'Total no período',
+            array_sum($evolution['users']) + array_sum($evolution['funcionarios']),
+        );
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildTaskVelocityChart(Empresa $empresa): ?array
+    {
+        $velocity = $this->countEntityRegistrationsLastMonths($empresa, DevTarefa::class, 6);
+        if (!$this->hasValues($velocity['values'])) {
+            return null;
+        }
+
+        $chart = ChartConfig::areaLine(
+            'task-velocity',
+            'Velocidade de tarefas criadas',
+            $velocity['labels'],
+            [['label' => 'Novas tarefas', 'data' => $velocity['values']]],
+            'Throughput mensal de criação de entregas no portfólio',
+        )->toArray();
+
+        return $this->withKpi($chart, 'Total', array_sum($velocity['values']));
+    }
+
+    /** @return ?array<string, mixed> */
+    private function buildRhActivityChart(Empresa $empresa): ?array
+    {
+        $onboarding = $this->countEntityRegistrationsLastMonths($empresa, RhOnboardingProcess::class, 6);
+        $offboarding = $this->countEntityRegistrationsLastMonths($empresa, RhOffboardingProcess::class, 6);
+
+        if (!$this->hasValues($onboarding['values']) && !$this->hasValues($offboarding['values'])) {
+            return null;
+        }
+
+        $datasets = array_values(array_filter([
+            $this->hasValues($onboarding['values'])
+                ? ['label' => 'Admissões', 'data' => $onboarding['values']]
+                : null,
+            $this->hasValues($offboarding['values'])
+                ? ['label' => 'Desligamentos', 'data' => $offboarding['values']]
+                : null,
+        ]));
+
+        $chart = ChartConfig::areaLine(
+            'rh-activity-trend',
+            'Movimentações RH (6 meses)',
+            $onboarding['labels'],
+            $datasets,
+            'Pulsos mensais de admissões e desligamentos abertos',
+        )->toArray();
+
+        return $this->withKpi(
+            $chart,
+            'Processos',
+            array_sum($onboarding['values']) + array_sum($offboarding['values']),
+        );
+    }
+
+    /**
+     * @return ?array{
+     *     depts: list<string>,
+     *     statuses: list<string>,
+     *     map: array<string, int>,
+     *     total: int
+     * }
+     */
+    private function fetchPeopleMatrix(Empresa $empresa): ?array
+    {
+        $rows = $this->funcionarioRepo->createQueryBuilder('f')
+            ->select('COALESCE(d.nome, :sem) AS dept, f.status AS status, COUNT(f.id) AS total')
+            ->leftJoin('f.departamento', 'd')
+            ->andWhere('f.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('sem', 'Sem departamento')
+            ->groupBy('dept, status')
+            ->getQuery()
+            ->getArrayResult();
+
+        if ($rows === []) {
+            return null;
+        }
+
+        $depts = [];
+        $statuses = [];
+        $map = [];
+        $total = 0;
+
+        foreach ($rows as $row) {
+            $dept = (string) $row['dept'];
+            $status = self::FUNC_STATUS_LABELS[(string) $row['status']] ?? (string) $row['status'];
+            $count = (int) $row['total'];
+            if (!\in_array($dept, $depts, true)) {
+                $depts[] = $dept;
+            }
+            if (!\in_array($status, $statuses, true)) {
+                $statuses[] = $status;
+            }
+            $map[$dept . '|' . $status] = $count;
+            $total += $count;
+        }
+
+        return ['depts' => $depts, 'statuses' => $statuses, 'map' => $map, 'total' => $total];
+    }
+
+    /**
+     * @param class-string $entityClass
+     *
+     * @return array{labels: list<string>, values: list<int>}
+     */
+    private function countEntityRegistrationsLastMonths(?Empresa $empresa, string $entityClass, int $months): array
+    {
+        $tz = new DateTimeZone(self::TZ);
+        $now = new DateTimeImmutable('now', $tz);
+        $labels = [];
+        $values = [];
+
+        $repo = match ($entityClass) {
+            DevTarefa::class => $this->tarefaRepo,
+            RhOnboardingProcess::class => $this->onboardingRepo,
+            RhOffboardingProcess::class => $this->offboardingRepo,
+            default => throw new \InvalidArgumentException('Unsupported entity'),
+        };
+
+        for ($i = $months - 1; $i >= 0; --$i) {
+            $monthStart = $now->modify('first day of this month')->modify("-{$i} months")->setTime(0, 0);
+            $monthEnd = $monthStart->modify('last day of this month')->setTime(23, 59, 59);
+            $labels[] = $this->formatMonthLabel($monthStart);
+
+            $qb = $repo->createQueryBuilder('e')
+                ->select('COUNT(e.id)')
+                ->andWhere('e.criadoEm BETWEEN :start AND :end')
+                ->setParameter('start', $monthStart)
+                ->setParameter('end', $monthEnd);
+
+            if ($empresa !== null) {
+                $qb->andWhere('e.empresa = :empresa')->setParameter('empresa', $empresa);
+            }
+
+            $values[] = (int) $qb->getQuery()->getSingleScalarResult();
+        }
+
+        return ['labels' => $labels, 'values' => $values];
     }
 
     /** @param list<int> $values */

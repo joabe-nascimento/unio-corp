@@ -1,5 +1,5 @@
-{% extends 'base.html.twig' %}
-{% import 'macros/huplex_offcanvas.html.twig' as offcanvas %}
+﻿{% extends 'base.html.twig' %}
+{% import 'macros/unio_offcanvas.html.twig' as offcanvas %}
 
 {% block title %}Bem-vindo{% endblock %}
 {% block page_show_title %}{% endblock %}
@@ -31,6 +31,21 @@
 
     {% include 'components/welcome/ai_spotlight.html.twig' %}
 
+    {% include 'components/welcome/professional_summary.html.twig' with {
+        summary_cards: welcome_content.summary_cards
+    } only %}
+
+    {% include 'components/welcome/news_updates_panel.html.twig' with {
+        news: welcome_content.news,
+        news_meta: welcome_content.news_meta,
+        updates: welcome_content.updates,
+        updates_meta: welcome_content.updates_meta
+    } only %}
+
+    {% include 'components/welcome/insights_strip.html.twig' with {
+        insights: welcome_content.insights
+    } only %}
+
     {% include 'components/welcome/onboarding_checklist.html.twig' with {
         onboarding: onboarding
     } only %}
@@ -50,7 +65,7 @@
     <div class="welcome-page-sections">
 
         {% if novidades|length > 0 %}
-        <section class="welcome-section welcome-section--spotlight huplex-card" data-welcome-section="novidades">
+        <section class="welcome-section welcome-section--spotlight unio-card" data-welcome-section="novidades">
             <header class="welcome-section-header">
                 <div>
                     <h2 class="welcome-section-title">Em destaque para você</h2>
@@ -85,7 +100,7 @@
         </section>
         {% endif %}
 
-        <section class="welcome-section huplex-card" data-welcome-section="hubs">
+        <section class="welcome-section unio-card" data-welcome-section="hubs">
             <header class="welcome-section-header">
                 <div>
                     <h2 class="welcome-section-title">Escolha seu ponto de partida</h2>
@@ -95,31 +110,11 @@
             </header>
 
             {% if hubs|length > 0 %}
-            <div class="welcome-hubs-grid welcome-hubs-grid--present" id="welcomeHubsGrid">
-                {% for hub in hubs %}
-                <article class="welcome-hub-tile welcome-hub-tile--present{% if loop.first %} welcome-hub-tile--featured{% endif %}"
-                         data-hub-id="{{ hub.id }}">
-                    <button type="button"
-                            class="welcome-hub-pin"
-                            data-welcome-pin-hub="{{ hub.id }}"
-                            title="Fixar hub"
-                            aria-label="Fixar {{ hub.title }}">
-                        <i class="far fa-star" aria-hidden="true"></i>
-                    </button>
-                    <a href="{{ path(hub.route) }}" class="welcome-hub-tile-link">
-                        {% if loop.first %}
-                        <span class="welcome-hub-featured-badge">Recomendado</span>
-                        {% endif %}
-                        <div class="welcome-hub-icon"><i class="fas {{ hub.icon }}" aria-hidden="true"></i></div>
-                        <div class="welcome-hub-body">
-                            <div class="welcome-hub-title">{{ hub.title }}</div>
-                            <div class="welcome-hub-sub">{{ hub.subtitle }}</div>
-                        </div>
-                        <span class="welcome-hub-enter">Entrar <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
-                    </a>
-                </article>
-                {% endfor %}
-            </div>
+            {% include 'components/hub_dock.html.twig' with {
+                items: hubs,
+                show_pin: true,
+                dock_id: 'welcomeHubsGrid'
+            } only %}
             {% else %}
             {% include 'components/empty_state.html.twig' with {
                 icon: 'fa-layer-group',
@@ -134,10 +129,11 @@
     <div id="welcome-analytics" data-welcome-section="graficos">
         {% include 'components/charts/panel.html.twig' with {
             sections: chart_sections,
+            chart_executive: chart_executive|default({ kpis: [] }),
             border_top: true,
             show_chartjs_badge: false,
-            title: 'Visão analítica da sua área',
-            subtitle: 'Indicadores construídos com os dados já cadastrados na plataforma'
+            title: 'Command Center · Analytics',
+            subtitle: 'Inteligência executiva ponta a ponta — people, RH, delivery e governança'
         } %}
     </div>
     {% endif %}
@@ -146,7 +142,7 @@
 {% endblock %}
 
 {% block page_overlays %}
-{% embed 'components/huplex_offcanvas.html.twig' with {
+{% embed 'components/unio_offcanvas.html.twig' with {
     id: 'welcome-personalize',
     title: 'Personalizar experiência',
     subtitle: 'Preferências salvas neste navegador',
@@ -159,18 +155,19 @@
         } only %}
     {% endblock %}
     {% block offcanvas_footer %}
-    <div class="huplex-offcanvas-footer">
-        <button type="button" class="btn-huplex-ghost" id="welcomePrefsReset">
+    <div class="unio-offcanvas-footer">
+        <button type="button" class="btn-unio-ghost" id="welcomePrefsReset">
             <i class="fas fa-rotate-left mr-1" aria-hidden="true"></i> Restaurar padrão
         </button>
-        <button type="button" class="btn-huplex" data-huplex-offcanvas-close>Concluir</button>
+        <button type="button" class="btn-unio" data-unio-offcanvas-close>Concluir</button>
     </div>
     {% endblock %}
 {% endembed %}
 {% endblock %}
 
 {% block javascripts %}
-{% include 'components/charts/assets.html.twig' with { sections: chart_sections, version: 2 } only %}
-<script src="{{ asset('js/welcome-home.js') }}?v=3"></script>
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections, version: 5 } only %}
+<script src="{{ asset('js/welcome-home.js') }}?v=4"></script>
+<script src="{{ asset('js/welcome-news.js') }}?v=5" defer></script>
 <script src="{{ asset('js/onboarding-checklist.js') }}?v=1"></script>
 {% endblock %}

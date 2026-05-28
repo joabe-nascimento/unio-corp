@@ -119,8 +119,8 @@ export default class extends Controller {
                 ok = false;
             }
         });
-        if (!ok && window.HuplexToast) {
-            window.HuplexToast.show('Preencha nome e e-mail para continuar.', 'warning');
+        if (!ok && window.UnioToast) {
+            window.UnioToast.show('Preencha nome e e-mail para continuar.', 'warning');
         }
         return ok;
     }
@@ -154,7 +154,7 @@ export default class extends Controller {
             this.requiredNoteTarget.hidden = id !== 'ident';
         }
 
-        const scrollHost = this.element.querySelector('.huplex-offcanvas-body');
+        const scrollHost = this.element.querySelector('.unio-offcanvas-body');
         if (scrollHost) {
             scrollHost.scrollTop = 0;
         }

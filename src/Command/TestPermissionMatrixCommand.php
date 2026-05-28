@@ -33,7 +33,7 @@ class TestPermissionMatrixCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        foreach (['membro@huplex.dev', 'supervisor@huplex.dev', 'gestor@huplex.dev'] as $email) {
+        foreach (['membro@unio.dev', 'supervisor@unio.dev', 'gestor@unio.dev'] as $email) {
             $user = $this->userRepo->findOneBy(['email' => $email]);
             if (!$user) {
                 continue;

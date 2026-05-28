@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Unio Cortex{% endblock %}
+{% block page_show_title %}{% endblock %}
+
+{% block content %}
+<div class="cortex-page" id="cortexPage"
+     data-cortex-api="{{ cortex_api_url }}">
+
+    <header class="cortex-hero">
+        <div class="cortex-hero-text">
+            <p class="cortex-hero-eyebrow"><i class="fas fa-brain" aria-hidden="true"></i> Neural Core</p>
+            <h1 class="cortex-hero-title">Unio Cortex</h1>
+            <p class="cortex-hero-sub">
+                Cérebro da plataforma — rede viva de pessoas, processos e entregas
+                {% if empresa %} · {{ empresa.nome }}{% endif %}
+            </p>
+        </div>
+        <div class="cortex-pulse-card" data-cortex-pulse>
+            <div class="cortex-pulse-ring cortex-pulse-ring--{{ cortex_payload.pulse.status|default('idle') }}">
+                <span class="cortex-pulse-score" data-cortex-pulse-score>{{ cortex_payload.pulse.score|default(0) }}</span>
+                <small>%</small>
+            </div>
+            <div>
+                <strong data-cortex-pulse-label>{{ cortex_payload.pulse.label|default('—') }}</strong>
+                <span data-cortex-pulse-hint>{{ cortex_payload.pulse.hint|default('') }}</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="cortex-domain-strip" data-cortex-domains>
+        {% for domain in cortex_payload.domains|default([]) %}
+        <button type="button"
+                class="cortex-domain-chip"
+                data-cortex-domain="{{ domain.id }}"
+                style="--chip-color: {{ domain.color }}">
+            <i class="fas {{ domain.icon }}" aria-hidden="true"></i>
+            <span>{{ domain.label }}</span>
+            <em>{{ domain.value }}</em>
+        </button>
+        {% endfor %}
+        <button type="button" class="cortex-domain-chip cortex-domain-chip--all is-active" data-cortex-domain="all">
+            <i class="fas fa-circle-nodes" aria-hidden="true"></i>
+            <span>Todos</span>
+        </button>
+    </div>
+
+    <div class="cortex-stage">
+        <section class="cortex-panel cortex-panel--3d unio-card">
+            <header class="cortex-panel-head">
+                <h2><i class="fas fa-cube" aria-hidden="true"></i> Visão neural 3D</h2>
+                <p>Malha cognitiva — clique em um domínio para filtrar o grafo</p>
+            </header>
+            <div class="cortex-3d-wrap">
+                <div class="cortex-3d-host"
+                     id="cortex3d"
+                     data-pulse-score="{{ cortex_payload.pulse.score|default(0) }}"
+                     data-pulse-status="{{ cortex_payload.pulse.status|default('idle') }}"
+                     aria-label="Visualização neural tridimensional"></div>
+                <canvas class="cortex-3d-eeg" id="cortex3dEeg" aria-hidden="true"></canvas>
+                <div class="cortex-3d-hud" id="cortex3dHud" aria-hidden="true"></div>
+                <div class="cortex-3d-status" id="cortex3dStatus" aria-hidden="true">
+                    <span class="cortex-3d-status-dot"></span>
+                    <span class="cortex-3d-status-text">Malha ativa</span>
+                </div>
+                <div class="cortex-3d-tooltip" id="cortex3dTip" role="tooltip" hidden></div>
+                <div class="cortex-3d-vignette" aria-hidden="true"></div>
+                <div class="cortex-3d-noise" aria-hidden="true"></div>
+                <div class="cortex-3d-scan" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <aside class="cortex-panel cortex-panel--insights unio-card">
+            <header class="cortex-panel-head">
+                <h2><i class="fas fa-lightbulb" aria-hidden="true"></i> Insights acionáveis</h2>
+                <p>Sinais prioritários detectados pelo Cortex</p>
+            </header>
+            <ul class="cortex-insights-list" data-cortex-insights>
+                {% for insight in cortex_payload.insights|default([]) %}
+                <li class="cortex-insight cortex-insight--{{ insight.priority|default('normal') }}">
+                    {% if insight.route %}
+                    <a href="{{ path(insight.route) }}" class="cortex-insight-link">
+                    {% else %}
+                    <div class="cortex-insight-link">
+                    {% endif %}
+                        <span class="cortex-insight-icon"><i class="fas {{ insight.icon }}" aria-hidden="true"></i></span>
+                        <span class="cortex-insight-body">
+                            <strong>{{ insight.title }}</strong>
+                            <small>{{ insight.summary }}</small>
+                            <em>{{ insight.category }}</em>
+                        </span>
+                    {% if insight.route %}</a>{% else %}</div>{% endif %}
+                </li>
+                {% else %}
+                <li class="cortex-insight cortex-insight--empty">Nenhum sinal crítico no momento.</li>
+                {% endfor %}
+            </ul>
+        </aside>
+    </div>
+
+    <section class="cortex-panel cortex-panel--graph unio-card">
+        <header class="cortex-panel-head">
+            <h2><i class="fas fa-project-diagram" aria-hidden="true"></i> Mapa neural 2D</h2>
+            <p>Grafo bidimensional de nós e relações — arraste, zoom e explore conexões</p>
+        </header>
+        <div class="cortex-graph-host" id="cortexGraph" role="img" aria-label="Grafo neural da plataforma"></div>
+    </section>
+
+    <script type="application/json" id="cortex-payload">{{ cortex_payload|json_encode|raw }}</script>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script src="{{ asset('js/cortex.js') }}?v=4"></script>
+{% endblock %}

@@ -5,7 +5,7 @@
 {% set page_list_actions_before_title = true %}
 
 {% block page_list_toolbar_actions %}
-<a href="{{ path('app_admin') }}" class="btn-huplex-ghost btn-sm">
+<a href="{{ path('app_admin') }}" class="btn-unio-ghost btn-sm">
     <i class="fas fa-arrow-left" aria-hidden="true"></i> Admin
 </a>
 {% endblock %}
@@ -76,7 +76,7 @@
         text: 'Ajuste os filtros ou crie um novo usuário.'
     } %}
 {% else %}
-<div class="huplex-card p-0">
+<div class="unio-card p-0">
     <table class="admin-table" id="adminUsuariosTable">
         <thead>
             <tr>
@@ -125,7 +125,7 @@
             <td class="admin-table-date">{{ u.criadoEm|date('d/m/Y') }}</td>
             <td class="admin-table-actions">
                 <button type="button"
-                        class="btn-huplex btn-xs"
+                        class="btn-unio btn-xs"
                         data-admin-edit-usuario="{{ u.id }}"
                         data-nome="{{ u.nome|e('html_attr') }}"
                         data-email="{{ u.email|e('html_attr') }}"
@@ -142,7 +142,7 @@
                     <input type="hidden" name="_token" value="{{ csrf_acao }}">
                     <input type="hidden" name="acao" value="{{ u.ativo ? 'desativar' : 'ativar' }}">
                     <button type="submit"
-                            class="btn-huplex-ghost btn-xs {{ u.ativo ? 'btn-danger-ghost' : '' }}"
+                            class="btn-unio-ghost btn-xs {{ u.ativo ? 'btn-danger-ghost' : '' }}"
                             title="{{ u.ativo ? 'Desativar' : 'Ativar' }}"
                             {% if app.user.id == u.id %}disabled{% endif %}
                             {% if u.ativo %}onclick="return confirm('Desativar acesso de {{ u.nome|e('js') }}?')"{% endif %}>
@@ -161,7 +161,7 @@
 
 {% block page_overlays %}
 {# ── Offcanvas: Novo Usuário ── #}
-{% embed 'components/huplex_offcanvas.html.twig' with {
+{% embed 'components/unio_offcanvas.html.twig' with {
     id: 'admin-novo-usuario',
     title: 'Novo Usuário',
     subtitle: 'Crie um acesso à plataforma',
@@ -172,40 +172,40 @@
     {% block offcanvas_body %}
     <form method="post"
           action="{{ path('app_admin_usuario_novo') }}"
-          class="huplex-form"
+          class="unio-form"
           id="adminNovoUsuarioForm">
         <input type="hidden" name="_token" value="{{ csrf_token('admin_usuario_form') }}">
 
         <div class="cfg-form-section-label">Dados pessoais</div>
 
-        {% include 'components/huplex_form_field.html.twig' with {
+        {% include 'components/unio_form_field.html.twig' with {
             id: 'novo_nome', name: 'nome', label: 'Nome completo',
             placeholder: 'Ex.: Ana Carolina Silva', required: true
         } %}
-        {% include 'components/huplex_form_field.html.twig' with {
+        {% include 'components/unio_form_field.html.twig' with {
             id: 'novo_email', name: 'email', label: 'E-mail',
             type: 'email', placeholder: 'usuario@empresa.com', required: true
         } %}
 
         <div class="cfg-form-section-label mt-3">Acesso &amp; permissões</div>
 
-        {% include 'components/huplex_form_field.html.twig' with {
+        {% include 'components/unio_form_field.html.twig' with {
             id: 'novo_senha', name: 'senha', label: 'Senha inicial',
             type: 'password', placeholder: 'Mínimo ' ~ platform_config.senha_min|default(8) ~ ' caracteres', required: true
         } %}
 
-        <div class="huplex-form-group">
-            <label class="huplex-form-label" for="novo_perfil">Perfil de acesso</label>
-            <select id="novo_perfil" name="perfil" class="huplex-form-control">
+        <div class="unio-form-group">
+            <label class="unio-form-label" for="novo_perfil">Perfil de acesso</label>
+            <select id="novo_perfil" name="perfil" class="unio-form-control">
                 {% for code, label in perfis %}
                     <option value="{{ code }}" {{ code == 'MEMBRO' ? 'selected' : '' }}>{{ label }}</option>
                 {% endfor %}
             </select>
         </div>
 
-        <div class="huplex-form-group">
-            <label class="huplex-form-label" for="novo_empresa">Empresa vinculada</label>
-            <select id="novo_empresa" name="empresa_id" class="huplex-form-control">
+        <div class="unio-form-group">
+            <label class="unio-form-label" for="novo_empresa">Empresa vinculada</label>
+            <select id="novo_empresa" name="empresa_id" class="unio-form-control">
                 <option value="">— Nenhuma —</option>
                 {% for emp in empresas %}
                     <option value="{{ emp.id }}">{{ emp.nome }}</option>
@@ -215,17 +215,17 @@
     </form>
     {% endblock %}
     {% block offcanvas_footer %}
-    <div class="huplex-offcanvas-footer">
-        <button type="submit" form="adminNovoUsuarioForm" class="btn-huplex">
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="adminNovoUsuarioForm" class="btn-unio">
             <i class="fas fa-check mr-1"></i> Criar usuário
         </button>
-        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
     </div>
     {% endblock %}
 {% endembed %}
 
 {# ── Offcanvas: Editar Usuário ── #}
-{% embed 'components/huplex_offcanvas.html.twig' with {
+{% embed 'components/unio_offcanvas.html.twig' with {
     id: 'admin-editar-usuario',
     title: 'Editar Usuário',
     icon: 'fa-user-pen',
@@ -249,39 +249,39 @@
 
     <form method="post"
           action="{{ path('app_admin_usuario_editar', { id: 0 }) }}"
-          class="huplex-form"
+          class="unio-form"
           id="adminEditarUsuarioForm">
         <input type="hidden" name="_token" value="{{ csrf_token('admin_usuario_form') }}">
 
         <div class="admin-edit-panel admin-edit-panel--active" data-admin-panel="geral">
-            {% include 'components/huplex_form_field.html.twig' with {
+            {% include 'components/unio_form_field.html.twig' with {
                 id: 'edit_nome', name: 'nome', label: 'Nome completo', required: true
             } %}
-            <div class="huplex-form-group">
-                <label class="huplex-form-label">E-mail</label>
+            <div class="unio-form-group">
+                <label class="unio-form-label">E-mail</label>
                 <p class="admin-edit-readonly" id="adminEditarUsuarioEmail">—</p>
             </div>
-            <div class="huplex-form-group">
-                <label class="huplex-form-label" for="edit_empresa">Empresa</label>
-                <select id="edit_empresa" name="empresa_id" class="huplex-form-control">
+            <div class="unio-form-group">
+                <label class="unio-form-label" for="edit_empresa">Empresa</label>
+                <select id="edit_empresa" name="empresa_id" class="unio-form-control">
                     <option value="">— Nenhuma —</option>
                     {% for emp in empresas %}
                         <option value="{{ emp.id }}">{{ emp.nome }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="huplex-form-group">
-                <label class="huplex-form-check d-flex align-items-center gap-2" for="edit_ativo">
-                    <input type="checkbox" id="edit_ativo" name="ativo" value="1" class="huplex-checkbox">
+            <div class="unio-form-group">
+                <label class="unio-form-check d-flex align-items-center gap-2" for="edit_ativo">
+                    <input type="checkbox" id="edit_ativo" name="ativo" value="1" class="unio-checkbox">
                     <span>Usuário ativo</span>
                 </label>
             </div>
         </div>
 
         <div class="admin-edit-panel" data-admin-panel="acesso" hidden>
-            <div class="huplex-form-group">
-                <label class="huplex-form-label" for="edit_perfil">Perfil global</label>
-                <select id="edit_perfil" name="perfil" class="huplex-form-control">
+            <div class="unio-form-group">
+                <label class="unio-form-label" for="edit_perfil">Perfil global</label>
+                <select id="edit_perfil" name="perfil" class="unio-form-control">
                     {% for code, label in perfis %}
                         <option value="{{ code }}">{{ label }}</option>
                     {% endfor %}
@@ -296,7 +296,7 @@
                     <div class="admin-grant-row">
                         <span class="admin-grant-product">{{ product.label }}</span>
                         <select name="grant[{{ scopeId }}][{{ product.id }}]"
-                                class="huplex-form-control huplex-form-control--xs admin-grant-select"
+                                class="unio-form-control unio-form-control--xs admin-grant-select"
                                 data-grant-scope="{{ scopeId }}"
                                 data-grant-product="{{ product.id }}">
                             <option value="">— Padrão —</option>
@@ -316,11 +316,11 @@
                 <i class="fas fa-lock-open fa-2x mb-2 text-muted"></i>
                 <p>Deixe em branco para não alterar a senha.</p>
             </div>
-            {% include 'components/huplex_form_field.html.twig' with {
+            {% include 'components/unio_form_field.html.twig' with {
                 id: 'edit_senha', name: 'senha', label: 'Nova senha',
                 type: 'password', placeholder: 'Mínimo ' ~ platform_config.senha_min|default(8) ~ ' caracteres'
             } %}
-            {% include 'components/huplex_form_field.html.twig' with {
+            {% include 'components/unio_form_field.html.twig' with {
                 id: 'edit_senha2', name: 'senha2', label: 'Confirmar senha',
                 type: 'password', placeholder: 'Repita a nova senha'
             } %}
@@ -334,11 +334,11 @@
     </form>
     {% endblock %}
     {% block offcanvas_footer %}
-    <div class="huplex-offcanvas-footer">
-        <button type="submit" form="adminEditarUsuarioForm" class="btn-huplex">
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="adminEditarUsuarioForm" class="btn-unio">
             <i class="fas fa-check mr-1"></i> Salvar alterações
         </button>
-        <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
     </div>
     {% endblock %}
 {% endembed %}
@@ -379,7 +379,7 @@
             if (ef) { ef.textContent = btn.dataset.email; }
             activateEditTab('geral');
             loadUserGrants(id);
-            window.HuplexOffcanvas && window.HuplexOffcanvas.open('admin-editar-usuario');
+            window.UnioOffcanvas && window.UnioOffcanvas.open('admin-editar-usuario');
         });
     });
     function activateEditTab(id) {

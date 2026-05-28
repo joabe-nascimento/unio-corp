@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class WorkspaceService
 {
     private const SESSION_KEY = 'workspace_empresa_id';
-    private const MEMO_ATTR = '_huplex_workspace_memo';
+    private const MEMO_ATTR = '_unio_workspace_memo';
 
     public function __construct(
         private RequestStack $requestStack,

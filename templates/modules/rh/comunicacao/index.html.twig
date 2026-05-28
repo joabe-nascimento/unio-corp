@@ -5,19 +5,19 @@
 
 {% block hub_content %}
 {% if grant_at_least('product_rh', 'comunicacao', 'GESTOR_EQUIPE') %}
-<div class="huplex-card p-4 mb-3">
+<div class="unio-card p-4 mb-3">
     <h4 class="h6 mb-3">Novo comunicado</h4>
     <form method="post" action="{{ path('app_rh_comunicacao') }}">
         <input type="hidden" name="_token" value="{{ csrf_token('rh_comunicacao_form') }}">
         <input type="hidden" name="action" value="criar">
         <div class="mb-2"><input type="text" name="titulo" class="form-control" placeholder="Título" required></div>
         <div class="mb-2"><textarea name="corpo" class="form-control" rows="3" placeholder="Conteúdo" required></textarea></div>
-        <button type="submit" class="btn-huplex btn-sm">Publicar</button>
+        <button type="submit" class="btn-unio btn-sm">Publicar</button>
     </form>
 </div>
 {% endif %}
 
-<div class="huplex-card p-4">
+<div class="unio-card p-4">
     {% if comunicados is empty %}
         <p class="text-muted mb-0">Nenhum comunicado ativo.</p>
     {% else %}
@@ -31,7 +31,7 @@
             <input type="hidden" name="_token" value="{{ csrf_token('rh_comunicacao_ler') }}">
             <input type="hidden" name="action" value="ler">
             <input type="hidden" name="comunicado_id" value="{{ c.id }}">
-            <button type="submit" class="btn-huplex-ghost btn-sm">Marcar como lido</button>
+            <button type="submit" class="btn-unio-ghost btn-sm">Marcar como lido</button>
         </form>
         {% endif %}
     </article>

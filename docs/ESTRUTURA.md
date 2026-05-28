@@ -1,4 +1,4 @@
-# Estrutura do projeto Huplex
+# Estrutura do projeto Unio
 
 Organização pensada para manutenção por módulo (RH, Pessoas) e por hub (Talentos, Maturidade).
 

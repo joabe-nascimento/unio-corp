@@ -10,8 +10,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ConfiguracoesControllerTest extends WebTestCase
 {
-    private const TENANT_EMAIL = 'tenant@huplex.dev';
-    private const TENANT_PASS  = 'huplex123';
+    private const TENANT_EMAIL = 'tenant@unio.dev';
+    private const TENANT_PASS  = 'unio123';
 
     private KernelBrowser $client;
 

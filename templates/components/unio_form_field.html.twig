@@ -1,0 +1,51 @@
+{#
+  unio_form_field — campo de formulário temático
+
+  Props:
+    id, name, label, type (text|email|date|select|textarea), value, placeholder,
+    required (bool), options (array for select: {value, label}), rows (textarea)
+#}
+{% set field_type = type is defined ? type : 'text' %}
+{% set field_required = required is defined and required %}
+{% set field_value = value is defined ? value : '' %}
+{% set field_options = options is defined ? options : [] %}
+{% set field_rows = rows is defined ? rows : 3 %}
+<div class="unio-form-group">
+    <label class="unio-form-label" for="{{ id }}">
+        {{ label }}
+        {% if field_required %}<span class="unio-form-required">*</span>{% endif %}
+    </label>
+    {% if field_type == 'select' %}
+        <select class="unio-form-control{% if searchable|default(false) %} unio-tomselect{% endif %}"
+                id="{{ id }}"
+                name="{{ name }}"
+                {% if searchable|default(false) %}
+                    data-controller="tom-select"
+                    data-tom-select-placeholder-value="{{ search_placeholder|default('Buscar…') }}"
+                {% endif %}
+                {% if field_required %} required{% endif %}
+                {% if attrs is defined %}{% for attr_name, attr_value in attrs %} {{ attr_name }}="{{ attr_value }}"{% endfor %}{% endif %}>
+            {% for opt in field_options %}
+                <option value="{{ opt.value }}"{% if opt.value == field_value %} selected{% endif %}>{{ opt.label }}</option>
+            {% endfor %}
+        </select>
+    {% elseif field_type == 'textarea' %}
+        <textarea class="unio-form-control" id="{{ id }}" name="{{ name }}" rows="{{ field_rows }}"{% if placeholder is defined and placeholder %} placeholder="{{ placeholder }}"{% endif %}>{{ field_value }}</textarea>
+    {% else %}
+        <input type="{{ field_type }}"
+               class="unio-form-control{% if input_class is defined %} {{ input_class }}{% endif %}"
+               id="{{ id }}"
+               name="{{ name }}"
+               value="{{ field_value }}"
+               {% if placeholder is defined and placeholder %}placeholder="{{ placeholder }}"{% endif %}
+               {% if inputmode is defined and inputmode %}inputmode="{{ inputmode }}"{% endif %}
+               {% if maxlength is defined and maxlength %}maxlength="{{ maxlength }}"{% endif %}
+               {% if autocomplete is defined and autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+               {% if attrs is defined %}
+                   {% for attr_name, attr_value in attrs %}
+                       {{ attr_name }}="{{ attr_value }}"
+                   {% endfor %}
+               {% endif %}
+               {% if field_required %}required{% endif %}>
+    {% endif %}
+</div>

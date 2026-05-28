@@ -1,0 +1,62 @@
+{#
+  unio_offcanvas — painel lateral reutilizável (Unio)
+
+  Props obrigatórias:
+    id (string)  slug único, ex.: dev-projeto
+
+  Props opcionais:
+    title, subtitle, icon (classe FA, ex. fa-diagram-project)
+    open (bool)
+    placement ('end'|'start', default end)
+    size ('sm'|'md'|'lg'|'xl', default md)
+    accent (bool, default true) — faixa e ícone no header
+
+  Blocks:
+    offcanvas_header  — substitui o header padrão
+    offcanvas_body    — conteúdo
+    offcanvas_footer  — rodapé fixo (opcional)
+
+  Abrir:  data-unio-offcanvas-open="{{ id }}"
+  Fechar: data-unio-offcanvas-close (dentro do painel)
+#}
+{% set _id = id %}
+{% set _open = open is defined and open %}
+{% set _placement = placement|default('end') %}
+{% set _size = size|default('md') %}
+{% set _accent = accent is not defined or accent %}
+{% set _title_id = 'unioOffcanvasTitle-' ~ _id|replace({'-': ''}) %}
+<div class="unio-offcanvas unio-offcanvas--{{ _placement }} unio-offcanvas--{{ _size }}{% if wizard|default(false) %} unio-offcanvas--wizard{% endif %}{% if _open %} is-open{% endif %}{% if _accent %} unio-offcanvas--accent{% endif %}"
+     data-unio-offcanvas="{{ _id }}"
+     aria-hidden="{{ _open ? 'false' : 'true' }}"
+     {% block offcanvas_root_attrs %}{% endblock %}>
+    <div class="unio-offcanvas-backdrop" data-unio-offcanvas-close tabindex="-1" aria-hidden="true"></div>
+    <aside class="unio-offcanvas-drawer" role="dialog" aria-modal="true" aria-labelledby="{{ _title_id }}"
+           {% block offcanvas_drawer_attrs %}{% endblock %}>
+        {% block offcanvas_header %}
+        <header class="unio-offcanvas-header">
+            <div class="unio-offcanvas-header-main">
+                {% if icon is defined and icon %}
+                <div class="unio-offcanvas-icon" aria-hidden="true">
+                    <i class="fas {{ icon }}"></i>
+                </div>
+                {% endif %}
+                <div class="unio-offcanvas-heading">
+                    {% if title is defined and title %}
+                    <h2 class="unio-offcanvas-title" id="{{ _title_id }}">{{ title }}</h2>
+                    {% endif %}
+                    {% if subtitle is defined and subtitle %}
+                    <p class="unio-offcanvas-subtitle">{{ subtitle }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <button type="button" class="unio-offcanvas-close" data-unio-offcanvas-close aria-label="Fechar">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </header>
+        {% endblock %}
+        <div class="unio-offcanvas-body">
+            {% block offcanvas_body %}{% endblock %}
+        </div>
+        {% block offcanvas_footer %}{% endblock %}
+    </aside>
+</div>

@@ -286,8 +286,8 @@ export default class extends Controller {
     }
 
     showToast(message, type) {
-        if (window.HuplexToast?.show) {
-            window.HuplexToast.show(message, type);
+        if (window.UnioToast?.show) {
+            window.UnioToast.show(message, type);
             return;
         }
         if (type === 'error') {

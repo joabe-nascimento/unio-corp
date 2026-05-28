@@ -9,12 +9,27 @@ final class PageBackResolver
 {
     /** @var array<string, string> hub index route => parent hub route */
     private const HUB_PARENT = [
+        'app_hub_operacoes' => 'app_dashboard',
         'app_rh' => 'app_hub_operacoes',
         'app_pessoas' => 'app_hub_operacoes',
         'app_engenharia' => 'app_hub_operacoes',
-        'app_talentos' => 'app_talentos',
+        'app_talentos' => 'app_dashboard',
+        'app_maturidade' => 'app_dashboard',
+        'app_comercial' => 'app_dashboard',
+        'app_beneficios' => 'app_dashboard',
+        'app_academy' => 'app_dashboard',
+        'app_parceiros' => 'app_dashboard',
+        'app_financeiro' => 'app_dashboard',
+        'app_compliance' => 'app_dashboard',
+        'app_analytics' => 'app_dashboard',
+        'app_juridico' => 'app_dashboard',
+        'app_clima' => 'app_dashboard',
+        'app_sst' => 'app_dashboard',
+        'app_comunicacao' => 'app_dashboard',
         'app_publicidade' => 'app_maturidade',
         'app_admin' => 'app_dashboard',
+        'app_welcome_news_show' => 'app_welcome',
+        'app_cortex' => 'app_dashboard',
     ];
 
     /** segmento da rota de detalhe => rota da listagem */

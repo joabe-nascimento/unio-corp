@@ -52,12 +52,12 @@ export default class extends Controller {
 
     onChecklistChange(event) {
         const input = event.target;
-        if (!input.matches('.huplex-checklist-input')) return;
+        if (!input.matches('.unio-checklist-input')) return;
         this.toggleItem({ currentTarget: input });
     }
 
     bindCloseReset() {
-        const root = this.element.closest('[data-huplex-offcanvas]');
+        const root = this.element.closest('[data-unio-offcanvas]');
         if (!root) return;
 
         this._wasOpen = root.classList.contains('is-open');
@@ -176,7 +176,7 @@ export default class extends Controller {
         const checkbox = event.currentTarget;
         const itemId = checkbox.dataset.itemId;
         const done = checkbox.checked;
-        const row = checkbox.closest('.huplex-checklist-item');
+        const row = checkbox.closest('.unio-checklist-item');
 
         const fd = new FormData();
         fd.append('_token', this.csrfActionValue);
@@ -218,10 +218,10 @@ export default class extends Controller {
     }
 
     closeAndRefresh() {
-        const root = this.element.closest('[data-huplex-offcanvas]');
-        const id = root?.getAttribute('data-huplex-offcanvas');
-        if (id && window.HuplexOffcanvas) {
-            window.HuplexOffcanvas.close(id);
+        const root = this.element.closest('[data-unio-offcanvas]');
+        const id = root?.getAttribute('data-unio-offcanvas');
+        if (id && window.UnioOffcanvas) {
+            window.UnioOffcanvas.close(id);
         }
         const url = new URL(window.location.href);
         url.searchParams.delete('open_nova');
@@ -274,31 +274,31 @@ export default class extends Controller {
         if (!this.hasChecklistHostTarget) return;
 
         const ul = document.createElement('ul');
-        ul.className = 'huplex-checklist';
+        ul.className = 'unio-checklist';
         ul.setAttribute('role', 'list');
 
         this.checklist.forEach((item) => {
             const li = document.createElement('li');
-            li.className = `huplex-checklist-item${item.done ? ' is-done' : ''}`;
+            li.className = `unio-checklist-item${item.done ? ' is-done' : ''}`;
             li.setAttribute('role', 'listitem');
 
             const label = document.createElement('label');
-            label.className = 'huplex-checklist-item-inner';
+            label.className = 'unio-checklist-item-inner';
 
             const input = document.createElement('input');
             input.type = 'checkbox';
-            input.className = 'huplex-checklist-input';
+            input.className = 'unio-checklist-input';
             input.checked = !!item.done;
             input.dataset.itemId = item.id;
             input.setAttribute('aria-label', item.label);
 
             const box = document.createElement('span');
-            box.className = 'huplex-checklist-box';
+            box.className = 'unio-checklist-box';
             box.setAttribute('aria-hidden', 'true');
             box.innerHTML = '<i class="fas fa-check"></i>';
 
             const text = document.createElement('span');
-            text.className = 'huplex-checklist-text';
+            text.className = 'unio-checklist-text';
             text.textContent = item.label;
 
             label.append(input, box, text);
@@ -391,7 +391,7 @@ export default class extends Controller {
             this.requiredNoteTarget.hidden = stepIdx !== 0;
         }
 
-        const scrollHost = this.element.querySelector('.huplex-offcanvas-body');
+        const scrollHost = this.element.querySelector('.unio-offcanvas-body');
         if (scrollHost) {
             scrollHost.scrollTop = 0;
         }
@@ -418,8 +418,8 @@ export default class extends Controller {
     }
 
     toast(message, tone) {
-        if (window.HuplexToast) {
-            window.HuplexToast.show(message, tone);
+        if (window.UnioToast) {
+            window.UnioToast.show(message, tone);
         }
     }
 

@@ -47,27 +47,15 @@
 {% endif %}
 
 {% if dashboard_modules|length > 0 %}
-<section class="dashboard-modules-section huplex-card mb-4">
-    {% if account_pending|default(false) and dashboard_modules|length == 0 %}
-    <p class="dashboard-modules-empty text-muted mb-0">
-        Nenhum módulo disponível até que sua conta seja vinculada a uma empresa.
-    </p>
-    {% elseif dashboard_modules|length > 0 %}
-    <header class="dashboard-modules-head">
+<section class="welcome-section dashboard-modules-section unio-card mb-4" data-dashboard-section="modules">
+    <header class="welcome-section-header">
         <div>
-            <h2 class="dashboard-modules-title">Módulos da plataforma</h2>
-            <p class="dashboard-modules-sub">Acesso rápido às funcionalidades</p>
+            <h2 class="welcome-section-title">Módulos da plataforma</h2>
+            <p class="welcome-section-sub">Acesso rápido às funcionalidades</p>
         </div>
-        <a href="{{ path('app_welcome') }}" class="btn btn-sm btn-outline-secondary">
-            <i class="fas fa-house-chimney mr-1" aria-hidden="true"></i> Início
-        </a>
+        <span class="welcome-section-count">{{ dashboard_modules|length }} módulos</span>
     </header>
-    <div class="dashboard-module-grid">
-        {% for m in dashboard_modules %}
-            {% include 'components/module_tile.html.twig' with m %}
-        {% endfor %}
-    </div>
-    {% endif %}
+    {% include 'components/hub_dock.html.twig' with { items: dashboard_modules } only %}
 </section>
 {% endif %}
 

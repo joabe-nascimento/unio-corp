@@ -1,0 +1,19 @@
+{# Faixa executiva de KPIs — props: executive (array com kpis[]) #}
+{% if executive.kpis|default([])|length > 0 %}
+<div class="unio-charts-executive" data-unio-charts-executive>
+    {% for kpi in executive.kpis %}
+    <article class="unio-charts-executive-card" data-unio-executive-kpi="{{ kpi.id }}">
+        <div class="unio-charts-executive-icon" aria-hidden="true">
+            <i class="fas {{ kpi.icon }}"></i>
+        </div>
+        <div class="unio-charts-executive-body">
+            <span class="unio-charts-executive-value">
+                <span data-unio-executive-value>{{ kpi.value }}</span>{% if kpi.suffix %}<small>{{ kpi.suffix }}</small>{% endif %}
+            </span>
+            <span class="unio-charts-executive-label" data-unio-executive-label>{{ kpi.label }}</span>
+            <span class="unio-charts-executive-hint" data-unio-executive-hint>{{ kpi.hint }}</span>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% endif %}

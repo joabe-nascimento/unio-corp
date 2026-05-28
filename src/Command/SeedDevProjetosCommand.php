@@ -34,7 +34,8 @@ class SeedDevProjetosCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $empresa = $this->empresaRepo->findOneBy(['nome' => 'Huplex Corp']) ?? $this->empresaRepo->findOneBy([], ['id' => 'ASC']);
+        $empresa = $this->empresaRepo->findOneBy(['nome' => SeedUsersCommand::DEMO_EMPRESA_NOME])
+            ?? $this->empresaRepo->findOneBy([], ['id' => 'ASC']);
 
         if (!$empresa) {
             $io->error('Execute app:seed-users antes.');
@@ -89,7 +90,7 @@ class SeedDevProjetosCommand extends Command
             $empresa,
             $hub,
             'Sidebar e hub cards alinhados ao design system',
-            'Remover textos pretos, table-huplex, tokens de cor.',
+            'Remover textos pretos, table-unio, tokens de cor.',
             DevMeta::STATUS_EM_ANDAMENTO,
             'ALTA',
             40,
@@ -108,7 +109,7 @@ class SeedDevProjetosCommand extends Command
         $this->service->createTarefa($rh, 'Componentizar admissões/demissões', null, DevTarefa::STATUS_CONCLUIDO, 'ALTA');
         $this->service->createTarefa($rh, 'Merge product/core', null, DevTarefa::STATUS_CONCLUIDO, 'MEDIA');
 
-        $io->success('Demo em /core/projetos — login gestor@huplex.dev, workspace Huplex Corp.');
+        $io->success('Demo em /core/projetos — login gestor@unio.dev, workspace Unio Demo.');
 
         return Command::SUCCESS;
     }

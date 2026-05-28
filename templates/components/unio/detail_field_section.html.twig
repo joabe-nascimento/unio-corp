@@ -1,0 +1,17 @@
+{#
+  detail_field_section — bloco de campos (ficha / detalhe)
+
+  Props:
+    title (string)
+    items (array)  cada item: { label, value, icon?, html?, multiline? }
+#}
+<div class="unio-detail-section">
+    {% if title is defined and title %}
+    <h3 class="unio-detail-section-title">{{ title }}</h3>
+    {% endif %}
+    <div class="unio-detail-list">
+        {% for item in items|default([]) %}
+            {% include 'components/unio/detail_field_row.html.twig' with item only %}
+        {% endfor %}
+    </div>
+</div>

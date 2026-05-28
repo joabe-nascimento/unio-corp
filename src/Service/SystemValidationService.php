@@ -13,21 +13,21 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 final class SystemValidationService
 {
     private const SEED_EMAILS = [
-        'tenant@huplex.dev',
-        'gestor@huplex.dev',
-        'membro@huplex.dev',
-        'supervisor@huplex.dev',
+        'tenant@unio.dev',
+        'gestor@unio.dev',
+        'membro@unio.dev',
+        'supervisor@unio.dev',
     ];
 
     /** @var array<string, array<string, bool>> */
     private const ROUTE_EXPECTATIONS = [
-        'membro@huplex.dev' => [
+        'membro@unio.dev' => [
             'app_pessoas' => true,
             'app_pessoas_membro_novo' => false,
             'app_core_projetos' => false,
             'app_core_tarefa_nova' => false,
         ],
-        'gestor@huplex.dev' => [
+        'gestor@unio.dev' => [
             'app_pessoas' => true,
             'app_pessoas_membro_novo' => true,
             'app_core_projetos' => true,
@@ -35,13 +35,13 @@ final class SystemValidationService
             'app_core_tarefa_editar' => true,
             'app_core_tarefa_excluir' => true,
         ],
-        'supervisor@huplex.dev' => [
+        'supervisor@unio.dev' => [
             'app_pessoas' => true,
             'app_pessoas_membro_novo' => false,
             'app_core_projetos' => true,
             'app_core_tarefa_nova' => true,
         ],
-        'tenant@huplex.dev' => [
+        'tenant@unio.dev' => [
             'app_core_projetos' => true,
             'app_pessoas_membro_novo' => true,
         ],
@@ -114,36 +114,36 @@ final class SystemValidationService
             }
         }
 
-        $membro = $this->userRepo->findOneBy(['email' => 'membro@huplex.dev']);
+        $membro = $this->userRepo->findOneBy(['email' => 'membro@unio.dev']);
         if ($membro) {
             $this->authenticateAs($membro);
             if ($this->permissions->canManagePermissions($membro)) {
-                $failures[] = 'membro@huplex.dev não deve gerenciar permissões globais';
+                $failures[] = 'membro@unio.dev não deve gerenciar permissões globais';
             }
             if ($this->grants->grantAtLeast($membro, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
-                $failures[] = 'membro@huplex.dev não deve criar membros';
+                $failures[] = 'membro@unio.dev não deve criar membros';
             }
             if ($this->navigation->showProjetosMetas($membro)) {
-                $failures[] = 'membro@huplex.dev não deve ver Projetos e Metas';
+                $failures[] = 'membro@unio.dev não deve ver Projetos e Metas';
             }
         }
 
-        $gestor = $this->userRepo->findOneBy(['email' => 'gestor@huplex.dev']);
+        $gestor = $this->userRepo->findOneBy(['email' => 'gestor@unio.dev']);
         if ($gestor) {
             $this->authenticateAs($gestor);
             if (!$this->permissions->canManagePermissions($gestor, 'product_pessoas')) {
-                $failures[] = 'gestor@huplex.dev deve gerenciar permissões em Pessoas';
+                $failures[] = 'gestor@unio.dev deve gerenciar permissões em Pessoas';
             }
             if (!$this->grants->grantAtLeast($gestor, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
-                $failures[] = 'gestor@huplex.dev deve poder criar membros';
+                $failures[] = 'gestor@unio.dev deve poder criar membros';
             }
         }
 
-        $tenant = $this->userRepo->findOneBy(['email' => 'tenant@huplex.dev']);
+        $tenant = $this->userRepo->findOneBy(['email' => 'tenant@unio.dev']);
         if ($tenant) {
             $empresas = $this->workspace->getAvailableEmpresas($tenant);
             if (\count($empresas) < 2) {
-                $failures[] = 'tenant@huplex.dev deve ver múltiplas empresas no workspace';
+                $failures[] = 'tenant@unio.dev deve ver múltiplas empresas no workspace';
             } else {
                 $reports[] = sprintf('Tenant workspace: %d empresas', \count($empresas));
             }
@@ -151,11 +151,11 @@ final class SystemValidationService
 
         $gestorEmpresas = $gestor ? $this->workspace->getAvailableEmpresas($gestor) : [];
         if ($gestor && \count($gestorEmpresas) !== 1) {
-            $failures[] = 'gestor@huplex.dev deve ter exatamente 1 empresa no workspace';
+            $failures[] = 'gestor@unio.dev deve ter exatamente 1 empresa no workspace';
         }
 
         if ($gestor && !$this->navigation->showProjetosMetas($gestor)) {
-            $failures[] = 'gestor@huplex.dev deve ver navegação Projetos e Metas';
+            $failures[] = 'gestor@unio.dev deve ver navegação Projetos e Metas';
         }
 
         if ($failures === []) {
@@ -168,6 +168,8 @@ final class SystemValidationService
     }
 
     private const CORE_ROUTES = [
+        'app_cortex',
+        'app_cortex_api_payload',
         'app_core_projetos',
         'app_core_projetos_show',
         'app_core_tarefa_nova',

@@ -1,4 +1,4 @@
-# Huplex — Plataforma de Gestão de Pessoas
+# Unio — Plataforma de Gestão de Pessoas
 
 Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Maturidade.
 

@@ -1,5 +1,5 @@
 {# Uso: {% include 'components/empty_state.html.twig' with { icon: 'fa-users', title: '...', text: '...', btn_label, btn_href } %} #}
-<div class="empty-state{% if compact|default(false) %} empty-state--compact{% endif %}">
+<div class="empty-state{% if compact|default(false) %} empty-state--compact{% endif %}{% if hero|default(false) %} empty-state--hero{% endif %}">
     <div class="empty-icon"><i class="fas {{ icon|default('fa-inbox') }}"></i></div>
     <h6>{{ title|default('Nenhum registro') }}</h6>
     {% if text is defined and text %}
@@ -7,13 +7,13 @@
     {% endif %}
     {% if btn_label is defined and btn_label %}
         {% if btn_opens is defined and btn_opens %}
-            <button type="button" class="btn-huplex mt-3"
-                    data-huplex-offcanvas-open="{{ btn_opens }}"
+            <button type="button" class="btn-unio mt-3"
+                    data-unio-offcanvas-open="{{ btn_opens }}"
                     data-{{ btn_opens }}-open>{{ btn_label }}</button>
         {% elseif btn_href is defined and btn_href %}
-            <a href="{{ btn_href }}" class="btn-huplex mt-3"{% if turbo_frame|default('') %} data-turbo-frame="{{ turbo_frame }}"{% endif %}>{{ btn_label }}</a>
+            <a href="{{ btn_href }}" class="btn-unio mt-3"{% if turbo_frame|default('') %} data-turbo-frame="{{ turbo_frame }}"{% endif %}>{{ btn_label }}</a>
         {% else %}
-            <button type="button" class="btn-huplex mt-3">{{ btn_label }}</button>
+            <button type="button" class="btn-unio mt-3">{{ btn_label }}</button>
         {% endif %}
     {% endif %}
 </div>

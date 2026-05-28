@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 {% set _pnome = platform_config.plataforma_nome|default('Unio') %}
 {% set _tema  = platform_config.tema|default('dark') %}
 <html lang="pt-BR" data-theme="{{ _tema }}">
@@ -14,11 +14,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||localStorage.getItem('huplex-theme')||'{{ _tema }}')}catch(e){}</script>
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap4.min.css">
-    {% include 'components/huplex_theme_vars.html.twig' %}
-    <link rel="stylesheet" href="{{ asset('css/huplex-app.css') }}?v=196">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/unio-app.css') }}?v=227">
 
     {% block stylesheets %}{% endblock %}
 </head>
@@ -26,7 +26,7 @@
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
-    {# ── Top Navbar (Helia, apps) ── #}
+    {# ── Top Navbar (Vitória, apps) ── #}
     <nav class="main-header navbar navbar-expand navbar-dark">
         <a class="nav-link nav-toggle-btn" data-widget="pushmenu" href="#" role="button" aria-label="Alternar menu lateral">
             <span class="nav-toggle-icon" aria-hidden="true">
@@ -42,7 +42,7 @@
 
         <ul class="navbar-nav ml-auto align-items-center mb-0">
             <li class="nav-item d-flex align-items-center">
-                <button type="button" class="helix-trigger" id="helixOpenBtn" aria-expanded="false" aria-controls="helixPanel" title="Helia — Assistente virtual">
+                <button type="button" class="helix-trigger" id="helixOpenBtn" aria-expanded="false" aria-controls="helixPanel" title="Vitória — Assistente virtual">
                     {{ helix.avatar('sm') }}
                 </button>
             </li>
@@ -126,7 +126,7 @@
 
     {% block page_overlays %}{% endblock %}
 
-    {% include 'components/huplex_toast_stack.html.twig' %}
+    {% include 'components/unio_toast_stack.html.twig' %}
 
     {% if platform_config.manutencao ?? false %}
     <div class="manut-tenant-banner" role="alert">
@@ -234,7 +234,7 @@ window.addEventListener('load', function () {
 </script>
 <script>
 (function() {
-    var saved = localStorage.getItem('unio-theme') || localStorage.getItem('huplex-theme') || 'dark';
+    var saved = localStorage.getItem('unio-theme') || 'dark';
     applyTheme(saved);
 
     function applyTheme(t) {
@@ -258,16 +258,16 @@ window.addEventListener('load', function () {
     };
 })();
 </script>
-<script src="{{ asset('js/huplex-file-upload.js') }}?v=2"></script>
-<script src="{{ asset('js/huplex-offcanvas.js') }}?v=1"></script>
-<script src="{{ asset('js/huplex-color-picker.js') }}?v=1"></script>
-<script src="{{ asset('js/huplex-toast.js') }}?v=2"></script>
+<script src="{{ asset('js/unio-file-upload.js') }}?v=2"></script>
+<script src="{{ asset('js/unio-offcanvas.js') }}?v=2"></script>
+<script src="{{ asset('js/unio-color-picker.js') }}?v=2"></script>
+<script src="{{ asset('js/unio-toast.js') }}?v=3"></script>
 <script src="{{ asset('js/global-search.js') }}?v=1"></script>
-<script src="{{ asset('js/sidebar-hubs.js') }}?v=3"></script>
-<script src="{{ asset('js/huplex-nav-progress.js') }}?v=1"></script>
-<script src="{{ asset('js/huplex-apps-launcher.js') }}?v=1"></script>
-<script src="{{ asset('js/huplex-sidebar-identity.js') }}?v=3"></script>
-<script src="{{ asset('js/huplex-ambient-sound.js') }}?v=3"></script>
+<script src="{{ asset('js/sidebar-hubs.js') }}?v=8"></script>
+<script src="{{ asset('js/unio-nav-progress.js') }}?v=1"></script>
+<script src="{{ asset('js/unio-apps-launcher.js') }}?v=1"></script>
+<script src="{{ asset('js/unio-sidebar-identity.js') }}?v=3"></script>
+<script src="{{ asset('js/unio-ambient-sound.js') }}?v=3"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
 {{ importmap('rh_ux') }}
@@ -318,7 +318,7 @@ window.addEventListener('load', function () {
 (function () {
     'use strict';
 
-    var STORAGE_KEY = 'huplex-helix-sessions';
+    var STORAGE_KEY = 'unio-helix-sessions';
     var panel = document.getElementById('helixPanel');
     var openBtn = document.getElementById('helixOpenBtn');
     var form = document.getElementById('helixForm');
@@ -417,7 +417,7 @@ window.addEventListener('load', function () {
         messagesEl.innerHTML =
             '<div class="helix-msg helix-msg--assistant">' + FACE_SM +
             '<div class="helix-msg-bubble">' +
-            '<p>' + greeting + ' Sou a Helia — sua assistente na Unio.</p>' +
+            '<p>' + greeting + ' Sou a Vitória — sua assistente na Unio.</p>' +
             '<p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens já ficam salvas no histórico.</p>' +
             '</div></div>';
         if (suggestions) suggestions.style.display = '';
@@ -456,7 +456,7 @@ window.addEventListener('load', function () {
     }
 
     function assistantReply() {
-        return 'Obrigado pela mensagem! A inteligência artificial da Helia está em desenvolvimento — em breve responderei de forma automática. Sua conversa foi salva no histórico.';
+        return 'Obrigado pela mensagem! A inteligência artificial da Vitória está em desenvolvimento — em breve responderei de forma automática. Sua conversa foi salva no histórico.';
     }
 
     function sendMessage(text) {
@@ -595,7 +595,7 @@ window.addEventListener('load', function () {
     });
 
     document.getElementById('helixClearHistory')?.addEventListener('click', function () {
-        if (!confirm('Limpar todo o histórico da Helia?')) return;
+        if (!confirm('Limpar todo o histórico da Vitória?')) return;
         saveSessions([]);
         currentSessionId = null;
         newChat();

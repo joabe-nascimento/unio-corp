@@ -3,11 +3,11 @@
 {% set page_list_title = funcionario.nome %}
 
 {% block page_list_toolbar_actions %}
-<a href="{{ path('app_rh_funcionarios') }}" class="btn-huplex-ghost btn-sm">Voltar</a>
+<a href="{{ path('app_rh_funcionarios') }}" class="btn-unio-ghost btn-sm">Voltar</a>
 {% if grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') %}
-<a href="{{ path('app_rh_funcionario_editar', { id: funcionario.id }) }}" class="btn-huplex btn-sm">Editar</a>
+<a href="{{ path('app_rh_funcionario_editar', { id: funcionario.id }) }}" class="btn-unio btn-sm">Editar</a>
 {% if funcionario.status == 'ATIVO' %}
-<a href="{{ path('app_rh_demissoes_nova') }}?funcionario_id={{ funcionario.id }}" class="btn-huplex-ghost btn-sm">Offboarding</a>
+<a href="{{ path('app_rh_demissoes_nova') }}?funcionario_id={{ funcionario.id }}" class="btn-unio-ghost btn-sm">Offboarding</a>
 {% endif %}
 {% endif %}
 {% endblock %}
@@ -15,7 +15,7 @@
 {% block page_list_content %}
 <div class="rh-process-show">
     <div class="rh-process-show-layout">
-        <div class="huplex-card rh-process-show-profile" style="grid-column:1/-1;display:flex;gap:16px;padding:20px;">
+        <div class="unio-card rh-process-show-profile" style="grid-column:1/-1;display:flex;gap:16px;padding:20px;">
             {% if funcionario.foto %}
             <img src="{{ asset(funcionario.foto) }}" alt="" style="width:72px;height:72px;border-radius:12px;object-fit:cover;">
             {% else %}
@@ -27,8 +27,8 @@
                 {% include 'components/status_badge.html.twig' with { label: funcionario.statusLabel, variant: funcionario.statusClass } %}
             </div>
         </div>
-        <div class="rh-process-show-section huplex-card">
-            {% include 'components/huplex/detail_field_section.html.twig' with { title: 'Cadastro', items: [
+        <div class="rh-process-show-section unio-card">
+            {% include 'components/unio/detail_field_section.html.twig' with { title: 'Cadastro', items: [
                 { label: 'Cargo', value: funcionario.cargo|default('—'), icon: 'fa-briefcase' },
                 { label: 'Telefone', value: funcionario.telefone|default('—'), icon: 'fa-phone' },
                 { label: 'Departamento', value: funcionario.departamento ? funcionario.departamento.nome : '—', icon: 'fa-building' },

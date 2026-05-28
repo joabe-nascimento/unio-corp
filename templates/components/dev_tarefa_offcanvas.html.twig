@@ -1,7 +1,7 @@
 {#
-  dev_tarefa_offcanvas — nova tarefa no kanban (usa huplex_offcanvas)
+  dev_tarefa_offcanvas — nova tarefa no kanban (usa unio_offcanvas)
 #}
-{% embed 'components/huplex_offcanvas.html.twig' with {
+{% embed 'components/unio_offcanvas.html.twig' with {
     id: 'dev-tarefa',
     title: 'Nova tarefa',
     subtitle: 'Adicione ao kanban com projeto, coluna, prioridade e meta opcional.',
@@ -12,7 +12,7 @@
     {% block offcanvas_body %}
         <form method="post"
               action="{{ path('app_core_tarefa_nova') }}"
-              class="huplex-form huplex-offcanvas-form"
+              class="unio-form unio-offcanvas-form"
               data-dev-tarefa-form
               data-locked-projeto="{{ locked_projeto_id|default(0) }}">
             <input type="hidden" name="_token" value="{{ csrf_token('dev_tarefa_create') }}">
@@ -28,11 +28,11 @@
                 kanban_columns: kanban_columns|default({}),
                 locked_projeto_id: locked_projeto_id|default(0)
             } %}
-            <div class="huplex-form-actions huplex-offcanvas-form-actions">
-                <button type="submit" class="btn-huplex">
+            <div class="unio-form-actions unio-offcanvas-form-actions">
+                <button type="submit" class="btn-unio">
                     <i class="fas fa-check mr-1" aria-hidden="true"></i> Criar tarefa
                 </button>
-                <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+                <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
             </div>
         </form>
     {% endblock %}

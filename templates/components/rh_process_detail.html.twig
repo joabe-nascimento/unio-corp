@@ -14,7 +14,7 @@
 
 <div class="rh-process-show rh-process-show--{{ variant }}">
     <div class="rh-process-show-layout">
-        <section class="rh-process-show-main huplex-card" aria-labelledby="rh-checklist-heading">
+        <section class="rh-process-show-main unio-card" aria-labelledby="rh-checklist-heading">
             <header class="rh-process-show-checklist-head">
                 <div class="rh-process-show-checklist-title-wrap">
                     <h2 id="rh-checklist-heading" class="rh-process-show-checklist-title">{{ checklist_title }}</h2>
@@ -44,7 +44,7 @@
                     <input type="hidden" name="_token" value="{{ csrf_token('rh_process_action') }}">
                     <input type="hidden" name="action" value="complete">
                     <button type="submit"
-                            class="btn-huplex rh-process-show-complete-btn"
+                            class="btn-unio rh-process-show-complete-btn"
                             {% if progress < 100 %}disabled{% endif %}>
                         <i class="fas fa-flag-checkered mr-2" aria-hidden="true"></i>
                         {{ complete_label }}
@@ -61,7 +61,7 @@
 
         <aside class="rh-process-show-aside">
             {% if profile is defined and profile %}
-            <div class="rh-process-show-profile huplex-card">
+            <div class="rh-process-show-profile unio-card">
                 <div class="rh-process-show-avatar" aria-hidden="true">
                     {{ profile.name|slice(0, 1)|upper }}
                 </div>
@@ -78,8 +78,8 @@
             {% endif %}
 
             {% for section in detail_sections|default([]) %}
-            <div class="rh-process-show-section huplex-card">
-                {% include 'components/huplex/detail_field_section.html.twig' with {
+            <div class="rh-process-show-section unio-card">
+                {% include 'components/unio/detail_field_section.html.twig' with {
                     title: section.title,
                     items: section.items
                 } only %}
@@ -87,7 +87,7 @@
             {% endfor %}
 
             {% if hint is defined and hint %}
-            <div class="rh-process-show-hint huplex-card">
+            <div class="rh-process-show-hint unio-card">
                 <p class="rh-process-show-hint-label">
                     <i class="fas fa-circle-info" aria-hidden="true"></i>
                     Como funciona

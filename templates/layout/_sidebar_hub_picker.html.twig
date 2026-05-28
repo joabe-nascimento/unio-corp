@@ -1,6 +1,7 @@
-{# Lista plana de hubs (modo seleção) #}
+{# Lista plana de hubs (modo seleção) — sempre no DOM; visibilidade via .is-hidden #}
+{% set _pick_hidden = hub_picker_hidden|default(false) ? ' is-hidden' : '' %}
 {% if nav_show_hub_operacoes|default(false) %}
-<li class="nav-item sidebar-hub-pick-item">
+<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
     <a href="{{ path('app_hub_operacoes') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="operacoes">
         <i class="fas fa-building nav-icon"></i>
         <p>Hub de Operações</p>
@@ -8,7 +9,7 @@
 </li>
 {% endif %}
 {% if nav_show_hub_talentos|default(false) %}
-<li class="nav-item sidebar-hub-pick-item">
+<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
     <a href="{{ path('app_talentos') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="talentos">
         <i class="fas fa-gem nav-icon"></i>
         <p>Hub de Talentos</p>
@@ -16,18 +17,26 @@
 </li>
 {% endif %}
 {% if nav_show_hub_maturidade|default(false) %}
-<li class="nav-item sidebar-hub-pick-item">
+<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
     <a href="{{ path('app_maturidade') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="maturidade">
         <i class="fas fa-seedling nav-icon"></i>
         <p>Hub de Maturidade</p>
     </a>
 </li>
 {% endif %}
+{% for hub in nav_planned_hubs|default([]) %}
+<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
+    <a href="{{ path(hub.route) }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="{{ hub.id }}">
+        <i class="fas {{ hub.icon }} nav-icon"></i>
+        <p>{{ hub.label }}</p>
+    </a>
+</li>
+{% endfor %}
 {% if nav_show_plataforma|default(false) %}
-<li class="nav-item sidebar-hub-pick-item">
+<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
     <a href="{{ path('app_admin') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="admin">
         <i class="fas fa-shield-halved nav-icon"></i>
-        <p>Plataforma Admin</p>
+        <p>Plataforma</p>
     </a>
 </li>
 {% endif %}

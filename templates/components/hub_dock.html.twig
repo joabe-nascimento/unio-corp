@@ -1,0 +1,31 @@
+{# Dock de hubs/módulos — ícone + nome (boas-vindas, dashboard, launcher) #}
+{% set _items = items|default([]) %}
+{% set _show_pin = show_pin|default(false) %}
+{% set _dock_id = dock_id|default(null) %}
+
+{% if _items|length > 0 %}
+<div class="welcome-hubs-dock"{% if _dock_id %} id="{{ _dock_id }}"{% endif %}>
+    {% for item in _items %}
+    {% set _id = item.id|default(item.route|default('item-' ~ loop.index)) %}
+    <div class="welcome-hub-tile welcome-hub-dock-tile" data-hub-id="{{ _id }}">
+        {% if _show_pin %}
+        <button type="button"
+                class="welcome-hub-pin"
+                data-welcome-pin-hub="{{ _id }}"
+                title="Fixar hub"
+                aria-label="Fixar {{ item.title }}">
+            <i class="far fa-star" aria-hidden="true"></i>
+        </button>
+        {% endif %}
+        <a href="{{ path(item.route) }}"
+           class="welcome-hub-dock-link"
+           title="{{ item.subtitle|default(item.title) }}">
+            <span class="welcome-hub-dock-icon" aria-hidden="true">
+                <i class="fas {{ item.icon }}"></i>
+            </span>
+            <span class="welcome-hub-dock-label">{{ item.title }}</span>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

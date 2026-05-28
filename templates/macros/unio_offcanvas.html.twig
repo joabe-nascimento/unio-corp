@@ -1,0 +1,19 @@
+{#
+  Macros do offcanvas Unio
+
+  Uso:
+    {% import 'macros/unio_offcanvas.html.twig' as offcanvas %}
+    {{ offcanvas.open_button('dev-projeto', 'Novo projeto', { icon: 'fa-plus' }) }}
+#}
+{% macro open_button(id, label, options = {}) %}
+    {% set _ghost = options.ghost|default(false) %}
+    {% set _class = options.class|default('') %}
+    {% set _icon = options.icon|default(null) %}
+    <button type="button"
+            class="{{ _ghost ? 'btn-unio-ghost' : 'btn-unio' }} {{ _class }}"
+            data-unio-offcanvas-open="{{ id }}"
+            data-{{ id }}-open>
+        {% if _icon %}<i class="fas {{ _icon }} mr-1" aria-hidden="true"></i>{% endif %}
+        {{ label }}
+    </button>
+{% endmacro %}

@@ -1,0 +1,40 @@
+{#
+  unio/file_upload — zona de upload com drag-and-drop (input nativo oculto)
+
+  Props:
+    id           (string, obrig.)   id do input file (e do label for)
+    name         (string, obrig.)   name do input
+    accept       (string, opt)     ex.: .pdf,.jpg,.png
+    hint         (string, opt)      texto de formatos/tamanho
+    required     (bool, opt)
+    compact      (bool, opt)        versão mais baixa para painéis laterais
+#}
+{% set _id = id %}
+{% set _hint = hint|default('PDF, JPG, PNG ou DOC — máx. 10 MB') %}
+<div class="unio-file-upload{% if compact|default(false) %} unio-file-upload--compact{% endif %}"
+     data-unio-file-upload>
+    <input type="file"
+           id="{{ _id }}"
+           name="{{ name }}"
+           class="unio-file-upload-input"
+           {% if accept is defined and accept %}accept="{{ accept }}"{% endif %}
+           {% if required|default(false) %}required{% endif %}>
+    <label class="unio-file-upload-drop" for="{{ _id }}">
+        <span class="unio-file-upload-icon" aria-hidden="true">
+            <i class="fas fa-cloud-arrow-up"></i>
+        </span>
+        <span class="unio-file-upload-text">
+            <span class="unio-file-upload-label">Clique ou arraste o arquivo</span>
+            <span class="unio-file-upload-hint">{{ _hint }}</span>
+        </span>
+    </label>
+    <div class="unio-file-upload-preview" hidden>
+        <span class="unio-file-upload-preview-icon" aria-hidden="true">
+            <i class="fas fa-file-lines"></i>
+        </span>
+        <span class="unio-file-upload-preview-name" data-file-name></span>
+        <button type="button" class="unio-file-upload-clear" data-file-clear aria-label="Remover arquivo">
+            <i class="fas fa-xmark"></i>
+        </button>
+    </div>
+</div>

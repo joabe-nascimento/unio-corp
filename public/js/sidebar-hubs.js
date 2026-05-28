@@ -13,7 +13,7 @@
         sidebar.classList.toggle('sidebar--hub-picker', !inHub);
         sidebar.classList.toggle('sidebar--hub-open', inHub);
 
-        sidebar.querySelectorAll('.sidebar-hub-pick-item, [data-sidebar-hub-picker] .sidebar-hub-pick-item').forEach(function (el) {
+        sidebar.querySelectorAll('.sidebar-hub-pick-item').forEach(function (el) {
             el.classList.toggle('is-hidden', inHub);
         });
 
@@ -94,6 +94,15 @@
         });
     }
 
+    function initHubBack(sidebar) {
+        sidebar.querySelectorAll('[data-sidebar-hub-back]').forEach(function (btn) {
+            btn.addEventListener('click', function (event) {
+                event.preventDefault();
+                setHubMode(false);
+            });
+        });
+    }
+
     function boot() {
         var sidebar = document.querySelector('.nav-sidebar[data-sidebar-hubs]');
         if (!sidebar) {
@@ -108,6 +117,7 @@
             setHubMode(false);
         }
 
+        initHubBack(sidebar);
         initModuleTrees(sidebar);
     }
 

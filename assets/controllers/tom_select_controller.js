@@ -22,7 +22,7 @@ export default class extends Controller {
             plugins: ['dropdown_input'],
         });
 
-        this.element.classList.add('huplex-tomselect-ready');
+        this.element.classList.add('unio-tomselect-ready');
     }
 
     disconnect() {

@@ -73,8 +73,24 @@ final class WelcomePresentationService
             ),
             'journey' => $this->buildJourney($user, $hubs, $empresa),
             'empresa_brief' => $this->buildEmpresaBrief($empresa),
-            'first_hub' => $hubs[0] ?? null,
+            'first_hub' => $this->pickPrimaryHubForCta($hubs),
         ];
+    }
+
+    /** @param list<array<string, mixed>> $hubs */
+    /** @return ?array{title: string, route: string, icon?: string} */
+    private function pickPrimaryHubForCta(array $hubs): ?array
+    {
+        foreach ($hubs as $hub) {
+            if (($hub['id'] ?? '') === 'cortex') {
+                continue;
+            }
+            if (!empty($hub['route']) && !empty($hub['title'])) {
+                return $hub;
+            }
+        }
+
+        return null;
     }
 
     private function buildIntro(User $user, ?Empresa $empresa, string $layout, string $platformName): string
@@ -119,13 +135,20 @@ final class WelcomePresentationService
         $steps = [];
         $step = 1;
 
-        if (isset($hubs[0]['route'], $hubs[0]['title'])) {
+        $primaryHub = null;
+        foreach ($hubs as $hub) {
+            if (($hub['id'] ?? '') !== 'cortex' && !empty($hub['route']) && !empty($hub['title'])) {
+                $primaryHub = $hub;
+                break;
+            }
+        }
+        if ($primaryHub !== null) {
             $steps[] = [
                 'step' => $step++,
                 'title' => 'Conheça seu hub principal',
-                'text' => 'Comece por ' . $hubs[0]['title'] . ' — o ponto de partida recomendado para o seu perfil.',
-                'icon' => $hubs[0]['icon'] ?? 'fa-briefcase',
-                'route' => $hubs[0]['route'],
+                'text' => 'Comece por ' . $primaryHub['title'] . ' — o ponto de partida recomendado para o seu perfil.',
+                'icon' => $primaryHub['icon'] ?? 'fa-briefcase',
+                'route' => $primaryHub['route'],
                 'cta' => 'Abrir hub',
             ];
         }

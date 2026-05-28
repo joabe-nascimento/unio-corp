@@ -1,7 +1,7 @@
 {#
-  dev_projeto_offcanvas — formulário de novo projeto (usa huplex_offcanvas)
+  dev_projeto_offcanvas — formulário de novo projeto (usa unio_offcanvas)
 #}
-{% embed 'components/huplex_offcanvas.html.twig' with {
+{% embed 'components/unio_offcanvas.html.twig' with {
     id: 'dev-projeto',
     title: 'Novo projeto',
     subtitle: 'Cadastre o que você está desenvolvendo na Unio.',
@@ -10,15 +10,15 @@
     size: 'md'
 } %}
     {% block offcanvas_body %}
-        <form method="post" action="{{ path('app_core_projetos_nova') }}" class="huplex-form huplex-offcanvas-form">
+        <form method="post" action="{{ path('app_core_projetos_nova') }}" class="unio-form unio-offcanvas-form">
             <input type="hidden" name="_token" value="{{ csrf_token('dev_projeto_create') }}">
             <input type="hidden" name="redirect_view" value="{{ active_view|default('kanban') }}">
             {% include 'modules/core/projetos/_form_fields.html.twig' with { rd: rd|default({}) } %}
-            <div class="huplex-form-actions huplex-offcanvas-form-actions">
-                <button type="submit" class="btn-huplex">
+            <div class="unio-form-actions unio-offcanvas-form-actions">
+                <button type="submit" class="btn-unio">
                     <i class="fas fa-check mr-1" aria-hidden="true"></i> Criar projeto
                 </button>
-                <button type="button" class="btn-huplex-ghost" data-huplex-offcanvas-close>Cancelar</button>
+                <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
             </div>
         </form>
     {% endblock %}

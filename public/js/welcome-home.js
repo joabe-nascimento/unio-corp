@@ -13,6 +13,10 @@
     var defaults = {
         layout: 'comfortable',
         sections: {
+            resumo: true,
+            noticias: true,
+            atualizacoes: true,
+            insights: true,
             metrics: true,
             highlights: true,
             journey: true,
@@ -207,7 +211,7 @@
             if (!target) return;
             e.preventDefault();
             if (hash === '#welcome-personalize') {
-                var openBtn = document.querySelector('[data-huplex-offcanvas-open="welcome-personalize"]');
+                var openBtn = document.querySelector('[data-unio-offcanvas-open="welcome-personalize"]');
                 if (openBtn) openBtn.click();
                 return;
             }

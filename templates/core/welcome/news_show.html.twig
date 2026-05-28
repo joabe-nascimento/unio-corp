@@ -1,0 +1,100 @@
+﻿{% extends 'base.html.twig' %}
+
+{% block title %}{{ article.title }}{% endblock %}
+{% block page_show_title %}{% endblock %}
+{% block breadcrumb %}{% endblock %}
+
+{% set cta_labels = {
+    'app_rh_admissoes': 'Ver admissões pendentes',
+    'app_core_projetos': 'Abrir projetos e metas',
+    'app_pessoas_membros': 'Gerenciar pessoas',
+    'app_admin_usuarios': 'Revisar usuários',
+    'app_dashboard': 'Abrir dashboard',
+} %}
+{% set cta_label = article.related_route ? (cta_labels[article.related_route]|default('Ir para o módulo relacionado')) : null %}
+
+{% block content %}
+<div class="welcome-news-page">
+    <div class="welcome-news-page__top">
+        <a href="{{ path('app_welcome') }}#welcome-news-title" class="welcome-news-read__back">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            Voltar ao radar
+        </a>
+    </div>
+
+    <article class="welcome-news-read unio-card{% if article.is_insight|default(false) %} welcome-news-read--insight{% elseif article.is_live|default(false) %} welcome-news-read--live{% endif %}">
+        <header class="welcome-news-read__head">
+            <div class="welcome-news-read__hero">
+                <div class="welcome-news-read__hero-body">
+                    <div class="welcome-news-read__meta">
+                        <span class="welcome-news-read__category">{{ article.category }}</span>
+                        {% if article.is_live|default(false) %}
+                        <span class="welcome-badge-new">Ao vivo</span>
+                        {% elseif article.is_insight|default(false) %}
+                        <span class="welcome-badge-insight">Sua área</span>
+                        {% elseif article.is_new|default(false) %}
+                        <span class="welcome-badge-new">Novo</span>
+                        {% endif %}
+                        {% if article.is_read|default(false) %}
+                        <span class="welcome-badge-read">Lido</span>
+                        {% endif %}
+                    </div>
+                    <h1 class="welcome-news-read__title">{{ article.title }}</h1>
+                    <p class="welcome-news-read__summary">{{ article.summary }}</p>
+                    <div class="welcome-news-read__info">
+                        <time datetime="{{ article.published_at }}">{{ article.date_label }}</time>
+                        <span class="welcome-news-read__sep" aria-hidden="true">·</span>
+                        <span>{{ article.read_min }} min de leitura</span>
+                        {% if article.is_insight|default(false) %}
+                        <span class="welcome-news-read__sep" aria-hidden="true">·</span>
+                        <span class="welcome-news-read__source">Dados da sua área de trabalho</span>
+                        {% elseif article.is_live|default(false) %}
+                        <span class="welcome-news-read__sep" aria-hidden="true">·</span>
+                        <span class="welcome-news-read__source">Atualizado agora</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% if article.is_insight|default(false) and cta_label %}
+        <aside class="welcome-news-read__action" aria-label="Ação sugerida">
+            <div class="welcome-news-read__action-copy">
+                <strong>Ação recomendada</strong>
+                <span>Com base nos dados atuais da plataforma.</span>
+            </div>
+            <a href="{{ path(article.related_route) }}" class="btn-unio btn-sm">
+                {{ cta_label }}
+                <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+            </a>
+        </aside>
+        {% endif %}
+
+        <div class="welcome-news-read__body">
+            {% for paragraph in article.body %}
+            <p{% if loop.first %} class="welcome-news-read__lead"{% endif %}>{{ paragraph }}</p>
+            {% endfor %}
+        </div>
+
+        <footer class="welcome-news-read__footer">
+            {% if cta_label and not article.is_insight|default(false) %}
+            <a href="{{ path(article.related_route) }}" class="btn-unio">
+                <i class="fas fa-arrow-up-right-from-square mr-1" aria-hidden="true"></i>
+                {{ cta_label }}
+            </a>
+            {% endif %}
+            <a href="{{ path('app_welcome', { refresh_news: 1 }) }}#welcome-news-title"
+               class="btn-unio-ghost"
+               data-welcome-news-refresh-link>
+                <i class="fas fa-newspaper mr-1" aria-hidden="true"></i>
+                Mais notícias
+            </a>
+        </footer>
+    </article>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/welcome-news.js') }}?v=4" defer></script>
+{% endblock %}

@@ -14,12 +14,12 @@ class UserFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $users = [
-            ['nome' => 'Tenant Master',       'email' => 'tenant@huplex.dev',     'perfil' => 'TENANT'],
-            ['nome' => 'Gestor Oliveira',      'email' => 'gestor@huplex.dev',     'perfil' => 'GESTOR'],
-            ['nome' => 'Gestor Equipe Costa',  'email' => 'gestor.eq@huplex.dev',  'perfil' => 'GESTOR_EQUIPE'],
-            ['nome' => 'Supervisor Geral',     'email' => 'supervisor@huplex.dev', 'perfil' => 'SUPERVISOR'],
-            ['nome' => 'Supervisor Equipe',    'email' => 'sup.eq@huplex.dev',     'perfil' => 'SUPERVISOR_EQUIPE'],
-            ['nome' => 'Membro Santos',        'email' => 'membro@huplex.dev',     'perfil' => 'MEMBRO'],
+            ['nome' => 'Tenant Master',       'email' => 'tenant@unio.dev',     'perfil' => 'TENANT'],
+            ['nome' => 'Gestor Oliveira',      'email' => 'gestor@unio.dev',     'perfil' => 'GESTOR'],
+            ['nome' => 'Gestor Equipe Costa',  'email' => 'gestor.eq@unio.dev',  'perfil' => 'GESTOR_EQUIPE'],
+            ['nome' => 'Supervisor Geral',     'email' => 'supervisor@unio.dev', 'perfil' => 'SUPERVISOR'],
+            ['nome' => 'Supervisor Equipe',    'email' => 'sup.eq@unio.dev',     'perfil' => 'SUPERVISOR_EQUIPE'],
+            ['nome' => 'Membro Santos',        'email' => 'membro@unio.dev',     'perfil' => 'MEMBRO'],
         ];
 
         foreach ($users as $data) {
@@ -28,7 +28,7 @@ class UserFixtures extends Fixture
             $user->setEmail($data['email']);
             $user->setPerfil($data['perfil']);
             $user->setRoles([$user->getRolePrincipal()]);
-            $user->setPassword($this->hasher->hashPassword($user, 'huplex123'));
+            $user->setPassword($this->hasher->hashPassword($user, 'unio123'));
             $user->setAtivo(true);
             $manager->persist($user);
         }
