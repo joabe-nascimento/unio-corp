@@ -1,0 +1,70 @@
+{# Seção Helix / IA — abaixo do hero de boas-vindas #}
+{% import 'macros/helix.html.twig' as helix %}
+
+<section class="welcome-ai-spotlight" aria-labelledby="welcome-ai-title">
+    <div class="welcome-ai-spotlight-bg" aria-hidden="true"></div>
+
+    <div class="welcome-ai-spotlight-inner">
+        <div class="welcome-ai-spotlight-brand">
+            {{ helix.avatar('lg') }}
+            <div class="welcome-ai-spotlight-badge">
+                <i class="fas fa-sparkles" aria-hidden="true"></i> IA integrada
+            </div>
+        </div>
+
+        <div class="welcome-ai-spotlight-copy">
+            <p class="welcome-ai-eyebrow">Assistente inteligente</p>
+            <h2 class="welcome-ai-title" id="welcome-ai-title">Conheça o Helix</h2>
+            <p class="welcome-ai-lead">
+                Seu copiloto na plataforma: responde dúvidas, sugere próximos passos e ajuda você
+                a navegar RH, hubs e indicadores com mais agilidade.
+            </p>
+
+            <ul class="welcome-ai-features">
+                <li>
+                    <span class="welcome-ai-feature-icon"><i class="fas fa-bolt" aria-hidden="true"></i></span>
+                    <span>Respostas rápidas sobre módulos e fluxos</span>
+                </li>
+                <li>
+                    <span class="welcome-ai-feature-icon"><i class="fas fa-chart-pie" aria-hidden="true"></i></span>
+                    <span>Contexto da sua área de trabalho e perfil</span>
+                </li>
+                <li>
+                    <span class="welcome-ai-feature-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></span>
+                    <span>Privacidade e governança da plataforma</span>
+                </li>
+            </ul>
+
+            <div class="welcome-ai-actions">
+                <button type="button" class="welcome-ai-btn welcome-ai-btn--primary" id="welcomeOpenHelixBtn">
+                    <i class="fas fa-comment-dots" aria-hidden="true"></i>
+                    Conversar com o Helix
+                </button>
+                <a href="{{ path('app_chat') }}" class="welcome-ai-btn welcome-ai-btn--ghost">
+                    <i class="fas fa-comments" aria-hidden="true"></i>
+                    Abrir bate-papo
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+(function () {
+    var btn = document.getElementById('welcomeOpenHelixBtn');
+    if (!btn) { return; }
+    btn.addEventListener('click', function () {
+        var helixBtn = document.getElementById('helixOpenBtn');
+        if (helixBtn) {
+            helixBtn.click();
+            return;
+        }
+        var panel = document.getElementById('helixPanel');
+        if (panel) {
+            panel.hidden = false;
+            panel.classList.add('is-open');
+            document.body.classList.add('helix-open');
+        }
+    });
+})();
+</script>

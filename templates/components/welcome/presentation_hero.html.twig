@@ -1,8 +1,18 @@
-{# Hero de apresentação — props: presentation, greeting, perfil_*, weekday, date_label, time_label, empresas_count #}
+{# Hero de apresentação — visual alinhado ao painel teal da tela de login #}
 {% set p = presentation %}
 
-<section class="welcome-present-hero">
-    <div class="welcome-present-hero-bg" aria-hidden="true"></div>
+<section class="welcome-present-hero welcome-present-hero--login">
+    <div class="welcome-present-hero-bg" aria-hidden="true">
+        <img class="welcome-present-deco welcome-present-deco--mesh"
+             src="{{ asset('images/auth/mesh-network.svg') }}" alt="">
+        <img class="welcome-present-deco welcome-present-deco--orbit"
+             src="{{ asset('images/auth/deco-orbit.svg') }}" alt="">
+        <img class="welcome-present-deco welcome-present-deco--chip"
+             src="{{ asset('images/auth/deco-chip.svg') }}" alt="">
+        <img class="welcome-present-deco welcome-present-deco--nodes"
+             src="{{ asset('images/auth/deco-nodes-cluster.svg') }}" alt="">
+    </div>
+
     <div class="welcome-present-hero-grid">
         <div class="welcome-present-hero-copy">
             <p class="welcome-present-eyebrow">
@@ -28,13 +38,13 @@
 
             <div class="welcome-present-cta">
                 {% if p.first_hub %}
-                <a href="{{ path(p.first_hub.route) }}" class="btn btn-primary btn-lg">
-                    <i class="fas {{ p.first_hub.icon|default('fa-rocket') }} mr-2" aria-hidden="true"></i>
+                <a href="{{ path(p.first_hub.route) }}" class="welcome-present-btn welcome-present-btn--primary">
+                    <i class="fas {{ p.first_hub.icon|default('fa-rocket') }}" aria-hidden="true"></i>
                     Começar em {{ p.first_hub.title }}
                 </a>
                 {% endif %}
-                <a href="{{ path('app_dashboard') }}" class="btn btn-outline-secondary btn-lg">
-                    <i class="fas fa-gauge-high mr-2" aria-hidden="true"></i>
+                <a href="{{ path('app_dashboard') }}" class="welcome-present-btn welcome-present-btn--ghost">
+                    <i class="fas fa-gauge-high" aria-hidden="true"></i>
                     Central do dashboard
                 </a>
             </div>
