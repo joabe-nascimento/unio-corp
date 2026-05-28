@@ -4,6 +4,15 @@
 (function () {
     'use strict';
 
+    function setPickerVisible(sidebar, visible) {
+        sidebar.querySelectorAll('.sidebar-hub-group').forEach(function (el) {
+            el.classList.toggle('is-hidden', !visible);
+        });
+        sidebar.querySelectorAll('.sidebar-hub-pick-item').forEach(function (el) {
+            el.classList.toggle('is-hidden', !visible);
+        });
+    }
+
     function setHubMode(inHub) {
         var sidebar = document.querySelector('.nav-sidebar');
         if (!sidebar) {
@@ -13,18 +22,15 @@
         sidebar.classList.toggle('sidebar--hub-picker', !inHub);
         sidebar.classList.toggle('sidebar--hub-open', inHub);
 
-        sidebar.querySelectorAll('.sidebar-hub-pick-item').forEach(function (el) {
-            el.classList.toggle('is-hidden', inHub);
-        });
+        setPickerVisible(sidebar, !inHub);
 
         sidebar.querySelectorAll('[data-sidebar-hub-panel]').forEach(function (panel) {
             panel.classList.add('is-hidden');
         });
 
-        var back = sidebar.querySelector('[data-sidebar-hub-back]');
-        if (back) {
+        sidebar.querySelectorAll('[data-sidebar-hub-back]').forEach(function (back) {
             back.classList.toggle('is-hidden', !inHub);
-        }
+        });
     }
 
     function showPanel(hubId) {
@@ -36,18 +42,15 @@
         sidebar.classList.add('sidebar--hub-open');
         sidebar.classList.remove('sidebar--hub-picker');
 
-        sidebar.querySelectorAll('.sidebar-hub-pick-item').forEach(function (el) {
-            el.classList.add('is-hidden');
-        });
+        setPickerVisible(sidebar, false);
 
         sidebar.querySelectorAll('[data-sidebar-hub-panel]').forEach(function (panel) {
             panel.classList.toggle('is-hidden', panel.getAttribute('data-sidebar-hub-panel') !== hubId);
         });
 
-        var back = sidebar.querySelector('[data-sidebar-hub-back]');
-        if (back) {
+        sidebar.querySelectorAll('[data-sidebar-hub-back]').forEach(function (back) {
             back.classList.remove('is-hidden');
-        }
+        });
     }
 
     function storageKeyForItem(item) {

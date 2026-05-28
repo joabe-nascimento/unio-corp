@@ -11,10 +11,13 @@
     value        (string, opt)
     disabled     (bool, opt)
     min_width    (string, opt)  ex.: '150px'
+    group_id     (string, opt)  id no wrapper .filter-group
+    select_attrs (array, opt)  atributos extras no select/input (data-*, etc.)
 #}
 {% set _type = type|default('select') %}
 {% set _id = id|default(name is defined and name ? 'filter-' ~ name : '') %}
-<div class="filter-group">
+{% set _select_attrs = select_attrs|default({}) %}
+<div class="filter-group"{% if group_id is defined and group_id %} id="{{ group_id }}"{% endif %}>
     {% if show_label|default(false) and label is defined and label %}
         <label class="filter-label"{% if _id %} for="{{ _id }}"{% endif %}>{{ label }}</label>
     {% endif %}
@@ -41,7 +44,8 @@
                 aria-label="{{ label|default('Filtrar') }}"
                 {% if name is defined and name %}{% if _id %}id="{{ _id }}"{% endif %} name="{{ name }}"{% endif %}
                 {% if disabled|default(false) %}disabled{% endif %}
-                {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
+                {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}
+                {% for attr, val in _select_attrs %}{{ attr }}="{{ val }}" {% endfor %}>
             {% for opt in options|default([]) %}
                 {% if opt is iterable and opt.label is defined %}
                     <option value="{{ opt.value|default(opt.label) }}"

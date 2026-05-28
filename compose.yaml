@@ -19,6 +19,19 @@ services:
             - '3000:3000'
 ###< symfony/mercure-bundle ###
 
+###> symfony/cache ###
+    redis:
+        image: redis:7-alpine
+        restart: unless-stopped
+        ports:
+            - '6379:6379'
+        volumes:
+            - redis_data:/data
+###< symfony/cache ###
+
+volumes:
+    redis_data:
+
 # --- PostgreSQL (desativado — era padrão Symfony Flex) ---
 # services:
 # ###> doctrine/doctrine-bundle ###

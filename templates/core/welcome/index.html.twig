@@ -133,7 +133,8 @@
             border_top: true,
             show_chartjs_badge: false,
             title: 'Command Center · Analytics',
-            subtitle: 'Inteligência executiva ponta a ponta — people, RH, delivery e governança'
+            subtitle: 'Inteligência executiva ponta a ponta — people, RH, delivery e governança',
+            data_section_attr: 'graficos'
         } %}
     </div>
     {% endif %}
@@ -166,8 +167,11 @@
 {% endblock %}
 
 {% block javascripts %}
-{% include 'components/charts/assets.html.twig' with { sections: chart_sections, version: 5 } only %}
-<script src="{{ asset('js/welcome-home.js') }}?v=4"></script>
+{% if chart_sections|length > 0 %}
+<script>document.body.dataset.unioChartsJs = {{ (asset('js/unio-charts.js') ~ '?v=5')|json_encode|raw }};</script>
+<script src="{{ asset('js/welcome-charts-lazy.js') }}?v=1" defer></script>
+{% endif %}
+<script src="{{ asset('js/welcome-home.js') }}?v=5"></script>
 <script src="{{ asset('js/welcome-news.js') }}?v=5" defer></script>
 <script src="{{ asset('js/onboarding-checklist.js') }}?v=1"></script>
 {% endblock %}

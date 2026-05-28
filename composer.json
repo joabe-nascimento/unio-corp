@@ -78,6 +78,15 @@
     "scripts": {
         "test": "php bin/phpunit",
         "validate:system": "php bin/console app:validate-system",
+        "minify-css": "php bin/minify-css.php",
+        "phpstan": [
+            "@php bin/console cache:warmup --env=dev",
+            "php vendor/bin/phpstan analyse -c phpstan.neon.dist"
+        ],
+        "phpstan:baseline": [
+            "@php bin/console cache:warmup --env=dev",
+            "php vendor/bin/phpstan analyse -c phpstan.neon.dist --generate-baseline=phpstan-baseline.neon"
+        ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
@@ -100,6 +109,9 @@
         }
     },
     "require-dev": {
+        "phpstan/phpstan": "^2.1.56",
+        "phpstan/phpstan-doctrine": "^2.0.22",
+        "phpstan/phpstan-symfony": "^2.0.18",
         "phpunit/phpunit": "^11.5",
         "symfony/browser-kit": "7.4.*",
         "symfony/css-selector": "7.4.*",

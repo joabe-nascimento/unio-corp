@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Config\PlannedHubRegistry;
 use App\Entity\User;
 use App\Security\ProductGrantAccess;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Menu e layout por perfil principal + grants granulares quando existem no banco.
@@ -20,6 +21,7 @@ class NavigationService
 
     public function __construct(
         private ProductGrantAccess $grants,
+        private RouterInterface $router,
     ) {
     }
 
@@ -168,8 +170,8 @@ class NavigationService
 
     public function showAnyPlannedHub(User $user): bool
     {
-        foreach (PlannedHubRegistry::scopes() as $scope) {
-            if ($this->showFutureHub($user, $scope)) {
+        foreach (PlannedHubRegistry::HUBS as $hub) {
+            if ($this->showPlannedHubEntry($user, $hub)) {
                 return true;
             }
         }
@@ -184,12 +186,44 @@ class NavigationService
     {
         $visible = [];
         foreach (PlannedHubRegistry::HUBS as $hub) {
-            if ($this->showFutureHub($user, $hub['scope'])) {
-                $visible[] = $hub;
+            if (!$this->showPlannedHubEntry($user, $hub)) {
+                continue;
             }
+            if (!$this->isRouteRegistered($hub['route'])) {
+                continue;
+            }
+            $visible[] = $hub;
         }
 
         return $visible;
+    }
+
+    /**
+     * Hubs planejados agrupados para o picker da sidebar.
+     *
+     * @return list<array{key: string, label: string, hubs: list<array<string, string>>}>
+     */
+    public function getVisiblePlannedHubGroups(User $user): array
+    {
+        return PlannedHubRegistry::groupHubs($this->getVisiblePlannedHubs($user));
+    }
+
+    private function isRouteRegistered(string $routeName): bool
+    {
+        return $this->router->getRouteCollection()->get($routeName) !== null;
+    }
+
+    private function showPlannedHubEntry(User $user, array $hub): bool
+    {
+        if ($this->showFutureHub($user, $hub['scope'])) {
+            return true;
+        }
+
+        return match ($hub['id']) {
+            'publicidade' => $this->showModuloPublicidade($user),
+            'obras' => $this->showModuloEngenharia($user),
+            default => false,
+        };
     }
 
     private function showFutureHub(User $user, string $scope): bool
@@ -343,10 +377,7 @@ class NavigationService
         return $this->showHubOperacoes($user)
             || $this->showHubTalentos($user)
             || $this->showHubMaturidade($user)
-            || $this->showHubComercial($user)
-            || $this->showHubBeneficios($user)
-            || $this->showHubAcademy($user)
-            || $this->showHubParceiros($user)
+            || $this->showAnyPlannedHub($user)
             || $this->showPlataforma($user);
     }
 
@@ -387,6 +418,7 @@ class NavigationService
             'nav_show_hub_talentos' => $this->showHubTalentos($user),
             'nav_show_hub_maturidade' => $this->showHubMaturidade($user),
             'nav_planned_hubs' => $this->getVisiblePlannedHubs($user),
+            'nav_planned_hub_groups' => $this->getVisiblePlannedHubGroups($user),
             'nav_show_modulo_rh' => $this->showModuloRh($user),
             'nav_show_modulo_pessoas' => $this->showModuloPessoas($user),
             'nav_show_modulo_engenharia' => $this->showModuloEngenharia($user),

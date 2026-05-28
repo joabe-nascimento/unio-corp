@@ -49,6 +49,20 @@
     </div>
     {% endif %}
 
+    {% if chart_sections|default([])|length > 0 %}
+    <div class="rh-hub-row rh-hub-row--analytics">
+        {% include 'components/charts/panel.html.twig' with {
+            sections: chart_sections,
+            chart_executive: chart_executive|default({ kpis: [] }),
+            panel_id: 'rh-hub',
+            title: 'Inteligência RH',
+            subtitle: 'Gráficos operacionais com dados reais do módulo',
+            title_icon: 'fa-chart-line',
+            class: 'rh-hub-charts-panel'
+        } only %}
+    </div>
+    {% endif %}
+
     {% if hub_modules is defined and hub_modules|length > 0 %}
         {% set hub_modules_visible = hub_modules|filter(m => product_grant('product_rh', m.grant)) %}
         {% if hub_modules_visible|length > 0 %}
@@ -79,5 +93,6 @@
 
 {% block javascripts %}
 {{ parent() }}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 5 } only %}
 <script src="{{ asset('js/rh-hub-dashboard.js') }}?v=8"></script>
 {% endblock %}

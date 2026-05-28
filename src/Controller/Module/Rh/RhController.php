@@ -15,6 +15,7 @@ use App\Service\RhDocumentService;
 use App\Service\RhHubService;
 use App\Service\RhOffboardingService;
 use App\Service\RhOnboardingService;
+use App\Service\Analytics\RhAnalyticsService;
 use App\Service\RhUserProvisioningService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,6 +43,7 @@ class RhController extends AbstractController
         private RhHubService $hub,
         private RhDocumentService $documents,
         private RhUserProvisioningService $userProvisioning,
+        private RhAnalyticsService $rhAnalytics,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -52,11 +54,18 @@ class RhController extends AbstractController
     #[Route('', name: 'app_rh')]
     public function index(): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
         $empresa = $this->requireEmpresa();
+        $chartPayload = $this->rhAnalytics->getHubChartPayload($user, $empresa);
 
         return $this->render(self::T . 'index.html.twig', array_merge(
-            ['empresa' => $empresa],
-            $this->hub->dashboard($empresa)
+            [
+                'empresa' => $empresa,
+                'chart_sections' => $chartPayload['sections'],
+                'chart_executive' => $chartPayload['executive'],
+            ],
+            $this->hub->dashboard($empresa),
         ));
     }
 

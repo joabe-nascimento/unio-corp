@@ -19,8 +19,8 @@ final class ProductGrantAccess
         'app_hub_operacoes' => ['hub_operacoes', 'product_rh', 'product_pessoas', 'product_engenharia'],
         'app_rh' => ['product_rh'],
         'app_pessoas' => ['product_pessoas'],
-        'app_engenharia' => ['product_engenharia'],
-        'app_publicidade' => ['product_publicidade'],
+        'app_engenharia' => ['hub_obras', 'product_engenharia', 'hub_operacoes'],
+        'app_publicidade' => ['hub_publicidade', 'product_publicidade'],
     ];
 
     /** Rotas de criação/edição — exigem perfil mínimo no grant do produto. */
@@ -242,7 +242,7 @@ final class ProductGrantAccess
             return false;
         }
 
-        if (preg_match('/^app_(talentos|maturidade|engenharia|publicidade|comercial|beneficios|academy|parceiros|financeiro|compliance|analytics|juridico|clima|sst|comunicacao)/', $routeName) === 1) {
+        if (preg_match('/^app_(talentos|maturidade|engenharia|publicidade|comercial|beneficios|academy|parceiros|financeiro|compliance|analytics|juridico|clima|sst|comunicacao|hub_portal|hub_recrutamento|esg|suprimentos|ti|expansao|qualidade|facilities|patrimonio|conhecimento|integracoes|customer_success|inovacao|holdings)/', $routeName) === 1) {
             return $this->security->isGranted('ROLE_GESTOR_EQUIPE');
         }
 

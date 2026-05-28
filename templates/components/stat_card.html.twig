@@ -1,14 +1,18 @@
 {#
-  stat_card — KPI sem ícone
+  stat_card — KPI (usado por kpi_row em toda a plataforma)
   Props:
     value   (string|int)  valor principal
     label   (string)      descrição
     sub     (string, opt) texto secundário pequeno
+    icon    (string, opt) classe Font Awesome, ex: fa-users
     route   (string, opt) se passado, envolve o card em <a href>
     trend   (string, opt) 'up' | 'down' | null
 #}
 {% set card_html %}
 <div class="unio-card stat-card w-100">
+    <div class="unio-kpi-icon" aria-hidden="true">
+        <i class="fas {{ icon|default('fa-chart-line') }}"></i>
+    </div>
     <div class="stat-card-body">
         <div class="card-value">{{ value }}</div>
         <div class="card-label">{{ label }}</div>

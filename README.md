@@ -26,11 +26,20 @@ Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Mat
 - **Hub de Talentos** — Banco de talentos, vagas, trilhas de carreira, mentoria
 - **Hub de Maturidade** — Avaliação, radar por dimensão, plano de ação, histórico
 
+## Documentação para desenvolvedores
+
+| Documento | Conteúdo |
+|-----------|----------|
+| [docs/ESTRUTURA.md](docs/ESTRUTURA.md) | Pastas, convenções, módulos |
+| [docs/QUALIDADE_PERFORMANCE_E_HUBS.md](docs/QUALIDADE_PERFORMANCE_E_HUBS.md) | Empty states, hubs planejados, performance, Redis, PHPStan |
+| [docs/RH.md](docs/RH.md) | Módulo RH (implementado e roadmap) |
+
 ## Instalação
 
 ```bash
 # 1. Instalar dependências
 composer install
+# Windows: se "composer" falhar, use php composer.phar install
 
 # 2. Configurar banco
 cp .env.local.example .env.local
@@ -45,6 +54,17 @@ php bin/console doctrine:fixtures:load  # (quando disponível)
 
 # 5. Iniciar servidor
 symfony server:start
+
+# 6. (Opcional) Qualidade e CSS de produção
+composer phpstan
+composer minify-css
+```
+
+### Serviços Docker opcionais
+
+```bash
+docker compose up -d mercure   # tempo real (kanban)
+docker compose up -d redis     # cache em produção
 ```
 
 ## Estrutura

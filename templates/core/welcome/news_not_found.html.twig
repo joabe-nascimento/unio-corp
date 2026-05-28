@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notícia indisponível{% endblock %}
+{% block page_show_title %}{% endblock %}
+{% block breadcrumb %}{% endblock %}
+
+{% block content %}
+<div class="empty-state-panel">
+    <div class="empty-state-panel__nav">
+        <a href="{{ path('app_welcome') }}#welcome-news-title" class="welcome-news-read__back">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            Voltar ao radar
+        </a>
+    </div>
+    {% include 'components/empty_state.html.twig' with {
+        hero: true,
+        icon: 'fa-newspaper',
+        title: 'Esta notícia não está mais disponível',
+        text: 'O conteúdo pode ter sido atualizado no radar de boas-vindas ou não se aplica mais ao seu perfil e empresa atuais.',
+        btn_label: 'Ver notícias atuais',
+        btn_href: path('app_welcome', { refresh_news: 1 }) ~ '#welcome-news-title',
+    } only %}
+</div>
+{% endblock %}

@@ -123,16 +123,27 @@ final class WelcomeNewsFeedService
      */
     public function findArticleForUser(User $user, string $slug, string $layout, ?Empresa $empresa): ?array
     {
+        $readMap = $this->readService->getReadKeyMap($user);
+
         foreach ($this->buildAllItems($user, $empresa, $layout) as $article) {
             if (($article['slug'] ?? '') !== $slug) {
                 continue;
             }
 
-            $readMap = $this->readService->getReadKeyMap($user);
             $formatted = $this->formatArticle($article, includeBody: true);
-            $formatted = $this->applyReadState($formatted, $readMap);
 
-            return $formatted;
+            return $this->applyReadState($formatted, $readMap);
+        }
+
+        // Discovery entra só no feed quando não há não lidas; precisa abrir pela URL também.
+        foreach ($this->intelligence->buildDiscoveryScan($user, $empresa, $layout) as $article) {
+            if (($article['slug'] ?? '') !== $slug) {
+                continue;
+            }
+
+            $formatted = $this->formatArticle($article, includeBody: true);
+
+            return $this->applyReadState($formatted, $readMap);
         }
 
         return null;

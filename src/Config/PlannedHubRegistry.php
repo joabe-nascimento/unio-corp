@@ -20,6 +20,69 @@ namespace App\Config;
  */
 final class PlannedHubRegistry
 {
+    /** @var array<string, string> */
+    public const GROUP_LABELS = [
+        'negocios' => 'Negócios & Growth',
+        'pessoas' => 'Pessoas & Cultura',
+        'financas' => 'Finanças & Compliance',
+        'dados' => 'Dados & Inteligência',
+        'operacoes_ext' => 'Operações & Ativos',
+        'tecnologia' => 'Tecnologia',
+        'estrategia' => 'Estratégia & Governança',
+    ];
+
+    /** @var list<string> */
+    public const GROUP_ORDER = [
+        'negocios',
+        'pessoas',
+        'financas',
+        'dados',
+        'operacoes_ext',
+        'tecnologia',
+        'estrategia',
+    ];
+
+    /** @var array<string, string> hub id => group key */
+    public const HUB_GROUP = [
+        'comercial' => 'negocios',
+        'beneficios' => 'negocios',
+        'seguros' => 'negocios',
+        'marketing' => 'negocios',
+        'parceiros' => 'negocios',
+        'customer_success' => 'negocios',
+        'expansao' => 'negocios',
+        'academy' => 'negocios',
+        'clima' => 'pessoas',
+        'portal' => 'pessoas',
+        'recrutamento' => 'pessoas',
+        'comunicacao' => 'pessoas',
+        'treinamento_regulatorio' => 'pessoas',
+        'terceiros' => 'pessoas',
+        'financeiro' => 'financas',
+        'compliance' => 'financas',
+        'juridico' => 'financas',
+        'licitacoes' => 'financas',
+        'analytics' => 'dados',
+        'integracoes' => 'dados',
+        'conhecimento' => 'dados',
+        'lakehouse' => 'dados',
+        'obras' => 'operacoes_ext',
+        'publicidade' => 'operacoes_ext',
+        'suprimentos' => 'operacoes_ext',
+        'facilities' => 'operacoes_ext',
+        'patrimonio' => 'operacoes_ext',
+        'qualidade' => 'operacoes_ext',
+        'sst' => 'operacoes_ext',
+        'saude_ocupacional' => 'operacoes_ext',
+        'pmo' => 'operacoes_ext',
+        'ti' => 'tecnologia',
+        'inovacao' => 'tecnologia',
+        'seguranca_info' => 'tecnologia',
+        'esg' => 'estrategia',
+        'holdings' => 'estrategia',
+        'franquias' => 'estrategia',
+    ];
+
     /** @var list<PlannedHub> */
     public const HUBS = [
         [
@@ -154,6 +217,318 @@ final class PlannedHubRegistry
             'empty_title' => 'Hub Comunicação em desenvolvimento',
             'empty_text' => 'Comunicados internos, mural da empresa e campanhas culturais estarão disponíveis em breve.',
         ],
+        [
+            'id' => 'publicidade',
+            'scope' => 'hub_publicidade',
+            'route' => 'app_publicidade',
+            'path' => '/publicidade',
+            'label' => 'Hub Publicidade',
+            'icon' => 'fa-palette',
+            'subtitle' => 'Marca, campanhas e criativos',
+            'empty_icon' => 'fa-palette',
+            'empty_title' => 'Hub Publicidade',
+            'empty_text' => 'Campanhas, clientes, criativos e métricas de marca em um só lugar.',
+        ],
+        [
+            'id' => 'obras',
+            'scope' => 'hub_obras',
+            'route' => 'app_engenharia',
+            'path' => '/engenharia',
+            'label' => 'Hub Obras e Projetos',
+            'icon' => 'fa-hard-hat',
+            'subtitle' => 'Engenharia e execução de obras',
+            'empty_icon' => 'fa-hard-hat',
+            'empty_title' => 'Hub Obras e Projetos',
+            'empty_text' => 'Projetos, cronograma, orçamentos e equipes de campo integrados.',
+        ],
+        [
+            'id' => 'portal',
+            'scope' => 'hub_portal',
+            'route' => 'app_hub_portal',
+            'path' => '/portal-colaborador',
+            'label' => 'Hub Portal do Colaborador',
+            'icon' => 'fa-id-badge',
+            'subtitle' => 'Autoserviço do colaborador',
+            'empty_icon' => 'fa-id-badge',
+            'empty_title' => 'Hub Portal do Colaborador em desenvolvimento',
+            'empty_text' => 'Holerites, férias, comunicados e solicitações em uma experiência unificada para o colaborador.',
+        ],
+        [
+            'id' => 'recrutamento',
+            'scope' => 'hub_recrutamento',
+            'route' => 'app_hub_recrutamento',
+            'path' => '/recrutamento',
+            'label' => 'Hub Recrutamento',
+            'icon' => 'fa-user-tie',
+            'subtitle' => 'Seleção e pipeline de talentos',
+            'empty_icon' => 'fa-user-tie',
+            'empty_title' => 'Hub Recrutamento em desenvolvimento',
+            'empty_text' => 'Vagas, candidatos, entrevistas e integração com o banco de talentos estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'esg',
+            'scope' => 'hub_esg',
+            'route' => 'app_esg',
+            'path' => '/esg',
+            'label' => 'Hub ESG',
+            'icon' => 'fa-leaf',
+            'subtitle' => 'Sustentabilidade e impacto',
+            'empty_icon' => 'fa-leaf',
+            'empty_title' => 'Hub ESG em desenvolvimento',
+            'empty_text' => 'Indicadores ambientais, diversidade, governança e relatórios de sustentabilidade estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'suprimentos',
+            'scope' => 'hub_suprimentos',
+            'route' => 'app_suprimentos',
+            'path' => '/suprimentos',
+            'label' => 'Hub Suprimentos',
+            'icon' => 'fa-boxes',
+            'subtitle' => 'Compras e estoque',
+            'empty_icon' => 'fa-boxes',
+            'empty_title' => 'Hub Suprimentos em desenvolvimento',
+            'empty_text' => 'Requisições, cotações, pedidos e controle de estoque para obras e operações estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'ti',
+            'scope' => 'hub_ti',
+            'route' => 'app_ti',
+            'path' => '/ti',
+            'label' => 'Hub TI',
+            'icon' => 'fa-headset',
+            'subtitle' => 'Service desk e ativos',
+            'empty_icon' => 'fa-headset',
+            'empty_title' => 'Hub TI em desenvolvimento',
+            'empty_text' => 'Chamados, inventário de ativos, SLAs e suporte interno estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'expansao',
+            'scope' => 'hub_expansao',
+            'route' => 'app_expansao',
+            'path' => '/expansao',
+            'label' => 'Hub Expansão',
+            'icon' => 'fa-globe',
+            'subtitle' => 'Franquias e novos mercados',
+            'empty_icon' => 'fa-globe',
+            'empty_title' => 'Hub Expansão em desenvolvimento',
+            'empty_text' => 'Franquias, unidades, playbooks de expansão e acompanhamento de novos mercados estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'qualidade',
+            'scope' => 'hub_qualidade',
+            'route' => 'app_qualidade',
+            'path' => '/qualidade',
+            'label' => 'Hub Qualidade',
+            'icon' => 'fa-clipboard-check',
+            'subtitle' => 'ISO e auditorias de processo',
+            'empty_icon' => 'fa-clipboard-check',
+            'empty_title' => 'Hub Qualidade em desenvolvimento',
+            'empty_text' => 'Gestão ISO, auditorias de processo, não conformidades e planos de ação corretiva estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'facilities',
+            'scope' => 'hub_facilities',
+            'route' => 'app_facilities',
+            'path' => '/facilities',
+            'label' => 'Hub Facilities',
+            'icon' => 'fa-building',
+            'subtitle' => 'Predial, frota e manutenção',
+            'empty_icon' => 'fa-building',
+            'empty_title' => 'Hub Facilities em desenvolvimento',
+            'empty_text' => 'Gestão predial, frota, manutenção preventiva e ordens de serviço estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'patrimonio',
+            'scope' => 'hub_patrimonio',
+            'route' => 'app_patrimonio',
+            'path' => '/patrimonio',
+            'label' => 'Hub Patrimônio',
+            'icon' => 'fa-warehouse',
+            'subtitle' => 'Ativos e inventário',
+            'empty_icon' => 'fa-warehouse',
+            'empty_title' => 'Hub Patrimônio em desenvolvimento',
+            'empty_text' => 'Inventário de ativos, depreciação, alocação e rastreio patrimonial estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'conhecimento',
+            'scope' => 'hub_conhecimento',
+            'route' => 'app_conhecimento',
+            'path' => '/conhecimento',
+            'label' => 'Hub Conhecimento',
+            'icon' => 'fa-book',
+            'subtitle' => 'Wiki, SOPs e playbooks',
+            'empty_icon' => 'fa-book',
+            'empty_title' => 'Hub Conhecimento em desenvolvimento',
+            'empty_text' => 'Base de conhecimento, SOPs, playbooks e documentação operacional estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'integracoes',
+            'scope' => 'hub_integracoes',
+            'route' => 'app_integracoes',
+            'path' => '/integracoes',
+            'label' => 'Hub Integrações',
+            'icon' => 'fa-plug',
+            'subtitle' => 'APIs e conectores',
+            'empty_icon' => 'fa-plug',
+            'empty_title' => 'Hub Integrações em desenvolvimento',
+            'empty_text' => 'APIs, conectores, webhooks e monitoramento de integrações estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'customer_success',
+            'scope' => 'hub_customer_success',
+            'route' => 'app_customer_success',
+            'path' => '/customer-success',
+            'label' => 'Hub Customer Success',
+            'icon' => 'fa-hand-holding-heart',
+            'subtitle' => 'Pós-venda e retenção',
+            'empty_icon' => 'fa-hand-holding-heart',
+            'empty_title' => 'Hub Customer Success em desenvolvimento',
+            'empty_text' => 'Pós-venda, NPS de clientes, health score e planos de retenção estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'inovacao',
+            'scope' => 'hub_inovacao',
+            'route' => 'app_inovacao',
+            'path' => '/inovacao',
+            'label' => 'Hub Inovação',
+            'icon' => 'fa-lightbulb',
+            'subtitle' => 'Labs e experimentos',
+            'empty_icon' => 'fa-lightbulb',
+            'empty_title' => 'Hub Inovação em desenvolvimento',
+            'empty_text' => 'POCs, experimentos, backlog de ideias e acompanhamento de inovação estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'holdings',
+            'scope' => 'hub_holdings',
+            'route' => 'app_holdings',
+            'path' => '/holdings',
+            'label' => 'Hub Multi-empresa',
+            'icon' => 'fa-sitemap',
+            'subtitle' => 'Holdings e visão consolidada',
+            'empty_icon' => 'fa-sitemap',
+            'empty_title' => 'Hub Multi-empresa em desenvolvimento',
+            'empty_text' => 'Visão consolidada de holdings, filiais, unidades de negócio e indicadores multi-empresa estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'seguros',
+            'scope' => 'hub_seguros',
+            'route' => 'app_seguros',
+            'path' => '/seguros',
+            'label' => 'Hub Seguros',
+            'icon' => 'fa-umbrella',
+            'subtitle' => 'Seguros e benefícios corporativos',
+            'empty_icon' => 'fa-umbrella',
+            'empty_title' => 'Hub Seguros em desenvolvimento',
+            'empty_text' => 'Apólices, coberturas, sinistros e benefícios corporativos integrados à folha e ao colaborador estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'saude_ocupacional',
+            'scope' => 'hub_saude_ocupacional',
+            'route' => 'app_saude_ocupacional',
+            'path' => '/saude-ocupacional',
+            'label' => 'Hub Saúde Ocupacional',
+            'icon' => 'fa-stethoscope',
+            'subtitle' => 'PCMSO, exames e medicina do trabalho',
+            'empty_icon' => 'fa-stethoscope',
+            'empty_title' => 'Hub Saúde Ocupacional em desenvolvimento',
+            'empty_text' => 'PCMSO, agendamento de exames, ASO, afastamentos e prontuário ocupacional estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'licitacoes',
+            'scope' => 'hub_licitacoes',
+            'route' => 'app_licitacoes',
+            'path' => '/licitacoes',
+            'label' => 'Hub Licitações',
+            'icon' => 'fa-landmark',
+            'subtitle' => 'Contratos públicos e B2G',
+            'empty_icon' => 'fa-landmark',
+            'empty_title' => 'Hub Licitações em desenvolvimento',
+            'empty_text' => 'Editais, propostas, contratos públicos e acompanhamento de obrigações B2G estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'marketing',
+            'scope' => 'hub_marketing',
+            'route' => 'app_marketing',
+            'path' => '/marketing',
+            'label' => 'Hub Marketing',
+            'icon' => 'fa-bullseye',
+            'subtitle' => 'Demand gen, leads e campanhas',
+            'empty_icon' => 'fa-bullseye',
+            'empty_title' => 'Hub Marketing em desenvolvimento',
+            'empty_text' => 'Geração de demanda, leads, funis de conversão e campanhas de performance estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'lakehouse',
+            'scope' => 'hub_lakehouse',
+            'route' => 'app_lakehouse',
+            'path' => '/lakehouse',
+            'label' => 'Hub Data & Lakehouse',
+            'icon' => 'fa-database',
+            'subtitle' => 'Dados brutos e pipelines',
+            'empty_icon' => 'fa-database',
+            'empty_title' => 'Hub Data & Lakehouse em desenvolvimento',
+            'empty_text' => 'Ingestão de dados brutos, catálogo, pipelines e camadas de lakehouse estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'franquias',
+            'scope' => 'hub_franquias',
+            'route' => 'app_franquias',
+            'path' => '/franquias',
+            'label' => 'Hub Franquias & Unidades',
+            'icon' => 'fa-store',
+            'subtitle' => 'Rede de unidades e franqueados',
+            'empty_icon' => 'fa-store',
+            'empty_title' => 'Hub Franquias & Unidades em desenvolvimento',
+            'empty_text' => 'Unidades, franqueados, royalties, indicadores por loja e playbooks de rede estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'seguranca_info',
+            'scope' => 'hub_seguranca_info',
+            'route' => 'app_seguranca_info',
+            'path' => '/seguranca-informacao',
+            'label' => 'Hub Segurança da Informação',
+            'icon' => 'fa-user-shield',
+            'subtitle' => 'LGPD técnica e incidentes',
+            'empty_icon' => 'fa-user-shield',
+            'empty_title' => 'Hub Segurança da Informação em desenvolvimento',
+            'empty_text' => 'Gestão de incidentes, vulnerabilidades, controles técnicos de LGPD e políticas de segurança estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'pmo',
+            'scope' => 'hub_pmo',
+            'route' => 'app_pmo',
+            'path' => '/pmo',
+            'label' => 'Hub PMO',
+            'icon' => 'fa-diagram-project',
+            'subtitle' => 'Projetos internos e governança',
+            'empty_icon' => 'fa-diagram-project',
+            'empty_title' => 'Hub PMO em desenvolvimento',
+            'empty_text' => 'Portfólio de projetos internos, governança PMO, status reports e alocação de recursos estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'treinamento_regulatorio',
+            'scope' => 'hub_treinamento_regulatorio',
+            'route' => 'app_treinamento_regulatorio',
+            'path' => '/treinamento-regulatorio',
+            'label' => 'Hub Treinamento Regulatório',
+            'icon' => 'fa-certificate',
+            'subtitle' => 'NR, certificações e obrigações',
+            'empty_icon' => 'fa-certificate',
+            'empty_title' => 'Hub Treinamento Regulatório em desenvolvimento',
+            'empty_text' => 'Normas regulamentadoras, certificações obrigatórias, reciclagens e comprovantes de treinamento estarão disponíveis em breve.',
+        ],
+        [
+            'id' => 'terceiros',
+            'scope' => 'hub_terceiros',
+            'route' => 'app_terceiros',
+            'path' => '/terceiros',
+            'label' => 'Hub Gestão de Terceiros',
+            'icon' => 'fa-user-clock',
+            'subtitle' => 'PJ, fornecedores e mão de obra',
+            'empty_icon' => 'fa-user-clock',
+            'empty_title' => 'Hub Gestão de Terceiros em desenvolvimento',
+            'empty_text' => 'Cadastro de terceiros, contratos PJ, documentação de fornecedores e controle de mão de obra terceirizada estarão disponíveis em breve.',
+        ],
     ];
 
     public static function findById(string $id): ?array
@@ -192,5 +567,47 @@ final class PlannedHubRegistry
     public static function scopes(): array
     {
         return array_column(self::HUBS, 'scope');
+    }
+
+    public static function groupFor(string $hubId): string
+    {
+        return self::HUB_GROUP[$hubId] ?? 'estrategia';
+    }
+
+    /**
+     * @param list<PlannedHub> $hubs
+     *
+     * @return list<array{key: string, label: string, hubs: list<PlannedHub>}>
+     */
+    public static function groupHubs(array $hubs): array
+    {
+        $buckets = [];
+        foreach ($hubs as $hub) {
+            $key = self::groupFor($hub['id']);
+            $buckets[$key][] = $hub;
+        }
+
+        $out = [];
+        foreach (self::GROUP_ORDER as $key) {
+            if (empty($buckets[$key])) {
+                continue;
+            }
+            $out[] = [
+                'key' => $key,
+                'label' => self::GROUP_LABELS[$key],
+                'hubs' => $buckets[$key],
+            ];
+            unset($buckets[$key]);
+        }
+
+        foreach ($buckets as $key => $items) {
+            $out[] = [
+                'key' => $key,
+                'label' => self::GROUP_LABELS[$key] ?? $key,
+                'hubs' => $items,
+            ];
+        }
+
+        return $out;
     }
 }

@@ -9,7 +9,6 @@ use App\Service\WelcomeContentService;
 use App\Service\WelcomeNewsFeedService;
 use App\Service\WelcomePresentationService;
 use App\Service\WelcomeService;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -73,7 +72,10 @@ class WelcomeController extends AbstractController
 
         $article = $newsFeed->findArticleForUser($user, $slug, $layout, $empresa);
         if ($article === null) {
-            throw new NotFoundHttpException('Artigo não encontrado.');
+            return $this->render('core/welcome/news_not_found.html.twig', [
+                'slug' => $slug,
+                'layout' => $layout,
+            ]);
         }
 
         $newsFeed->markArticleRead($user, $slug, $empresa);

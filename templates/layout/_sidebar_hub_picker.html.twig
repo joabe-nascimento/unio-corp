@@ -1,42 +1,62 @@
-{# Lista plana de hubs (modo seleção) — sempre no DOM; visibilidade via .is-hidden #}
+{# Lista de hubs (modo seleção) — agrupada por domínio #}
 {% set _pick_hidden = hub_picker_hidden|default(false) ? ' is-hidden' : '' %}
-{% if nav_show_hub_operacoes|default(false) %}
-<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
-    <a href="{{ path('app_hub_operacoes') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="operacoes">
-        <i class="fas fa-building nav-icon"></i>
-        <p>Hub de Operações</p>
-    </a>
+
+<li class="sidebar-hub-group sidebar-hub-group--core{{ _pick_hidden }}">
+    <span class="sidebar-hub-group-label">Operação</span>
+    <ul class="sidebar-hub-group-list">
+        {% if nav_show_hub_operacoes|default(false) %}
+        <li class="nav-item sidebar-hub-pick-item">
+            <a href="{{ path('app_hub_operacoes') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="operacoes">
+                <i class="fas fa-building nav-icon"></i>
+                <p>Hub de Operações</p>
+            </a>
+        </li>
+        {% endif %}
+        {% if nav_show_hub_talentos|default(false) %}
+        <li class="nav-item sidebar-hub-pick-item">
+            <a href="{{ path('app_talentos') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="talentos">
+                <i class="fas fa-gem nav-icon"></i>
+                <p>Hub de Talentos</p>
+            </a>
+        </li>
+        {% endif %}
+        {% if nav_show_hub_maturidade|default(false) %}
+        <li class="nav-item sidebar-hub-pick-item">
+            <a href="{{ path('app_maturidade') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="maturidade">
+                <i class="fas fa-seedling nav-icon"></i>
+                <p>Hub de Maturidade</p>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
 </li>
-{% endif %}
-{% if nav_show_hub_talentos|default(false) %}
-<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
-    <a href="{{ path('app_talentos') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="talentos">
-        <i class="fas fa-gem nav-icon"></i>
-        <p>Hub de Talentos</p>
-    </a>
-</li>
-{% endif %}
-{% if nav_show_hub_maturidade|default(false) %}
-<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
-    <a href="{{ path('app_maturidade') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="maturidade">
-        <i class="fas fa-seedling nav-icon"></i>
-        <p>Hub de Maturidade</p>
-    </a>
-</li>
-{% endif %}
-{% for hub in nav_planned_hubs|default([]) %}
-<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
-    <a href="{{ path(hub.route) }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="{{ hub.id }}">
-        <i class="fas {{ hub.icon }} nav-icon"></i>
-        <p>{{ hub.label }}</p>
-    </a>
+
+{% for group in nav_planned_hub_groups|default([]) %}
+<li class="sidebar-hub-group{{ _pick_hidden }}">
+    <span class="sidebar-hub-group-label">{{ group.label }}</span>
+    <ul class="sidebar-hub-group-list">
+        {% for hub in group.hubs %}
+        <li class="nav-item sidebar-hub-pick-item">
+            <a href="{{ path(hub.route) }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="{{ hub.id }}">
+                <i class="fas {{ hub.icon }} nav-icon"></i>
+                <p>{{ hub.label }}</p>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
 </li>
 {% endfor %}
+
 {% if nav_show_plataforma|default(false) %}
-<li class="nav-item sidebar-hub-pick-item{{ _pick_hidden }}">
-    <a href="{{ path('app_admin') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="admin">
-        <i class="fas fa-shield-halved nav-icon"></i>
-        <p>Plataforma</p>
-    </a>
+<li class="sidebar-hub-group sidebar-hub-group--platform{{ _pick_hidden }}">
+    <span class="sidebar-hub-group-label">Plataforma</span>
+    <ul class="sidebar-hub-group-list">
+        <li class="nav-item sidebar-hub-pick-item">
+            <a href="{{ path('app_admin') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="admin">
+                <i class="fas fa-shield-halved nav-icon"></i>
+                <p>Plataforma</p>
+            </a>
+        </li>
+    </ul>
 </li>
 {% endif %}
