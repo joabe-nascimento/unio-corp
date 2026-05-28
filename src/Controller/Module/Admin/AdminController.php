@@ -634,20 +634,23 @@ class AdminController extends AbstractController
 
     private function resolveUploadExtension(UploadedFile $file): string
     {
-        $ext = strtolower(ltrim((string) ($file->guessExtension() ?: $file->getClientOriginalExtension()), '.'));
+        $allowed = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico'];
+        $ext     = strtolower(ltrim((string) $file->getClientOriginalExtension(), '.'));
 
-        $byMime = [
-            'image/png'                => 'png',
-            'image/jpeg'               => 'jpg',
-            'image/gif'                => 'gif',
-            'image/webp'               => 'webp',
-            'image/svg+xml'            => 'svg',
-            'image/x-icon'             => 'ico',
-            'image/vnd.microsoft.icon' => 'ico',
-        ];
+        if (!\in_array($ext, $allowed, true)) {
+            $name = strtolower((string) $file->getClientOriginalName());
+            $ext  = match (true) {
+                str_ends_with($name, '.svg')  => 'svg',
+                str_ends_with($name, '.webp') => 'webp',
+                str_ends_with($name, '.ico')  => 'ico',
+                str_ends_with($name, '.gif')  => 'gif',
+                str_ends_with($name, '.jpg'), str_ends_with($name, '.jpeg') => 'jpg',
+                default => 'png',
+            };
+        }
 
-        if ($ext === '' || $ext === 'bin') {
-            $ext = $byMime[$file->getMimeType() ?? ''] ?? 'png';
+        if ($ext === 'jpeg') {
+            $ext = 'jpg';
         }
 
         return preg_match('/^[a-z0-9]{2,5}$/', $ext) ? $ext : 'png';
