@@ -1,0 +1,46 @@
+{# OKR Alignment — componentes padrão da plataforma #}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'OKR Alignment',
+        subtitle: 'Metas da empresa com oportunidade de aceleração via inovação',
+        btn_label: 'Ver todas',
+        btn_href: path('app_core_projetos'),
+        btn_ghost: true,
+        btn_icon: 'fa-arrow-right'
+    } %}
+    {% if okr_alignment|length > 0 %}
+    <div class="inov-card-list">
+        {% for okr in okr_alignment %}
+        {% set okr_variant = okr.progress < 30 ? 'warning' : (okr.progress < 70 ? 'info' : 'success') %}
+        <div class="inov-card-list-item">
+            <div class="inov-idea-row-head">
+                <span class="perm-label">{{ okr.title }}</span>
+                <div class="inov-idea-row-meta">
+                    {% if okr.alinhado %}
+                    {% include 'components/status_badge.html.twig' with { label: 'Oportunidade', variant: 'success' } %}
+                    {% endif %}
+                    {% include 'components/status_badge.html.twig' with {
+                        label: okr.priority == 'ALTA' ? 'Alta' : (okr.priority == 'MEDIA' ? 'Média' : 'Baixa'),
+                        variant: okr.priority == 'ALTA' ? 'warning' : (okr.priority == 'MEDIA' ? 'info' : 'secondary')
+                    } %}
+                </div>
+            </div>
+            {% include 'components/progress_inline.html.twig' with {
+                percent: okr.progress,
+                variant: okr_variant,
+                show_label: true
+            } %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-bullseye',
+        title: 'Nenhuma meta cadastrada',
+        text: 'Crie OKRs para ver o alinhamento com inovação.',
+        btn_label: 'Ir para Projetos',
+        btn_href: path('app_core_projetos'),
+        compact: true
+    } %}
+    {% endif %}
+</section>

@@ -1,0 +1,356 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+
+
+{% block inov_section_content %}
+
+<div class="inov-form-page">
+
+    <nav class="inov-form-stepper" id="inovFormStepper" aria-label="Etapas do cadastro">
+
+        {% for step in [
+
+            { n: 1, label: 'Problema' },
+
+            { n: 2, label: 'Hipótese' },
+
+            { n: 3, label: 'Classificação' },
+
+            { n: 4, label: 'Confirmação' },
+
+        ] %}
+
+        <div class="inov-form-step{% if step.n == 1 %} is-active{% endif %}" data-step="{{ step.n }}">
+
+            <span class="inov-form-step-num">{{ step.n }}</span>
+
+            <span class="inov-form-step-label">{{ step.label }}</span>
+
+        </div>
+
+        {% if not loop.last %}<span class="inov-form-step-connector" aria-hidden="true"></span>{% endif %}
+
+        {% endfor %}
+
+    </nav>
+
+
+
+    <form action="{{ path('app_inovacao_nova_ideia_submit') }}"
+          method="POST"
+          id="inovIdeaForm"
+          novalidate>
+        <input type="hidden" name="_token" value="{{ csrf_token('inovacao_nova_ideia') }}">
+
+
+
+        {# Step 1 #}
+
+        <div class="unio-card mb-3 inov-form-panel is-active" data-form-panel="1">
+
+            {% include 'components/section_header.html.twig' with {
+
+                title: 'Qual é o problema?',
+
+                subtitle: 'Descreva a dor, ineficiência ou oportunidade que você identificou.'
+
+            } %}
+
+            {% include 'components/unio_form_field.html.twig' with {
+
+                id: 'idea_title', name: 'title', label: 'Título da ideia',
+
+                placeholder: 'Ex: Automação do processo de admissão via OCR', required: true, maxlength: 120
+
+            } %}
+
+            {% include 'components/unio_form_field.html.twig' with {
+
+                id: 'idea_problem', name: 'problem', label: 'Descrição do problema', type: 'textarea', rows: 4,
+
+                placeholder: 'Qual processo está lento, manual ou custoso?', required: true
+
+            } %}
+
+            <div class="unio-form-group">
+
+                <label class="unio-form-label">Hub relacionado</label>
+
+                <div class="inov-form-hub-chips">
+
+                    {% for hub in idea_hubs %}
+
+                    <label class="inov-form-chip">
+
+                        <input type="radio" name="related_hub" value="{{ hub }}">
+
+                        <span>{{ hub }}</span>
+
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <div class="inov-form-nav">
+
+                <button type="button" class="btn-unio-primary" data-form-next="2">
+
+                    Próximo <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        {# Step 2 #}
+
+        <div class="unio-card mb-3 inov-form-panel" data-form-panel="2">
+
+            {% include 'components/section_header.html.twig' with {
+
+                title: 'Qual é a sua hipótese?',
+
+                subtitle: 'Formule a solução proposta como uma hipótese testável.'
+
+            } %}
+
+            <div class="unio-form-group inov-form-hypothesis-template">
+
+                <label class="unio-form-label" for="idea_hypothesis">Hipótese <span class="unio-form-required">*</span></label>
+
+                <p class="inov-form-template-prefix">Acreditamos que…</p>
+
+                <textarea class="unio-form-control unio-form-textarea--inline" id="idea_hypothesis" name="hypothesis" rows="3"
+
+                          placeholder="ao automatizar o processo via OCR, reduziremos o tempo manual de 2h para 10min…" required></textarea>
+
+            </div>
+
+            {% include 'components/unio_form_field.html.twig' with {
+
+                id: 'idea_metric', name: 'metric', label: 'Critério de sucesso',
+
+                placeholder: 'Ex: Tempo de processo < 15 min para 80% dos casos'
+
+            } %}
+
+            {% include 'components/unio_form_field.html.twig' with {
+
+                id: 'idea_test', name: 'test_method', label: 'Como testar em 2 semanas?', type: 'textarea', rows: 3,
+
+                placeholder: 'Descreva o MVP ou experimento mínimo…'
+
+            } %}
+
+            <div class="inov-form-nav">
+
+                <button type="button" class="btn-unio-ghost" data-form-back="1">
+
+                    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Voltar
+
+                </button>
+
+                <button type="button" class="btn-unio-primary" data-form-next="3">
+
+                    Próximo <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        {# Step 3 #}
+
+        <div class="unio-card mb-3 inov-form-panel" data-form-panel="3">
+
+            {% include 'components/section_header.html.twig' with {
+
+                title: 'Classifique a ideia',
+
+                subtitle: 'Ajuda o time a priorizar no backlog automaticamente.'
+
+            } %}
+
+            <div class="inov-form-grid-2">
+
+                <div>
+
+                    {% set cat_options = [] %}
+
+                    {% for cat in idea_categories %}
+
+                        {% set cat_options = cat_options|merge([{ value: cat.id, label: cat.label }]) %}
+
+                    {% endfor %}
+
+                    {% include 'components/unio_form_field.html.twig' with {
+
+                        id: 'idea_category', name: 'category', label: 'Categoria', type: 'select', options: cat_options
+
+                    } %}
+
+                </div>
+
+                <div>
+
+                    <div class="unio-form-group">
+
+                        <label class="unio-form-label" for="idea_impact">
+
+                            Impacto estimado
+
+                            <span id="impactVal" class="inov-form-range-val">50%</span>
+
+                        </label>
+
+                        <input type="range" class="inov-form-range" id="idea_impact" name="impact"
+
+                               min="0" max="100" value="50" data-range-label="impactVal">
+
+                    </div>
+
+                    <div class="unio-form-group">
+
+                        <label class="unio-form-label" for="idea_effort">
+
+                            Esforço estimado
+
+                            <span id="effortVal" class="inov-form-range-val">50%</span>
+
+                        </label>
+
+                        <input type="range" class="inov-form-range" id="idea_effort" name="effort"
+
+                               min="0" max="100" value="50" data-range-label="effortVal">
+
+                    </div>
+
+                    {% include 'components/unio_form_field.html.twig' with {
+
+                        id: 'idea_urgency', name: 'urgency', label: 'Urgência', type: 'select', value: 'media',
+
+                        options: [
+
+                            { value: 'alta', label: 'Alta — próximos 30 dias' },
+
+                            { value: 'media', label: 'Média — próximo trimestre' },
+
+                            { value: 'baixa', label: 'Baixa — pode aguardar' },
+
+                        ]
+
+                    } %}
+
+                </div>
+
+            </div>
+
+            <div class="inov-form-nav">
+
+                <button type="button" class="btn-unio-ghost" data-form-back="2">
+
+                    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Voltar
+
+                </button>
+
+                <button type="button" class="btn-unio-primary" data-form-next="4">
+
+                    Revisar <i class="fas fa-check ml-1" aria-hidden="true"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        {# Step 4 #}
+
+        <div class="unio-card mb-3 inov-form-panel" data-form-panel="4">
+
+            {% include 'components/section_header.html.twig' with {
+
+                title: 'Pronto para lançar!',
+
+                subtitle: 'Sua ideia será registrada no backlog e notificará o time de inovação.'
+
+            } %}
+
+            <div class="inov-form-confirm-card">
+
+                <div class="inov-form-confirm-row">
+
+                    <span>Título</span>
+
+                    <strong id="confirmTitle">—</strong>
+
+                </div>
+
+                <div class="inov-form-confirm-row">
+
+                    <span>Hipótese</span>
+
+                    <em id="confirmHypothesis">—</em>
+
+                </div>
+
+                <div class="inov-form-confirm-row">
+
+                    <span>Critério de sucesso</span>
+
+                    <small id="confirmMetric">—</small>
+
+                </div>
+
+                <div class="inov-form-confirm-row">
+
+                    <span>Impacto × Esforço</span>
+
+                    <strong id="confirmMatrix">—</strong>
+
+                </div>
+
+            </div>
+
+            <p class="inov-form-confirm-disclaimer">
+
+                <i class="fas fa-info-circle" aria-hidden="true"></i>
+
+                <span>A ideia entra no backlog como <strong>Ideia</strong> e aguarda a próxima sessão de priorização.</span>
+
+            </p>
+
+            <div class="inov-form-nav">
+
+                <button type="button" class="btn-unio-ghost" data-form-back="3">
+
+                    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Revisar
+
+                </button>
+
+                <button type="submit" class="btn-unio-primary inov-form-submit-btn">
+
+                    <i class="fas fa-rocket mr-1" aria-hidden="true"></i> Registrar no Backlog
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+

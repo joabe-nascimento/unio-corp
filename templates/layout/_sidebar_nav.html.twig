@@ -5,6 +5,9 @@
 {% set modulo_pessoas_open = nav_modulo_pessoas_active|default(false) %}
 {% set modulo_engenharia_open = nav_modulo_engenharia_active|default(false) %}
 {% set modulo_publicidade_open = nav_modulo_publicidade_active|default(false) %}
+{% set modulo_inovacao_fluxo_open = nav_modulo_inovacao_fluxo_active|default(false) %}
+{% set modulo_inovacao_ideacao_open = nav_modulo_inovacao_ideacao_active|default(false) %}
+{% set modulo_inovacao_inteligencia_open = nav_modulo_inovacao_inteligencia_active|default(false) %}
 {% set _active_hub = nav_active_hub|default(null) %}
 {% set _in_hub = _active_hub is not null %}
 
@@ -63,7 +66,11 @@
 {% for hub in nav_planned_hubs|default([]) %}
 <li class="sidebar-hub-panel-root{% if _active_hub != hub.id %} is-hidden{% endif %}" data-sidebar-hub-panel="{{ hub.id }}">
     <ul class="nav nav-pills flex-column sidebar-hub-panel-list">
-        {% include 'layout/_sidebar_hub_planned_panel.html.twig' with { hub: hub } %}
+        {% if hub.id == 'inovacao' %}
+            {% include 'layout/_sidebar_hub_inovacao.html.twig' %}
+        {% else %}
+            {% include 'layout/_sidebar_hub_planned_panel.html.twig' with { hub: hub } %}
+        {% endif %}
     </ul>
 </li>
 {% endfor %}

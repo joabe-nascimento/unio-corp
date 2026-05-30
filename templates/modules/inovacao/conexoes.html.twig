@@ -1,0 +1,160 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_inovacao_conexao_nova') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova conexão
+</a>
+{% endblock %}
+
+{% block inov_section_content %}
+
+
+
+{% set active_count = network_nodes|filter(n => n.status == 'active')|length %}
+
+{% set avg_synergy = network_nodes|length > 0
+
+    ? (network_nodes|map(n => n.synergy)|reduce((carry, v) => carry + v, 0) / network_nodes|length)|round
+
+    : 0 %}
+
+
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: network_nodes|length, label: 'Hubs conectados', sub: 'Na Innovation Network', icon: 'fa-share-nodes' },
+
+    { value: active_count,         label: 'Conexões ativas', sub: 'Em andamento',          icon: 'fa-circle-check', trend: 'up' },
+
+    { value: avg_synergy~'%',      label: 'Sinergia média',  sub: 'Score de integração',   icon: 'fa-chart-simple' },
+
+], mb: 'mb-3' } %}
+
+
+
+<div class="row">
+
+    {% for node in network_nodes %}
+
+    {% set synergy_variant = node.synergy >= 70 ? 'success' : (node.synergy >= 40 ? 'warning' : 'accent') %}
+
+    <div class="col-md-6 col-xl-4 mb-3 d-flex">
+
+        <div class="unio-card flex-fill d-flex flex-column">
+
+            <div class="inov-node-head">
+
+                <div class="mi-icon" aria-hidden="true"><i class="fas {{ node.icon }}"></i></div>
+
+                <div class="flex-fill min-width-0">
+
+                    <div class="section-title mb-1">Hub {{ node.hub }}</div>
+
+                    {% include 'components/status_badge.html.twig' with {
+
+                        label: node.status == 'active' ? 'Ativa' : 'Explorar',
+
+                        variant: node.status == 'active' ? 'success' : 'secondary'
+
+                    } %}
+
+                </div>
+
+            </div>
+
+            <p class="section-subtitle flex-fill mb-3">{{ node.opportunity }}</p>
+
+            <div class="perm-label mb-2">Sinergia</div>
+
+            {% include 'components/progress_inline.html.twig' with {
+
+                percent: node.synergy,
+
+                variant: synergy_variant,
+
+                show_label: true
+
+            } %}
+
+            <div class="inov-card-actions mt-auto">
+                {% if node.action %}
+                <span class="inov-card-actions-hint">{{ node.action }}</span>
+                {% endif %}
+                {% if node.id is defined %}
+                <div class="inov-card-actions-btns">
+                    <a href="{{ path('app_inovacao_conexao_editar', { id: node.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                    <form action="{{ path('app_inovacao_conexao_excluir', { id: node.id }) }}" method="post"
+                          onsubmit="return confirm('Excluir esta conexão?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('inovacao_conexao_delete_' ~ node.id) }}">
+                        <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+
+
+<section class="unio-card">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Como ativar uma conexão',
+
+        subtitle: 'Metodologia para transformar sinergias em experimentos concretos'
+
+    } %}
+
+    {% set steps = [
+
+        { title: 'Identifique a sobreposição', text: 'Quais dados ou processos os dois hubs compartilham hoje?' },
+
+        { title: 'Formule a hipótese', text: 'Escreva uma hipótese testável e registre no Laboratório.' },
+
+        { title: 'Execute um POC em 2 semanas', text: 'Mantenha escopo mínimo; foque no critério de sucesso definido.' },
+
+        { title: 'Decida: Kill · Pivot · Scale', text: 'Use os dados coletados para uma decisão fundamentada.' },
+
+    ] %}
+
+    <ul class="unio-checklist mb-0" role="list">
+
+        {% for step in steps %}
+
+        <li class="unio-checklist-item" role="listitem">
+
+            <div class="unio-checklist-item-inner unio-checklist-item-inner--readonly">
+
+                <span class="unio-checklist-box" aria-hidden="true">{{ loop.index }}</span>
+
+                <span class="unio-checklist-text">
+
+                    <strong class="inov-checklist-title">{{ step.title }}</strong>
+
+                    <small class="inov-checklist-desc">{{ step.text }}</small>
+
+                </span>
+
+            </div>
+
+        </li>
+
+        {% endfor %}
+
+    </ul>
+
+</section>
+
+
+
+{% endblock %}
+

@@ -1,0 +1,84 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+{% block inov_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: lab_metrics.active,           label: 'Ativos',            sub: 'Em laboratório',         icon: 'fa-flask' },
+    { value: lab_metrics.pocs,             label: 'POCs',              sub: 'Em validação',           icon: 'fa-microscope' },
+    { value: lab_metrics.success_rate~'%', label: 'Taxa de sucesso',   sub: 'Experimentos validados', icon: 'fa-check-double', trend: 'up' },
+    { value: lab_metrics.avg_days~'d',     label: 'Ciclo médio',       sub: 'Por experimento',        icon: 'fa-clock' },
+    { value: lab_metrics.rigor_index~'%',  label: 'Rigor científico',  sub: 'Índice de qualidade',    icon: 'fa-shield-halved' },
+], mb: 'mb-3' } %}
+
+{% if lab_canvas|length > 0 %}
+<div class="row">
+    {% for entry in lab_canvas %}
+    <div class="col-lg-6 mb-4 d-flex">
+        <div class="unio-card flex-fill d-flex flex-column">
+            <div class="inov-lab-card-head">
+                <div class="inov-lab-card-meta">
+                    {% include 'components/status_badge.html.twig' with {
+                        label: entry.stage == 'poc' ? 'POC' : 'Hipótese',
+                        variant: entry.stage == 'poc' ? 'info' : 'secondary'
+                    } %}
+                    <code class="inov-idea-code">{{ entry.id }}</code>
+                </div>
+                <div class="inov-lab-card-rigor">
+                    <span class="perm-label d-block mb-1">Rigor</span>
+                    {% include 'components/progress_inline.html.twig' with {
+                        percent: entry.rigor,
+                        variant: entry.rigor < 40 ? 'warning' : 'success',
+                        show_label: true,
+                        compact: true,
+                        min_width: 80
+                    } %}
+                </div>
+            </div>
+
+            <div class="section-title mb-3">{{ entry.title }}</div>
+
+            {% include 'components/unio/detail_field_row.html.twig' with { label: 'Problema', value: entry.problem, icon: 'fa-triangle-exclamation' } %}
+            {% include 'components/unio/detail_field_row.html.twig' with { label: 'Hipótese', value: entry.hypothesis, icon: 'fa-lightbulb' } %}
+            {% include 'components/unio/detail_field_row.html.twig' with { label: 'Como testar', value: entry.test, icon: 'fa-vial' } %}
+            {% include 'components/unio/detail_field_row.html.twig' with { label: 'Resultado atual', value: entry.outcome, icon: 'fa-chart-bar', multiline: true } %}
+
+            <div class="inov-lab-card-foot mt-auto">
+                <div class="perm-label mb-2">Progresso</div>
+                {% include 'components/progress_inline.html.twig' with {
+                    percent: entry.progress,
+                    variant: 'accent',
+                    show_label: true
+                } %}
+                <div class="inov-idea-row-meta mt-2">
+                    <span class="inov-idea-owner">
+                        <i class="fas fa-user-circle" aria-hidden="true"></i> {{ entry.owner }}
+                    </span>
+                    <span class="status-badge status-badge--secondary">{{ entry.days }}d</span>
+                    {% for tag in entry.tags %}
+                    {% include 'components/status_badge.html.twig' with { label: tag, variant: 'secondary' } %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="unio-card mb-4">
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-flask',
+        title: 'Nenhuma hipótese ativa',
+        text: 'Registre ideias no Backlog para iniciar experimentos.',
+        btn_label: 'Ir para Backlog',
+        btn_href: path('app_inovacao_backlog')
+    } %}
+</div>
+{% endif %}
+
+{% include 'components/module_card.html.twig' with {
+    title: 'Promover do Backlog',
+    subtitle: 'Selecione uma ideia aprovada para iniciar validação científica',
+    links: [{ label: 'Ver Backlog', route: 'app_inovacao_backlog', icon: 'fa-arrow-right', primary: true }]
+} %}
+
+{% endblock %}

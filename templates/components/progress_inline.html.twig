@@ -8,9 +8,12 @@
     show_label (bool)   exibe % abaixo (default: true)
 #}
 {% set _variant = variant|default('accent') %}
-<div class="progress-unio"{% if min_width is defined %} style="min-width: {{ min_width }}px;"{% endif %}>
-    <div class="progress-unio-bar progress-unio-bar--{{ _variant }}" style="width: {{ percent|default(0) }}%;" role="progressbar" aria-valuenow="{{ percent|default(0) }}" aria-valuemin="0" aria-valuemax="100"></div>
+{% set _compact = compact|default(false) %}
+<div class="progress-unio-wrap{% if _compact %} progress-unio-wrap--compact{% endif %}">
+    <div class="progress-unio"{% if min_width is defined %} style="min-width: {{ min_width }}px;"{% endif %}>
+        <div class="progress-unio-bar progress-unio-bar--{{ _variant }}" style="width: {{ percent|default(0) }}%;" role="progressbar" aria-valuenow="{{ percent|default(0) }}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    {% if show_label|default(true) %}
+        <small class="progress-unio-label">{{ percent|default(0) }}%</small>
+    {% endif %}
 </div>
-{% if show_label|default(true) %}
-    <small class="progress-unio-label">{{ percent|default(0) }}%</small>
-{% endif %}

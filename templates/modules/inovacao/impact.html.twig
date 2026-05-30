@@ -1,0 +1,84 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_inovacao_impact_nova') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova entrada
+</a>
+{% endblock %}
+
+{% block inov_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: module_payload.totals.captured, label: 'ROI Capturado',       sub: 'Últimos 90 dias',              icon: 'fa-coins' },
+    { value: module_payload.totals.projected, label: 'ROI Projetado',      sub: 'Próximos 90 dias',             icon: 'fa-chart-line' },
+    { value: module_payload.totals.roi,       label: 'Multiplicador médio', sub: 'Retorno sobre investimento',  icon: 'fa-arrow-trend-up', trend: 'up' },
+], mb: 'mb-3' } %}
+
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Evolução do ROI',
+        subtitle: 'Valor capturado vs projetado por mês'
+    } %}
+    <div class="inov-chart-host inov-chart-host--timeline" id="inovTimelineChart"
+         role="img" aria-label="Evolução do ROI mês a mês"></div>
+</section>
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Impact Ledger',
+        subtitle: module_payload.ledger|length ~ ' entradas · Registro de valor por experimento'
+    } %}
+    <div class="table-responsive inov-ledger-table">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Experimento</th>
+                    <th>Estágio</th>
+                    <th>Valor capturado</th>
+                    <th>ROI</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in module_payload.ledger %}
+                <tr>
+                    <td><strong>{{ row.title }}</strong></td>
+                    <td>
+                        {% include 'components/status_badge.html.twig' with {
+                            label: row.stage,
+                            variant: 'info'
+                        } %}
+                    </td>
+                    <td>{{ row.value }}</td>
+                    <td>{{ row.roi }}</td>
+                    <td>
+                        {% include 'components/status_badge.html.twig' with {
+                            label: row.status == 'active' ? 'Ativo' : (row.status == 'piloting' ? 'Pilotando' : (row.status == 'testing' ? 'Testando' : 'Hipótese')),
+                            variant: row.status == 'active' ? 'success' : (row.status == 'piloting' ? 'warning' : 'secondary')
+                        } %}
+                    </td>
+                    {% if row.id is defined %}
+                    <td class="text-nowrap">
+                        <a href="{{ path('app_inovacao_impact_editar', { id: row.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                        <form action="{{ path('app_inovacao_impact_excluir', { id: row.id }) }}" method="post" class="d-inline"
+                              onsubmit="return confirm('Excluir esta entrada?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('inovacao_impact_delete_' ~ row.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+window.__inovImpactTimeline = {{ impact_timeline|json_encode|raw }};
+</script>
+{% endblock %}

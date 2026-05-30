@@ -1,0 +1,41 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+{% block inov_section_content %}
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: item ? 'Editar tendência' : 'Nova tendência',
+        subtitle: 'Radar de tecnologias'
+    } %}
+    <form method="post" action="{{ item ? path('app_inovacao_tendencia_editar', { id: item.id }) : path('app_inovacao_tendencia_nova') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('inovacao_tendencia_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'label', name: 'label', label: 'Tecnologia', required: true,
+            value: form_data.label|default(item ? item.label : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'valor', name: 'valor', label: 'Relevância (%)', type: 'number',
+            value: form_data.valor|default(item ? item.valor : 50), min: 0, max: 100
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'hint', name: 'hint', label: 'Descrição', type: 'textarea', rows: 2,
+            value: form_data.hint|default(item ? item.hint : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'status', name: 'status', label: 'Status', type: 'select',
+            value: form_data.status|default(item ? item.status : 'stable'),
+            options: [
+                { value: 'hot', label: 'Em alta' },
+                { value: 'rising', label: 'Ascensão' },
+                { value: 'stable', label: 'Estável' },
+                { value: 'watch', label: 'Observar' },
+                { value: 'cooling', label: 'Resfriando' },
+                { value: 'research', label: 'Pesquisa' },
+            ]
+        } %}
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-unio-primary">Salvar</button>
+            <a href="{{ path('app_inovacao_tendencias') }}" class="btn-unio-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

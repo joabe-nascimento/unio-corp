@@ -1,0 +1,92 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_inovacao_novidade_nova') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova novidade
+</a>
+{% endblock %}
+
+{% block inov_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: novidades_feed|length, label: 'Atualizações', sub: 'Últimos 30 dias', icon: 'fa-newspaper' },
+
+    { value: novidades_feed|filter(n => n.variant == 'success')|length, label: 'Lançamentos', sub: 'Novos recursos', icon: 'fa-rocket', trend: 'up' },
+
+    { value: novidades_feed|filter(n => n.variant == 'warning')|length, label: 'Alertas', sub: 'Requerem ação', icon: 'fa-bell' },
+
+], mb: 'mb-3' } %}
+
+
+
+<section class="unio-card">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Feed de inovação',
+
+        subtitle: 'Lançamentos, alertas e insights do Hub Inovação'
+
+    } %}
+
+    <div class="inov-card-list">
+
+    {% for item in novidades_feed %}
+
+    <div class="inov-card-list-item">
+
+        <div class="inov-history-row mb-0 pb-0 border-0">
+
+            <div class="mi-icon" aria-hidden="true"><i class="fas {{ item.icon }}"></i></div>
+
+            <div class="flex-fill min-width-0">
+
+                <div class="inov-idea-row-head mb-1">
+
+                    <span class="section-title">{{ item.title }}</span>
+
+                    <div class="inov-idea-row-meta">
+
+                        {% include 'components/status_badge.html.twig' with { label: item.badge, variant: item.variant|default('info') } %}
+
+                        <span class="text-muted" style="font-size:11px">{{ item.date }}</span>
+
+                    </div>
+
+                </div>
+
+                <p class="section-subtitle mb-0">{{ item.summary }}</p>
+
+                <div class="inov-card-actions">
+                    <div class="inov-card-actions-btns">
+                        <a href="{{ path(item.route) }}" class="btn-unio-ghost btn-sm">
+                            Ver detalhes<i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        {% if item.id is defined %}
+                        <a href="{{ path('app_inovacao_novidade_editar', { id: item.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                        <form action="{{ path('app_inovacao_novidade_excluir', { id: item.id }) }}" method="post"
+                              onsubmit="return confirm('Excluir esta novidade?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('inovacao_novidade_delete_' ~ item.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}
+

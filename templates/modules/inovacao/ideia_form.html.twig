@@ -1,0 +1,84 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_inovacao_ideia_show', { id: ideia.id }) }}" class="btn-unio-ghost btn-sm">Cancelar</a>
+{% endblock %}
+
+{% block inov_section_content %}
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Editar ideia',
+        subtitle: ideia.codigo ~ ' · ' ~ ideia.titulo
+    } %}
+
+    <form action="{{ path('app_inovacao_ideia_editar', { id: ideia.id }) }}" method="post" class="inov-form-page">
+        <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_form') }}">
+
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'titulo', name: 'titulo', label: 'Título', value: form_data.titulo|default(ideia.titulo), required: true, maxlength: 180
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'resumo', name: 'resumo', label: 'Resumo', type: 'textarea', rows: 2,
+            value: form_data.resumo|default(ideia.resumo)
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'problema', name: 'problema', label: 'Problema', type: 'textarea', rows: 3,
+            value: form_data.problema|default(ideia.problema)
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'hipotese', name: 'hipotese', label: 'Hipótese', type: 'textarea', rows: 3,
+            value: form_data.hipotese|default(ideia.hipotese)
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'metrica_sucesso', name: 'metrica_sucesso', label: 'Critério de sucesso',
+            value: form_data.metrica_sucesso|default(ideia.metricaSucesso)
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'metodo_teste', name: 'metodo_teste', label: 'Método de teste', type: 'textarea', rows: 2,
+            value: form_data.metodo_teste|default(ideia.metodoTeste)
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'owner_nome', name: 'owner_nome', label: 'Responsável',
+            value: form_data.owner_nome|default(ideia.ownerNome)
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'hub_relacionado', name: 'hub_relacionado', label: 'Hub relacionado',
+            value: form_data.hub_relacionado|default(ideia.hubRelacionado)
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'tags', name: 'tags', label: 'Tags (separadas por vírgula)',
+            value: form_data.tags|default(ideia.tags|join(', '))
+        } %}
+
+        <div class="inov-form-grid-2">
+            <div class="unio-form-group">
+                <label class="unio-form-label" for="impacto">Impacto ({{ form_data.impacto|default(ideia.impacto) }}%)</label>
+                <input type="range" class="inov-form-range" id="impacto" name="impacto" min="0" max="100"
+                       value="{{ form_data.impacto|default(ideia.impacto) }}">
+            </div>
+            <div class="unio-form-group">
+                <label class="unio-form-label" for="esforco">Esforço ({{ form_data.esforco|default(ideia.esforco) }}%)</label>
+                <input type="range" class="inov-form-range" id="esforco" name="esforco" min="0" max="100"
+                       value="{{ form_data.esforco|default(ideia.esforco) }}">
+            </div>
+        </div>
+
+        {% set stage_opts = [] %}
+        {% for opt in stage_options %}
+            {% set stage_opts = stage_opts|merge([{ value: opt.id, label: opt.label }]) %}
+        {% endfor %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'estagio', name: 'estagio', label: 'Estágio', type: 'select',
+            value: form_data.estagio|default(ideia.estagio), options: stage_opts
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'progresso', name: 'progresso', label: 'Progresso (%)', type: 'number',
+            value: form_data.progresso|default(ideia.progresso), min: 0, max: 100
+        } %}
+
+        <div class="inov-form-nav mt-3">
+            <button type="submit" class="btn-unio-primary">Salvar alterações</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_inovacao_tendencia_nova') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova tendência
+</a>
+{% endblock %}
+
+{% block inov_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: trend_radar|length, label: 'Tecnologias monitoradas', sub: 'Radar atualizado semanalmente', icon: 'fa-satellite-dish' },
+
+    { value: trend_radar|filter(t => t.status == 'hot')|length, label: 'Em alta', sub: 'Prioridade imediata', icon: 'fa-fire', trend: 'up' },
+
+    { value: trend_radar|filter(t => t.status == 'rising')|length, label: 'Em ascensão', sub: 'Vale experimentar', icon: 'fa-arrow-trend-up' },
+
+    { value: trend_radar|filter(t => t.status == 'research')|length, label: 'Em pesquisa', sub: 'Horizonte longo', icon: 'fa-flask' },
+
+], mb: 'mb-3' } %}
+
+
+
+<section class="unio-card">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Radar de tendências',
+
+        subtitle: 'Sinais de mercado e tecnologias relevantes para a operação'
+
+    } %}
+
+    <div class="inov-card-list">
+
+    {% for trend in trend_radar %}
+
+    {% set status_variant = trend.status == 'hot' ? 'warning' : (trend.status in ['rising'] ? 'success' : (trend.status == 'research' ? 'secondary' : 'info')) %}
+
+    {% set status_label = trend.status == 'hot' ? 'Em alta' : (trend.status == 'rising' ? 'Ascensão' : (trend.status == 'stable' ? 'Estável' : (trend.status == 'watch' ? 'Observar' : (trend.status == 'cooling' ? 'Resfriando' : 'Pesquisa')))) %}
+
+    <div class="inov-card-list-item">
+
+        <div class="inov-idea-row-head">
+
+            <span class="section-title">{{ trend.label }}</span>
+
+            {% include 'components/status_badge.html.twig' with { label: status_label, variant: status_variant } %}
+
+        </div>
+
+        <p class="section-subtitle mb-2">{{ trend.hint }}</p>
+
+        {% include 'components/progress_inline.html.twig' with {
+
+            percent: trend.value,
+
+            variant: trend.value >= 70 ? 'success' : (trend.value >= 40 ? 'warning' : 'accent'),
+
+            show_label: true
+
+        } %}
+
+        {% if trend.id is defined %}
+        <div class="inov-card-actions">
+            <div class="inov-card-actions-btns">
+                <a href="{{ path('app_inovacao_tendencia_editar', { id: trend.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                <form action="{{ path('app_inovacao_tendencia_excluir', { id: trend.id }) }}" method="post"
+                      onsubmit="return confirm('Excluir esta tendência?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('inovacao_tendencia_delete_' ~ trend.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}
+

@@ -1,0 +1,47 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+{% block inov_section_content %}
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: item ? 'Editar novidade' : 'Nova novidade',
+        subtitle: 'Feed de inovação'
+    } %}
+    <form method="post" action="{{ item ? path('app_inovacao_novidade_editar', { id: item.id }) : path('app_inovacao_novidade_nova') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('inovacao_novidade_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'titulo', name: 'titulo', label: 'Título', required: true,
+            value: form_data.titulo|default(item ? item.titulo : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'resumo', name: 'resumo', label: 'Resumo', type: 'textarea', rows: 3, required: true,
+            value: form_data.resumo|default(item ? item.resumo : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'icon', name: 'icon', label: 'Ícone',
+            value: form_data.icon|default(item ? item.icon : 'fa-lightbulb')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'badge', name: 'badge', label: 'Badge',
+            value: form_data.badge|default(item ? item.badge : 'Novo')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'variant', name: 'variant', label: 'Variante', type: 'select',
+            value: form_data.variant|default(item ? item.variant : 'info'),
+            options: [
+                { value: 'success', label: 'Success' },
+                { value: 'info', label: 'Info' },
+                { value: 'warning', label: 'Warning' },
+                { value: 'secondary', label: 'Secondary' },
+            ]
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'route_name', name: 'route_name', label: 'Rota interna',
+            value: form_data.route_name|default(item ? item.routeName : 'app_inovacao')
+        } %}
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-unio-primary">Salvar</button>
+            <a href="{{ path('app_inovacao_novidades') }}" class="btn-unio-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+{% set hub_page_title = ideia.titulo %}
+{% set hub_page_subtitle = ideia.codigo ~ ' · ' ~ ideia.estagio|capitalize %}
+
+{% block hub_toolbar_actions %}
+<div class="d-flex flex-wrap gap-2 align-items-center">
+    <a href="{{ path('app_inovacao_backlog') }}" class="btn-unio-ghost btn-sm">Voltar</a>
+    <a href="{{ path('app_inovacao_ideia_editar', { id: ideia.id }) }}" class="btn-unio btn-sm">Editar</a>
+    <form action="{{ path('app_inovacao_ideia_excluir', { id: ideia.id }) }}" method="post" class="d-inline"
+          onsubmit="return confirm('Excluir esta ideia permanentemente?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_delete_' ~ ideia.id) }}">
+        <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block inov_section_content %}
+{% set q_variant = pipeline_item.quadrant == 'quick_win' ? 'success' : (pipeline_item.quadrant == 'big_bet' ? 'info' : 'warning') %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: ideia.codigo, label: 'Código', sub: ideia.estagio|capitalize, icon: 'fa-hashtag' },
+    { value: ideia.votos, label: 'Votos', sub: 'Comunidade', icon: 'fa-thumbs-up' },
+    { value: ideia.impacto ~ '%', label: 'Impacto', sub: 'Estimado', icon: 'fa-arrow-trend-up' },
+    { value: ideia.esforco ~ '%', label: 'Esforço', sub: 'Estimado', icon: 'fa-gauge' },
+], mb: 'mb-3' } %}
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with {
+                title: ideia.titulo,
+                subtitle: 'Aberta há ' ~ ideia.daysOpen ~ ' dias · ' ~ (ideia.ownerNome|default('—'))
+            } %}
+            {% include 'components/status_badge.html.twig' with {
+                label: pipeline_item.quadrant == 'quick_win' ? 'Quick Win' : (pipeline_item.quadrant == 'big_bet' ? 'Big Bet' : 'Fill-In'),
+                variant: q_variant
+            } %}
+            {% if ideia.resumo %}
+            <p class="section-subtitle mt-3 mb-0">{{ ideia.resumo }}</p>
+            {% endif %}
+
+            {% include 'components/unio/detail_field_section.html.twig' with { title: 'Detalhes', items: [
+                { label: 'Problema', value: ideia.problema|default('—'), icon: 'fa-circle-exclamation' },
+                { label: 'Hipótese', value: ideia.hipotese|default('—'), icon: 'fa-lightbulb' },
+                { label: 'Critério de sucesso', value: ideia.metricaSucesso|default(ideia.metrica|default('—')), icon: 'fa-bullseye' },
+                { label: 'Método de teste', value: ideia.metodoTeste|default('—'), icon: 'fa-vial' },
+                { label: 'Hub relacionado', value: ideia.hubRelacionado|default('—'), icon: 'fa-share-nodes' },
+                { label: 'Categoria', value: ideia.categoria|default('—'), icon: 'fa-tag' },
+                { label: 'Urgência', value: ideia.urgencia|default('—'), icon: 'fa-clock' },
+            ]} only %}
+
+            {% if ideia.progresso > 0 %}
+            <div class="mt-3">
+                <div class="perm-label mb-2">Progresso</div>
+                {% include 'components/progress_inline.html.twig' with {
+                    percent: ideia.progresso,
+                    variant: 'accent',
+                    show_label: true
+                } %}
+            </div>
+            {% endif %}
+
+            {% if ideia.tags|length > 0 %}
+            <div class="mt-3 d-flex flex-wrap gap-1">
+                {% for tag in ideia.tags %}
+                {% include 'components/status_badge.html.twig' with { label: tag, variant: 'secondary' } %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="unio-card mb-3">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Ações',
+                subtitle: 'Fluxo do experimento'
+            } %}
+            <div class="d-flex flex-column gap-2">
+                {% if ideia.estagio == 'ideia' %}
+                <form action="{{ path('app_inovacao_ideia_promover', { id: ideia.id }) }}" method="post">
+                    <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ ideia.id) }}">
+                    <button type="submit" class="btn-unio btn-sm w-100">
+                        <i class="fas fa-flask mr-1" aria-hidden="true"></i> Promover ao Laboratório
+                    </button>
+                </form>
+                {% endif %}
+                <form action="{{ path('app_inovacao_ideia_votar', { id: ideia.id }) }}" method="post">
+                    <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ ideia.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-sm w-100">
+                        <i class="fas fa-thumbs-up mr-1" aria-hidden="true"></i> Votar ({{ ideia.votos }})
+                    </button>
+                </form>
+                <form action="{{ path('app_inovacao_ideia_arquivar', { id: ideia.id }) }}" method="post">
+                    <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ ideia.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-sm w-100">Arquivar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="unio-card mb-3">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Mover estágio',
+                subtitle: 'Atualizar posição no pipeline'
+            } %}
+            <form action="{{ path('app_inovacao_ideia_mover', { id: ideia.id }) }}" method="post" class="d-flex flex-column gap-2">
+                <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ ideia.id) }}">
+                <select name="stage" class="unio-form-control">
+                    {% for opt in stage_options %}
+                    <option value="{{ opt.id }}"{% if opt.id == ideia.estagio %} selected{% endif %}>{{ opt.label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-unio btn-sm">Atualizar estágio</button>
+            </form>
+        </div>
+
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Decisão',
+                subtitle: 'Kill · Pivot · Scale'
+            } %}
+            <form action="{{ path('app_inovacao_ideia_decisao', { id: ideia.id }) }}" method="post" class="d-flex flex-column gap-2">
+                <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ ideia.id) }}">
+                <select name="tipo" class="unio-form-control" required>
+                    <option value="">Tipo de decisão…</option>
+                    <option value="kill">Kill</option>
+                    <option value="pivot">Pivot</option>
+                    <option value="scale">Scale</option>
+                </select>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'decisao_motivo', name: 'motivo', label: 'Motivo', type: 'textarea', rows: 3, required: true
+                } %}
+                <button type="submit" class="btn-unio btn-sm">Registrar decisão</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

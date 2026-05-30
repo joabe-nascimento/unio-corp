@@ -1,0 +1,46 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+{% block inov_section_content %}
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Maturidade de inovação',
+                subtitle: 'Radar multidimensional da operação'
+            } %}
+            <div class="inov-chart-host" id="inovRadarChart" role="img" aria-label="Radar de maturidade de inovação"></div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Funil de conversão',
+                subtitle: 'Volume por estágio do pipeline'
+            } %}
+            <div class="inov-chart-host inov-chart-host--funnel" id="inovFunnelChart" role="img" aria-label="Funil de experimentos"></div>
+        </div>
+    </div>
+</div>
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Dimensões detalhadas',
+        subtitle: 'Indicadores que compõem o radar de maturidade'
+    } %}
+    <div class="inov-card-list">
+    {% for dim in radar %}
+    <div class="inov-card-list-item">
+        <div class="perm-label mb-2">{{ dim.label }}</div>
+        {% if dim.hint is defined and dim.hint %}
+        <p class="section-subtitle mb-2">{{ dim.hint }}</p>
+        {% endif %}
+        {% include 'components/progress_inline.html.twig' with {
+            percent: dim.value,
+            variant: dim.value >= 70 ? 'success' : (dim.value >= 50 ? 'warning' : 'accent'),
+            show_label: true
+        } %}
+    </div>
+    {% endfor %}
+    </div>
+</section>
+{% endblock %}

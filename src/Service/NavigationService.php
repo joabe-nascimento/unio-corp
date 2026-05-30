@@ -401,6 +401,36 @@ class NavigationService
         return (bool) $route && str_starts_with($route, 'app_publicidade');
     }
 
+    public function isModuloInovacaoFluxoActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_inovacao_pipeline',
+            'app_inovacao_laboratorio',
+            'app_inovacao_experimentos',
+        ], true);
+    }
+
+    public function isModuloInovacaoIdeacaoActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_inovacao_backlog',
+            'app_inovacao_nova_ideia',
+            'app_inovacao_nova_ideia_submit',
+        ], true);
+    }
+
+    public function isModuloInovacaoInteligenciaActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_inovacao_analytics',
+            'app_inovacao_conexoes',
+            'app_inovacao_impact',
+            'app_inovacao_tendencias',
+            'app_inovacao_portfolio',
+            'app_inovacao_novidades',
+        ], true);
+    }
+
     /**
      * Globais Twig de navegação (uma passagem por request).
      *
@@ -433,6 +463,9 @@ class NavigationService
             'nav_modulo_pessoas_active' => $this->isModuloPessoasActive($route),
             'nav_modulo_engenharia_active' => $this->isModuloEngenhariaActive($route),
             'nav_modulo_publicidade_active' => $this->isModuloPublicidadeActive($route),
+            'nav_modulo_inovacao_fluxo_active' => $this->isModuloInovacaoFluxoActive($route),
+            'nav_modulo_inovacao_ideacao_active' => $this->isModuloInovacaoIdeacaoActive($route),
+            'nav_modulo_inovacao_inteligencia_active' => $this->isModuloInovacaoInteligenciaActive($route),
             'nav_active_hub' => $this->getActiveHubId($route),
             'nav_has_hubs' => $this->hasAnyHub($user),
         ];

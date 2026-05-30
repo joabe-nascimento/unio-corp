@@ -1,0 +1,236 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Hub Inovação{% endblock %}
+{% block permissions_scope %}{% if inov_section == 'overview' %}hub_inovacao{% endif %}{% endblock %}
+{% set hub_page_title = inov_section == 'overview' ? 'Hub Inovação' : inov_active_module.label|default('Hub Inovação') %}
+{% set hub_page_subtitle = inov_section != 'overview' ? inov_active_module.subtitle|default('') : '' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+{% if inov_section != 'overview' %}
+<div class="inov-toolbar-meta">
+    {% include 'components/status_badge.html.twig' with { label: pulse.boldness_label, variant: 'info' } %}
+    {% include 'components/status_badge.html.twig' with { label: pulse.score ~ '% índice', variant: 'success' } %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block hub_kpis %}
+{% if inov_section == 'overview' %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: kpis, mb: 'mb-0' } %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="inov-hub inov-hub--{{ inov_section }}" id="inovHub" data-inov-hub data-inov-section="{{ inov_section }}">
+
+    {% if inov_section == 'overview' %}
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            {# Fluxo do pipeline — kpi_row dentro de unio-card #}
+            <div class="unio-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Fluxo do pipeline',
+                    subtitle: 'Distribuição atual de ideias por estágio',
+                    btn_label: 'Abrir kanban',
+                    btn_href: path('app_inovacao_pipeline'),
+                    btn_ghost: true,
+                    btn_icon: 'fa-arrow-right'
+                } %}
+                {% set flow_kpis = [] %}
+                {% for stage in flow_stages %}
+                    {% set flow_kpis = flow_kpis|merge([{
+                        value: stage.value,
+                        label: stage.label,
+                        icon: stage.icon,
+                        route: 'app_inovacao_pipeline'
+                    }]) %}
+                {% endfor %}
+                {% include 'components/kpi_row.html.twig' with { items: flow_kpis, mb: 'mb-0', extra_class: 'inov-flow-kpis' } %}
+            </div>
+
+            {# Módulos — module_grid padrão #}
+            {% set module_items = [] %}
+            {% for card in module_cards %}
+                {% if product_grant('hub_inovacao', card.id) %}
+                    {% set module_items = module_items|merge([{
+                        icon: card.icon,
+                        title: card.title,
+                        subtitle: card.subtitle ~ ' · ' ~ card.metric,
+                        route: card.route
+                    }]) %}
+                {% endif %}
+            {% endfor %}
+            {% include 'components/module_grid.html.twig' with {
+                title: 'Módulos',
+                subtitle: 'Selecione um módulo na barra lateral ou abaixo',
+                items: module_items,
+                cols: 2
+            } %}
+
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="unio-card h-100">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Serendipity Lab',
+                            subtitle: 'Combinações inesperadas entre hubs — oportunidades de inovação',
+                            btn_label: 'Conexões',
+                            btn_href: path('app_inovacao_conexoes'),
+                            btn_ghost: true,
+                            btn_icon: 'fa-arrow-right'
+                        } %}
+                        <div class="inov-stack-list">
+                        {% for item in serendipity %}
+                            {% include 'components/module_tile.html.twig' with {
+                                icon: item.icon,
+                                title: item.title,
+                                subtitle: item.combo,
+                                route: 'app_inovacao_conexoes'
+                            } %}
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="unio-card h-100">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Últimas novidades',
+                            subtitle: 'Feed de atualizações do hub',
+                            btn_label: 'Ver todas',
+                            btn_href: path('app_inovacao_novidades'),
+                            btn_ghost: true,
+                            btn_icon: 'fa-arrow-right'
+                        } %}
+                        <div class="inov-card-list">
+                        {% for item in novidades|slice(0, 4) %}
+                        <div class="inov-card-list-item">
+                            <div class="inov-idea-row-head">
+                                <span class="perm-label">{{ item.title }}</span>
+                                <div class="inov-idea-row-meta">
+                                    {% include 'components/status_badge.html.twig' with { label: item.badge, variant: item.variant|default('info') } %}
+                                    <span class="text-muted" style="font-size:11px">{{ item.date }}</span>
+                                </div>
+                            </div>
+                            <p class="section-subtitle mb-0">{{ item.summary }}</p>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            {# Maturidade — padrão maturidade hub #}
+            <div class="unio-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Maturidade',
+                    subtitle: pulse.boldness_label,
+                    btn_label: 'Analytics',
+                    btn_href: path('app_inovacao_analytics'),
+                    btn_ghost: true,
+                    btn_icon: 'fa-arrow-right'
+                } %}
+                <div class="inov-maturity-score">
+                    <span class="inov-maturity-score-value">{{ pulse.score }}%</span>
+                    <span class="inov-maturity-score-label">Índice de maturidade</span>
+                </div>
+                <div class="inov-card-list">
+                {% for dim in radar %}
+                <div class="inov-card-list-item">
+                    <div class="perm-label mb-2">{{ dim.label }}</div>
+                    {% include 'components/progress_inline.html.twig' with {
+                        percent: dim.value,
+                        variant: dim.value >= 70 ? 'success' : (dim.value >= 50 ? 'warning' : 'accent'),
+                        show_label: true
+                    } %}
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+
+            {# Innovation Signals — module_tile #}
+            <div class="unio-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Innovation Signals',
+                    subtitle: 'Dados reais dos hubs conectados'
+                } %}
+                <div class="inov-stack-list">
+                {% for signal in real_signals %}
+                    {% include 'components/module_tile.html.twig' with {
+                        icon: signal.icon,
+                        title: signal.title,
+                        subtitle: signal.source,
+                        route: signal.link
+                    } %}
+                {% else %}
+                    {% include 'components/empty_state.html.twig' with {
+                        icon: 'fa-satellite-dish',
+                        title: 'Nenhum sinal detectado',
+                        text: 'Ative hubs como RH e Projetos para ver dados reais.',
+                        compact: true
+                    } %}
+                {% endfor %}
+                </div>
+            </div>
+
+            {# OKR Alignment #}
+            {% include 'components/inovacao/okr_pulse.html.twig' %}
+
+            {# Insights acionáveis — module_tile #}
+            <div class="unio-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Insights acionáveis',
+                    subtitle: 'Recomendações com base no pipeline e na operação'
+                } %}
+                <div class="inov-stack-list">
+                {% for insight in insights %}
+                    {% if insight.route %}
+                    {% include 'components/module_tile.html.twig' with {
+                        icon: insight.icon,
+                        title: insight.title,
+                        subtitle: insight.summary,
+                        route: insight.route
+                    } %}
+                    {% endif %}
+                {% else %}
+                    {% include 'components/empty_state.html.twig' with {
+                        icon: 'fa-lightbulb',
+                        title: 'Tudo em ordem',
+                        text: 'Nenhum insight prioritário no momento.',
+                        compact: true
+                    } %}
+                {% endfor %}
+                </div>
+            </div>
+
+            {# Destaque da semana — module_card #}
+            {% include 'components/module_card.html.twig' with {
+                title: experiment_week.title,
+                subtitle: experiment_week.stage ~ ' · ' ~ experiment_week.metric,
+                links: [{ label: 'Ver Pipeline', route: 'app_inovacao_pipeline', icon: 'fa-arrow-right', primary: true }]
+            } %}
+        </div>
+    </div>
+
+    {% else %}
+        {% block inov_section_content %}{% endblock %}
+    {% endif %}
+
+    <script type="application/json" id="inov-hub-payload">{{ {
+        pulse: pulse,
+        radar: radar,
+        funnel: funnel,
+        section: inov_section
+    }|json_encode|raw }}</script>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% if inov_section in ['overview', 'analytics', 'impact'] %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+{% endif %}
+<script src="{{ asset('js/inovacao-hub.js') }}?v=14" defer></script>
+{% endblock %}

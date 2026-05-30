@@ -1,0 +1,42 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+{% block inov_section_content %}
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: item ? 'Editar conexão' : 'Nova conexão',
+        subtitle: 'Sinergia entre hubs'
+    } %}
+    <form method="post" action="{{ item ? path('app_inovacao_conexao_editar', { id: item.id }) : path('app_inovacao_conexao_nova') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('inovacao_conexao_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'hub', name: 'hub', label: 'Hub', required: true,
+            value: form_data.hub|default(item ? item.hub : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'icon', name: 'icon', label: 'Ícone (Font Awesome)',
+            value: form_data.icon|default(item ? item.icon : 'fa-share-nodes')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'sinergia', name: 'sinergia', label: 'Sinergia (%)', type: 'number',
+            value: form_data.sinergia|default(item ? item.sinergia : 70), min: 0, max: 100
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'status', name: 'status', label: 'Status', type: 'select',
+            value: form_data.status|default(item ? item.status : 'active'),
+            options: [{ value: 'active', label: 'Ativa' }, { value: 'explore', label: 'Explorar' }]
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'oportunidade', name: 'oportunidade', label: 'Oportunidade', type: 'textarea', rows: 3, required: true,
+            value: form_data.oportunidade|default(item ? item.oportunidade : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'acao', name: 'acao', label: 'Próxima ação', required: true,
+            value: form_data.acao|default(item ? item.acao : '')
+        } %}
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-unio-primary">Salvar</button>
+            <a href="{{ path('app_inovacao_conexoes') }}" class="btn-unio-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

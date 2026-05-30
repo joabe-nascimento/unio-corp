@@ -1,0 +1,167 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+
+
+{% block inov_section_content %}
+
+{% include 'components/inovacao/methodology_strip.html.twig' %}
+
+
+
+{% set decision_cols = [
+
+    { key: 'kill',  label: 'Kill',  variant: 'secondary', icon: 'fa-xmark',  items: decision_board.kill },
+
+    { key: 'pivot', label: 'Pivot', variant: 'warning',   icon: 'fa-rotate', items: decision_board.pivot },
+
+    { key: 'scale', label: 'Scale', variant: 'success',   icon: 'fa-rocket', items: decision_board.scale },
+
+] %}
+
+
+
+<div class="row mb-3">
+
+    {% for col in decision_cols %}
+
+    <div class="col-md-4 mb-3 d-flex">
+
+        <div class="unio-card flex-fill d-flex flex-column">
+
+            {% include 'components/section_header.html.twig' with {
+
+                title: col.label,
+
+                subtitle: col.items|length ~ ' experimento(s)'
+
+            } %}
+
+            <div class="inov-card-list flex-fill">
+
+            {% for item in col.items %}
+
+            <div class="inov-card-list-item inov-decision-item">
+
+                <div class="inov-decision-item-body">
+
+                    <div class="section-title">
+                        {% if item.db_id is defined and item.db_id %}
+                        <a href="{{ path('app_inovacao_ideia_show', { id: item.db_id }) }}" class="text-reset">{{ item.title }}</a>
+                        {% else %}
+                        {{ item.title }}
+                        {% endif %}
+                    </div>
+
+                    <p class="section-subtitle">{{ item.summary }}</p>
+
+                    {% if item.progress is defined %}
+
+                    <div class="inov-decision-item-progress">
+                        {% include 'components/progress_inline.html.twig' with {
+                            percent: item.progress,
+                            variant: col.variant == 'accent' ? 'info' : col.variant,
+                            show_label: true,
+                            compact: true
+                        } %}
+                    </div>
+
+                    {% endif %}
+
+                    <div class="inov-decision-item-meta">
+
+                        <span class="inov-idea-owner">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i> {{ item.owner }}
+                        </span>
+
+                        {% if item.metric is defined and item.metric %}
+                        <span class="status-badge status-badge--info">{{ item.metric }}</span>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                {% if item.db_id is defined and item.db_id %}
+                <div class="inov-decision-item-actions">
+                    <a href="{{ path('app_inovacao_ideia_show', { id: item.db_id }) }}" class="btn-unio btn-sm">
+                        <i class="fas fa-gavel mr-1" aria-hidden="true"></i> Decidir
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+
+            {% else %}
+
+            {% include 'components/empty_state.html.twig' with {
+
+                icon: col.key == 'scale' ? 'fa-hourglass-half' : 'fa-check-circle',
+
+                title: 'Nenhum item',
+
+                text: 'Sem experimentos nesta fila.',
+
+                compact: true
+
+            } %}
+
+            {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+
+
+<section class="unio-card">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Histórico de decisões',
+
+        subtitle: 'Últimas decisões Kill · Pivot · Scale registradas'
+
+    } %}
+
+    {% for item in decision_history %}
+
+    <div class="inov-history-row">
+
+        {% include 'components/status_badge.html.twig' with {
+
+            label: item.decision|upper,
+
+            variant: item.decision == 'kill' ? 'secondary' : (item.decision == 'pivot' ? 'warning' : 'success')
+
+        } %}
+
+        <div class="flex-fill min-width-0">
+
+            <div class="section-title mb-1">{{ item.title }}</div>
+
+            <p class="section-subtitle mb-1">{{ item.reason }}</p>
+
+            <div class="inov-history-meta">
+
+                <span><i class="fas fa-user-circle" aria-hidden="true"></i> {{ item.owner }}</span>
+
+                <span><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ item.date }}</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</section>
+
+{% endblock %}
+

@@ -84,12 +84,6 @@ class ExtendedHubController extends AbstractController
         return $this->renderPlannedHub('customer_success');
     }
 
-    #[Route('/inovacao', name: 'app_inovacao')]
-    public function inovacao(): Response
-    {
-        return $this->renderPlannedHub('inovacao');
-    }
-
     #[Route('/holdings', name: 'app_holdings')]
     public function holdings(): Response
     {

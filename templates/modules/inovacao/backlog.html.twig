@@ -1,0 +1,310 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+
+
+{% block inov_section_content %}
+
+
+
+{% set quick_wins  = backlog_matrix|filter(i => i.quadrant == 'quick_win')|length %}
+
+{% set total_votes = backlog_matrix|reduce((carry, i) => carry + i.votes|default(0), 0) %}
+
+
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: backlog_matrix|length,                                       label: 'Ideias no backlog', sub: 'Aguardando priorização',       icon: 'fa-layer-group' },
+
+    { value: quick_wins,                                                  label: 'Quick Wins',        sub: 'Alto impacto, baixo esforço',  icon: 'fa-bolt', trend: 'up' },
+
+    { value: total_votes,                                                 label: 'Votos acumulados',  sub: 'Da comunidade',                icon: 'fa-thumbs-up' },
+
+    { value: backlog_matrix|filter(i => i.quadrant == 'big_bet')|length, label: 'Big Bets',          sub: 'Alto impacto, alto esforço',   icon: 'fa-rocket' },
+
+], mb: 'mb-3' } %}
+
+
+
+<div class="row" data-inov-backlog>
+
+    <div class="col-lg-4 mb-4">
+
+        <div class="unio-card h-100">
+
+            {% include 'components/section_header.html.twig' with {
+
+                title: 'Matriz Impacto × Esforço',
+
+                subtitle: backlog_matrix|length ~ ' ideias · Clique para localizar na lista'
+
+            } %}
+
+
+
+            {% set quadrants = [
+
+                { key: 'quick_win', label: 'Quick Win', sub: 'Alto impacto · Baixo esforço', variant: 'success', icon: 'fa-bolt' },
+
+                { key: 'big_bet',   label: 'Big Bet',   sub: 'Alto impacto · Alto esforço',  variant: 'info',    icon: 'fa-rocket' },
+
+                { key: 'fill_in',   label: 'Fill-In',   sub: 'Baixo impacto · Baixo esforço', variant: 'warning', icon: 'fa-inbox' },
+
+                { key: 'thankless', label: 'Ponderar',  sub: 'Baixo impacto · Alto esforço', variant: 'secondary', icon: 'fa-hourglass' },
+
+            ] %}
+
+
+
+            <div class="inov-card-list inov-card-list--flush">
+
+            {% for q in quadrants %}
+
+            {% set q_items = backlog_matrix|filter(i => i.quadrant == q.key) %}
+
+            {% if q.key != 'thankless' or q_items|length > 0 %}
+
+            <div class="inov-matrix-group" data-matrix-group="{{ q.key }}">
+
+                <div class="inov-matrix-group-head">
+
+                    <i class="fas {{ q.icon }} inov-matrix-group-icon" aria-hidden="true"></i>
+
+                    {% include 'components/status_badge.html.twig' with { label: q.label, variant: q.variant } %}
+
+                    <small>{{ q.sub }}</small>
+
+                    <span class="inov-matrix-group-count" data-matrix-count>({{ q_items|length }})</span>
+
+                </div>
+
+                {% for item in q_items %}
+
+                <button type="button"
+
+                        class="module-item inov-matrix-row mb-2"
+
+                        data-idea-id="{{ item.id }}"
+
+                        data-idea-tags="{{ item.tags|default([])|join(',') }}"
+
+                        title="{{ item.title }}">
+
+                    <div class="mi-icon" aria-hidden="true"><i class="fas {{ q.icon }}"></i></div>
+
+                    <div class="module-item-body">
+
+                        <div class="mi-title">{{ item.id }} · {{ item.title }}</div>
+
+                    </div>
+
+                    <i class="fas fa-chevron-right mi-arrow" aria-hidden="true"></i>
+
+                </button>
+
+                {% else %}
+
+                <p class="inov-matrix-empty">Nenhuma ideia neste quadrante</p>
+
+                {% endfor %}
+
+            </div>
+
+            {% endif %}
+
+            {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-lg-8 mb-4">
+
+        <div class="unio-card">
+
+            {% include 'components/section_header.html.twig' with {
+
+                title: 'Ideias no backlog',
+
+                subtitle: 'Filtre por categoria e promova para o Laboratório'
+
+            } %}
+
+            <div class="inov-stage-toolbar" role="group" aria-label="Filtrar por categoria">
+
+                <button type="button" class="btn-unio-ghost btn-sm is-active" data-filter-tag="all">
+
+                    <i class="fas fa-layer-group mr-1" aria-hidden="true"></i> Todas <span class="text-muted">({{ backlog_matrix|length }})</span>
+
+                </button>
+
+                {% for cat in backlog_categories %}
+
+                <button type="button" class="btn-unio-ghost btn-sm" data-filter-tag="{{ cat.tag }}">
+
+                    {{ cat.tag }} <span class="text-muted">({{ cat.count }})</span>
+
+                </button>
+
+                {% endfor %}
+
+            </div>
+
+
+
+            <div class="inov-card-list" data-inov-backlog-list>
+
+            {% for item in backlog_matrix %}
+
+            {% set q_variant = item.quadrant == 'quick_win' ? 'success' : (item.quadrant == 'big_bet' ? 'info' : 'warning') %}
+
+            <article class="inov-card-list-item inov-idea-row"
+
+                     id="idea-{{ item.id }}"
+
+                     data-idea-id="{{ item.id }}"
+
+                     data-idea-tags="{{ item.tags|default([])|join(',') }}">
+
+                <div class="inov-idea-row-head">
+
+                    <div class="inov-idea-row-meta">
+
+                        <code class="inov-idea-code">{{ item.id }}</code>
+
+                        {% include 'components/status_badge.html.twig' with {
+
+                            label: item.quadrant == 'quick_win' ? 'Quick Win' : (item.quadrant == 'big_bet' ? 'Big Bet' : 'Fill-In'),
+
+                            variant: q_variant
+
+                        } %}
+
+                    </div>
+
+                    <div class="inov-idea-row-meta">
+
+                        <span class="status-badge status-badge--secondary">
+
+                            <i class="fas fa-thumbs-up" aria-hidden="true"></i> {{ item.votes }}
+
+                        </span>
+
+                        <span class="status-badge status-badge--info">
+
+                            <i class="fas fa-arrow-trend-up" aria-hidden="true"></i> {{ item.impact }}%
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="section-title mb-1">
+                    {% if item.db_id is defined and item.db_id %}
+                    <a href="{{ path('app_inovacao_ideia_show', { id: item.db_id }) }}" class="text-reset">{{ item.title }}</a>
+                    {% else %}
+                    {{ item.title }}
+                    {% endif %}
+                </div>
+
+                <p class="section-subtitle mb-3">{{ item.summary }}</p>
+
+                <div class="inov-idea-row-foot">
+
+                    <div class="inov-idea-row-meta">
+
+                        <span class="inov-idea-owner">
+
+                            <i class="fas fa-user-circle" aria-hidden="true"></i> {{ item.owner }}
+
+                        </span>
+
+                        <span class="status-badge status-badge--secondary">{{ item.days }}d</span>
+
+                        {% for tag in item.tags|default([]) %}
+
+                        {% include 'components/status_badge.html.twig' with { label: tag, variant: 'secondary' } %}
+
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-1 align-items-center">
+                        {% if item.db_id is defined and item.db_id %}
+                        <a href="{{ path('app_inovacao_ideia_show', { id: item.db_id }) }}" class="btn-unio-ghost btn-sm">Ver</a>
+                        <form action="{{ path('app_inovacao_ideia_votar', { id: item.db_id }) }}" method="post" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ item.db_id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm" title="Votar">
+                                <i class="fas fa-thumbs-up" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                        <form action="{{ path('app_inovacao_ideia_promover', { id: item.db_id }) }}" method="post" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ item.db_id) }}">
+                            <button type="submit" class="btn-unio btn-sm">
+                                <i class="fas fa-flask mr-1" aria-hidden="true"></i> Promover
+                            </button>
+                        </form>
+                        {% else %}
+                        <a href="{{ path('app_inovacao_laboratorio') }}" class="btn-unio btn-sm">
+                            <i class="fas fa-flask mr-1" aria-hidden="true"></i> Promover
+                        </a>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            </article>
+
+            {% else %}
+
+            {% include 'components/empty_state.html.twig' with {
+
+                icon: 'fa-inbox',
+
+                title: 'Nenhuma ideia no backlog',
+
+                text: 'Registre a primeira ideia para começar.',
+
+                btn_label: 'Registrar primeira ideia',
+
+                btn_href: path('app_inovacao_nova_ideia')
+
+            } %}
+
+            {% endfor %}
+
+            </div>
+
+
+
+            <div class="inov-backlog-filter-empty" data-inov-backlog-empty hidden>
+
+                {% include 'components/empty_state.html.twig' with {
+
+                    icon: 'fa-filter',
+
+                    title: 'Nenhuma ideia nesta categoria',
+
+                    text: 'Tente outro filtro ou registre uma nova ideia.',
+
+                    compact: true
+
+                } %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+{% endblock %}
+

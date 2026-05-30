@@ -1,0 +1,43 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+{% block inov_section_content %}
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: item ? 'Editar entrada' : 'Nova entrada no ledger',
+        subtitle: 'Impacto e ROI'
+    } %}
+    <form method="post" action="{{ item ? path('app_inovacao_impact_editar', { id: item.id }) : path('app_inovacao_impact_nova') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('inovacao_impact_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'titulo', name: 'titulo', label: 'Experimento', required: true,
+            value: form_data.titulo|default(item ? item.titulo : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'estagio_label', name: 'estagio_label', label: 'Estágio',
+            value: form_data.estagio_label|default(item ? item.estagioLabel : 'Ideia')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'valor_capturado', name: 'valor_capturado', label: 'Valor capturado',
+            value: form_data.valor_capturado|default(item ? item.valorCapturado : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'roi', name: 'roi', label: 'ROI',
+            value: form_data.roi|default(item ? item.roi : '')
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'status', name: 'status', label: 'Status', type: 'select',
+            value: form_data.status|default(item ? item.status : 'hypothesis'),
+            options: [
+                { value: 'hypothesis', label: 'Hipótese' },
+                { value: 'testing', label: 'Testando' },
+                { value: 'piloting', label: 'Pilotando' },
+                { value: 'active', label: 'Ativo' },
+            ]
+        } %}
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-unio-primary">Salvar</button>
+            <a href="{{ path('app_inovacao_impact') }}" class="btn-unio-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

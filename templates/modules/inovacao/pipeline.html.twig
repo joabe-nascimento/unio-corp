@@ -1,0 +1,151 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+
+
+{% block inov_section_content %}
+
+<div data-inov-pipeline>
+
+
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: pipeline_velocity.this_week,      label: 'Itens esta semana', sub: 'vs '~pipeline_velocity.last_week~' semana anterior', icon: 'fa-layer-group' },
+
+    { value: pipeline_velocity.throughput,     label: 'Throughput',        sub: 'vs semana anterior',          icon: 'fa-arrow-trend-up', trend: 'up' },
+
+    { value: pipeline_velocity.avg_cycle~'d',  label: 'Ciclo médio',       sub: 'Ideia → decisão',             icon: 'fa-clock' },
+
+    { value: pipeline_blocked|length,          label: 'Bloqueados',        sub: '> 20 dias parado',            icon: 'fa-triangle-exclamation' },
+
+    { value: pipeline_total,                   label: 'Total no funil',    sub: 'Em todos os estágios',        icon: 'fa-flag-checkered' },
+
+], mb: 'mb-3' } %}
+
+
+
+<section class="unio-card mb-3" aria-label="Funil de conversão entre estágios">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Conversão do funil',
+
+        subtitle: pipeline_total ~ ' itens no pipeline'
+
+    } %}
+
+    <div class="inov-card-list">
+
+    {% for step in pipeline_velocity.conversion %}
+
+    {% set step_variant = step.rate >= 80 ? 'success' : (step.rate >= 50 ? 'warning' : 'accent') %}
+
+    <div class="inov-card-list-item">
+
+        <div class="perm-label mb-2">
+
+            {% if not loop.last %}{{ step.from }} <i class="fas fa-chevron-right mx-1 text-muted inov-inline-chevron" aria-hidden="true"></i> {{ step.to }}
+
+            {% else %}{{ step.from }}{% endif %}
+
+        </div>
+
+        {% include 'components/progress_inline.html.twig' with {
+
+            percent: step.rate,
+
+            variant: step_variant,
+
+            show_label: true
+
+        } %}
+
+    </div>
+
+    {% endfor %}
+
+    </div>
+
+</section>
+
+
+
+{% if pipeline_blocked|length > 0 %}
+
+<section class="unio-card mb-3" aria-label="Itens bloqueados">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: pipeline_blocked|length ~ ' item(s) parado(s)',
+
+        subtitle: 'Mais de 20 dias sem avanço — risco de bloqueio'
+
+    } %}
+
+    <div class="inov-stack-list">
+
+    {% for item in pipeline_blocked %}
+
+    <button type="button"
+
+            class="module-item w-100 text-left"
+
+            data-blocked-item="{{ item.id }}"
+
+            data-blocked-stage="{{ item.stage|default('poc') }}">
+
+        <div class="mi-icon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></div>
+
+        <div class="module-item-body">
+
+            <div class="mi-title">{{ item.title }}</div>
+
+            <div class="mi-sub">
+
+                {% include 'components/status_badge.html.twig' with { label: item.stage_label, variant: 'warning' } %}
+
+                <span class="ml-1">{{ item.days }}d parado</span>
+
+            </div>
+
+        </div>
+
+    </button>
+
+    {% endfor %}
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+
+<div class="unio-card">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Kanban do pipeline',
+
+        subtitle: 'Filtre por estágio ou clique em itens bloqueados'
+
+    } %}
+
+    {% include 'components/inovacao/stage_strip.html.twig' %}
+
+    {% include 'components/inovacao/pipeline_board.html.twig' with { page_mode: true, kanban_dnd: true } %}
+
+</div>
+
+
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/sortable.min.js') }}"></script>
+{% endblock %}
+

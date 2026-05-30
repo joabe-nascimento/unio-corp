@@ -1,0 +1,92 @@
+{% extends 'modules/inovacao/_base.html.twig' %}
+
+
+
+{% block inov_section_content %}
+
+{% set total_value = portfolio_items|length %}
+
+
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: portfolio_items|length, label: 'Inovações ativas', sub: 'Em produção ou escala', icon: 'fa-trophy', trend: 'up' },
+
+    { value: portfolio_items|filter(i => i.status == 'active')|length, label: 'Em operação', sub: 'Gerando valor contínuo', icon: 'fa-circle-check' },
+
+    { value: portfolio_totals.captured|default('—'), label: 'Valor capturado', sub: 'Soma do portfólio', icon: 'fa-coins' },
+
+    { value: portfolio_totals.roi|default('—'), label: 'ROI médio', sub: 'Retorno consolidado', icon: 'fa-chart-line' },
+
+], mb: 'mb-3' } %}
+
+
+
+<div class="row">
+
+    {% for item in portfolio_items %}
+
+    <div class="col-lg-6 mb-4 d-flex">
+
+        <div class="unio-card flex-fill d-flex flex-column">
+
+            <div class="inov-lab-card-head">
+
+                <div class="inov-lab-card-meta">
+
+                    {% include 'components/status_badge.html.twig' with { label: 'Em escala', variant: 'success' } %}
+
+                    <code class="inov-idea-code">{{ item.id }}</code>
+
+                </div>
+
+                <span class="text-muted" style="font-size:11px">Desde {{ item.since }}</span>
+
+            </div>
+
+            <div class="section-title mb-2">
+                {% if item.db_id is defined and item.db_id %}
+                <a href="{{ path('app_inovacao_ideia_show', { id: item.db_id }) }}" class="text-reset">{{ item.title }}</a>
+                {% else %}
+                {{ item.title }}
+                {% endif %}
+            </div>
+
+            <p class="section-subtitle flex-fill mb-3">{{ item.summary }}</p>
+
+            <div class="d-flex flex-wrap mb-3" style="gap:6px">
+
+                {% include 'components/status_badge.html.twig' with { label: item.metric, variant: 'info' } %}
+
+                {% include 'components/status_badge.html.twig' with { label: item.roi ~ ' ROI', variant: 'success' } %}
+
+                {% include 'components/status_badge.html.twig' with { label: item.value, variant: 'secondary' } %}
+
+            </div>
+
+            <div class="inov-idea-row-meta mt-auto">
+
+                <span class="inov-idea-owner">
+
+                    <i class="fas fa-user-circle" aria-hidden="true"></i> {{ item.owner }}
+
+                </span>
+
+                {% for tag in item.tags %}
+
+                {% include 'components/status_badge.html.twig' with { label: tag, variant: 'secondary' } %}
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}
+

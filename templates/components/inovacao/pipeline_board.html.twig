@@ -1,0 +1,79 @@
+{# Pipeline board — kanban padrão da plataforma #}
+{% set compact = compact|default(false) %}
+{% set page_mode = page_mode|default(false) %}
+{% set kanban_dnd = kanban_dnd|default(false) %}
+<div class="kanban-board{% if page_mode %} dev-kanban-board{% endif %}{% if kanban_dnd %} inov-kanban-dnd{% endif %}"
+     data-inov-pipeline-board
+     {% if kanban_dnd %}data-inov-kanban-dnd{% endif %}>
+    {% for stage in flow_stages %}
+    <div class="kanban-column" data-inov-pipeline-col="{{ stage.id }}">
+        <div class="kanban-column-header">
+            <span class="kanban-column-title">
+                <i class="fas {{ stage.icon }} mr-1" aria-hidden="true"></i>{{ stage.label }}
+            </span>
+            <span class="kanban-column-count" data-inov-kanban-count="{{ stage.id }}">{{ stage.value }}</span>
+        </div>
+        <div class="kanban-column-body">
+            <div class="kanban-column-cards{% if kanban_dnd %} inov-kanban-column{% endif %}"
+                 {% if kanban_dnd %}data-inov-kanban-column="{{ stage.id }}"{% endif %}>
+                {% for item in pipeline[stage.id]|default([]) %}
+                {% if not compact or loop.index <= 2 %}
+                {% set is_blocked = (item.days|default(0) > 20) and (item.progress|default(0) < 70) %}
+                <div class="kanban-card{% if is_blocked %} kanban-card--blocked{% endif %}{% if kanban_dnd and item.db_id is defined %} inov-kanban-card{% endif %}"
+                     data-stage="{{ stage.id }}"
+                     data-item-id="{{ item.id }}"
+                     {% if item.db_id is defined %}data-db-id="{{ item.db_id }}"{% endif %}
+                     {% if kanban_dnd and item.db_id is defined %}
+                     data-move-url="{{ path('app_inovacao_ideia_mover', { id: item.db_id }) }}"
+                     data-csrf="{{ csrf_token('inovacao_ideia_action_' ~ item.db_id) }}"
+                     {% endif %}>
+                    <div class="kanban-card-top">
+                        <code class="inov-idea-code">{{ item.id }}</code>
+                        {% if is_blocked %}
+                        {% include 'components/status_badge.html.twig' with { label: item.days ~ 'd parado', variant: 'warning' } %}
+                        {% elseif item.days|default(0) > 0 %}
+                        <span class="status-badge status-badge--secondary">{{ item.days }}d</span>
+                        {% endif %}
+                    </div>
+                    <p class="kanban-card-title">
+                        {% if item.db_id is defined and item.db_id %}
+                        <a href="{{ path('app_inovacao_ideia_show', { id: item.db_id }) }}" class="text-reset">{{ item.title }}</a>
+                        {% else %}
+                        {{ item.title }}
+                        {% endif %}
+                    </p>
+                    {% if not compact and item.summary %}
+                    <p class="kanban-card-desc">{{ item.summary }}</p>
+                    {% endif %}
+                    {% if item.metric is defined and item.metric and not compact %}
+                    <small class="text-muted d-block mb-2" style="font-size:11px">
+                        <i class="fas fa-bullseye" aria-hidden="true"></i> {{ item.metric }}
+                    </small>
+                    {% endif %}
+                    {% if item.progress|default(0) > 0 %}
+                    {% include 'components/progress_inline.html.twig' with {
+                        percent: item.progress,
+                        variant: is_blocked ? 'warning' : 'accent',
+                        show_label: true
+                    } %}
+                    {% endif %}
+                    {% if not compact %}
+                    <div class="kanban-card-footer">
+                        <span class="text-muted" style="font-size:11px">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i> {{ item.owner }}
+                        </span>
+                        {% for tag in item.tags|default([])|slice(0, 2) %}
+                        {% include 'components/status_badge.html.twig' with { label: tag, variant: 'secondary' } %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% else %}
+                <p class="text-muted small mb-0 px-2 py-3">Nenhum item</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
