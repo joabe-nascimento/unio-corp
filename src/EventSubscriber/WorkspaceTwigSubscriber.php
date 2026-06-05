@@ -3,7 +3,7 @@
 namespace App\EventSubscriber;
 
 use App\Entity\User;
-use App\Service\ChatMockService;
+use App\Service\ChatService;
 use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
 use App\Service\PageBackResolver;
@@ -35,7 +35,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private WorkspaceService $workspaceService,
         private NavigationService $navigation,
         private NotificationMockService $notifications,
-        private ChatMockService $chat,
+        private ChatService $chat,
         private GlobalSearchService $globalSearch,
         private PageBackResolver $pageBackResolver,
     ) {}
@@ -71,7 +71,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         }
 
         $this->twig->addGlobal('nav_notifications_unread', $this->notifications->getUnreadCount());
-        $this->twig->addGlobal('nav_chat_unread', $this->chat->getUnreadCount());
+        $this->twig->addGlobal('nav_chat_unread', $this->chat->getUnreadCount($user, $this->workspaceService->getActiveEmpresa($user) ?? $user->getEmpresa()));
         $this->twig->addGlobal(
             'global_search_members_json',
             json_encode(

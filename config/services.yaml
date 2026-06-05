@@ -9,7 +9,8 @@
 parameters:
     app.mailer_from: '%env(MAILER_FROM_ADDRESS)%'
     mercure_url_default: 'http://localhost:3000/.well-known/mercure'
-    mercure_jwt_default: 'changeme'
+    mercure_jwt_default: '!ChangeMe!UnioMercureJwtDevSecret32!'
+    app.chat_mercure_topic_base_default: 'https://localhost/chat'
 
 services:
     # default configuration for services in *this* file
@@ -39,6 +40,14 @@ services:
     App\Service\RhDocumentService:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\Service\ChatService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    App\Service\ChatMercureTopics:
+        arguments:
+            $topicBase: '%env(default:app.chat_mercure_topic_base_default:MERCURE_CHAT_TOPIC_BASE)%'
 
     App\Controller\Module\Admin\AdminController:
         arguments:

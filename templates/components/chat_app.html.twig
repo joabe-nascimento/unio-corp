@@ -1,123 +1,241 @@
-{# Chat Bate Papo — chat interno (mock; backend em implementação futura) #}
+{# Chat Bate Papo — mensagens, áudio e chamada de voz (Mercure) #}
 <div
     id="chatApp"
     class="chat-app"
     data-user-initials="{{ user_initials|e('html_attr') }}"
-    data-storage-key="unio-chat-bate-papo"
+    data-user-id="{{ user_id }}"
+    data-api-base="{{ chat_api_base|default('/bate-papo/api') }}"
+    data-has-workspace="{{ chat_has_workspace|default(false) ? '1' : '0' }}"
+    {% if chat_mercure_enabled|default(false) and chat_mercure_url|default('') %}
+    data-mercure-enabled="1"
+    data-mercure-url="{{ chat_mercure_url|e('html_attr') }}"
+    {% else %}
+    data-mercure-enabled="0"
+    {% endif %}
 >
+    {% if chat_has_workspace|default(false) %}
     <script type="application/json" id="chatInitialData">{{ conversations|json_encode|raw }}</script>
+    {% endif %}
 
     <aside class="chat-sidebar" id="chatSidebar" aria-label="Lista de conversas do Chat Bate Papo">
         <header class="chat-sidebar-head">
             <div class="chat-sidebar-title-wrap">
                 <h2 class="chat-sidebar-title">Chat Bate Papo</h2>
-                <span class="chat-sidebar-sub">Mensagens da equipe</span>
+                <span class="chat-sidebar-sub">Mensagens e voz da equipe</span>
             </div>
             <div class="dropdown">
-                <button
-                    type="button"
-                    class="chat-icon-btn"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                    aria-label="Ações do Chat Bate Papo"
-                    title="Ações"
-                >
+                <button type="button" class="chat-icon-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="Ações" title="Ações">
                     <i class="fas fa-plus" aria-hidden="true"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right chat-action-menu">
                     <h6 class="dropdown-header">Ações</h6>
-                    <button type="button" class="dropdown-item chat-action-soon" data-chat-action="nova-conversa">
+                    <button type="button" class="dropdown-item" data-chat-action="nova-conversa">
                         <i class="fas fa-comment-medical" aria-hidden="true"></i>
                         <span>Nova conversa</span>
-                        <span class="chat-soon-badge">Em breve</span>
                     </button>
-                    <button type="button" class="dropdown-item chat-action-soon" data-chat-action="criar-grupo">
+                    <button type="button" class="dropdown-item" data-chat-action="criar-grupo">
                         <i class="fas fa-users" aria-hidden="true"></i>
                         <span>Criar grupo</span>
-                        <span class="chat-soon-badge">Em breve</span>
                     </button>
-                    <button type="button" class="dropdown-item chat-action-soon" data-chat-action="transmissao">
-                        <i class="fas fa-tower-broadcast" aria-hidden="true"></i>
-                        <span>Iniciar transmissão</span>
-                        <span class="chat-soon-badge">Em breve</span>
-                    </button>
-                    <div class="dropdown-divider"></div>
-                    <button type="button" class="dropdown-item chat-action-soon" data-chat-action="convidar">
+                    <button type="button" class="dropdown-item" data-chat-action="adicionar-grupo" hidden>
                         <i class="fas fa-user-plus" aria-hidden="true"></i>
-                        <span>Convidar membros</span>
-                        <span class="chat-soon-badge">Em breve</span>
+                        <span>Adicionar ao grupo</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <div class="chat-sidebar-search">
-            <i class="fas fa-search" aria-hidden="true"></i>
-            <input type="search" id="chatSearch" class="chat-search-input" placeholder="Buscar conversas…" autocomplete="off" aria-label="Buscar conversas">
+        <div class="chat-sidebar-browse" id="chatSidebarBrowse">
+            <div class="chat-sidebar-search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search" id="chatSearch" class="chat-search-input" placeholder="Buscar conversas…" autocomplete="off" aria-label="Buscar conversas">
+            </div>
+
+            <div class="chat-tabs" role="tablist" aria-label="Filtrar conversas">
+                <button type="button" class="chat-tab chat-tab--active" data-chat-tab="all" role="tab" aria-selected="true">Todas</button>
+                <button type="button" class="chat-tab" data-chat-tab="direct" role="tab" aria-selected="false">Diretas</button>
+                <button type="button" class="chat-tab" data-chat-tab="group" role="tab" aria-selected="false">Grupos</button>
+            </div>
+
+            <div class="chat-conv-list" id="chatConvList" role="list"></div>
         </div>
 
-        <div class="chat-tabs" role="tablist" aria-label="Filtrar conversas">
-            <button type="button" class="chat-tab chat-tab--active" data-chat-tab="all" role="tab" aria-selected="true">Todas</button>
-            <button type="button" class="chat-tab" data-chat-tab="direct" role="tab" aria-selected="false">Diretas</button>
-            <button type="button" class="chat-tab" data-chat-tab="group" role="tab" aria-selected="false">Grupos</button>
-        </div>
+        <div class="chat-sidebar-panel" id="chatSidebarPanel" hidden>
+            <header class="chat-sidebar-panel-head">
+                <button type="button" class="chat-sidebar-back" id="chatSidebarBackBtn" aria-label="Voltar">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                </button>
+                <h3 class="chat-sidebar-panel-title" id="chatSidebarPanelTitle">Nova conversa</h3>
+            </header>
 
-        <div class="chat-conv-list" id="chatConvList" role="list"></div>
+            <div class="chat-sidebar-panel-body">
+                <div class="chat-sidebar-section chat-sidebar-section--pick" id="chatDirectPanel" hidden>
+                    <div class="chat-panel-list-wrap">
+                        <input type="search" id="chatColleagueSearch" class="chat-sidebar-field" placeholder="Buscar colega…" aria-label="Buscar colega">
+                        <div class="chat-colleague-list" id="chatColleagueList"></div>
+                    </div>
+                </div>
+
+                <div class="chat-sidebar-section chat-sidebar-section--pick" id="chatGroupPanel" hidden>
+                    <div class="chat-panel-form">
+                        <input type="text" id="chatGroupName" class="chat-sidebar-field" maxlength="120" placeholder="Nome do grupo" aria-label="Nome do grupo">
+                    </div>
+                    <div class="chat-panel-list-wrap">
+                        <input type="search" id="chatGroupMemberSearch" class="chat-sidebar-field" placeholder="Buscar colega…" aria-label="Buscar participante">
+                        <div class="chat-colleague-list" id="chatGroupMemberList"></div>
+                    </div>
+                </div>
+
+                <div class="chat-info-layout" id="chatInfoLayout" hidden>
+                    <section id="chatInfoMedia" class="chat-info-media">
+                        <h4 class="chat-info-block-title">Galeria</h4>
+                        <div class="chat-media-tabs" role="tablist" aria-label="Galeria da conversa">
+                            <button type="button" class="chat-media-tab chat-media-tab--active" data-media-tab="all" role="tab" aria-selected="true">Tudo</button>
+                            <button type="button" class="chat-media-tab" data-media-tab="images" role="tab" aria-selected="false">Mídia</button>
+                            <button type="button" class="chat-media-tab" data-media-tab="documents" role="tab" aria-selected="false">Docs</button>
+                            <button type="button" class="chat-media-tab" data-media-tab="links" role="tab" aria-selected="false">Links</button>
+                            <button type="button" class="chat-media-tab" data-media-tab="audio" role="tab" aria-selected="false">Áudio</button>
+                        </div>
+                        <div class="chat-media-body" id="chatMediaBody" role="tabpanel"></div>
+                    </section>
+
+                    <section class="chat-sidebar-section chat-sidebar-section--info" id="chatInfoGroup" hidden>
+                        <div class="chat-info-participants-head">
+                            <h4 class="chat-info-block-title">Participantes</h4>
+                            <button type="button" class="chat-info-add-toggle" id="chatInfoAddToggle">Adicionar</button>
+                        </div>
+                        <div class="chat-info-top">
+                            <input type="text" id="chatInfoGroupName" class="chat-sidebar-field chat-info-name-input" maxlength="120" placeholder="Nome do grupo" aria-label="Nome do grupo">
+                            <button type="button" class="chat-icon-btn chat-info-save-btn" id="chatInfoRenameBtn" title="Salvar nome" aria-label="Salvar nome">
+                                <i class="fas fa-check" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="chat-info-members" id="chatInfoMembers"></div>
+                        <div class="chat-panel-list-wrap chat-panel-list-wrap--info" id="chatInfoAddWrap" hidden>
+                            <input type="search" id="chatInfoAddSearch" class="chat-sidebar-field" placeholder="Buscar colega…" aria-label="Adicionar colega">
+                            <div class="chat-colleague-list" id="chatInfoAddList"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <footer class="chat-sidebar-panel-foot" id="chatGroupFooter" hidden>
+                <button type="button" class="btn-unio btn-sm" id="chatGroupCreateBtn" disabled>Criar grupo</button>
+            </footer>
+
+            <footer class="chat-sidebar-panel-foot chat-sidebar-panel-foot--info" id="chatInfoFooter" hidden>
+                <button type="button" class="btn-unio btn-sm" id="chatInfoAddBtn" disabled>Adicionar</button>
+                <button type="button" class="btn-unio btn-sm btn-outline-danger" id="chatInfoLeaveBtn">Sair</button>
+            </footer>
+        </div>
     </aside>
 
     <main class="chat-main" id="chatMain">
+        {% if not chat_has_workspace|default(false) %}
+        <div class="chat-empty chat-empty--blocked">
+            <div class="chat-empty-icon" aria-hidden="true"><i class="fas fa-building"></i></div>
+            <h3 class="chat-empty-title">Selecione uma área de trabalho</h3>
+            <p class="chat-empty-text">O Chat Bate Papo usa a empresa ativa do seu workspace.</p>
+            <a href="{{ path('app_workspace_select') }}" class="btn-unio btn-sm mt-2">Escolher workspace</a>
+        </div>
+        {% else %}
         <div class="chat-empty" id="chatEmpty">
             <div class="chat-empty-icon" aria-hidden="true"><i class="fas fa-comments"></i></div>
             <h3 class="chat-empty-title">Selecione uma conversa</h3>
-            <p class="chat-empty-text">Escolha um contato ou grupo na lista ao lado para começar.</p>
+            <p class="chat-empty-text">Escolha um contato ou grupo na lista ao lado.</p>
         </div>
 
         <div class="chat-room" id="chatRoom" hidden>
             <header class="chat-room-head">
-                <button type="button" class="chat-back-btn" id="chatBackBtn" aria-label="Voltar para conversas">
-                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
-                </button>
+                <button type="button" class="chat-back-btn" id="chatBackBtn" aria-label="Voltar"><i class="fas fa-arrow-left"></i></button>
                 <div class="chat-room-avatar" id="chatRoomAvatar" aria-hidden="true"></div>
                 <div class="chat-room-meta">
                     <h3 class="chat-room-name" id="chatRoomName"></h3>
                     <p class="chat-room-status" id="chatRoomStatus"></p>
                 </div>
                 <div class="chat-room-actions">
-                    <button type="button" class="chat-icon-btn" disabled title="Chamada de voz (em breve)" aria-label="Chamada de voz">
+                    <button type="button" class="chat-icon-btn" id="chatRoomInfoBtn" title="Detalhes da conversa" aria-label="Detalhes da conversa">
+                        <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="chat-icon-btn" id="chatVoiceCallBtn" title="Chamada de voz" aria-label="Chamada de voz">
                         <i class="fas fa-phone" aria-hidden="true"></i>
                     </button>
                     <button type="button" class="chat-icon-btn" disabled title="Chamada de vídeo (em breve)" aria-label="Chamada de vídeo">
                         <i class="fas fa-video" aria-hidden="true"></i>
                     </button>
-                    <button type="button" class="chat-icon-btn" disabled title="Informações (em breve)" aria-label="Informações da conversa">
-                        <i class="fas fa-circle-info" aria-hidden="true"></i>
-                    </button>
                 </div>
             </header>
 
-            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+            <div class="chat-messages-wrap">
+                <div class="chat-load-more-wrap" id="chatLoadMoreWrap" hidden>
+                    <button type="button" class="chat-load-more-btn" id="chatLoadMoreBtn">Carregar mensagens anteriores</button>
+                </div>
+                <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+            </div>
+
+            <div class="chat-reply-bar" id="chatReplyBar" hidden>
+                <div class="chat-reply-bar-body">
+                    <span class="chat-reply-bar-label">Respondendo</span>
+                    <span class="chat-reply-bar-text" id="chatReplyText"></span>
+                </div>
+                <button type="button" class="chat-icon-btn chat-reply-bar-close" id="chatReplyCancel" aria-label="Cancelar resposta"><i class="fas fa-xmark"></i></button>
+            </div>
 
             <footer class="chat-composer">
-                <button type="button" class="chat-icon-btn" disabled title="Anexo (em breve)" aria-label="Anexar arquivo">
+                <input type="file" id="chatFileInput" class="chat-file-input" accept="image/*,video/*,.pdf,.txt,.doc,.docx,.xls,.xlsx,.zip" hidden>
+                <button type="button" class="chat-icon-btn" id="chatAttachBtn" title="Anexar arquivo" aria-label="Anexar arquivo">
                     <i class="fas fa-paperclip" aria-hidden="true"></i>
                 </button>
+                <button type="button" class="chat-icon-btn chat-voice-record-btn" id="chatVoiceRecordBtn" title="Gravar mensagem de voz" aria-label="Gravar mensagem de voz">
+                    <i class="fas fa-microphone" aria-hidden="true"></i>
+                </button>
                 <form class="chat-composer-form" id="chatForm">
-                    <textarea
-                        id="chatInput"
-                        class="chat-input"
-                        rows="1"
-                        placeholder="Escreva uma mensagem…"
-                        maxlength="4000"
-                        aria-label="Mensagem"
-                    ></textarea>
+                    <textarea id="chatInput" class="chat-input" rows="1" placeholder="Escreva uma mensagem…" maxlength="4000" aria-label="Mensagem"></textarea>
                     <button type="submit" class="chat-send-btn" id="chatSendBtn" aria-label="Enviar" disabled>
                         <i class="fas fa-paper-plane" aria-hidden="true"></i>
                     </button>
                 </form>
             </footer>
         </div>
+        {% endif %}
     </main>
 
     <div id="chatToast" class="chat-toast" role="status" aria-live="polite" hidden></div>
 </div>
+
+{% if chat_has_workspace|default(false) %}
+    <div class="chat-msg-menu" id="chatMsgMenu" hidden role="menu">
+        <button type="button" class="chat-msg-menu-item" data-msg-action="reply"><i class="fas fa-reply"></i> Responder</button>
+        <button type="button" class="chat-msg-menu-item" data-msg-action="copy"><i class="fas fa-copy"></i> Copiar</button>
+        <button type="button" class="chat-msg-menu-item chat-msg-menu-item--danger" data-msg-action="delete" hidden><i class="fas fa-trash"></i> Apagar</button>
+    </div>
+
+    <div class="chat-call-overlay" id="chatCallOverlay" hidden>
+        <div class="chat-call-card">
+            <div class="chat-call-avatar" id="chatCallAvatar">?</div>
+            <h3 class="chat-call-name" id="chatCallName">—</h3>
+            <p class="chat-call-status" id="chatCallStatus">Chamando…</p>
+            <div class="chat-call-actions">
+                <button type="button" class="chat-call-btn chat-call-btn--accept" id="chatCallAcceptBtn" hidden><i class="fas fa-phone"></i></button>
+                <button type="button" class="chat-call-btn chat-call-btn--end" id="chatCallEndBtn"><i class="fas fa-phone-slash"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-media-lightbox" id="chatMediaLightbox" hidden>
+        <button type="button" class="chat-media-lightbox-close" id="chatMediaLightboxClose" aria-label="Fechar"><i class="fas fa-xmark"></i></button>
+        <div class="chat-media-lightbox-body" id="chatMediaLightboxBody"></div>
+    </div>
+
+    <div class="chat-media-gallery-modal" id="chatMediaGalleryModal" hidden>
+        <div class="chat-media-gallery-modal-card" role="dialog" aria-modal="true" aria-labelledby="chatMediaGalleryTitle">
+            <header class="chat-media-gallery-modal-head">
+                <h3 class="chat-media-gallery-modal-title" id="chatMediaGalleryTitle">Galeria</h3>
+                <button type="button" class="chat-media-gallery-modal-close" id="chatMediaGalleryClose" aria-label="Fechar">
+                    <i class="fas fa-xmark" aria-hidden="true"></i>
+                </button>
+            </header>
+            <div class="chat-media-gallery-modal-body" id="chatMediaGalleryModalBody"></div>
+        </div>
+    </div>
+{% endif %}
