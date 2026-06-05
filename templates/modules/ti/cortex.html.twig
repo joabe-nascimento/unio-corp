@@ -1,0 +1,246 @@
+{% extends 'modules/ti/_base.html.twig' %}
+
+{% block ti_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: pulse.cortex_auto_rate ~ '%', label: 'Triagem automática', sub: 'Cortex + Helia', icon: 'fa-brain', trend: 'up' },
+
+    { value: cortex_queue|length, label: 'Na fila Cortex', sub: 'Aguardando ação', icon: 'fa-list' },
+
+    { value: helia_suggestions|length, label: 'Sugestões', sub: 'Prontas para aplicar', icon: 'fa-wand-magic-sparkles' },
+
+], mb: 'mb-3' } %}
+
+
+
+<div class="row">
+
+    <div class="col-lg-7 mb-4">
+
+        <section class="unio-card">
+
+            {% include 'components/section_header.html.twig' with {
+
+                title: 'Fila Cortex Ops',
+
+                subtitle: 'Triagens pendentes de aplicar ou revisar'
+
+            } %}
+
+            <div class="ti-card-list">
+
+            {% for item in cortex_queue %}
+
+            <div class="ti-card-list-item ti-cortex-queue-item">
+
+                <div class="ti-idea-row-head flex-wrap gap-2">
+
+                    <a href="{{ path('app_ti_chamado_show', { id: item.ticket_id }) }}" class="section-title text-reset">{{ item.title }}</a>
+
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: item.status == 'done' ? 'Concluído' : 'Revisar',
+                        variant: item.status == 'done' ? 'success' : 'secondary'
+                    } %}
+
+                    {% if item.confidence|default(null) %}
+
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: item.confidence ~ '%',
+                        variant: 'secondary'
+                    } %}
+
+                    {% endif %}
+
+                </div>
+
+                <p class="section-subtitle mb-2">{{ item.result }}</p>
+
+                {% if ti_can('apply_helia') and item.status != 'done' %}
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    {% if not item.applied|default(false) %}
+
+                    <form method="post" action="{{ path('app_ti_chamado_helia_aplicar', { id: item.ticket_id }) }}" class="m-0">
+
+                        <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_helia_aplicar_' ~ item.ticket_id) }}">
+
+                        <input type="hidden" name="redirect" value="cortex">
+
+                        <button type="submit" class="btn-unio btn-xs">
+
+                            <i class="fas fa-wand-magic-sparkles mr-1"></i> Aplicar
+
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                    {% if not item.reviewed|default(false) %}
+
+                    <form method="post" action="{{ path('app_ti_chamado_helia_revisar', { id: item.ticket_id }) }}" class="m-0">
+
+                        <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_helia_revisar_' ~ item.ticket_id) }}">
+
+                        <input type="hidden" name="redirect" value="cortex">
+
+                        <button type="submit" class="btn-unio-ghost btn-xs">
+
+                            <i class="fas fa-check mr-1"></i> Revisado
+
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                    <a href="{{ path('app_ti_chamado_show', { id: item.ticket_id }) }}" class="btn-unio-ghost btn-xs">
+
+                        <i class="fas fa-arrow-up-right-from-square mr-1"></i> Abrir
+
+                    </a>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            {% else %}
+
+            <p class="section-subtitle mb-0 px-1">Nenhuma triagem pendente. Todos os chamados foram processados.</p>
+
+            {% endfor %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <div class="col-lg-5 mb-4">
+
+        <section class="unio-card">
+
+            {% include 'components/section_header.html.twig' with { title: 'Sugestões Helia', subtitle: 'Aplicar triagem com um clique' } %}
+
+            <div class="ti-card-list">
+
+            {% for s in helia_suggestions %}
+
+            <div class="ti-card-list-item">
+
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+
+                    <a href="{{ path('app_ti_chamado_show', { id: s.ticket_id }) }}"><code class="ti-ticket-code">{{ s.ticket_id }}</code></a>
+
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: s.suggested_priority|default('P3') ~ ' · ' ~ s.suggested_category|default(''),
+                        variant: 'secondary'
+                    } %}
+
+                </div>
+
+                <p class="section-subtitle mt-0 mb-2">{{ s.suggestion }}</p>
+
+                {% if ti_can('apply_helia') %}
+
+                <form method="post" action="{{ path('app_ti_chamado_helia_aplicar', { id: s.ticket_id }) }}" class="m-0">
+
+                    <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_helia_aplicar_' ~ s.ticket_id) }}">
+
+                    <input type="hidden" name="redirect" value="cortex">
+
+                    <button type="submit" class="btn-unio btn-xs">
+
+                        <i class="fas fa-wand-magic-sparkles mr-1"></i> Aplicar Helia
+
+                    </button>
+
+                </form>
+
+                {% endif %}
+
+            </div>
+
+            {% else %}
+
+            <p class="section-subtitle mb-0 px-1">Sem sugestões pendentes.</p>
+
+            {% endfor %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+
+<section class="unio-card">
+
+    {% include 'components/section_header.html.twig' with { title: 'Insights Cortex', subtitle: 'Detecção proativa' } %}
+
+    <div class="row">
+
+    {% for insight in cortex_insights %}
+
+    <div class="col-md-4 mb-3 d-flex">
+
+        <div class="ti-cortex-card flex-fill">
+
+            <div class="ti-cortex-card-head">
+
+                <span class="mi-icon"><i class="fas {{ insight.icon }}"></i></span>
+
+                <span class="section-title">{{ insight.title }}</span>
+
+            </div>
+
+            <p class="section-subtitle flex-fill">{{ insight.summary }}</p>
+
+            <span class="perm-label">{{ insight.confidence }}% confiança · {{ insight.action }}</span>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+    </div>
+
+</section>
+
+{% if playbooks|default([])|length > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Playbooks operacionais',
+        subtitle: 'Runbooks automáticos por gatilho'
+    } %}
+    <div class="row">
+    {% for pb in playbooks %}
+    <div class="col-md-4 mb-3 d-flex">
+        <div class="ti-cortex-card flex-fill">
+            <div class="ti-cortex-card-head">
+                <span class="mi-icon"><i class="fas fa-book"></i></span>
+                <span class="section-title">{{ pb.title }}</span>
+            </div>
+            <p class="section-subtitle">{{ pb.trigger|default(pb.gatilho) }}{% if pb.priority %} · {{ pb.priority }}{% endif %}</p>
+            <ol class="ti-helia-steps mb-0 small">
+                {% for step in pb.steps|default([])|slice(0, 4) %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+    {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+

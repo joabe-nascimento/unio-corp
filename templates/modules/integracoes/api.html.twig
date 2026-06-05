@@ -1,0 +1,76 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+{% block hub_toolbar_actions %}
+{% if product_grant('hub_integracoes', 'api_keys') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="integ-api-key-form">
+    <i class="fas fa-plus mr-1"></i> Nova chave
+</button>
+{% endif %}
+{{ parent() }}
+{% endblock %}
+
+{% block integ_section_content %}
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with { title: 'API REST UNio', subtitle: 'Documentação e endpoints' } %}
+            <p class="section-subtitle">Base URL: <code>{{ app.request.schemeAndHttpHost }}/api/v1</code></p>
+            <ul class="integ-api-endpoints">
+                <li><code>GET /funcionarios</code> — Lista funcionários (scope: read:rh)</li>
+                <li><code>POST /webhooks</code> — Registrar webhook (scope: webhook:manage)</li>
+                <li><code>GET /integracoes/status</code> — Saúde dos conectores</li>
+                <li><code>POST /eventos/replay</code> — Reprocessar evento com falha</li>
+            </ul>
+            <p class="text-muted small mb-0">Autenticação via header <code>Authorization: Bearer &lt;api_key&gt;</code></p>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="unio-card h-100 integ-api-scopes-card">
+            {% include 'components/section_header.html.twig' with { title: 'Scopes disponíveis', subtitle: 'Permissões por chave' } %}
+            {% for scope in api_scopes|default([]) %}
+            <div class="integ-scope-row"><code>{{ scope.id }}</code><span>{{ scope.label }}</span></div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with { title: 'Chaves de API', subtitle: 'Gerencie acesso programático' } %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Nome</th><th>Chave</th><th>Ambiente</th><th>Scopes</th><th>Último uso</th><th>Status</th>{% if product_grant('hub_integracoes', 'api_keys') %}<th></th>{% endif %}</tr></thead>
+            <tbody>
+            {% for key in api_keys %}
+            <tr>
+                <td><strong>{{ key.nome }}</strong></td>
+                <td><code>{{ key.masked_key }}</code></td>
+                <td>{% include 'components/status_badge.html.twig' with { label: key.ambiente|upper, variant: key.ambiente == 'prod' ? 'success' : 'info' } %}</td>
+                <td>{% for s in key.scopes %}<span class="integ-tag">{{ s }}</span>{% endfor %}</td>
+                <td>{{ key.ultimo_uso }}</td>
+                <td>{% include 'components/status_badge.html.twig' with { label: key.revogada ? 'Revogada' : 'Ativa', variant: key.revogada ? 'danger' : 'success' } %}</td>
+                {% if product_grant('hub_integracoes', 'api_keys') %}
+                <td class="text-end">
+                    {% if not key.revogada %}
+                    <form method="post" action="{{ path('app_integracoes_api_revogar', { id: key.db_id }) }}" class="d-inline" onsubmit="return confirm('Revogar chave?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('integ_api_revoke_' ~ key.db_id) }}">
+                        <button type="submit" class="btn-unio btn-sm btn-unio-ghost text-danger">Revogar</button>
+                    </form>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: product_grant('hub_integracoes', 'api_keys') ? 7 : 6,
+                icon: 'fa-key',
+                title: 'Nenhuma chave de API.'
+            } %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% if product_grant('hub_integracoes', 'api_keys') %}
+{% include 'components/integracoes/api_key_offcanvas.html.twig' with { scopes: api_scopes|default([]) } %}
+{% endif %}
+{% endblock %}

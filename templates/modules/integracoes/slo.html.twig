@@ -1,0 +1,113 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+
+{% block integ_section_content %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: slo_stats.total, label: 'SLOs monitorados', icon: 'fa-shield-check' },
+    { value: slo_stats.brechas, label: 'Em brecha', icon: 'fa-triangle-exclamation', trend: slo_stats.brechas > 0 ? 'down' : null },
+    { value: slo_stats.ok, label: 'Cumpridos', icon: 'fa-circle-check' },
+], mb: 'mb-3' } %}
+
+{% if slo_stats.brechas > 0 %}
+<div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+    <i class="fas fa-triangle-exclamation me-2"></i>
+    <strong>{{ slo_stats.brechas }} SLO(s) em brecha.</strong>&nbsp;Revise as métricas abaixo e tome ação.
+</div>
+{% endif %}
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'SLOs por Fluxo de Negócio',
+        subtitle: 'Metas de uptime e latência por fluxo cross-núcleo'
+    } %}
+    {% if slos|length > 0 %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Fluxo</th>
+                    <th class="text-end">Meta Uptime</th>
+                    <th class="text-end">Uptime Atual</th>
+                    <th class="text-end">Gap</th>
+                    <th class="text-end">Meta Latência</th>
+                    <th class="text-end">Latência Atual</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for slo in slos %}
+            {% set gap_variant = slo.gap_uptime >= 0 ? 'success' : (slo.gap_uptime >= -1 ? 'warning' : 'danger') %}
+            <tr class="{% if slo.em_brecha %}table-warning{% endif %}">
+                <td>
+                    <strong>{{ slo.titulo }}</strong>
+                    <br><small class="admin-table-mono text-muted">{{ slo.flow_key }}</small>
+                </td>
+                <td class="text-end">{{ slo.meta_uptime }}%</td>
+                <td class="text-end">
+                    <strong class="text-{{ slo.em_brecha ? 'danger' : 'success' }}">{{ slo.uptime_atual }}%</strong>
+                </td>
+                <td class="text-end">
+                    <span class="ti-badge ti-badge-metric ti-badge-metric--{{ gap_variant }}">
+                        {{ slo.gap_uptime >= 0 ? '+' : '' }}{{ slo.gap_uptime }}%
+                    </span>
+                </td>
+                <td class="text-end">{{ slo.meta_latencia_ms }} ms</td>
+                <td class="text-end">
+                    {% if slo.latencia_atual_ms %}
+                    <strong class="text-{{ slo.latencia_atual_ms > slo.meta_latencia_ms ? 'danger' : 'success' }}">
+                        {{ slo.latencia_atual_ms }} ms
+                    </strong>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: slo.em_brecha ? 'BRECHA' : 'OK',
+                        variant: slo.em_brecha ? 'danger' : 'success'
+                    } %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-shield-check',
+        title: 'Nenhum SLO configurado',
+        text: 'Os SLOs serão criados automaticamente a partir dos fluxos monitorados.',
+        compact: true
+    } %}
+    {% endif %}
+</section>
+
+{% if slo_stats.brechas > 0 %}
+<section class="unio-card mt-3">
+    {% include 'components/section_header.html.twig' with {
+        title: 'SLOs em Brecha',
+        subtitle: 'Fluxos que não estão atingindo as metas definidas'
+    } %}
+    <ul class="list-group list-group-flush">
+    {% for slo in slos %}
+    {% if slo.em_brecha %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+        <div>
+            <strong>{{ slo.titulo }}</strong>
+            <br>
+            <small class="text-muted">
+                {% if slo.uptime_atual < slo.meta_uptime %}
+                Uptime {{ slo.uptime_atual }}% abaixo da meta {{ slo.meta_uptime }}%.
+                {% endif %}
+                {% if slo.latencia_atual_ms and slo.latencia_atual_ms > slo.meta_latencia_ms %}
+                Latência {{ slo.latencia_atual_ms }}ms acima da meta {{ slo.meta_latencia_ms }}ms.
+                {% endif %}
+            </small>
+        </div>
+        {% include 'components/ti/ti_metric_badge.html.twig' with { label: 'BRECHA', variant: 'danger' } %}
+    </li>
+    {% endif %}
+    {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% endblock %}

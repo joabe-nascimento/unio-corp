@@ -25,6 +25,14 @@ class PlatformConfigService
     /** @var list<string> */
     private const ASSET_URL_KEYS = ['logo_url', 'logo_mark_url', 'logo_full_url', 'favicon_url'];
 
+    /** @var array<string,string> Placeholders exibidos quando nenhum asset foi configurado. */
+    public const DEFAULT_ASSET_PATHS = [
+        'logo_url'      => '/images/logos/logo-placeholder-full.svg',
+        'logo_full_url' => '/images/logos/logo-placeholder-full.svg',
+        'logo_mark_url' => '/images/logos/logo-placeholder-mark.svg',
+        'favicon_url'   => '/images/logos/favicon-placeholder.svg',
+    ];
+
     private const MIN_ASSET_BYTES = 200;
 
     public function __construct(string $projectDir)
@@ -174,6 +182,19 @@ class PlatformConfigService
             || trim((string) $this->get('website')) !== '';
     }
 
+    /** Caminho relativo (/…) ou URL absoluta do asset; usa placeholder quando vazio. */
+    public function resolveAssetUrl(string $key): string
+    {
+        $custom = trim((string) $this->get($key, ''));
+
+        return $custom !== '' ? $custom : (self::DEFAULT_ASSET_PATHS[$key] ?? '');
+    }
+
+    public function hasCustomAsset(string $key): bool
+    {
+        return trim((string) $this->get($key, '')) !== '';
+    }
+
     /** @param array<string,mixed> $config */
     public function save(array $config): void
     {
@@ -224,8 +245,19 @@ class PlatformConfigService
             $url = '/' . ltrim($url, '/');
         }
 
+        foreach (self::DEFAULT_ASSET_PATHS as $defaultPath) {
+            if ($url === $defaultPath) {
+                return $url;
+            }
+        }
+
         $path = $this->projectDir . '/public' . $url;
-        if (!is_file($path) || filesize($path) < self::MIN_ASSET_BYTES) {
+        if (!is_file($path)) {
+            return '';
+        }
+
+        $minBytes = str_ends_with(strtolower($path), '.svg') ? 80 : self::MIN_ASSET_BYTES;
+        if (filesize($path) < $minBytes) {
             return '';
         }
 

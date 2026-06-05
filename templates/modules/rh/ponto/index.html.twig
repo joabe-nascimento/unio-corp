@@ -6,37 +6,55 @@
 {% block hub_content %}
 <div class="unio-card p-4 mb-3">
     <form method="get" class="d-flex align-items-end gap-2 mb-3">
-        <div>
-            <label class="form-label">Data</label>
-            <input type="date" name="data" class="form-control" value="{{ data_filtro|date('Y-m-d') }}">
-        </div>
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Data',
+            type: 'date',
+            name: 'data',
+            value: data_filtro|date('Y-m-d'),
+            show_label: true
+        } %}
         <button type="submit" class="btn-unio-ghost btn-sm">Filtrar</button>
     </form>
 
     <form method="post" action="{{ path('app_rh_ponto', { data: data_filtro|date('Y-m-d') }) }}">
         <input type="hidden" name="_token" value="{{ csrf_token('rh_ponto_batida') }}">
         {% if grant_at_least('product_rh', 'ponto', 'GESTOR_EQUIPE') and not funcionario %}
-        <div class="mb-2">
-            <select name="funcionario_id" class="form-select form-select-sm" required>
-                <option value="">Colaborador</option>
-                {% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome }}</option>{% endfor %}
-            </select>
-        </div>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ponto-funcionario',
+            name: 'funcionario_id',
+            label: 'Colaborador',
+            type: 'select',
+            required: true,
+            options: [{ value: '', label: 'Colaborador' }]|merge(
+                funcionarios|map(f => { value: f.id ~ '', label: f.nome })
+            )
+        } %}
         {% endif %}
-        <div class="d-flex gap-2 flex-wrap">
-            <select name="tipo" class="form-select form-select-sm" style="max-width:140px">
-                <option value="ENTRADA">Entrada</option>
-                <option value="SAIDA">Saída</option>
-            </select>
+        <div class="d-flex gap-2 flex-wrap align-items-end">
+            {% include 'components/filter_group.html.twig' with {
+                label: 'Tipo',
+                name: 'tipo',
+                min_width: '140px',
+                options: [
+                    { value: 'ENTRADA', label: 'Entrada' },
+                    { value: 'SAIDA', label: 'Saída' },
+                ]
+            } %}
             <button type="submit" class="btn-unio btn-sm">Registrar batida</button>
         </div>
     </form>
 </div>
 
 <div class="unio-card p-4">
-    <h4 class="h6 mb-3">Espelho — {{ data_filtro|date('d/m/Y') }}</h4>
+    {% include 'components/section_header.html.twig' with {
+        title: 'Espelho — ' ~ data_filtro|date('d/m/Y')
+    } %}
     {% if registros is empty %}
-        <p class="text-muted mb-0">Nenhuma batida nesta data.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-clock',
+            title: 'Nenhuma batida nesta data.',
+            compact: true
+        } %}
     {% else %}
     <ul class="list-unstyled mb-0">
         {% for r in registros %}

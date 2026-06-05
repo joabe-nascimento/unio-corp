@@ -345,7 +345,7 @@ class NavigationService
             || str_starts_with($route, 'app_publicidade');
     }
 
-    /** Identificador do hub ativo pela rota atual (null = exibir lista de hubs). */
+    /** Identificador do hub ativo pela rota atual (null = exibir lista de núcleos). */
     public function getActiveHubId(?string $route): ?string
     {
         if (!$route) {
@@ -431,6 +431,108 @@ class NavigationService
         ], true);
     }
 
+    public function isModuloIntegracoesConexoesActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_integracoes_catalogo',
+            'app_integracoes_conectores',
+            'app_integracoes_webhooks',
+            'app_integracoes_catalogo_ativar',
+            'app_integracoes_conector_novo_submit',
+            'app_integracoes_conector_editar_submit',
+            'app_integracoes_conector_excluir',
+            'app_integracoes_conector_testar',
+            'app_integracoes_conector_pausar',
+            'app_integracoes_webhook_novo_submit',
+            'app_integracoes_webhook_editar_submit',
+            'app_integracoes_webhook_excluir',
+            'app_integracoes_webhook_toggle',
+        ], true);
+    }
+
+    public function isModuloIntegracoesDadosActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_integracoes_mapeamentos',
+            'app_integracoes_api',
+            'app_integracoes_mapeamento_novo_submit',
+            'app_integracoes_mapeamento_editar_submit',
+            'app_integracoes_mapeamento_excluir',
+            'app_integracoes_api_nova_submit',
+            'app_integracoes_api_revogar',
+        ], true);
+    }
+
+    public function isModuloIntegracoesObsActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_integracoes_logs',
+            'app_integracoes_logs_export',
+            'app_integracoes_observatorio',
+            'app_integracoes_observatorio_shadow',
+            'app_integracoes_drift_resolver',
+            'app_integracoes_playbooks',
+            'app_integracoes_dead_letter',
+            'app_integracoes_dead_letter_retry',
+            'app_integracoes_dead_letter_descartar',
+            'app_integracoes_slo',
+        ], true);
+    }
+
+    public function isModuloTiOpsActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_ti_chamados',
+            'app_ti_chamado_novo',
+            'app_ti_chamado_novo_submit',
+            'app_ti_chamado_show',
+            'app_ti_chamado_status',
+            'app_ti_chamado_excluir',
+            'app_ti_chamado_atribuir',
+            'app_ti_chamado_nota',
+            'app_ti_chamado_prioridade',
+            'app_ti_chamado_helia_aplicar',
+            'app_ti_chamado_helia_revisar',
+            'app_ti_catalogo',
+            'app_ti_sla',
+            'app_ti_manutencoes',
+            'app_ti_manutencao_novo_submit',
+            'app_ti_manutencao_editar_submit',
+            'app_ti_manutencao_excluir',
+        ], true);
+    }
+
+    public function isModuloTiInfraActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_ti_ativos',
+            'app_ti_ativo_novo_submit',
+            'app_ti_ativo_editar_submit',
+            'app_ti_ativo_excluir',
+            'app_ti_licencas',
+            'app_ti_licenca_novo_submit',
+            'app_ti_licenca_editar_submit',
+            'app_ti_licenca_excluir',
+            'app_ti_integracoes',
+            'app_ti_integracao_novo_submit',
+            'app_ti_integracao_editar_submit',
+            'app_ti_integracao_excluir',
+        ], true);
+    }
+
+    public function isModuloTiIntelActive(?string $route): bool
+    {
+        return (bool) $route && \in_array($route, [
+            'app_ti_cortex',
+            'app_ti_analytics',
+            'app_ti_novidades',
+            'app_ti_novidade_novo_submit',
+            'app_ti_novidade_editar_submit',
+            'app_ti_novidade_excluir',
+            'app_ti_war_room',
+        ], true);
+    }
+
     /**
      * Globais Twig de navegação (uma passagem por request).
      *
@@ -466,6 +568,12 @@ class NavigationService
             'nav_modulo_inovacao_fluxo_active' => $this->isModuloInovacaoFluxoActive($route),
             'nav_modulo_inovacao_ideacao_active' => $this->isModuloInovacaoIdeacaoActive($route),
             'nav_modulo_inovacao_inteligencia_active' => $this->isModuloInovacaoInteligenciaActive($route),
+            'nav_modulo_integracoes_conexoes_active' => $this->isModuloIntegracoesConexoesActive($route),
+            'nav_modulo_integracoes_dados_active' => $this->isModuloIntegracoesDadosActive($route),
+            'nav_modulo_integracoes_obs_active' => $this->isModuloIntegracoesObsActive($route),
+            'nav_modulo_ti_ops_open' => $this->isModuloTiOpsActive($route),
+            'nav_modulo_ti_infra_open' => $this->isModuloTiInfraActive($route),
+            'nav_modulo_ti_intel_open' => $this->isModuloTiIntelActive($route),
             'nav_active_hub' => $this->getActiveHubId($route),
             'nav_has_hubs' => $this->hasAnyHub($user),
         ];
@@ -494,7 +602,7 @@ class NavigationService
             $modules[] = [
                 'id' => 'operacoes',
                 'icon' => 'fa-briefcase',
-                'title' => 'Hub Operações',
+                'title' => 'Núcleo de Operações',
                 'subtitle' => 'RH e Gestão de Pessoas',
                 'route' => 'app_hub_operacoes',
             ];
@@ -503,7 +611,7 @@ class NavigationService
             $modules[] = [
                 'id' => 'talentos',
                 'icon' => 'fa-gem',
-                'title' => 'Hub de Talentos',
+                'title' => 'Núcleo de Talentos',
                 'subtitle' => 'Banco, vagas e trilhas',
                 'route' => 'app_talentos',
             ];
@@ -512,7 +620,7 @@ class NavigationService
             $modules[] = [
                 'id' => 'maturidade',
                 'icon' => 'fa-gauge-high',
-                'title' => 'Hub de Maturidade',
+                'title' => 'Núcleo de Maturidade',
                 'subtitle' => 'Radar e plano de ação',
                 'route' => 'app_maturidade',
             ];

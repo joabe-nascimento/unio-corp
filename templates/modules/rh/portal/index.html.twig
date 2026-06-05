@@ -65,10 +65,12 @@
                         <label class="form-label text-muted small">E-mail</label>
                         <p class="mb-0">{{ funcionario.email }}</p>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="telefone">Telefone para contato</label>
-                        <input type="text" id="telefone" name="telefone" class="form-control" value="{{ funcionario.telefone|default('') }}">
-                    </div>
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'telefone',
+                        name: 'telefone',
+                        label: 'Telefone para contato',
+                        value: funcionario.telefone|default('')
+                    } %}
                     <button type="submit" class="btn-unio btn-sm">Salvar telefone</button>
                 </form>
             </div>
@@ -80,7 +82,11 @@
                     <a href="{{ path('app_rh_portal_holerites') }}" class="small">Ver todos</a>
                 </div>
                 {% if holerites_recentes is empty %}
-                    <p class="text-muted mb-0 small">Nenhum holerite disponível (competências fechadas).</p>
+                    {% include 'components/empty_state.html.twig' with {
+                        icon: 'fa-file-invoice-dollar',
+                        title: 'Nenhum holerite disponível (competências fechadas).',
+                        compact: true
+                    } %}
                 {% else %}
                 <ul class="list-unstyled mb-0 rh-portal-list">
                     {% for h in holerites_recentes %}
@@ -100,7 +106,11 @@
                     <a href="{{ path('app_rh_portal_comunicados') }}" class="small">Ver todos</a>
                 </div>
                 {% if comunicados_preview is empty %}
-                    <p class="text-muted mb-0 small">Nenhum comunicado publicado.</p>
+                    {% include 'components/empty_state.html.twig' with {
+                        icon: 'fa-bullhorn',
+                        title: 'Nenhum comunicado publicado.',
+                        compact: true
+                    } %}
                 {% else %}
                 <ul class="list-unstyled mb-0 rh-portal-list">
                     {% for item in comunicados_preview %}

@@ -1,19 +1,17 @@
-{# Favicon da plataforma — configurável em Admin > Configurações #}
-{% set _favicon = platform_config.favicon_url|default('') %}
-{% if _favicon %}
-    {% set _favicon_href = _favicon starts with 'http' ? _favicon : asset(_favicon) %}
-    {% set _favicon_lower = _favicon|lower %}
-    {% if _favicon_lower ends with '.png' %}
-        {% set _favicon_type = 'image/png' %}
-    {% elseif _favicon_lower ends with '.svg' %}
-        {% set _favicon_type = 'image/svg+xml' %}
-    {% elseif _favicon_lower ends with '.webp' %}
-        {% set _favicon_type = 'image/webp' %}
-    {% elseif _favicon_lower ends with '.gif' %}
-        {% set _favicon_type = 'image/gif' %}
-    {% else %}
-        {% set _favicon_type = 'image/x-icon' %}
-    {% endif %}
-    <link rel="icon" type="{{ _favicon_type }}" href="{{ _favicon_href }}">
-    <link rel="shortcut icon" href="{{ _favicon_href }}">
+{# Favicon da plataforma — configurável ou placeholder padrão #}
+{% set _src = platform_asset_src('favicon') %}
+{% set _href = public_asset_href(_src) %}
+{% set _favicon_lower = _src|lower %}
+{% if _favicon_lower ends with '.png' %}
+    {% set _favicon_type = 'image/png' %}
+{% elseif _favicon_lower ends with '.svg' %}
+    {% set _favicon_type = 'image/svg+xml' %}
+{% elseif _favicon_lower ends with '.webp' %}
+    {% set _favicon_type = 'image/webp' %}
+{% elseif _favicon_lower ends with '.gif' %}
+    {% set _favicon_type = 'image/gif' %}
+{% else %}
+    {% set _favicon_type = 'image/x-icon' %}
 {% endif %}
+<link rel="icon" type="{{ _favicon_type }}" href="{{ _href }}">
+<link rel="shortcut icon" href="{{ _href }}">

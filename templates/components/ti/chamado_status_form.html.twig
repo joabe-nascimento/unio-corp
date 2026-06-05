@@ -1,0 +1,19 @@
+{# Formulário de alteração de status do chamado #}
+{% set st_key = ticket.status|default('novo') %}
+{% set status_labels = status_labels|default({}) %}
+<form method="post"
+      action="{{ path('app_ti_chamado_status', { id: ticket.id }) }}"
+      class="ti-chamado-status-form unio-form mb-3">
+    <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_status_' ~ ticket.id) }}">
+    <label class="unio-form-label" for="tiChamadoStatus">Alterar status</label>
+    <div class="ti-chamado-status-row">
+        <select id="tiChamadoStatus" name="status" class="unio-form-control" required>
+            {% for key, label in status_labels %}
+            <option value="{{ key }}"{% if key == st_key %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-unio btn-sm">
+            <i class="fas fa-check mr-1" aria-hidden="true"></i> Atualizar
+        </button>
+    </div>
+</form>

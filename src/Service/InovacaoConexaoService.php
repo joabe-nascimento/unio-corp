@@ -40,7 +40,7 @@ final class InovacaoConexaoService
         $oportunidade = trim((string) ($data['oportunidade'] ?? ''));
         $acao = trim((string) ($data['acao'] ?? ''));
         if ($hub === '' || $oportunidade === '' || $acao === '') {
-            throw new \InvalidArgumentException('Hub, oportunidade e ação são obrigatórios.');
+            throw new \InvalidArgumentException('Núcleo, oportunidade e ação são obrigatórios.');
         }
 
         $conexao = new InovConexao();
@@ -66,7 +66,7 @@ final class InovacaoConexaoService
         $oportunidade = trim((string) ($data['oportunidade'] ?? $conexao->getOportunidade()));
         $acao = trim((string) ($data['acao'] ?? $conexao->getAcao()));
         if ($hub === '' || $oportunidade === '' || $acao === '') {
-            throw new \InvalidArgumentException('Hub, oportunidade e ação são obrigatórios.');
+            throw new \InvalidArgumentException('Núcleo, oportunidade e ação são obrigatórios.');
         }
 
         $conexao->setHub($hub);

@@ -1,0 +1,27 @@
+{# Notificações in-app Núcleo TI #}
+{% set _count = ti_notifications_count|default(0) %}
+<div class="ti-notifications-wrap dropdown">
+    <button type="button" class="btn-unio-ghost btn-sm ti-notifications-btn" data-toggle="dropdown" aria-label="Notificações TI">
+        <i class="fas fa-bell" aria-hidden="true"></i>
+        {% if _count > 0 %}
+        <span class="ti-notifications-badge">{{ _count > 9 ? '9+' : _count }}</span>
+        {% endif %}
+    </button>
+    <div class="dropdown-menu dropdown-menu-right ti-notifications-menu">
+        <div class="ti-notifications-menu-head">
+            <span class="section-title mb-0">Alertas TI</span>
+            {% if _count > 0 %}
+            {% include 'components/ti/ti_metric_badge.html.twig' with { label: _count ~ ' novas', variant: 'warning' } %}
+            {% endif %}
+        </div>
+        {% for n in ti_notifications|default([]) %}
+        <a href="{{ n.link|default('#') }}" class="dropdown-item ti-notifications-item">
+            <span class="ti-notifications-item-title">{{ n.title }}</span>
+            <span class="ti-notifications-item-msg">{{ n.message }}</span>
+            <span class="ti-notifications-item-at">{{ n.at }}</span>
+        </a>
+        {% else %}
+        <span class="dropdown-item text-muted">Nenhuma notificação pendente.</span>
+        {% endfor %}
+    </div>
+</div>

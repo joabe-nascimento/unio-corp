@@ -1,0 +1,57 @@
+{# Resultado de um shadow replay #}
+<div class="integ-shadow-run" data-shadow-run-id="{{ run.db_id|default('') }}">
+    <div class="integ-shadow-stats mb-3">
+        <div class="integ-shadow-stat">
+            <strong>{{ run.total_eventos|number_format(0, ',', '.') }}</strong>
+            <span>Eventos replay</span>
+            {% include 'components/ti/ti_metric_badge.html.twig' with { label: 'INFO', variant: 'info' } %}
+        </div>
+        <div class="integ-shadow-stat">
+            <strong>{{ run.taxa_sucesso }}%</strong>
+            <span>Sucesso previsto</span>
+            {% include 'components/ti/ti_metric_badge.html.twig' with {
+                label: 'OK',
+                variant: run.taxa_sucesso >= 99 ? 'success' : 'warning'
+            } %}
+        </div>
+        <div class="integ-shadow-stat">
+            <strong>{{ run.falhas }}</strong>
+            <span>Falhas simuladas</span>
+            {% include 'components/ti/ti_metric_badge.html.twig' with { label: 'WARN', variant: 'warning' } %}
+        </div>
+        <div class="integ-shadow-stat">
+            <strong>{{ run.duplicatas }}</strong>
+            <span>Duplicatas evitadas</span>
+            {% include 'components/ti/ti_metric_badge.html.twig' with { label: 'DUP', variant: 'danger' } %}
+        </div>
+    </div>
+    <p class="section-subtitle mb-2">
+        <code>{{ run.campo_origem }}</code> :
+        <code>{{ run.campo_destino_atual }}</code> → <code>{{ run.campo_destino_proposto }}</code>
+        · {{ run.periodo_dias }} dia(s) · {{ run.criado_em }}
+    </p>
+    {% if run.amostras|default([])|length > 0 %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Hora</th><th>Payload</th><th>Atual</th><th>Proposto</th><th>Resultado</th></tr></thead>
+            <tbody>
+            {% for s in run.amostras %}
+            <tr>
+                <td>{{ s.timestamp|default('—') }}</td>
+                <td class="admin-table-mono">{{ s.payload }}</td>
+                <td class="admin-table-mono">{{ s.atual }}</td>
+                <td class="admin-table-mono">{{ s.proposto }}</td>
+                <td>
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: s.resultado|upper,
+                        variant: s.resultado == 'ok' ? 'success' : (s.resultado == 'fail' ? 'danger' : 'warning')
+                    } %}
+                    {% if s.motivo|default('') %}<br><small class="text-muted">{{ s.motivo }}</small>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>

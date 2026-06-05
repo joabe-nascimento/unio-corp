@@ -1,0 +1,165 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Núcleo Integrações{% endblock %}
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/integracoes-hub.css') }}?v=11">
+{% endblock %}
+{% block permissions_scope %}{% if integ_section == 'overview' %}hub_integracoes{% endif %}{% endblock %}
+{% set hub_page_title = integ_section == 'overview' ? 'Núcleo Integrações' : integ_active_module.label|default('Núcleo Integrações') %}
+{% set hub_page_subtitle = integ_section != 'overview' ? integ_active_module.subtitle|default('') : 'APIs, conectores, webhooks e monitoramento da plataforma' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+{% if integ_section != 'overview' %}
+<div class="integ-toolbar-meta">
+    {% include 'components/ti/ti_metric_badge.html.twig' with {
+        label: health_score ~ '% saúde',
+        variant: health_score >= 90 ? 'success' : (health_score >= 70 ? 'warning' : 'danger')
+    } %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block hub_kpis %}
+{% if integ_section == 'overview' %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: kpis, mb: 'mb-0' } %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="integ-hub integ-hub--{{ integ_section }}" id="integHub" data-integ-hub data-integ-section="{{ integ_section }}">
+
+    {% if integ_section == 'overview' %}
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            {% if integration_alerts|default([])|length > 0 %}
+            <div class="unio-card mb-4 integ-alert-banner">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Integrações degradadas',
+                    subtitle: integration_alerts|length ~ ' conector(es) requerem atenção',
+                    btn_label: 'Ver conectores',
+                    btn_href: path('app_integracoes_conectores'),
+                    btn_ghost: true
+                } %}
+                <div class="integ-alert-list">
+                    {% for alert in integration_alerts %}
+                    <div class="integ-alert-item integ-alert-item--{{ alert.status }}">
+                        <span class="integ-int-pulse integ-int-pulse--{{ alert.status }}"></span>
+                        <strong>{{ alert.name }}</strong>
+                        <span class="text-muted">{{ alert.latency }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% include 'components/integracoes/health_grid.html.twig' with {
+                integrations: integrations,
+                title: 'Status dos conectores',
+                subtitle: integrations|length ~ ' ativos',
+                btn_href: path('app_integracoes_logs')
+            } %}
+
+            {% if cortex_preview|default(null) and product_grant('hub_integracoes', 'observatorio') %}
+            <div class="unio-card mb-4 integ-cortex-preview">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Observatório Causal',
+                    subtitle: cortex_preview.fluxos ~ ' fluxos · ' ~ cortex_preview.em_risco ~ ' em risco · ' ~ cortex_preview.drifts_abertos|default(0) ~ ' drifts',
+                    btn_label: 'Abrir malha',
+                    btn_href: path('app_integracoes_observatorio'),
+                    btn_ghost: true,
+                    btn_icon: 'fa-diagram-project'
+                } %}
+                {% if cortex_preview.trace_destaque %}
+                <div class="integ-cortex-preview-body">
+                    <span class="integ-int-pulse integ-int-pulse--{{ cortex_preview.trace_destaque.status == 'healthy' ? 'healthy' : 'degraded' }}"></span>
+                    <div>
+                        <strong>{{ cortex_preview.trace_destaque.titulo }}</strong>
+                        <p class="section-subtitle mb-0">{{ cortex_preview.trace_destaque.nos|first.detail|default('Fluxo cross-núcleo ativo') }}</p>
+                    </div>
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: cortex_preview.trace_destaque.confiabilidade ~ '%',
+                        variant: cortex_preview.trace_destaque.status == 'healthy' ? 'success' : 'warning'
+                    } %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% set module_items = [] %}
+            {% for card in module_cards %}
+                {% if product_grant('hub_integracoes', card.id) %}
+                    {% set module_items = module_items|merge([{
+                        icon: card.icon,
+                        title: card.title,
+                        subtitle: card.subtitle ~ ' · ' ~ card.metric,
+                        route: card.route
+                    }]) %}
+                {% endif %}
+            {% endfor %}
+            {% include 'components/module_grid.html.twig' with {
+                title: 'Módulos',
+                subtitle: 'Centro de conectividade da plataforma UNio',
+                items: module_items,
+                cols: 2
+            } %}
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="unio-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Eventos recentes',
+                    subtitle: 'Últimas sincronizações',
+                    btn_label: 'Ver logs',
+                    btn_href: path('app_integracoes_logs'),
+                    btn_ghost: true
+                } %}
+                <div class="integ-event-feed">
+                    {% for ev in event_timeline|default([]) %}
+                    <div class="integ-event-item">
+                        <span class="integ-event-time">{{ ev.time }}</span>
+                        {% include 'components/ti/ti_metric_badge.html.twig' with {
+                            label: ev.level|upper,
+                            variant: ev.level == 'error' ? 'danger' : (ev.level == 'warn' ? 'warning' : 'info')
+                        } %}
+                        <span class="integ-event-msg">{{ ev.message }}</span>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">Nenhum evento registrado.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="unio-card">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Playbooks',
+                    subtitle: 'Guias de integração prontos',
+                    btn_label: 'Ver todos',
+                    btn_href: path('app_integracoes_playbooks'),
+                    btn_ghost: true
+                } %}
+                {% for pb in playbooks_preview|default([]) %}
+                <div class="integ-playbook-preview">
+                    <i class="fas {{ pb.icon }} mr-2" aria-hidden="true"></i>
+                    <div>
+                        <strong>{{ pb.titulo }}</strong>
+                        <p class="section-subtitle mb-0">{{ pb.descricao }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+        {% block integ_section_content %}{% endblock %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/integracoes-hub.js') }}?v=7" defer></script>
+{% endblock %}

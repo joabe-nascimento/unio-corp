@@ -6,13 +6,25 @@
 {% block hub_content %}
 {% if grant_at_least('product_rh', 'recrutamento', 'GESTOR_EQUIPE') %}
 <div class="unio-card p-4 mb-3">
-    <h4 class="h6 mb-3">Nova vaga</h4>
+    {% include 'components/section_header.html.twig' with { title: 'Nova vaga' } %}
     <form method="post" action="{{ path('app_rh_recrutamento') }}">
         <input type="hidden" name="_token" value="{{ csrf_token('rh_recrutamento_vaga') }}">
-        <div class="row g-2">
-            <div class="col-md-4"><input type="text" name="titulo" class="form-control" placeholder="Título" required></div>
-            <div class="col-md-3"><input type="text" name="departamento" class="form-control" placeholder="Departamento"></div>
-            <div class="col-md-3"><input type="text" name="descricao" class="form-control" placeholder="Descrição breve"></div>
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'vaga-titulo', name: 'titulo', label: 'Título', placeholder: 'Título', required: true
+                } %}
+            </div>
+            <div class="col-md-3">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'vaga-departamento', name: 'departamento', label: 'Departamento', placeholder: 'Departamento'
+                } %}
+            </div>
+            <div class="col-md-3">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'vaga-descricao', name: 'descricao', label: 'Descrição', placeholder: 'Descrição breve'
+                } %}
+            </div>
             <div class="col-md-2"><button type="submit" class="btn-unio btn-sm w-100">Criar</button></div>
         </div>
     </form>
@@ -35,8 +47,12 @@
                     {% if grant_at_least('product_rh', 'recrutamento', 'GESTOR_EQUIPE') %}
                     <form method="post" action="{{ path('app_rh_recrutamento_candidato', { id: v.id }) }}" class="d-flex gap-1 flex-wrap">
                         <input type="hidden" name="_token" value="{{ csrf_token('rh_recrutamento_candidato') }}">
-                        <input type="text" name="nome" class="form-control form-control-sm" placeholder="Nome" required style="max-width:120px">
-                        <input type="email" name="email" class="form-control form-control-sm" placeholder="E-mail" required style="max-width:140px">
+                        {% include 'components/filter_group.html.twig' with {
+                            type: 'text', name: 'nome', placeholder: 'Nome', min_width: '120px'
+                        } %}
+                        {% include 'components/filter_group.html.twig' with {
+                            type: 'text', input_type: 'email', name: 'email', placeholder: 'E-mail', min_width: '140px'
+                        } %}
                         <button type="submit" class="btn-unio-ghost btn-sm">+</button>
                     </form>
                     {% endif %}

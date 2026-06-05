@@ -1,9 +1,7 @@
 {% set _tema = platform_config.tema|default('dark') %}
 {% set _pnome = platform_config.plataforma_nome|default('Unio') %}
 {% set _tagline = platform_config.plataforma_tagline|default('Plataforma de Gestão de Pessoas') %}
-{% set _logo_full = platform_config.logo_full_url|default('') %}
-{% set _logo_src = _logo_full ? (_logo_full starts with 'http' ? _logo_full : asset(_logo_full)) : asset('images/logos/unio-logotipo.png') %}
-{% set _logo_default = _logo_full is empty %}
+{% set _logo_custom = platform_asset_custom('full') %}
 {% import 'macros/helix.html.twig' as helix %}
 
 <!DOCTYPE html>
@@ -12,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ _pnome }} — {{ _tagline }}</title>
-    <meta name="description" content="{{ _pnome }}: gestão de pessoas, RH operacional, hubs integrados e assistente inteligente Vitória.">
+    <meta name="description" content="{{ _pnome }}: gestão de pessoas, RH operacional, núcleos integrados e assistente inteligente Vitória.">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
@@ -25,11 +23,14 @@
 <header class="mkt-header">
     <div class="mkt-header-inner">
         <a href="{{ path('app_home') }}" class="mkt-brand" title="{{ _pnome }}">
-            <img src="{{ _logo_src }}" alt="{{ _pnome }}" class="mkt-logo {{ _logo_default ? 'mkt-logo--default' : 'mkt-logo--custom' }}">
+            {% include 'components/platform_logo.html.twig' with {
+                variant: 'full',
+                class: 'mkt-logo' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
+            } only %}
         </a>
         <nav class="mkt-nav" aria-label="Navegação principal">
             <a href="#recursos">Recursos</a>
-            <a href="#hubs">Hubs</a>
+            <a href="#nucleos">Núcleos</a>
             <a href="#como-funciona">Como funciona</a>
             <a href="#vitoria">Vitória</a>
             <a href="#faq">FAQ</a>
@@ -68,7 +69,7 @@
                     Pessoas, processos e resultados em um só lugar
                 </h1>
                 <p class="mkt-hero-lead">
-                    {{ _pnome }} centraliza RH, hubs de operação e indicadores com segurança,
+                    {{ _pnome }} centraliza RH, núcleos de operação e indicadores com segurança,
                     multi-empresa e a assistente inteligente Vitória — pronta para escalar com sua organização.
                 </p>
                 <div class="mkt-hero-cta">
@@ -121,7 +122,7 @@
                         <div class="mkt-hero-card-row">
                             <span class="mkt-hero-card-icon"><i class="fas fa-chart-line"></i></span>
                             <span class="mkt-hero-card-text">
-                                <strong>Indicadores e hubs</strong>
+                                <strong>Indicadores e núcleos</strong>
                                 <span>Operação, pessoas e maturidade</span>
                             </span>
                         </div>
@@ -176,7 +177,7 @@
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></div>
                 <h3>Segurança e permissões</h3>
-                <p>Controle fino por perfil e produto. Cada usuário vê apenas o que precisa, em cada hub e módulo.</p>
+                <p>Controle fino por perfil e produto. Cada usuário vê apenas o que precisa, em cada núcleo e módulo.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-palette" aria-hidden="true"></i></div>
@@ -191,7 +192,7 @@
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-bell" aria-hidden="true"></i></div>
                 <h3>Central unificada</h3>
-                <p>Dashboard, notificações, busca global e navegação por hubs — experiência coesa em toda a plataforma.</p>
+                <p>Dashboard, notificações, busca global e navegação por núcleos — experiência coesa em toda a plataforma.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-mobile-screen" aria-hidden="true"></i></div>
@@ -227,7 +228,7 @@
                 <li class="mkt-step">
                     <span class="mkt-step-num">3</span>
                     <div class="mkt-step-body">
-                        <h3>Navegue pelos hubs</h3>
+                        <h3>Navegue pelos núcleos</h3>
                         <p>Acesse RH, Operações, Pessoas e demais módulos liberados para o seu perfil.</p>
                     </div>
                 </li>
@@ -257,7 +258,7 @@
                 <ul>
                     <li>Dashboard por layout</li>
                     <li>Permissões por equipe</li>
-                    <li>Hubs de maturidade</li>
+                    <li>Núcleos de maturidade</li>
                 </ul>
             </article>
             <article class="mkt-persona">
@@ -273,7 +274,7 @@
             <article class="mkt-persona">
                 <div class="mkt-persona-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
                 <h3>Equipes operacionais</h3>
-                <p>Ferramentas do dia a dia com interface clara, busca global e navegação por hubs.</p>
+                <p>Ferramentas do dia a dia com interface clara, busca global e navegação por núcleos.</p>
                 <ul>
                     <li>Portal e comunicação</li>
                     <li>Bate-papo integrado</li>
@@ -293,12 +294,12 @@
         </div>
     </section>
 
-    {# ── Hubs ── #}
-    <section class="mkt-section mkt-section--alt" id="hubs" aria-labelledby="mkt-hubs-title">
+    {# ── Núcleos ── #}
+    <section class="mkt-section mkt-section--alt" id="nucleos" aria-labelledby="mkt-nucleos-title">
         <div class="mkt-section-head">
-            <p class="mkt-section-eyebrow">Hubs</p>
-            <h2 class="mkt-section-title" id="mkt-hubs-title">Uma plataforma, vários centros de excelência</h2>
-            <p class="mkt-section-sub">Navegue entre hubs especializados sem perder contexto da sua área de trabalho.</p>
+            <p class="mkt-section-eyebrow">Núcleos</p>
+            <h2 class="mkt-section-title" id="mkt-nucleos-title">Uma plataforma, vários centros de excelência</h2>
+            <p class="mkt-section-sub">Navegue entre núcleos especializados sem perder contexto da sua área de trabalho.</p>
         </div>
         <div class="mkt-hubs">
             <article class="mkt-hub">
@@ -365,7 +366,7 @@
                 <h3 id="mkt-helia-title">Conheça a Vitória</h3>
                 <p>
                     Sua copiloto na {{ _pnome }}: responde dúvidas, sugere próximos passos e ajuda você
-                    a navegar módulos, hubs e indicadores com mais agilidade — sempre no contexto da sua empresa.
+                    a navegar módulos, núcleos e indicadores com mais agilidade — sempre no contexto da sua empresa.
                 </p>
                 <div class="mkt-helia-chips">
                     <span class="mkt-helia-chip"><i class="fas fa-bolt" aria-hidden="true"></i> Respostas rápidas</span>
@@ -393,7 +394,7 @@
                 <article class="mkt-showcase-card">
                     <div class="mkt-showcase-icon"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
                     <h3>Busca global</h3>
-                    <p>Encontre hubs, apps e membros da equipe em segundos — sem perder o contexto.</p>
+                    <p>Encontre núcleos, apps e membros da equipe em segundos — sem perder o contexto.</p>
                 </article>
                 <article class="mkt-showcase-card">
                     <div class="mkt-showcase-icon"><i class="fas fa-sliders" aria-hidden="true"></i></div>
@@ -425,7 +426,7 @@
             <article class="mkt-security-card">
                 <div class="mkt-security-icon"><i class="fas fa-key" aria-hidden="true"></i></div>
                 <h3>Grants por produto</h3>
-                <p>Cada usuário acessa somente os módulos e hubs liberados para o seu perfil.</p>
+                <p>Cada usuário acessa somente os módulos e núcleos liberados para o seu perfil.</p>
             </article>
             <article class="mkt-security-card">
                 <div class="mkt-security-icon"><i class="fas fa-eye" aria-hidden="true"></i></div>
@@ -446,7 +447,7 @@
             <div class="mkt-faq">
                 <details class="mkt-faq-item">
                     <summary>O que é a {{ _pnome }}?</summary>
-                    <p>É uma plataforma de gestão de pessoas que unifica RH operacional, hubs especializados, dashboards e a assistente Vitória em um ambiente multi-empresa.</p>
+                    <p>É uma plataforma de gestão de pessoas que unifica RH operacional, núcleos especializados, dashboards e a assistente Vitória em um ambiente multi-empresa.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>Preciso escolher uma área de trabalho?</summary>
@@ -473,7 +474,7 @@
         <div class="mkt-cta-banner">
             <div class="mkt-cta-banner-inner">
                 <h2 id="mkt-cta-title">Pronto para transformar a gestão de pessoas?</h2>
-                <p>Acesse a {{ _pnome }}, escolha sua área de trabalho e comece com RH, hubs e a Vitória ao seu lado.</p>
+                <p>Acesse a {{ _pnome }}, escolha sua área de trabalho e comece com RH, núcleos e a Vitória ao seu lado.</p>
                 <div class="mkt-cta-banner-actions">
                     <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--white">
                         <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
@@ -492,7 +493,10 @@
 
 <footer class="mkt-footer">
     <div class="mkt-footer-inner">
-        <img src="{{ _logo_src }}" alt="{{ _pnome }}" class="mkt-footer-logo mkt-logo {{ _logo_default ? 'mkt-logo--default' : 'mkt-logo--custom' }}">
+        {% include 'components/platform_logo.html.twig' with {
+            variant: 'full',
+            class: 'mkt-footer-logo mkt-logo' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
+        } only %}
         <p class="mkt-footer-text">
             © {{ "now"|date("Y") }} {{ _pnome }}. {{ platform_config.rodape_texto|default(_tagline) }}
         </p>

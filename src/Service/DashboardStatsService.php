@@ -124,7 +124,7 @@ final class DashboardStatsService
             'tenant' => [
                 'icon' => 'fa-shield-halved',
                 'title' => 'Gestão da plataforma',
-                'subtitle' => 'Multi-empresa · hubs operacionais e configuração'
+                'subtitle' => 'Multi-empresa · núcleos operacionais e configuração'
                     . ($empresa ? ' · ' . $empresa->getNome() : ''),
             ],
             'gestor' => [

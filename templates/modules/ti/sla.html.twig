@@ -1,0 +1,40 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: pulse.sla_compliance ~ '%', label: 'SLA global', sub: '7 dias', icon: 'fa-gauge-high', trend: 'up' },
+    { value: '4h', label: 'Meta P1', sub: 'Resolução', icon: 'fa-bolt' },
+    { value: ticket_stats.novo|default(2), label: 'Fora do SLA', sub: 'Requer ação', icon: 'fa-triangle-exclamation' },
+], mb: 'mb-3' } %}
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <section class="unio-card">
+            {% include 'components/section_header.html.twig' with {
+                title: 'SLA Heatmap',
+                subtitle: 'Cumprimento por prioridade e dia — exclusivo Unio'
+            } %}
+            {% include 'components/ti/sla_heatmap.html.twig' %}
+        </section>
+    </div>
+    <div class="col-lg-5 mb-4">
+        <section class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Metas por prioridade', subtitle: 'Tempo de resposta e resolução' } %}
+            <div class="ti-card-list">
+            {% for rule in sla_rules %}
+            <div class="ti-card-list-item">
+                <div class="ti-idea-row-head">
+                    <span class="section-title">{{ rule.priority }} · {{ rule.label }}</span>
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: rule.compliance ~ '%',
+                        variant: rule.compliance >= 95 ? 'success' : 'warning'
+                    } %}
+                </div>
+                <p class="section-subtitle mb-2">Resposta {{ rule.response }} · Resolução {{ rule.resolution }}</p>
+                {% include 'components/progress_inline.html.twig' with { percent: rule.compliance, variant: 'accent', show_label: true } %}
+            </div>
+            {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

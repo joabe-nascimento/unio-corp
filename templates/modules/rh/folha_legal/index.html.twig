@@ -17,9 +17,13 @@
 <div class="row g-3">
     <div class="col-lg-5">
         <div class="unio-card p-4">
-            <h4 class="h6 mb-3">Rubricas</h4>
+            {% include 'components/section_header.html.twig' with { title: 'Rubricas' } %}
             {% if rubricas is empty %}
-                <p class="text-muted mb-0">Nenhuma rubrica cadastrada.</p>
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-list',
+                    title: 'Nenhuma rubrica cadastrada.',
+                    compact: true
+                } %}
             {% else %}
             <ul class="list-unstyled mb-0">
                 {% for r in rubricas %}
@@ -31,18 +35,29 @@
     </div>
     <div class="col-lg-7">
         <div class="unio-card p-4">
-            <h4 class="h6 mb-3">Gerar holerites (INSS/IRRF/FGTS stub)</h4>
+            {% include 'components/section_header.html.twig' with {
+                title: 'Gerar holerites (INSS/IRRF/FGTS stub)'
+            } %}
             {% if grant_at_least('product_rh', 'folha_legal', 'GESTOR') and competencias is not empty %}
             <form method="post" action="{{ path('app_rh_folha_legal') }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('rh_folha_legal_gerar') }}">
                 <input type="hidden" name="action" value="gerar_holerites">
-                <select name="competencia_id" class="form-select form-select-sm mb-2" required>
-                    {% for c in competencias %}<option value="{{ c.id }}">{{ c.referencia }}</option>{% endfor %}
-                </select>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'folha-legal-competencia',
+                    name: 'competencia_id',
+                    label: 'Competência',
+                    type: 'select',
+                    required: true,
+                    options: competencias|map(c => { value: c.id ~ '', label: c.referencia })
+                } %}
                 <button type="submit" class="btn-unio btn-sm">Gerar holerites</button>
             </form>
             {% else %}
-            <p class="text-muted mb-0">Gere uma competência em Folha operacional primeiro.</p>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-file-invoice',
+                title: 'Gere uma competência em Folha operacional primeiro.',
+                compact: true
+            } %}
             {% endif %}
         </div>
     </div>

@@ -1,0 +1,51 @@
+{# Command strip — visão geral Núcleo TI #}
+<section class="ti-overview-command unio-card mb-4">
+    <div class="ti-overview-command-main">
+        <div class="ti-overview-command-status">
+            <span class="ti-overview-command-pulse" aria-hidden="true"></span>
+            <div>
+                <div class="section-title">NOC Center ativo</div>
+                <p class="section-subtitle mb-0">
+                    {{ pulse.systems_up }}/{{ pulse.systems_total }} sistemas operacionais
+                    · {{ pulse.open_tickets }} chamados abertos
+                    {% if pulse.p1_active > 0 %}· <strong class="text-danger">{{ pulse.p1_active }} P1 críticos</strong>{% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="ti-overview-command-actions">
+            {% if ti_can('operate_chamados') %}
+            <button type="button" class="btn-unio-primary" data-unio-offcanvas-open="ti-chamado-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Abrir chamado
+            </button>
+            {% elseif ti_can('create_chamado') %}
+            <a href="{{ path('app_ti_catalogo') }}" class="btn-unio-primary">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Abrir chamado
+            </a>
+            {% endif %}
+            {% if ti_view('chamados') %}
+            <a href="{{ path('app_ti_chamados') }}" class="btn-unio-ghost">
+                <i class="fas fa-headset mr-1" aria-hidden="true"></i> Service desk
+            </a>
+            {% endif %}
+            {% if ti_view('cortex') %}
+            <a href="{{ path('app_ti_cortex') }}" class="btn-unio-ghost btn-sm">
+                <i class="fas fa-brain mr-1" aria-hidden="true"></i> Cortex
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="ti-overview-command-metrics">
+        <div class="ti-overview-metric">
+            <span class="ti-overview-metric-value">{{ pulse.sla_compliance }}%</span>
+            <span class="ti-overview-metric-label">SLA 7d</span>
+        </div>
+        <div class="ti-overview-metric">
+            <span class="ti-overview-metric-value">{{ pulse.mttr_hours }}h</span>
+            <span class="ti-overview-metric-label">MTTR</span>
+        </div>
+        <div class="ti-overview-metric">
+            <span class="ti-overview-metric-value">{{ pulse.cortex_auto_rate }}%</span>
+            <span class="ti-overview-metric-label">Triagem auto</span>
+        </div>
+    </div>
+</section>

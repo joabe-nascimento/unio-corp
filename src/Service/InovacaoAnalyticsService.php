@@ -14,7 +14,7 @@ use App\Repository\InovNovidadeRepository;
 use App\Repository\InovTendenciaRepository;
 
 /**
- * Métricas do Hub Inovação calculadas a partir dos dados persistidos.
+ * Métricas do Núcleo Inovação calculadas a partir dos dados persistidos.
  */
 final class InovacaoAnalyticsService
 {
@@ -197,7 +197,7 @@ final class InovacaoAnalyticsService
         $items = [];
         foreach (array_slice($conexoes, 0, 4) as $conexao) {
             $items[] = [
-                'title' => 'Hub ' . $conexao->getHub(),
+                'title' => 'Núcleo ' . $conexao->getHub(),
                 'combo' => $conexao->getHub() . ' × Inovação',
                 'icon' => $conexao->getIcon(),
                 'color' => $this->hubColor($conexao->getHub()),
@@ -270,7 +270,7 @@ final class InovacaoAnalyticsService
             $insights[] = [
                 'title' => 'Conexão estratégica detectada',
                 'summary' => sprintf(
-                    'Hub %s com %d%% de sinergia — %s',
+                    'Núcleo %s com %d%% de sinergia — %s',
                     $topConexao->getHub(),
                     $topConexao->getSinergia(),
                     $topConexao->getAcao()

@@ -1,0 +1,98 @@
+{# Schema Drift Guard #}
+<section class="unio-card" data-integ-panel="drift">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Schema Drift Guard',
+        subtitle: 'Detecção de mudanças de schema antes da quebra em produção'
+    } %}
+    {% if schema_drifts|default([])|length > 0 %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Campo UNio</th>
+                    <th>Esperado</th>
+                    <th>Detectado</th>
+                    <th>Fluxo</th>
+                    <th>Severidade</th>
+                    <th>Status</th>
+                    <th class="text-end" style="width:220px">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for drift in schema_drifts %}
+            <tr class="{% if drift.resolvido %}text-muted{% endif %}" data-drift-row="{{ drift.db_id }}">
+                <td class="admin-table-mono">{{ drift.campo_origem }}</td>
+                <td class="admin-table-mono">{{ drift.campo_esperado }}</td>
+                <td class="admin-table-mono">{{ drift.campo_detectado }}</td>
+                <td>{{ drift.conector|default('—') }}</td>
+                <td>
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: drift.severidade|upper,
+                        variant: drift.severidade == 'critica' ? 'danger' : (drift.severidade == 'media' ? 'warning' : 'secondary')
+                    } %}
+                </td>
+                <td>
+                    {% if drift.resolvido and drift.resolucao %}
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: drift.resolucao|upper,
+                        variant: 'success'
+                    } %}
+                    {% else %}
+                    {% include 'components/status_badge.html.twig' with {
+                        label: drift.resolvido ? 'Resolvido' : 'Aberto',
+                        variant: drift.resolvido ? 'success' : 'warning'
+                    } %}
+                    {% endif %}
+                </td>
+                <td class="text-end" data-drift-actions="{{ drift.db_id }}">
+                    {% if not drift.resolvido %}
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn-unio btn-sm btn-unio-ghost text-success"
+                            data-drift-action="aceitar"
+                            data-drift-id="{{ drift.db_id }}"
+                            data-drift-url="{{ path('app_integracoes_drift_resolver', { id: drift.db_id }) }}"
+                            data-drift-token="{{ csrf_token('integracoes_drift_' ~ drift.db_id) }}"
+                            title="Aceitar drift">
+                            <i class="fas fa-check"></i> Aceitar
+                        </button>
+                        <button type="button" class="btn-unio btn-sm btn-unio-ghost text-secondary"
+                            data-drift-action="ignorar"
+                            data-drift-id="{{ drift.db_id }}"
+                            data-drift-url="{{ path('app_integracoes_drift_resolver', { id: drift.db_id }) }}"
+                            data-drift-token="{{ csrf_token('integracoes_drift_' ~ drift.db_id) }}"
+                            title="Ignorar drift">
+                            <i class="fas fa-times"></i> Ignorar
+                        </button>
+                        <button type="button" class="btn-unio btn-sm btn-unio-ghost text-primary"
+                            data-drift-action="sugerir_mapeamento"
+                            data-drift-id="{{ drift.db_id }}"
+                            data-drift-url="{{ path('app_integracoes_drift_resolver', { id: drift.db_id }) }}"
+                            data-drift-token="{{ csrf_token('integracoes_drift_' ~ drift.db_id) }}"
+                            title="Criar mapeamento">
+                            <i class="fas fa-arrow-up-right-from-square"></i> Mapear
+                        </button>
+                    </div>
+                    {% else %}
+                    <small class="text-muted">{{ drift.resolvido_por|default('—') }}<br>{{ drift.resolvido_em }}</small>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="integ-drift-sugestao{% if drift.resolvido %} text-muted{% endif %}">
+                <td colspan="7">
+                    <i class="fas fa-lightbulb" aria-hidden="true"></i> {{ drift.sugestao }}
+                    <small class="text-muted ml-2">Detectado {{ drift.detectado_em }}</small>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-code-branch',
+        title: 'Nenhum drift detectado',
+        text: 'Schemas externos alinhados com os contratos UNio.',
+        compact: true
+    } %}
+    {% endif %}
+</section>

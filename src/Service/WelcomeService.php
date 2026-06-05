@@ -7,7 +7,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 
 /**
- * Saudação, hubs da tela de boas-vindas e destaques de novidades.
+ * Saudação, núcleos da tela de boas-vindas e destaques de novidades.
  * Ao adicionar hub/módulo novo, inclua em NOVIDADES ou marque is_new no hub.
  */
 class WelcomeService
@@ -28,7 +28,7 @@ class WelcomeService
         [
             'id' => 'membros_equipes',
             'title' => 'Membros e Equipes',
-            'description' => 'Ficha técnica, fotos e gestão de equipes no Hub Operações.',
+            'description' => 'Ficha técnica, fotos e gestão de equipes no Núcleo de Operações.',
             'route' => 'app_pessoas_membros',
             'icon' => 'fa-user-group',
             'is_new' => true,
@@ -37,7 +37,7 @@ class WelcomeService
         [
             'id' => 'engenharia',
             'title' => 'Obras e Projetos',
-            'description' => 'Engenharia civil integrada ao Hub Operações.',
+            'description' => 'Engenharia civil integrada ao Núcleo de Operações.',
             'route' => 'app_engenharia',
             'icon' => 'fa-hard-hat',
             'is_new' => true,
@@ -46,7 +46,7 @@ class WelcomeService
         [
             'id' => 'publicidade',
             'title' => 'Marca e Comunicação',
-            'description' => 'Campanhas e materiais no Hub de Maturidade.',
+            'description' => 'Campanhas e materiais no Núcleo de Maturidade.',
             'route' => 'app_publicidade',
             'icon' => 'fa-bullhorn',
             'is_new' => true,
@@ -89,7 +89,7 @@ class WelcomeService
         if ($this->navigation->showHubOperacoes($user)) {
             $hubs[] = [
                 'id' => 'operacoes',
-                'title' => 'Hub Operações',
+                'title' => 'Núcleo de Operações',
                 'subtitle' => 'RH, Gestão de Pessoas e operações do dia a dia',
                 'icon' => 'fa-briefcase',
                 'route' => 'app_hub_operacoes',
@@ -100,7 +100,7 @@ class WelcomeService
         if ($this->navigation->showHubTalentos($user)) {
             $hubs[] = [
                 'id' => 'talentos',
-                'title' => 'Hub de Talentos',
+                'title' => 'Núcleo de Talentos',
                 'subtitle' => 'Banco de talentos, vagas e trilhas de desenvolvimento',
                 'icon' => 'fa-gem',
                 'route' => 'app_talentos',
@@ -111,7 +111,7 @@ class WelcomeService
         if ($this->navigation->showHubMaturidade($user)) {
             $hubs[] = [
                 'id' => 'maturidade',
-                'title' => 'Hub de Maturidade',
+                'title' => 'Núcleo de Maturidade',
                 'subtitle' => 'Radar organizacional, plano de ação e evolução',
                 'icon' => 'fa-gauge-high',
                 'route' => 'app_maturidade',

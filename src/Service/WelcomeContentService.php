@@ -15,14 +15,14 @@ final class WelcomeContentService
         [
             'id' => 'tenant-scale',
             'title' => 'Escale com governança',
-            'text' => 'Revise empresas ativas e perfis de acesso antes de liberar novos hubs para equipes operacionais.',
+            'text' => 'Revise empresas ativas e perfis de acesso antes de liberar novos núcleos para equipes operacionais.',
             'icon' => 'fa-building-shield',
             'layouts' => ['tenant'],
         ],
         [
             'id' => 'gestor-rhythm',
             'title' => 'Ritmo de gestão semanal',
-            'text' => 'Combine dashboard, Hub Operações e indicadores analíticos em uma rotina fixa de segunda-feira.',
+            'text' => 'Combine dashboard, Núcleo de Operações e indicadores analíticos em uma rotina fixa de segunda-feira.',
             'icon' => 'fa-calendar-check',
             'layouts' => ['gestor'],
         ],
@@ -43,7 +43,7 @@ final class WelcomeContentService
         [
             'id' => 'helix-copilot',
             'title' => 'Use a Vitória como copiloto',
-            'text' => 'Pergunte sobre navegação, próximos passos e atalhos — a assistente conhece os hubs do seu perfil.',
+            'text' => 'Pergunte sobre navegação, próximos passos e atalhos — a assistente conhece os núcleos do seu perfil.',
             'icon' => 'fa-wand-magic-sparkles',
             'layouts' => ['tenant', 'gestor', 'supervisor', 'membro'],
         ],
@@ -154,7 +154,7 @@ final class WelcomeContentService
             'value' => $user->getPerfilLabel(),
             'hint' => match ($layout) {
                 'tenant' => 'Visão completa da plataforma',
-                'gestor' => 'Gestão de hubs e equipes',
+                'gestor' => 'Gestão de núcleos e equipes',
                 'supervisor' => 'Supervisão operacional',
                 default => 'Acesso colaborador',
             },

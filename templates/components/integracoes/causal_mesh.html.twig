@@ -1,0 +1,109 @@
+{# Malha cross-núcleo — grafo causal interativo #}
+{% set mesh = causal_mesh|default({ hubs: [], edges: [], stats: {} }) %}
+{% set hub_pos = {
+    'rh':          { x: 110, y: 130, pct_x: 13.75, pct_y: 54 },
+    'integracoes': { x: 400, y: 68,  pct_x: 50,    pct_y: 28 },
+    'ti':          { x: 690, y: 130, pct_x: 86.25, pct_y: 54 },
+    'inovacao':    { x: 400, y: 192, pct_x: 50,    pct_y: 80 }
+} %}
+<section class="unio-card mb-4 integ-mesh-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Malha cross-núcleo',
+        subtitle: mesh.stats.fluxos_totais|default(0) ~ ' fluxos · ' ~ mesh.stats.links_ativos|default(0) ~ ' vínculos causais entre núcleos UNio'
+    } %}
+
+    <div class="integ-mesh-tree" data-integ-mesh>
+        <div class="integ-mesh-canvas">
+            <svg class="integ-mesh-svg" viewBox="0 0 800 220" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <linearGradient id="integMeshGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="var(--text-3)" stop-opacity="0.08"/>
+                        <stop offset="50%" stop-color="var(--text-3)" stop-opacity="0.45"/>
+                        <stop offset="100%" stop-color="var(--text-3)" stop-opacity="0.08"/>
+                    </linearGradient>
+                    <linearGradient id="integMeshGradActive" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.2"/>
+                        <stop offset="50%" stop-color="var(--accent)" stop-opacity="0.9"/>
+                        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.2"/>
+                    </linearGradient>
+                    <filter id="integMeshGlow">
+                        <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+
+                {% for edge in mesh.edges %}
+                {% set from = hub_pos[edge.from]|default({ x: 400, y: 110 }) %}
+                {% set to = hub_pos[edge.to]|default({ x: 400, y: 110 }) %}
+                {% set mx = (from.x + to.x) / 2 %}
+                {% set my = (from.y + to.y) / 2 - 36 %}
+                <path class="integ-mesh-path"
+                      data-mesh-edge="{{ edge.id }}"
+                      data-flow-keys="{{ edge.flows|map(f => f.flow_key)|join(',') }}"
+                      d="M {{ from.x }} {{ from.y }} Q {{ mx }} {{ my }} {{ to.x }} {{ to.y }}"
+                      fill="none"
+                      stroke="url(#integMeshGrad)"
+                      stroke-width="1.5"
+                      stroke-linecap="round"/>
+                <circle class="integ-mesh-pulse-dot" r="2.5" fill="var(--accent)" opacity="0.7">
+                    <animateMotion dur="{{ 3 + loop.index0 * 0.5 }}s" repeatCount="indefinite"
+                                   path="M {{ from.x }} {{ from.y }} Q {{ mx }} {{ my }} {{ to.x }} {{ to.y }}"/>
+                </circle>
+                {% endfor %}
+            </svg>
+
+            <div class="integ-mesh-nodes">
+                {% for hub in mesh.hubs %}
+                {% set pos = hub_pos[hub.id]|default({ pct_x: 50, pct_y: 50 }) %}
+                <button type="button"
+                        class="integ-mesh-node"
+                        data-mesh-hub="{{ hub.id }}"
+                        data-flow-keys="{{ hub.flow_keys|join(',') }}"
+                        style="--mesh-x: {{ pos.pct_x }}%; --mesh-y: {{ pos.pct_y }}%;"
+                        title="{{ hub.label }} · {{ hub.confiabilidade|default(100) }}% · {{ hub.flow_keys|length }} fluxo(s)"
+                        aria-label="{{ hub.label }}">
+                    <span class="integ-mesh-node-icon">
+                        <i class="fas {{ hub.icon }}" aria-hidden="true"></i>
+                    </span>
+                    <span class="integ-mesh-node-dot integ-mesh-node-dot--{{ hub.status }}" aria-hidden="true"></span>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if mesh.edges|length > 0 %}
+        <div class="integ-mesh-links">
+            {% for edge in mesh.edges %}
+            <button type="button"
+                    class="integ-mesh-link"
+                    data-mesh-edge="{{ edge.id }}"
+                    data-flow-keys="{{ edge.flows|map(f => f.flow_key)|join(',') }}"
+                    data-flow-key="{{ edge.flows[0].flow_key|default('') }}"
+                    title="{{ edge.flows|map(f => f.titulo)|join(' · ') }}">
+                <span class="integ-mesh-link-dot integ-mesh-link-dot--{{ edge.status }}" aria-hidden="true"></span>
+                <span class="integ-mesh-link-route">
+                    {{ hub_labels[edge.from]|default(edge.from) }}
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    {{ hub_labels[edge.to]|default(edge.to) }}
+                </span>
+                <span class="integ-mesh-link-flow">
+                    {% for flow in edge.flows|slice(0, 2) %}
+                    {{ flow.titulo }}{% if not loop.last %} · {% endif %}
+                    {% endfor %}
+                    {% if edge.flows|length > 2 %}
+                    <span class="integ-mesh-link-more">+{{ edge.flows|length - 2 }}</span>
+                    {% endif %}
+                </span>
+                <span class="integ-mesh-link-meta">
+                    {{ edge.eventos }} evt{% if edge.avg_latency %} · ~{{ edge.avg_latency }}{% endif %}
+                </span>
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="integ-mesh-legend">
+            <span class="integ-mesh-legend-hint"><i class="fas fa-hand-pointer" aria-hidden="true"></i> Clique em um núcleo ou vínculo para filtrar fluxos</span>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,46 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+{% block integ_section_content %}
+<div class="integ-catalog-filters mb-3" data-integ-catalog-filter>
+    <button type="button" class="btn-unio btn-sm btn-unio-ghost is-active" data-filter="all">Todos</button>
+    {% for cat in catalog_categorias %}
+    <button type="button" class="btn-unio btn-sm btn-unio-ghost" data-filter="{{ cat.id }}">{{ cat.label }}</button>
+    {% endfor %}
+</div>
+
+<div class="row" data-integ-catalog-grid>
+    {% for item in catalog_items %}
+    <div class="col-md-6 col-xl-4 mb-3 d-flex" data-catalog-item data-category="{{ item.categoria }}">
+        <div class="unio-card flex-fill integ-catalog-card">
+            <div class="integ-catalog-head">
+                <span class="mi-icon"><i class="fas {{ item.icon }}" aria-hidden="true"></i></span>
+                <div class="flex-fill min-width-0">
+                    <div class="section-title">{{ item.nome }}</div>
+                    {% include 'components/status_badge.html.twig' with {
+                        label: item.badge == 'oficial' ? 'Oficial UNio' : (item.badge == 'parceiro' ? 'Parceiro' : 'Custom'),
+                        variant: item.badge == 'oficial' ? 'success' : (item.badge == 'parceiro' ? 'info' : 'secondary')
+                    } %}
+                </div>
+            </div>
+            <p class="section-subtitle">{{ item.descricao }}</p>
+            <div class="integ-catalog-tags mb-3">
+                {% for hub in item.hubs|slice(0, 3) %}
+                <span class="integ-tag">{{ hub }}</span>
+                {% endfor %}
+            </div>
+            {% if item.ativo %}
+            {% include 'components/status_badge.html.twig' with { label: 'Ativo', variant: 'success' } %}
+            {% elseif product_grant('hub_integracoes', 'conectores') %}
+            <form method="post" action="{{ path('app_integracoes_catalogo_ativar', { catalogoId: item.id }) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('integ_catalogo_ativar_' ~ item.id) }}">
+                <button type="submit" class="btn-unio btn-sm">
+                    <i class="fas fa-plug mr-1"></i> Ativar
+                </button>
+            </form>
+            {% else %}
+            <span class="text-muted small">Sem permissão para ativar</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

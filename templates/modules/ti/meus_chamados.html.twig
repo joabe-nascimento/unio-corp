@@ -1,0 +1,36 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Meus chamados',
+        subtitle: 'Portal do solicitante · acompanhe suas solicitações',
+        btn_label: ti_can('create_chamado') ? 'Abrir chamado' : null,
+        btn_icon: 'fa-plus',
+        btn_tag: 'button',
+        btn_attrs: ti_can('create_chamado') ? { 'data-unio-offcanvas-open': 'ti-chamado-novo' } : {}
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-sm mb-0">
+            <thead><tr><th>Chamado</th><th>Título</th><th>Status</th><th>Prioridade</th><th>SLA</th><th>Aberto</th></tr></thead>
+            <tbody>
+            {% for t in my_tickets %}
+            <tr>
+                <td><a href="{{ path('app_ti_chamado_show', { id: t.id }) }}"><code>{{ t.id }}</code></a></td>
+                <td>{{ t.title }}</td>
+                <td>{% include 'components/ti/ti_ticket_status_badge.html.twig' with { status: t.status, status_labels: status_labels } %}</td>
+                <td>{% include 'components/ti/ti_priority_badge.html.twig' with { priority: t.priority } %}</td>
+                <td>{% include 'components/progress_inline.html.twig' with { percent: t.sla_pct, variant: t.sla_pct < 50 ? 'danger' : 'accent', compact: true } %}</td>
+                <td>{{ t.opened_at }}</td>
+            </tr>
+            {% else %}
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: 6,
+                icon: 'fa-ticket',
+                title: 'Você ainda não abriu chamados.'
+            } %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

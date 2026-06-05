@@ -30,34 +30,54 @@
                {% if disabled|default(false) %}disabled{% endif %}
                aria-label="{{ label|default('Filtrar') }}"
                {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
-    {% elseif _type == 'text' %}
-        <input type="text"
+    {% elseif _type in ['text', 'date'] %}
+        <input type="{{ _type == 'text' ? input_type|default('text') : _type }}"
                class="filter-select"
                {% if _id %}id="{{ _id }}"{% endif %}
                {% if name is defined and name %}name="{{ name }}"{% endif %}
                {% if value is defined and value %}value="{{ value }}"{% endif %}
+               {% if placeholder is defined and placeholder %}placeholder="{{ placeholder }}"{% endif %}
                {% if disabled|default(false) %}disabled{% endif %}
                aria-label="{{ label|default('Filtrar') }}"
                {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}>
     {% else %}
-        <select class="filter-select"
-                aria-label="{{ label|default('Filtrar') }}"
-                {% if name is defined and name %}{% if _id %}id="{{ _id }}"{% endif %} name="{{ name }}"{% endif %}
-                {% if disabled|default(false) %}disabled{% endif %}
-                {% if min_width is defined and min_width %}style="min-width: {{ min_width }}"{% endif %}
-                {% for attr, val in _select_attrs %}{{ attr }}="{{ val }}" {% endfor %}>
-            {% for opt in options|default([]) %}
-                {% if opt is iterable and opt.label is defined %}
-                    <option value="{{ opt.value|default(opt.label) }}"
-                            {% if value is defined and value is not null and value|length > 0 and (value == opt.value|default(opt.label)) %}selected{% endif %}>
-                        {{ opt.label }}
-                    </option>
-                {% else %}
-                    <option {% if value is defined and value is not null and value|length > 0 and value == opt %}selected{% endif %}>
-                        {{ opt }}
-                    </option>
-                {% endif %}
-            {% endfor %}
-        </select>
+        {% set _selected_label = label|default('Filtrar') %}
+        {% for opt in options|default([]) %}
+            {% if opt is iterable and opt.label is defined %}
+                {% set _opt_val = opt.value|default(opt.label) %}
+                {% set _is_selected = (value is defined and value is not null and value|length > 0 and value == _opt_val)
+                    or (loop.first and (value is not defined or value is null or value|length == 0)) %}
+                {% if _is_selected %}{% set _selected_label = opt.label %}{% endif %}
+            {% else %}
+                {% set _is_selected = (value is defined and value is not null and value|length > 0 and value == opt)
+                    or (loop.first and (value is not defined or value is null or value|length == 0)) %}
+                {% if _is_selected %}{% set _selected_label = opt %}{% endif %}
+            {% endif %}
+        {% endfor %}
+        <div class="filter-select-wrap"{% if min_width is defined and min_width %} style="max-width: {{ min_width }}"{% endif %}>
+            <span class="filter-select-sizer" aria-hidden="true">{{ _selected_label }}</span>
+            <select class="filter-select"
+                    data-filter-select
+                    aria-label="{{ label|default('Filtrar') }}"
+                    {% if _id %}id="{{ _id }}"{% endif %}
+                    {% if name is defined and name %}name="{{ name }}"{% endif %}
+                    {% if disabled|default(false) %}disabled{% endif %}
+                    {% for attr, val in _select_attrs %}{{ attr }}="{{ val }}" {% endfor %}>
+                {% for opt in options|default([]) %}
+                    {% if opt is iterable and opt.label is defined %}
+                        {% set _opt_val = opt.value|default(opt.label) %}
+                        {% set _is_selected = (value is defined and value is not null and value|length > 0 and value == _opt_val)
+                            or (loop.first and (value is not defined or value is null or value|length == 0)) %}
+                        <option value="{{ _opt_val }}"{% if _is_selected %} selected{% endif %}>
+                            {{ opt.label }}
+                        </option>
+                    {% else %}
+                        {% set _is_selected = (value is defined and value is not null and value|length > 0 and value == opt)
+                            or (loop.first and (value is not defined or value is null or value|length == 0)) %}
+                        <option{% if _is_selected %} selected{% endif %}>{{ opt }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
     {% endif %}
 </div>

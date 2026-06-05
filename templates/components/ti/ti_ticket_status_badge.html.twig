@@ -1,0 +1,18 @@
+{#
+  ti_ticket_status_badge — status do chamado (Núcleo TI)
+
+  Props:
+    status         (string)  novo | em_analise | em_execucao | aguardando | resolvido
+    label          (string)  opcional
+    status_labels  (object)  mapa de labels (TiReferenceData)
+    attrs          (object)  atributos HTML extras
+#}
+{% set key = status|default('novo') %}
+{% set label = label|default(status_labels[key]|default(key|replace({'_': ' '})|capitalize)) %}
+{% set variant = key == 'resolvido' ? 'success' : (key == 'novo' ? 'info' : (key == 'aguardando' ? 'warning' : 'secondary')) %}
+{% include 'components/status_badge.html.twig' with {
+    label: label,
+    variant: variant,
+    extra_class: 'ti-badge ti-ticket-status-badge ti-ticket-status-badge--' ~ key,
+    attrs: attrs|default({})|merge({ 'data-ti-status-badge': key })
+} %}

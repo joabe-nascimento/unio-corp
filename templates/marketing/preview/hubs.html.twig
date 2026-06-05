@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Preview — Núcleos | Unio</title>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/unio-app.min.css') }}?v=260">
+    <style>
+        html, body { height: 100%; overflow: hidden; margin: 0; }
+        body { background: #f1f5f9; padding: 32px; display: flex; align-items: center; justify-content: center; }
+        #capture-root {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+        }
+        .preview-shell {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            width: 1440px;
+            height: 900px;
+            overflow: hidden;
+        }
+        .preview-sidebar {
+            background: var(--sidebar-bg, #0a0f1a);
+            border-right: 1px solid var(--border);
+            height: 100%;
+            overflow-y: auto;
+            padding: 12px 0 24px;
+        }
+        .preview-sidebar-brand {
+            padding: 16px 18px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 8px;
+        }
+        .preview-sidebar-brand img {
+            height: 28px;
+            width: auto;
+        }
+        .preview-sidebar-brand span {
+            display: block;
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 6px;
+        }
+        .preview-main {
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .preview-topbar {
+            height: 56px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+        .preview-search {
+            flex: 1;
+            max-width: 420px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 8px;
+            color: var(--text-3);
+            font-size: 13px;
+        }
+        .preview-topbar-chip {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(79,127,255,0.15);
+            border: 1px solid rgba(79,127,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: var(--accent);
+        }
+        .preview-content {
+            flex: 1;
+            padding: 40px 48px;
+            overflow: hidden;
+        }
+        .preview-content h1 {
+            font-family: 'Sora', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-1);
+            margin: 0 0 8px;
+        }
+        .preview-content p {
+            font-size: 15px;
+            color: var(--text-2);
+            margin: 0 0 28px;
+            max-width: 520px;
+        }
+        .preview-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: rgba(79,127,255,0.08);
+            border: 1px solid rgba(79,127,255,0.2);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .sidebar-hub-group-label {
+            display: block;
+            padding: 10px 18px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-3);
+        }
+        .sidebar-hub-group-list { list-style: none; padding: 0; margin: 0; }
+        .sidebar-hub-pick-item > .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 18px;
+            color: var(--text-2);
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .sidebar-hub-pick-item > .nav-link > .nav-icon {
+            width: 18px;
+            text-align: center;
+            color: var(--text-3);
+            font-size: 13px;
+        }
+        .sidebar-hub-pick-item > .nav-link > p { margin: 0; font-size: 13px; }
+        .sidebar-hub-pick-item > .nav-link:hover,
+        .sidebar-hub-pick-item > .nav-link.is-highlight {
+            background: rgba(79,127,255,0.08);
+            color: var(--text-1);
+        }
+        .sidebar-hub-pick-item > .nav-link.is-highlight > .nav-icon { color: var(--accent); }
+        .sidebar-hub-heading-label {
+            display: block;
+            padding: 14px 18px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-2);
+        }
+    </style>
+</head>
+<body>
+<div class="preview-shell" id="capture-root">
+    <aside class="preview-sidebar">
+        <div class="preview-sidebar-brand">
+            {% include 'components/platform_logo.html.twig' with { variant: 'full' } only %}
+            <span>Nexus Saúde · workspace</span>
+        </div>
+        <span class="sidebar-hub-heading-label">Núcleo selecionado</span>
+        {% for group in hub_groups %}
+        <div class="sidebar-hub-group">
+            <span class="sidebar-hub-group-label">{{ group.label }}</span>
+            <ul class="sidebar-hub-group-list">
+                {% for hub in group.hubs %}
+                <li class="sidebar-hub-pick-item">
+                    <a href="#" class="nav-link{% if hub.id == 'ti' %} is-highlight{% endif %}">
+                        <i class="fas {{ hub.icon }} nav-icon"></i>
+                        <p>{{ hub.label }}</p>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </aside>
+    <div class="preview-main">
+        <header class="preview-topbar">
+            <div class="preview-search">
+                <i class="fas fa-magnifying-glass"></i>
+                <span>Buscar núcleos, apps e membros…</span>
+            </div>
+            <div class="preview-topbar-chip">JA</div>
+        </header>
+        <div class="preview-content">
+            <h1>Escolha seu núcleo de trabalho</h1>
+            <p>Selecione um centro de excelência na barra lateral. Cada núcleo reúne módulos, indicadores e fluxos da sua área.</p>
+            <div class="preview-hint">
+                <i class="fas fa-arrow-left"></i>
+                30+ núcleos modulares · mesma autenticação · permissões por perfil
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

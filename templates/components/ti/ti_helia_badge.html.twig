@@ -1,0 +1,22 @@
+{#
+  ti_helia_badge — badge Helia / confiança (Núcleo TI)
+
+  Props:
+    label        (string)  texto completo
+    confidence   (int)     monta label automaticamente
+    style        (string)  confidence | helia  (default: confidence)
+    attrs        (object)
+#}
+{% if label|default('') == '' and confidence is defined %}
+    {% if style|default('confidence') == 'helia' %}
+        {% set label = 'Helia ' ~ confidence ~ '%' %}
+    {% else %}
+        {% set label = confidence ~ '% confiança' %}
+    {% endif %}
+{% endif %}
+{% include 'components/status_badge.html.twig' with {
+    label: label|default('Helia'),
+    variant: 'info',
+    extra_class: 'ti-badge ti-badge-helia',
+    attrs: attrs|default({})
+} %}

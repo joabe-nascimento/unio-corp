@@ -111,7 +111,7 @@ final class WelcomeNewsIntelligenceService
                 body: [
                     sprintf('Com %s colaborador(es) registrado(s), cada admissão e movimentação impacta fortemente a operação.', number_format($headcount, 0, ',', '.')),
                     'Aproveite para cadastrar departamentos, equipes e avaliações — a base fica pronta antes da expansão do quadro.',
-                    'O Hub Operações concentra pessoas, RH e organograma para acelerar essa estruturação.',
+                    'O Núcleo de Operações concentra pessoas, RH e organograma para acelerar essa estruturação.',
                 ],
                 layouts: ['tenant', 'gestor'],
             );
@@ -222,7 +222,7 @@ final class WelcomeNewsIntelligenceService
                     slug: 'discovery-empresas-' . $dayKey,
                     category: 'Multi-empresa',
                     title: sprintf('%d empresas ativas na plataforma', $empresasAtivas),
-                    summary: 'Alterne workspaces e valide grants antes de liberar novos hubs.',
+                    summary: 'Alterne workspaces e valide grants antes de liberar novos núcleos.',
                     icon: 'fa-building',
                     relatedRoute: 'app_admin_empresas',
                     body: [

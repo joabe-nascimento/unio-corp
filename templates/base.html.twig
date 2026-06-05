@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap4.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=257">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=260">
 
     {% block stylesheets %}{% endblock %}
 </head>
@@ -62,7 +62,10 @@
                 {% include 'components/sidebar_identity_hub.html.twig' %}
             {% else %}
                 <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0" title="{{ _pnome }}">
-                    <img src="{{ asset('images/logos/unio-logotipo.png') }}" alt="{{ _pnome }}" class="sidebar-logo sidebar-logo-full">
+                    {% include 'components/platform_logo.html.twig' with {
+                        variant: 'full',
+                        class: 'sidebar-logo sidebar-logo-full'
+                    } only %}
                 </a>
             {% endif %}
         </div>
@@ -213,6 +216,7 @@ window.addEventListener('load', function () {
                 wrap.classList.remove('is-expanded');
                 toggle.setAttribute('aria-expanded', 'false');
                 input.value = '';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
                 return;
             }
             if (wrap.classList.contains('is-expanded') && !wrap.contains(e.target) && !input.value.trim()) {
@@ -228,7 +232,10 @@ window.addEventListener('load', function () {
             var input = wrap.querySelector('.list-search-input');
             wrap.classList.remove('is-expanded');
             if (toggle) toggle.setAttribute('aria-expanded', 'false');
-            if (input) input.value = '';
+            if (input) {
+                input.value = '';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         });
     });
 })();
@@ -261,6 +268,7 @@ window.addEventListener('load', function () {
 </script>
 <script src="{{ asset('js/unio-file-upload.js') }}?v=2"></script>
 <script src="{{ asset('js/unio-offcanvas.js') }}?v=2"></script>
+<script src="{{ asset('js/unio-filter-select.js') }}?v=3"></script>
 <script src="{{ asset('js/unio-color-picker.js') }}?v=2"></script>
 <script src="{{ asset('js/unio-toast.js') }}?v=3"></script>
 <script src="{{ asset('js/global-search.js') }}?v=1"></script>

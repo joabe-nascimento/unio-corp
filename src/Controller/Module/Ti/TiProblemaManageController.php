@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Controller\Module\Ti;
+
+use App\Entity\Empresa;
+use App\Entity\User;
+use App\Service\Ti\TiProblemaService;
+use App\Service\WorkspaceService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+#[IsGranted('ROLE_USER')]
+final class TiProblemaManageController extends AbstractController
+{
+    public function __construct(
+        private WorkspaceService $workspace,
+        private TiProblemaService $problemas,
+    ) {}
+
+    #[Route('/ti/problemas/novo', name: 'app_ti_problema_novo_submit', methods: ['POST'])]
+    public function novo(Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $this->requireCsrf($request, 'ti_problema_form');
+        try {
+            $this->problemas->create($empresa, $request->request->all());
+            $this->addFlash('success', 'Problema registrado.');
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+            return $this->redirectToRoute('app_ti_problemas', ['open_novo' => 1]);
+        }
+        return $this->redirectToRoute('app_ti_problemas');
+    }
+
+    #[Route('/ti/problemas/{id}/editar', name: 'app_ti_problema_editar_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function editar(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $this->requireCsrf($request, 'ti_problema_form');
+        try {
+            $this->problemas->update($this->problemas->load($empresa, $id), $request->request->all());
+            $this->addFlash('success', 'Problema atualizado.');
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+            return $this->redirectToRoute('app_ti_problemas', ['open_edit' => $id]);
+        }
+        return $this->redirectToRoute('app_ti_problemas');
+    }
+
+    #[Route('/ti/problemas/{id}/excluir', name: 'app_ti_problema_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function excluir(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $this->requireCsrf($request, 'ti_problema_delete_' . $id);
+        $this->problemas->delete($this->problemas->load($empresa, $id));
+        $this->addFlash('success', 'Problema excluído.');
+        return $this->redirectToRoute('app_ti_problemas');
+    }
+
+    private function requireEmpresa(): Empresa
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
+        if (!$empresa) {
+            throw new \RuntimeException('Selecione uma área de trabalho.');
+        }
+        return $empresa;
+    }
+
+    private function requireCsrf(Request $request, string $tokenId): void
+    {
+        if (!$this->isCsrfTokenValid($tokenId, (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token inválido.');
+        }
+    }
+}

@@ -1,0 +1,79 @@
+{# Shadow Replay Lab — simulação funcional #}
+{% set lab = shadow_lab|default({ mapeamentos: [], runs: [], periodos: [] }) %}
+<section class="unio-card" data-integ-panel="shadow">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Shadow Replay Lab',
+        subtitle: 'Replay de payloads reais anonimizados — teste antes de publicar'
+    } %}
+
+    <form class="integ-shadow-form px-3 pb-3" data-integ-shadow-form
+          data-action="{{ path('app_integracoes_observatorio_shadow') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('integ_cortex_shadow') }}">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="unio-form-label" for="shadowMap">Mapeamento</label>
+                <select id="shadowMap" name="mapeamento_id" class="unio-form-control" required data-shadow-map-select>
+                    {% for map in lab.mapeamentos %}
+                    <option value="{{ map.db_id }}"
+                            data-origem="{{ map.campo_origem }}"
+                            data-destino="{{ map.campo_destino }}">
+                        {{ map.nome }} ({{ map.campo_origem }} → {{ map.campo_destino }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="unio-form-label" for="shadowDest">Campo destino proposto</label>
+                <input type="text" id="shadowDest" name="campo_destino_proposto" class="unio-form-control"
+                       value="{{ lab.mapeamentos[0].campo_destino|default('userPrincipalName') }}" required>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label class="unio-form-label" for="shadowPeriod">Período</label>
+                <select id="shadowPeriod" name="periodo_dias" class="unio-form-control">
+                    {% for p in lab.periodos %}
+                    <option value="{{ p.value }}"{% if p.value == 7 %} selected{% endif %}>{{ p.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 mb-3 d-flex align-items-end">
+                <button type="submit" class="btn-unio btn-sm w-100" data-shadow-submit>
+                    <i class="fas fa-play mr-1" aria-hidden="true"></i> Executar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="integ-shadow-results px-3 pb-3" data-integ-shadow-results>
+        {% if lab.runs|length > 0 %}
+        {% set last = lab.runs[0] %}
+        {% include 'components/integracoes/shadow_run_result.html.twig' with { run: last } %}
+        {% else %}
+        <p class="section-subtitle mb-0">Execute um replay para ver resultados comparativos.</p>
+        {% endif %}
+    </div>
+
+    {% if lab.runs|length > 1 %}
+    <div class="integ-shadow-history px-3 pb-3">
+        <h4 class="section-title mb-2">Histórico de replays</h4>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead><tr><th>Quando</th><th>Mapeamento</th><th>Proposta</th><th>Taxa</th><th>Falhas</th></tr></thead>
+                <tbody>
+                {% for run in lab.runs|slice(1) %}
+                <tr>
+                    <td>{{ run.criado_em }}</td>
+                    <td>{{ run.mapeamento_nome }}</td>
+                    <td class="admin-table-mono">{{ run.campo_destino_atual }} → {{ run.campo_destino_proposto }}</td>
+                    <td>{% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: run.taxa_sucesso ~ '%',
+                        variant: run.taxa_sucesso >= 99 ? 'success' : (run.taxa_sucesso >= 95 ? 'warning' : 'danger')
+                    } %}</td>
+                    <td>{{ run.falhas }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</section>

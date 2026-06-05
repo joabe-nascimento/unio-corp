@@ -1,0 +1,35 @@
+{# Runbooks auto-gerados pelo Cortex #}
+<section class="unio-card" data-integ-panel="runbooks">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Runbooks automáticos',
+        subtitle: 'Playbooks gerados a partir de incidentes e drifts detectados'
+    } %}
+    {% if auto_playbooks|default([])|length > 0 %}
+    <div class="integ-cortex-playbooks">
+        {% for pb in auto_playbooks %}
+        <details class="integ-cortex-playbook"{% if loop.first %} open{% endif %}>
+            <summary>
+                <span class="integ-cortex-playbook-title">{{ pb.titulo }}</span>
+                {% include 'components/ti/ti_metric_badge.html.twig' with {
+                    label: pb.severidade|upper,
+                    variant: pb.severidade == 'critica' ? 'danger' : (pb.severidade == 'media' ? 'warning' : 'secondary')
+                } %}
+                <small class="text-muted">{{ pb.origem }}</small>
+            </summary>
+            <ol class="integ-cortex-playbook-steps">
+                {% for step in pb.steps %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+        </details>
+        {% endfor %}
+    </div>
+    {% else %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-book-open',
+        title: 'Nenhum runbook pendente',
+        text: 'Fluxos saudáveis — runbooks serão gerados automaticamente em incidentes.',
+        compact: true
+    } %}
+    {% endif %}
+</section>

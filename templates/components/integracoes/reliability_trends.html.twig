@@ -1,0 +1,30 @@
+{# Tendência de confiabilidade — 7 dias #}
+{% if reliability_trends|default([])|length > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Tendência de confiabilidade',
+        subtitle: 'Últimos 7 dias por fluxo'
+    } %}
+    <div class="integ-cortex-trends">
+        {% for trend in reliability_trends %}
+        <div class="integ-cortex-trend-row">
+            <div class="integ-cortex-trend-label">
+                <strong>{{ trend.titulo }}</strong>
+                {% include 'components/ti/ti_metric_badge.html.twig' with {
+                    label: (trend.delta >= 0 ? '+' : '') ~ trend.delta ~ 'pp',
+                    variant: trend.delta >= 0 ? 'success' : 'warning'
+                } %}
+            </div>
+            <div class="integ-cortex-trend-bars">
+                {% for pt in trend.points %}
+                <div class="integ-cortex-trend-bar" title="{{ pt.day }}: {{ pt.value }}%">
+                    <span style="height: {{ pt.value }}%"></span>
+                    <em>{{ pt.day }}</em>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

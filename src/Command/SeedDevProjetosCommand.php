@@ -55,10 +55,10 @@ class SeedDevProjetosCommand extends Command
 
         $hub = $this->service->createProjeto(
             $empresa,
-            'Hub Operações — layout e navegação',
+            'Núcleo de Operações — layout e navegação',
             'UNIO-HUB-OPS',
             'Ajustar page_list, sidebar, cards do hub e consistência visual.',
-            'Hub Operações',
+            'Núcleo de Operações',
             DevProjeto::STATUS_EM_ANDAMENTO,
             '#4F7FFF',
             new \DateTimeImmutable('+30 days'),

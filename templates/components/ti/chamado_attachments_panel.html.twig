@@ -1,0 +1,31 @@
+{# Anexos do chamado — grid com prévia #}
+{% set attachments = attachments|default(ticket.attachments|default([])) %}
+{% if attachments|length > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Anexos',
+        subtitle: attachments|length ~ ' arquivo' ~ (attachments|length != 1 ? 's' : '')
+    } %}
+    <div class="ti-chamado-attachments-grid">
+        {% for file in attachments %}
+        <a href="{{ asset(file.url) }}"
+           class="ti-chamado-attachment-card{% if file.is_image %} ti-chamado-attachment-card--image{% endif %}"
+           target="_blank"
+           rel="noopener noreferrer"
+           title="{{ file.name }}">
+            {% if file.is_image %}
+            <img src="{{ asset(file.url) }}" alt="" class="ti-chamado-attachment-thumb" loading="lazy">
+            {% else %}
+            <span class="ti-chamado-attachment-icon" aria-hidden="true">
+                <i class="fas {{ file.mime == 'application/pdf' ? 'fa-file-pdf' : 'fa-file-lines' }}"></i>
+            </span>
+            {% endif %}
+            <span class="ti-chamado-attachment-meta">
+                <span class="ti-chamado-attachment-name">{{ file.name }}</span>
+                <span class="ti-chamado-attachment-size">{{ file.size_label }}</span>
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

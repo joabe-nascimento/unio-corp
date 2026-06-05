@@ -1,0 +1,18 @@
+{# Rodapé fixo A4 — igual em preview e PDF #}
+{% set _dark = dark|default(false) %}
+{% set _variant = variant|default('default') %}
+
+{% if _variant == 'cta' %}
+<footer class="apr-sheet-foot apr-sheet-foot--cta">
+    {% include 'components/platform_logo.html.twig' with {
+        variant: 'full',
+        class: 'apr-sheet-foot-logo'
+    } only %}
+    <p>© {{ "now"|date("Y") }} Unio · Plataforma de Gestão de Pessoas · Apresentação comercial</p>
+</footer>
+{% else %}
+<footer class="apr-sheet-foot{% if _dark %} apr-sheet-foot--dark{% endif %}">
+    <span>Plataforma de Gestão de Pessoas</span>
+    <span>{{ "now"|date("Y") }} · unio.app</span>
+</footer>
+{% endif %}

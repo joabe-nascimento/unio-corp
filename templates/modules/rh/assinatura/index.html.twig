@@ -6,9 +6,14 @@
 {% block hub_content %}
 {% if grant_at_least('product_rh', 'assinatura', 'GESTOR_EQUIPE') %}
 <div class="unio-card p-4 mb-3">
-    <form method="post" action="{{ path('app_rh_assinatura') }}" class="d-flex gap-2">
+    <form method="post" action="{{ path('app_rh_assinatura') }}" class="d-flex gap-2 align-items-end">
         <input type="hidden" name="_token" value="{{ csrf_token('rh_assinatura_envelope') }}">
-        <input type="text" name="titulo" class="form-control" placeholder="Título do documento" required>
+        <div class="flex-fill">
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'envelope-titulo', name: 'titulo', label: 'Título do documento',
+                placeholder: 'Título do documento', required: true
+            } %}
+        </div>
         <button type="submit" class="btn-unio btn-sm">Criar envelope</button>
     </form>
 </div>
@@ -16,7 +21,11 @@
 
 <div class="unio-card p-4">
     {% if envelopes is empty %}
-        <p class="text-muted mb-0">Nenhum envelope de assinatura.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-file-signature',
+            title: 'Nenhum envelope de assinatura.',
+            compact: true
+        } %}
     {% else %}
     <ul class="list-unstyled mb-0">
         {% for e in envelopes %}

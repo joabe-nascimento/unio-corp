@@ -1,0 +1,66 @@
+{# Offcanvas — CRUD comunicados TI #}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'ti-novidade-form',
+    title: 'Novo comunicado',
+    subtitle: 'Manutenções, políticas e releases',
+    icon: 'fa-bullhorn',
+    size: 'md',
+    open: app.request.query.get('open_novo') == 'novidade' or (app.request.query.get('resource') == 'novidade' and app.request.query.get('open_edit'))
+} %}
+    {% block offcanvas_drawer_attrs %}data-ti-infra-form="novidade"{% endblock %}
+    {% block offcanvas_body %}
+    <form method="post"
+          action="{{ path('app_ti_novidade_novo_submit') }}"
+          class="unio-form"
+          id="tiNovidadeForm"
+          data-ti-infra-form-el="novidade"
+          data-ti-edit-url="{{ path('app_ti_novidade_editar_submit', { id: 0 }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('ti_novidade_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_novidade_titulo', name: 'titulo', label: 'Título',
+            placeholder: 'Ex.: Janela de manutenção programada', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_novidade_resumo', name: 'resumo', label: 'Resumo', type: 'textarea',
+            rows: 4, placeholder: 'Descreva o comunicado…', required: true
+        } %}
+        <div class="row">
+            <div class="col-6">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'ti_novidade_badge', name: 'badge', label: 'Badge',
+                    placeholder: 'Manutenção, Alerta…', value: 'Comunicado'
+                } %}
+            </div>
+            <div class="col-6">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'ti_novidade_variant', name: 'variant', label: 'Tipo', type: 'select', required: true,
+                    value: 'info',
+                    options: [
+                        { value: 'info', label: 'Informativo' },
+                        { value: 'success', label: 'Lançamento' },
+                        { value: 'warning', label: 'Manutenção' },
+                        { value: 'danger', label: 'Alerta' },
+                        { value: 'secondary', label: 'Geral' },
+                    ]
+                } %}
+            </div>
+        </div>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_novidade_icon', name: 'icon', label: 'Ícone (Font Awesome)',
+            placeholder: 'fa-bullhorn', value: 'fa-bullhorn'
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_novidade_publicado', name: 'publicado_em', label: 'Data de publicação',
+            type: 'date', required: true, value: 'now'|date('Y-m-d')
+        } %}
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="tiNovidadeForm" class="btn-unio" data-ti-infra-submit="novidade">
+            <i class="fas fa-check mr-1"></i> <span data-ti-infra-submit-label="novidade">Publicar</span>
+        </button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}

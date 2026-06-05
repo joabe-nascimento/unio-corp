@@ -1,0 +1,32 @@
+{#
+  infra_row_actions — editar / excluir linha de infra TI
+
+  Props:
+    resource   ativo | licenca | integracao | manutencao
+    id         db_id numérico
+    label      rótulo para confirmação de exclusão
+    fields     mapa data-* para preencher o offcanvas de edição
+#}
+{% set _resource = resource|default('ativo') %}
+{% set _id = id|default(0) %}
+{% set _label = label|default('registro')|e('html_attr') %}
+{% set _fields = fields|default({}) %}
+<div class="ti-infra-row-actions d-flex gap-1 justify-content-end">
+    <button type="button"
+            class="btn-unio-ghost btn-xs"
+            title="Editar"
+            data-ti-infra-edit="{{ _resource }}"
+            data-ti-infra-id="{{ _id }}"
+            {% for key, val in _fields %}data-ti-field-{{ key }}="{{ val|e('html_attr') }}" {% endfor %}>
+        <i class="fas fa-pen" aria-hidden="true"></i>
+    </button>
+    <form method="post"
+          action="{{ path('app_ti_' ~ _resource ~ '_excluir', { id: _id }) }}"
+          class="d-inline"
+          onsubmit="return confirm('Excluir {{ _label|e('js') }}?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('ti_' ~ _resource ~ '_delete_' ~ _id) }}">
+        <button type="submit" class="btn-unio-ghost btn-xs btn-danger-ghost" title="Excluir">
+            <i class="fas fa-trash" aria-hidden="true"></i>
+        </button>
+    </form>
+</div>

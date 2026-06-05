@@ -1,0 +1,42 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'integ-mapeamento-form',
+    title: 'Mapeamento',
+    subtitle: 'Campo origem → destino',
+    icon: 'fa-right-left',
+    size: 'md',
+    open: app.request.query.get('open_novo') == '1' or app.request.query.get('open_edit')
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_integracoes_mapeamento_novo_submit') }}" id="integMapForm" data-integ-map-form data-integ-edit-url="{{ path('app_integracoes_mapeamento_editar_submit', { id: 0 }) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('integ_mapeamento_form') }}">
+    <div class="form-group">
+        <label for="integMapNome">Nome</label>
+        <input type="text" class="form-control" id="integMapNome" name="nome" required>
+    </div>
+    <div class="form-group">
+        <label for="integMapCon">Conector</label>
+        <select class="form-control" id="integMapCon" name="conector_id" required>
+            <option value="">Selecione…</option>
+            {% for c in conectores|default([]) %}
+            <option value="{{ c.db_id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-6">
+            <label for="integMapOrig">Campo origem (UNio)</label>
+            <input type="text" class="form-control" id="integMapOrig" name="campo_origem" required placeholder="funcionario.email">
+        </div>
+        <div class="form-group col-6">
+            <label for="integMapDest">Campo destino</label>
+            <input type="text" class="form-control" id="integMapDest" name="campo_destino" required placeholder="userPrincipalName">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="integMapTrans">Transformação (opcional)</label>
+        <input type="text" class="form-control" id="integMapTrans" name="transformacao" placeholder="lowercase, date:Y-m-d">
+    </div>
+    <button type="submit" class="btn-unio btn-block">Salvar mapeamento</button>
+</form>
+{% endblock %}
+{% endembed %}

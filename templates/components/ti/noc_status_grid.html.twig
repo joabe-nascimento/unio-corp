@@ -1,0 +1,47 @@
+{# NOC status grid — exclusivo Núcleo TI #}
+{% set noc_real = integ_health_real|default(false) %}
+<div class="unio-card mb-4 ti-noc-grid-wrap">
+    {% include 'components/section_header.html.twig' with {
+        title: 'NOC Status Board',
+        subtitle: pulse.systems_up ~ ' de ' ~ pulse.systems_total ~ ' sistemas operacionais',
+        btn_label: noc_real ? 'Observatório Causal' : null,
+        btn_href: noc_real ? '/integracoes/observatorio' : null,
+        btn_ghost: true
+    } %}
+    {% if noc_real %}
+    <div class="ti-noc-real-badge mb-2">
+        <i class="fas fa-satellite-dish fa-xs" aria-hidden="true"></i>
+        <span>Dados em tempo real — Núcleo Integrações</span>
+    </div>
+    {% endif %}
+    <div class="ti-noc-grid" role="list">
+        {% for sys in noc_systems %}
+        {% set status_label = sys.status == 'operational' ? 'Operacional' : (sys.status == 'degraded' ? 'Degradado' : 'Incidente') %}
+        {% set has_link = sys.observatorio_url is defined and sys.observatorio_url %}
+        {% if has_link %}
+        <a href="{{ sys.observatorio_url }}" class="ti-noc-cell ti-noc-cell--{{ sys.status }} ti-noc-cell--link" role="listitem" title="Ver no Observatório Causal">
+        {% else %}
+        <div class="ti-noc-cell ti-noc-cell--{{ sys.status }}" role="listitem">
+        {% endif %}
+            <div class="ti-noc-cell-head">
+                <span class="ti-noc-pulse ti-noc-pulse--{{ sys.status }}" aria-hidden="true"></span>
+                <i class="fas {{ sys.icon }}" aria-hidden="true"></i>
+                <span class="ti-noc-name">{{ sys.name }}</span>
+                {% if sys.open_incidents is defined and sys.open_incidents > 0 %}
+                <span class="ti-noc-incident-badge" title="{{ sys.open_incidents }} chamado(s) aberto(s)">{{ sys.open_incidents }}</span>
+                {% endif %}
+            </div>
+            <div class="ti-noc-metrics">
+                {% include 'components/ti/ti_health_badge.html.twig' with { status: sys.status, label: status_label } %}
+                <span class="ti-noc-uptime">{{ sys.uptime }} uptime</span>
+                {% if sys.latency is defined and sys.latency != '—' %}
+                <span class="ti-noc-latency">{{ sys.latency }}</span>
+                {% endif %}
+                {% if has_link %}
+                <span class="ti-noc-link-hint"><i class="fas fa-arrow-right fa-xs"></i></span>
+                {% endif %}
+            </div>
+        {% if has_link %}</a>{% else %}</div>{% endif %}
+        {% endfor %}
+    </div>
+</div>

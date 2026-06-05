@@ -1,0 +1,181 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+
+{% block hub_toolbar_actions %}
+
+{% if product_grant('hub_integracoes', 'webhooks') %}
+
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="integ-webhook-form">
+
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo webhook
+
+</button>
+
+{% endif %}
+
+{{ parent() }}
+
+{% endblock %}
+
+
+
+{% block integ_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: webhooks|length, label: 'Total', icon: 'fa-bolt' },
+
+    { value: webhooks|filter(w => w.ativo)|length, label: 'Ativos', icon: 'fa-circle-check', trend: 'up' },
+
+    { value: webhooks|filter(w => w.falhas > 0)|length, label: 'Com falhas', icon: 'fa-triangle-exclamation' },
+
+], mb: 'mb-3' } %}
+
+
+
+<section class="unio-card">
+
+    {% include 'components/section_header.html.twig' with { title: 'Webhooks', subtitle: 'Eventos de entrada e saída' } %}
+
+    <div class="table-responsive">
+
+        <table class="table table-sm mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>Nome</th>
+
+                    <th>Direção</th>
+
+                    <th>Evento</th>
+
+                    <th>URL</th>
+
+                    <th>Status</th>
+
+                    <th>Último disparo</th>
+
+                    {% if product_grant('hub_integracoes', 'webhooks') %}<th class="admin-table-actions"></th>{% endif %}
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for wh in webhooks %}
+
+            <tr>
+
+                <td>
+
+                    <strong>{{ wh.nome }}</strong>
+
+                    {% if wh.conector %}<br><small class="text-muted">{{ wh.conector }}</small>{% endif %}
+
+                </td>
+
+                <td>
+                    {% include 'components/status_badge.html.twig' with {
+                        label: wh.direcao == 'in' ? 'Entrada' : 'Saída',
+                        variant: wh.direcao == 'in' ? 'info' : 'secondary'
+                    } %}
+                </td>
+
+                <td class="admin-table-mono">{{ wh.evento }}</td>
+
+                <td class="admin-table-mono text-truncate" style="max-width:200px" title="{{ wh.url }}">{{ wh.url }}</td>
+
+                <td>
+                    {% include 'components/status_badge.html.twig' with {
+                        label: wh.ativo ? 'Ativo' : 'Pausado',
+                        variant: wh.ativo ? 'success' : 'warning'
+                    } %}
+                </td>
+
+                <td>{{ wh.ultimo_disparo|default('—') }}</td>
+
+                {% if product_grant('hub_integracoes', 'webhooks') %}
+
+                <td class="admin-table-actions">
+
+                    <form method="post" action="{{ path('app_integracoes_webhook_toggle', { id: wh.db_id }) }}" class="d-inline">
+
+                        <input type="hidden" name="_token" value="{{ csrf_token('integ_webhook_toggle_' ~ wh.db_id) }}">
+
+                        <button type="submit" class="btn-unio-ghost btn-xs {{ wh.ativo ? 'btn-success-ghost' : 'btn-danger-ghost' }}" title="{{ wh.ativo ? 'Pausar' : 'Ativar' }}">
+
+                            <i class="fas fa-power-off" aria-hidden="true"></i>
+
+                        </button>
+
+                    </form>
+
+                    <button type="button"
+
+                            class="btn-unio-ghost btn-xs"
+
+                            title="Editar"
+
+                            data-unio-offcanvas-open="integ-webhook-form"
+
+                            data-integ-webhook-edit='{{ wh|json_encode|e('html_attr') }}'>
+
+                        <i class="fas fa-pen" aria-hidden="true"></i>
+
+                    </button>
+
+                    <form method="post"
+
+                          action="{{ path('app_integracoes_webhook_excluir', { id: wh.db_id }) }}"
+
+                          class="d-inline"
+
+                          onsubmit="return confirm('Excluir webhook?')">
+
+                        <input type="hidden" name="_token" value="{{ csrf_token('integ_webhook_delete_' ~ wh.db_id) }}">
+
+                        <button type="submit" class="btn-unio-ghost btn-xs btn-danger-ghost" title="Excluir">
+
+                            <i class="fas fa-trash" aria-hidden="true"></i>
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+                {% endif %}
+
+            </tr>
+
+            {% else %}
+
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: product_grant('hub_integracoes', 'webhooks') ? 7 : 6,
+                icon: 'fa-webhook',
+                title: 'Nenhum webhook configurado.'
+            } %}
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+{% if product_grant('hub_integracoes', 'webhooks') %}
+
+{% include 'components/integracoes/webhook_offcanvas.html.twig' with { conectores: conectores_options|default([]) } %}
+
+{% endif %}
+
+{% endblock %}
+
+

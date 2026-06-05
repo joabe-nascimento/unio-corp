@@ -1,0 +1,16 @@
+{# Aplicar sugestão Helia — triagem automática #}
+{% set applied = ticket.helia_applied|default(false) %}
+{% set resolved = ticket.status|default('') == 'resolvido' %}
+{% if not applied and not resolved %}
+<form method="post"
+      action="{{ path('app_ti_chamado_helia_aplicar', { id: ticket.id }) }}"
+      class="ti-helia-apply-form m-0">
+    <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_helia_aplicar_' ~ ticket.id) }}">
+    {% if redirect|default('show') == 'cortex' %}
+    <input type="hidden" name="redirect" value="cortex">
+    {% endif %}
+    <button type="submit" class="btn-unio btn-sm">
+        <i class="fas fa-wand-magic-sparkles mr-1" aria-hidden="true"></i> Aplicar sugestão Helia
+    </button>
+</form>
+{% endif %}

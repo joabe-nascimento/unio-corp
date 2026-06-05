@@ -1,0 +1,17 @@
+{#
+  ti_priority_badge — prioridade P1–P4 (Núcleo TI)
+
+  Props:
+    priority     (string)  P1 | P2 | P3 | P4
+    label        (string)  opcional; default = priority
+    attrs        (object)  atributos HTML extras
+#}
+{% set p = priority|default('P4')|upper %}
+{% set p_key = p|lower %}
+{% set variant = p == 'P1' ? 'danger' : (p == 'P2' ? 'warning' : 'secondary') %}
+{% include 'components/status_badge.html.twig' with {
+    label: label|default(p),
+    variant: variant,
+    extra_class: 'ti-badge ti-badge-priority ti-badge-priority--' ~ p_key,
+    attrs: attrs|default({})
+} %}

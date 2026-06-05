@@ -6,7 +6,11 @@
     class        (string, opt)  classe extra do badge (ex.: membro, gestor)
     description  (string)        texto do tooltip
 #}
+{% if description is defined and description %}
 <span class="unio-tooltip badge-perfil {{ class|default('') }}" tabindex="0">
     {{ label }}
     <span class="unio-tooltip-bubble" role="tooltip">{{ description }}</span>
 </span>
+{% else %}
+<span class="badge-perfil {{ class|default('') }}">{{ label }}</span>
+{% endif %}

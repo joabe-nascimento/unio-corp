@@ -1,0 +1,15 @@
+{#
+  ti_tag_badge — tag de chamado (impacto ou categoria)
+
+  Props:
+    tag          (string)
+    attrs        (object)
+#}
+{% set tag_lower = tag|default('')|lower %}
+{% set tag_class = ('impacto' in tag_lower or 'alto' in tag_lower or 'p1' in tag_lower) ? 'ti-badge-impact' : 'ti-badge-cat' %}
+{% include 'components/status_badge.html.twig' with {
+    label: tag,
+    variant: tag_class == 'ti-badge-impact' ? 'danger' : 'secondary',
+    extra_class: 'ti-badge ' ~ tag_class,
+    attrs: attrs|default({})
+} %}

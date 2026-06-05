@@ -1,0 +1,19 @@
+{# SLA heatmap — exclusivo Unio #}
+<div class="ti-sla-heatmap">
+    <div class="ti-sla-heatmap-head">
+        <span></span>
+        {% for day in ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'] %}
+        <span class="ti-sla-heatmap-day">{{ day }}</span>
+        {% endfor %}
+    </div>
+    {% for row in sla_heatmap|default([]) %}
+    <div class="ti-sla-heatmap-row">
+        <span class="ti-sla-heatmap-priority">{{ row.priority }}</span>
+        {% for cell in row.cells %}
+        {% set v = cell.value %}
+        {% set tone = v >= 97 ? 'high' : (v >= 90 ? 'mid' : 'low') %}
+        <span class="ti-sla-heatmap-cell ti-sla-heatmap-cell--{{ tone }}" title="{{ row.priority }} {{ cell.day }}: {{ v }}%">{{ v }}%</span>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>

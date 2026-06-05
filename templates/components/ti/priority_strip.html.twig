@@ -1,0 +1,12 @@
+{# Priority queue strip #}
+<div class="ti-priority-strip">
+    {% for item in items|default([]) %}
+    <a href="{{ path('app_ti_chamado_show', { id: item.id }) }}" class="ti-priority-item ti-priority-item--{{ item.priority|lower }}">
+        <span class="ti-priority-code">{{ item.id }}</span>
+        <span class="ti-priority-title">{{ item.title }}</span>
+        {% include 'components/ti/ti_priority_badge.html.twig' with { priority: item.priority|default('P4') } %}
+    </a>
+    {% else %}
+    <p class="text-muted small mb-0">Nenhum chamado prioritário na fila.</p>
+    {% endfor %}
+</div>

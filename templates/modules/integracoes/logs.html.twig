@@ -1,0 +1,156 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_integracoes_logs_export') }}" class="btn-unio btn-sm btn-unio-ghost">
+    <i class="fas fa-file-csv mr-1"></i> Exportar CSV
+</a>
+{{ parent() }}
+{% endblock %}
+
+{% block integ_section_content %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: log_stats.today|default(0), label: 'Eventos hoje', icon: 'fa-bolt' },
+    { value: log_stats.errors|default(0), label: 'Erros (24h)', icon: 'fa-triangle-exclamation' },
+    { value: log_pagination ? log_pagination.total : logs|length, label: 'Total filtrado', icon: 'fa-list' },
+], mb: 'mb-3' } %}
+
+<form method="get" action="{{ path('app_integracoes_logs') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with { btn_sm: true } %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Nível',
+            name: 'nivel',
+            value: log_filters.nivel|default(''),
+            min_width: '100px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'info', label: 'INFO' },
+                { value: 'warn', label: 'WARN' },
+                { value: 'error', label: 'ERROR' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Origem',
+            type: 'text',
+            name: 'origem',
+            value: log_filters.origem|default(''),
+            placeholder: 'ex: TOTVS',
+            min_width: '140px'
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Trace / Flow',
+            type: 'text',
+            name: 'flow_key',
+            value: log_filters.flow_key|default(''),
+            placeholder: 'trace-id',
+            min_width: '140px'
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'A partir de',
+            type: 'date',
+            name: 'data_inicio',
+            value: log_filters.data_inicio|default(''),
+            min_width: '140px'
+        } %}
+        <button type="submit" class="btn-unio btn-sm">
+            <i class="fas fa-filter mr-1"></i> Filtrar
+        </button>
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_integracoes_logs'),
+            has_filters: log_filters|default({})|length > 0
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with { title: 'Log de eventos', subtitle: 'Auditoria e sincronizações' } %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0" id="integLogsTable">
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Origem</th>
+                    <th>Nível</th>
+                    <th>Mensagem</th>
+                    <th>Trace ID</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+            <tr class="integ-log-row" data-log-id="{{ log.db_id }}" style="cursor:pointer" onclick="integLogToggle(this)">
+                <td>{{ log.time }}</td>
+                <td>{{ log.connector }}</td>
+                <td>{% include 'components/ti/ti_metric_badge.html.twig' with {
+                    label: log.level|upper,
+                    variant: log.level == 'error' ? 'danger' : (log.level == 'warn' ? 'warning' : 'info')
+                } %}</td>
+                <td>{{ log.message|slice(0, 80) }}{% if log.message|length > 80 %}…{% endif %}</td>
+                <td>
+                    {% if log.trace_id %}
+                    <span class="admin-table-mono text-muted" style="font-size:.75rem">{{ log.trace_id|slice(0,16) }}</span>
+                    <button type="button" class="btn-unio btn-xs btn-unio-ghost p-0 ms-1" title="Copiar trace ID"
+                        onclick="event.stopPropagation();navigator.clipboard.writeText('{{ log.trace_id }}')">
+                        <i class="fas fa-copy fa-xs"></i>
+                    </button>
+                    {% else %}—{% endif %}
+                </td>
+            </tr>
+            <tr class="integ-log-detail d-none" id="logDetail{{ log.db_id }}">
+                <td colspan="5" class="bg-light px-3 py-2">
+                    <strong>Mensagem completa:</strong>
+                    <pre class="mb-1 mt-1" style="white-space:pre-wrap;font-size:.8rem">{{ log.message }}</pre>
+                    {% if log.trace_id %}
+                    <small class="text-muted"><strong>Trace ID:</strong> {{ log.trace_id }}</small>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: 5,
+                icon: 'fa-list',
+                title: 'Nenhum evento registrado.'
+            } %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Pagination #}
+    {% if log_pagination and log_pagination.total > log_pagination.limit %}
+    {% set total_pages = (log_pagination.total / log_pagination.limit)|round(0, 'ceil') %}
+    {% set cur = log_pagination.page %}
+    <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+        <small class="text-muted">
+            {{ ((cur - 1) * log_pagination.limit + 1) }}–{{ cur * log_pagination.limit < log_pagination.total ? cur * log_pagination.limit : log_pagination.total }} de {{ log_pagination.total }}
+        </small>
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item{% if cur == 1 %} disabled{% endif %}">
+                    <a class="page-link" href="{{ path('app_integracoes_logs', log_filters|default({})|merge({page: cur - 1})) }}">‹</a>
+                </li>
+                {% for p in 1..total_pages %}
+                {% if p == cur or p == 1 or p == total_pages or (p >= cur - 2 and p <= cur + 2) %}
+                <li class="page-item{% if p == cur %} active{% endif %}">
+                    <a class="page-link" href="{{ path('app_integracoes_logs', log_filters|default({})|merge({page: p})) }}">{{ p }}</a>
+                </li>
+                {% elseif p == cur - 3 or p == cur + 3 %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                {% endfor %}
+                <li class="page-item{% if cur >= total_pages %} disabled{% endif %}">
+                    <a class="page-link" href="{{ path('app_integracoes_logs', log_filters|default({})|merge({page: cur + 1})) }}">›</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</section>
+
+<script>
+function integLogToggle(row) {
+    var id = row.getAttribute('data-log-id');
+    var detail = document.getElementById('logDetail' + id);
+    if (detail) detail.classList.toggle('d-none');
+}
+</script>
+{% endblock %}

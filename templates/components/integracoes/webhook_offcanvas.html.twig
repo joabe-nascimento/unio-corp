@@ -1,0 +1,49 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'integ-webhook-form',
+    title: 'Webhook',
+    subtitle: 'Evento de entrada ou saída',
+    icon: 'fa-bolt',
+    size: 'md',
+    open: app.request.query.get('open_novo') == '1' or app.request.query.get('open_edit')
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_integracoes_webhook_novo_submit') }}" id="integWebhookForm" data-integ-webhook-form data-integ-edit-url="{{ path('app_integracoes_webhook_editar_submit', { id: 0 }) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('integ_webhook_form') }}">
+    <div class="form-group">
+        <label for="integWhNome">Nome</label>
+        <input type="text" class="form-control" id="integWhNome" name="nome" required>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-6">
+            <label for="integWhDir">Direção</label>
+            <select class="form-control" id="integWhDir" name="direcao">
+                <option value="out">Saída</option>
+                <option value="in">Entrada</option>
+            </select>
+        </div>
+        <div class="form-group col-6">
+            <label for="integWhCon">Conector (opcional)</label>
+            <select class="form-control" id="integWhCon" name="conector_id">
+                <option value="">—</option>
+                {% for c in conectores|default([]) %}
+                <option value="{{ c.db_id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="integWhEvento">Evento</label>
+        <input type="text" class="form-control" id="integWhEvento" name="evento" placeholder="rh.admissao.concluida" required>
+    </div>
+    <div class="form-group">
+        <label for="integWhUrl">URL</label>
+        <input type="url" class="form-control" id="integWhUrl" name="url" required>
+    </div>
+    <div class="form-check mb-3">
+        <input type="checkbox" class="form-check-input" id="integWhAtivo" name="ativo" value="1" checked>
+        <label class="form-check-label" for="integWhAtivo">Ativo</label>
+    </div>
+    <button type="submit" class="btn-unio btn-block">Salvar webhook</button>
+</form>
+{% endblock %}
+{% endembed %}
