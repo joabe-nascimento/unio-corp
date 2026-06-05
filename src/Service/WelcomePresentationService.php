@@ -100,7 +100,7 @@ final class WelcomePresentationService
 
         return match ($layout) {
             'tenant' => sprintf(
-                '%s, você tem visão completa da %s. Gerencie empresas, usuários e hubs em um ambiente preparado para escalar com segurança.',
+                '%s, você tem visão completa da %s. Gerencie empresas, usuários e núcleos em um ambiente preparado para escalar com segurança.',
                 $firstName,
                 $platformName,
             ),
@@ -113,7 +113,7 @@ final class WelcomePresentationService
                 : sprintf('%s, bem-vindo à sua área de gestão na %s.', $firstName, $platformName),
             'supervisor' => $empresaNome
                 ? sprintf(
-                    '%s, tudo pronto para você liderar em %s. Visualize indicadores da equipe e acesse os hubs liberados para o seu perfil.',
+                    '%s, tudo pronto para você liderar em %s. Visualize indicadores da equipe e acesse os núcleos liberados para o seu perfil.',
                     $firstName,
                     $empresaNome,
                 )

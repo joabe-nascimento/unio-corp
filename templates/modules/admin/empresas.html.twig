@@ -61,9 +61,9 @@
             <td>{{ e.usuarios|length }}</td>
             <td>
                 {% if e.ativo %}
-                    <span class="admin-badge admin-badge--success">Ativa</span>
+                    {% include 'components/status_badge.html.twig' with { label: 'Ativa', variant: 'success' } %}
                 {% else %}
-                    <span class="admin-badge admin-badge--muted">Inativa</span>
+                    {% include 'components/status_badge.html.twig' with { label: 'Inativa', variant: 'secondary' } %}
                 {% endif %}
             </td>
             <td class="admin-table-date">{{ e.criadoEm|date('d/m/Y') }}</td>
@@ -123,11 +123,10 @@
             id: 'nova_empresa_setor', name: 'setor', label: 'Setor',
             placeholder: 'Ex.: Tecnologia'
         } %}
-        <div class="unio-form-group">
-            <label class="unio-form-label" for="nova_empresa_logo">Logo (URL)</label>
-            <input type="text" id="nova_empresa_logo" name="logo" class="unio-form-control"
-                   placeholder="https://…/logo.png">
-        </div>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'nova_empresa_logo', name: 'logo', label: 'Logo (URL)',
+            placeholder: 'https://…/logo.png'
+        } %}
     </form>
     {% endblock %}
     {% block offcanvas_footer %}
@@ -156,20 +155,18 @@
         {% include 'components/unio_form_field.html.twig' with {
             id: 'edit_empresa_nome', name: 'nome', label: 'Nome da empresa', required: true
         } %}
-        <div class="unio-form-group">
-            <label class="unio-form-label" for="edit_empresa_cnpj">CNPJ</label>
-            <input type="text" id="edit_empresa_cnpj" name="cnpj" class="unio-form-control"
-                   placeholder="Deixe em branco para manter">
-        </div>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'edit_empresa_cnpj', name: 'cnpj', label: 'CNPJ',
+            placeholder: 'Deixe em branco para manter'
+        } %}
         {% include 'components/unio_form_field.html.twig' with {
             id: 'edit_empresa_setor', name: 'setor', label: 'Setor',
             placeholder: 'Ex.: Tecnologia'
         } %}
-        <div class="unio-form-group">
-            <label class="unio-form-label" for="edit_empresa_logo">Logo (URL)</label>
-            <input type="text" id="edit_empresa_logo" name="logo" class="unio-form-control"
-                   placeholder="https://…/logo.png">
-        </div>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'edit_empresa_logo', name: 'logo', label: 'Logo (URL)',
+            placeholder: 'https://…/logo.png'
+        } %}
         <div class="unio-form-group">
             <label class="unio-form-check d-flex align-items-center gap-2" for="edit_empresa_ativo">
                 <input type="checkbox" id="edit_empresa_ativo" name="ativo" value="1" class="unio-checkbox">

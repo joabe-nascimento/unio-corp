@@ -1,0 +1,258 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+{% block integ_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: cortex_kpis, mb: 'mb-3' } %}
+
+{% include 'components/integracoes/predictive_alerts.html.twig' %}
+
+<nav class="integ-cortex-nav mb-3" data-integ-cortex-nav>
+    <button type="button" class="integ-cortex-nav-item is-active" data-cortex-tab="malha">
+        <i class="fas fa-diagram-project" aria-hidden="true"></i> Malha causal
+    </button>
+    <button type="button" class="integ-cortex-nav-item" data-cortex-tab="shadow">
+        <i class="fas fa-flask" aria-hidden="true"></i> Shadow Replay
+    </button>
+    <button type="button" class="integ-cortex-nav-item" data-cortex-tab="drift">
+        <i class="fas fa-code-branch" aria-hidden="true"></i> Drift Guard
+    </button>
+    <button type="button" class="integ-cortex-nav-item" data-cortex-tab="runbooks">
+        <i class="fas fa-book-open" aria-hidden="true"></i> Runbooks
+    </button>
+    <button type="button" class="integ-cortex-nav-item" data-cortex-tab="eventos">
+        <i class="fas fa-rss" aria-hidden="true"></i> Eventos de Domínio
+    </button>
+</nav>
+
+<div data-integ-cortex-panel="malha">
+    {% include 'components/integracoes/causal_mesh.html.twig' %}
+
+    <div class="row">
+        <div class="col-lg-5 mb-4">
+            <section class="unio-card integ-cortex-flows">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Fluxos de negócio',
+                    subtitle: causal_traces|length ~ ' fluxos · malha causal em tempo real'
+                } %}
+                <div class="integ-cortex-flow-list" data-integ-cortex-flows>
+                    {% for trace in causal_traces %}
+                    <button type="button"
+                            class="integ-cortex-flow-item{% if trace.flow_key == selected_flow_key %} is-active{% endif %}"
+                            data-flow-key="{{ trace.flow_key }}"
+                            data-flow-json="{{ trace|json_encode|e('html_attr') }}">
+                        <div class="integ-cortex-flow-item-head">
+                            <span class="integ-int-pulse integ-int-pulse--{{ trace.status == 'healthy' ? 'healthy' : (trace.status == 'degraded' ? 'degraded' : 'down') }}"></span>
+                            <strong>{{ trace.titulo }}</strong>
+                            {% include 'components/ti/ti_health_badge.html.twig' with {
+                                status: trace.status == 'healthy' ? 'healthy' : (trace.status == 'degraded' ? 'degraded' : 'down'),
+                                label: trace.confiabilidade ~ '%'
+                            } %}
+                        </div>
+                        <div class="integ-cortex-flow-item-meta">
+                            <span><i class="fas fa-clock" aria-hidden="true"></i> {{ trace.ultimo_evento_rel }}</span>
+                            {% if trace.previsao.risco_48h|default(0) >= 50 %}
+                            <span class="integ-cortex-impact-warn">
+                                <i class="fas fa-chart-line" aria-hidden="true"></i> {{ trace.previsao.risco_48h }}% risco 48h
+                            </span>
+                            {% endif %}
+                            {% if trace.impacto.tickets_ti|default(0) > 0 %}
+                            <span class="integ-cortex-impact-warn">
+                                <i class="fas fa-headset" aria-hidden="true"></i> {{ trace.impacto.tickets_ti }} chamado(s)
+                            </span>
+                            {% endif %}
+                        </div>
+                    </button>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="unio-card mt-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Eventos causais',
+                    subtitle: 'Correlação automática entre núcleos'
+                } %}
+                <div class="integ-cortex-events">
+                    {% for ev in recent_causal_events %}
+                    <div class="integ-cortex-event">
+                        {% include 'components/ti/ti_metric_badge.html.twig' with {
+                            label: ev.level|upper,
+                            variant: ev.level == 'error' ? 'danger' : (ev.level == 'warn' ? 'warning' : 'info')
+                        } %}
+                        <div>
+                            {% if ev.flow_titulo %}<strong>{{ ev.flow_titulo }}</strong>{% endif %}
+                            <p class="section-subtitle mb-0">{{ ev.message }}</p>
+                            <small class="text-muted">{{ ev.time }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+        <div class="col-lg-7 mb-4">
+            <section class="unio-card integ-cortex-chain-panel" data-integ-cortex-chain-panel>
+                {% include 'components/integracoes/causal_chain.html.twig' with { trace: selected_trace, hub_labels: hub_labels } %}
+            </section>
+
+            <div data-integ-cortex-impact-panel>
+                {% if selected_trace and selected_trace.impacto.tickets_ti|default(0) > 0 %}
+                <section class="unio-card mt-4 integ-cortex-impact">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Impacto downstream',
+                        subtitle: 'Efeitos na plataforma UNio'
+                    } %}
+                    <div class="integ-cortex-impact-grid">
+                        <div class="integ-cortex-impact-stat">
+                            <strong>{{ selected_trace.impacto.tickets_ti }}</strong><span>Chamados TI</span>
+                        </div>
+                        <div class="integ-cortex-impact-stat">
+                            <strong>{{ selected_trace.impacto.usuarios_afetados|default(0) }}</strong><span>Usuários afetados</span>
+                        </div>
+                        <div class="integ-cortex-impact-stat">
+                            {% include 'components/ti/ti_metric_badge.html.twig' with {
+                                label: selected_trace.impacto.sla_risco ? 'SLA em risco' : 'SLA ok',
+                                variant: selected_trace.impacto.sla_risco ? 'danger' : 'success'
+                            } %}
+                            <span>Operação</span>
+                        </div>
+                    </div>
+                    {% if selected_trace.impacto.chamados|default([])|length > 0 %}
+                    <ul class="integ-cortex-ticket-list mb-0">
+                        {% for ticket in selected_trace.impacto.chamados %}
+                        <li><i class="fas fa-ticket" aria-hidden="true"></i> {{ ticket }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </section>
+                {% endif %}
+
+                {% if selected_trace and selected_trace.previsao|default({})|length > 0 %}
+                <section class="unio-card mt-4 integ-cortex-previsao-detail">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Previsão do fluxo',
+                        subtitle: selected_trace.titulo
+                    } %}
+                    <div class="integ-cortex-previsao-body px-3 pb-3">
+                        {% include 'components/ti/ti_metric_badge.html.twig' with {
+                            label: selected_trace.previsao.risco_48h ~ '% em 48h',
+                            variant: selected_trace.previsao.risco_48h >= 75 ? 'danger' : (selected_trace.previsao.risco_48h >= 50 ? 'warning' : 'success')
+                        } %}
+                        <p class="section-subtitle mt-2 mb-1">{{ selected_trace.previsao.mensagem }}</p>
+                        <small><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> {{ selected_trace.previsao.acao_sugerida }}</small>
+                    </div>
+                </section>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% include 'components/integracoes/reliability_trends.html.twig' %}
+</div>
+
+<div class="d-none" data-integ-cortex-panel="shadow">
+    {% include 'components/integracoes/shadow_replay_panel.html.twig' %}
+</div>
+
+<div class="d-none" data-integ-cortex-panel="drift">
+    {% include 'components/integracoes/schema_drift_panel.html.twig' %}
+</div>
+
+<div class="d-none" data-integ-cortex-panel="runbooks">
+    {% include 'components/integracoes/cortex_playbooks.html.twig' %}
+</div>
+
+<div class="d-none" data-integ-cortex-panel="eventos">
+    <section class="unio-card">
+        {% include 'components/section_header.html.twig' with {
+            title: 'Eventos de Domínio',
+            subtitle: 'Feed em tempo real de eventos cross-núcleo'
+        } %}
+
+        {# Publish test event form #}
+        <details class="mb-3">
+            <summary class="btn-unio btn-xs btn-unio-ghost d-inline-flex align-items-center gap-1 mb-2" style="cursor:pointer">
+                <i class="fas fa-plus-circle" aria-hidden="true"></i> Publicar evento de teste
+            </summary>
+            <div class="mt-2 p-3 border rounded" id="integ-evento-form-wrap">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'integ-event-tipo',
+                            name: 'tipo',
+                            label: 'Tipo',
+                            value: 'rh.admissao.concluida',
+                            placeholder: 'ex: rh.admissao.concluida'
+                        } %}
+                    </div>
+                    <div class="col-md-4">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'integ-event-origem',
+                            name: 'origem',
+                            label: 'Origem',
+                            value: 'hub_rh',
+                            placeholder: 'ex: hub_rh'
+                        } %}
+                    </div>
+                    <div class="col-md-4">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'integ-event-payload',
+                            name: 'payload',
+                            label: 'Payload (JSON)',
+                            value: '{"nome":"Teste"}'
+                        } %}
+                    </div>
+                </div>
+                <button type="button"
+                        class="btn-unio btn-sm btn-unio-primary mt-2"
+                        id="integ-evento-publicar-btn"
+                        data-url="{{ path('app_integracoes_evento_publicar') }}">
+                    <i class="fas fa-paper-plane mr-1"></i> Publicar
+                </button>
+            </div>
+        </details>
+
+        <div class="integ-domain-events-feed" id="integ-domain-events-feed">
+            {% if domain_events is empty %}
+            <p class="section-subtitle text-muted py-3">Nenhum evento registrado ainda.</p>
+            {% else %}
+            {% for ev in domain_events %}
+            <div class="integ-domain-event d-flex align-items-start gap-3 py-2 border-bottom">
+                <div class="flex-shrink-0 mt-1">
+                    {% if ev.status == 'processado' %}
+                    <span class="integ-int-pulse integ-int-pulse--healthy" title="Processado"></span>
+                    {% elseif ev.status == 'falhou' %}
+                    <span class="integ-int-pulse integ-int-pulse--down" title="Falhou"></span>
+                    {% else %}
+                    <span class="integ-int-pulse integ-int-pulse--degraded" title="Pendente"></span>
+                    {% endif %}
+                </div>
+                <div class="flex-fill">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <strong class="text-mono small">{{ ev.tipo }}</strong>
+                        {% if ev.origem %}
+                        {% include 'components/status_badge.html.twig' with { label: ev.origem, variant: 'info' } %}
+                        {% endif %}
+                        {% include 'components/status_badge.html.twig' with {
+                            label: ev.status,
+                            variant: ev.status == 'processado' ? 'success' : (ev.status == 'falhou' ? 'danger' : 'warning')
+                        } %}
+                    </div>
+                    <p class="section-subtitle mb-0 text-truncate" style="max-width:480px" title="{{ ev.payload_preview }}">
+                        {{ ev.payload_preview }}
+                    </p>
+                    {% if ev.erro %}
+                    <small class="text-danger"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {{ ev.erro }}</small>
+                    {% endif %}
+                    <small class="text-muted d-block">{{ ev.criado_em }}</small>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<script type="application/json" id="integ-cortex-payload">{{ {
+    traces: causal_traces,
+    hub_labels: hub_labels
+}|json_encode|raw }}</script>
+{% endblock %}

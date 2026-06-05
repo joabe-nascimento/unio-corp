@@ -1,0 +1,102 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+{% block hub_toolbar_actions %}
+{% if product_grant('hub_integracoes', 'conectores') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="integ-conector-form">
+    <i class="fas fa-plus mr-1"></i> Novo conector
+</button>
+{% endif %}
+{{ parent() }}
+{% endblock %}
+
+{% block integ_section_content %}
+{% include 'components/integracoes/health_grid.html.twig' with {
+    integrations: conectores,
+    title: 'Meus conectores',
+    subtitle: conectores|length ~ ' cadastrados',
+    extra_class: 'mb-4'
+} %}
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Lista de conectores',
+        subtitle: 'Gerencie integrações ativas'
+    } %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Conector</th><th>Categoria</th><th>Status</th><th>Latência</th><th>Uptime</th><th>Eventos/24h</th>
+                    {% if product_grant('hub_integracoes', 'conectores') %}<th class="text-end" style="width:120px"></th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for int in conectores %}
+            {% set st_label = int.status == 'healthy' ? 'Saudável' : (int.status == 'degraded' ? 'Degradado' : 'Indisponível') %}
+            <tr>
+                <td><strong>{{ int.name }}</strong></td>
+                <td><span class="integ-tag">{{ int.categoria }}</span></td>
+                <td>{% include 'components/ti/ti_health_badge.html.twig' with { status: int.status, label: st_label } %}</td>
+                <td>{{ int.latency }}</td>
+                <td>{{ int.uptime }}%</td>
+                <td>{{ int.events }}</td>
+                {% if product_grant('hub_integracoes', 'conectores') %}
+                <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                        <form method="post" action="{{ path('app_integracoes_conector_testar', { id: int.db_id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('integ_conector_test_' ~ int.db_id) }}">
+                            <button type="submit" class="btn-unio btn-sm btn-unio-ghost" title="Testar"><i class="fas fa-vial"></i></button>
+                        </form>
+                        <button type="button" class="btn-unio btn-sm btn-unio-ghost text-warning"
+                            data-simular-impacto="{{ int.db_id }}"
+                            data-simular-url="{{ path('app_integracoes_simular_impacto', { id: int.db_id }) }}"
+                            data-simular-token="{{ csrf_token('integracoes_simular_' ~ int.db_id) }}"
+                            data-simular-nome="{{ int.name }}"
+                            title="Simular impacto">
+                            <i class="fas fa-bolt-lightning"></i>
+                        </button>
+                        <button type="button" class="btn-unio btn-sm btn-unio-ghost"
+                            data-unio-offcanvas-open="integ-conector-form"
+                            data-integ-edit='{{ int|json_encode|e('html_attr') }}'
+                            title="Editar"><i class="fas fa-pen"></i></button>
+                        <form method="post" action="{{ path('app_integracoes_conector_excluir', { id: int.db_id }) }}" class="d-inline" onsubmit="return confirm('Remover conector?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('integ_conector_delete_' ~ int.db_id) }}">
+                            <button type="submit" class="btn-unio btn-sm btn-unio-ghost text-danger" title="Excluir"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </div>
+                </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: product_grant('hub_integracoes', 'conectores') ? 7 : 6,
+                icon: 'fa-plug',
+                title: 'Nenhum conector cadastrado.'
+            } %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% if product_grant('hub_integracoes', 'conectores') %}
+{% include 'components/integracoes/conector_offcanvas.html.twig' %}
+{% endif %}
+
+{# Impact Simulator offcanvas #}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'integ-simular-impacto',
+    title: 'Simulador de Impacto',
+    subtitle: 'Análise de dependências e risco operacional',
+    icon: 'fa-bolt-lightning',
+    size: 'xl'
+} %}
+{% block offcanvas_body %}
+<div id="simuladorImpactoContent">
+    <div class="text-center text-muted py-5">
+        <i class="fas fa-bolt-lightning fa-2x mb-3 d-block" style="opacity:.35"></i>
+        Clique no ícone <i class="fas fa-bolt-lightning text-warning"></i> de um conector para simular o impacto de uma pausa.
+    </div>
+</div>
+{% endblock %}
+{% endembed %}
+{% endblock %}

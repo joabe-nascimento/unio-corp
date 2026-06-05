@@ -1,0 +1,165 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Volume de chamados',
+        subtitle: 'Abertos vs resolvidos — últimos 6 meses',
+        btn_label: ti_can('export_analytics') ? 'Exportar CSV' : null,
+        btn_href: ti_can('export_analytics') ? path('app_ti_analytics_export') : null,
+        btn_icon: 'fa-download',
+        btn_ghost: true
+    } %}
+    <div class="ti-chart-host" id="tiVolumeChart" role="img" aria-label="Gráfico volume chamados"></div>
+</section>
+
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'SLA por prioridade', subtitle: 'Cumprimento consolidado' } %}
+    <div class="row">
+    {% for rule in sla_rules|default([]) %}
+    <div class="col-md-3 mb-3">
+        <div class="ti-analytics-pill">
+            <span class="ti-analytics-pill-value">{{ rule.compliance }}%</span>
+            <span class="ti-analytics-pill-label">{{ rule.priority }}</span>
+        </div>
+    </div>
+    {% endfor %}
+    </div>
+</section>
+
+{# Workload por técnico #}
+{% if workload_by_technician|default([])|length > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Workload por técnico', subtitle: 'Chamados abertos por responsável' } %}
+    <div class="ti-workload-bars">
+    {% set max_count = 1 %}
+    {% for row in workload_by_technician %}{% if row.count > max_count %}{% set max_count = row.count %}{% endif %}{% endfor %}
+    {% for row in workload_by_technician %}
+    <div class="ti-workload-row d-flex align-items-center gap-3 mb-2">
+        <span class="ti-workload-name text-truncate" style="min-width:140px;max-width:200px;">{{ row.name }}</span>
+        <div class="flex-fill">
+            <div class="progress" style="height:18px;border-radius:4px;">
+                <div class="progress-bar bg-primary" role="progressbar"
+                     style="width:{{ (row.count / max_count * 100)|round }}%"
+                     aria-valuenow="{{ row.count }}" aria-valuemin="0" aria-valuemax="{{ max_count }}">
+                </div>
+            </div>
+        </div>
+        {% include 'components/status_badge.html.twig' with {
+            label: row.count,
+            variant: 'secondary',
+            extra_class: 'ms-2'
+        } %}
+    </div>
+    {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{# MTTR por categoria #}
+{% if mttr_by_category|default([])|length > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'MTTR por categoria', subtitle: 'Tempo médio de resolução — últimos 30 dias' } %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Categoria</th><th class="text-end">Média (horas)</th><th class="text-end">Chamados</th></tr></thead>
+            <tbody>
+            {% for row in mttr_by_category %}
+            <tr>
+                <td><strong>{{ row.category|capitalize }}</strong></td>
+                <td class="text-end">
+                    <span class="badge {{ row.avg_hours > 48 ? 'bg-danger' : (row.avg_hours > 24 ? 'bg-warning text-dark' : 'bg-success') }}">
+                        {{ row.avg_hours }}h
+                    </span>
+                </td>
+                <td class="text-end">{{ row.count }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+
+{# Heatmap SLA por hora do dia #}
+{% if sla_heatmap_hour|default([])|length > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Heatmap SLA por hora', subtitle: 'Distribuição de abertura e breaches por hora do dia' } %}
+    <div class="ti-hour-heatmap d-flex flex-wrap gap-1">
+    {% for cell in sla_heatmap_hour %}
+    {% set breach_ratio = cell.count > 0 ? (cell.sla_breach / cell.count) : 0 %}
+    {% set cell_color = breach_ratio > 0.5 ? '#dc3545' : (breach_ratio > 0.2 ? '#fd7e14' : (cell.count > 0 ? '#198754' : '#e9ecef')) %}
+    <div class="ti-heatmap-cell" title="{{ cell.hour }}h: {{ cell.count }} chamados, {{ cell.sla_breach }} breaches"
+         style="width:36px;height:36px;background:{{ cell_color }};border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:default;">
+        <span style="color:#fff;font-size:10px;font-weight:600;">{{ cell.hour }}h</span>
+    </div>
+    {% endfor %}
+    </div>
+    <div class="d-flex gap-3 mt-2">
+        <span class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#198754;border-radius:2px;display:inline-block;"></span><small>OK</small></span>
+        <span class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#fd7e14;border-radius:2px;display:inline-block;"></span><small>Risco</small></span>
+        <span class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#dc3545;border-radius:2px;display:inline-block;"></span><small>Crítico</small></span>
+        <span class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#e9ecef;border-radius:2px;display:inline-block;"></span><small>Sem dados</small></span>
+    </div>
+</section>
+{% endif %}
+
+{# Tendência P1 — sparkline SVG #}
+{% if p1_trend|default([])|length > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Tendência P1', subtitle: 'Incidentes críticos por semana (8 semanas)' } %}
+    {% set max_p1 = 1 %}
+    {% for w in p1_trend %}{% if w.p1 > max_p1 %}{% set max_p1 = w.p1 %}{% endif %}{% endfor %}
+    {% set max_p1 = max_p1 > 0 ? max_p1 : 1 %}
+    {% set chart_w = 560 %}
+    {% set chart_h = 80 %}
+    {% set step = chart_w / (p1_trend|length - 1) %}
+    <div style="overflow-x:auto;">
+    <svg width="{{ chart_w }}" height="{{ chart_h + 30 }}" viewBox="0 0 {{ chart_w }} {{ chart_h + 30 }}" aria-label="Tendência P1">
+        {% for i, week in p1_trend %}
+        {% set x = (i * step)|round %}
+        {% set y = (chart_h - (week.p1 / max_p1 * chart_h * 0.85))|round %}
+        {% if not loop.first %}
+        {% set px = ((i - 1) * step)|round %}
+        {% set py = (chart_h - (p1_trend[i - 1].p1 / max_p1 * chart_h * 0.85))|round %}
+        <line x1="{{ px }}" y1="{{ py }}" x2="{{ x }}" y2="{{ y }}" stroke="#dc3545" stroke-width="2"/>
+        {% endif %}
+        <circle cx="{{ x }}" cy="{{ y }}" r="4" fill="#dc3545"/>
+        <text x="{{ x }}" y="{{ chart_h + 20 }}" text-anchor="middle" font-size="10" fill="var(--bs-secondary-color,#6c757d)">{{ week.week }}</text>
+        {% if week.p1 > 0 %}
+        <text x="{{ x }}" y="{{ y - 8 }}" text-anchor="middle" font-size="10" fill="#dc3545">{{ week.p1 }}</text>
+        {% endif %}
+        {% endfor %}
+    </svg>
+    </div>
+</section>
+{% endif %}
+
+{# CSAT Score #}
+{% if csat_metrics is defined and csat_metrics.count > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'CSAT Score', subtitle: 'Satisfação estimada — últimos 30 dias' } %}
+    <div class="d-flex align-items-center gap-4 flex-wrap">
+        <div class="text-center" style="min-width:120px;">
+            <div style="font-size:3rem;font-weight:700;line-height:1;color:var(--unio-accent,#06B6D4);">{{ csat_metrics.avg|default('—') }}</div>
+            <div class="text-muted small">de 5 stars</div>
+            <div class="text-muted small mt-1">{{ csat_metrics.count }} resolvidos</div>
+        </div>
+        <div class="flex-fill" style="max-width:320px;">
+        {% for stars in 5..1 %}
+        {% set starIdx = stars - 1 %}
+        {% set starCount = csat_metrics.dist[starIdx]|default(0) %}
+        {% set pct = csat_metrics.count > 0 ? (starCount / csat_metrics.count * 100)|round : 0 %}
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span style="width:18px;text-align:right;font-size:12px;">{{ stars }}</span>
+            <i class="fas fa-star" style="color:#F59E0B;font-size:11px;"></i>
+            <div class="progress flex-fill" style="height:12px;border-radius:3px;">
+                <div class="progress-bar" style="width:{{ pct }}%;background:#F59E0B;"></div>
+            </div>
+            <span class="text-muted" style="width:28px;font-size:11px;">{{ starCount }}</span>
+        </div>
+        {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

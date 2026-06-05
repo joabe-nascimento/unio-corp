@@ -1,0 +1,39 @@
+{# Integration health grid — Núcleo Integrações #}
+{% set integrations = integrations|default([]) %}
+<section class="unio-card{% if extra_class|default('') %} {{ extra_class }}{% endif %}">
+    {% include 'components/section_header.html.twig' with {
+        title: title|default('Integrações'),
+        subtitle: subtitle|default('Status dos conectores'),
+        btn_label: btn_href|default(null) ? 'Ver log' : null,
+        btn_href: btn_href|default(null),
+        btn_ghost: true
+    } %}
+    {% if integrations|length > 0 %}
+    <div class="integ-int-grid">
+        {% for int in integrations %}
+        {% set st_label = int.status == 'healthy' ? 'Saudável' : (int.status == 'degraded' ? 'Degradado' : 'Indisponível') %}
+        <div class="integ-int-card integ-int-card--{{ int.status }}">
+            <div class="integ-int-card-head">
+                <span class="integ-int-pulse integ-int-pulse--{{ int.status }}"></span>
+                <span class="section-title">{{ int.name }}</span>
+            </div>
+            {% include 'components/ti/ti_health_badge.html.twig' with { status: int.status, label: st_label } %}
+            <div class="integ-int-meta">
+                <span>{{ int.latency }} latência</span>
+                <span>{{ int.uptime }}% uptime</span>
+                <span>{{ int.events }} evt/24h</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-plug',
+        title: 'Nenhum conector ativo',
+        text: 'Ative conectores pelo catálogo para monitorar a saúde das integrações.',
+        btn_label: 'Abrir catálogo',
+        btn_href: path('app_integracoes_catalogo'),
+        compact: true
+    } %}
+    {% endif %}
+</section>

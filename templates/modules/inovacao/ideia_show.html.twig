@@ -44,7 +44,7 @@
                 { label: 'Hipótese', value: ideia.hipotese|default('—'), icon: 'fa-lightbulb' },
                 { label: 'Critério de sucesso', value: ideia.metricaSucesso|default(ideia.metrica|default('—')), icon: 'fa-bullseye' },
                 { label: 'Método de teste', value: ideia.metodoTeste|default('—'), icon: 'fa-vial' },
-                { label: 'Hub relacionado', value: ideia.hubRelacionado|default('—'), icon: 'fa-share-nodes' },
+                { label: 'Núcleo relacionado', value: ideia.hubRelacionado|default('—'), icon: 'fa-share-nodes' },
                 { label: 'Categoria', value: ideia.categoria|default('—'), icon: 'fa-tag' },
                 { label: 'Urgência', value: ideia.urgencia|default('—'), icon: 'fa-clock' },
             ]} only %}
@@ -105,11 +105,14 @@
             } %}
             <form action="{{ path('app_inovacao_ideia_mover', { id: ideia.id }) }}" method="post" class="d-flex flex-column gap-2">
                 <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ ideia.id) }}">
-                <select name="stage" class="unio-form-control">
-                    {% for opt in stage_options %}
-                    <option value="{{ opt.id }}"{% if opt.id == ideia.estagio %} selected{% endif %}>{{ opt.label }}</option>
-                    {% endfor %}
-                </select>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'ideia-stage-' ~ ideia.id,
+                    name: 'stage',
+                    label: 'Estágio',
+                    type: 'select',
+                    value: ideia.estagio,
+                    options: stage_options|map(opt => { value: opt.id, label: opt.label })
+                } %}
                 <button type="submit" class="btn-unio btn-sm">Atualizar estágio</button>
             </form>
         </div>
@@ -121,12 +124,19 @@
             } %}
             <form action="{{ path('app_inovacao_ideia_decisao', { id: ideia.id }) }}" method="post" class="d-flex flex-column gap-2">
                 <input type="hidden" name="_token" value="{{ csrf_token('inovacao_ideia_action_' ~ ideia.id) }}">
-                <select name="tipo" class="unio-form-control" required>
-                    <option value="">Tipo de decisão…</option>
-                    <option value="kill">Kill</option>
-                    <option value="pivot">Pivot</option>
-                    <option value="scale">Scale</option>
-                </select>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'ideia-decisao-tipo-' ~ ideia.id,
+                    name: 'tipo',
+                    label: 'Tipo',
+                    type: 'select',
+                    required: true,
+                    options: [
+                        { value: '', label: 'Tipo de decisão…' },
+                        { value: 'kill', label: 'Kill' },
+                        { value: 'pivot', label: 'Pivot' },
+                        { value: 'scale', label: 'Scale' },
+                    ]
+                } %}
                 {% include 'components/unio_form_field.html.twig' with {
                     id: 'decisao_motivo', name: 'motivo', label: 'Motivo', type: 'textarea', rows: 3, required: true
                 } %}

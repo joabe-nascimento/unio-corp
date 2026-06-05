@@ -1,0 +1,86 @@
+{# Preview de asset configurável (logo, favicon, mark, full) #}
+{% set _variant = variant|default('full') %}
+{% set _placeholder_type = placeholder_type|default(_variant == 'mark' ? 'mark' : (_variant == 'favicon' ? 'favicon' : 'full')) %}
+{% set _is_custom = platform_asset_custom(_variant) %}
+{% set _custom_path = platform_asset_src(_variant) %}
+{% set _custom_href = public_asset_href(_custom_path) %}
+{% set _input_key = input_key|default('logo_url') %}
+{% set _file_key = file_key|default('logo_file') %}
+{% set _clear_key = clear_key|default('logo_url_clear') %}
+{% set _picker_id = picker_id|default('logoPicker') %}
+{% set _preview_id = preview_id|default('logoPreview') %}
+{% set _preview_sm = preview_sm|default(false) %}
+{% set _label = label|default('Logotipo') %}
+{% set _alt = alt|default('Logo atual') %}
+{% set _url_placeholder = url_placeholder|default('/uploads/… ou https://…/logo.svg') %}
+{% set _file_hint = file_hint|default('PNG, SVG, JPG, ICO — máx. 2 MB') %}
+{% set _file_accept = file_accept|default('image/*,.ico,.svg') %}
+
+<div class="unio-form-group{% if compact|default(false) %} mb-0{% endif %}">
+    {% if show_label|default(true) %}
+    <label class="unio-form-label"{% if label_style is defined %} style="{{ label_style }}"{% endif %}>{{ _label|raw }}</label>
+    {% endif %}
+    <div class="cfg-img-picker" id="{{ _picker_id }}"
+         data-input-id="cfg_{{ _input_key }}"
+         data-file-input-id="cfg_{{ _file_key }}"
+         data-placeholder-type="{{ _placeholder_type }}">
+
+        <div class="cfg-img-preview{% if _preview_sm %} cfg-img-preview--sm{% endif %}{% if not _is_custom %} cfg-img-preview--default{% endif %}"
+             {% if _preview_id %} id="{{ _preview_id }}"{% endif %}
+             data-custom="{{ _is_custom ? '1' : '0' }}">
+
+            {% if _is_custom %}
+            <img src="{{ _custom_href }}" alt="{{ _alt }}" class="cfg-preview-img" data-role="preview-img">
+            {% else %}
+            <div class="cfg-preview-default" data-role="preview-default" aria-label="{{ _alt }}">
+                {% include 'components/logo_placeholder_inline.html.twig' with { type: _placeholder_type } only %}
+            </div>
+            {% endif %}
+        </div>
+
+        <template class="cfg-preview-default-tpl">
+            <div class="cfg-preview-default" data-role="preview-default" aria-label="{{ _alt }}">
+                {% include 'components/logo_placeholder_inline.html.twig' with { type: _placeholder_type } only %}
+            </div>
+        </template>
+
+        <div class="cfg-img-controls">
+            <div class="cfg-img-tabs">
+                <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="{{ _picker_id }}">
+                    <i class="fas fa-link fa-xs mr-1"></i> URL
+                </button>
+                <button type="button" class="cfg-img-tab" data-tab="file" data-picker="{{ _picker_id }}">
+                    <i class="fas fa-upload fa-xs mr-1"></i> Upload
+                </button>
+            </div>
+
+            <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
+                <input type="hidden" name="{{ _clear_key }}" id="cfg_{{ _clear_key }}" value="0">
+                <input type="text" id="cfg_{{ _input_key }}" name="{{ _input_key }}"
+                       value="{{ config[_input_key]|default('') }}"
+                       class="unio-form-control"
+                       placeholder="{{ _url_placeholder }}"
+                       autocomplete="off">
+            </div>
+
+            <div class="cfg-img-panel" data-panel="file">
+                <label class="cfg-file-drop" for="cfg_{{ _file_key }}">
+                    <i class="fas fa-cloud-upload-alt mr-2"></i>
+                    <span class="cfg-file-drop-label">Clique ou arraste{% if not _preview_sm %} um arquivo{% endif %}</span>
+                    <span class="cfg-file-drop-hint">{{ _file_hint }}</span>
+                </label>
+                <input type="file" id="cfg_{{ _file_key }}" name="{{ _file_key }}"
+                       accept="{{ _file_accept }}"
+                       class="cfg-file-input">
+            </div>
+
+            {% if _is_custom %}
+            <button type="button" class="cfg-img-remove" data-picker="{{ _picker_id }}"
+                    data-url-input="cfg_{{ _input_key }}" data-file-input="cfg_{{ _file_key }}"
+                    data-clear-input="cfg_{{ _clear_key }}">
+                <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>

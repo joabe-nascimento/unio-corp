@@ -1,0 +1,55 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: novidades_feed|length, label: 'Comunicados', sub: 'Últimos 30 dias', icon: 'fa-bullhorn' },
+    { value: novidades_feed|filter(n => n.variant == 'warning')|length, label: 'Alertas', sub: 'Ação requerida', icon: 'fa-triangle-exclamation' },
+    { value: novidades_feed|filter(n => n.variant == 'success')|length, label: 'Lançamentos', sub: 'Novidades TI', icon: 'fa-rocket', trend: 'up' },
+], mb: 'mb-3' } %}
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Comunicados TI',
+        subtitle: 'Manutenções, políticas e releases',
+        btn_label: ti_can('manage_novidades') ? 'Novo comunicado' : null,
+        btn_icon: 'fa-plus',
+        btn_tag: 'button',
+        btn_attrs: ti_can('manage_novidades') ? { 'data-unio-offcanvas-open': 'ti-novidade-form', 'data-ti-infra-open-novo': 'novidade' } : {}
+    } %}
+    <div class="ti-card-list">
+    {% for item in novidades_feed %}
+    <div class="ti-card-list-item">
+        <div class="ti-history-row">
+            <div class="mi-icon"><i class="fas {{ item.icon }}" aria-hidden="true"></i></div>
+            <div class="flex-fill">
+                <div class="ti-idea-row-head mb-1">
+                    <span class="section-title">{{ item.title }}</span>
+                    <div class="ti-idea-row-meta">
+                        {% include 'components/ti/ti_metric_badge.html.twig' with { label: item.badge, variant: item.variant|default('info') } %}
+                        <span class="text-muted" style="font-size:11px">{{ item.date }}</span>
+                        {% if ti_can('manage_novidades') %}
+                        {% include 'components/ti/infra_row_actions.html.twig' with {
+                            resource: 'novidade',
+                            id: item.db_id,
+                            label: item.title,
+                            fields: {
+                                titulo: item.titulo,
+                                resumo: item.resumo,
+                                icon: item.icon,
+                                badge: item.badge,
+                                variant: item.variant,
+                                publicado_em: item.publicado_em
+                            }
+                        } %}
+                        {% endif %}
+                    </div>
+                </div>
+                <p class="section-subtitle mb-0">{{ item.summary }}</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-muted mb-0 py-3">Nenhum comunicado publicado.</p>
+    {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -71,7 +71,10 @@
                     <p class="rh-process-show-profile-sub">{{ profile.subtitle }}</p>
                     {% endif %}
                     {% if profile.badge is defined and profile.badge %}
-                    <span class="status-badge status-badge--{{ profile.badge_tone|default('info') }}">{{ profile.badge }}</span>
+                    {% include 'components/status_badge.html.twig' with {
+                        label: profile.badge,
+                        variant: profile.badge_tone|default('info')
+                    } %}
                     {% endif %}
                 </div>
             </div>

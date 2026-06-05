@@ -1,0 +1,52 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+{% block hub_toolbar_actions %}
+{% if product_grant('hub_integracoes', 'mapeamentos') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="integ-mapeamento-form">
+    <i class="fas fa-plus mr-1"></i> Novo mapeamento
+</button>
+{% endif %}
+{{ parent() }}
+{% endblock %}
+
+{% block integ_section_content %}
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with { title: 'Mapeamentos de dados', subtitle: 'Campos UNio ↔ sistemas externos' } %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Nome</th><th>Conector</th><th>Origem</th><th></th><th>Destino</th><th>Transformação</th><th>Status</th>{% if product_grant('hub_integracoes', 'mapeamentos') %}<th></th>{% endif %}</tr></thead>
+            <tbody>
+            {% for map in mapeamentos %}
+            <tr>
+                <td><strong>{{ map.nome }}</strong></td>
+                <td>{{ map.conector }}</td>
+                <td><code>{{ map.campo_origem }}</code></td>
+                <td class="text-muted"><i class="fas fa-arrow-right"></i></td>
+                <td><code>{{ map.campo_destino }}</code></td>
+                <td>{{ map.transformacao|default('—') }}</td>
+                <td>{% include 'components/status_badge.html.twig' with { label: map.ativo ? 'Ativo' : 'Inativo', variant: map.ativo ? 'success' : 'secondary' } %}</td>
+                {% if product_grant('hub_integracoes', 'mapeamentos') %}
+                <td class="text-end">
+                    <button type="button" class="btn-unio btn-sm btn-unio-ghost" data-unio-offcanvas-open="integ-mapeamento-form" data-integ-map-edit='{{ map|json_encode|e('html_attr') }}'><i class="fas fa-pen"></i></button>
+                    <form method="post" action="{{ path('app_integracoes_mapeamento_excluir', { id: map.db_id }) }}" class="d-inline" onsubmit="return confirm('Excluir mapeamento?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('integ_mapeamento_delete_' ~ map.db_id) }}">
+                        <button type="submit" class="btn-unio btn-sm btn-unio-ghost text-danger"><i class="fas fa-trash"></i></button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: product_grant('hub_integracoes', 'mapeamentos') ? 8 : 7,
+                icon: 'fa-diagram-project',
+                title: 'Nenhum mapeamento configurado.'
+            } %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% if product_grant('hub_integracoes', 'mapeamentos') %}
+{% include 'components/integracoes/mapeamento_offcanvas.html.twig' with { conectores: conectores_options|default([]) } %}
+{% endif %}
+{% endblock %}

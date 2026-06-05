@@ -10,13 +10,15 @@
 {% set field_value = value is defined ? value : '' %}
 {% set field_options = options is defined ? options : [] %}
 {% set field_rows = rows is defined ? rows : 3 %}
-<div class="unio-form-group">
+<div class="unio-form-group{% if group_class|default('') %} {{ group_class }}{% endif %}">
+    {% if label is defined and label %}
     <label class="unio-form-label" for="{{ id }}">
         {{ label }}
         {% if field_required %}<span class="unio-form-required">*</span>{% endif %}
     </label>
+    {% endif %}
     {% if field_type == 'select' %}
-        <select class="unio-form-control{% if searchable|default(false) %} unio-tomselect{% endif %}"
+        <select class="unio-form-control{% if input_class|default('') %} {{ input_class }}{% endif %}{% if searchable|default(false) %} unio-tomselect{% endif %}"
                 id="{{ id }}"
                 name="{{ name }}"
                 {% if searchable|default(false) %}
@@ -30,7 +32,7 @@
             {% endfor %}
         </select>
     {% elseif field_type == 'textarea' %}
-        <textarea class="unio-form-control" id="{{ id }}" name="{{ name }}" rows="{{ field_rows }}"{% if placeholder is defined and placeholder %} placeholder="{{ placeholder }}"{% endif %}>{{ field_value }}</textarea>
+        <textarea class="unio-form-control{% if input_class|default('') %} {{ input_class }}{% endif %}" id="{{ id }}" name="{{ name }}" rows="{{ field_rows }}"{% if placeholder is defined and placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if field_required %} required{% endif %}>{{ field_value }}</textarea>
     {% else %}
         <input type="{{ field_type }}"
                class="unio-form-control{% if input_class is defined %} {{ input_class }}{% endif %}"
@@ -47,5 +49,8 @@
                    {% endfor %}
                {% endif %}
                {% if field_required %}required{% endif %}>
+    {% endif %}
+    {% if help_text is defined and help_text %}
+        <p class="section-subtitle mt-1 mb-0" style="font-size:11.5px;">{{ help_text }}</p>
     {% endif %}
 </div>

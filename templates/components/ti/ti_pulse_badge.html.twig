@@ -1,0 +1,29 @@
+{#
+  ti_pulse_badge — badges da toolbar do Núcleo TI
+
+  Props:
+    kind         (string)  sla | open | p1
+    value        (string|number)  valor principal (sla %, contagem abertos ou P1)
+    alert        (bool)    open com P1 ativo
+    attrs        (object)
+#}
+{% set kind = kind|default('sla') %}
+{% if kind == 'sla' %}
+    {% set lbl = value ~ '% SLA' %}
+    {% set variant = 'success' %}
+    {% set extra = 'ti-badge ti-badge-sla' %}
+{% elseif kind == 'open' %}
+    {% set lbl = value ~ ' abertos' %}
+    {% set variant = alert|default(false) ? 'danger' : 'info' %}
+    {% set extra = 'ti-badge ti-badge-open' ~ (alert|default(false) ? ' ti-badge-open--alert' : '') %}
+{% elseif kind == 'p1' %}
+    {% set lbl = value ~ ' P1' %}
+    {% set variant = 'danger' %}
+    {% set extra = 'ti-badge ti-badge-priority ti-badge-priority--p1' %}
+{% endif %}
+{% include 'components/status_badge.html.twig' with {
+    label: lbl|default(''),
+    variant: variant|default('info'),
+    extra_class: extra|default('ti-badge'),
+    attrs: attrs|default({})
+} %}

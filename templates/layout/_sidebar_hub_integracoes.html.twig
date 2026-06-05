@@ -1,0 +1,99 @@
+{% import 'macros/sidebar_nav.html.twig' as nav %}
+
+<li class="nav-item sidebar-hub-current">
+    <a href="{{ path('app_integracoes') }}" class="nav-link{{ route == 'app_integracoes' ? ' active' : '' }}">
+        <i class="fas fa-plug nav-icon"></i>
+        <p>Núcleo Integrações</p>
+    </a>
+</li>
+
+{% if product_grant('hub_integracoes', 'conectores') %}
+<li class="nav-item nav-item--cta">
+    <a href="{{ path('app_integracoes_catalogo') }}" class="nav-link nav-link--cta{{ route == 'app_integracoes_catalogo' ? ' active' : '' }}">
+        <i class="fas fa-plus nav-icon" aria-hidden="true"></i>
+        <p>Ativar conector</p>
+    </a>
+</li>
+{% endif %}
+
+{% set show_conexoes = product_grant('hub_integracoes', 'catalogo')
+    or product_grant('hub_integracoes', 'conectores')
+    or product_grant('hub_integracoes', 'webhooks') %}
+{% if show_conexoes %}
+<li class="nav-item has-treeview"
+    data-module-tree
+    data-auto-open="{{ modulo_integracoes_conexoes_open ? '1' : '0' }}"
+    data-storage-key="integracoes-conexoes-sidebar-collapsed">
+    <a href="#" class="nav-link{{ modulo_integracoes_conexoes_open ? ' active' : '' }}">
+        <i class="fas fa-link nav-icon"></i>
+        <p>Conexões <i class="fas fa-angle-left right"></i></p>
+    </a>
+    <ul class="nav nav-treeview nav-product-children">
+        {% if product_grant('hub_integracoes', 'catalogo') %}
+        {{ nav.submenu('Catálogo', path('app_integracoes_catalogo'), route == 'app_integracoes_catalogo') }}
+        {% endif %}
+        {% if product_grant('hub_integracoes', 'conectores') %}
+        {{ nav.submenu('Meus conectores', path('app_integracoes_conectores'), route == 'app_integracoes_conectores') }}
+        {% endif %}
+        {% if product_grant('hub_integracoes', 'webhooks') %}
+        {{ nav.submenu('Webhooks', path('app_integracoes_webhooks'), route == 'app_integracoes_webhooks') }}
+        {% endif %}
+    </ul>
+</li>
+{% endif %}
+
+{% set show_dados = product_grant('hub_integracoes', 'mapeamentos')
+    or product_grant('hub_integracoes', 'api_keys') %}
+{% if show_dados %}
+<li class="nav-item has-treeview"
+    data-module-tree
+    data-auto-open="{{ modulo_integracoes_dados_open ? '1' : '0' }}"
+    data-storage-key="integracoes-dados-sidebar-collapsed">
+    <a href="#" class="nav-link{{ modulo_integracoes_dados_open ? ' active' : '' }}">
+        <i class="fas fa-right-left nav-icon"></i>
+        <p>Dados & API <i class="fas fa-angle-left right"></i></p>
+    </a>
+    <ul class="nav nav-treeview nav-product-children">
+        {% if product_grant('hub_integracoes', 'mapeamentos') %}
+        {{ nav.submenu('Mapeamentos', path('app_integracoes_mapeamentos'), route == 'app_integracoes_mapeamentos') }}
+        {% endif %}
+        {% if product_grant('hub_integracoes', 'api_keys') %}
+        {{ nav.submenu('API & chaves', path('app_integracoes_api'), route == 'app_integracoes_api') }}
+        {% endif %}
+    </ul>
+</li>
+{% endif %}
+
+{% set show_obs = product_grant('hub_integracoes', 'observatorio')
+    or product_grant('hub_integracoes', 'logs')
+    or product_grant('hub_integracoes', 'playbooks')
+    or product_grant('hub_integracoes', 'dead_letter')
+    or product_grant('hub_integracoes', 'slo') %}
+{% if show_obs %}
+<li class="nav-item has-treeview"
+    data-module-tree
+    data-auto-open="{{ modulo_integracoes_obs_open ? '1' : '0' }}"
+    data-storage-key="integracoes-obs-sidebar-collapsed">
+    <a href="#" class="nav-link{{ modulo_integracoes_obs_open ? ' active' : '' }}">
+        <i class="fas fa-chart-line nav-icon"></i>
+        <p>Observabilidade <i class="fas fa-angle-left right"></i></p>
+    </a>
+    <ul class="nav nav-treeview nav-product-children">
+        {% if product_grant('hub_integracoes', 'observatorio') %}
+        {{ nav.submenu('Observatório Causal', path('app_integracoes_observatorio'), route == 'app_integracoes_observatorio') }}
+        {% endif %}
+        {% if product_grant('hub_integracoes', 'logs') %}
+        {{ nav.submenu('Logs', path('app_integracoes_logs'), route == 'app_integracoes_logs') }}
+        {% endif %}
+        {% if product_grant('hub_integracoes', 'slo') %}
+        {{ nav.submenu('SLOs', path('app_integracoes_slo'), route == 'app_integracoes_slo') }}
+        {% endif %}
+        {% if product_grant('hub_integracoes', 'dead_letter') %}
+        {{ nav.submenu('Dead Letter', path('app_integracoes_dead_letter'), route == 'app_integracoes_dead_letter') }}
+        {% endif %}
+        {% if product_grant('hub_integracoes', 'playbooks') %}
+        {{ nav.submenu('Playbooks', path('app_integracoes_playbooks'), route == 'app_integracoes_playbooks') }}
+        {% endif %}
+    </ul>
+</li>
+{% endif %}

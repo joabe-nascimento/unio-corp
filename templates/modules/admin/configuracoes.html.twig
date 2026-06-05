@@ -67,274 +67,96 @@
                 } %}
 
                 <div class="cfg-row-2">
-                    {# ── Logo picker ── #}
-                    <div class="unio-form-group">
-                        <label class="unio-form-label">Logotipo</label>
-                        <div class="cfg-img-picker" id="logoPicker"
-                             data-input-id="cfg_logo_url"
-                             data-file-input-id="cfg_logo_file">
+                    {% include 'components/cfg_asset_preview.html.twig' with {
+                        variant: 'logo',
+                        picker_id: 'logoPicker',
+                        preview_id: 'logoPreview',
+                        input_key: 'logo_url',
+                        file_key: 'logo_file',
+                        clear_key: 'logo_url_clear',
+                        default_asset: 'images/logos/logo-placeholder-full.svg',
+                        label: 'Logotipo',
+                        alt: 'Logo atual',
+                        url_placeholder: '/uploads/… ou https://…/logo.svg',
+                        file_hint: 'PNG, SVG, JPG, ICO — máx. 2 MB',
+                        file_accept: 'image/*,.ico,.svg'
+                    } %}
 
-                            <div class="cfg-img-preview" id="logoPreview">
-                                {% if config.logo_url|default('') %}
-                                {% set _logo_src = config.logo_url starts with 'http' ? config.logo_url : asset(config.logo_url) %}
-                                <img src="{{ _logo_src }}" alt="Logo atual" id="logoPreviewImg"
-                                     data-initial-src="{{ _logo_src }}"
-                                     onerror="this.hidden=true;this.nextElementSibling&&(this.nextElementSibling.hidden=false)">
-                                <span class="cfg-img-placeholder" id="logoPreviewPlaceholder" hidden>
-                                    <i class="fas fa-image"></i>
-                                </span>
-                                {% else %}
-                                <span class="cfg-img-placeholder" id="logoPreviewPlaceholder">
-                                    <i class="fas fa-image"></i>
-                                </span>
-                                {% endif %}
-                            </div>
-
-                            <div class="cfg-img-controls">
-                                <div class="cfg-img-tabs">
-                                    <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="logoPicker">
-                                        <i class="fas fa-link fa-xs mr-1"></i> URL
-                                    </button>
-                                    <button type="button" class="cfg-img-tab" data-tab="file" data-picker="logoPicker">
-                                        <i class="fas fa-upload fa-xs mr-1"></i> Upload
-                                    </button>
-                                </div>
-
-                                <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
-                                    <input type="hidden" name="logo_url_clear" id="cfg_logo_url_clear" value="0">
-                                    <input type="text" id="cfg_logo_url" name="logo_url"
-                                           value="{{ config.logo_url|default('') }}"
-                                           class="unio-form-control"
-                                           placeholder="/uploads/… ou https://…/logo.svg"
-                                           autocomplete="off">
-                                </div>
-
-                                <div class="cfg-img-panel" data-panel="file">
-                                    <label class="cfg-file-drop" id="logoDropZone" for="cfg_logo_file">
-                                        <i class="fas fa-cloud-upload-alt mr-2"></i>
-                                        <span class="cfg-file-drop-label">Clique ou arraste um arquivo</span>
-                                        <span class="cfg-file-drop-hint">PNG, SVG, JPG, ICO — máx. 2 MB</span>
-                                    </label>
-                                    <input type="file" id="cfg_logo_file" name="logo_file"
-                                           accept="image/*,.ico,.svg"
-                                           class="cfg-file-input">
-                                </div>
-
-                                {% if config.logo_url|default('') %}
-                                <button type="button" class="cfg-img-remove" data-picker="logoPicker"
-                                        data-url-input="cfg_logo_url" data-file-input="cfg_logo_file"
-                                        data-clear-input="cfg_logo_url_clear">
-                                    <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
-                                </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    {# ── Favicon picker ── #}
-                    <div class="unio-form-group">
-                        <label class="unio-form-label">Favicon</label>
-                        <div class="cfg-img-picker" id="faviconPicker"
-                             data-input-id="cfg_favicon_url"
-                             data-file-input-id="cfg_favicon_file">
-
-                            <div class="cfg-img-preview cfg-img-preview--sm" id="faviconPreview">
-                                {% if config.favicon_url|default('') %}
-                                {% set _fav_src = config.favicon_url starts with 'http' ? config.favicon_url : asset(config.favicon_url) %}
-                                <img src="{{ _fav_src }}" alt="Favicon atual" id="faviconPreviewImg"
-                                     data-initial-src="{{ _fav_src }}"
-                                     onerror="this.hidden=true;this.nextElementSibling&&(this.nextElementSibling.hidden=false)">
-                                <span class="cfg-img-placeholder" id="faviconPreviewPlaceholder" hidden>
-                                    <i class="fas fa-globe"></i>
-                                </span>
-                                {% else %}
-                                <span class="cfg-img-placeholder" id="faviconPreviewPlaceholder">
-                                    <i class="fas fa-globe"></i>
-                                </span>
-                                {% endif %}
-                            </div>
-
-                            <div class="cfg-img-controls">
-                                <div class="cfg-img-tabs">
-                                    <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="faviconPicker">
-                                        <i class="fas fa-link fa-xs mr-1"></i> URL
-                                    </button>
-                                    <button type="button" class="cfg-img-tab" data-tab="file" data-picker="faviconPicker">
-                                        <i class="fas fa-upload fa-xs mr-1"></i> Upload
-                                    </button>
-                                </div>
-
-                                <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
-                                    <input type="hidden" name="favicon_url_clear" id="cfg_favicon_url_clear" value="0">
-                                    <input type="text" id="cfg_favicon_url" name="favicon_url"
-                                           value="{{ config.favicon_url|default('') }}"
-                                           class="unio-form-control"
-                                           placeholder="/uploads/… ou https://…/favicon.ico"
-                                           autocomplete="off">
-                                </div>
-
-                                <div class="cfg-img-panel" data-panel="file">
-                                    <label class="cfg-file-drop" id="faviconDropZone" for="cfg_favicon_file">
-                                        <i class="fas fa-cloud-upload-alt mr-2"></i>
-                                        <span class="cfg-file-drop-label">Clique ou arraste um arquivo</span>
-                                        <span class="cfg-file-drop-hint">ICO, PNG, SVG — máx. 512 KB</span>
-                                    </label>
-                                    <input type="file" id="cfg_favicon_file" name="favicon_file"
-                                           accept="image/*,.ico"
-                                           class="cfg-file-input">
-                                </div>
-
-                                {% if config.favicon_url|default('') %}
-                                <button type="button" class="cfg-img-remove" data-picker="faviconPicker"
-                                        data-url-input="cfg_favicon_url" data-file-input="cfg_favicon_file"
-                                        data-clear-input="cfg_favicon_url_clear">
-                                    <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
-                                </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
+                    {% include 'components/cfg_asset_preview.html.twig' with {
+                        variant: 'favicon',
+                        picker_id: 'faviconPicker',
+                        preview_id: 'faviconPreview',
+                        preview_sm: true,
+                        input_key: 'favicon_url',
+                        file_key: 'favicon_file',
+                        clear_key: 'favicon_url_clear',
+                        default_asset: 'images/logos/favicon-placeholder.svg',
+                        label: 'Favicon',
+                        alt: 'Favicon atual',
+                        url_placeholder: '/uploads/… ou https://…/favicon.ico',
+                        file_hint: 'ICO, PNG, SVG — máx. 512 KB',
+                        file_accept: 'image/*,.ico'
+                    } %}
                 </div>
 
                 {# ── Logos da sidebar ── #}
                 <div class="cfg-form-section-label">Logos da barra lateral</div>
                 <p class="cfg-section-sub mb-3" style="margin-top:-4px;">
-                    Sidebar fechada: ícone/marca. Sidebar aberta ou ao passar o mouse: logotipo completo. Deixe em branco para o padrão do sistema.
+                    Sidebar fechada: ícone/marca. Sidebar aberta ou ao passar o mouse: logotipo completo. Deixe em branco para exibir o placeholder padrão.
                 </p>
                 <div class="cfg-row-2 mb-3">
-                        {# ── Logo marca (sidebar fechada) ── #}
-                        <div class="unio-form-group mb-0">
-                            <label class="unio-form-label" style="font-size:11px;">Ícone / Marca <span style="opacity:.5">(sidebar fechada)</span></label>
-                            <div class="cfg-img-picker" id="logoMarkPicker"
-                                 data-input-id="cfg_logo_mark_url"
-                                 data-file-input-id="cfg_logo_mark_file">
+                    {% include 'components/cfg_asset_preview.html.twig' with {
+                        variant: 'mark',
+                        picker_id: 'logoMarkPicker',
+                        preview_sm: true,
+                        compact: true,
+                        input_key: 'logo_mark_url',
+                        file_key: 'logo_mark_file',
+                        clear_key: 'logo_mark_url_clear',
+                        default_asset: 'images/logos/logo-placeholder-mark.svg',
+                        label: 'Ícone / Marca <span style="opacity:.5">(sidebar fechada)</span>',
+                        label_style: 'font-size:11px;',
+                        alt: 'Ícone atual',
+                        url_placeholder: '/uploads/… ou https://…/mark.png',
+                        file_hint: 'PNG, SVG — máx. 2 MB',
+                        file_accept: 'image/*,.svg'
+                    } %}
 
-                                <div class="cfg-img-preview cfg-img-preview--sm">
-                                    {% if config.logo_mark_url|default('') %}
-                                    {% set _mark_src = config.logo_mark_url starts with 'http' ? config.logo_mark_url : asset(config.logo_mark_url) %}
-                                    <img src="{{ _mark_src }}" alt="Ícone atual"
-                                         data-initial-src="{{ _mark_src }}"
-                                         onerror="this.hidden=true;this.nextElementSibling&&(this.nextElementSibling.hidden=false)">
-                                    <span class="cfg-img-placeholder" hidden><i class="fas fa-image"></i></span>
-                                    {% else %}
-                                    <span class="cfg-img-placeholder"><i class="fas fa-image"></i></span>
-                                    {% endif %}
-                                </div>
-
-                                <div class="cfg-img-controls">
-                                    <div class="cfg-img-tabs">
-                                        <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="logoMarkPicker">
-                                            <i class="fas fa-link fa-xs mr-1"></i> URL
-                                        </button>
-                                        <button type="button" class="cfg-img-tab" data-tab="file" data-picker="logoMarkPicker">
-                                            <i class="fas fa-upload fa-xs mr-1"></i> Upload
-                                        </button>
-                                    </div>
-                                    <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
-                                        <input type="hidden" name="logo_mark_url_clear" id="cfg_logo_mark_url_clear" value="0">
-                                        <input type="text" id="cfg_logo_mark_url" name="logo_mark_url"
-                                               value="{{ config.logo_mark_url|default('') }}"
-                                               class="unio-form-control"
-                                               placeholder="/uploads/… ou https://…/mark.png"
-                                               autocomplete="off">
-                                    </div>
-                                    <div class="cfg-img-panel" data-panel="file">
-                                        <label class="cfg-file-drop" for="cfg_logo_mark_file">
-                                            <i class="fas fa-cloud-upload-alt mr-2"></i>
-                                            <span class="cfg-file-drop-label">Clique ou arraste</span>
-                                            <span class="cfg-file-drop-hint">PNG, SVG — máx. 2 MB</span>
-                                        </label>
-                                        <input type="file" id="cfg_logo_mark_file" name="logo_mark_file"
-                                               accept="image/*,.svg" class="cfg-file-input">
-                                    </div>
-                                    {% if config.logo_mark_url|default('') %}
-                                    <button type="button" class="cfg-img-remove" data-picker="logoMarkPicker"
-                                            data-url-input="cfg_logo_mark_url" data-file-input="cfg_logo_mark_file"
-                                            data-clear-input="cfg_logo_mark_url_clear">
-                                        <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        {# ── Logo completo (sidebar aberta) ── #}
-                        <div class="unio-form-group mb-0">
-                            <label class="unio-form-label" style="font-size:11px;">Logotipo completo <span style="opacity:.5">(sidebar aberta)</span></label>
-                            <div class="cfg-img-picker" id="logoFullPicker"
-                                 data-input-id="cfg_logo_full_url"
-                                 data-file-input-id="cfg_logo_full_file">
-
-                                <div class="cfg-img-preview">
-                                    {% if config.logo_full_url|default('') %}
-                                    {% set _full_src = config.logo_full_url starts with 'http' ? config.logo_full_url : asset(config.logo_full_url) %}
-                                    <img src="{{ _full_src }}" alt="Logotipo atual"
-                                         data-initial-src="{{ _full_src }}"
-                                         onerror="this.hidden=true;this.nextElementSibling&&(this.nextElementSibling.hidden=false)">
-                                    <span class="cfg-img-placeholder" hidden><i class="fas fa-image"></i></span>
-                                    {% else %}
-                                    <span class="cfg-img-placeholder"><i class="fas fa-image"></i></span>
-                                    {% endif %}
-                                </div>
-
-                                <div class="cfg-img-controls">
-                                    <div class="cfg-img-tabs">
-                                        <button type="button" class="cfg-img-tab cfg-img-tab--active" data-tab="url" data-picker="logoFullPicker">
-                                            <i class="fas fa-link fa-xs mr-1"></i> URL
-                                        </button>
-                                        <button type="button" class="cfg-img-tab" data-tab="file" data-picker="logoFullPicker">
-                                            <i class="fas fa-upload fa-xs mr-1"></i> Upload
-                                        </button>
-                                    </div>
-                                    <div class="cfg-img-panel cfg-img-panel--active" data-panel="url">
-                                        <input type="hidden" name="logo_full_url_clear" id="cfg_logo_full_url_clear" value="0">
-                                        <input type="text" id="cfg_logo_full_url" name="logo_full_url"
-                                               value="{{ config.logo_full_url|default('') }}"
-                                               class="unio-form-control"
-                                               placeholder="/uploads/… ou https://…/logotipo.png"
-                                               autocomplete="off">
-                                    </div>
-                                    <div class="cfg-img-panel" data-panel="file">
-                                        <label class="cfg-file-drop" for="cfg_logo_full_file">
-                                            <i class="fas fa-cloud-upload-alt mr-2"></i>
-                                            <span class="cfg-file-drop-label">Clique ou arraste</span>
-                                            <span class="cfg-file-drop-hint">PNG, SVG — máx. 2 MB</span>
-                                        </label>
-                                        <input type="file" id="cfg_logo_full_file" name="logo_full_file"
-                                               accept="image/*,.svg" class="cfg-file-input">
-                                    </div>
-                                    {% if config.logo_full_url|default('') %}
-                                    <button type="button" class="cfg-img-remove" data-picker="logoFullPicker"
-                                            data-url-input="cfg_logo_full_url" data-file-input="cfg_logo_full_file"
-                                            data-clear-input="cfg_logo_full_url_clear">
-                                        <i class="fas fa-trash-alt fa-xs mr-1"></i> Remover
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+                    {% include 'components/cfg_asset_preview.html.twig' with {
+                        variant: 'full',
+                        picker_id: 'logoFullPicker',
+                        compact: true,
+                        input_key: 'logo_full_url',
+                        file_key: 'logo_full_file',
+                        clear_key: 'logo_full_url_clear',
+                        default_asset: 'images/logos/logo-placeholder-full.svg',
+                        label: 'Logotipo completo <span style="opacity:.5">(sidebar aberta)</span>',
+                        label_style: 'font-size:11px;',
+                        alt: 'Logotipo atual',
+                        url_placeholder: '/uploads/… ou https://…/logotipo.png',
+                        file_hint: 'PNG, SVG — máx. 2 MB',
+                        file_accept: 'image/*,.svg'
+                    } %}
                 </div>
 
                 <div class="cfg-row-2">
-                    <div class="unio-form-group">
-                        <label class="unio-form-label" for="cfg_cor_primaria">Cor de destaque (accent)</label>
-                        <div class="cfg-color-row">
-                            <input type="color" id="cfg_cor_primaria" name="cor_primaria"
-                                   value="{{ config.cor_primaria|default('#4F7FFF') }}"
-                                   class="cfg-color-input">
-                            <input type="text" name="cor_primaria_hex"
-                                   value="{{ config.cor_primaria|default('#4F7FFF') }}"
-                                   class="unio-form-control cfg-color-hex"
-                                   placeholder="#4F7FFF" maxlength="7">
-                        </div>
-                    </div>
-                    <div class="unio-form-group">
-                        <label class="unio-form-label" for="cfg_tema">Tema padrão</label>
-                        <select id="cfg_tema" name="tema" class="unio-form-control">
-                            <option value="dark"  {{ config.tema|default('dark')  == 'dark'  ? 'selected' : '' }}>Escuro (padrão)</option>
-                            <option value="light" {{ config.tema|default('dark')  == 'light' ? 'selected' : '' }}>Claro</option>
-                        </select>
-                    </div>
+                    {% include 'components/unio_color_picker.html.twig' with {
+                        id: 'cfg_cor_primaria',
+                        name: 'cor_primaria',
+                        label: 'Cor de destaque (accent)',
+                        value: config.cor_primaria|default('#4F7FFF')
+                    } %}
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'cfg_tema',
+                        name: 'tema',
+                        label: 'Tema padrão',
+                        type: 'select',
+                        value: config.tema|default('dark'),
+                        options: [
+                            { value: 'dark', label: 'Escuro (padrão)' },
+                            { value: 'light', label: 'Claro' },
+                        ]
+                    } %}
                 </div>
             </div>
         </section>
@@ -396,21 +218,23 @@
 
             <div class="cfg-fields">
                 <div class="cfg-row-2">
-                    <div class="unio-form-group">
-                        <label class="unio-form-label" for="cfg_senha_min">Tamanho mínimo da senha</label>
-                        <input type="number" id="cfg_senha_min" name="senha_min"
-                               value="{{ config.senha_min|default(8) }}"
-                               min="6" max="32"
-                               class="unio-form-control">
-                    </div>
-                    <div class="unio-form-group">
-                        <label class="unio-form-label" for="cfg_sessao_timeout">Tempo de sessão (minutos)</label>
-                        <input type="number" id="cfg_sessao_timeout" name="sessao_timeout"
-                               value="{{ config.sessao_timeout|default(120) }}"
-                               min="15" max="1440"
-                               class="unio-form-control">
-                        <p class="form-text text-muted mt-1 mb-0" style="font-size:11.5px;">Inatividade antes do logout automático (aplicado a todos os usuários logados).</p>
-                    </div>
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'cfg_senha_min',
+                        name: 'senha_min',
+                        label: 'Tamanho mínimo da senha',
+                        type: 'number',
+                        value: config.senha_min|default(8) ~ '',
+                        attrs: { min: '6', max: '32' }
+                    } %}
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'cfg_sessao_timeout',
+                        name: 'sessao_timeout',
+                        label: 'Tempo de sessão (minutos)',
+                        type: 'number',
+                        value: config.sessao_timeout|default(120) ~ '',
+                        attrs: { min: '15', max: '1440' },
+                        help_text: 'Inatividade antes do logout automático (aplicado a todos os usuários logados).'
+                    } %}
                 </div>
 
                 <div class="cfg-toggles">
@@ -528,7 +352,10 @@
                         <span class="cfg-info-label">{{ item.label }}</span>
                         <span class="cfg-info-value">
                             {% if item.badge is defined %}
-                                <span class="admin-badge admin-badge--{{ item.badge }}">{{ item.value }}</span>
+                                {% include 'components/status_badge.html.twig' with {
+                                    label: item.value,
+                                    variant: item.badge == 'muted' ? 'secondary' : item.badge
+                                } %}
                             {% else %}
                                 {{ item.value }}
                             {% endif %}
@@ -593,18 +420,6 @@
             });
         }, { threshold: 0.3 });
         sections.forEach(function (s) { observer.observe(s); });
-    }
-
-    /* ── Color picker sync ── */
-    var colorInput = document.getElementById('cfg_cor_primaria');
-    var colorHex   = document.querySelector('.cfg-color-hex');
-    if (colorInput && colorHex) {
-        colorInput.addEventListener('input', function () { colorHex.value = colorInput.value; });
-        colorHex.addEventListener('input', function () {
-            if (/^#[0-9A-Fa-f]{6}$/.test(colorHex.value)) {
-                colorInput.value = colorHex.value;
-            }
-        });
     }
 
     /* ── Maintenance toggle ── */
@@ -703,74 +518,59 @@
     function resolvePreviewSrc(src) {
         if (!src) { return ''; }
         if (/^https?:\/\//i.test(src)) { return src; }
+        if (/^data:/i.test(src)) { return src; }
         if (src.charAt(0) === '/') { return src; }
         return '/' + src.replace(/^\.\//, '');
     }
 
-    function isBrokenPreviewImage(img) {
-        return !img || img.naturalWidth <= 2 || img.naturalHeight <= 2;
-    }
-
-    function showPreviewPlaceholder(previewEl) {
-        if (!previewEl) { return; }
-        var img = previewEl.querySelector('img');
-        var placeholder = previewEl.querySelector('.cfg-img-placeholder');
-        if (img) {
-            img.hidden = true;
-            img.removeAttribute('src');
+    function showDefaultPreview(previewEl, picker) {
+        if (!previewEl || !picker) { return; }
+        var tpl = picker.querySelector('.cfg-preview-default-tpl');
+        previewEl.innerHTML = '';
+        previewEl.classList.add('cfg-img-preview--default');
+        previewEl.dataset.custom = '0';
+        if (tpl && tpl.content) {
+            previewEl.appendChild(tpl.content.cloneNode(true));
         }
-        if (placeholder) { placeholder.hidden = false; }
     }
 
-    function bindPreviewImage(img) {
-        if (!img || img.dataset.previewBound === '1') { return; }
-        img.dataset.previewBound = '1';
-        var previewEl = img.parentElement;
-        var placeholder = previewEl && previewEl.querySelector('.cfg-img-placeholder');
-
+    function showCustomPreview(previewEl, picker, src) {
+        if (!previewEl || !picker || !src) {
+            showDefaultPreview(previewEl, picker);
+            return;
+        }
+        previewEl.classList.remove('cfg-img-preview--default');
+        previewEl.dataset.custom = '1';
+        previewEl.innerHTML = '';
+        var img = document.createElement('img');
+        img.className = 'cfg-preview-img';
+        img.dataset.role = 'preview-img';
+        img.alt = 'Preview';
+        img.src = resolvePreviewSrc(src);
         img.addEventListener('error', function () {
-            showPreviewPlaceholder(previewEl);
+            showDefaultPreview(previewEl, picker);
         });
-
-        img.addEventListener('load', function () {
-            if (isBrokenPreviewImage(img)) {
-                showPreviewPlaceholder(previewEl);
-                return;
-            }
-            img.hidden = false;
-            if (placeholder) { placeholder.hidden = true; }
-        }, { once: true });
-
-        if (img.complete) {
-            if (isBrokenPreviewImage(img)) {
-                showPreviewPlaceholder(previewEl);
-            } else {
-                img.hidden = false;
-                if (placeholder) { placeholder.hidden = true; }
-            }
-        }
+        previewEl.appendChild(img);
     }
 
     function refreshPreview(picker, src) {
         var previewEl = picker.querySelector('.cfg-img-preview');
         if (!previewEl) { return; }
-        var img = previewEl.querySelector('img');
-        var placeholder = previewEl.querySelector('.cfg-img-placeholder');
-        if (src) {
-            if (!img) {
-                img = document.createElement('img');
-                img.alt = 'Preview';
-                previewEl.appendChild(img);
-            }
-            bindPreviewImage(img);
-            img.src = resolvePreviewSrc(src);
+        if (src && String(src).trim() !== '') {
+            showCustomPreview(previewEl, picker, src);
         } else {
-            showPreviewPlaceholder(previewEl);
+            showDefaultPreview(previewEl, picker);
         }
     }
 
-    document.querySelectorAll('.cfg-img-preview img[data-initial-src]').forEach(function (img) {
-        bindPreviewImage(img);
+    document.querySelectorAll('.cfg-img-picker').forEach(function (picker) {
+        var previewEl = picker.querySelector('.cfg-img-preview');
+        var img = previewEl && previewEl.querySelector('.cfg-preview-img[data-role="preview-img"]');
+        if (img) {
+            img.addEventListener('error', function () {
+                showDefaultPreview(previewEl, picker);
+            });
+        }
     });
 
     /* ── Flash "saved" hint ── */

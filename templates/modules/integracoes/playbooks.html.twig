@@ -1,0 +1,125 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+{% block integ_section_content %}
+
+{# ── Playbooks estáticos ──────────────────────────────────────────────────── #}
+<div class="row mb-4">
+    {% for pb in playbooks %}
+    <div class="col-lg-6 mb-4 d-flex">
+        <div class="unio-card flex-fill integ-playbook-card">
+            <div class="integ-playbook-card-head">
+                <span class="mi-icon"><i class="fas {{ pb.icon }}" aria-hidden="true"></i></span>
+                <div>
+                    <div class="section-title">{{ pb.titulo }}</div>
+                    {% include 'components/status_badge.html.twig' with { label: pb.categoria|upper, variant: 'info' } %}
+                </div>
+            </div>
+            <p class="section-subtitle">{{ pb.descricao }}</p>
+            <ol class="integ-playbook-steps">
+                {% for step in pb.passos %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+            <div class="d-flex gap-2 mt-3">
+                {% if product_grant('hub_integracoes', 'catalogo') %}
+                <a href="{{ path('app_integracoes_catalogo') }}" class="btn-unio btn-sm btn-unio-ghost">
+                    <i class="fas fa-plug mr-1"></i> Ir ao catálogo
+                </a>
+                {% endif %}
+                <button type="button"
+                        class="btn-unio btn-sm btn-unio-primary integ-pb-iniciar-btn"
+                        data-playbook-id="{{ pb.id }}"
+                        data-playbook-titulo="{{ pb.titulo|e('html_attr') }}"
+                        data-url="{{ path('app_integracoes_playbook_iniciar', { playbookId: pb.id }) }}">
+                    <i class="fas fa-play mr-1"></i> Iniciar execução
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{# ── Execuções ativas ─────────────────────────────────────────────────────── #}
+<section class="unio-card" id="integ-playbook-runs-section">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Execuções',
+        subtitle: playbook_runs|length ~ ' run(s) registrado(s)'
+    } %}
+
+    {% if playbook_runs is empty %}
+    <p class="section-subtitle text-muted py-3">
+        Nenhuma execução ainda. Inicie um playbook acima.
+    </p>
+    {% else %}
+    <div class="integ-pb-runs-list" id="integ-pb-runs-list">
+        {% for run in playbook_runs %}
+        <div class="integ-pb-run-item{% if run.status == 'concluido' %} is-done{% endif %}"
+             data-run-id="{{ run.id }}"
+             data-run-json="{{ run|json_encode|e('html_attr') }}">
+            <div class="integ-pb-run-head">
+                <div class="d-flex align-items-center gap-2">
+                    {% if run.status == 'concluido' %}
+                    <i class="fas fa-circle-check text-success" title="Concluído" aria-hidden="true"></i>
+                    {% elseif run.status == 'cancelado' %}
+                    <i class="fas fa-circle-xmark text-danger" title="Cancelado" aria-hidden="true"></i>
+                    {% else %}
+                    <i class="fas fa-circle-play text-info" title="Em progresso" aria-hidden="true"></i>
+                    {% endif %}
+                    <strong>{{ run.titulo }}</strong>
+                    <span class="text-muted ms-1">por {{ run.iniciado_por }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-muted">{{ run.criado_em }}</small>
+                    <button type="button"
+                            class="btn-unio btn-xs btn-unio-ghost integ-pb-run-toggle"
+                            data-run-id="{{ run.id }}"
+                            aria-expanded="false">
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+            {# Progress bar #}
+            <div class="integ-pb-progress mt-2">
+                <div class="progress" style="height:6px">
+                    <div class="progress-bar{% if run.status == 'concluido' %} bg-success{% endif %}"
+                         role="progressbar"
+                         style="width:{{ run.progress_pct }}%"
+                         aria-valuenow="{{ run.progress_pct }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted">{{ run.steps_done }}/{{ run.steps_total }} passos · {{ run.progress_pct }}%</small>
+            </div>
+
+            {# Steps panel (collapsed) #}
+            <div class="integ-pb-run-steps mt-3 d-none" id="integ-pb-steps-{{ run.id }}">
+                {% for step in run.steps %}
+                <div class="integ-pb-step d-flex align-items-start gap-2 py-2 border-bottom">
+                    <input type="checkbox"
+                           class="integ-pb-step-check form-check-input mt-1"
+                           {% if step.feito %}checked{% endif %}
+                           data-run-id="{{ run.id }}"
+                           data-step-index="{{ step.index }}"
+                           data-url="{{ path('app_integracoes_playbook_step', { runId: run.id }) }}"
+                           {% if run.status == 'concluido' or run.status == 'cancelado' %}disabled{% endif %}>
+                    <div class="flex-fill">
+                        <div class="fw-medium{% if step.feito %} text-decoration-line-through text-muted{% endif %}">
+                            {{ step.index }}. {{ step.titulo }}
+                        </div>
+                        {% if step.descricao %}
+                        <small class="text-muted">{{ step.descricao }}</small>
+                        {% endif %}
+                        {% if step.feito and step.feito_em %}
+                        <div><small class="text-success"><i class="fas fa-check" aria-hidden="true"></i> {{ step.feito_em }}</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,292 @@
+{#
+  ti/chamado_create_offcanvas — abertura de chamado (wizard 4 etapas)
+#}
+{% set cat_options = [] %}
+{% for c in categories|default([]) %}
+    {% set cat_options = cat_options|merge([{ value: c.id, label: c.label }]) %}
+{% endfor %}
+{% set pri_options = [] %}
+{% for p in priorities|default([]) %}
+    {% set pri_options = pri_options|merge([{ value: p, label: p }]) %}
+{% endfor %}
+{% set loc_options = [] %}
+{% for loc in locations|default([]) %}
+    {% set loc_options = loc_options|merge([{ value: loc.id, label: loc.label }]) %}
+{% endfor %}
+{% set channel_options = [] %}
+{% for ch in contact_channels|default([]) %}
+    {% set channel_options = channel_options|merge([{ value: ch.id, label: ch.label }]) %}
+{% endfor %}
+{% set sla_map = {} %}
+{% for rule in sla_rules|default([]) %}
+    {% set sla_map = sla_map|merge({ (rule.priority): rule }) %}
+{% endfor %}
+
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'ti-chamado-novo',
+    title: 'Abrir chamado',
+    subtitle: 'Service desk · triagem Cortex automática',
+    icon: 'fa-headset',
+    size: 'xl',
+    wizard: true,
+    open: open|default(false)
+} %}
+    {% block offcanvas_drawer_attrs %}data-ti-chamado-wizard{% endblock %}
+
+    {% block offcanvas_body %}
+    <div class="ti-chamado-wizard">
+        <div class="ti-chamado-wizard-progress">
+            <div class="ti-chamado-wizard-steps" role="tablist" aria-label="Etapas do chamado">
+                {% for step in [
+                    { n: 1, label: 'Serviço' },
+                    { n: 2, label: 'Detalhes' },
+                    { n: 3, label: 'Classificação' },
+                    { n: 4, label: 'Revisão' },
+                ] %}
+                <div class="ti-chamado-wizard-step{% if step.n == 1 %} is-active{% endif %}" data-ti-wizard-step="{{ step.n }}">
+                    <span class="ti-chamado-wizard-step-num">{{ step.n }}</span>
+                    <span>{{ step.label }}</span>
+                </div>
+                {% if not loop.last %}<span class="ti-chamado-wizard-connector" aria-hidden="true"></span>{% endif %}
+                {% endfor %}
+            </div>
+            <div class="progress-unio mt-3">
+                <div class="progress-unio-bar progress-unio-bar--accent" data-ti-wizard-progress style="width: 25%" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+
+        <form action="{{ path('app_ti_chamado_novo_submit') }}"
+              method="post"
+              class="unio-form ti-chamado-form"
+              id="tiChamadoForm"
+              data-ti-chamado-form
+              data-ti-helia-url="{{ path('app_ti_helia_analyze') }}"
+              data-ti-helia-csrf="{{ csrf_token('ti_helia_analyze') }}"
+              enctype="multipart/form-data">
+            <input type="hidden" name="_token" value="{{ csrf_token('ti_novo_chamado') }}">
+            <input type="hidden" name="catalog_item" id="tiCatalogItem" value="">
+
+            {# Etapa 1 — Catálogo #}
+            <div class="ti-chamado-wizard-panel is-active" data-ti-wizard-panel="1">
+                <p class="section-subtitle mb-3">Escolha um serviço padronizado ou abra um chamado personalizado.</p>
+                <div class="ti-chamado-catalog-grid">
+                    {% for item in catalog|default([]) %}
+                    <button type="button"
+                            class="ti-chamado-catalog-card{% if app.request.query.get('catalog') == item.id %} is-selected{% endif %}"
+                            data-ti-catalog-pick
+                            data-ti-catalog-id="{{ item.id }}"
+                            data-ti-catalog-title="{{ item.title }}"
+                            data-ti-catalog-cat="{{ item.category|default('sistema') }}"
+                            data-ti-catalog-priority="{{ item.priority|default('P3') }}"
+                            data-ti-catalog-desc="{{ item.desc }}">
+                        <span class="ti-chamado-catalog-icon"><i class="fas {{ item.icon }}" aria-hidden="true"></i></span>
+                        <span class="ti-chamado-catalog-title">{{ item.title }}</span>
+                        <span class="ti-chamado-catalog-desc">{{ item.desc }}</span>
+                        <span class="ti-chamado-catalog-sla">SLA {{ item.sla }}</span>
+                    </button>
+                    {% endfor %}
+                    <button type="button"
+                            class="ti-chamado-catalog-card ti-chamado-catalog-card--custom"
+                            data-ti-catalog-custom>
+                        <span class="ti-chamado-catalog-icon"><i class="fas fa-pen-to-square" aria-hidden="true"></i></span>
+                        <span class="ti-chamado-catalog-title">Outro assunto</span>
+                        <span class="ti-chamado-catalog-desc">Descreva um problema fora do catálogo.</span>
+                    </button>
+                </div>
+            </div>
+
+            {# Etapa 2 — Detalhes #}
+            <div class="ti-chamado-wizard-panel" data-ti-wizard-panel="2" hidden>
+                <div class="ti-chamado-selected-service mb-3" data-ti-selected-service hidden>
+                    <i class="fas fa-tag mr-2" aria-hidden="true"></i>
+                    <span data-ti-selected-service-label></span>
+                </div>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'title', name: 'title', label: 'Título', required: true,
+                    placeholder: 'Ex.: VPN não conecta após atualização do Windows'
+                } %}
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'summary', name: 'summary', label: 'Descrição detalhada', type: 'textarea', rows: 5, required: true,
+                    placeholder: 'Sintomas, mensagens de erro, passos para reproduzir e impacto no trabalho.'
+                } %}
+                <div class="ti-chamado-hint unio-card mt-2 mb-2 p-3">
+                    <i class="fas fa-brain text-info mr-2" aria-hidden="true"></i>
+                    <span class="section-subtitle mb-0">A Helia analisa sua descrição e sugere classificação e artigos da base de conhecimento.</span>
+                </div>
+                {% include 'components/ti/helia_assist_panel.html.twig' %}
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'location', name: 'location', label: 'Local / unidade', type: 'select', required: true,
+                            value: 'matriz',
+                            options: loc_options,
+                            attrs: { 'data-ti-review-field': 'location' }
+                        } %}
+                    </div>
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'asset_tag', name: 'asset_tag', label: 'Etiqueta do ativo (opcional)',
+                            placeholder: 'Ex.: NB-1187',
+                            attrs: { 'data-ti-review-field': 'asset_tag' }
+                        } %}
+                    </div>
+                </div>
+                <div class="unio-form-group">
+                    <span class="unio-form-label d-block">Anexos (opcional)</span>
+                    {% include 'components/ti/chamado_attachments_upload.html.twig' %}
+                    <small class="text-muted d-block mt-1">Capturas de tela e logs aceleram a triagem Cortex.</small>
+                </div>
+            </div>
+
+            {# Etapa 3 — Classificação & contato #}
+            <div class="ti-chamado-wizard-panel" data-ti-wizard-panel="3" hidden>
+                <div class="row">
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'category', name: 'category', label: 'Categoria', type: 'select', required: true,
+                            value: 'sistema',
+                            options: cat_options,
+                            attrs: { 'data-ti-review-field': 'category' }
+                        } %}
+                    </div>
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'priority', name: 'priority', label: 'Prioridade', type: 'select', required: true,
+                            value: 'P3',
+                            options: pri_options,
+                            attrs: { 'data-ti-priority-select': '1', 'data-ti-review-field': 'priority' }
+                        } %}
+                    </div>
+                </div>
+
+                <fieldset class="unio-form-group">
+                    <legend class="unio-form-label">Impacto operacional <span class="unio-form-required">*</span></legend>
+                    <div class="ti-impact-grid">
+                        {% for level in impact_levels|default([]) %}
+                        <label class="ti-impact-option">
+                            <input type="radio" name="impact" value="{{ level.id }}" data-ti-review-field="impact"{% if level.id == 'medio' %} checked{% endif %} required>
+                            <span class="ti-impact-option-inner">
+                                <strong>{{ level.label }}</strong>
+                                <small>{{ level.desc }}</small>
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'affected_users', name: 'affected_users', label: 'Usuários afetados', type: 'number',
+                            value: '1', required: true,
+                            attrs: { min: '1', max: '9999', 'data-ti-review-field': 'affected_users' }
+                        } %}
+                    </div>
+                    <div class="col-md-8">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'preferred_time', name: 'preferred_time', label: 'Melhor horário para contato (opcional)',
+                            placeholder: 'Ex.: 14h–17h ou o quanto antes',
+                            attrs: { 'data-ti-review-field': 'preferred_time' }
+                        } %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'contact_channel', name: 'contact_channel', label: 'Canal de retorno', type: 'select', required: true,
+                            value: 'portal',
+                            options: channel_options,
+                            attrs: { 'data-ti-review-field': 'contact_channel' }
+                        } %}
+                    </div>
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'contact_phone', name: 'contact_phone', label: 'Telefone / ramal (opcional)',
+                            placeholder: '(11) 99999-9999 ou ramal 2040',
+                            inputmode: 'tel',
+                            attrs: { 'data-ti-review-field': 'contact_phone' }
+                        } %}
+                    </div>
+                </div>
+
+                <label class="ti-chamado-check mt-2">
+                    <input type="checkbox" name="notify_manager" value="1" data-ti-review-field="notify_manager">
+                    <span>Notificar meu gestor imediato sobre este chamado</span>
+                </label>
+
+                <div class="ti-sla-preview unio-card p-3 mt-3" data-ti-sla-preview>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <span class="section-title mb-0">SLA previsto</span>
+                        {% include 'components/ti/ti_priority_badge.html.twig' with { priority: 'P3', attrs: { 'data-ti-sla-priority-badge': '1' } } %}
+                    </div>
+                    <div class="ti-sla-preview-meta">
+                        <div><span class="perm-label">Resposta</span><br><strong data-ti-sla-response>4 h</strong></div>
+                        <div><span class="perm-label">Resolução</span><br><strong data-ti-sla-resolution>24 h</strong></div>
+                        <div><span class="perm-label">Conformidade</span><br><strong data-ti-sla-compliance>98%</strong></div>
+                    </div>
+                </div>
+
+                <script type="application/json" id="ti-sla-rules-data">{{ sla_map|json_encode|raw }}</script>
+                <script type="application/json" id="ti-form-labels-data">{{ {
+                    categories: categories|default([]),
+                    locations: locations|default([]),
+                    contact_channels: contact_channels|default([]),
+                    impact_levels: impact_levels|default([])
+                }|json_encode|raw }}</script>
+            </div>
+
+            {# Etapa 4 — Revisão #}
+            <div class="ti-chamado-wizard-panel" data-ti-wizard-panel="4" hidden>
+                <p class="section-subtitle mb-3">Confira os dados antes de abrir. A Helia já pré-classificou quando disponível.</p>
+                <div class="ti-helia-assist ti-helia-assist--review mb-3" data-ti-helia-review hidden>
+                    <div class="ti-helia-assist-head mb-2">
+                        <span class="ti-helia-assist-avatar" aria-hidden="true"><i class="fas fa-brain"></i></span>
+                        <div>
+                            <div class="section-title mb-0">Pré-triagem Helia</div>
+                            <p class="section-subtitle mb-0" data-ti-helia-review-summary></p>
+                        </div>
+                        <span class="ti-helia-confidence" data-ti-helia-review-confidence></span>
+                    </div>
+                </div>
+                <div class="ti-chamado-review unio-card p-3" data-ti-review-summary>
+                    <dl class="ti-chamado-review-list mb-0">
+                        <div class="ti-chamado-review-row"><dt>Título</dt><dd data-ti-review-out="title">—</dd></div>
+                        <div class="ti-chamado-review-row"><dt>Descrição</dt><dd data-ti-review-out="summary">—</dd></div>
+                        <div class="ti-chamado-review-row"><dt>Categoria</dt><dd data-ti-review-out="category">—</dd></div>
+                        <div class="ti-chamado-review-row"><dt>Prioridade</dt><dd data-ti-review-out="priority">—</dd></div>
+                        <div class="ti-chamado-review-row"><dt>Impacto</dt><dd data-ti-review-out="impact">—</dd></div>
+                        <div class="ti-chamado-review-row"><dt>Local</dt><dd data-ti-review-out="location">—</dd></div>
+                        <div class="ti-chamado-review-row"><dt>Usuários afetados</dt><dd data-ti-review-out="affected_users">—</dd></div>
+                        <div class="ti-chamado-review-row"><dt>Canal de retorno</dt><dd data-ti-review-out="contact_channel">—</dd></div>
+                        <div class="ti-chamado-review-row" data-ti-review-row="contact_phone" hidden><dt>Contato</dt><dd data-ti-review-out="contact_phone">—</dd></div>
+                        <div class="ti-chamado-review-row" data-ti-review-row="asset_tag" hidden><dt>Ativo</dt><dd data-ti-review-out="asset_tag">—</dd></div>
+                        <div class="ti-chamado-review-row" data-ti-review-row="preferred_time" hidden><dt>Horário</dt><dd data-ti-review-out="preferred_time">—</dd></div>
+                    </dl>
+                </div>
+                <div class="ti-chamado-hint unio-card mt-3 p-3">
+                    <i class="fas fa-shield-halved text-info mr-2" aria-hidden="true"></i>
+                    <span class="section-subtitle mb-0">Ao confirmar, o chamado entra na fila <strong>Novo</strong> e recebe número automático. Você será redirecionado para a lista atualizada.</span>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endblock %}
+
+    {% block offcanvas_footer %}
+    <div class="unio-offcanvas-footer ti-chamado-wizard-footer">
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+        <div class="ti-chamado-wizard-actions">
+            <button type="button" class="btn-unio-ghost" data-ti-wizard-prev hidden>
+                <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Anterior
+            </button>
+            <button type="button" class="btn-unio" data-ti-wizard-next>
+                Próximo <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+            </button>
+            <button type="submit" form="tiChamadoForm" class="btn-unio-primary" data-ti-wizard-submit hidden>
+                <i class="fas fa-paper-plane mr-1" aria-hidden="true"></i> Confirmar e abrir
+            </button>
+        </div>
+    </div>
+    {% endblock %}
+{% endembed %}

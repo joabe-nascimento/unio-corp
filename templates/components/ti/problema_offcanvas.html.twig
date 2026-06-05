@@ -1,0 +1,49 @@
+{# Offcanvas CRUD — Problemas #}
+<div class="unio-offcanvas" id="ti-problema-form" data-unio-offcanvas="ti-problema-form">
+    <div class="unio-offcanvas-backdrop" data-unio-offcanvas-close></div>
+    <div class="unio-offcanvas-panel">
+        <div class="unio-offcanvas-head">
+            <h2 class="unio-offcanvas-title section-title mb-0">Problema</h2>
+            <button type="button" class="btn-unio-ghost btn-sm" data-unio-offcanvas-close aria-label="Fechar"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="post" action="{{ path('app_ti_problema_novo_submit') }}" class="unio-offcanvas-body" id="tiProblemaForm" data-ti-infra-form="problema" data-ti-edit-url="{{ path('app_ti_problema_editar_submit', { id: 0 }) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('ti_problema_form') }}">
+            <div class="mb-3">
+                <label class="perm-label">Título</label>
+                <input type="text" name="titulo" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="perm-label">Resumo</label>
+                <textarea name="resumo" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="perm-label">Causa raiz</label>
+                <textarea name="causa_raiz" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label class="perm-label">Prioridade</label>
+                    <select name="prioridade" class="form-control">
+                        <option value="P1">P1</option>
+                        <option value="P2">P2</option>
+                        <option value="P3" selected>P3</option>
+                        <option value="P4">P4</option>
+                    </select>
+                </div>
+                <div class="col-6 mb-3">
+                    <label class="perm-label">Status</label>
+                    <select name="status" class="form-control">
+                        <option value="aberto">Aberto</option>
+                        <option value="investigacao">Investigação</option>
+                        <option value="resolvido">Resolvido</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="perm-label">Categoria</label>
+                <input type="text" name="categoria" class="form-control" value="sistema">
+            </div>
+            <button type="submit" class="btn-unio" data-ti-infra-submit-label="problema">Registrar problema</button>
+        </form>
+    </div>
+</div>

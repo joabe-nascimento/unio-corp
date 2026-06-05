@@ -6,10 +6,13 @@
 {% block hub_content %}
 <div class="unio-card p-4 mb-3">
     <form method="get" class="d-flex gap-2 align-items-end mb-3">
-        <div>
-            <label class="form-label">Competência</label>
-            <input type="month" name="ref" class="form-control" value="{{ referencia }}">
-        </div>
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Competência',
+            type: 'month',
+            name: 'ref',
+            value: referencia,
+            show_label: true
+        } %}
         <button type="submit" class="btn-unio-ghost btn-sm">Filtrar</button>
     </form>
     {% if grant_at_least('product_rh', 'contabilidade', 'GESTOR') %}
@@ -23,7 +26,11 @@
 
 <div class="unio-card p-4">
     {% if provisoes is empty %}
-        <p class="text-muted mb-0">Nenhuma provisão para esta competência.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-calculator',
+            title: 'Nenhuma provisão para esta competência.',
+            compact: true
+        } %}
     {% else %}
     <table class="table table-unio mb-0">
         <thead><tr><th>Tipo</th><th>Valor</th><th>Status</th></tr></thead>

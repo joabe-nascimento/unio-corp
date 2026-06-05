@@ -11,7 +11,7 @@ use App\Repository\InovDecisaoRepository;
 use App\Repository\InovIdeiaRepository;
 
 /**
- * Hub Inovação — orquestração de dados (DB + sinais reais de RH, Projetos e OKRs).
+ * Núcleo Inovação — orquestração de dados (DB + sinais reais de RH, Projetos e OKRs).
  */
 final class InovacaoService
 {
@@ -140,7 +140,7 @@ final class InovacaoService
     {
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
         if (!$empresa) {
-            throw new \RuntimeException('Selecione uma área de trabalho para acessar o Hub Inovação.');
+            throw new \RuntimeException('Selecione uma área de trabalho para acessar o Núcleo Inovação.');
         }
         $this->seedService->seedDemoData($empresa, $user);
 
@@ -243,7 +243,7 @@ final class InovacaoService
             ['id' => 'tendencias',   'title' => 'Tendências',   'subtitle' => 'Radar de tecnologias',         'icon' => 'fa-satellite-dish','metric' => $tendCount . ' sinais',          'route' => 'app_inovacao_tendencias',   'tone' => '#A855F7'],
             ['id' => 'portfolio',    'title' => 'Portfólio',    'subtitle' => 'Inovações escaladas',          'icon' => 'fa-trophy',        'metric' => \count($pipeline['escala'] ?? []) . ' ativos', 'route' => 'app_inovacao_portfolio',    'tone' => '#F97316'],
             ['id' => 'analytics',    'title' => 'Analytics',    'subtitle' => 'Maturidade e funil',           'icon' => 'fa-chart-pie',   'metric' => 'Score ' . ($pulse['score'] ?? 0) . ' %',        'route' => 'app_inovacao_analytics',    'tone' => '#F59E0B'],
-            ['id' => 'conexoes',     'title' => 'Conexões',     'subtitle' => 'Oportunidades entre hubs',     'icon' => 'fa-share-nodes',   'metric' => $connCount . ' sinergias',       'route' => 'app_inovacao_conexoes',     'tone' => '#EC4899'],
+            ['id' => 'conexoes',     'title' => 'Conexões',     'subtitle' => 'Oportunidades entre núcleos',     'icon' => 'fa-share-nodes',   'metric' => $connCount . ' sinergias',       'route' => 'app_inovacao_conexoes',     'tone' => '#EC4899'],
             ['id' => 'impact',       'title' => 'Impacto',      'subtitle' => 'ROI e ledger de valor',        'icon' => 'fa-coins',         'metric' => $impactTotals['captured'],          'route' => 'app_inovacao_impact',       'tone' => '#14B8A6'],
             ['id' => 'novidades',    'title' => 'Novidades',    'subtitle' => 'Feed de inovação',             'icon' => 'fa-newspaper',     'metric' => $novCount . ' updates',         'route' => 'app_inovacao_novidades',    'tone' => '#3B82F6'],
         ];
@@ -261,7 +261,7 @@ final class InovacaoService
             ['id' => 'experimentos', 'label' => 'Experimentos', 'icon' => 'fa-vial',          'route' => 'app_inovacao_experimentos', 'subtitle' => 'Fila Kill · Pivot · Scale'],
             ['id' => 'backlog',      'label' => 'Backlog',      'icon' => 'fa-lightbulb',     'route' => 'app_inovacao_backlog',      'subtitle' => 'Ideias e hipóteses'],
             ['id' => 'analytics',    'label' => 'Analytics',    'icon' => 'fa-chart-pie',     'route' => 'app_inovacao_analytics',   'subtitle' => 'Maturidade e funil'],
-            ['id' => 'conexoes',     'label' => 'Conexões',     'icon' => 'fa-share-nodes',   'route' => 'app_inovacao_conexoes',     'subtitle' => 'Sinergias entre hubs'],
+            ['id' => 'conexoes',     'label' => 'Conexões',     'icon' => 'fa-share-nodes',   'route' => 'app_inovacao_conexoes',     'subtitle' => 'Sinergias entre núcleos'],
             ['id' => 'impact',       'label' => 'Impacto',      'icon' => 'fa-coins',         'route' => 'app_inovacao_impact',       'subtitle' => 'ROI e valor capturado'],
             ['id' => 'tendencias',   'label' => 'Tendências',   'icon' => 'fa-satellite-dish','route' => 'app_inovacao_tendencias',   'subtitle' => 'Radar de tecnologias'],
             ['id' => 'portfolio',    'label' => 'Portfólio',    'icon' => 'fa-trophy',        'route' => 'app_inovacao_portfolio',    'subtitle' => 'Inovações escaladas'],
@@ -344,7 +344,7 @@ final class InovacaoService
             $totalFunc = $this->funcionarioRepo->countByEmpresa($empresa);
             if ($totalFunc > 0) {
                 $signals[] = [
-                    'source'   => 'Hub RH',
+                    'source'   => 'Núcleo RH',
                     'icon'     => 'fa-users',
                     'color'    => '#0EA5E9',
                     'title'    => "{$totalFunc} colaboradores cadastrados",
@@ -394,7 +394,7 @@ final class InovacaoService
     private function getFallbackSignals(): array
     {
         return [
-            ['source' => 'Hub RH',        'icon' => 'fa-users',           'color' => '#0EA5E9', 'title' => 'Conecte o Hub RH',        'summary' => 'Dados de colaboradores habilitarão sinais de inovação baseados em talentos reais.', 'priority' => 'normal', 'link' => 'app_rh'],
+            ['source' => 'Núcleo RH',        'icon' => 'fa-users',           'color' => '#0EA5E9', 'title' => 'Conecte o Núcleo RH',        'summary' => 'Dados de colaboradores habilitarão sinais de inovação baseados em talentos reais.', 'priority' => 'normal', 'link' => 'app_rh'],
             ['source' => 'Core Projetos', 'icon' => 'fa-diagram-project', 'color' => '#10B981', 'title' => 'Conecte Core Projetos',   'summary' => 'Projetos ativos alimentarão o pipeline de inovação com candidatos reais.', 'priority' => 'normal', 'link' => 'app_core_projetos'],
             ['source' => 'OKRs',          'icon' => 'fa-bullseye',        'color' => '#F59E0B', 'title' => 'Conecte Metas (OKRs)',    'summary' => 'Metas com progresso baixo são oportunidades priorizadas de inovação.', 'priority' => 'normal', 'link' => 'app_core_projetos'],
         ];
@@ -517,7 +517,7 @@ final class InovacaoService
     /** @return list<string> */
     private function getIdeaHubs(): array
     {
-        return ['Hub RH', 'Hub Talentos', 'Hub Maturidade', 'Hub Analytics', 'Hub ESG', 'Hub TI', 'Hub Projetos', 'Hub Cortex', 'Transversal'];
+        return ['Núcleo RH', 'Núcleo Talentos', 'Núcleo Maturidade', 'Núcleo Analytics', 'Núcleo ESG', 'Núcleo TI', 'Núcleo Projetos', 'Núcleo Cortex', 'Transversal'];
     }
 
     /** @param array<string, list<array<string,mixed>>> $pipeline */

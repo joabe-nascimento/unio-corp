@@ -1,4 +1,4 @@
-{# Menu lateral — itens principais + zona Hub Selecionado (lista / painel) #}
+{# Menu lateral — itens principais + zona Núcleo selecionado (lista / painel) #}
 {% set route = app.request.attributes.get('_route') %}
 {% set hub_operacoes_open = nav_hub_operacoes_active|default(false) %}
 {% set modulo_rh_open = nav_modulo_rh_active|default(false) %}
@@ -8,6 +8,9 @@
 {% set modulo_inovacao_fluxo_open = nav_modulo_inovacao_fluxo_active|default(false) %}
 {% set modulo_inovacao_ideacao_open = nav_modulo_inovacao_ideacao_active|default(false) %}
 {% set modulo_inovacao_inteligencia_open = nav_modulo_inovacao_inteligencia_active|default(false) %}
+{% set modulo_integracoes_conexoes_open = nav_modulo_integracoes_conexoes_active|default(false) %}
+{% set modulo_integracoes_dados_open = nav_modulo_integracoes_dados_active|default(false) %}
+{% set modulo_integracoes_obs_open = nav_modulo_integracoes_obs_active|default(false) %}
 {% set _active_hub = nav_active_hub|default(null) %}
 {% set _in_hub = _active_hub is not null %}
 
@@ -18,11 +21,11 @@
 
 <li class="nav-item sidebar-hub-heading-item">
     <div class="sidebar-hub-heading" data-sidebar-hub-heading>
-        <span class="sidebar-hub-heading-label">Hub Selecionado</span>
+        <span class="sidebar-hub-heading-label">Núcleo selecionado</span>
         <a href="#"
            class="sidebar-hub-back{% if not _in_hub %} is-hidden{% endif %}"
            data-sidebar-hub-back
-           aria-label="Voltar para lista de hubs"
+           aria-label="Voltar para lista de núcleos"
            title="Voltar">
             <i class="fas fa-arrow-left" aria-hidden="true"></i>
         </a>
@@ -68,6 +71,10 @@
     <ul class="nav nav-pills flex-column sidebar-hub-panel-list">
         {% if hub.id == 'inovacao' %}
             {% include 'layout/_sidebar_hub_inovacao.html.twig' %}
+        {% elseif hub.id == 'ti' %}
+            {% include 'layout/_sidebar_hub_ti.html.twig' %}
+        {% elseif hub.id == 'integracoes' %}
+            {% include 'layout/_sidebar_hub_integracoes.html.twig' %}
         {% else %}
             {% include 'layout/_sidebar_hub_planned_panel.html.twig' with { hub: hub } %}
         {% endif %}

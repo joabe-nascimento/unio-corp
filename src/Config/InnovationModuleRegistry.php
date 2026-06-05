@@ -3,7 +3,7 @@
 namespace App\Config;
 
 /**
- * Módulos do Hub Inovação (sidebar + rotas).
+ * Módulos do Núcleo Inovação (sidebar + rotas).
  */
 final class InnovationModuleRegistry
 {

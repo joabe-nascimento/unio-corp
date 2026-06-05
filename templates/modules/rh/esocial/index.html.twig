@@ -4,24 +4,12 @@
 {% set hub_page_title = 'eSocial' %}
 
 {% block hub_content %}
-<div class="rh-esocial-summary">
-    <div class="rh-esocial-stat">
-        <span class="rh-esocial-stat-value">{{ queue.pendente }}</span>
-        <span class="rh-esocial-stat-label">Na fila</span>
-    </div>
-    <div class="rh-esocial-stat">
-        <span class="rh-esocial-stat-value">{{ queue.processando }}</span>
-        <span class="rh-esocial-stat-label">Processando</span>
-    </div>
-    <div class="rh-esocial-stat">
-        <span class="rh-esocial-stat-value">{{ queue.enviado }}</span>
-        <span class="rh-esocial-stat-label">Enviados</span>
-    </div>
-    <div class="rh-esocial-stat">
-        <span class="rh-esocial-stat-value">{{ queue.erro }}</span>
-        <span class="rh-esocial-stat-label">Com erro</span>
-    </div>
-</div>
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: queue.pendente, label: 'Na fila', icon: 'fa-clock' },
+    { value: queue.processando, label: 'Processando', icon: 'fa-spinner' },
+    { value: queue.enviado, label: 'Enviados', icon: 'fa-paper-plane' },
+    { value: queue.erro, label: 'Com erro', icon: 'fa-triangle-exclamation' },
+], mb: 'mb-3' } %}
 
 {% if grant_at_least('product_rh', 'esocial', 'GESTOR') %}
 <div class="unio-card p-4 mb-3">
@@ -29,18 +17,23 @@
         <form method="post" action="{{ path('app_rh_esocial') }}" class="d-flex flex-wrap gap-2 align-items-end flex-grow-1">
             <input type="hidden" name="_token" value="{{ csrf_token('rh_esocial_lote') }}">
             <input type="hidden" name="action" value="criar">
-            <div>
-                <label class="form-label small text-muted mb-1">Competência</label>
-                <input type="month" name="referencia" class="form-control form-control-sm" value="{{ 'now'|date('Y-m') }}">
-            </div>
-            <div>
-                <label class="form-label small text-muted mb-1">Evento</label>
-                <select name="tipo_evento" class="form-select form-select-sm">
-                    <option value="S1200">S-1200 — Remuneração</option>
-                    <option value="S1210">S-1210 — Pagamentos</option>
-                    <option value="S1299">S-1299 — Fechamento</option>
-                </select>
-            </div>
+            {% include 'components/filter_group.html.twig' with {
+                label: 'Competência',
+                type: 'month',
+                name: 'referencia',
+                value: 'now'|date('Y-m'),
+                show_label: true
+            } %}
+            {% include 'components/filter_group.html.twig' with {
+                label: 'Evento',
+                name: 'tipo_evento',
+                show_label: true,
+                options: [
+                    { value: 'S1200', label: 'S-1200 — Remuneração' },
+                    { value: 'S1210', label: 'S-1210 — Pagamentos' },
+                    { value: 'S1299', label: 'S-1299 — Fechamento' },
+                ]
+            } %}
             <div><button type="submit" class="btn-unio btn-sm">Enfileirar lote</button></div>
         </form>
         {% if queue.pendente > 0 or queue.erro > 0 %}
@@ -57,7 +50,11 @@
 
 <div class="unio-card p-4">
     {% if lotes is empty %}
-        <p class="text-muted mb-0">Nenhum lote na fila.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-file-export',
+            title: 'Nenhum lote na fila.',
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="table table-unio mb-0">
@@ -90,7 +87,7 @@
                     {% if grant_at_least('product_rh', 'esocial', 'GESTOR') and l.canRetry %}
                     <form method="post" action="{{ path('app_rh_esocial_retry', { id: l.id }) }}" class="d-inline">
                         <input type="hidden" name="_token" value="{{ csrf_token('rh_esocial_retry_' ~ l.id) }}">
-                        <button type="submit" class="btn btn-link btn-sm p-0">Reenviar</button>
+                        <button type="submit" class="btn-unio btn-xs btn-unio-ghost p-0">Reenviar</button>
                     </form>
                     {% endif %}
                 </td>

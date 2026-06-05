@@ -1,0 +1,341 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Núcleo TI{% endblock %}
+{% block permissions_scope %}{% if ti_section == 'overview' %}hub_ti{% endif %}{% endblock %}
+{% set hub_page_title = ti_section == 'overview' ? 'Núcleo TI' : ti_active_module.label|default('Núcleo TI') %}
+{% set hub_page_subtitle = ti_section != 'overview' ? ti_active_module.subtitle|default('') : 'NOC Center · Service desk & infraestrutura' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<div class="ti-toolbar-meta ti-toolbar-meta--badges">
+    {% include 'components/ti/ti_pulse_badge.html.twig' with { kind: 'sla', value: pulse.sla_compliance } %}
+    {% include 'components/ti/ti_pulse_badge.html.twig' with {
+        kind: 'open',
+        value: pulse.open_tickets,
+        alert: pulse.p1_active > 0
+    } %}
+    {% if pulse.p1_active > 0 %}
+    {% include 'components/ti/ti_pulse_badge.html.twig' with { kind: 'p1', value: pulse.p1_active } %}
+    {% endif %}
+</div>
+{% include 'components/ti/ti_notifications_dropdown.html.twig' %}
+{% if ti_can('create_chamado') %}
+    {% if ti_section in ['overview', 'chamados'] %}
+        {% if ti_section != 'chamados' %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-chamado-novo">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Abrir chamado
+    </button>
+        {% endif %}
+    {% elseif ti_section == 'ativos' and ti_can('manage_ativos') %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-ativo-form" data-ti-infra-open-novo="ativo">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo ativo
+    </button>
+    {% elseif ti_section == 'licencas' and ti_can('manage_licencas') %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-licenca-form" data-ti-infra-open-novo="licenca">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova licença
+    </button>
+    {% elseif ti_section == 'integracoes' and ti_at_least('integracoes', 'GESTOR') %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-integracao-form" data-ti-infra-open-novo="integracao">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova integração
+    </button>
+    {% elseif ti_section == 'manutencoes' and ti_can('manage_manutencoes') %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-manutencao-form" data-ti-infra-open-novo="manutencao">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova manutenção
+    </button>
+    {% elseif ti_section == 'novidades' and ti_can('manage_novidades') %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-novidade-form" data-ti-infra-open-novo="novidade">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo comunicado
+    </button>
+    {% elseif ti_section == 'kb' and ti_can('manage_kb') %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-kb-form" data-ti-infra-open-novo="kb">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo artigo
+    </button>
+    {% elseif ti_section == 'problemas' and ti_can('manage_problemas') %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-problema-form" data-ti-infra-open-novo="problema">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo problema
+    </button>
+    {% elseif ti_section == 'meus_chamados' and ti_can('create_chamado') %}
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-chamado-novo">
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Abrir chamado
+    </button>
+    {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block hub_kpis %}
+{% if ti_section == 'overview' %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: kpis, mb: 'mb-0' } %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="ti-hub ti-hub--{{ ti_section }}" id="tiHub" data-ti-hub data-ti-section="{{ ti_section }}">
+
+    {% if ti_section == 'overview' %}
+    <div class="ti-overview">
+        {% include 'components/ti/overview_command.html.twig' %}
+        {% include 'components/ti/noc_alerts_panel.html.twig' %}
+
+        <div class="row ti-overview-grid">
+            <div class="col-xl-8 ti-overview-main">
+                {% include 'components/ti/noc_status_grid.html.twig' %}
+
+                {% set module_items = [] %}
+                {% for card in module_cards %}
+                    {% if ti_view(card.id) %}
+                        {% set module_items = module_items|merge([{
+                            icon: card.icon,
+                            title: card.title,
+                            subtitle: card.subtitle ~ ' · ' ~ card.metric,
+                            route: card.route
+                        }]) %}
+                    {% endif %}
+                {% endfor %}
+                {% include 'components/module_grid.html.twig' with {
+                    title: 'Módulos TI',
+                    subtitle: 'Service desk, infraestrutura e inteligência operacional',
+                    items: module_items,
+                    cols: 2
+                } %}
+            </div>
+
+            <div class="col-xl-4 ti-overview-sidebar">
+                <div class="ti-overview-sidebar-inner">
+                    <section class="unio-card mb-4">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Live Ops',
+                            subtitle: 'Feed operacional'
+                        } %}
+                        {% include 'components/ti/live_ops_ticker.html.twig' %}
+                    </section>
+
+                    <section class="unio-card mb-4">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Fila prioritária',
+                            subtitle: 'P1 e P2 — ação imediata'
+                        } %}
+                        {% include 'components/ti/priority_strip.html.twig' with { items: priority_queue } %}
+                    </section>
+
+                    {% if integration_alerts|default([])|length > 0 %}
+                    <section class="unio-card mb-4 ti-noc-alerts">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Integrações degradadas',
+                            subtitle: 'Health check automático',
+                            btn_label: 'Ver integrações',
+                            btn_href: path('app_ti_integracoes'),
+                            btn_ghost: true,
+                            btn_icon: 'fa-arrow-right'
+                        } %}
+                        <div class="ti-noc-alerts-feed">
+                        {% for alert in integration_alerts %}
+                        <div class="ti-noc-alert-row ti-noc-alert-row--warn">
+                            <span class="ti-noc-alert-icon"><i class="fas fa-plug"></i></span>
+                            <span class="ti-noc-alert-body">
+                                <span class="ti-noc-alert-head">
+                                    <span class="section-title mb-0">{{ alert.name }}</span>
+                                    {% include 'components/ti/ti_health_badge.html.twig' with { status: alert.status, label: alert.status|capitalize } %}
+                                </span>
+                                <span class="ti-noc-alert-detail">Latência {{ alert.latency|default('—') }}</span>
+                            </span>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    {% if license_alerts|default([])|length > 0 %}
+                    <section class="unio-card mb-4 ti-noc-alerts">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Alertas de licenças',
+                            subtitle: 'Renovação e seats'
+                        } %}
+                        <div class="ti-noc-alerts-feed">
+                        {% for alert in license_alerts %}
+                        <div class="ti-noc-alert-row ti-noc-alert-row--warn">
+                            <span class="ti-noc-alert-icon"><i class="fas fa-key"></i></span>
+                            <span class="ti-noc-alert-body">
+                                <span class="section-title mb-0">{{ alert.name }}</span>
+                                <span class="ti-noc-alert-detail">{{ alert.detail }}</span>
+                            </span>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    {% if license_renewal_alerts|default([])|length > 0 %}
+                    <section class="unio-card mb-4 ti-noc-alerts">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Renovações próximas',
+                            subtitle: 'Licenças expirando em 45 dias',
+                            btn_label: 'Ver licenças',
+                            btn_href: path('app_ti_licencas'),
+                            btn_ghost: true,
+                            btn_icon: 'fa-arrow-right'
+                        } %}
+                        <div class="ti-noc-alerts-feed">
+                        {% for alert in license_renewal_alerts|slice(0, 5) %}
+                        <div class="ti-noc-alert-row ti-noc-alert-row--{{ alert.urgency == 'danger' ? 'critical' : 'warn' }}">
+                            <span class="ti-noc-alert-icon"><i class="fas fa-key"></i></span>
+                            <span class="ti-noc-alert-body">
+                                <span class="section-title mb-0">{{ alert.name }}</span>
+                                <span class="ti-noc-alert-detail">
+                                    {% if alert.days_left == 0 %}Vence hoje{% elseif alert.days_left == 1 %}Vence amanhã{% else %}{{ alert.days_left }}d — {{ alert.renewal }}{% endif %}
+                                </span>
+                            </span>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    {% if recurring_problems|default([])|length > 0 %}
+                    <section class="unio-card mb-4">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Padrões recorrentes',
+                            subtitle: 'Helia detectou similaridade',
+                            btn_label: 'Ver problemas',
+                            btn_href: path('app_ti_problemas'),
+                            btn_ghost: true,
+                            btn_icon: 'fa-arrow-right'
+                        } %}
+                        <div class="ti-card-list">
+                        {% for r in recurring_problems|slice(0, 3) %}
+                        <div class="ti-card-list-item">
+                            <div class="section-title mb-1">{{ r.title }}</div>
+                            <p class="section-subtitle mb-0">{{ r.count|default(r.ticket_ids|length) }} chamados · {{ r.ticket_ids|slice(0, 3)|join(', ') }}</p>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    <section class="unio-card mb-4">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Cortex Ops',
+                            subtitle: 'Insights proativos',
+                            btn_label: 'Abrir',
+                            btn_href: path('app_ti_cortex'),
+                            btn_ghost: true,
+                            btn_icon: 'fa-arrow-right'
+                        } %}
+                        <div class="ti-card-list">
+                        {% for insight in cortex_insights %}
+                        <div class="ti-card-list-item">
+                            <div class="section-title mb-1">{{ insight.title }}</div>
+                            <p class="section-subtitle mb-0">{{ insight.summary }}</p>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="unio-card">
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Comunicados',
+                            btn_label: 'Ver todos',
+                            btn_href: path('app_ti_novidades'),
+                            btn_ghost: true,
+                            btn_icon: 'fa-arrow-right'
+                        } %}
+                        <div class="ti-card-list">
+                        {% for item in novidades|slice(0, 3) %}
+                        <div class="ti-card-list-item">
+                            <div class="ti-idea-row-head">
+                                <span class="perm-label">{{ item.title }}</span>
+                                {% include 'components/ti/ti_metric_badge.html.twig' with {
+                                    label: item.badge,
+                                    variant: item.variant|default('info')
+                                } %}
+                            </div>
+                            <p class="section-subtitle mb-0">{{ item.summary }}</p>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {% block ti_section_content %}{% endblock %}
+    {% endif %}
+
+    <script type="application/json" id="ti-hub-payload">{{ {
+        pulse: pulse,
+        section: ti_section,
+        analytics_volume: analytics_volume|default([])
+    }|json_encode|raw }}</script>
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% if ti_can('create_chamado') and ti_section in ['overview', 'chamados', 'meus_chamados', 'catalogo'] %}
+{% include 'components/ti/chamado_create_offcanvas.html.twig' with {
+    open: app.request.query.getBoolean('open_novo'),
+    categories: categories|default([]),
+    priorities: priorities|default([]),
+    catalog: catalog|default([]),
+    sla_rules: sla_rules|default([]),
+    impact_levels: impact_levels|default([]),
+    locations: locations|default([]),
+    contact_channels: contact_channels|default([])
+} %}
+{% endif %}
+{% if ti_section == 'ativos' and ti_can('manage_ativos') %}
+{% include 'components/ti/infra_crud_offcanvas.html.twig' %}
+{% endif %}
+{% if ti_section == 'licencas' and ti_can('manage_licencas') %}
+{% include 'components/ti/infra_crud_offcanvas.html.twig' %}
+{% endif %}
+{% if ti_section == 'integracoes' and ti_can('manage_integracoes') %}
+{% include 'components/ti/infra_crud_offcanvas.html.twig' %}
+{% endif %}
+{% if ti_section == 'manutencoes' and ti_can('manage_manutencoes') %}
+{% include 'components/ti/infra_crud_offcanvas.html.twig' %}
+{% endif %}
+{% if ti_section == 'novidades' and ti_can('manage_novidades') %}
+{% include 'components/ti/novidade_offcanvas.html.twig' %}
+{% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/ti-hub.css') }}?v=42">
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% if ti_section in ['overview', 'analytics'] %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+{% endif %}
+<script src="{{ asset('js/ti-hub.js') }}?v=40" defer></script>
+{% if ti_section == 'overview' and app.request.query.getBoolean('open_novo') %}
+<script>
+(function () {
+    window.UnioOffcanvas && window.UnioOffcanvas.open('ti-chamado-novo');
+})();
+</script>
+{% endif %}
+{% if ti_section in ['ativos', 'licencas', 'integracoes', 'manutencoes', 'novidades', 'kb', 'problemas'] and app.request.query.get('open_edit') %}
+<script type="application/json" id="ti-infra-open-edit">{{ {
+    resource: app.request.query.get('resource'),
+    id: app.request.query.get('open_edit')
+}|json_encode|raw }}</script>
+{% endif %}
+{% if ti_section == 'kb' and app.request.query.getBoolean('open_novo') %}
+<script>
+(function () {
+    window.UnioOffcanvas && window.UnioOffcanvas.open('ti-kb-form');
+})();
+</script>
+{% endif %}
+{% if ti_section == 'problemas' and app.request.query.getBoolean('open_novo') %}
+<script>
+(function () {
+    window.UnioOffcanvas && window.UnioOffcanvas.open('ti-problema-form');
+})();
+</script>
+{% endif %}
+{% endblock %}

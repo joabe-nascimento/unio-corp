@@ -1,0 +1,80 @@
+{# Helia insight — painel IA na visualização do chamado #}
+{% set helia = helia|default({}) %}
+<section class="unio-card ti-helia-insight mb-4">
+    <div class="ti-helia-insight-head">
+        <div class="ti-helia-assist-avatar ti-helia-assist-avatar--lg" aria-hidden="true">
+            <i class="fas fa-brain"></i>
+        </div>
+        <div class="flex-fill">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Helia · Cortex Ops',
+                subtitle: 'Triagem inteligente · exclusivo Unio'
+            } %}
+        </div>
+        {% include 'components/ti/ti_helia_badge.html.twig' with { confidence: helia.confidence|default(0) } %}
+    </div>
+
+    <div class="ti-helia-insight-body">
+        <p class="section-subtitle">{{ helia.suggestion|default('Análise em andamento.') }}</p>
+
+        {% if helia.suggested_priority|default(null) %}
+        <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+            <span class="perm-label mb-0">Helia sugere:</span>
+            {% include 'components/ti/ti_priority_badge.html.twig' with { priority: helia.suggested_priority } %}
+            {% include 'components/ti/ti_tag_badge.html.twig' with { tag: helia.suggested_category|replace({'_': ' '})|capitalize } %}
+        </div>
+        {% endif %}
+
+        {% if helia.kb_articles|default([])|length > 0 %}
+        <div class="ti-helia-kb-block mt-3">
+            <span class="perm-label d-block mb-2">Artigos recomendados</span>
+            <ul class="ti-helia-kb-list">
+                {% for kb in helia.kb_articles %}
+                <li class="ti-helia-kb-item">
+                    <code>{{ kb.id }}</code>
+                    <span>{{ kb.title }}</span>
+                    {% include 'components/ti/ti_insight_badge.html.twig' with { kind: 'match', label: kb.match ~ '% match' } %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if helia.next_steps|default([])|length > 0 %}
+        <div class="mt-3">
+            <span class="perm-label d-block mb-2">Próximos passos sugeridos</span>
+            <ol class="ti-helia-steps mb-0">
+                {% for step in helia.next_steps %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+        {% endif %}
+
+        <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
+            {% include 'components/ti/ti_insight_badge.html.twig' with {
+                kind: 'sentiment',
+                label: helia.sentiment.label|default('Estável'),
+                tone: helia.sentiment.tone|default('success')
+            } %}
+            {% include 'components/ti/ti_insight_badge.html.twig' with {
+                kind: 'mode',
+                mode: ticket.helia_applied|default(false) ? 'auto' : 'review'
+            } %}
+            {% if product_grant('hub_ti', 'chamados') %}
+            {% include 'components/ti/chamado_helia_apply_form.html.twig' with { ticket: ticket } %}
+            {% if ticket.helia_reviewed|default(false) == false and ticket.helia_confidence|default(null) %}
+            <form method="post" action="{{ path('app_ti_chamado_helia_revisar', { id: ticket.id }) }}" class="m-0 d-inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_helia_revisar_' ~ ticket.id) }}">
+                <button type="submit" class="btn-unio-ghost btn-sm">
+                    <i class="fas fa-check mr-1"></i> Marcar revisado
+                </button>
+            </form>
+            {% endif %}
+            {% endif %}
+            <a href="{{ path('app_ti_cortex') }}" class="btn-unio-ghost btn-sm">
+                <i class="fas fa-arrow-right mr-1"></i> Cortex Ops
+            </a>
+        </div>
+    </div>
+</section>

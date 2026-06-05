@@ -1,0 +1,86 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+{% include 'components/ti/integration_health_grid.html.twig' with {
+    integrations: integrations,
+    title: 'Painel de integrações',
+    subtitle: 'APIs e webhooks entre núcleos Unio'
+} %}
+
+<section class="unio-card mt-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Conectores',
+        subtitle: integrations|length ~ ' cadastrados',
+        btn_label: ti_can('manage_integracoes') ? 'Nova integração' : null,
+        btn_icon: 'fa-plus',
+        btn_tag: 'button',
+        btn_attrs: ti_can('manage_integracoes') ? { 'data-unio-offcanvas-open': 'ti-integracao-form', 'data-ti-infra-open-novo': 'integracao' } : {}
+    } %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Conector</th><th>Status</th><th>Latência</th><th>Uptime</th><th>Eventos/24h</th>{% if ti_can('manage_integracoes') %}<th class="text-end" style="width:88px"></th>{% endif %}</tr></thead>
+            <tbody>
+            {% for int in integrations %}
+            {% set st_label = int.status == 'healthy' ? 'Saudável' : (int.status == 'degraded' ? 'Degradado' : 'Indisponível') %}
+            <tr>
+                <td><strong>{{ int.name }}</strong></td>
+                <td>{% include 'components/ti/ti_health_badge.html.twig' with { status: int.status, label: st_label } %}</td>
+                <td>{{ int.latency }}</td>
+                <td>{{ int.uptime }}%</td>
+                <td>{{ int.events }}</td>
+                {% if ti_can('manage_integracoes') %}
+                <td class="text-end">
+                    {% include 'components/ti/infra_row_actions.html.twig' with {
+                        resource: 'integracao',
+                        id: int.db_id,
+                        label: int.name,
+                        fields: {
+                            nome: int.nome,
+                            status: int.status,
+                            latencia: int.latencia,
+                            uptime: int.uptime,
+                            eventos_24h: int.eventos_24h
+                        }
+                    } %}
+                </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: ti_can('manage_integracoes') ? 6 : 5,
+                icon: 'fa-plug',
+                title: 'Nenhuma integração cadastrada.'
+            } %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="unio-card mt-4">
+    {% include 'components/section_header.html.twig' with { title: 'Log de eventos', subtitle: 'Últimas ocorrências (somente leitura)' } %}
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Hora</th><th>Conector</th><th>Nível</th><th>Mensagem</th></tr></thead>
+            <tbody>
+            {% for log in integration_logs %}
+            <tr>
+                <td>{{ log.time }}</td>
+                <td>{{ log.connector }}</td>
+                <td>{% include 'components/ti/ti_metric_badge.html.twig' with {
+                    label: log.level|upper,
+                    variant: log.level == 'error' ? 'danger' : (log.level == 'warn' ? 'warning' : 'info')
+                } %}</td>
+                <td>{{ log.message }}</td>
+            </tr>
+            {% else %}
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: 4,
+                icon: 'fa-list',
+                title: 'Nenhum evento registrado.'
+            } %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

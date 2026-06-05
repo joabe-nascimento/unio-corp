@@ -1,0 +1,110 @@
+{# Timeline profissional — histórico do chamado #}
+
+{% set events = events|default([]) %}
+
+<ul class="ti-timeline ti-timeline--pro mb-0" role="list">
+
+    {% for ev in events %}
+
+    {% set actor = ev.actor|default('') %}
+
+    {% set ev_text = ev.event|default('Evento') %}
+
+    {% set ev_lower = ev_text|lower %}
+
+    {% set is_helia = actor in ['Helia', 'Cortex'] or 'helia' in ev_lower or 'cortex' in ev_lower or 'triagem' in ev_lower %}
+
+    {% set tone = is_helia ? 'helia' : (
+
+        'status' in ev_lower ? 'status' : (
+
+        'atribu' in ev_lower ? 'assign' : (
+
+        'nota' in ev_lower ? 'note' : (
+
+        'prioridade' in ev_lower or 'escalad' in ev_lower ? 'priority' : (
+
+        'aberto' in ev_lower or 'registrado' in ev_lower ? 'open' : 'default'
+
+    )))) ) %}
+
+    {% set icon = tone == 'helia' ? 'fa-brain' : (
+
+        tone == 'status' ? 'fa-arrows-rotate' : (
+
+        tone == 'assign' ? 'fa-user-check' : (
+
+        tone == 'note' ? 'fa-note-sticky' : (
+
+        tone == 'priority' ? 'fa-arrow-up' : (
+
+        tone == 'open' ? 'fa-ticket' : 'fa-circle-dot'
+
+    ))))) %}
+
+    <li class="ti-timeline-item ti-timeline-item--{{ tone }}{% if loop.last %} ti-timeline-item--last{% endif %}"
+
+        role="listitem">
+
+        <div class="ti-timeline-track" aria-hidden="true">
+
+            <span class="ti-timeline-dot">
+
+                <i class="fas {{ icon }}" aria-hidden="true"></i>
+
+            </span>
+
+        </div>
+
+        <div class="ti-timeline-body">
+
+            <time class="ti-timeline-date" datetime="{{ ev.at|default('') }}">{{ ev.at|default('—') }}</time>
+
+            <p class="ti-timeline-event">{{ ev_text }}</p>
+
+            {% if actor %}
+
+            <p class="ti-timeline-meta">
+
+                <span class="ti-timeline-actor">
+
+                    {% if is_helia %}<i class="fas fa-microchip ti-timeline-actor-icon" aria-hidden="true"></i>{% endif %}
+
+                    {{ actor }}
+
+                </span>
+
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </li>
+
+    {% else %}
+
+    <li class="ti-timeline-item ti-timeline-item--empty ti-timeline-item--last" role="listitem">
+
+        <div class="ti-timeline-track" aria-hidden="true">
+
+            <span class="ti-timeline-dot ti-timeline-dot--muted">
+
+                <i class="fas fa-clock" aria-hidden="true"></i>
+
+            </span>
+
+        </div>
+
+        <div class="ti-timeline-body">
+
+            <p class="ti-timeline-meta mb-0">Nenhum evento registrado.</p>
+
+        </div>
+
+    </li>
+
+    {% endfor %}
+
+</ul>
+

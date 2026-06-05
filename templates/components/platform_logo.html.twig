@@ -1,0 +1,25 @@
+{# Logotipo da plataforma — configurável ou placeholder padrão #}
+{# variant: full | mark | logo | favicon #}
+{% set _variant = variant|default('full') %}
+{% set _src = platform_asset_src(_variant) %}
+{% set _href = public_asset_href(_src) %}
+{% set _custom = platform_asset_custom(_variant) %}
+{% set _classes = [
+    class|default(''),
+    _custom ? '' : 'platform-logo--placeholder',
+]|filter(v => v)|join(' ') %}
+{% if _custom %}
+<img src="{{ _href }}"
+     alt="{{ alt|default(platform_config.plataforma_nome|default('Plataforma')) }}"
+     {% if _classes %}class="{{ _classes }}"{% endif %}
+     {% if width is defined %}width="{{ width }}"{% endif %}
+     {% if height is defined %}height="{{ height }}"{% endif %}
+     {% if id is defined %}id="{{ id }}"{% endif %}
+     {% if crossorigin is defined %}crossorigin="{{ crossorigin }}"{% endif %}>
+{% else %}
+<span class="platform-logo-placeholder-wrap {{ _classes }}"{% if width is defined %} style="max-width:{{ width }}px"{% endif %}{% if id is defined %} id="{{ id }}"{% endif %} aria-label="{{ alt|default(platform_config.plataforma_nome|default('Plataforma')) }}">
+    {% include 'components/logo_placeholder_inline.html.twig' with {
+        type: _variant == 'mark' ? 'mark' : (_variant == 'favicon' ? 'favicon' : 'full')
+    } only %}
+</span>
+{% endif %}

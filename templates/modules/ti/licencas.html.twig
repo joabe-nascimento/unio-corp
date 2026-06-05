@@ -1,0 +1,90 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+
+{% if license_renewal_alerts|default([])|length > 0 %}
+<div class="mb-3">
+{% for alert in license_renewal_alerts %}
+<div class="alert alert-{{ alert.urgency }} d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap" role="alert">
+    <div class="d-flex align-items-center gap-2">
+        <i class="fas fa-{{ alert.urgency == 'danger' ? 'triangle-exclamation' : (alert.urgency == 'warning' ? 'clock' : 'info-circle') }}"></i>
+        <div>
+            <strong>{{ alert.name }}</strong> —
+            {% if alert.days_left == 0 %}vence hoje{% elseif alert.days_left == 1 %}vence amanhã{% else %}vence em {{ alert.days_left }} dias{% endif %}
+            <span class="ms-1 text-muted">({{ alert.renewal }})</span>
+            {% if alert.cost %}{% include 'components/status_badge.html.twig' with { label: alert.cost, variant: 'secondary', extra_class: 'ms-2' } %}{% endif %}
+        </div>
+    </div>
+    <a href="{{ path('app_ti', { open_novo: 1, prefill_title: 'Renovar licença: ' ~ alert.name, prefill_category: 'sistema', prefill_priority: alert.urgency == 'danger' ? 'P1' : 'P2' }) }}"
+       class="btn-unio btn-sm btn-unio-ghost text-nowrap">
+        <i class="fas fa-ticket me-1"></i>Criar chamado
+    </a>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: license_kpis.count|default(licenses|length), label: 'Contratos', sub: 'Software corporativo', icon: 'fa-key' },
+    { value: license_kpis.cost_label|default('R$ 0'), label: 'Custo mensal', sub: 'Estimativa consolidada', icon: 'fa-coins' },
+    { value: (license_kpis.avg_burn|default(0)) ~ '%', label: 'Burn médio', sub: 'Seats utilizados', icon: 'fa-fire', trend: 'up' },
+], mb: 'mb-3' } %}
+
+<div class="row">
+    <div class="col-lg-5 mb-4">
+        <section class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'License Burn', subtitle: 'Exclusivo Unio — consumo de seats' } %}
+            {% include 'components/ti/license_burn_gauge.html.twig' with { licenses: licenses } %}
+        </section>
+    </div>
+    <div class="col-lg-7 mb-4">
+        <section class="unio-card">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Contratos',
+                subtitle: licenses|length ~ ' licenças ativas',
+                btn_label: ti_can('manage_licencas') ? 'Nova licença' : null,
+                btn_icon: 'fa-plus',
+                btn_tag: 'button',
+                btn_attrs: ti_can('manage_licencas') ? { 'data-unio-offcanvas-open': 'ti-licenca-form', 'data-ti-infra-open-novo': 'licenca' } : {}
+            } %}
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Software</th><th>Seats</th><th>Custo</th><th>Renovação</th><th>Uso</th>{% if ti_can('manage_licencas') %}<th class="text-end" style="width:88px"></th>{% endif %}</tr></thead>
+                    <tbody>
+                    {% for lic in licenses %}
+                    <tr>
+                        <td><strong>{{ lic.name }}</strong></td>
+                        <td>{{ lic.used }}/{{ lic.seats }}</td>
+                        <td>{{ lic.cost }}</td>
+                        <td>{{ lic.renewal }}</td>
+                        <td>{% include 'components/progress_inline.html.twig' with { percent: lic.burn, variant: lic.burn >= 90 ? 'warning' : 'accent', show_label: true, compact: true } %}</td>
+                        {% if ti_can('manage_licencas') %}
+                        <td class="text-end">
+                            {% include 'components/ti/infra_row_actions.html.twig' with {
+                                resource: 'licenca',
+                                id: lic.db_id,
+                                label: lic.name,
+                                fields: {
+                                    nome: lic.nome,
+                                    seats: lic.seats,
+                                    used: lic.used,
+                                    custo_mensal: lic.custo_mensal,
+                                    renovacao_em: lic.renovacao_em
+                                }
+                            } %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% else %}
+                    {% include 'components/table_empty_row.html.twig' with {
+                        colspan: ti_can('manage_licencas') ? 6 : 5,
+                        icon: 'fa-key',
+                        title: 'Nenhuma licença cadastrada.'
+                    } %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

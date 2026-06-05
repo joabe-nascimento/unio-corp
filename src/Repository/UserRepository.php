@@ -34,6 +34,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    /** @return list<User> */
+    public function findActiveByEmpresa(Empresa $empresa): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.empresa = :empresa')
+            ->andWhere('u.ativo = true')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('u.nome', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countByEmpresa(Empresa $empresa): int
     {
         return (int) $this->createQueryBuilder('u')

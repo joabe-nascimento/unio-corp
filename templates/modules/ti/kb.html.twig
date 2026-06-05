@@ -1,0 +1,44 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Base de Conhecimento',
+        subtitle: kb_articles|length ~ ' artigos · alimenta triagem Helia',
+        btn_label: ti_can('manage_kb') ? 'Novo artigo' : null,
+        btn_icon: 'fa-plus',
+        btn_tag: 'button',
+        btn_attrs: ti_can('manage_kb') ? { 'data-unio-offcanvas-open': 'ti-kb-form', 'data-ti-infra-open-novo': 'kb' } : {}
+    } %}
+    <div class="ti-card-list">
+    {% for item in kb_articles %}
+    <div class="ti-card-list-item">
+        <div class="ti-idea-row-head">
+            <code>{{ item.id }}</code>
+            {% include 'components/ti/ti_metric_badge.html.twig' with { label: item.category|capitalize, variant: 'info' } %}
+            {% if ti_can('manage_kb') %}
+            {% include 'components/ti/infra_row_actions.html.twig' with {
+                resource: 'kb',
+                id: item.db_id,
+                label: item.title,
+                fields: {
+                    titulo: item.titulo,
+                    resumo: item.resumo,
+                    conteudo: item.content|default(''),
+                    categoria: item.categoria,
+                    tags: item.tags|join(', ')
+                }
+            } %}
+            {% endif %}
+        </div>
+        <p class="section-title mb-1">{{ item.title }}</p>
+        <p class="section-subtitle mb-0">{{ item.summary }}</p>
+    </div>
+    {% else %}
+    <p class="text-muted mb-0 py-3">Nenhum artigo cadastrado.</p>
+    {% endfor %}
+    </div>
+</section>
+{% if ti_can('manage_kb') %}
+{% include 'components/ti/kb_offcanvas.html.twig' %}
+{% endif %}
+{% endblock %}

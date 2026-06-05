@@ -1,0 +1,28 @@
+{# Alertas preditivos — risco 48h #}
+{% if predictive_alerts|default([])|length > 0 %}
+<section class="unio-card mb-4 integ-cortex-predict">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Alertas preditivos',
+        subtitle: 'Risco de falha nas próximas 48 horas'
+    } %}
+    <div class="integ-cortex-predict-list">
+        {% for alert in predictive_alerts %}
+        <div class="integ-cortex-predict-item integ-cortex-predict-item--{{ alert.variant }}">
+            <div class="integ-cortex-predict-prob">
+                <strong>{{ alert.probabilidade }}%</strong>
+                <span>risco</span>
+            </div>
+            <div>
+                <strong>{{ alert.titulo }}</strong>
+                <p class="section-subtitle mb-1">{{ alert.mensagem }}</p>
+                <small><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> {{ alert.acao }}</small>
+            </div>
+            {% include 'components/ti/ti_metric_badge.html.twig' with {
+                label: alert.variant == 'danger' ? 'Crítico' : 'Atenção',
+                variant: alert.variant
+            } %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

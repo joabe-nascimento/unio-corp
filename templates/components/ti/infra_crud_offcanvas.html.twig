@@ -1,0 +1,233 @@
+{# CRUD offcanvas — ativos, licenças, integrações, manutenções #}
+
+{# ── Ativo ── #}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'ti-ativo-form',
+    title: 'Novo ativo',
+    subtitle: 'Inventário de hardware e equipamentos',
+    icon: 'fa-laptop',
+    size: 'md',
+    open: app.request.query.get('open_novo') == 'ativo' or (app.request.query.get('resource') == 'ativo' and app.request.query.get('open_edit'))
+} %}
+    {% block offcanvas_drawer_attrs %}data-ti-infra-form="ativo"{% endblock %}
+    {% block offcanvas_body %}
+    <form method="post"
+          action="{{ path('app_ti_ativo_novo_submit') }}"
+          class="unio-form"
+          id="tiAtivoForm"
+          data-ti-infra-form-el="ativo"
+          data-ti-edit-url="{{ path('app_ti_ativo_editar_submit', { id: 0 }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('ti_ativo_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_ativo_codigo', name: 'codigo', label: 'Código / patrimônio',
+            placeholder: 'Ex.: NB-1204', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_ativo_tipo', name: 'tipo', label: 'Tipo',
+            placeholder: 'Notebook, Monitor, Servidor…', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_ativo_modelo', name: 'modelo', label: 'Modelo',
+            placeholder: 'Ex.: Dell Latitude 5540', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_ativo_responsavel', name: 'responsavel', label: 'Responsável',
+            placeholder: 'Colaborador ou área (opcional)'
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_ativo_status', name: 'status', label: 'Status', type: 'select', required: true,
+            options: [
+                { value: 'ativo', label: 'Em uso' },
+                { value: 'manutencao', label: 'Manutenção' },
+                { value: 'estoque', label: 'Estoque' },
+            ]
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_ativo_ciclo', name: 'ciclo_pct', label: 'Ciclo de vida (%)',
+            type: 'text', inputmode: 'numeric', placeholder: '0–100', value: '0'
+        } %}
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="tiAtivoForm" class="btn-unio" data-ti-infra-submit="ativo">
+            <i class="fas fa-check mr-1"></i> <span data-ti-infra-submit-label="ativo">Cadastrar</span>
+        </button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}
+
+{# ── Licença ── #}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'ti-licenca-form',
+    title: 'Nova licença',
+    subtitle: 'Contratos de software corporativo',
+    icon: 'fa-key',
+    size: 'md',
+    open: app.request.query.get('open_novo') == 'licenca' or (app.request.query.get('resource') == 'licenca' and app.request.query.get('open_edit'))
+} %}
+    {% block offcanvas_drawer_attrs %}data-ti-infra-form="licenca"{% endblock %}
+    {% block offcanvas_body %}
+    <form method="post"
+          action="{{ path('app_ti_licenca_novo_submit') }}"
+          class="unio-form"
+          id="tiLicencaForm"
+          data-ti-infra-form-el="licenca"
+          data-ti-edit-url="{{ path('app_ti_licenca_editar_submit', { id: 0 }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('ti_licenca_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_licenca_nome', name: 'nome', label: 'Software',
+            placeholder: 'Ex.: Microsoft 365 E3', required: true
+        } %}
+        <div class="row">
+            <div class="col-6">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'ti_licenca_seats', name: 'seats', label: 'Seats contratados',
+                    type: 'text', inputmode: 'numeric', value: '1', required: true
+                } %}
+            </div>
+            <div class="col-6">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'ti_licenca_used', name: 'used', label: 'Seats em uso',
+                    type: 'text', inputmode: 'numeric', value: '0', required: true
+                } %}
+            </div>
+        </div>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_licenca_custo', name: 'custo_mensal', label: 'Custo mensal (R$ mil)',
+            type: 'text', inputmode: 'decimal', placeholder: 'Ex.: 48.2', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_licenca_renovacao', name: 'renovacao_em', label: 'Renovação',
+            type: 'date', required: true
+        } %}
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="tiLicencaForm" class="btn-unio" data-ti-infra-submit="licenca">
+            <i class="fas fa-check mr-1"></i> <span data-ti-infra-submit-label="licenca">Cadastrar</span>
+        </button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}
+
+{# ── Integração ── #}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'ti-integracao-form',
+    title: 'Nova integração',
+    subtitle: 'Conectores, APIs e webhooks',
+    icon: 'fa-plug',
+    size: 'md',
+    open: app.request.query.get('open_novo') == 'integracao' or (app.request.query.get('resource') == 'integracao' and app.request.query.get('open_edit'))
+} %}
+    {% block offcanvas_drawer_attrs %}data-ti-infra-form="integracao"{% endblock %}
+    {% block offcanvas_body %}
+    <form method="post"
+          action="{{ path('app_ti_integracao_novo_submit') }}"
+          class="unio-form"
+          id="tiIntegracaoForm"
+          data-ti-infra-form-el="integracao"
+          data-ti-edit-url="{{ path('app_ti_integracao_editar_submit', { id: 0 }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('ti_integracao_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_integracao_nome', name: 'nome', label: 'Nome do conector',
+            placeholder: 'Ex.: Núcleo RH → AD', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_integracao_status', name: 'status', label: 'Status', type: 'select', required: true,
+            options: [
+                { value: 'healthy', label: 'Saudável' },
+                { value: 'degraded', label: 'Degradado' },
+                { value: 'down', label: 'Indisponível' },
+            ]
+        } %}
+        <div class="row">
+            <div class="col-6">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'ti_integracao_latencia', name: 'latencia', label: 'Latência',
+                    placeholder: '120ms', value: '—'
+                } %}
+            </div>
+            <div class="col-6">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'ti_integracao_uptime', name: 'uptime', label: 'Uptime (%)',
+                    type: 'text', inputmode: 'decimal', value: '99.9', required: true
+                } %}
+            </div>
+        </div>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_integracao_eventos', name: 'eventos_24h', label: 'Eventos / 24h',
+            type: 'text', inputmode: 'numeric', value: '0'
+        } %}
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="tiIntegracaoForm" class="btn-unio" data-ti-infra-submit="integracao">
+            <i class="fas fa-check mr-1"></i> <span data-ti-infra-submit-label="integracao">Cadastrar</span>
+        </button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}
+
+{# ── Manutenção ── #}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'ti-manutencao-form',
+    title: 'Nova manutenção',
+    subtitle: 'Janelas de change management',
+    icon: 'fa-screwdriver-wrench',
+    size: 'md',
+    open: app.request.query.get('open_novo') == 'manutencao' or (app.request.query.get('resource') == 'manutencao' and app.request.query.get('open_edit'))
+} %}
+    {% block offcanvas_drawer_attrs %}data-ti-infra-form="manutencao"{% endblock %}
+    {% block offcanvas_body %}
+    <form method="post"
+          action="{{ path('app_ti_manutencao_novo_submit') }}"
+          class="unio-form"
+          id="tiManutencaoForm"
+          data-ti-infra-form-el="manutencao"
+          data-ti-edit-url="{{ path('app_ti_manutencao_editar_submit', { id: 0 }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('ti_manutencao_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_manutencao_titulo', name: 'titulo', label: 'Título',
+            placeholder: 'Ex.: Patch firewall datacenter', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_manutencao_janela', name: 'janela', label: 'Janela',
+            placeholder: '31/05 02:00–04:00', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_manutencao_impacto', name: 'impacto', label: 'Impacto',
+            placeholder: 'VPN instável, APIs indisponíveis…', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_manutencao_owner', name: 'owner', label: 'Responsável',
+            placeholder: 'Infra, DevOps, Segurança…', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_manutencao_status', name: 'status', label: 'Status', type: 'select', required: true,
+            options: [
+                { value: 'scheduled', label: 'Agendada' },
+                { value: 'approved', label: 'Aprovada' },
+                { value: 'done', label: 'Concluída' },
+            ]
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_manutencao_servicos', name: 'servicos_afetados', label: 'Serviços afetados',
+            placeholder: 'ERP, VPN, E-mail (separados por vírgula)'
+        } %}
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="tiManutencaoForm" class="btn-unio" data-ti-infra-submit="manutencao">
+            <i class="fas fa-check mr-1"></i> <span data-ti-infra-submit-label="manutencao">Cadastrar</span>
+        </button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    </div>
+    {% endblock %}
+{% endembed %}

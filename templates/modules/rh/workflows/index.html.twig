@@ -6,20 +6,34 @@
 {% block hub_content %}
 {% if grant_at_least('product_rh', 'workflows', 'GESTOR_EQUIPE') %}
 <div class="unio-card p-4 mb-3">
-    <h4 class="h6 mb-3">Novo template</h4>
+    {% include 'components/section_header.html.twig' with { title: 'Novo template' } %}
     <form method="post" action="{{ path('app_rh_workflows') }}">
         <input type="hidden" name="_token" value="{{ csrf_token('rh_workflow_form') }}">
         <div class="row g-2 mb-2">
-            <div class="col-md-3"><input type="text" name="codigo" class="form-control" placeholder="Código" required></div>
-            <div class="col-md-4"><input type="text" name="nome" class="form-control" placeholder="Nome" required></div>
             <div class="col-md-3">
-                <select name="tipo_processo" class="form-select">
-                    <option value="onboarding">Onboarding</option>
-                    <option value="offboarding">Offboarding</option>
-                </select>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'workflow-codigo', name: 'codigo', label: 'Código', placeholder: 'Código', required: true
+                } %}
+            </div>
+            <div class="col-md-4">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'workflow-nome', name: 'nome', label: 'Nome', placeholder: 'Nome', required: true
+                } %}
+            </div>
+            <div class="col-md-3">
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'workflow-tipo', name: 'tipo_processo', label: 'Tipo', type: 'select', value: 'onboarding',
+                    options: [
+                        { value: 'onboarding', label: 'Onboarding' },
+                        { value: 'offboarding', label: 'Offboarding' },
+                    ]
+                } %}
             </div>
         </div>
-        <textarea name="checklist" class="form-control mb-2" rows="4" placeholder="Itens do checklist (um por linha)" required></textarea>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'workflow-checklist', name: 'checklist', label: 'Checklist',
+            type: 'textarea', rows: 4, placeholder: 'Itens do checklist (um por linha)', required: true
+        } %}
         <button type="submit" class="btn-unio btn-sm">Salvar template</button>
     </form>
 </div>
@@ -27,7 +41,11 @@
 
 <div class="unio-card p-4">
     {% if templates is empty %}
-        <p class="text-muted mb-0">Nenhum template configurado.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-diagram-project',
+            title: 'Nenhum template configurado.',
+            compact: true
+        } %}
     {% else %}
     <ul class="list-unstyled mb-0">
         {% for t in templates %}

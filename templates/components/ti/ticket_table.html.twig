@@ -1,0 +1,143 @@
+{# Tabela de chamados — Service Desk #}
+{% set tickets = tickets|default([]) %}
+{% set status_labels = status_labels|default({}) %}
+{% set category_map = {} %}
+{% for c in categories|default([]) %}
+    {% set category_map = category_map|merge({ (c.id): c.label }) %}
+{% endfor %}
+
+<div class="ti-ticket-table-wrap" data-ti-ticket-table data-ti-ticket-count="{{ tickets|length }}">
+    <table class="table table-unio table-hover mb-0 ti-ticket-table">
+        <colgroup>
+            <col class="ti-ticket-col-chamado">
+            <col class="ti-ticket-col-status">
+            <col class="ti-ticket-col-cat">
+            <col class="ti-ticket-col-requester">
+            <col class="ti-ticket-col-assign">
+            <col class="ti-ticket-col-sla">
+            <col class="ti-ticket-col-helia">
+            <col class="ti-ticket-col-date">
+            <col class="ti-ticket-col-action">
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="ti-ticket-col-chamado">Chamado</th>
+                <th class="ti-ticket-col-status">Status</th>
+                <th class="ti-ticket-col-cat">Categoria</th>
+                <th class="ti-ticket-col-requester">Solicitante</th>
+                <th class="ti-ticket-col-assign">Responsável</th>
+                <th class="ti-ticket-col-sla">SLA</th>
+                <th class="ti-ticket-col-helia">Helia</th>
+                <th class="ti-ticket-col-date">Aberto</th>
+                <th class="ti-ticket-col-action">Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+            {% set st_key = ticket.status|default('novo') %}
+            {% set sla_warn = (ticket.sla_pct|default(100)) < 50 %}
+            {% set cat_label = category_map[ticket.category|default('')] ?? ticket.category|default('—')|capitalize %}
+            {% set has_helia = ticket.helia_insight|default(false) %}
+            {% set opened_parts = ticket.opened_at|default('')|split(' ') %}
+            {% set _summary = ticket.summary|default('') %}
+            {% set _sum_half = (_summary|length / 2)|round(0, 'ceil') %}
+            {% set summary_short = _summary != '' ? _summary|slice(0, _sum_half) ~ (_summary|length > _sum_half ? '…' : '') : '' %}
+            <tr class="ti-ticket-row"
+                data-ti-ticket-row
+                data-ti-search="{{ (ticket.id ~ ' ' ~ ticket.title ~ ' ' ~ ticket.summary ~ ' ' ~ ticket.requester ~ ' ' ~ ticket.assignee)|lower }}"
+                data-ti-status="{{ st_key }}"
+                data-ti-priority="{{ ticket.priority|default('P4') }}"
+                data-ti-category="{{ ticket.category|default('') }}">
+                <td class="ti-ticket-col-chamado">
+                    <div class="ti-ticket-cell">
+                        <div class="ti-ticket-cell-head">
+                            {% include 'components/ti/ti_priority_badge.html.twig' with { priority: ticket.priority|default('P4') } %}
+                            <code class="ti-ticket-code">{{ ticket.id }}</code>
+                        </div>
+                        <div class="ti-ticket-cell-text" title="{{ ticket.title ~ ' — ' ~ ticket.summary }}">
+                            <a href="{{ path('app_ti_chamado_show', { id: ticket.id }) }}"
+                               class="ti-ticket-title-link">{{ ticket.title }}</a>
+                            {% if summary_short %}
+                            <p class="ti-ticket-summary">{{ summary_short }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </td>
+                <td class="ti-ticket-col-status">
+                    {% include 'components/ti/ti_ticket_status_badge.html.twig' with {
+                        status: st_key,
+                        status_labels: status_labels
+                    } %}
+                </td>
+                <td class="ti-ticket-col-cat">
+                    <div class="ti-ticket-stack">
+                        <span class="ti-ticket-stack-value ti-ticket-stack-value--one">{{ cat_label }}</span>
+                        <span class="ti-ticket-stack-sub ti-ticket-stack-sub--truncate" title="{{ ticket.channel|default('Portal') }}">{{ ticket.channel|default('Portal') }}</span>
+                    </div>
+                </td>
+                <td class="ti-ticket-col-requester">
+                    <div class="ti-ticket-person">
+                        <i class="fas fa-user ti-ticket-person-icon" aria-hidden="true"></i>
+                        <span class="ti-ticket-person-name">{{ ticket.requester|default('—') }}</span>
+                    </div>
+                </td>
+                <td class="ti-ticket-col-assign">
+                    {% include 'components/ti/ticket_assign_inline.html.twig' with {
+                        ticket: ticket,
+                        technicians: technicians|default([]),
+                        can_assign: can_assign|default(false)
+                    } %}
+                </td>
+                <td class="ti-ticket-col-sla">
+                    {% include 'components/progress_inline.html.twig' with {
+                        percent: ticket.sla_pct|default(100),
+                        variant: sla_warn ? 'danger' : (ticket.sla_pct|default(100) < 75 ? 'warning' : 'accent'),
+                        show_label: true,
+                        compact: false,
+                        min_width: 48
+                    } %}
+                </td>
+                <td class="ti-ticket-col-helia">
+                    {% if has_helia %}
+                    <span class="ti-helia-table-badge" title="Triagem Helia disponível">
+                        <i class="fas fa-brain" aria-hidden="true"></i>
+                    </span>
+                    {% else %}
+                    <span class="ti-ticket-meta ti-ticket-meta--muted">—</span>
+                    {% endif %}
+                </td>
+                <td class="ti-ticket-col-date">
+                    <div class="ti-ticket-stack">
+                        <time class="ti-ticket-date" datetime="{{ ticket.opened_at|default('') }}" title="{{ ticket.opened_at|default('') }}">
+                            {{- opened_parts[0]|default('') -}}
+                        </time>
+                        {% if opened_parts[1] is defined %}
+                        <span class="ti-ticket-stack-sub ti-ticket-date-time">{{ opened_parts[1] }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="ti-ticket-col-action">
+                    <div class="ti-ticket-action-cell">
+                    {% include 'components/ti/ticket_row_actions.html.twig' with {
+                        id: ticket.id,
+                        title: ticket.title|default(ticket.id)
+                    } %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="p-0 border-0">
+                    {% include 'components/empty_state.html.twig' with {
+                        icon: 'fa-headset',
+                        title: 'Nenhum chamado',
+                        text: 'Abra o primeiro ticket pelo botão acima.',
+                        btn_label: 'Abrir chamado',
+                        btn_opens: 'ti-chamado-novo'
+                    } %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

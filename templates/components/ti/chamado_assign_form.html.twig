@@ -1,0 +1,25 @@
+{# Formulário — atribuir técnico #}
+{% set technicians = technicians|default([]) %}
+{% set assignee_id = ticket.assignee_id|default(null) %}
+<form method="post"
+      action="{{ path('app_ti_chamado_atribuir', { id: ticket.id }) }}"
+      class="ti-chamado-quick-form unio-form"
+      data-ti-ticket-assign>
+    <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_atribuir_' ~ ticket.id) }}">
+    <label class="unio-form-label" for="tiChamadoTechnician">Atribuir técnico</label>
+    {% if technicians is empty %}
+    <p class="section-subtitle mb-0">Nenhum usuário ativo na empresa.</p>
+    {% else %}
+    <div class="ti-chamado-status-row">
+        <select id="tiChamadoTechnician" name="technician_id" class="unio-form-control" required>
+            <option value="" disabled{% if not assignee_id %} selected{% endif %}>Selecione…</option>
+            {% for tech in technicians %}
+            <option value="{{ tech.id }}"{% if assignee_id == tech.id %} selected{% endif %}>{{ tech.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-unio btn-sm">
+            <i class="fas fa-user-plus mr-1" aria-hidden="true"></i> Atribuir
+        </button>
+    </div>
+    {% endif %}
+</form>

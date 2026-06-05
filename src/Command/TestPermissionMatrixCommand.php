@@ -54,7 +54,7 @@ class TestPermissionMatrixCommand extends Command
                 'Painel Permissões (global)' => $this->permissions->canManagePermissions($user),
                 'Painel Pessoas (escopo)' => $this->permissions->canManagePermissions($user, 'product_pessoas'),
                 'Matriz configurada' => $this->grantRepo->userHasConfiguredMatrix($user),
-                'Nav Hub Operações' => $this->navigation->showHubOperacoes($user),
+                'Nav Núcleo de Operações' => $this->navigation->showHubOperacoes($user),
                 'Nav Pessoas' => $this->navigation->showModuloPessoas($user),
                 'Ver membros' => $this->grants->canViewProductForUi($user, 'product_pessoas', 'membros'),
                 'Criar membro (>= GESTOR_EQUIPE)' => $this->grants->grantAtLeast($user, 'product_pessoas', 'membros', 'GESTOR_EQUIPE'),

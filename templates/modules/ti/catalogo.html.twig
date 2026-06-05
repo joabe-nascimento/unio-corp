@@ -1,0 +1,225 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+
+{# Banner for static catalog #}
+{% set has_custom = catalog|filter(i => i.is_custom|default(false))|length > 0 %}
+{% if not has_custom %}
+<div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    <div>
+        <strong>Configure seu catálogo</strong> — você está usando o catálogo padrão.
+        {% if product_grant('hub_ti', 'gestao') %}
+        Adicione itens personalizados usando o botão abaixo.
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Catálogo de serviços',
+        subtitle: 'Solicitações padronizadas com SLA definido'
+    } %}
+
+    {% if product_grant('hub_ti', 'gestao') %}
+    <div class="mb-3">
+        <button type="button"
+                class="btn-unio btn-sm btn-unio-primary"
+                data-bs-toggle="collapse"
+                data-bs-target="#ti-catalogo-novo-form"
+                aria-expanded="false">
+            <i class="fas fa-plus mr-1"></i> Novo item
+        </button>
+    </div>
+
+    {# New item form (collapsed) #}
+    <div class="collapse mb-4" id="ti-catalogo-novo-form">
+        <div class="unio-card border-dashed p-3">
+            <form method="POST" action="{{ path('app_ti_catalogo_novo') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('ti_catalogo_form') }}">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-titulo',
+                            name: 'titulo',
+                            label: 'Título',
+                            required: true
+                        } %}
+                    </div>
+                    <div class="col-md-4">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-categoria',
+                            name: 'categoria',
+                            label: 'Categoria',
+                            type: 'select',
+                            value: 'sistema',
+                            options: [
+                                { value: 'sistema', label: 'Sistema' },
+                                { value: 'acesso', label: 'Acesso' },
+                                { value: 'hardware', label: 'Hardware' },
+                                { value: 'rede', label: 'Rede' },
+                                { value: 'software', label: 'Software' },
+                            ]
+                        } %}
+                    </div>
+                    <div class="col-md-2">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-prioridade',
+                            name: 'prioridade_padrao',
+                            label: 'Prioridade padrão',
+                            type: 'select',
+                            value: 'P3',
+                            options: [
+                                { value: 'P1', label: 'P1' },
+                                { value: 'P2', label: 'P2' },
+                                { value: 'P3', label: 'P3' },
+                                { value: 'P4', label: 'P4' },
+                            ]
+                        } %}
+                    </div>
+                    <div class="col-md-2">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-sla',
+                            name: 'sla_horas',
+                            label: 'SLA (horas)',
+                            type: 'number',
+                            value: '8',
+                            attrs: { min: '1' }
+                        } %}
+                    </div>
+                    <div class="col-12">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-descricao',
+                            name: 'descricao',
+                            label: 'Descrição',
+                            type: 'textarea',
+                            rows: 2
+                        } %}
+                    </div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="submit" class="btn-unio btn-sm btn-unio-primary">Salvar</button>
+                    <button type="button"
+                            class="btn-unio btn-sm btn-unio-ghost"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#ti-catalogo-novo-form">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+    {% for item in catalog %}
+    <div class="col-md-6 col-xl-4 mb-3 d-flex flex-column">
+        <a href="{{ path('app_ti_chamados', { open_novo: 1, catalog: item.item_id|default(item.id) }) }}"
+           class="ti-catalog-card flex-fill">
+            <div class="ti-catalog-icon"><i class="fas {{ item.icon|default('fa-cog') }}" aria-hidden="true"></i></div>
+            <div class="section-title mb-2">{{ item.titulo|default(item.title) }}</div>
+            <p class="section-subtitle flex-fill">{{ item.descricao|default(item.desc) }}</p>
+            <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                {% include 'components/ti/ti_metric_badge.html.twig' with {
+                    label: 'SLA ' ~ (item.sla_horas is defined ? item.sla_horas ~ ' h' : item.sla),
+                    variant: 'info'
+                } %}
+                {% if item.prioridade_padrao|default(item.priority) %}
+                {% include 'components/ti/ti_priority_badge.html.twig' with {
+                    priority: item.prioridade_padrao|default(item.priority)
+                } %}
+                {% endif %}
+            </div>
+        </a>
+
+        {% if product_grant('hub_ti', 'gestao') and item.is_custom|default(false) %}
+        <div class="d-flex gap-1 mt-1">
+            <button type="button"
+                    class="btn-unio btn-xs btn-unio-ghost flex-fill ti-catalogo-edit-btn"
+                    data-item-id="{{ item.id }}"
+                    data-item-json="{{ item|json_encode|e('html_attr') }}"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#ti-catalogo-edit-{{ item.id }}">
+                <i class="fas fa-pencil" aria-hidden="true"></i> Editar
+            </button>
+            <form method="POST"
+                  action="{{ path('app_ti_catalogo_excluir', { id: item.id }) }}"
+                  onsubmit="return confirm('Excluir este item?')">
+                <input type="hidden" name="_token" value="{{ csrf_token('ti_catalogo_delete_' ~ item.id) }}">
+                <button type="submit" class="btn-unio btn-xs btn-unio-danger">
+                    <i class="fas fa-trash" aria-hidden="true"></i>
+                </button>
+            </form>
+        </div>
+        {# Inline edit form #}
+        <div class="collapse" id="ti-catalogo-edit-{{ item.id }}">
+            <form method="POST"
+                  action="{{ path('app_ti_catalogo_editar', { id: item.id }) }}"
+                  class="unio-card p-3 mt-1 border-dashed">
+                <input type="hidden" name="_token" value="{{ csrf_token('ti_catalogo_form') }}">
+                <div class="row g-2">
+                    <div class="col-12">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-edit-titulo-' ~ item.id,
+                            name: 'titulo',
+                            label: 'Título',
+                            value: item.titulo|default(item.title),
+                            required: true
+                        } %}
+                    </div>
+                    <div class="col-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-edit-categoria-' ~ item.id,
+                            name: 'categoria',
+                            label: 'Categoria',
+                            type: 'select',
+                            value: item.categoria|default(item.category),
+                            options: ['sistema','acesso','hardware','rede','software']|map(cat => {
+                                value: cat, label: cat|capitalize
+                            })
+                        } %}
+                    </div>
+                    <div class="col-3">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-edit-prioridade-' ~ item.id,
+                            name: 'prioridade_padrao',
+                            label: 'Prioridade',
+                            type: 'select',
+                            value: item.prioridade_padrao|default(item.priority),
+                            options: ['P1','P2','P3','P4']|map(p => { value: p, label: p })
+                        } %}
+                    </div>
+                    <div class="col-3">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-edit-sla-' ~ item.id,
+                            name: 'sla_horas',
+                            label: 'SLA (h)',
+                            type: 'number',
+                            value: item.sla_horas|default(8) ~ '',
+                            attrs: { min: '1' }
+                        } %}
+                    </div>
+                    <div class="col-12">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'catalogo-edit-descricao-' ~ item.id,
+                            name: 'descricao',
+                            label: 'Descrição',
+                            type: 'textarea',
+                            rows: 2,
+                            value: item.descricao|default(item.desc)
+                        } %}
+                    </div>
+                </div>
+                <div class="mt-2 d-flex gap-2">
+                    <button type="submit" class="btn-unio btn-xs btn-unio-primary">Salvar</button>
+                    <button type="button"
+                            class="btn-unio btn-xs btn-unio-ghost"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#ti-catalogo-edit-{{ item.id }}">Cancelar</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    </div>
+</section>
+{% endblock %}

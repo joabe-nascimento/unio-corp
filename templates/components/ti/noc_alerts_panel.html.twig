@@ -1,0 +1,65 @@
+{# Alertas operacionais — NOC Center #}
+{% set alerts = noc_alerts|default([]) %}
+{% if alerts|length > 0 %}
+<section class="unio-card mb-4 ti-noc-alerts">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Alertas operacionais',
+        subtitle: alerts|length ~ ' ativo' ~ (alerts|length != 1 ? 's' : '') ~ ' · Helia · SLA · responsáveis',
+        btn_label: product_grant('hub_ti', 'cortex') ? 'Cortex Ops' : '',
+        btn_href: product_grant('hub_ti', 'cortex') ? path('app_ti_cortex') : '',
+        btn_ghost: true,
+        btn_icon: 'fa-arrow-right'
+    } %}
+    <div class="ti-noc-alerts-feed" role="list">
+        {% for alert in alerts %}
+        {% set tone = alert.tone|default('neutral') %}
+        {% set badge_variant = tone == 'critical' ? 'danger' : (tone == 'warn' ? 'warning' : (tone == 'info' ? 'info' : 'secondary')) %}
+        {% set sla_pct = alert.sla_pct|default(null) %}
+        {% set progress_variant = sla_pct is not null and sla_pct <= 25 ? 'danger' : (sla_pct is not null and sla_pct <= 50 ? 'warning' : 'accent') %}
+        <a href="{{ path('app_ti_chamado_show', { id: alert.ticket_id }) }}"
+           class="ti-noc-alert-row ti-noc-alert-row--{{ tone }}"
+           role="listitem">
+            <span class="ti-noc-alert-icon" aria-hidden="true">
+                <i class="fas {{ alert.icon|default('fa-circle-info') }}"></i>
+            </span>
+            <span class="ti-noc-alert-body">
+                <span class="ti-noc-alert-head">
+                    <code class="ti-ticket-code">{{ alert.ticket_id }}</code>
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: alert.label|default('Alerta'),
+                        variant: badge_variant
+                    } %}
+                    {% if alert.priority|default(null) %}
+                    {% include 'components/ti/ti_priority_badge.html.twig' with { priority: alert.priority } %}
+                    {% endif %}
+                </span>
+                {% if alert.detail|default('') %}
+                <span class="ti-noc-alert-detail">{{ alert.detail }}</span>
+                {% endif %}
+            </span>
+            {% if sla_pct is not null %}
+            <span class="ti-noc-alert-sla">
+                {% include 'components/progress_inline.html.twig' with {
+                    percent: sla_pct,
+                    variant: progress_variant,
+                    show_label: true,
+                    compact: true,
+                    min_width: 56
+                } %}
+            </span>
+            {% elseif alert.helia_confidence|default(null) %}
+            <span class="ti-noc-alert-meta">
+                {% include 'components/ti/ti_helia_badge.html.twig' with {
+                    confidence: alert.helia_confidence,
+                    style: 'helia'
+                } %}
+            </span>
+            {% endif %}
+            <span class="ti-noc-alert-chevron" aria-hidden="true">
+                <i class="fas fa-chevron-right"></i>
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

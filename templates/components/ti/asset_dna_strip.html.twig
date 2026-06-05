@@ -1,0 +1,25 @@
+{# Asset DNA lifecycle strip #}
+{% set stages = asset_dna_stages|default([]) %}
+{% if stages is empty %}
+    {% set stages = [
+        { label: 'Aquisição', pct: 0, color: '#64748B' },
+        { label: 'Deploy', pct: 0, color: '#06B6D4' },
+        { label: 'Operação', pct: 0, color: '#10B981' },
+        { label: 'Manutenção', pct: 0, color: '#F59E0B' },
+        { label: 'Baixa', pct: 0, color: '#EF4444' },
+    ] %}
+{% endif %}
+<div class="ti-asset-dna">
+    <div class="ti-asset-dna-bar" role="img" aria-label="Distribuição do ciclo de vida">
+        {% for stage in stages %}
+        {% if stage.pct > 0 %}
+        <span class="ti-asset-dna-seg" style="flex: {{ stage.pct }}; background: {{ stage.color }}" title="{{ stage.label }} {{ stage.pct }}%"></span>
+        {% endif %}
+        {% endfor %}
+    </div>
+    <ul class="ti-asset-dna-legend">
+        {% for stage in stages %}
+        <li><span class="ti-asset-dna-dot" style="background:{{ stage.color }}"></span>{{ stage.label }} <strong>{{ stage.pct }}%</strong></li>
+        {% endfor %}
+    </ul>
+</div>

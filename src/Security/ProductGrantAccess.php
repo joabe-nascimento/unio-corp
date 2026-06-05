@@ -21,6 +21,15 @@ final class ProductGrantAccess
         'app_pessoas' => ['product_pessoas'],
         'app_engenharia' => ['hub_obras', 'product_engenharia', 'hub_operacoes'],
         'app_publicidade' => ['hub_publicidade', 'product_publicidade'],
+        'app_ti' => ['hub_ti'],
+        'app_integracoes' => ['hub_integracoes'],
+    ];
+
+    /** Rotas TI com regra própria (além do produto primário no mapa). */
+    private const TI_ROUTE_FALLBACK = [
+        'app_ti_chamado_show' => 'view_chamado',
+        'app_ti_chamado_novo_submit' => 'create_chamado',
+        'app_ti_helia_analyze' => 'create_chamado',
     ];
 
     /** Rotas de criação/edição — exigem perfil mínimo no grant do produto. */
@@ -34,6 +43,55 @@ final class ProductGrantAccess
         'app_rh_demissoes_nova' => ['scope' => 'product_rh', 'product' => 'admissoes', 'min' => 'GESTOR_EQUIPE'],
         'app_rh_ferias_nova' => ['scope' => 'product_rh', 'product' => 'ferias', 'min' => 'GESTOR_EQUIPE'],
         'app_rh_folha_gerar' => ['scope' => 'product_rh', 'product' => 'folha', 'min' => 'GESTOR'],
+        // Núcleo TI — chamados
+        'app_ti_chamado_novo_submit' => ['scope' => 'hub_ti', 'product' => 'meus_chamados', 'min' => 'MEMBRO'],
+        'app_ti_chamado_status' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_atribuir' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_nota' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_prioridade' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_helia_aplicar' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_helia_revisar' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_helia_feedback' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_sla_pausa' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR'],
+        'app_ti_chamado_problema' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR'],
+        'app_ti_chamado_excluir' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_helia_analyze' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        // Núcleo TI — KB, problemas, infra, novidades, analytics
+        'app_ti_kb_novo_submit' => ['scope' => 'hub_ti', 'product' => 'kb', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_kb_editar_submit' => ['scope' => 'hub_ti', 'product' => 'kb', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_kb_excluir' => ['scope' => 'hub_ti', 'product' => 'kb', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_problema_novo_submit' => ['scope' => 'hub_ti', 'product' => 'problemas', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_problema_editar_submit' => ['scope' => 'hub_ti', 'product' => 'problemas', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_problema_excluir' => ['scope' => 'hub_ti', 'product' => 'problemas', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_ativo_novo_submit' => ['scope' => 'hub_ti', 'product' => 'ativos', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_ativo_editar_submit' => ['scope' => 'hub_ti', 'product' => 'ativos', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_ativo_excluir' => ['scope' => 'hub_ti', 'product' => 'ativos', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_licenca_novo_submit' => ['scope' => 'hub_ti', 'product' => 'licencas', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_licenca_editar_submit' => ['scope' => 'hub_ti', 'product' => 'licencas', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_licenca_excluir' => ['scope' => 'hub_ti', 'product' => 'licencas', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_integracao_novo_submit' => ['scope' => 'hub_ti', 'product' => 'integracoes', 'min' => 'GESTOR'],
+        'app_ti_integracao_editar_submit' => ['scope' => 'hub_ti', 'product' => 'integracoes', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_integracao_excluir' => ['scope' => 'hub_ti', 'product' => 'integracoes', 'min' => 'GESTOR'],
+        'app_ti_manutencao_novo_submit' => ['scope' => 'hub_ti', 'product' => 'manutencoes', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_manutencao_editar_submit' => ['scope' => 'hub_ti', 'product' => 'manutencoes', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_manutencao_excluir' => ['scope' => 'hub_ti', 'product' => 'manutencoes', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_novidade_novo_submit' => ['scope' => 'hub_ti', 'product' => 'novidades', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_novidade_editar_submit' => ['scope' => 'hub_ti', 'product' => 'novidades', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_novidade_excluir' => ['scope' => 'hub_ti', 'product' => 'novidades', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_analytics_export' => ['scope' => 'hub_ti', 'product' => 'analytics', 'min' => 'GESTOR_EQUIPE'],
+        // Núcleo Integrações
+        'app_integracoes_catalogo_ativar' => ['scope' => 'hub_integracoes', 'product' => 'conectores', 'min' => 'GESTOR_EQUIPE'],
+        'app_integracoes_conector_novo_submit' => ['scope' => 'hub_integracoes', 'product' => 'conectores', 'min' => 'GESTOR_EQUIPE'],
+        'app_integracoes_conector_editar_submit' => ['scope' => 'hub_integracoes', 'product' => 'conectores', 'min' => 'GESTOR_EQUIPE'],
+        'app_integracoes_conector_excluir' => ['scope' => 'hub_integracoes', 'product' => 'conectores', 'min' => 'GESTOR'],
+        'app_integracoes_webhook_novo_submit' => ['scope' => 'hub_integracoes', 'product' => 'webhooks', 'min' => 'GESTOR_EQUIPE'],
+        'app_integracoes_webhook_editar_submit' => ['scope' => 'hub_integracoes', 'product' => 'webhooks', 'min' => 'GESTOR_EQUIPE'],
+        'app_integracoes_webhook_excluir' => ['scope' => 'hub_integracoes', 'product' => 'webhooks', 'min' => 'GESTOR'],
+        'app_integracoes_api_nova_submit' => ['scope' => 'hub_integracoes', 'product' => 'api_keys', 'min' => 'GESTOR'],
+        'app_integracoes_api_revogar' => ['scope' => 'hub_integracoes', 'product' => 'api_keys', 'min' => 'GESTOR'],
+        'app_integracoes_mapeamento_novo_submit' => ['scope' => 'hub_integracoes', 'product' => 'mapeamentos', 'min' => 'GESTOR_EQUIPE'],
+        'app_integracoes_mapeamento_editar_submit' => ['scope' => 'hub_integracoes', 'product' => 'mapeamentos', 'min' => 'GESTOR_EQUIPE'],
+        'app_integracoes_mapeamento_excluir' => ['scope' => 'hub_integracoes', 'product' => 'mapeamentos', 'min' => 'GESTOR_EQUIPE'],
         // Engenharia / Publicidade — idem
     ];
 
@@ -134,6 +192,10 @@ final class ProductGrantAccess
             return true;
         }
 
+        if ($routeName === 'app_ti_chamado_novo_submit' || $routeName === 'app_ti_helia_analyze') {
+            return $this->tiCanCreateChamado($user);
+        }
+
         if (!isset(self::MANAGE_ROUTES[$routeName])) {
             return true;
         }
@@ -210,6 +272,10 @@ final class ProductGrantAccess
         $primary = ProductGrantRouteMap::MAP[$routeName];
         if ($this->canView($user, $primary['scope'], $primary['product'])) {
             return true;
+        }
+
+        if (isset(self::TI_ROUTE_FALLBACK[$routeName])) {
+            return $this->tiRouteAllowed($user, self::TI_ROUTE_FALLBACK[$routeName]);
         }
 
         foreach ($moduleScopes ?? [] as $scope) {
@@ -342,5 +408,30 @@ final class ProductGrantAccess
         }
 
         return $bestId;
+    }
+
+    private function tiRouteAllowed(User $user, string $action): bool
+    {
+        if ($user->isTenant()) {
+            return true;
+        }
+
+        return match ($action) {
+            'view_chamado' => $this->grantAtLeast($user, TiGrantPolicy::SCOPE, 'chamados', TiGrantPolicy::OPERATE_CHAMADOS)
+                || $this->grantAtLeast($user, TiGrantPolicy::SCOPE, 'meus_chamados', TiGrantPolicy::PORTAL_CHAMADO),
+            'create_chamado' => $this->tiCanCreateChamado($user),
+            default => false,
+        };
+    }
+
+    private function tiCanCreateChamado(User $user): bool
+    {
+        if ($user->isTenant()) {
+            return true;
+        }
+
+        return $this->grantAtLeast($user, TiGrantPolicy::SCOPE, 'meus_chamados', TiGrantPolicy::PORTAL_CHAMADO)
+            || $this->grantAtLeast($user, TiGrantPolicy::SCOPE, 'catalogo', TiGrantPolicy::PORTAL_CHAMADO)
+            || $this->grantAtLeast($user, TiGrantPolicy::SCOPE, 'chamados', TiGrantPolicy::OPERATE_CHAMADOS);
     }
 }

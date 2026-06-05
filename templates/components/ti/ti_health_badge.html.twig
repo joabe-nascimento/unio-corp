@@ -1,0 +1,32 @@
+{#
+  ti_health_badge — status operacional (NOC, integrações, ativos, manutenções)
+
+  Props:
+    status       (string)  chave conhecida OU
+    label        (string)  texto customizado
+    variant      (string)  info | success | warning | danger | secondary
+    attrs        (object)
+#}
+{% set maps = {
+    operational: { label: 'Operacional', variant: 'success' },
+    healthy: { label: 'Saudável', variant: 'success' },
+    ativo: { label: 'Em uso', variant: 'success' },
+    done: { label: 'Concluída', variant: 'success' },
+    degraded: { label: 'Degradado', variant: 'warning' },
+    manutencao: { label: 'Manutenção', variant: 'warning' },
+    scheduled: { label: 'Agendada', variant: 'warning' },
+    down: { label: 'Indisponível', variant: 'danger' },
+    incident: { label: 'Incidente', variant: 'danger' },
+    estoque: { label: 'Estoque', variant: 'secondary' },
+    approved: { label: 'Aprovada', variant: 'info' },
+} %}
+{% set key = status|default('') %}
+{% set mapped = maps[key]|default(null) %}
+{% set lbl = label|default(mapped.label|default(key|capitalize)) %}
+{% set tone = variant|default(mapped.variant|default('secondary')) %}
+{% include 'components/status_badge.html.twig' with {
+    label: lbl,
+    variant: tone,
+    extra_class: 'ti-badge ti-badge-health ti-badge-health--' ~ tone,
+    attrs: attrs|default({})
+} %}

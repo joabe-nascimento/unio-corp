@@ -1,0 +1,149 @@
+{% extends 'modules/ti/_base.html.twig' %}
+
+{% block ti_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: asset_stats.total, label: 'Total', sub: 'Itens cadastrados', icon: 'fa-boxes' },
+
+    { value: asset_stats.ativos, label: 'Em uso', sub: 'Alocados', icon: 'fa-laptop', trend: 'up' },
+
+    { value: asset_stats.estoque, label: 'Estoque', sub: 'Disponíveis', icon: 'fa-warehouse' },
+
+    { value: asset_stats.sem_owner, label: 'Sem responsável', sub: 'Requer atribuição', icon: 'fa-user-slash' },
+
+], mb: 'mb-3' } %}
+
+
+
+<section class="unio-card mb-4">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Asset DNA',
+
+        subtitle: 'Ciclo de vida visual — exclusivo Unio'
+
+    } %}
+
+    {% include 'components/ti/asset_dna_strip.html.twig' %}
+
+</section>
+
+
+
+<section class="unio-card">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Inventário',
+
+        subtitle: assets|length ~ ' itens exibidos',
+
+        btn_label: ti_can('manage_ativos') ? 'Novo ativo' : null,
+
+        btn_icon: 'fa-plus',
+
+        btn_tag: 'button',
+
+        btn_attrs: ti_can('manage_ativos') ? { 'data-unio-offcanvas-open': 'ti-ativo-form', 'data-ti-infra-open-novo': 'ativo' } : {}
+
+    } %}
+
+    <div class="table-responsive">
+
+        <table class="table table-unio table-sm mb-0">
+
+            <thead>
+
+                <tr><th>ID</th><th>Tipo</th><th>Modelo</th><th>Responsável</th><th>Status</th><th>Ciclo</th><th>Chamados</th>{% if ti_can('manage_ativos') %}<th class="text-end" style="width:88px"></th>{% endif %}</tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for a in assets %}
+
+            <tr>
+
+                <td><code>{{ a.id }}</code></td>
+
+                <td>{{ a.type }}</td>
+
+                <td>{{ a.model }}</td>
+
+                <td>{{ a.owner }}</td>
+
+                <td>{% include 'components/ti/ti_health_badge.html.twig' with { status: a.status } %}</td>
+
+                <td>{% include 'components/progress_inline.html.twig' with { percent: a.lifecycle, variant: 'accent', show_label: true, compact: true } %}</td>
+
+                <td>
+                    {% if a.ticket_count|default(0) > 0 %}
+                    {% include 'components/ti/ti_metric_badge.html.twig' with { label: a.ticket_count, variant: 'info' } %}
+                    <div class="small mt-1">
+                    {% for t in a.recent_tickets|default([]) %}
+                    <a href="{{ path('app_ti_chamado_show', { id: t.id }) }}" class="d-block"><code>{{ t.id }}</code></a>
+                    {% endfor %}
+                    </div>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+
+                {% if ti_can('manage_ativos') %}
+
+                <td class="text-end">
+
+                    {% include 'components/ti/infra_row_actions.html.twig' with {
+
+                        resource: 'ativo',
+
+                        id: a.db_id,
+
+                        label: a.id,
+
+                        fields: {
+
+                            codigo: a.codigo,
+
+                            tipo: a.type,
+
+                            modelo: a.model,
+
+                            responsavel: a.responsavel,
+
+                            status: a.status,
+
+                            ciclo_pct: a.ciclo_pct
+
+                        }
+
+                    } %}
+
+                </td>
+
+                {% endif %}
+
+            </tr>
+
+            {% else %}
+
+            {% include 'components/table_empty_row.html.twig' with {
+                colspan: ti_can('manage_ativos') ? 8 : 7,
+                icon: 'fa-server',
+                title: 'Nenhum ativo cadastrado.'
+            } %}
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+{% endblock %}
+

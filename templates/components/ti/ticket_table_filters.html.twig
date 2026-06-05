@@ -1,0 +1,65 @@
+{#
+  ticket_table_filters — filtros client-side da tabela de chamados
+
+  Props:
+    categories  list[{ id, label }]
+#}
+{% set cat_filter_options = [{ value: '', label: 'Todas categorias' }] %}
+{% for c in categories|default([]) %}
+    {% set cat_filter_options = cat_filter_options|merge([{ value: c.id, label: c.label }]) %}
+{% endfor %}
+<div class="ti-ticket-table-filters" data-ti-ticket-filters>
+    <div class="ti-ticket-table-filters-row">
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'ti_table_status',
+            id: 'ti-table-filter-status',
+            group_id: 'ti-table-filter-status-group',
+            value: '',
+            min_width: '140px',
+            select_attrs: { 'data-ti-filter': 'status' },
+            options: [
+                { value: '', label: 'Todos status' },
+                { value: 'novo', label: 'Novo' },
+                { value: 'em_analise', label: 'Em análise' },
+                { value: 'em_execucao', label: 'Em execução' },
+                { value: 'aguardando', label: 'Aguardando' },
+                { value: 'resolvido', label: 'Resolvido' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Prioridade',
+            name: 'ti_table_priority',
+            id: 'ti-table-filter-priority',
+            group_id: 'ti-table-filter-priority-group',
+            value: '',
+            min_width: '120px',
+            select_attrs: { 'data-ti-filter': 'priority' },
+            options: [
+                { value: '', label: 'Todas' },
+                { value: 'P1', label: 'P1' },
+                { value: 'P2', label: 'P2' },
+                { value: 'P3', label: 'P3' },
+                { value: 'P4', label: 'P4' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Categoria',
+            name: 'ti_table_category',
+            id: 'ti-table-filter-category',
+            group_id: 'ti-table-filter-category-group',
+            value: '',
+            min_width: '150px',
+            select_attrs: { 'data-ti-filter': 'category' },
+            options: cat_filter_options
+        } %}
+        <div class="filter-group ti-ticket-table-search">
+            <input type="search"
+                   class="filter-select ti-ticket-filter-search"
+                   data-ti-filter-search
+                   placeholder="Buscar ID, título, solicitante…"
+                   aria-label="Buscar chamados"
+                   autocomplete="off">
+        </div>
+    </div>
+</div>

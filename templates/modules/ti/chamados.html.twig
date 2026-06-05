@@ -1,0 +1,72 @@
+{% extends 'modules/ti/_base.html.twig' %}
+
+{% block hub_section_toolbar %}
+<div class="ti-chamados-toolbar-wrap">
+    {% embed 'components/section_toolbar.html.twig' with {
+        btn_label: ti_can('create_chamado') ? 'Abrir chamado' : '',
+        btn_opens: ti_can('create_chamado') ? 'ti-chamado-novo' : '',
+        btn_icon: 'fa-plus',
+        btn_align: 'left',
+        search_in_section: false
+    } %}
+        {% block section_toolbar_filters %}
+            <div class="ti-view-toggle" role="group" aria-label="Visualização">
+                <button type="button" class="ti-view-btn is-active" data-ti-view="lista" title="Lista" aria-pressed="true">
+                    <i class="fas fa-list" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="ti-view-btn" data-ti-view="kanban" title="Kanban" aria-pressed="false">
+                    <i class="fas fa-columns" aria-hidden="true"></i>
+                </button>
+            </div>
+        {% endblock %}
+    {% endembed %}
+</div>
+{% endblock %}
+
+{% block ti_section_content %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: ticket_stats.total, label: 'Total', sub: 'No funil', icon: 'fa-layer-group' },
+    { value: ticket_stats.novo, label: 'Novos', sub: 'Aguardando triagem', icon: 'fa-inbox' },
+    { value: ticket_stats.execucao, label: 'Em execução', sub: 'Técnicos ativos', icon: 'fa-gears', trend: 'up' },
+    { value: ticket_stats.resolvido, label: 'Resolvidos', sub: 'Este ciclo', icon: 'fa-check' },
+], mb: 'mb-3' } %}
+
+<section class="unio-card ti-chamados-card" data-ti-chamados-root>
+    {% include 'components/section_header.html.twig' with {
+        title: 'Chamados',
+        subtitle: tickets|length ~ ' registros · ordenados por data de abertura'
+    } %}
+    {% include 'components/ti/ticket_table_filters.html.twig' with { categories: categories|default([]) } %}
+
+    <div class="ti-chamados-view" data-ti-view-panel="lista">
+        {% include 'components/ti/ticket_table.html.twig' with {
+            tickets: tickets,
+            categories: categories,
+            status_labels: status_labels,
+            technicians: technicians|default([]),
+            can_assign: ti_can('operate_chamados')
+        } %}
+    </div>
+
+    <div class="ti-chamados-view" data-ti-view-panel="kanban" hidden>
+        {% include 'components/ti/ticket_board.html.twig' %}
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    {% if app.request.query.getBoolean('open_novo') %}
+    window.UnioOffcanvas && window.UnioOffcanvas.open('ti-chamado-novo');
+    {% endif %}
+    {% if app.request.query.get('catalog') %}
+    document.addEventListener('DOMContentLoaded', function () {
+        var pick = document.querySelector('[data-ti-catalog-id="{{ app.request.query.get('catalog')|e('js') }}"]');
+        if (pick) pick.click();
+    });
+    {% endif %}
+})();
+</script>
+{% endblock %}

@@ -1,7 +1,4 @@
-{# Hub de identidade — topo da sidebar: conta e atalhos #}
-{% set _pnome = platform_config.plataforma_nome|default('Unio') %}
-{% set _logo_full = platform_config.logo_full_url|default('') %}
-{% set _sidebar_full_src = _logo_full ? (_logo_full starts with 'http' ? _logo_full : asset(_logo_full)) : asset('images/logos/unio-logotipo.png') %}
+{# Núcleo de identidade — topo da sidebar: conta e atalhos #}
 {% set _first_name = app.user.nome|split(' ')|first %}
 
 <div class="sidebar-identity">
@@ -32,10 +29,6 @@
         <div class="sidebar-identity-panel__hero">
             <div class="sidebar-identity-panel__hero-bg" aria-hidden="true"></div>
             <div class="sidebar-identity-panel__hero-inner">
-                <a href="{{ path('app_dashboard') }}" class="sidebar-identity-panel__brand" title="{{ _pnome }}">
-                    <img src="{{ _sidebar_full_src }}" alt="{{ _pnome }}" class="sidebar-identity-panel__logo">
-                </a>
-
                 <div class="sidebar-identity-panel__user">
                     <span class="sidebar-identity-panel__avatar-wrap" aria-hidden="true">
                         <span class="avatar-circle sidebar-identity-panel__avatar">{{ app.user.initials }}</span>

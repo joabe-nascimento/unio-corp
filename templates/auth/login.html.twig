@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if active_tab == 'register' %}Criar Conta{% else %}Entrar{% endif %} | Unio</title>
-    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
+    <script>try{var _p=new URLSearchParams(location.search);var _t=_p.get('theme')||localStorage.getItem('unio-theme')||'{{ _tema }}';document.documentElement.setAttribute('data-theme',_t);if(_p.get('theme'))localStorage.setItem('unio-theme',_t);}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -38,7 +38,7 @@
 
         /* ── Lado esquerdo ──────────────────────────────── */
         .auth-left {
-            background: linear-gradient(155deg, #0a0c16 0%, #0f1435 48%, #121a42 100%);
+            background: #10131c;
             padding: 56px 64px;
             display: flex;
             flex-direction: column;
@@ -50,7 +50,7 @@
         }
 
         [data-theme="light"] .auth-left {
-            background: linear-gradient(155deg, #0a4a54 0%, var(--accent) 38%, #12616E 62%, #0D3B44 100%);
+            background: #dcebf2;
         }
 
         .auth-left-bg {
@@ -62,16 +62,7 @@
         }
 
         .auth-left-bg::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            background: radial-gradient(ellipse 80% 60% at 20% 50%, rgba(255,255,255,0.07) 0%, transparent 55%);
-            pointer-events: none;
-        }
-
-        [data-theme="light"] .auth-left-bg::after {
-            background: radial-gradient(ellipse 70% 55% at 25% 45%, rgba(255,255,255,0.10) 0%, transparent 58%);
+            content: none;
         }
 
         .auth-deco {
@@ -90,7 +81,7 @@
         }
 
         [data-theme="light"] .auth-deco--mesh {
-            opacity: 0.34;
+            opacity: 0.16;
         }
 
         .auth-deco--orbit {
@@ -102,6 +93,8 @@
             animation: authDecoFloat 14s ease-in-out infinite;
         }
 
+        [data-theme="light"] .auth-deco--orbit { opacity: 0.2; }
+
         .auth-deco--chip {
             top: 22%;
             right: 18%;
@@ -110,6 +103,8 @@
             opacity: 0.36;
             animation: authDecoFloat 11s ease-in-out infinite reverse;
         }
+
+        [data-theme="light"] .auth-deco--chip { opacity: 0.16; }
 
         .auth-deco--nodes {
             bottom: 14%;
@@ -120,6 +115,8 @@
             animation: authDecoDrift 16s ease-in-out infinite;
         }
 
+        [data-theme="light"] .auth-deco--nodes { opacity: 0.22; }
+
         .auth-deco--circuit {
             bottom: 28%;
             right: 2%;
@@ -128,6 +125,8 @@
             opacity: 0.32;
             animation: authDecoFloat 13s ease-in-out infinite 1.5s;
         }
+
+        [data-theme="light"] .auth-deco--circuit { opacity: 0.14; }
 
         [data-theme="dark"] .auth-deco--orbit,
         [data-theme="dark"] .auth-deco--chip,
@@ -152,6 +151,10 @@
 
         @media (prefers-reduced-motion: reduce) {
             .auth-deco { animation: none !important; }
+            .auth-logo-anim,
+            .auth-logo-anim *,
+            .auth-left-tagline--anim { animation: none !important; }
+            .auth-logo-anim__img { opacity: 1 !important; clip-path: none !important; transform: none !important; filter: none !important; }
         }
 
         .auth-left-inner,
@@ -174,7 +177,76 @@
             padding-top: 32px;
         }
 
-        .auth-hero-logo {
+        /* ── Logotipo animado ───────────────────────────── */
+        .auth-logo-anim {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            opacity: 0;
+            animation: authLogoWrapIn 0.5s ease forwards;
+        }
+
+        .auth-logo-anim__glow {
+            position: absolute;
+            left: 8%;
+            top: 50%;
+            width: 38%;
+            height: 72%;
+            transform: translateY(-50%);
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(79, 127, 255, 0.42) 0%, transparent 68%);
+            opacity: 0;
+            pointer-events: none;
+            animation: authLogoGlowPulse 2.8s ease-in-out 0.35s forwards;
+        }
+
+        [data-theme="light"] .auth-logo-anim__glow {
+            background: radial-gradient(ellipse at center, rgba(79, 127, 255, 0.28) 0%, transparent 70%);
+        }
+
+        .auth-logo-anim__stage {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .auth-logo-anim__stage::after {
+            content: '';
+            position: absolute;
+            inset: -4% -8%;
+            background: linear-gradient(
+                105deg,
+                transparent 38%,
+                rgba(255, 255, 255, 0.22) 48%,
+                rgba(255, 255, 255, 0.38) 50%,
+                rgba(255, 255, 255, 0.18) 52%,
+                transparent 62%
+            );
+            transform: translateX(-130%) skewX(-12deg);
+            pointer-events: none;
+            opacity: 0;
+            animation: authLogoShine 1.1s ease-in-out 1.15s forwards;
+        }
+
+        [data-theme="light"] .auth-logo-anim__stage::after {
+            background: linear-gradient(
+                105deg,
+                transparent 38%,
+                rgba(255, 255, 255, 0.55) 48%,
+                rgba(255, 255, 255, 0.75) 50%,
+                rgba(255, 255, 255, 0.45) 52%,
+                transparent 62%
+            );
+        }
+
+        @keyframes authLogoShine {
+            0% { opacity: 0; transform: translateX(-130%) skewX(-12deg); }
+            20% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(130%) skewX(-12deg); }
+        }
+
+        .auth-logo-anim__img,
+        .auth-logo-anim .platform-logo-placeholder-wrap {
             display: block;
             width: 100%;
             max-width: 420px;
@@ -182,8 +254,101 @@
             max-height: min(52vh, 380px);
             object-fit: contain;
             object-position: left center;
-            /* PNG com fundo preto: fundo some, texto branco e ícone colorido permanecem */
-            mix-blend-mode: screen;
+        }
+
+        .auth-logo-anim__img {
+            opacity: 0;
+            transform: translateY(14px) scale(0.96);
+            filter: blur(6px);
+            clip-path: inset(0 56% 0 0 round 2px);
+            animation:
+                authLogoIconIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards,
+                authLogoReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
+        }
+
+        .auth-logo-anim--placeholder .auth-logo-anim__img,
+        .auth-logo-anim--placeholder .platform-logo-placeholder-wrap {
+            clip-path: none;
+            animation: authLogoFadeIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+        }
+
+        .auth-logo-anim--idle .auth-logo-anim__stage {
+            animation: authLogoFloat 5.5s ease-in-out infinite;
+        }
+
+        .auth-logo-anim--idle .auth-logo-anim__glow {
+            animation: authLogoGlowIdle 4s ease-in-out infinite;
+        }
+
+        @keyframes authLogoWrapIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes authLogoIconIn {
+            0% {
+                opacity: 0;
+                transform: translateY(14px) scale(0.96);
+                filter: blur(6px);
+                clip-path: inset(0 56% 0 0 round 2px);
+            }
+            55% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+                clip-path: inset(0 56% 0 0 round 2px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+                clip-path: inset(0 56% 0 0 round 2px);
+            }
+        }
+
+        @keyframes authLogoReveal {
+            from { clip-path: inset(0 56% 0 0 round 2px); }
+            to { clip-path: inset(0 0 0 0 round 2px); }
+        }
+
+        @keyframes authLogoFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes authLogoGlowPulse {
+            0% { opacity: 0; transform: translateY(-50%) scale(0.85); }
+            45% { opacity: 0.85; transform: translateY(-50%) scale(1.05); }
+            100% { opacity: 0.55; transform: translateY(-50%) scale(1); }
+        }
+
+        @keyframes authLogoGlowIdle {
+            0%, 100% { opacity: 0.4; transform: translateY(-50%) scale(1); }
+            50% { opacity: 0.7; transform: translateY(-50%) scale(1.06); }
+        }
+
+        @keyframes authLogoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .auth-left-tagline--anim {
+            opacity: 0;
+            transform: translateY(8px);
+            animation: authTaglineIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) 1.05s forwards;
+        }
+
+        @keyframes authTaglineIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        [data-theme="light"] .auth-left-tagline--anim {
+            animation-delay: 0.95s;
         }
 
         .auth-left-tagline {
@@ -194,12 +359,24 @@
             font-weight: 400;
         }
 
+        [data-theme="light"] .auth-left-tagline {
+            color: var(--text-2);
+        }
+
         .auth-left .platform-support__item {
             color: rgba(255, 255, 255, 0.48);
         }
 
+        [data-theme="light"] .auth-left .platform-support__item {
+            color: var(--text-3);
+        }
+
         .auth-left .platform-support__item:hover {
             color: rgba(255, 255, 255, 0.78);
+        }
+
+        [data-theme="light"] .auth-left .platform-support__item:hover {
+            color: var(--accent);
         }
 
         /* ── Lado direito ───────────────────────────────── */
@@ -475,6 +652,18 @@
             text-decoration: none;
         }
 
+        [data-theme="light"] .auth-back-home--banner {
+            color: var(--text-2);
+            border-color: var(--border-2);
+            background: rgba(255, 255, 255, 0.65);
+        }
+
+        [data-theme="light"] .auth-back-home--banner:hover {
+            color: var(--text-1);
+            border-color: var(--accent-line);
+            background: #fff;
+        }
+
         .auth-back-home--form {
             display: none;
             margin-bottom: 20px;
@@ -508,7 +697,9 @@
                 min-height: 280px;
                 padding: 32px 28px;
             }
-            .auth-hero-logo { max-height: 200px; max-width: 320px; }
+            .auth-logo-anim,
+            .auth-logo-anim__img,
+            .auth-logo-anim .platform-logo-placeholder-wrap { max-height: 200px; max-width: 320px; }
             .auth-left { display: flex; }
         }
 
@@ -547,13 +738,11 @@
         </a>
 
         <div class="auth-left-inner">
-            <img src="{{ asset('images/logos/logotipo-unio.png') }}"
-                 alt="Unio — Pessoas. Processos. Resultados."
-                 class="auth-hero-logo">
+            {% include 'components/auth_logo_animated.html.twig' with { variant: 'full' } only %}
 
             {% set _auth_tagline = platform_config.plataforma_tagline|default('')|trim %}
             {% if _auth_tagline %}
-            <p class="auth-left-tagline">{{ _auth_tagline }}</p>
+            <p class="auth-left-tagline auth-left-tagline--anim">{{ _auth_tagline }}</p>
             {% endif %}
         </div>
 
@@ -707,5 +896,32 @@
     </div>{# /auth-right-inner #}
     </div>{# /auth-right #}
 </div>{# /auth-wrapper #}
+<script>
+(function () {
+    var root = document.querySelector('[data-auth-logo-anim]');
+    if (!root) return;
+    var img = root.querySelector('.auth-logo-anim__img');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function setIdle() { root.classList.add('auth-logo-anim--idle'); }
+    if (reduce) {
+        setIdle();
+        return;
+    }
+    if (!img) {
+        setTimeout(setIdle, 1200);
+        return;
+    }
+    var done = false;
+    function onEnd() {
+        if (done) return;
+        done = true;
+        setIdle();
+    }
+    img.addEventListener('animationend', function (e) {
+        if (e.animationName === 'authLogoReveal') onEnd();
+    });
+    setTimeout(onEnd, 1600);
+})();
+</script>
 </body>
 </html>

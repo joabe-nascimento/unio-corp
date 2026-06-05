@@ -17,24 +17,26 @@
 <div class="row g-3">
     <div class="col-lg-5">
         <div class="unio-card p-4">
-            <h3 class="h6 mb-3">Nova solicitação</h3>
+            {% include 'components/section_header.html.twig' with { title: 'Nova solicitação' } %}
             {% if funcionario.status != 'ATIVO' %}
-                <p class="text-muted mb-0">Somente colaboradores ativos podem solicitar férias.</p>
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-user-clock',
+                    title: 'Somente colaboradores ativos podem solicitar férias.',
+                    compact: true
+                } %}
             {% else %}
             <form method="post" action="{{ path('app_rh_portal_ferias') }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('rh_portal_ferias') }}">
-                <div class="mb-3">
-                    <label class="form-label" for="data_inicio">Data início</label>
-                    <input type="date" id="data_inicio" name="data_inicio" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="data_fim">Data fim</label>
-                    <input type="date" id="data_fim" name="data_fim" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="observacoes">Observações</label>
-                    <textarea id="observacoes" name="observacoes" class="form-control" rows="3" placeholder="Opcional"></textarea>
-                </div>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'data_inicio', name: 'data_inicio', label: 'Data início', type: 'date', required: true
+                } %}
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'data_fim', name: 'data_fim', label: 'Data fim', type: 'date', required: true
+                } %}
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'observacoes', name: 'observacoes', label: 'Observações',
+                    type: 'textarea', rows: 3, placeholder: 'Opcional'
+                } %}
                 <button type="submit" class="btn-unio">Enviar solicitação</button>
             </form>
             {% endif %}
@@ -42,9 +44,13 @@
     </div>
     <div class="col-lg-7">
         <div class="unio-card p-4">
-            <h3 class="h6 mb-3">Histórico</h3>
+            {% include 'components/section_header.html.twig' with { title: 'Histórico' } %}
             {% if ferias is empty %}
-                <p class="text-muted mb-0">Você ainda não possui solicitações de férias.</p>
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-umbrella-beach',
+                    title: 'Você ainda não possui solicitações de férias.',
+                    compact: true
+                } %}
             {% else %}
             <div class="table-responsive">
                 <table class="table table-sm mb-0 rh-portal-table">
@@ -61,9 +67,11 @@
                             <td>{{ f.dataInicio|date('d/m/Y') }} — {{ f.dataFim|date('d/m/Y') }}</td>
                             <td>{{ f.dias }}</td>
                             <td>
-                                <span class="rh-portal-pill rh-portal-pill--{{ f.status|lower }}">
-                                    {{ ferias_status_labels[f.status]|default(f.status) }}
-                                </span>
+                                {% set _ferias_variant = f.status == 'APROVADA' ? 'success' : (f.status == 'REJEITADA' ? 'danger' : (f.status == 'SOLICITADA' ? 'warning' : 'info')) %}
+                                {% include 'components/status_badge.html.twig' with {
+                                    label: ferias_status_labels[f.status]|default(f.status),
+                                    variant: _ferias_variant
+                                } %}
                                 {% if f.status == 'REJEITADA' and f.motivoRejeicao %}
                                     <br><small class="text-muted">{{ f.motivoRejeicao }}</small>
                                 {% endif %}

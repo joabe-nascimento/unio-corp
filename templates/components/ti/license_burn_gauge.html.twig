@@ -1,0 +1,17 @@
+{# License burn gauge #}
+<div class="ti-license-burn">
+    {% for lic in licenses|default([])|slice(0, 3) %}
+    <div class="ti-license-burn-item">
+        <div class="d-flex justify-content-between mb-1">
+            <span class="perm-label">{{ lic.name }}</span>
+            <span class="text-muted" style="font-size:11px">{{ lic.used }}/{{ lic.seats }} seats</span>
+        </div>
+        {% include 'components/progress_inline.html.twig' with {
+            percent: lic.burn,
+            variant: lic.burn >= 95 ? 'danger' : (lic.burn >= 85 ? 'warning' : 'accent'),
+            show_label: true,
+            compact: true
+        } %}
+    </div>
+    {% endfor %}
+</div>

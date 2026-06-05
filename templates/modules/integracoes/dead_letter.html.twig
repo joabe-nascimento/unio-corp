@@ -1,0 +1,224 @@
+{% extends 'modules/integracoes/_base.html.twig' %}
+
+
+
+{% block integ_section_content %}
+
+{% include 'components/kpi_row.html.twig' with { items: [
+
+    { value: dl_stats.total, label: 'Total na fila', icon: 'fa-inbox' },
+
+    { value: dl_stats.pendente, label: 'Pendentes', icon: 'fa-clock', trend: dl_stats.pendente > 0 ? 'down' : null },
+
+    { value: dl_stats.resolvido, label: 'Resolvidos', icon: 'fa-check-circle' },
+
+], mb: 'mb-3' } %}
+
+
+
+<section class="unio-card integ-dl-card">
+
+    {% include 'components/section_header.html.twig' with {
+
+        title: 'Dead Letter Queue',
+
+        subtitle: 'Eventos que falharam em processar — retry manual ou descarte'
+
+    } %}
+
+
+
+    {% if dead_letters|length > 0 %}
+
+    <div class="integ-dl-filters mb-3" data-integ-dl-filters>
+
+        <button type="button" class="integ-dl-filter is-active" data-dl-filter="all">Todos <span class="integ-dl-filter-count">{{ dead_letters|length }}</span></button>
+
+        <button type="button" class="integ-dl-filter" data-dl-filter="pendente">Pendentes</button>
+
+        <button type="button" class="integ-dl-filter" data-dl-filter="retry">Em retry</button>
+
+        <button type="button" class="integ-dl-filter" data-dl-filter="resolvido">Resolvidos</button>
+
+        <button type="button" class="integ-dl-filter" data-dl-filter="descartado">Descartados</button>
+
+    </div>
+
+
+
+    <div class="table-responsive">
+
+        <table class="table table-sm mb-0 integ-dl-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>Evento</th>
+
+                    <th>Conector</th>
+
+                    <th>Erro</th>
+
+                    <th>Tentativas</th>
+
+                    <th>Próximo retry</th>
+
+                    <th>Status</th>
+
+                    <th>Criado</th>
+
+                    <th class="text-end" style="width:180px">Ações</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for dl in dead_letters %}
+
+            <tr data-dl-row="{{ dl.id }}" data-dl-status="{{ dl.status }}">
+
+                <td>
+
+                    <strong class="admin-table-mono">{{ dl.evento }}</strong>
+
+                    <br>
+
+                    <button type="button" class="btn-unio btn-xs btn-unio-ghost integ-dl-payload-toggle" data-dl-payload-toggle="{{ dl.id }}">
+
+                        {{ dl.payload_preview }} <i class="fas fa-chevron-down fa-xs"></i>
+
+                    </button>
+
+                </td>
+
+                <td>{{ dl.conector }}</td>
+
+                <td>
+
+                    <span class="text-danger integ-dl-erro" title="{{ dl.erro }}">{{ dl.erro|slice(0, 60) }}{% if dl.erro|length > 60 %}…{% endif %}</span>
+
+                </td>
+
+                <td class="text-center" data-dl-tentativas="{{ dl.id }}">
+
+                    <span class="ti-badge ti-badge-metric ti-badge-metric--{{ dl.tentativas > 3 ? 'danger' : 'warning' }}">
+
+                        {{ dl.tentativas }}×
+
+                    </span>
+
+                </td>
+
+                <td data-dl-retry="{{ dl.id }}">{{ dl.proxima_retry|default('—') }}</td>
+
+                <td data-dl-status-cell="{{ dl.id }}">
+
+                    {% set sv = dl.status == 'resolvido' ? 'success' : (dl.status == 'descartado' ? 'secondary' : (dl.status == 'retry' ? 'info' : 'warning')) %}
+
+                    {% include 'components/ti/ti_metric_badge.html.twig' with {
+                        label: dl.status|upper,
+                        variant: sv
+                    } %}
+
+                </td>
+
+                <td><small>{{ dl.criado_em }}</small></td>
+
+                <td class="text-end" data-dl-actions="{{ dl.id }}">
+
+                    {% if dl.status in ['pendente', 'retry'] %}
+
+                    <div class="btn-group btn-group-sm">
+
+                        <button type="button" class="btn-unio btn-sm btn-unio-ghost text-success"
+
+                            data-dl-action="retry"
+
+                            data-dl-id="{{ dl.id }}"
+
+                            data-dl-url="{{ path('app_integracoes_dead_letter_retry', { id: dl.id }) }}"
+
+                            data-dl-token="{{ csrf_token('integ_dl_retry_' ~ dl.id) }}"
+
+                            title="Tentar novamente">
+
+                            <i class="fas fa-rotate-right"></i> Retry
+
+                        </button>
+
+                        <button type="button" class="btn-unio btn-sm btn-unio-ghost text-danger"
+
+                            data-dl-action="descartar"
+
+                            data-dl-id="{{ dl.id }}"
+
+                            data-dl-url="{{ path('app_integracoes_dead_letter_descartar', { id: dl.id }) }}"
+
+                            data-dl-token="{{ csrf_token('integ_dl_descartar_' ~ dl.id) }}"
+
+                            title="Descartar">
+
+                            <i class="fas fa-trash"></i>
+
+                        </button>
+
+                    </div>
+
+                    {% else %}
+
+                    <small class="text-muted">—</small>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            <tr id="dlPayload{{ dl.id }}" class="d-none integ-dl-payload-row">
+
+                <td colspan="8" class="bg-light px-3 py-2">
+
+                    <strong>Payload completo:</strong>
+
+                    <pre class="mb-0 mt-1 integ-dl-payload-pre">{{ dl.payload|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE')) }}</pre>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    {% include 'components/empty_state.html.twig' with {
+
+        icon: 'fa-inbox',
+
+        title: 'Fila vazia',
+
+        text: 'Nenhum evento falhou recentemente. Ótimo sinal!',
+
+        compact: true
+
+    } %}
+
+    {% endif %}
+
+</section>
+
+
+
+<div id="dlActionFeedback" class="integ-dl-toast-stack"></div>
+
+{% endblock %}
+
+

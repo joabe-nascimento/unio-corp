@@ -1,0 +1,89 @@
+{% extends 'modules/ti/_base.html.twig' %}
+{% block ti_section_content %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: maintenances|filter(m => m.status == 'scheduled')|length, label: 'Agendadas', sub: 'Próximas janelas', icon: 'fa-calendar' },
+    { value: maintenances|filter(m => m.status == 'approved')|length, label: 'Aprovadas', sub: 'Change Advisory', icon: 'fa-check-double' },
+    { value: maintenances|filter(m => m.status == 'done')|length, label: 'Concluídas', sub: 'Este mês', icon: 'fa-check' },
+], mb: 'mb-3' } %}
+
+{% set approved_today = maintenances|filter(m => m.aprovada and m.janela is not empty) %}
+{% if approved_today|length > 0 %}
+<div class="alert alert-info d-flex align-items-center gap-2 mb-3" role="alert">
+    <i class="fas fa-bell-on"></i>
+    <div>
+        <strong>{{ approved_today|length }} janela(s) aprovada(s)</strong> —
+        {% for m in approved_today|slice(0, 3) %}{{ m.title }}{% if not loop.last %}, {% endif %}{% endfor %}
+        {% if approved_today|length > 3 %} e mais {{ approved_today|length - 3 }}{% endif %}
+    </div>
+</div>
+{% endif %}
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Janelas de manutenção',
+        subtitle: 'Change management operacional',
+        btn_label: ti_can('manage_manutencoes') ? 'Nova manutenção' : null,
+        btn_icon: 'fa-plus',
+        btn_tag: 'button',
+        btn_attrs: ti_can('manage_manutencoes') ? { 'data-unio-offcanvas-open': 'ti-manutencao-form', 'data-ti-infra-open-novo': 'manutencao' } : {}
+    } %}
+    <div class="ti-card-list">
+    {% for m in maintenances %}
+    <div class="ti-card-list-item">
+        <div class="ti-idea-row-head">
+            <span class="section-title">{{ m.title }}</span>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                {% include 'components/ti/ti_health_badge.html.twig' with { status: m.status } %}
+                {% if m.aprovada %}
+                {% include 'components/status_badge.html.twig' with { label: 'Aprovada', variant: 'success' } %}
+                {% endif %}
+                {% if ti_can('manutencao_approve') and not m.aprovada and m.status == 'scheduled' %}
+                <form method="post" action="{{ path('app_ti_manutencao_aprovar', { id: m.db_id }) }}" class="m-0 d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('ti_manutencao_aprovar_' ~ m.db_id) }}">
+                    <button type="submit" class="btn-unio btn-sm" onclick="return confirm('Aprovar esta janela de manutenção?')">
+                        <i class="fas fa-check me-1"></i>Aprovar
+                    </button>
+                </form>
+                {% endif %}
+                {% if ti_can('manage_manutencoes') %}
+                {% include 'components/ti/infra_row_actions.html.twig' with {
+                    resource: 'manutencao',
+                    id: m.db_id,
+                    label: m.title,
+                    fields: {
+                        titulo: m.titulo,
+                        janela: m.janela,
+                        impacto: m.impacto,
+                        owner: m.owner,
+                        status: m.status,
+                        servicos_afetados: m.servicos_afetados|join(', ')
+                    }
+                } %}
+                {% endif %}
+            </div>
+        </div>
+        <p class="section-subtitle mb-1"><i class="fas fa-clock mr-1"></i>{{ m.window }}</p>
+        <p class="section-subtitle mb-1">Impacto: {{ m.impact }}</p>
+        {% if m.servicos_afetados|default([])|length > 0 %}
+        <p class="section-subtitle mb-1">
+            <i class="fas fa-server mr-1"></i>Serviços afetados:
+            {% for svc in m.servicos_afetados %}
+            {% include 'components/status_badge.html.twig' with { label: svc, variant: 'secondary', extra_class: 'me-1' } %}
+            {% endfor %}
+        </p>
+        {% endif %}
+        <span class="perm-label">Owner: {{ m.owner }}</span>
+        {% if m.aprovada_por %}
+        <span class="perm-label ms-3">Aprovado por: {{ m.aprovada_por }}{% if m.aprovada_em %} · {{ m.aprovada_em }}{% endif %}</span>
+        {% endif %}
+    </div>
+    {% else %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-wrench',
+        title: 'Nenhuma janela de manutenção cadastrada.',
+        compact: true
+    } %}
+    {% endfor %}
+    </div>
+</section>
+{% endblock %}

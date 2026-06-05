@@ -1,0 +1,27 @@
+{# Stage strip — pipeline do chamado #}
+{% set stages = [
+    { key: 'novo', label: 'Novo', icon: 'fa-inbox' },
+    { key: 'em_analise', label: 'Análise', icon: 'fa-search' },
+    { key: 'em_execucao', label: 'Execução', icon: 'fa-gears' },
+    { key: 'aguardando', label: 'Aguardando', icon: 'fa-hourglass-half' },
+    { key: 'resolvido', label: 'Resolvido', icon: 'fa-check' },
+] %}
+{% set current = ticket.status|default('novo') %}
+{% set stage_index = {
+    'novo': 0,
+    'em_analise': 1,
+    'em_execucao': 2,
+    'aguardando': 3,
+    'resolvido': 4
+} %}
+<div class="ti-stage-strip" role="list" aria-label="Estágio do chamado">
+    {% set cur_i = stage_index[current]|default(0) %}
+    {% for stage in stages %}
+    {% set si = stage_index[stage.key]|default(0) %}
+    <div class="ti-stage-item ti-stage-item--{{ stage.key }}{% if stage.key == current %} is-current{% elseif si < cur_i %} is-done{% else %} is-upcoming{% endif %}" role="listitem">
+        <span class="ti-stage-icon"><i class="fas {{ stage.icon }}" aria-hidden="true"></i></span>
+        <span class="ti-stage-label">{{ stage.label }}</span>
+    </div>
+    {% if not loop.last %}<span class="ti-stage-connector{% if si < cur_i %} is-done{% endif %}" aria-hidden="true"></span>{% endif %}
+    {% endfor %}
+</div>

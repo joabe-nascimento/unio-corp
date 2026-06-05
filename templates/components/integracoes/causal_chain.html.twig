@@ -1,0 +1,43 @@
+{# Cadeia causal — nós conectados do fluxo selecionado #}
+{% set trace = trace|default(null) %}
+{% if trace %}
+{% include 'components/section_header.html.twig' with {
+    title: 'Cadeia causal',
+    subtitle: trace.titulo ~ ' · ' ~ trace.confiabilidade ~ '% confiabilidade'
+} %}
+<div class="integ-causal-chain" data-integ-causal-chain>
+    {% for node in trace.nos %}
+    <div class="integ-causal-node integ-causal-node--{{ node.status|default('ok') }}">
+        <div class="integ-causal-node-icon">
+            <i class="fas {{ node.icon|default('fa-circle') }}" aria-hidden="true"></i>
+        </div>
+        <div class="integ-causal-node-body">
+            <div class="integ-causal-node-head">
+                <span class="integ-causal-hub">{{ hub_labels[node.hub]|default(node.hub|upper) }}</span>
+                {% include 'components/ti/ti_metric_badge.html.twig' with {
+                    label: node.tipo|replace({'_': ' '})|capitalize,
+                    variant: node.status == 'error' ? 'danger' : (node.status == 'warn' ? 'warning' : (node.status == 'ok' ? 'success' : 'secondary'))
+                } %}
+            </div>
+            <strong>{{ node.label }}</strong>
+            <p class="section-subtitle mb-0">{{ node.detail|default('') }}</p>
+            {% if node.latency|default('') and node.latency != '—' %}
+            <small class="integ-causal-latency"><i class="fas fa-gauge-high" aria-hidden="true"></i> {{ node.latency }}</small>
+            {% endif %}
+        </div>
+    </div>
+    {% if not loop.last %}
+    <div class="integ-causal-connector" aria-hidden="true">
+        <span></span>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+{% include 'components/empty_state.html.twig' with {
+    icon: 'fa-diagram-project',
+    title: 'Nenhum fluxo monitorado',
+    text: 'Ative conectores para iniciar o rastreamento causal.',
+    compact: true
+} %}
+{% endif %}

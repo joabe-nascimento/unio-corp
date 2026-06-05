@@ -6,12 +6,17 @@
 {% block hub_content %}
 {% if grant_at_least('product_rh', 'comunicacao', 'GESTOR_EQUIPE') %}
 <div class="unio-card p-4 mb-3">
-    <h4 class="h6 mb-3">Novo comunicado</h4>
+    {% include 'components/section_header.html.twig' with { title: 'Novo comunicado' } %}
     <form method="post" action="{{ path('app_rh_comunicacao') }}">
         <input type="hidden" name="_token" value="{{ csrf_token('rh_comunicacao_form') }}">
         <input type="hidden" name="action" value="criar">
-        <div class="mb-2"><input type="text" name="titulo" class="form-control" placeholder="Título" required></div>
-        <div class="mb-2"><textarea name="corpo" class="form-control" rows="3" placeholder="Conteúdo" required></textarea></div>
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'comunicado-titulo', name: 'titulo', label: 'Título', placeholder: 'Título', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'comunicado-corpo', name: 'corpo', label: 'Conteúdo',
+            type: 'textarea', rows: 3, placeholder: 'Conteúdo', required: true
+        } %}
         <button type="submit" class="btn-unio btn-sm">Publicar</button>
     </form>
 </div>
@@ -19,7 +24,11 @@
 
 <div class="unio-card p-4">
     {% if comunicados is empty %}
-        <p class="text-muted mb-0">Nenhum comunicado ativo.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-bullhorn',
+            title: 'Nenhum comunicado ativo.',
+            compact: true
+        } %}
     {% else %}
     {% for c in comunicados %}
     <article class="mb-4 pb-3 border-bottom">

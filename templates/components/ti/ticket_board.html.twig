@@ -1,0 +1,90 @@
+{# Ticket kanban board #}
+{% set compact = compact|default(false) %}
+{% set hide_resolvido = hide_resolvido|default(compact) %}
+{% set all_status_cols = [
+    { key: 'novo', label: 'Novo', icon: 'fa-inbox', color: '#6366F1' },
+    { key: 'em_analise', label: 'Em análise', icon: 'fa-search', color: '#8B5CF6' },
+    { key: 'em_execucao', label: 'Em execução', icon: 'fa-gears', color: '#0EA5E9' },
+    { key: 'aguardando', label: 'Aguardando', icon: 'fa-hourglass-half', color: '#F59E0B' },
+    { key: 'resolvido', label: 'Resolvido', icon: 'fa-check', color: '#10B981' },
+] %}
+{% set status_cols = [] %}
+{% for col in all_status_cols %}
+    {% if not (hide_resolvido and col.key == 'resolvido') %}
+        {% set status_cols = status_cols|merge([col]) %}
+    {% endif %}
+{% endfor %}
+{% if compact %}
+<div class="kanban-board ti-ticket-board ti-ticket-board--compact" data-ti-ticket-board>
+{% else %}
+<div class="ti-kanban-scroll">
+<div class="kanban-board ti-ticket-board" data-ti-ticket-board>
+{% endif %}
+    {% for col in status_cols %}
+    <div class="kanban-column" data-ti-ticket-col="{{ col.key }}">
+        <div class="kanban-column-header">
+            <span class="kanban-column-title">
+                <i class="fas {{ col.icon }} mr-1" aria-hidden="true"></i>{{ col.label }}
+            </span>
+            <span class="kanban-column-count">{{ ticket_board[col.key]|default([])|length }}</span>
+        </div>
+        <div class="kanban-column-body">
+            <div class="kanban-column-cards">
+                {% for ticket in ticket_board[col.key]|default([]) %}
+                {% if not compact or loop.index <= 2 %}
+                {% set sla_warn = (ticket.sla_pct|default(100)) < 50 %}
+                <div class="kanban-card ti-ticket-card{% if sla_warn %} kanban-card--blocked{% endif %}{% if not compact %} ti-ticket-card--draggable{% endif %}"
+                     data-ti-ticket-card
+                     data-ti-status="{{ col.key }}"
+                     data-ti-priority="{{ ticket.priority }}"
+                     data-ti-category="{{ ticket.category|default('') }}"
+                     data-ti-search="{{ (ticket.id ~ ' ' ~ ticket.title ~ ' ' ~ ticket.summary ~ ' ' ~ ticket.requester ~ ' ' ~ ticket.assignee)|lower }}"
+                     data-ticket-id="{{ ticket.id }}"
+                     {% if not compact and ti_can('operate_chamados') %}
+                     draggable="true"
+                     data-ti-status-url="{{ path('app_ti_chamado_status', { id: ticket.id }) }}"
+                     data-ti-status-token="{{ csrf_token('ti_chamado_status_' ~ ticket.id) }}"
+                     {% endif %}>
+                    <div class="kanban-card-top">
+                        <code class="ti-ticket-code">{{ ticket.id }}</code>
+                        {% include 'components/ti/ti_priority_badge.html.twig' with { priority: ticket.priority|default('P4') } %}
+                    </div>
+                    <p class="kanban-card-title">
+                        <a href="{{ path('app_ti_chamado_show', { id: ticket.id }) }}" class="text-reset">{{ ticket.title }}</a>
+                    </p>
+                    {% if not compact %}
+                    <p class="kanban-card-desc">{{ ticket.summary }}</p>
+                    {% endif %}
+                    {% if not compact %}
+                    {% include 'components/progress_inline.html.twig' with {
+                        percent: ticket.sla_pct,
+                        variant: sla_warn ? 'warning' : 'accent',
+                        show_label: true,
+                        compact: true
+                    } %}
+                    {% endif %}
+                    {% if not compact %}
+                    <div class="kanban-card-footer">
+                        <span class="kanban-card-footer-user" title="{{ ticket.assignee|default('—') }}">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
+                            <span>{{ ticket.assignee|default('—') }}</span>
+                        </span>
+                        <div class="kanban-card-footer-tags">
+                        {% for tag in ticket.tags|default([])|slice(0, 2) %}
+                        {% include 'components/ti/ti_tag_badge.html.twig' with { tag: tag } %}
+                        {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% if ticket_board[col.key]|default([])|length == 0 %}
+                <p class="text-muted small mb-0 px-2 py-3" data-ti-kanban-col-empty>Nenhum ticket</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% if not compact %}</div>{% endif %}

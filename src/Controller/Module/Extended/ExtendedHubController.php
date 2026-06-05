@@ -36,12 +36,6 @@ class ExtendedHubController extends AbstractController
         return $this->renderPlannedHub('suprimentos');
     }
 
-    #[Route('/ti', name: 'app_ti')]
-    public function ti(): Response
-    {
-        return $this->renderPlannedHub('ti');
-    }
-
     #[Route('/expansao', name: 'app_expansao')]
     public function expansao(): Response
     {
@@ -70,12 +64,6 @@ class ExtendedHubController extends AbstractController
     public function conhecimento(): Response
     {
         return $this->renderPlannedHub('conhecimento');
-    }
-
-    #[Route('/integracoes', name: 'app_integracoes')]
-    public function integracoes(): Response
-    {
-        return $this->renderPlannedHub('integracoes');
     }
 
     #[Route('/customer-success', name: 'app_customer_success')]

@@ -1,0 +1,26 @@
+{# Macro — captura numerada do tour #}
+{% macro tour_shot(step) %}
+<div class="apr-tour-item">
+    <div class="apr-tour-rail">
+        <span class="apr-tour-num">{{ step.step }}</span>
+        {% if not loop.last|default(true) %}<span class="apr-tour-line" aria-hidden="true"></span>{% endif %}
+    </div>
+    <div class="apr-tour-body">
+        <header class="apr-tour-head">
+            <h3 class="apr-tour-title">{{ step.title }}</h3>
+            <p class="apr-tour-sub">{{ step.subtitle }}</p>
+        </header>
+        <div class="apr-shot-block">
+            <div class="apr-browser-frame apr-browser-frame--light">
+                <div class="apr-browser-chrome">
+                    <div class="apr-browser-dots"><span></span><span></span><span></span></div>
+                    <div class="apr-browser-url">{{ step.url }}</div>
+                </div>
+                <div class="apr-browser-body">
+                    <img src="{{ asset(step.image) }}?v=3" alt="{{ step.alt }}" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

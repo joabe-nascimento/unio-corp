@@ -17,7 +17,7 @@ trait InovacaoEmpresaScopeTrait
         $empresa = $this->getWorkspace()->getActiveEmpresa($user);
 
         if (!$empresa) {
-            throw $this->createAccessDeniedException('Selecione uma área de trabalho para acessar o Hub Inovação.');
+            throw $this->createAccessDeniedException('Selecione uma área de trabalho para acessar o Núcleo Inovação.');
         }
 
         return $empresa;

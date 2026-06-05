@@ -17,6 +17,16 @@
         {% endif %}
     </div>
     {% if btn_label is defined and btn_label %}
+        {% if btn_tag|default('a') == 'button' %}
+        <button type="button"
+                class="section-header-action {{ btn_ghost|default(false) ? 'btn-unio-ghost' : 'btn-unio' }}"
+                {% if btn_attrs is defined %}{% for attr, val in btn_attrs %}{{ attr }}="{{ val }}" {% endfor %}{% endif %}>
+            {% if btn_icon is defined and btn_icon %}
+                <i class="fas {{ btn_icon }} mr-1"></i>
+            {% endif %}
+            {{ btn_label }}
+        </button>
+        {% else %}
         <a href="{{ btn_href|default('#') }}"
            class="section-header-action {{ btn_ghost|default(false) ? 'btn-unio-ghost' : 'btn-unio' }}">
             {% if btn_icon is defined and btn_icon %}
@@ -24,5 +34,6 @@
             {% endif %}
             {{ btn_label }}
         </a>
+        {% endif %}
     {% endif %}
 </div>

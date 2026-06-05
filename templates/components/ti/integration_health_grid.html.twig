@@ -1,0 +1,29 @@
+{# Integration health grid #}
+{% set integrations = integrations|default([]) %}
+{% set btn_href = btn_href|default(null) %}
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: title|default('Integrações'),
+        subtitle: subtitle|default('Status dos conectores'),
+        btn_label: btn_href ? 'Ver log' : null,
+        btn_href: btn_href,
+        btn_ghost: true
+    } %}
+    <div class="ti-int-grid">
+        {% for int in integrations %}
+        {% set st_label = int.status == 'healthy' ? 'Saudável' : (int.status == 'degraded' ? 'Degradado' : 'Indisponível') %}
+        <div class="ti-int-card ti-int-card--{{ int.status }}">
+            <div class="ti-int-card-head">
+                <span class="ti-int-pulse ti-int-pulse--{{ int.status }}"></span>
+                <span class="section-title">{{ int.name }}</span>
+            </div>
+            {% include 'components/ti/ti_health_badge.html.twig' with { status: int.status, label: st_label } %}
+            <div class="ti-int-meta">
+                <span>{{ int.latency }} latência</span>
+                <span>{{ int.uptime }}% uptime</span>
+                <span>{{ int.events }} evt/24h</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>

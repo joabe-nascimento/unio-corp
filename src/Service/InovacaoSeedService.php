@@ -14,7 +14,7 @@ use App\Repository\InovIdeiaRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Popula dados demo do Hub Inovação quando a empresa ainda não tem ideias.
+ * Popula dados demo do Núcleo Inovação quando a empresa ainda não tem ideias.
  */
 final class InovacaoSeedService
 {
@@ -205,7 +205,7 @@ final class InovacaoSeedService
         return [
             ['codigo' => 'I01', 'title' => 'Assistente de triagem de currículos por IA', 'summary' => 'Usar LLM para pré-filtrar candidatos com base em critérios configuráveis.', 'owner' => 'Ana Costa', 'tags' => ['IA', 'RH'], 'progress' => 0, 'stage' => InovIdeia::STAGE_IDEIA, 'days' => 3, 'impact' => 80, 'effort' => 25, 'votes' => 12],
             ['codigo' => 'I02', 'title' => 'Dashboard unificado de ESG por empresa', 'summary' => 'KPIs ambientais e sociais consolidados por tenant.', 'owner' => 'Pedro Lima', 'tags' => ['ESG', 'Analytics'], 'progress' => 0, 'stage' => InovIdeia::STAGE_IDEIA, 'days' => 5, 'impact' => 85, 'effort' => 75, 'votes' => 9],
-            ['codigo' => 'I03', 'title' => 'Gamificação de metas da equipe', 'summary' => 'Pontos, badges e leaderboard interno integrado ao Hub Talentos.', 'owner' => 'Juliana Torres', 'tags' => ['Talentos', 'Produto'], 'progress' => 0, 'stage' => InovIdeia::STAGE_IDEIA, 'days' => 1, 'impact' => 35, 'effort' => 20, 'votes' => 4],
+            ['codigo' => 'I03', 'title' => 'Gamificação de metas da equipe', 'summary' => 'Pontos, badges e leaderboard interno integrado ao Núcleo Talentos.', 'owner' => 'Juliana Torres', 'tags' => ['Talentos', 'Produto'], 'progress' => 0, 'stage' => InovIdeia::STAGE_IDEIA, 'days' => 1, 'impact' => 35, 'effort' => 20, 'votes' => 4],
             ['codigo' => 'I04', 'title' => 'Copiloto de contratos com IA', 'summary' => 'Revisão automática de cláusulas e alertas de risco em contratos corporativos.', 'owner' => 'Rafael Souza', 'tags' => ['IA', 'Legal'], 'progress' => 0, 'stage' => InovIdeia::STAGE_IDEIA, 'days' => 2, 'impact' => 78, 'effort' => 70, 'votes' => 7],
             ['codigo' => 'I05', 'title' => 'Programa de hackathons trimestrais', 'summary' => 'Eventos internos de co-criação com premiação e pipeline automático para POC.', 'owner' => 'Camila Dias', 'tags' => ['Cultura', 'Pessoas'], 'progress' => 0, 'stage' => InovIdeia::STAGE_IDEIA, 'days' => 4, 'impact' => 72, 'effort' => 30, 'votes' => 15],
             ['codigo' => 'I06', 'title' => 'Integração Slack × Cortex', 'summary' => 'Comandos slash para resumir projetos, OKRs e alertas direto no Slack.', 'owner' => 'Bruno Almeida', 'tags' => ['IA', 'Integrações'], 'progress' => 0, 'stage' => InovIdeia::STAGE_IDEIA, 'days' => 6, 'impact' => 45, 'effort' => 35, 'votes' => 6],
@@ -245,7 +245,7 @@ final class InovacaoSeedService
     private function impactSeed(): array
     {
         return [
-            ['title' => 'Helia no Hub RH', 'stage' => 'Escala', 'value' => 'R$ 87 k', 'roi' => '3,4×', 'status' => 'active', 'ideia_codigo' => 'S01'],
+            ['title' => 'Helia no Núcleo RH', 'stage' => 'Escala', 'value' => 'R$ 87 k', 'roi' => '3,4×', 'status' => 'active', 'ideia_codigo' => 'S01'],
             ['title' => 'Treinamento por performance', 'stage' => 'Piloto', 'value' => 'R$ 42 k', 'roi' => '2,1×', 'status' => 'piloting', 'ideia_codigo' => 'T01'],
             ['title' => 'Cortex × Projetos', 'stage' => 'POC', 'value' => 'R$ 13 k', 'roi' => '—', 'status' => 'testing', 'ideia_codigo' => 'P01'],
             ['title' => 'OCR onboarding', 'stage' => 'Hipótese', 'value' => '—', 'roi' => '—', 'status' => 'hypothesis', 'ideia_codigo' => 'H01'],
@@ -272,12 +272,12 @@ final class InovacaoSeedService
     private function novidadeSeed(): array
     {
         return [
-            ['title' => 'Hub Inovação expandido', 'summary' => 'Novos módulos de Tendências, Portfólio e feed de Novidades disponíveis.', 'icon' => 'fa-lightbulb', 'route' => 'app_inovacao', 'badge' => 'Novo', 'variant' => 'success'],
+            ['title' => 'Núcleo Inovação expandido', 'summary' => 'Novos módulos de Tendências, Portfólio e feed de Novidades disponíveis.', 'icon' => 'fa-lightbulb', 'route' => 'app_inovacao', 'badge' => 'Novo', 'variant' => 'success'],
             ['title' => 'Framework Kill · Pivot · Scale', 'summary' => 'Metodologia unificada para encerrar ciclos de experimentação.', 'icon' => 'fa-vial', 'route' => 'app_inovacao_experimentos', 'badge' => 'Metodologia', 'variant' => 'info'],
             ['title' => '6 ideias no backlog', 'summary' => 'Sessão de priorização recomendada para Quick Wins identificados.', 'icon' => 'fa-inbox', 'route' => 'app_inovacao_backlog', 'badge' => 'Alerta', 'variant' => 'warning'],
             ['title' => 'Radar de maturidade atualizado', 'summary' => '6 dimensões com dados em tempo real dos hubs conectados.', 'icon' => 'fa-chart-pie', 'route' => 'app_inovacao_analytics', 'badge' => 'Update', 'variant' => 'secondary'],
             ['title' => 'Helia escalada globalmente', 'summary' => 'Assistente IA do RH disponível em todos os tenants da plataforma.', 'icon' => 'fa-rocket', 'route' => 'app_inovacao_portfolio', 'badge' => 'Scale', 'variant' => 'success'],
-            ['title' => '4 sinergias cross-hub detectadas', 'summary' => 'Conexões entre RH, Projetos, Cortex e Talentos prontas para POC.', 'icon' => 'fa-share-nodes', 'route' => 'app_inovacao_conexoes', 'badge' => 'Insight', 'variant' => 'info'],
+            ['title' => '4 sinergias cross-núcleo detectadas', 'summary' => 'Conexões entre RH, Projetos, Cortex e Talentos prontas para POC.', 'icon' => 'fa-share-nodes', 'route' => 'app_inovacao_conexoes', 'badge' => 'Insight', 'variant' => 'info'],
         ];
     }
 }

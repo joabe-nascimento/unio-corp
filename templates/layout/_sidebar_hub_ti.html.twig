@@ -1,0 +1,190 @@
+{% import 'macros/sidebar_nav.html.twig' as nav %}
+
+
+
+<li class="nav-item sidebar-hub-current">
+
+    <a href="{{ path('app_ti') }}" class="nav-link{{ route == 'app_ti' ? ' active' : '' }}">
+
+        <i class="fas fa-tower-broadcast nav-icon"></i>
+
+        <p>Núcleo TI</p>
+
+    </a>
+
+</li>
+
+
+
+{% if ti_can('create_chamado') %}
+
+<li class="nav-item nav-item--cta">
+
+    <a href="{{ path('app_ti', { open_novo: 1 }) }}" class="nav-link nav-link--cta{{ route == 'app_ti' and app.request.query.getBoolean('open_novo') ? ' active' : '' }}">
+
+        <i class="fas fa-plus nav-icon" aria-hidden="true"></i>
+
+        <p>Abrir Chamado</p>
+
+    </a>
+
+</li>
+
+{% endif %}
+
+
+
+{% set show_ops = ti_view('chamados') or ti_view('catalogo') or ti_view('kb') or ti_view('problemas') or ti_view('meus_chamados') or ti_view('sla') or ti_view('manutencoes') %}
+
+{% if show_ops %}
+
+<li class="nav-item has-treeview" data-module-tree data-auto-open="{{ nav_modulo_ti_ops_open ? '1' : '0' }}" data-storage-key="ti-ops-sidebar-collapsed">
+
+    <a href="#" class="nav-link{{ nav_modulo_ti_ops_open ? ' active' : '' }}">
+
+        <i class="fas fa-headset nav-icon"></i>
+
+        <p>Operações <i class="fas fa-angle-left right"></i></p>
+
+    </a>
+
+    <ul class="nav nav-treeview nav-product-children">
+
+        {% if ti_view('chamados') %}
+
+        {{ nav.submenu('Chamados', path('app_ti_chamados'), route in ['app_ti_chamados', 'app_ti_chamado_show', 'app_ti_chamado_novo', 'app_ti_chamado_novo_submit', 'app_ti_chamado_status']) }}
+
+        {% endif %}
+
+        {% if ti_view('meus_chamados') %}
+
+        {{ nav.submenu('Meus Chamados', path('app_ti_meus_chamados'), route == 'app_ti_meus_chamados') }}
+
+        {% endif %}
+
+        {% if ti_view('catalogo') %}
+
+        {{ nav.submenu('Catálogo', path('app_ti_catalogo'), route == 'app_ti_catalogo') }}
+
+        {% endif %}
+
+        {% if ti_view('kb') %}
+
+        {{ nav.submenu('Base de Conhecimento', path('app_ti_kb'), route == 'app_ti_kb') }}
+
+        {% endif %}
+
+        {% if ti_view('problemas') %}
+
+        {{ nav.submenu('Problemas', path('app_ti_problemas'), route == 'app_ti_problemas') }}
+
+        {% endif %}
+
+        {% if ti_view('sla') %}
+
+        {{ nav.submenu('SLA & Prioridades', path('app_ti_sla'), route == 'app_ti_sla') }}
+
+        {% endif %}
+
+        {% if ti_view('manutencoes') %}
+
+        {{ nav.submenu('Manutenções', path('app_ti_manutencoes'), route in ['app_ti_manutencoes', 'app_ti_manutencao_novo_submit', 'app_ti_manutencao_editar_submit', 'app_ti_manutencao_excluir']) }}
+
+        {% endif %}
+
+    </ul>
+
+</li>
+
+{% endif %}
+
+
+
+{% set show_infra = ti_view('ativos') or ti_view('licencas') or ti_view('integracoes') %}
+
+{% if show_infra %}
+
+<li class="nav-item has-treeview" data-module-tree data-auto-open="{{ nav_modulo_ti_infra_open ? '1' : '0' }}" data-storage-key="ti-infra-sidebar-collapsed">
+
+    <a href="#" class="nav-link{{ nav_modulo_ti_infra_open ? ' active' : '' }}">
+
+        <i class="fas fa-server nav-icon"></i>
+
+        <p>Infraestrutura <i class="fas fa-angle-left right"></i></p>
+
+    </a>
+
+    <ul class="nav nav-treeview nav-product-children">
+
+        {% if ti_view('ativos') %}
+
+        {{ nav.submenu('Ativos', path('app_ti_ativos'), route in ['app_ti_ativos', 'app_ti_ativo_novo_submit', 'app_ti_ativo_editar_submit', 'app_ti_ativo_excluir']) }}
+
+        {% endif %}
+
+        {% if ti_view('licencas') %}
+
+        {{ nav.submenu('Licenças', path('app_ti_licencas'), route in ['app_ti_licencas', 'app_ti_licenca_novo_submit', 'app_ti_licenca_editar_submit', 'app_ti_licenca_excluir']) }}
+
+        {% endif %}
+
+        {% if ti_view('integracoes') %}
+
+        {{ nav.submenu('Integrações', path('app_ti_integracoes'), route in ['app_ti_integracoes', 'app_ti_integracao_novo_submit', 'app_ti_integracao_editar_submit', 'app_ti_integracao_excluir']) }}
+
+        {% endif %}
+
+    </ul>
+
+</li>
+
+{% endif %}
+
+
+
+{% set show_intel = ti_view('cortex') or ti_view('analytics') or ti_view('novidades') or ti_view('chamados') %}
+
+{% if show_intel %}
+
+<li class="nav-item has-treeview" data-module-tree data-auto-open="{{ nav_modulo_ti_intel_open ? '1' : '0' }}" data-storage-key="ti-intel-sidebar-collapsed">
+
+    <a href="#" class="nav-link{{ nav_modulo_ti_intel_open ? ' active' : '' }}">
+
+        <i class="fas fa-brain nav-icon"></i>
+
+        <p>Inteligência <i class="fas fa-angle-left right"></i></p>
+
+    </a>
+
+    <ul class="nav nav-treeview nav-product-children">
+
+        {% if ti_view('cortex') %}
+
+        {{ nav.submenu('Cortex Ops', path('app_ti_cortex'), route == 'app_ti_cortex') }}
+
+        {% endif %}
+
+        {% if ti_view('analytics') %}
+
+        {{ nav.submenu('Analytics', path('app_ti_analytics'), route == 'app_ti_analytics') }}
+
+        {% endif %}
+
+        {% if ti_view('novidades') %}
+
+        {{ nav.submenu('Novidades', path('app_ti_novidades'), route in ['app_ti_novidades', 'app_ti_novidade_novo_submit', 'app_ti_novidade_editar_submit', 'app_ti_novidade_excluir']) }}
+
+        {% endif %}
+
+        {% if ti_view('chamados') %}
+
+        {{ nav.submenu('⚡ War Room P1', path('app_ti_war_room'), route == 'app_ti_war_room') }}
+
+        {% endif %}
+
+    </ul>
+
+</li>
+
+{% endif %}
+

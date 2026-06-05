@@ -1,0 +1,37 @@
+{#
+  ticket_row_actions — menu ⋮ da linha de chamado
+
+  Props:
+    id      código do chamado (ex. TK-0001)
+    title   título para confirmação de exclusão
+#}
+{% set _id = id|default('') %}
+{% set _title = title|default(_id)|e('html_attr') %}
+<div class="dropdown ti-ticket-row-actions" data-ti-ticket-row-menu>
+    <button type="button"
+            class="ti-row-menu-btn"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-label="Opções do chamado {{ _id }}"
+            title="Opções">
+        <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right unio-dropdown ti-ticket-row-dropdown">
+        <a href="{{ path('app_ti_chamado_show', { id: _id }) }}" class="dropdown-item">
+            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> Abrir
+        </a>
+        <a href="{{ path('app_ti_chamado_show', { id: _id }) }}" class="dropdown-item">
+            <i class="fas fa-pen" aria-hidden="true"></i> Editar
+        </a>
+        <div class="dropdown-divider"></div>
+        <form method="post"
+              action="{{ path('app_ti_chamado_excluir', { id: _id }) }}"
+              onsubmit="return confirm('Excluir o chamado {{ _title|e('js') }}? Esta ação não pode ser desfeita.')">
+            <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_delete_' ~ _id) }}">
+            <button type="submit" class="dropdown-item">
+                <i class="fas fa-trash" aria-hidden="true"></i> Excluir
+            </button>
+        </form>
+    </div>
+</div>

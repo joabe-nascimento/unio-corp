@@ -1,0 +1,31 @@
+{#
+  ticket_assign_inline — atribuir técnico na linha da tabela
+
+  Props:
+    ticket        array do chamado
+    technicians   list[{ id, name }]
+    can_assign    bool
+#}
+{% set _techs = technicians|default([]) %}
+{% set _can = can_assign|default(false) %}
+{% set _assignee_id = ticket.assignee_id|default(null) %}
+{% set _assignee = ticket.assignee|default('—') %}
+{% if _can and _techs|length > 0 %}
+<form method="post"
+      action="{{ path('app_ti_chamado_atribuir', { id: ticket.id }) }}"
+      class="ti-ticket-assign-inline m-0"
+      data-ti-ticket-assign>
+    <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_atribuir_' ~ ticket.id) }}">
+    <select name="technician_id"
+            class="ti-ticket-assign-select unio-form-control"
+            aria-label="Atribuir técnico para {{ ticket.id }}"
+            title="{{ _assignee_id ? 'Alterar responsável' : 'Atribuir responsável' }}">
+        <option value="" disabled{% if not _assignee_id %} selected{% endif %}>Atribuir</option>
+        {% for tech in _techs %}
+        <option value="{{ tech.id }}"{% if _assignee_id == tech.id %} selected{% endif %}>{{ tech.name }}</option>
+        {% endfor %}
+    </select>
+</form>
+{% else %}
+<span class="ti-ticket-person-name" title="{{ _assignee }}">{{ _assignee }}</span>
+{% endif %}

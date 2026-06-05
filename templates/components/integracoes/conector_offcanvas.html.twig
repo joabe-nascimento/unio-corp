@@ -1,0 +1,55 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'integ-conector-form',
+    title: 'Conector',
+    subtitle: 'Cadastro manual ou edição',
+    icon: 'fa-plug',
+    size: 'md',
+    open: app.request.query.get('open_novo') == '1' or app.request.query.get('open_edit')
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_integracoes_conector_novo_submit') }}" id="integConectorForm" data-integ-conector-form data-integ-edit-url="{{ path('app_integracoes_conector_editar_submit', { id: 0 }) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('integ_conector_form') }}">
+    <div class="form-group">
+        <label for="integConNome">Nome</label>
+        <input type="text" class="form-control" id="integConNome" name="nome" required>
+    </div>
+    <div class="form-group">
+        <label for="integConCat">Categoria</label>
+        <select class="form-control" id="integConCat" name="categoria">
+            <option value="produtividade">Produtividade</option>
+            <option value="rh">RH & Pessoas</option>
+            <option value="financeiro">Financeiro</option>
+            <option value="identidade">Identidade</option>
+            <option value="dados" selected>Dados</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="integConEndpoint">Endpoint URL</label>
+        <input type="url" class="form-control" id="integConEndpoint" name="endpoint_url" placeholder="https://...">
+    </div>
+    <div class="form-row">
+        <div class="form-group col-6">
+            <label for="integConHealth">Saúde</label>
+            <select class="form-control" id="integConHealth" name="health">
+                <option value="healthy">Saudável</option>
+                <option value="degraded">Degradado</option>
+                <option value="down">Indisponível</option>
+            </select>
+        </div>
+        <div class="form-group col-6">
+            <label for="integConStatus">Operacional</label>
+            <select class="form-control" id="integConStatus" name="operational_status">
+                <option value="active">Ativo</option>
+                <option value="paused">Pausado</option>
+                <option value="error">Erro</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="integConNotas">Notas de configuração</label>
+        <textarea class="form-control" id="integConNotas" name="config_notas" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn-unio btn-block">Salvar conector</button>
+</form>
+{% endblock %}
+{% endembed %}
