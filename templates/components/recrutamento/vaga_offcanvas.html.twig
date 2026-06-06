@@ -1,0 +1,169 @@
+{#
+  recrutamento/vaga_offcanvas — nova vaga (offcanvas lateral)
+#}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'recrutamento-vaga-form',
+    title: 'Nova vaga',
+    subtitle: 'Cadastre a oportunidade e comece a receber candidatos.',
+    icon: 'fa-briefcase',
+    size: 'lg'
+} %}
+    {% block offcanvas_body %}
+        <div class="recrutamento-vaga-offcanvas">
+            <div class="recrutamento-vaga-offcanvas-hint unio-card p-3 mb-3">
+                <i class="fas fa-circle-info text-info mr-2" aria-hidden="true"></i>
+                <span class="section-subtitle mb-0">
+                    Vagas <strong>abertas</strong> entram na listagem e no pipeline.
+                    Você pode pausar ou fechar depois, conforme o andamento da seleção.
+                </span>
+            </div>
+
+            <form method="post" action="{{ path('app_recrutamento_vagas') }}" class="unio-form unio-offcanvas-form" id="recrutamentoVagaForm">
+                <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_vaga') }}">
+                {% if filter_status|default('') %}
+                <input type="hidden" name="redirect_status" value="{{ filter_status }}">
+                {% endif %}
+                {% if filter_q|default('') %}
+                <input type="hidden" name="redirect_q" value="{{ filter_q }}">
+                {% endif %}
+
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Informações básicas',
+                    subtitle: 'Título e área responsável pela vaga.'
+                } %}
+
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'vaga-titulo',
+                    name: 'titulo',
+                    label: 'Título da vaga',
+                    placeholder: 'Ex.: Analista de People Ops · Pleno',
+                    required: true,
+                    maxlength: 150,
+                    help_text: 'Use cargo e senioridade para facilitar a busca depois.'
+                } %}
+
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'vaga-departamento',
+                    name: 'departamento',
+                    label: 'Departamento / área',
+                    placeholder: 'Ex.: People, Comercial, TI',
+                    maxlength: 100,
+                    attrs: { list: 'vaga-departamentos-datalist', autocomplete: 'organization' },
+                    help_text: departamentos|default([]) is not empty
+                        ? 'Sugestões com base nos departamentos já cadastrados na empresa.'
+                        : 'Informe a área ou squad responsável pela contratação.'
+                } %}
+                <datalist id="vaga-departamentos-datalist">
+                    {% for d in departamentos|default([]) %}
+                    <option value="{{ d.nome }}"></option>
+                    {% endfor %}
+                </datalist>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'vaga-tipo-contrato',
+                            name: 'tipo_contrato',
+                            label: 'Tipo de contrato',
+                            type: 'select',
+                            value: '',
+                            options: recrutamento_tipo_contrato_options(),
+                        } %}
+                    </div>
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'vaga-quantidade',
+                            name: 'vagas_quantidade',
+                            label: 'Vagas abertas',
+                            type: 'number',
+                            value: '1',
+                            attrs: { min: 1, max: 99 },
+                            help_text: 'Quantidade de posições para esta oportunidade.'
+                        } %}
+                    </div>
+                </div>
+
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'vaga-local',
+                    name: 'local_trabalho',
+                    label: 'Local / modelo',
+                    placeholder: 'Ex.: Remoto · São Paulo · Híbrido',
+                    maxlength: 120,
+                } %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'vaga-status',
+                            name: 'status',
+                            label: 'Status inicial',
+                            type: 'select',
+                            value: constant('App\\Entity\\RhVaga::STATUS_ABERTA'),
+                            options: [
+                                { value: constant('App\\Entity\\RhVaga::STATUS_ABERTA'), label: 'Aberta — recebendo candidatos' },
+                                { value: constant('App\\Entity\\RhVaga::STATUS_PAUSADA'), label: 'Pausada — rascunho interno' },
+                            ],
+                            help_text: 'Pausada não impede cadastro, mas sinaliza que a vaga ainda não está publicada.'
+                        } %}
+                    </div>
+                    <div class="col-md-6">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'vaga-after-create',
+                            name: 'after_create',
+                            label: 'Após criar',
+                            type: 'select',
+                            value: 'list',
+                            options: [
+                                { value: 'list', label: 'Voltar para a listagem' },
+                                { value: 'show', label: 'Abrir detalhes da vaga' },
+                                { value: 'show_candidato', label: 'Abrir vaga e adicionar candidato' },
+                            ],
+                            help_text: 'Escolha o próximo passo no fluxo de recrutamento.'
+                        } %}
+                    </div>
+                </div>
+
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Descrição da vaga',
+                    subtitle: 'Resumo para o time de seleção (opcional, mas recomendado).'
+                } %}
+
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'vaga-descricao',
+                    name: 'descricao',
+                    label: 'Descrição da vaga',
+                    placeholder: 'Resumo da oportunidade, cultura, benefícios…',
+                    type: 'textarea',
+                    rows: 4,
+                    help_text: 'Visível nos detalhes da vaga para o time de seleção.'
+                } %}
+
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'vaga-requisitos',
+                    name: 'requisitos',
+                    label: 'Requisitos e responsabilidades',
+                    placeholder: 'Experiência, skills, formação, idiomas…',
+                    type: 'textarea',
+                    rows: 5,
+                    help_text: 'Base para triagem e entrevistas estruturadas.'
+                } %}
+
+                <div class="recrutamento-vaga-offcanvas-steps unio-card p-3 mb-3">
+                    <div class="section-title mb-2">Próximos passos</div>
+                    <ol class="recrutamento-vaga-offcanvas-steps-list mb-0 pl-3">
+                        <li>Candidatos entram pela vaga ou pelo pipeline.</li>
+                        <li>Movimente etapas no kanban (triagem → contratação).</li>
+                        <li>Ao contratar, o fluxo segue para admissão no RH.</li>
+                    </ol>
+                </div>
+
+                <div class="unio-form-actions unio-offcanvas-form-actions">
+                    <button type="submit" class="btn-unio">
+                        <i class="fas fa-check mr-1" aria-hidden="true"></i> Criar vaga
+                    </button>
+                    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+                </div>
+            </form>
+        </div>
+    {% endblock %}
+{% endembed %}

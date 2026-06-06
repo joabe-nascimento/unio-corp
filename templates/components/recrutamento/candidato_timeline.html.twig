@@ -1,0 +1,58 @@
+{# Histórico de atividades do candidato — timeline estilizada #}
+{% set events = events|default([]) %}
+<ul class="recrutamento-timeline mb-0" role="list">
+{% for ev in events %}
+{% set kind = ev.kind|default('default') %}
+{% set icon = kind == 'etapa' ? 'fa-shuffle' : (kind == 'cadastro' ? 'fa-user-plus' : (kind == 'admissao' ? 'fa-user-check' : (kind == 'avaliacao' ? 'fa-star' : (kind == 'contato' ? 'fa-address-card' : 'fa-circle-dot')))) %}
+<li class="recrutamento-timeline-item recrutamento-timeline-item--{{ kind }}{% if loop.last %} recrutamento-timeline-item--last{% endif %}" role="listitem">
+    <div class="recrutamento-timeline-track" aria-hidden="true">
+        <span class="recrutamento-timeline-dot">
+            <i class="fas {{ icon }}" aria-hidden="true"></i>
+        </span>
+    </div>
+    <div class="recrutamento-timeline-body">
+        <time class="recrutamento-timeline-date" datetime="{{ ev.at|default('') }}">{{ ev.at|default('—') }}</time>
+        {% if kind == 'etapa' and ev.de|default('') and ev.para|default('') %}
+        <div class="recrutamento-timeline-move">
+            <span class="recrutamento-timeline-move-label">Etapa alterada</span>
+            <div class="recrutamento-timeline-move-badges">
+                {% include 'components/status_badge.html.twig' with {
+                    label: recrutamento_etapa_label(ev.de),
+                    variant: recrutamento_etapa_badge_variant(ev.de),
+                    extra_class: 'ti-badge-health'
+                } %}
+                <i class="fas fa-arrow-right recrutamento-timeline-move-arrow" aria-hidden="true"></i>
+                {% include 'components/status_badge.html.twig' with {
+                    label: recrutamento_etapa_label(ev.para),
+                    variant: recrutamento_etapa_badge_variant(ev.para),
+                    extra_class: 'ti-badge-health'
+                } %}
+            </div>
+            {% if ev.motivo|default('') %}
+            <p class="recrutamento-timeline-motivo mb-0">{{ ev.motivo }}</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <p class="recrutamento-timeline-event mb-0">{{ ev.event|default('Evento') }}</p>
+        {% endif %}
+        {% if ev.actor|default('') %}
+        <p class="recrutamento-timeline-meta mb-0">
+            <i class="fas fa-user recrutamento-timeline-meta-icon" aria-hidden="true"></i>
+            {{ ev.actor }}
+        </p>
+        {% endif %}
+    </div>
+</li>
+{% else %}
+<li class="recrutamento-timeline-item recrutamento-timeline-item--empty recrutamento-timeline-item--last" role="listitem">
+    <div class="recrutamento-timeline-track" aria-hidden="true">
+        <span class="recrutamento-timeline-dot recrutamento-timeline-dot--muted">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+        </span>
+    </div>
+    <div class="recrutamento-timeline-body">
+        <p class="recrutamento-timeline-empty mb-0">Nenhum evento registrado.</p>
+    </div>
+</li>
+{% endfor %}
+</ul>

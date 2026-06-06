@@ -1,0 +1,110 @@
+{#
+  recrutamento/vaga_row_actions — ações compactas da linha de vaga
+
+  Props:
+    vaga           RhVaga
+    filter_status  (string)
+    can_manage     (bool)
+    can_pipeline   (bool)
+    redirect_to    (string, opt) list | show
+    show_nav       (bool, opt) exibe ver/editar/adicionar; default true
+    show_pipeline  (bool, opt) exibe atalho pipeline; default true
+    lifecycle_only (bool, opt) só pausar/fechar/reabrir
+#}
+{% set _v = vaga %}
+{% set _filter = filter_status|default('') %}
+{% set _redirect = redirect_to|default('list') %}
+{% set _show_nav = show_nav|default(true) %}
+{% set _show_pipeline = show_pipeline|default(true) %}
+{% set _lifecycle_only = lifecycle_only|default(false) %}
+<div class="recrutamento-vaga-row-actions">
+    {% if _show_nav and not _lifecycle_only %}
+    <a href="{{ path('app_recrutamento_vagas_show', { id: _v.id }) }}"
+       class="btn-unio-ghost btn-xs"
+       title="Ver vaga">
+        <i class="fas fa-eye" aria-hidden="true"></i>
+    </a>
+    {% if can_manage %}
+    <button type="button"
+            class="btn-unio-ghost btn-xs"
+            title="Editar vaga"
+            data-unio-offcanvas-open="recrutamento-vaga-edit-form"
+            data-recrutamento-vaga-edit="{{ _v.id }}"
+            data-recrutamento-vaga-titulo="{{ _v.titulo|e('html_attr') }}"
+            data-recrutamento-vaga-departamento="{{ _v.departamento|default('')|e('html_attr') }}"
+            data-recrutamento-vaga-descricao="{{ _v.descricao|default('')|e('html_attr') }}"
+            data-recrutamento-vaga-requisitos="{{ _v.requisitos|default('')|e('html_attr') }}"
+            data-recrutamento-vaga-tipo-contrato="{{ _v.tipoContrato|default('')|e('html_attr') }}"
+            data-recrutamento-vaga-local="{{ _v.localTrabalho|default('')|e('html_attr') }}"
+            data-recrutamento-vaga-quantidade="{{ _v.vagasQuantidade|default(1) }}"
+            data-recrutamento-vaga-status="{{ _v.status }}"
+            data-recrutamento-vaga-edit-redirect="{{ _redirect }}"
+            data-recrutamento-vaga-edit-filter-status="{{ _filter|e('html_attr') }}"
+            data-recrutamento-vaga-edit-filter-q="{{ filter_q|default('')|e('html_attr') }}"
+            data-recrutamento-vaga-edit-token="{{ csrf_token('recrutamento_vaga_edit_' ~ _v.id) }}">
+        <i class="fas fa-pen" aria-hidden="true"></i>
+    </button>
+    {% if _v.status != constant('App\\Entity\\RhVaga::STATUS_FECHADA') %}
+    <button type="button"
+            class="btn-unio-ghost btn-xs"
+            title="Adicionar candidato"
+            data-unio-offcanvas-open="recrutamento-candidato-form"
+            data-recrutamento-candidato-vaga="{{ _v.id }}"
+            data-recrutamento-candidato-titulo="{{ _v.titulo|e('html_attr') }}"
+            data-recrutamento-candidato-redirect="{{ _redirect }}">
+        <i class="fas fa-user-plus" aria-hidden="true"></i>
+    </button>
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% if can_pipeline and _show_pipeline and not _lifecycle_only %}
+    <a href="{{ path('app_recrutamento_pipeline', { vaga: _v.id }) }}"
+       class="btn-unio-ghost btn-xs"
+       title="Ver pipeline">
+        <i class="fas fa-diagram-project" aria-hidden="true"></i>
+    </a>
+    {% endif %}
+    {% if can_manage %}
+    {% if _v.status == constant('App\\Entity\\RhVaga::STATUS_ABERTA') %}
+    <form method="post" action="{{ path('app_recrutamento_vaga_status', { id: _v.id }) }}" class="d-inline">
+        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_vaga_status_' ~ _v.id) }}">
+        <input type="hidden" name="filter_status" value="{{ _filter }}">
+        <input type="hidden" name="redirect_status" value="{{ _filter }}">
+        <input type="hidden" name="redirect_q" value="{{ filter_q|default('') }}">
+        <input type="hidden" name="redirect_to" value="{{ _redirect }}">
+        <input type="hidden" name="status" value="{{ constant('App\\Entity\\RhVaga::STATUS_PAUSADA') }}">
+        <button type="submit" class="btn-unio-ghost btn-xs" title="Pausar vaga">
+            <i class="fas fa-pause" aria-hidden="true"></i>
+        </button>
+    </form>
+    {% elseif _v.status == constant('App\\Entity\\RhVaga::STATUS_PAUSADA') or _v.status == constant('App\\Entity\\RhVaga::STATUS_FECHADA') %}
+    <form method="post" action="{{ path('app_recrutamento_vaga_status', { id: _v.id }) }}" class="d-inline">
+        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_vaga_status_' ~ _v.id) }}">
+        <input type="hidden" name="filter_status" value="{{ _filter }}">
+        <input type="hidden" name="redirect_status" value="{{ _filter }}">
+        <input type="hidden" name="redirect_q" value="{{ filter_q|default('') }}">
+        <input type="hidden" name="redirect_to" value="{{ _redirect }}">
+        <input type="hidden" name="status" value="{{ constant('App\\Entity\\RhVaga::STATUS_ABERTA') }}">
+        <button type="submit" class="btn-unio-ghost btn-xs" title="Reabrir vaga">
+            <i class="fas fa-play" aria-hidden="true"></i>
+        </button>
+    </form>
+    {% endif %}
+    {% if _v.status != constant('App\\Entity\\RhVaga::STATUS_FECHADA') %}
+    <form method="post"
+          action="{{ path('app_recrutamento_vaga_status', { id: _v.id }) }}"
+          class="d-inline"
+          onsubmit="return confirm('Fechar a vaga {{ _v.titulo|e('js') }}?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_vaga_status_' ~ _v.id) }}">
+        <input type="hidden" name="filter_status" value="{{ _filter }}">
+        <input type="hidden" name="redirect_status" value="{{ _filter }}">
+        <input type="hidden" name="redirect_q" value="{{ filter_q|default('') }}">
+        <input type="hidden" name="redirect_to" value="{{ _redirect }}">
+        <input type="hidden" name="status" value="{{ constant('App\\Entity\\RhVaga::STATUS_FECHADA') }}">
+        <button type="submit" class="btn-unio-ghost btn-xs btn-danger-ghost" title="Fechar vaga">
+            <i class="fas fa-lock" aria-hidden="true"></i>
+        </button>
+    </form>
+    {% endif %}
+    {% endif %}
+</div>

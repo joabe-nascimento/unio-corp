@@ -1,0 +1,135 @@
+{#
+  recrutamento/pipeline_card — card compacto de candidato no kanban
+
+  Props:
+    candidato        RhCandidato
+    filter_vaga_id   (int|null)
+    filter_q         (string)
+    can_manage       (bool)
+    can_view_admissoes (bool)
+#}
+{% set etapa = candidato.etapa %}
+{% set next_etapa = recrutamento_etapa_next(etapa) %}
+{% set prev_etapa = recrutamento_etapa_prev(etapa) %}
+{% set show_vaga_badge = not filter_vaga_id %}
+{% set show_reject = can_manage and etapa not in ['REPROVADO', 'CONTRATADO'] %}
+{% set contact_hint = candidato.email ~ (candidato.telefone ? ' · ' ~ candidato.telefone : '') %}
+<div class="kanban-card recrutamento-pipeline-card{% if not show_vaga_badge %} recrutamento-pipeline-card--single-vaga{% endif %}"
+     data-recrutamento-pipeline-card="{{ candidato.id }}"
+     data-recrutamento-pipeline-etapa="{{ etapa }}"
+     {% if can_manage %}
+     data-recrutamento-pipeline-move-url="{{ path('app_recrutamento_candidato_etapa', { id: candidato.id }) }}"
+     data-recrutamento-pipeline-move-token="{{ csrf_token('recrutamento_candidato_etapa_' ~ candidato.id) }}"
+     data-recrutamento-pipeline-filter-vaga="{{ filter_vaga_id|default('') }}"
+     data-recrutamento-pipeline-filter-q="{{ filter_q|default('') }}"
+     {% endif %}>
+    {% if can_manage %}
+    <span class="recrutamento-pipeline-card-drag-handle" title="Arrastar entre etapas" aria-label="Arrastar candidato">
+        <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+    </span>
+    {% endif %}
+    <div class="recrutamento-pipeline-card-body">
+        {% if show_vaga_badge %}
+        <div class="recrutamento-pipeline-card-top">
+            <span class="recrutamento-pipeline-card-vaga">{{ candidato.vaga.titulo }}</span>
+        </div>
+        {% endif %}
+        <p class="recrutamento-pipeline-card-name">
+            <a href="{{ path('app_recrutamento_candidatos_show', { id: candidato.id }) }}"
+               class="recrutamento-pipeline-card-name-link"
+               title="{{ contact_hint }}">{{ candidato.nome|recrutamento_nome }}</a>
+        </p>
+    </div>
+    {% if can_manage %}
+        {% if etapa == 'CONTRATADO' %}
+        <div class="recrutamento-pipeline-card-extra">
+            {% if candidato.onboardingProcess %}
+            {% if can_view_admissoes %}
+            <a href="{{ path('app_rh_admissoes_show', { id: candidato.onboardingProcess.id }) }}" class="recrutamento-pipeline-btn recrutamento-pipeline-btn--secondary">
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                <span>Admissão #{{ candidato.onboardingProcess.id }}</span>
+            </a>
+            {% else %}
+            {% include 'components/status_badge.html.twig' with {
+                label: 'Admissão #' ~ candidato.onboardingProcess.id,
+                variant: 'success',
+                extra_class: 'ti-badge-health'
+            } %}
+            {% endif %}
+            {% else %}
+            <span class="recrutamento-pipeline-card-extra-hint">Admissão será criada ao confirmar contratação.</span>
+            {% endif %}
+        </div>
+        {% elseif next_etapa or etapa == 'REPROVADO' %}
+        <div class="recrutamento-pipeline-card-actions">
+            <div class="recrutamento-pipeline-card-actions-row">
+                {% if next_etapa %}
+                <form method="post"
+                      action="{{ path('app_recrutamento_candidato_etapa', { id: candidato.id }) }}"
+                      class="recrutamento-pipeline-card-actions-forward"
+                      data-recrutamento-pipeline-form>
+                    <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_etapa_' ~ candidato.id) }}">
+                    <input type="hidden" name="etapa" value="{{ next_etapa }}">
+                    <input type="hidden" name="vaga" value="{{ filter_vaga_id|default('') }}">
+                    <input type="hidden" name="q" value="{{ filter_q|default('') }}">
+                    <button type="submit" class="recrutamento-pipeline-btn recrutamento-pipeline-btn--primary" aria-label="Avançar para {{ recrutamento_etapa_label(next_etapa) }}">
+                        <span>{{ recrutamento_etapa_label(next_etapa) }}</span>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </button>
+                </form>
+                {% elseif etapa == 'REPROVADO' %}
+                <form method="post"
+                      action="{{ path('app_recrutamento_candidato_etapa', { id: candidato.id }) }}"
+                      class="recrutamento-pipeline-card-actions-forward"
+                      data-recrutamento-pipeline-form>
+                    <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_etapa_' ~ candidato.id) }}">
+                    <input type="hidden" name="etapa" value="TRIAGEM">
+                    <input type="hidden" name="vaga" value="{{ filter_vaga_id|default('') }}">
+                    <input type="hidden" name="q" value="{{ filter_q|default('') }}">
+                    <button type="submit" class="recrutamento-pipeline-btn recrutamento-pipeline-btn--primary" aria-label="Restaurar para triagem">
+                        <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                        <span>Restaurar</span>
+                    </button>
+                </form>
+                {% endif %}
+                {% if show_reject %}
+                <button type="button"
+                        class="recrutamento-pipeline-btn recrutamento-pipeline-btn--icon recrutamento-pipeline-btn--danger"
+                        title="Reprovar candidato"
+                        aria-label="Reprovar candidato"
+                        data-unio-offcanvas-open="recrutamento-candidato-reject-form"
+                        data-recrutamento-candidato-reject="{{ candidato.id }}"
+                        data-recrutamento-candidato-reject-nome="{{ candidato.nome|recrutamento_nome|e('html_attr') }}"
+                        data-recrutamento-candidato-reject-token="{{ csrf_token('recrutamento_candidato_reprovar_' ~ candidato.id) }}"
+                        data-recrutamento-candidato-reject-vaga="{{ filter_vaga_id|default('') }}"
+                        data-recrutamento-candidato-reject-q="{{ filter_q|default('') }}"
+                        data-recrutamento-candidato-reject-redirect="pipeline">
+                    <i class="fas fa-ban" aria-hidden="true"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% if prev_etapa %}
+        <div class="recrutamento-pipeline-card-actions-back-row">
+            <form method="post"
+                  action="{{ path('app_recrutamento_candidato_etapa', { id: candidato.id }) }}"
+                  class="recrutamento-pipeline-card-actions-back"
+                  data-recrutamento-pipeline-form>
+                <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_etapa_' ~ candidato.id) }}">
+                <input type="hidden" name="etapa" value="{{ prev_etapa }}">
+                <input type="hidden" name="vaga" value="{{ filter_vaga_id|default('') }}">
+                <input type="hidden" name="q" value="{{ filter_q|default('') }}">
+                <button type="submit" class="recrutamento-pipeline-btn recrutamento-pipeline-btn--ghost" title="Voltar para {{ recrutamento_etapa_label(prev_etapa) }}" aria-label="Voltar para {{ recrutamento_etapa_label(prev_etapa) }}">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                    <span>{{ recrutamento_etapa_label(prev_etapa) }}</span>
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    {% else %}
+    <div class="recrutamento-pipeline-card-readonly">
+        {% include 'components/recrutamento/candidato_etapa_badge.html.twig' with { candidato: candidato } %}
+    </div>
+    {% endif %}
+</div>

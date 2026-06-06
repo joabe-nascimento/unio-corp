@@ -1,0 +1,40 @@
+{% extends 'public/carreiras/layout.html.twig' %}
+{% block title %}Candidatura enviada{% endblock %}
+
+{% block hero %}
+<section class="carreiras-hero carreiras-hero--success" aria-label="Confirmação">
+    {% include 'public/carreiras/_hero_bg.html.twig' with { empresa: empresa } %}
+    <div class="container carreiras-hero-inner carreiras-hero-inner--center">
+        <span class="carreiras-success-icon" aria-hidden="true"><i class="fas fa-circle-check"></i></span>
+        <h1 class="carreiras-hero-title">Candidatura enviada!</h1>
+        <p class="carreiras-hero-desc mb-0">
+            Recebemos sua inscrição para <strong>{{ vaga.titulo }}</strong>.
+            Enviamos um e-mail de confirmação com os próximos passos.
+        </p>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<div class="carreiras-success-page">
+    <div class="carreiras-success-actions">
+        <a href="{{ path('app_carreiras_index', { empresaSlug: empresa.slug }) }}" class="carreiras-btn carreiras-btn--primary">
+            <i class="fas fa-briefcase" aria-hidden="true"></i>
+            Ver outras vagas
+        </a>
+        <a href="{{ path('app_carreiras_vaga', { empresaSlug: empresa.slug, vagaSlug: vaga.slug }) }}" class="carreiras-btn carreiras-btn--ghost">
+            Voltar à vaga
+        </a>
+    </div>
+
+    {% include 'public/carreiras/_process_timeline.html.twig' with { mode: 'success' } %}
+
+    <aside class="carreiras-success-tip">
+        <span class="carreiras-success-tip-icon" aria-hidden="true"><i class="fas fa-lightbulb"></i></span>
+        <p class="mb-0">
+            <strong>Dica:</strong> adicione <em>{{ empresa.nome }}</em> aos remetentes confiáveis
+            para não perder nossas mensagens sobre esta vaga.
+        </p>
+    </aside>
+</div>
+{% endblock %}

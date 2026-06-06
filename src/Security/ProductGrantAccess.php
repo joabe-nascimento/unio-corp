@@ -23,6 +23,44 @@ final class ProductGrantAccess
         'app_publicidade' => ['hub_publicidade', 'product_publicidade'],
         'app_ti' => ['hub_ti'],
         'app_integracoes' => ['hub_integracoes'],
+        'app_recrutamento' => ['hub_recrutamento', 'product_rh'],
+        'app_recrutamento_analytics' => ['hub_recrutamento', 'product_rh'],
+    ];
+
+    /** Hub Recrutamento ↔ módulo RH Recrutamento (rotas espelhadas). */
+    private const RECRUTAMENTO_ROUTE_FALLBACK = [
+        'app_recrutamento' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_analytics' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_vagas' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_pipeline' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_carreiras' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_talentos' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_integracoes' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato_etapa' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato_reprovar' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_vaga_status' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_vagas_show' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_vaga_edit' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidatos' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidatos_show' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato_edit' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_vaga_publicar' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_vaga_despublicar' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_talento_inscrever' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato_entrevista' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato_scorecard' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato_curriculo' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato_banco_talentos' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_aprovacao_decidir' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidato_avaliacao' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_recrutamento_candidatos_export' => ['scope' => 'product_rh', 'product' => 'recrutamento'],
+        'app_rh_recrutamento' => ['scope' => 'hub_recrutamento', 'product' => 'vagas'],
+        'app_rh_recrutamento_vaga_status' => ['scope' => 'hub_recrutamento', 'product' => 'vagas'],
+        'app_rh_recrutamento_candidato' => ['scope' => 'hub_recrutamento', 'product' => 'vagas'],
+        'app_rh_recrutamento_pipeline' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline'],
+        'app_rh_recrutamento_candidato_etapa' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline'],
+        'app_rh_recrutamento_candidato_reprovar' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline'],
     ];
 
     /** Rotas TI com regra própria (além do produto primário no mapa). */
@@ -43,6 +81,21 @@ final class ProductGrantAccess
         'app_rh_demissoes_nova' => ['scope' => 'product_rh', 'product' => 'admissoes', 'min' => 'GESTOR_EQUIPE'],
         'app_rh_ferias_nova' => ['scope' => 'product_rh', 'product' => 'ferias', 'min' => 'GESTOR_EQUIPE'],
         'app_rh_folha_gerar' => ['scope' => 'product_rh', 'product' => 'folha', 'min' => 'GESTOR'],
+        // Recrutamento
+        'app_recrutamento_vaga_status' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_vaga_edit' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_candidato' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_candidato_etapa' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_candidato_reprovar' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_candidato_edit' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_vaga_publicar' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_vaga_despublicar' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_talento_inscrever' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_candidato_entrevista' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_candidato_scorecard' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_candidato_curriculo' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_candidato_banco_talentos' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
+        'app_recrutamento_aprovacao_decidir' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
         // Núcleo TI — chamados
         'app_ti_chamado_novo_submit' => ['scope' => 'hub_ti', 'product' => 'meus_chamados', 'min' => 'MEMBRO'],
         'app_ti_chamado_status' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
@@ -202,7 +255,15 @@ final class ProductGrantAccess
 
         $rule = self::MANAGE_ROUTES[$routeName];
 
-        return $this->grantAtLeast($user, $rule['scope'], $rule['product'], $rule['min']);
+        if ($this->grantAtLeast($user, $rule['scope'], $rule['product'], $rule['min'])) {
+            return true;
+        }
+
+        if (str_starts_with($routeName, 'app_recrutamento_')) {
+            return $this->grantAtLeast($user, 'product_rh', 'recrutamento', $rule['min']);
+        }
+
+        return false;
     }
 
     /**
@@ -278,6 +339,12 @@ final class ProductGrantAccess
             return $this->tiRouteAllowed($user, self::TI_ROUTE_FALLBACK[$routeName]);
         }
 
+        if (isset(self::RECRUTAMENTO_ROUTE_FALLBACK[$routeName])) {
+            $fallback = self::RECRUTAMENTO_ROUTE_FALLBACK[$routeName];
+
+            return $this->canView($user, $fallback['scope'], $fallback['product']);
+        }
+
         foreach ($moduleScopes ?? [] as $scope) {
             if ($this->canViewAnyProductInScope($user, $scope)) {
                 return true;
@@ -308,7 +375,7 @@ final class ProductGrantAccess
             return false;
         }
 
-        if (preg_match('/^app_(talentos|maturidade|engenharia|publicidade|comercial|beneficios|academy|parceiros|financeiro|compliance|analytics|juridico|clima|sst|comunicacao|hub_portal|hub_recrutamento|esg|suprimentos|ti|expansao|qualidade|facilities|patrimonio|conhecimento|integracoes|customer_success|inovacao|holdings)/', $routeName) === 1) {
+        if (preg_match('/^app_(talentos|maturidade|recrutamento|engenharia|publicidade|comercial|beneficios|academy|parceiros|financeiro|compliance|analytics|juridico|clima|sst|comunicacao|hub_portal|esg|suprimentos|ti|expansao|qualidade|facilities|patrimonio|conhecimento|integracoes|customer_success|inovacao|holdings)/', $routeName) === 1) {
             return $this->security->isGranted('ROLE_GESTOR_EQUIPE');
         }
 

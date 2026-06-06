@@ -10,15 +10,15 @@
 #}
 {% set kind = kind|default('match') %}
 {% if kind == 'match' %}
-    {% set extra = 'ti-badge ti-badge-match' %}
+    {% set extra = 'ti-badge-match' %}
     {% set variant = 'info' %}
 {% elseif kind == 'sentiment' %}
     {% set tone = tone|default('success') %}
-    {% set extra = 'ti-badge ti-badge-sentiment ti-badge-sentiment--' ~ tone %}
+    {% set extra = 'ti-badge-sentiment ti-badge-sentiment--' ~ tone %}
     {% set variant = tone %}
 {% elseif kind == 'mode' %}
     {% set is_auto = mode|default('review') == 'auto' %}
-    {% set extra = 'ti-badge ' ~ (is_auto ? 'ti-badge-auto' : 'ti-badge-review') %}
+    {% set extra = is_auto ? 'ti-badge-auto' : 'ti-badge-review' %}
     {% set variant = is_auto ? 'success' : 'secondary' %}
     {% set label = label|default(is_auto ? 'Auto-aplicado' : 'Revisão manual') %}
 {% endif %}

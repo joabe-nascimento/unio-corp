@@ -1,0 +1,24 @@
+{# Faixa de progresso do candidato no funil #}
+{% set current = candidato.etapa %}
+{% set flow = ['TRIAGEM', 'ENTREVISTA', 'PROPOSTA', 'CONTRATADO'] %}
+{% set stage_index = { 'TRIAGEM': 0, 'ENTREVISTA': 1, 'PROPOSTA': 2, 'CONTRATADO': 3 } %}
+{% if current == 'REPROVADO' %}
+<div class="recrutamento-candidato-reprovado-banner mb-3">
+    {% include 'components/recrutamento/candidato_etapa_badge.html.twig' with { candidato: candidato } %}
+    <span class="text-muted small ml-2">Fora do funil ativo</span>
+</div>
+{% else %}
+<div class="ti-stage-strip recrutamento-candidato-stage-strip" role="list" aria-label="Progresso no funil">
+    {% set cur_i = stage_index[current]|default(0) %}
+    {% for stage_id in flow %}
+    {% set si = stage_index[stage_id] %}
+    {% set stage_label = recrutamento_etapa_label(stage_id) %}
+    {% set stage_icon = stage_id == 'TRIAGEM' ? 'fa-inbox' : (stage_id == 'ENTREVISTA' ? 'fa-comments' : (stage_id == 'PROPOSTA' ? 'fa-file-signature' : 'fa-user-check')) %}
+    <div class="ti-stage-item ti-stage-item--{{ stage_id|lower }}{% if stage_id == current %} is-current{% elseif si < cur_i %} is-done{% else %} is-upcoming{% endif %}" role="listitem">
+        <span class="ti-stage-icon"><i class="fas {{ stage_icon }}" aria-hidden="true"></i></span>
+        <span class="ti-stage-label">{{ stage_label }}</span>
+    </div>
+    {% if not loop.last %}<span class="ti-stage-connector{% if si < cur_i %} is-done{% endif %}" aria-hidden="true"></span>{% endif %}
+    {% endfor %}
+</div>
+{% endif %}

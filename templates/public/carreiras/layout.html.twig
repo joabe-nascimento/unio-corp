@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}{{ empresa.carreirasDescricao|default('Oportunidades de carreira')|striptags|slice(0, 160) }}{% endblock %}">
+    <title>{% block title %}Carreiras{% endblock %} — {{ empresa.nome|default('Empresa') }}</title>
+    {% include 'components/platform_favicon.html.twig' %}
+    <script>try{document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset(app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css') }}?v=272">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="carreiras-public-page carreiras-public-page--flex">
+<header class="carreiras-public-header">
+    <div class="container carreiras-public-header-inner">
+        <a href="{{ path('app_carreiras_index', { empresaSlug: empresa.slug }) }}" class="carreiras-public-brand">
+            {% import 'macros/empresa.html.twig' as empresa_macro %}
+            {{ empresa_macro.logo(empresa, 'carreiras-public-brand-logo', 'mark') }}
+            <span class="carreiras-public-brand-copy">
+                <span class="carreiras-public-brand-name">{{ empresa.carreirasTitulo|default(empresa.nome) }}</span>
+                <span class="carreiras-public-brand-tag">Carreiras</span>
+            </span>
+        </a>
+        <div class="carreiras-public-header-aside">
+            <a href="{{ path('app_carreiras_index', { empresaSlug: empresa.slug }) }}" class="carreiras-header-link">
+                <i class="fas fa-briefcase mr-1" aria-hidden="true"></i> Vagas abertas
+            </a>
+        </div>
+    </div>
+</header>
+
+{% block hero %}{% endblock %}
+
+<main class="carreiras-public-main">
+    <div class="container">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+            <div class="carreiras-alert carreiras-alert--{{ label == 'error' ? 'danger' : label }}" role="alert">
+                <i class="fas fa-{{ label == 'error' ? 'circle-exclamation' : 'circle-check' }} mr-2" aria-hidden="true"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<footer class="carreiras-public-footer">
+    <div class="container carreiras-public-footer-inner">
+        <div class="carreiras-public-footer-brand">
+            <strong>{{ empresa.nome }}</strong>
+            {% if empresa.carreirasDescricao %}
+            <p class="mb-0">{{ empresa.carreirasDescricao|length > 120 ? empresa.carreirasDescricao|slice(0, 120) ~ '…' : empresa.carreirasDescricao }}</p>
+            {% endif %}
+        </div>
+        <div class="carreiras-public-footer-meta">
+            <span>Powered by {{ platform_config.plataforma_nome|default('Unio') }}</span>
+            <a href="{{ path('app_carreiras_index', { empresaSlug: empresa.slug }) }}">Ver todas as vagas</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/carreiras-public.js') }}"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

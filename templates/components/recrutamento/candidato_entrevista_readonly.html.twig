@@ -1,0 +1,21 @@
+{#
+  recrutamento/candidato_entrevista_readonly — entrevista agendada (somente leitura)
+
+  Props:
+    candidato (RhCandidato, required)
+#}
+{% set entrevista_titulo = recrutamento_entrevista_titulo(candidato) %}
+
+<div class="recrutamento-entrevista-readonly">
+    {% include 'components/recrutamento/entrevista_participant.html.twig' with {
+        candidato: candidato,
+        show_ficha_link: false
+    } %}
+
+    <div class="recrutamento-entrevista-meeting-head">
+        <span class="recrutamento-entrevista-meeting-label">Título da reunião</span>
+        <strong class="recrutamento-entrevista-meeting-title">{{ entrevista_titulo }}</strong>
+    </div>
+
+    {% include 'components/recrutamento/candidato_entrevista_booking.html.twig' with { candidato: candidato } %}
+</div>

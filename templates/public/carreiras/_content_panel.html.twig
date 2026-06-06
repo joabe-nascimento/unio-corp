@@ -1,0 +1,25 @@
+{#
+  Painel de conteúdo — portal de carreiras
+
+  Props:
+    icon (string, FA class without fa- prefix)
+    title (string)
+    subtitle (string, optional)
+    variant (string, optional: default|muted|company)
+#}
+<article class="carreiras-panel carreiras-panel--{{ variant|default('default') }}">
+    <header class="carreiras-panel-header">
+        <span class="carreiras-panel-icon" aria-hidden="true">
+            <i class="fas fa-{{ icon }}"></i>
+        </span>
+        <div class="carreiras-panel-header-copy">
+            <h2 class="carreiras-panel-title">{{ title }}</h2>
+            {% if subtitle|default('') %}
+            <p class="carreiras-panel-subtitle">{{ subtitle }}</p>
+            {% endif %}
+        </div>
+    </header>
+    <div class="carreiras-panel-content">
+        {% block panel_content %}{% endblock %}
+    </div>
+</article>

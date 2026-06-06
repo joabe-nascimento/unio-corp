@@ -1,0 +1,39 @@
+{#
+  recrutamento/candidato_avaliacao_form — notas internas e rating
+#}
+<form method="post"
+      action="{{ path('app_recrutamento_candidato_avaliacao', { id: candidato.id }) }}"
+      class="recrutamento-candidato-avaliacao-form">
+    <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_avaliacao_' ~ candidato.id) }}">
+
+    <div class="recrutamento-candidato-avaliacao-editor">
+        <div class="recrutamento-scorecard-row recrutamento-candidato-avaliacao-rating-row">
+            <span class="recrutamento-scorecard-criterion" id="candidato-avaliacao-label-{{ candidato.id }}">Avaliação geral</span>
+            {% include 'components/recrutamento/rating_pills.html.twig' with {
+                name: 'avaliacao',
+                value: candidato.avaliacao,
+                include_clear: true,
+                aria_label: 'Avaliação geral'
+            } %}
+        </div>
+        <p class="recrutamento-candidato-avaliacao-legend mb-0">1 Fraco · 2 Abaixo · 3 Adequado · 4 Bom · 5 Excelente</p>
+
+        <div class="recrutamento-candidato-avaliacao-notes">
+            <label class="recrutamento-scorecard-comment-label" for="candidato-observacoes-{{ candidato.id }}">Notas internas</label>
+            <textarea class="unio-form-control"
+                      id="candidato-observacoes-{{ candidato.id }}"
+                      name="observacoes"
+                      rows="4"
+                      placeholder="Impressões da entrevista, pontos fortes, gaps, próximos passos…">{{ candidato.observacoes|default('') }}</textarea>
+            <p class="recrutamento-candidato-avaliacao-hint mb-0">
+                <i class="fas fa-lock mr-1" aria-hidden="true"></i> Visível apenas para o time de seleção.
+            </p>
+        </div>
+    </div>
+
+    <div class="recrutamento-candidato-avaliacao-footer">
+        <button type="submit" class="btn-unio btn-sm">
+            <i class="fas fa-save mr-1" aria-hidden="true"></i> Salvar avaliação
+        </button>
+    </div>
+</form>

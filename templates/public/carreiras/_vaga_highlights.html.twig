@@ -1,0 +1,40 @@
+{#
+  Destaques rápidos da vaga — coluna principal
+
+  Props: vaga
+#}
+<div class="carreiras-vaga-highlights" aria-label="Resumo da vaga">
+    {% if vaga.departamento %}
+    <div class="carreiras-vaga-highlight">
+        <span class="carreiras-vaga-highlight-icon" aria-hidden="true"><i class="fas fa-building"></i></span>
+        <span class="carreiras-vaga-highlight-label">Departamento</span>
+        <strong class="carreiras-vaga-highlight-value">{{ vaga.departamento }}</strong>
+    </div>
+    {% endif %}
+    {% if vaga.localTrabalho %}
+    <div class="carreiras-vaga-highlight">
+        <span class="carreiras-vaga-highlight-icon" aria-hidden="true"><i class="fas fa-location-dot"></i></span>
+        <span class="carreiras-vaga-highlight-label">Local</span>
+        <strong class="carreiras-vaga-highlight-value">{{ vaga.localTrabalho }}</strong>
+    </div>
+    {% endif %}
+    {% if vaga.tipoContrato %}
+    <div class="carreiras-vaga-highlight">
+        <span class="carreiras-vaga-highlight-icon" aria-hidden="true"><i class="fas fa-file-contract"></i></span>
+        <span class="carreiras-vaga-highlight-label">Contrato</span>
+        <strong class="carreiras-vaga-highlight-value">{{ recrutamento_tipo_contrato_label(vaga.tipoContrato) }}</strong>
+    </div>
+    {% endif %}
+    <div class="carreiras-vaga-highlight">
+        <span class="carreiras-vaga-highlight-icon" aria-hidden="true"><i class="fas fa-users"></i></span>
+        <span class="carreiras-vaga-highlight-label">Vagas</span>
+        <strong class="carreiras-vaga-highlight-value">{{ vaga.vagasQuantidade }} {{ vaga.vagasQuantidade == 1 ? 'posição' : 'posições' }}</strong>
+    </div>
+    {% if vaga.publicadaEm %}
+    <div class="carreiras-vaga-highlight">
+        <span class="carreiras-vaga-highlight-icon" aria-hidden="true"><i class="fas fa-calendar-check"></i></span>
+        <span class="carreiras-vaga-highlight-label">Publicada</span>
+        <strong class="carreiras-vaga-highlight-value">{{ vaga.publicadaEm|date('d/m/Y') }}</strong>
+    </div>
+    {% endif %}
+</div>

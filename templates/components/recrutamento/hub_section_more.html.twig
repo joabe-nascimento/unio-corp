@@ -1,0 +1,20 @@
+{#
+  recrutamento/hub_section_more — rodapé "Ver mais" dos widgets do dashboard
+
+  Props:
+    href    (string, required)
+    label   (string, default 'Ver mais')
+    total   (int, opt) total de itens na seção
+    shown   (int, opt) itens exibidos no widget
+#}
+{% if href|default('') and (total is not defined or shown is not defined or total > shown) %}
+<div class="recrutamento-hub-section-foot">
+    <a href="{{ href }}" class="recrutamento-hub-section-more">
+        <span>{{ label|default('Ver mais') }}</span>
+        {% if total is defined and shown is defined and total > shown %}
+        <span class="recrutamento-hub-section-more-meta">{{ total - shown }} restante{{ (total - shown) != 1 ? 's' : '' }}</span>
+        {% endif %}
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+    </a>
+</div>
+{% endif %}

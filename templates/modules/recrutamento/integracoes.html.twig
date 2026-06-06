@@ -1,0 +1,215 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Integrações{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set hub_page_title = 'Integrações' %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · LinkedIn, calendário, e-mail e HRIS' %}
+{% set can_manage = recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+{% set cfg = integracoes|default({}) %}
+{% set linkedin_on = cfg.linkedin_share|default(false) %}
+{% set calendar_on = cfg.calendar_google|default(true) %}
+{% set hris_on = cfg.hris_auto_export|default(false) %}
+{% set hris_configured = cfg.hris_webhook_url|default('') != '' %}
+
+{% block hub_toolbar_actions %}
+{% include 'components/recrutamento/hub_back_link.html.twig' %}
+{% endblock %}
+
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: aprovacoes_pendentes|length, label: 'Aprovações', sub: 'Aguardando gestor' },
+        { value: emails_pendentes|default(0), label: 'E-mails na fila', sub: 'Pendentes de envio' },
+        { value: linkedin_on ? 'On' : 'Off', label: 'LinkedIn', sub: 'Compartilhar vagas' },
+        { value: hris_on and hris_configured ? 'On' : 'Off', label: 'HRIS', sub: 'Webhook ao contratar' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block hub_content %}
+<div class="recrutamento-shell recrutamento-admin recrutamento-admin--integracoes">
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <form method="post" class="recrutamento-admin-form-stack">
+                <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_integracoes') }}">
+
+                <div class="unio-card recrutamento-admin-panel mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Canais e calendário',
+                        subtitle: 'LinkedIn e Google Calendar'
+                    } %}
+                    <div class="recrutamento-admin-toggle-stack px-3 pb-3">
+                        {% include 'components/unio/toggle_switch.html.twig' with {
+                            id: 'linkedin_share',
+                            name: 'linkedin_share',
+                            label: 'Compartilhar vaga no LinkedIn',
+                            hint: 'Exibe link de compartilhamento nas vagas publicadas.',
+                            icon: 'fab fa-linkedin',
+                            checked: linkedin_on,
+                            disabled: not can_manage
+                        } %}
+                        {% include 'components/unio/toggle_switch.html.twig' with {
+                            id: 'calendar_google',
+                            name: 'calendar_google',
+                            label: 'Google Calendar nos e-mails de entrevista',
+                            hint: 'Inclui botão "Adicionar ao calendário" ao agendar entrevistas.',
+                            icon: 'fas fa-calendar-check',
+                            checked: calendar_on,
+                            disabled: not can_manage
+                        } %}
+                    </div>
+                </div>
+
+                <div class="unio-card recrutamento-admin-panel mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'E-mail automático',
+                        subtitle: 'Notificações transacionais do funil'
+                    } %}
+                    <div class="recrutamento-admin-info-block px-3 pb-3">
+                        <div class="recrutamento-admin-info-row">
+                            <span class="recrutamento-admin-info-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+                            <div>
+                                <strong>Candidatura, mudança de etapa e entrevista</strong>
+                                <p class="recrutamento-admin-hint mb-0">Envio automático sempre ativo. A fila é processada pelo comando abaixo.</p>
+                            </div>
+                            {% include 'components/status_badge.html.twig' with {
+                                label: 'Ativo',
+                                variant: 'success',
+                                extra_class: 'recrutamento-admin-status-chip'
+                            } %}
+                        </div>
+                        {% if emails_pendentes|default(0) > 0 %}
+                        <div class="recrutamento-admin-queue-banner">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                            <span><strong>{{ emails_pendentes }}</strong> e-mail(s) aguardando processamento na fila.</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="unio-card recrutamento-admin-panel mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'HRIS / Webhook',
+                        subtitle: 'Exportação automática ao contratar candidato'
+                    } %}
+                    <div class="px-3 pb-3">
+                        <div class="recrutamento-admin-field-grid mb-3">
+                            <div class="unio-form-group recrutamento-admin-field">
+                                <label class="unio-form-label" for="hris_webhook_url">URL do webhook</label>
+                                <div class="recrutamento-admin-input-icon">
+                                    <i class="fas fa-link" aria-hidden="true"></i>
+                                    <input type="url"
+                                           class="unio-form-control"
+                                           id="hris_webhook_url"
+                                           name="hris_webhook_url"
+                                           value="{{ cfg.hris_webhook_url|default('') }}"
+                                           placeholder="https://seu-hris.com/webhook"
+                                           {% if not can_manage %}readonly{% endif %}>
+                                </div>
+                            </div>
+                            <div class="unio-form-group recrutamento-admin-field">
+                                <label class="unio-form-label" for="hris_webhook_secret">Segredo HMAC SHA-256</label>
+                                <div class="recrutamento-admin-input-icon">
+                                    <i class="fas fa-key" aria-hidden="true"></i>
+                                    <input type="text"
+                                           class="unio-form-control"
+                                           id="hris_webhook_secret"
+                                           name="hris_webhook_secret"
+                                           value="{{ cfg.hris_webhook_secret|default('') }}"
+                                           placeholder="Opcional — header X-Huplex-Signature"
+                                           autocomplete="off"
+                                           {% if not can_manage %}readonly{% endif %}>
+                                </div>
+                            </div>
+                        </div>
+                        {% include 'components/unio/toggle_switch.html.twig' with {
+                            id: 'hris_auto_export',
+                            name: 'hris_auto_export',
+                            label: 'Enviar evento ao contratar candidato',
+                            hint: 'Dispara POST com payload do candidato quando a etapa for Contratado.',
+                            icon: 'fas fa-building',
+                            checked: hris_on,
+                            disabled: not can_manage,
+                            extra_class: 'unio-toggle-row--inset'
+                        } %}
+                    </div>
+                </div>
+
+                {% if can_manage %}
+                <div class="recrutamento-admin-form-footer mb-4">
+                    <button type="submit" class="btn-unio">
+                        <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar integrações
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+
+            <div class="unio-card recrutamento-admin-callout px-3 py-3">
+                <span class="recrutamento-admin-callout-icon" aria-hidden="true"><i class="fas fa-terminal"></i></span>
+                <div>
+                    <strong>Processamento da fila</strong>
+                    <p class="recrutamento-admin-hint mb-0">
+                        Execute <code>php bin/console app:rh-email-process-queue</code> — cron recomendado a cada 5 min.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 mb-4">
+            <div class="unio-card recrutamento-admin-panel mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Aprovações pendentes',
+                    subtitle: 'Decisões multi-nível do funil'
+                } %}
+                <div class="px-3 pb-3">
+                    {% include 'components/recrutamento/aprovacoes_pendentes_list.html.twig' with {
+                        aprovacoes: aprovacoes_pendentes,
+                        can_manage: can_manage,
+                        redirect_to: 'integracoes'
+                    } %}
+                </div>
+            </div>
+
+            <div class="unio-card recrutamento-admin-panel">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Integrações ativas',
+                    subtitle: 'Resumo da configuração'
+                } %}
+                <ul class="recrutamento-admin-status-list px-3 pb-3">
+                    <li class="recrutamento-admin-status-item">
+                        <span class="recrutamento-admin-status-item-icon recrutamento-admin-status-item-icon--linkedin" aria-hidden="true"><i class="fab fa-linkedin"></i></span>
+                        <span class="recrutamento-admin-status-item-label">LinkedIn</span>
+                        {% include 'components/status_badge.html.twig' with {
+                            label: linkedin_on ? 'Habilitado' : 'Desabilitado',
+                            variant: linkedin_on ? 'success' : 'secondary'
+                        } %}
+                    </li>
+                    <li class="recrutamento-admin-status-item">
+                        <span class="recrutamento-admin-status-item-icon" aria-hidden="true"><i class="fas fa-calendar-check"></i></span>
+                        <span class="recrutamento-admin-status-item-label">Google Calendar</span>
+                        {% include 'components/status_badge.html.twig' with {
+                            label: calendar_on ? 'Habilitado' : 'Desabilitado',
+                            variant: calendar_on ? 'success' : 'secondary'
+                        } %}
+                    </li>
+                    <li class="recrutamento-admin-status-item">
+                        <span class="recrutamento-admin-status-item-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+                        <span class="recrutamento-admin-status-item-label">E-mail automático</span>
+                        {% include 'components/status_badge.html.twig' with {
+                            label: 'Ativo',
+                            variant: 'success'
+                        } %}
+                    </li>
+                    <li class="recrutamento-admin-status-item">
+                        <span class="recrutamento-admin-status-item-icon" aria-hidden="true"><i class="fas fa-building"></i></span>
+                        <span class="recrutamento-admin-status-item-label">HRIS / Webhook</span>
+                        {% include 'components/status_badge.html.twig' with {
+                            label: hris_configured ? (hris_on ? 'Exportação ativa' : 'Configurado') : 'Não configurado',
+                            variant: hris_on and hris_configured ? 'success' : (hris_configured ? 'warning' : 'secondary')
+                        } %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

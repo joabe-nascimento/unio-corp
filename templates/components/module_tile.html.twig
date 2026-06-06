@@ -1,6 +1,7 @@
 {# Tile de módulo — variant: horizontal (padrão) | dock (ícone + nome, dashboard) #}
 {% set _variant = variant|default('horizontal') %}
-<a href="{{ path(route) }}"
+{% set _href = href is defined and href ? href : (route is defined ? path(route, route_params|default({})) : '#') %}
+<a href="{{ _href }}"
    class="module-item{% if _variant == 'dock' %} module-item--dock{% endif %}"
    {% if _variant == 'dock' %}style="--module-i: {{ index|default(0) }}"{% endif %}>
     <div class="mi-icon" aria-hidden="true"><i class="fas {{ icon }}"></i></div>

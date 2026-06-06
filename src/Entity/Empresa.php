@@ -30,6 +30,22 @@ class Empresa
     #[ORM\Column]
     private bool $ativo = true;
 
+    #[ORM\Column(length: 80, nullable: true, unique: true)]
+    private ?string $slug = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $carreirasAtivo = false;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $carreirasTitulo = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $carreirasDescricao = null;
+
+    /** @var array<string, mixed>|null */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $recruitmentIntegracoes = null;
+
     #[ORM\Column]
     private \DateTimeImmutable $criadoEm;
 
@@ -61,6 +77,18 @@ class Empresa
     public function setLogo(?string $logo): static { $this->logo = $logo; return $this; }
     public function isAtivo(): bool { return $this->ativo; }
     public function setAtivo(bool $ativo): static { $this->ativo = $ativo; return $this; }
+    public function getSlug(): ?string { return $this->slug; }
+    public function setSlug(?string $slug): static { $this->slug = $slug; return $this; }
+    public function isCarreirasAtivo(): bool { return $this->carreirasAtivo; }
+    public function setCarreirasAtivo(bool $carreirasAtivo): static { $this->carreirasAtivo = $carreirasAtivo; return $this; }
+    public function getCarreirasTitulo(): ?string { return $this->carreirasTitulo; }
+    public function setCarreirasTitulo(?string $carreirasTitulo): static { $this->carreirasTitulo = $carreirasTitulo; return $this; }
+    public function getCarreirasDescricao(): ?string { return $this->carreirasDescricao; }
+    public function setCarreirasDescricao(?string $carreirasDescricao): static { $this->carreirasDescricao = $carreirasDescricao; return $this; }
+    /** @return array<string, mixed>|null */
+    public function getRecruitmentIntegracoes(): ?array { return $this->recruitmentIntegracoes; }
+    /** @param array<string, mixed>|null $recruitmentIntegracoes */
+    public function setRecruitmentIntegracoes(?array $recruitmentIntegracoes): static { $this->recruitmentIntegracoes = $recruitmentIntegracoes; return $this; }
     public function getCriadoEm(): \DateTimeImmutable { return $this->criadoEm; }
     public function getUsuarios(): Collection { return $this->usuarios; }
     public function getFuncionarios(): Collection { return $this->funcionarios; }

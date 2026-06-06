@@ -503,12 +503,15 @@
         mutations.forEach(function (m) { if (m.attributeName === 'data-theme') document.querySelectorAll('[data-unio-charts-panel]').forEach(initPanel); });
     }).observe(document.documentElement, { attributes: true });
 
-    global.addEventListener('resize', function () {
+    global.addEventListener('resize', resizeAllCharts);
+    global.addEventListener('unio-charts-resize', resizeAllCharts);
+
+    function resizeAllCharts() {
         Object.keys(registry).forEach(function (pid) {
             Object.keys(registry[pid]).forEach(function (id) { if (registry[pid][id]) registry[pid][id].resize(); });
         });
         Object.keys(echartsRegistry).forEach(function (pid) {
             Object.keys(echartsRegistry[pid]).forEach(function (id) { if (echartsRegistry[pid][id]) echartsRegistry[pid][id].resize(); });
         });
-    });
+    }
 })(window);

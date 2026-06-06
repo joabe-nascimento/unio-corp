@@ -7,6 +7,7 @@ use App\Entity\RhOnboardingProcess;
 use App\Entity\RhProcessDocument;
 use App\Entity\User;
 use App\Exception\RhProcessException;
+use App\Rh\RhProcessDisplay;
 use App\Repository\FuncionarioRepository;
 use App\Repository\RhOffboardingProcessRepository;
 use App\Repository\RhOnboardingProcessRepository;
@@ -121,6 +122,9 @@ class RhController extends AbstractController
             $email = trim((string) $request->request->get('email', ''));
             if ($nome === '' || $email === '') {
                 throw new RhProcessException('Nome e e-mail são obrigatórios.');
+            }
+            if (RhProcessDisplay::isGenericHubName($nome)) {
+                throw new RhProcessException('Informe o nome do colaborador, não o nome de um núcleo ou módulo.');
             }
             if (!filter_var($email, \FILTER_VALIDATE_EMAIL)) {
                 throw new RhProcessException('Informe um e-mail válido.');

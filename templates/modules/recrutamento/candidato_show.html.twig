@@ -1,0 +1,378 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}{{ hub_page_title }} — Candidato{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set can_manage_vagas = recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+{% set can_manage_pipeline = recrutamento_grant_at_least('pipeline', 'GESTOR_EQUIPE')
+    or recrutamento_grant_at_least('product_rh', 'recrutamento', 'GESTOR_EQUIPE') %}
+{% set can_manage = can_manage_vagas or can_manage_pipeline %}
+{% set can_view_pipeline = recrutamento_grant('pipeline') %}
+{% set can_approve = recrutamento_grant_at_least('pipeline', 'GESTOR_EQUIPE') %}
+{% set can_view_admissoes = product_grant('product_rh', 'admissoes') %}
+{% set vaga = candidato.vaga %}
+{% set dias_no_funil = candidato.criadoEm.diff(date()).days %}
+{% set hub_page_title = candidato.nome|recrutamento_nome %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · Ficha do candidato' %}
+{% set show_entrevista_tab = can_manage or candidato.entrevistaEm %}
+{% set tab_requested = app.request.query.get('tab', 'geral') %}
+{% set candidato_tab = tab_requested in ['geral', 'entrevista', 'historico'] ? tab_requested : 'geral' %}
+{% if candidato_tab == 'entrevista' and not show_entrevista_tab %}
+    {% set candidato_tab = 'geral' %}
+{% endif %}
+
+{% block hub_toolbar_actions %}
+{% include 'components/recrutamento/hub_back_link.html.twig' %}
+<a href="{{ path('app_recrutamento_candidatos') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Candidatos
+</a>
+<a href="{{ path('app_recrutamento_vagas_show', { id: vaga.id }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-briefcase mr-1" aria-hidden="true"></i> Vaga
+</a>
+{% if can_view_pipeline %}
+<a href="{{ path('app_recrutamento_pipeline', { vaga: vaga.id }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Pipeline
+</a>
+{% endif %}
+{% endblock %}
+
+{% block hub_kpis %}{% endblock %}
+
+{% block hub_content %}
+<div class="recrutamento-shell">
+<div class="recrutamento-candidato-show" data-candidato-show-tabs>
+    {% if candidato.etapa == 'REPROVADO' and candidato.motivoReprovacao %}
+    <div class="recrutamento-candidato-alert recrutamento-candidato-alert--danger mb-4">
+        <i class="fas fa-circle-xmark" aria-hidden="true"></i>
+        <div>
+            <strong>Motivo da reprovação</strong>
+            <p class="mb-0">{{ candidato.motivoReprovacao }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <section class="rh-hub-hero unio-card recrutamento-candidato-hero mb-4" aria-label="Resumo do candidato">
+        <div class="rh-hub-hero-bg" aria-hidden="true"></div>
+
+        <div class="rh-hub-hero-inner rh-hub-hero-inner--banner">
+            <div class="rh-hub-hero-copy">
+                <p class="rh-hub-hero-eyebrow">
+                    <i class="fas fa-user-tie mr-1" aria-hidden="true"></i>
+                    <a href="{{ path('app_recrutamento') }}" class="recrutamento-candidato-hero-nucleo-link">Núcleo de Recrutamento</a>
+                </p>
+                <h2 class="rh-hub-hero-title">{{ hub_page_title }}</h2>
+                <p class="rh-hub-hero-desc mb-0">
+                    Vaga ·
+                    <a href="{{ path('app_recrutamento_vagas_show', { id: vaga.id }) }}" class="recrutamento-candidato-hero-vaga-link">{{ vaga.titulo }}</a>
+                </p>
+                <p class="recrutamento-candidato-hero-contact">
+                    <a href="mailto:{{ candidato.email }}" class="recrutamento-candidato-hero-contact-item">{{ candidato.email }}</a>
+                    {% if candidato.telefone %}
+                    <span class="recrutamento-candidato-hero-contact-item">{{ candidato.telefone }}</span>
+                    {% endif %}
+                </p>
+                <div class="recrutamento-candidato-hero-tags">
+                    {% include 'components/recrutamento/candidato_etapa_badge.html.twig' with { candidato: candidato } %}
+                    {% include 'components/status_badge.html.twig' with {
+                        label: candidato.origemLabel,
+                        variant: 'secondary',
+                        extra_class: 'ti-badge-metric'
+                    } %}
+                    {% if candidato.noBancoTalentos %}
+                    {% include 'components/status_badge.html.twig' with {
+                        label: 'Banco de talentos',
+                        variant: 'info',
+                        extra_class: 'ti-badge-metric'
+                    } %}
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if can_manage_vagas %}
+            <aside class="rh-hub-hero-aside recrutamento-candidato-hero-aside">
+                <button type="button"
+                        class="btn-unio-ghost btn-sm"
+                        data-unio-offcanvas-open="recrutamento-candidato-form"
+                        data-recrutamento-candidato-edit="{{ candidato.id }}"
+                        data-recrutamento-candidato-nome="{{ candidato.nome|e('html_attr') }}"
+                        data-recrutamento-candidato-email="{{ candidato.email|e('html_attr') }}"
+                        data-recrutamento-candidato-telefone="{{ candidato.telefone|default('')|e('html_attr') }}"
+                        data-recrutamento-candidato-origem="{{ candidato.origem|e('html_attr') }}"
+                        data-recrutamento-candidato-linkedin="{{ candidato.linkedin|default('')|e('html_attr') }}"
+                        data-recrutamento-candidato-edit-token="{{ csrf_token('recrutamento_candidato_edit_' ~ candidato.id) }}"
+                        data-recrutamento-candidato-redirect="show">
+                    <i class="fas fa-pen mr-1" aria-hidden="true"></i> Editar contato
+                </button>
+            </aside>
+            {% endif %}
+        </div>
+
+        <div class="recrutamento-candidato-hero-body">
+        <div class="recrutamento-candidato-hero-stats">
+            <div class="recrutamento-candidato-stat">
+                <div class="card-value">{{ dias_no_funil }}d</div>
+                <div class="card-label">No funil</div>
+                <div class="card-sub">Desde {{ candidato.criadoEm|date('d/m/Y') }}</div>
+            </div>
+            <div class="recrutamento-candidato-stat">
+                <div class="card-value">{{ candidato.avaliacao ? candidato.avaliacao ~ '/5' : '—' }}</div>
+                <div class="card-label">Avaliação</div>
+                <div class="card-sub">Nota interna</div>
+            </div>
+            <div class="recrutamento-candidato-stat">
+                <div class="card-value recrutamento-candidato-stat-value--text">{{ vaga.titulo|length > 22 ? vaga.titulo|slice(0, 22) ~ '…' : vaga.titulo }}</div>
+                <div class="card-label">Vaga</div>
+                <div class="card-sub">{{ vaga.departamento|default('Sem departamento') }}</div>
+            </div>
+            <div class="recrutamento-candidato-stat">
+                <div class="card-value">{{ candidato.onboardingProcess ? '#' ~ candidato.onboardingProcess.id : '—' }}</div>
+                <div class="card-label">Admissão</div>
+                <div class="card-sub">{{ candidato.onboardingProcess ? 'Processo vinculado' : 'Pendente' }}</div>
+            </div>
+        </div>
+
+        <div class="recrutamento-candidato-hero-stage">
+            {% include 'components/recrutamento/candidato_stage_strip.html.twig' with { candidato: candidato } %}
+        </div>
+        </div>
+    </section>
+
+    {% set candidato_tabs = [{ key: 'geral', label: 'Qualificação', icon: 'clipboard-check' }] %}
+    {% if show_entrevista_tab %}
+        {% set entrevista_tab = { key: 'entrevista', label: 'Entrevista', icon: 'calendar-check' } %}
+        {% if candidato.entrevistaEm %}
+            {% set entrevista_tab = entrevista_tab|merge({ badge: candidato.entrevistaEm|date('d/m · H:i') }) %}
+        {% endif %}
+        {% set candidato_tabs = candidato_tabs|merge([entrevista_tab]) %}
+    {% endif %}
+    {% set candidato_tabs = candidato_tabs|merge([{ key: 'historico', label: 'Histórico', icon: 'clock-rotate-left' }]) %}
+    {% include 'components/recrutamento/detail_tabs.html.twig' with {
+        tabs: candidato_tabs,
+        active_tab: candidato_tab,
+        tabs_attr: 'data-candidato-tabs',
+        tab_attr: 'data-candidato-tab',
+        aria_label: 'Seções da ficha'
+    } %}
+
+    <div class="row recrutamento-candidato-show-grid">
+        <div class="col-lg-8 mb-4">
+            <div class="hub-tab-panel{% if candidato_tab == 'geral' %} hub-tab-panel--active{% endif %}"
+                 data-candidato-panel="geral"
+                 role="tabpanel"
+                 {% if candidato_tab != 'geral' %}hidden{% endif %}>
+
+            <div class="unio-card recrutamento-candidato-panel mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Scorecard por etapa',
+                    subtitle: 'Critérios objetivos de avaliação'
+                } %}
+                <div class="px-3 pb-3">
+                    {% if can_manage %}
+                    {% include 'components/recrutamento/candidato_scorecard_form.html.twig' with { candidato: candidato } %}
+                    {% elseif candidato.scorecards %}
+                    <pre class="recrutamento-candidato-code mb-0">{{ candidato.scorecards|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                    {% else %}
+                    {% include 'components/empty_state.html.twig' with {
+                        icon: 'fa-clipboard-check',
+                        title: 'Sem scorecard',
+                        text: 'Nenhum critério registrado ainda.',
+                        compact: true
+                    } %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="unio-card recrutamento-candidato-panel mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Avaliação do candidato',
+                    subtitle: 'Notas internas da equipe'
+                } %}
+                <div class="px-3 pb-3">
+                    {% if can_manage %}
+                    {% include 'components/recrutamento/candidato_avaliacao_form.html.twig' with { candidato: candidato } %}
+                    {% else %}
+                    <div class="recrutamento-candidato-avaliacao-editor recrutamento-candidato-avaliacao-editor--readonly">
+                        {% if candidato.avaliacao %}
+                        <div class="recrutamento-candidato-avaliacao-readonly-score">
+                            <span class="recrutamento-scorecard-criterion">Avaliação geral</span>
+                            <span class="recrutamento-candidato-rating-badge">{{ candidato.avaliacao }}/5</span>
+                        </div>
+                        {% endif %}
+                        {% if candidato.observacoes %}
+                        <div class="recrutamento-candidato-avaliacao-notes">
+                            <span class="recrutamento-scorecard-comment-label">Notas internas</span>
+                            <p class="recrutamento-candidato-notes mb-0">{{ candidato.observacoes|nl2br }}</p>
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">Sem notas registradas.</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="unio-card recrutamento-candidato-panel mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Aprovações',
+                    subtitle: 'Solicitações multi-nível'
+                } %}
+                <div class="px-3 pb-3">
+                    {% include 'components/recrutamento/candidato_aprovacoes.html.twig' with {
+                        aprovacoes: aprovacoes|default([]),
+                        can_approve: can_approve
+                    } %}
+                </div>
+            </div>
+
+            </div>{# /panel geral #}
+
+            {% if show_entrevista_tab %}
+            <div class="hub-tab-panel{% if candidato_tab == 'entrevista' %} hub-tab-panel--active{% endif %}"
+                 data-candidato-panel="entrevista"
+                 role="tabpanel"
+                 {% if candidato_tab != 'entrevista' %}hidden{% endif %}>
+                <div class="unio-card recrutamento-candidato-panel mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Entrevista',
+                        subtitle: candidato.nome|recrutamento_nome ~ ' · ' ~ vaga.titulo
+                    } %}
+                    <div class="px-3 pb-3">
+                        {% if can_manage %}
+                        {% include 'components/recrutamento/candidato_entrevista_form.html.twig' with {
+                            candidato: candidato,
+                            entrevistadores: entrevistadores|default([])
+                        } %}
+                        {% else %}
+                        {% include 'components/recrutamento/candidato_entrevista_readonly.html.twig' with { candidato: candidato } %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="hub-tab-panel{% if candidato_tab == 'historico' %} hub-tab-panel--active{% endif %}"
+                 data-candidato-panel="historico"
+                 role="tabpanel"
+                 {% if candidato_tab != 'historico' %}hidden{% endif %}>
+                <div class="unio-card recrutamento-candidato-panel">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Histórico',
+                        subtitle: 'Movimentações e eventos registrados'
+                    } %}
+                    <div class="px-3 pb-3">
+                        {% include 'components/recrutamento/candidato_timeline.html.twig' with { events: timeline } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="recrutamento-candidato-show-aside">
+                <div class="unio-card recrutamento-candidato-panel mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Contato',
+                        subtitle: 'Informações do candidato'
+                    } %}
+                    <div class="px-3 pb-3">
+                        {% include 'components/unio/detail_field_section.html.twig' with { items: [
+                            { label: 'Nome', value: candidato.nome|recrutamento_nome, icon: 'fa-user' },
+                            { label: 'E-mail', value: '<a href="mailto:' ~ candidato.email ~ '">' ~ candidato.email ~ '</a>', icon: 'fa-envelope', html: true },
+                            { label: 'Telefone', value: candidato.telefone|default('—'), icon: 'fa-phone' },
+                            { label: 'LinkedIn', value: candidato.linkedin ? '<a href="' ~ candidato.linkedin ~ '" target="_blank" rel="noopener noreferrer">Ver perfil</a>' : '—', icon: 'fa-link', html: candidato.linkedin ? true : false },
+                            { label: 'Origem', value: candidato.origemLabel, icon: 'fa-route' },
+                            { label: 'Cadastro', value: candidato.criadoEm|date('d/m/Y H:i'), icon: 'fa-clock' },
+                        ]} only %}
+                    </div>
+                </div>
+
+                {% if can_manage_vagas %}
+                <div class="unio-card recrutamento-candidato-panel mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Currículo',
+                        subtitle: 'Anexos PDF'
+                    } %}
+                    <div class="px-3 pb-3">
+                        {% include 'components/recrutamento/candidato_anexos.html.twig' with { candidato: candidato, anexos: anexos|default([]) } %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if can_manage %}
+                <div class="unio-card recrutamento-candidato-panel recrutamento-candidato-actions-card mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Ações',
+                        subtitle: 'Movimentar no funil'
+                    } %}
+                    <div class="px-3 pb-3">
+                        {% include 'components/recrutamento/candidato_actions.html.twig' with {
+                            candidato: candidato,
+                            can_manage: true,
+                            redirect_to: 'show'
+                        } %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if can_manage_vagas and not candidato.noBancoTalentos %}
+                <div class="unio-card recrutamento-candidato-panel mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Banco de talentos',
+                        subtitle: 'Salvar perfil para reutilizar em outras vagas'
+                    } %}
+                    <div class="px-3 pb-3">
+                        <form method="post" action="{{ path('app_recrutamento_candidato_banco_talentos', { id: candidato.id }) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_banco_' ~ candidato.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm btn-block">
+                                <i class="fas fa-gem mr-1" aria-hidden="true"></i> Adicionar ao banco de talentos
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if candidato.onboardingProcess and can_view_admissoes %}
+                <div class="unio-card recrutamento-candidato-cta mb-4">
+                    <div class="recrutamento-candidato-cta-body">
+                        <span class="recrutamento-candidato-cta-label">Admissão em andamento</span>
+                        <strong>Processo #{{ candidato.onboardingProcess.id }}</strong>
+                    </div>
+                    <a href="{{ path('app_rh_admissoes_show', { id: candidato.onboardingProcess.id }) }}" class="btn-unio btn-sm">
+                        Abrir <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% if can_manage_vagas %}
+{% include 'components/recrutamento/candidato_offcanvas.html.twig' %}
+{% include 'components/recrutamento/candidato_reject_offcanvas.html.twig' %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/recrutamento-hub.js') }}"></script>
+<script>
+(function () {
+    if (window.UnioOffcanvas && typeof window.UnioOffcanvas.refresh === 'function') {
+        window.UnioOffcanvas.refresh();
+    }
+    if (window.RecrutamentoHub && typeof window.RecrutamentoHub.initCandidatoForm === 'function') {
+        window.RecrutamentoHub.initCandidatoForm({ defaultRedirect: 'show' });
+    }
+    if (window.RecrutamentoHub && typeof window.RecrutamentoHub.initRejectOffcanvas === 'function') {
+        window.RecrutamentoHub.initRejectOffcanvas();
+    }
+    if (window.RecrutamentoHub && typeof window.RecrutamentoHub.initCandidatoShowTabs === 'function') {
+        window.RecrutamentoHub.initCandidatoShowTabs();
+    }
+    if (window.RecrutamentoHub && typeof window.RecrutamentoHub.initEntrevistaForm === 'function') {
+        window.RecrutamentoHub.initEntrevistaForm();
+    }
+})();
+</script>
+{% endblock %}

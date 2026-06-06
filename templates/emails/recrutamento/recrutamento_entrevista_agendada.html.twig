@@ -1,0 +1,29 @@
+{% extends 'emails/recrutamento/generic.html.twig' %}
+{% block body %}
+<p>Olá, {{ payload.candidato_nome }}!</p>
+<p>Sua entrevista para a vaga <strong>{{ payload.vaga_titulo }}</strong> foi agendada.</p>
+{% if payload.entrevista_titulo is defined and payload.entrevista_titulo %}
+<p><strong>Reunião:</strong> {{ payload.entrevista_titulo }}</p>
+{% endif %}
+{% if payload.entrevista_tipo is defined and payload.entrevista_tipo %}
+<p><strong>Modalidade:</strong> {{ payload.entrevista_tipo }}</p>
+{% endif %}
+{% if payload.entrevistador_nome is defined and payload.entrevistador_nome %}
+<p><strong>Entrevistador:</strong> {{ payload.entrevistador_nome }}</p>
+{% endif %}
+{% if payload.entrevista_em is defined and payload.entrevista_em %}
+<p><strong>Data e hora:</strong> {{ payload.entrevista_em }}</p>
+{% endif %}
+{% if payload.entrevista_link is defined and payload.entrevista_link %}
+<p><strong>{{ (payload.entrevista_tipo|default('')) == 'Presencial' ? 'Local' : 'Link' }}:</strong>
+    {% if (payload.entrevista_tipo|default('Online')) == 'Online' %}
+    <a href="{{ payload.entrevista_link }}">{{ payload.entrevista_link }}</a>
+    {% else %}
+    {{ payload.entrevista_link }}
+    {% endif %}
+</p>
+{% endif %}
+{% if payload.calendar_url is defined and payload.calendar_url %}
+<p style="margin-top:20px;"><a href="{{ payload.calendar_url }}" style="background:#0EA5E9;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Adicionar ao Google Calendar</a></p>
+{% endif %}
+{% endblock %}

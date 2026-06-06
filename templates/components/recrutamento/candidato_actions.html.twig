@@ -1,0 +1,68 @@
+{#
+  Ações de movimentação do candidato (detalhe / offcanvas)
+
+  Props: candidato, can_manage, redirect_to (pipeline|show|list), filter_vaga_id, filter_q, filter_etapa
+#}
+{% set etapa = candidato.etapa %}
+{% set next_etapa = recrutamento_etapa_next(etapa) %}
+{% set prev_etapa = recrutamento_etapa_prev(etapa) %}
+{% set redirect_to = redirect_to|default('show') %}
+{% if can_manage %}
+<div class="recrutamento-candidato-actions">
+    {% if next_etapa %}
+    <form method="post"
+          action="{{ path('app_recrutamento_candidato_etapa', { id: candidato.id }) }}"
+          class="recrutamento-candidato-actions-forward">
+        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_etapa_' ~ candidato.id) }}">
+        <input type="hidden" name="etapa" value="{{ next_etapa }}">
+        <input type="hidden" name="redirect_to" value="{{ redirect_to }}">
+        <input type="hidden" name="vaga" value="{{ filter_vaga_id|default('') }}">
+        <input type="hidden" name="q" value="{{ filter_q|default('') }}">
+        <input type="hidden" name="etapa_filter" value="{{ filter_etapa|default('') }}">
+        <button type="submit" class="recrutamento-pipeline-btn recrutamento-pipeline-btn--primary">
+            <span>Avançar para {{ recrutamento_etapa_label(next_etapa) }}</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+    </form>
+    {% elseif etapa == 'REPROVADO' %}
+    <form method="post"
+          action="{{ path('app_recrutamento_candidato_etapa', { id: candidato.id }) }}"
+          class="recrutamento-candidato-actions-forward">
+        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_etapa_' ~ candidato.id) }}">
+        <input type="hidden" name="etapa" value="TRIAGEM">
+        <input type="hidden" name="redirect_to" value="{{ redirect_to }}">
+        <button type="submit" class="recrutamento-pipeline-btn recrutamento-pipeline-btn--primary">
+            <i class="fas fa-rotate-left" aria-hidden="true"></i>
+            <span>Restaurar para triagem</span>
+        </button>
+    </form>
+    {% endif %}
+    <div class="recrutamento-candidato-actions-secondary">
+        {% if prev_etapa %}
+        <form method="post"
+              action="{{ path('app_recrutamento_candidato_etapa', { id: candidato.id }) }}"
+              class="recrutamento-candidato-actions-back">
+            <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_etapa_' ~ candidato.id) }}">
+            <input type="hidden" name="etapa" value="{{ prev_etapa }}">
+            <input type="hidden" name="redirect_to" value="{{ redirect_to }}">
+            <button type="submit" class="recrutamento-pipeline-btn recrutamento-pipeline-btn--ghost" title="Voltar para {{ recrutamento_etapa_label(prev_etapa) }}">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <span>{{ recrutamento_etapa_label(prev_etapa) }}</span>
+            </button>
+        </form>
+        {% endif %}
+        {% if etapa != 'REPROVADO' %}
+        <button type="button"
+                class="recrutamento-pipeline-btn recrutamento-pipeline-btn--ghost recrutamento-pipeline-btn--danger"
+                data-unio-offcanvas-open="recrutamento-candidato-reject-form"
+                data-recrutamento-candidato-reject="{{ candidato.id }}"
+                data-recrutamento-candidato-reject-nome="{{ candidato.nome|recrutamento_nome|e('html_attr') }}"
+                data-recrutamento-candidato-reject-token="{{ csrf_token('recrutamento_candidato_reprovar_' ~ candidato.id) }}"
+                data-recrutamento-candidato-reject-redirect="{{ redirect_to }}">
+            <i class="fas fa-ban" aria-hidden="true"></i>
+            <span>Reprovar</span>
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

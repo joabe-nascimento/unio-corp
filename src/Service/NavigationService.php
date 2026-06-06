@@ -113,6 +113,22 @@ class NavigationService
         return \in_array($user->getPerfil(), self::PROFILES_GESTOR_HUBS, true);
     }
 
+    public function showHubRecrutamento(User $user): bool
+    {
+        if ($this->isTenant($user)) {
+            return true;
+        }
+
+        $hasGrant = $this->grants->canViewAnyProductInScope($user, 'hub_recrutamento')
+            || $this->grants->canViewAnyProductInScope($user, 'product_rh');
+
+        if ($this->grants->usesGranularGrants($user)) {
+            return $hasGrant;
+        }
+
+        return \in_array($user->getPerfil(), self::PROFILES_GESTOR_HUBS, true);
+    }
+
     public function showHubComercial(User $user): bool
     {
         return $this->showFutureHub($user, 'hub_comercial');
@@ -325,9 +341,19 @@ class NavigationService
         }
 
         return str_starts_with($route, 'app_hub_operacoes')
-            || str_starts_with($route, 'app_rh')
+            || (str_starts_with($route, 'app_rh') && !str_starts_with($route, 'app_rh_recrutamento'))
             || str_starts_with($route, 'app_pessoas')
             || str_starts_with($route, 'app_engenharia');
+    }
+
+    public function isHubRecrutamentoActive(?string $route): bool
+    {
+        if (!$route) {
+            return false;
+        }
+
+        return str_starts_with($route, 'app_recrutamento')
+            || str_starts_with($route, 'app_rh_recrutamento');
     }
 
     public function isHubTalentosActive(?string $route): bool
@@ -361,6 +387,9 @@ class NavigationService
         if ($this->isHubMaturidadeActive($route)) {
             return 'maturidade';
         }
+        if ($this->isHubRecrutamentoActive($route)) {
+            return 'recrutamento';
+        }
         $planned = PlannedHubRegistry::findByRoute($route);
         if ($planned !== null) {
             return $planned['id'];
@@ -377,13 +406,16 @@ class NavigationService
         return $this->showHubOperacoes($user)
             || $this->showHubTalentos($user)
             || $this->showHubMaturidade($user)
+            || $this->showHubRecrutamento($user)
             || $this->showAnyPlannedHub($user)
             || $this->showPlataforma($user);
     }
 
     public function isModuloRhActive(?string $route): bool
     {
-        return (bool) $route && str_starts_with($route, 'app_rh');
+        return (bool) $route
+            && str_starts_with($route, 'app_rh')
+            && !str_starts_with($route, 'app_rh_recrutamento');
     }
 
     public function isModuloPessoasActive(?string $route): bool
@@ -479,6 +511,21 @@ class NavigationService
         ], true);
     }
 
+    public function isModuloRecrutamentoSelecaoActive(?string $route): bool
+    {
+        if (!$route) {
+            return false;
+        }
+
+        return str_starts_with($route, 'app_recrutamento_vaga')
+            || str_starts_with($route, 'app_recrutamento_candidato')
+            || $route === 'app_recrutamento_pipeline'
+            || $route === 'app_recrutamento_carreiras'
+            || $route === 'app_recrutamento_talentos'
+            || $route === 'app_recrutamento_integracoes'
+            || str_starts_with($route, 'app_rh_recrutamento');
+    }
+
     public function isModuloTiOpsActive(?string $route): bool
     {
         return (bool) $route && \in_array($route, [
@@ -549,6 +596,7 @@ class NavigationService
             'nav_show_hub_operacoes' => $this->showHubOperacoes($user),
             'nav_show_hub_talentos' => $this->showHubTalentos($user),
             'nav_show_hub_maturidade' => $this->showHubMaturidade($user),
+            'nav_show_hub_recrutamento' => $this->showHubRecrutamento($user),
             'nav_planned_hubs' => $this->getVisiblePlannedHubs($user),
             'nav_planned_hub_groups' => $this->getVisiblePlannedHubGroups($user),
             'nav_show_modulo_rh' => $this->showModuloRh($user),
@@ -561,6 +609,7 @@ class NavigationService
             'nav_hub_operacoes_active' => $this->isHubOperacoesActive($route),
             'nav_hub_talentos_active' => $this->isHubTalentosActive($route),
             'nav_hub_maturidade_active' => $this->isHubMaturidadeActive($route),
+            'nav_hub_recrutamento_active' => $this->isHubRecrutamentoActive($route),
             'nav_modulo_rh_active' => $this->isModuloRhActive($route),
             'nav_modulo_pessoas_active' => $this->isModuloPessoasActive($route),
             'nav_modulo_engenharia_active' => $this->isModuloEngenhariaActive($route),
@@ -572,6 +621,7 @@ class NavigationService
             'nav_modulo_integracoes_dados_active' => $this->isModuloIntegracoesDadosActive($route),
             'nav_modulo_integracoes_obs_active' => $this->isModuloIntegracoesObsActive($route),
             'nav_modulo_ti_ops_open' => $this->isModuloTiOpsActive($route),
+            'nav_modulo_recrutamento_selecao_active' => $this->isModuloRecrutamentoSelecaoActive($route),
             'nav_modulo_ti_infra_open' => $this->isModuloTiInfraActive($route),
             'nav_modulo_ti_intel_open' => $this->isModuloTiIntelActive($route),
             'nav_active_hub' => $this->getActiveHubId($route),
@@ -623,6 +673,15 @@ class NavigationService
                 'title' => 'Núcleo de Maturidade',
                 'subtitle' => 'Radar e plano de ação',
                 'route' => 'app_maturidade',
+            ];
+        }
+        if ($this->showHubRecrutamento($user)) {
+            $modules[] = [
+                'id' => 'recrutamento',
+                'icon' => 'fa-user-tie',
+                'title' => 'Núcleo de Recrutamento',
+                'subtitle' => 'Vagas e pipeline',
+                'route' => 'app_recrutamento',
             ];
         }
         foreach ($this->getVisiblePlannedHubs($user) as $hub) {

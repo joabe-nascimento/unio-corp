@@ -1,0 +1,79 @@
+{% import 'macros/sidebar_nav.html.twig' as nav %}
+
+<li class="nav-item sidebar-hub-current">
+    <a href="{{ path('app_recrutamento') }}" class="nav-link{{ route == 'app_recrutamento' ? ' active' : '' }}">
+        <i class="fas fa-user-tie nav-icon"></i>
+        <p>Núcleo de Recrutamento</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_recrutamento_analytics') }}" class="nav-link{{ route == 'app_recrutamento_analytics' ? ' active' : '' }}">
+        <i class="fas fa-chart-pie nav-icon"></i>
+        <p>Analytics</p>
+    </a>
+</li>
+
+{% if recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+<li class="nav-item nav-item--cta">
+    <a href="{{ path('app_recrutamento_vagas', { open_vaga: 1 }) }}"
+       class="nav-link nav-link--cta{{ route == 'app_recrutamento_vagas' and app.request.query.getBoolean('open_vaga') ? ' active' : '' }}">
+        <i class="fas fa-plus nav-icon" aria-hidden="true"></i>
+        <p>Nova vaga</p>
+    </a>
+</li>
+{% endif %}
+
+{% set show_selecao = recrutamento_grant('vagas') or recrutamento_grant('pipeline') %}
+{% if show_selecao %}
+<li class="nav-item has-treeview"
+    data-module-tree
+    data-auto-open="{{ modulo_recrutamento_selecao_open ? '1' : '0' }}"
+    data-storage-key="recrutamento-selecao-sidebar-collapsed">
+    <a href="#" class="nav-link{{ modulo_recrutamento_selecao_open ? ' active' : '' }}">
+        <i class="fas fa-users-gear nav-icon"></i>
+        <p>Seleção <i class="fas fa-angle-left right"></i></p>
+    </a>
+    <ul class="nav nav-treeview nav-product-children">
+        {% if recrutamento_grant('vagas') %}
+        {{ nav.submenu(
+            'Vagas',
+            path('app_recrutamento_vagas'),
+            route starts with 'app_recrutamento_vaga' or route == 'app_rh_recrutamento'
+        ) }}
+        {% endif %}
+        {% if recrutamento_grant('pipeline') %}
+        {{ nav.submenu(
+            'Candidatos',
+            path('app_recrutamento_candidatos'),
+            route starts with 'app_recrutamento_candidato'
+        ) }}
+        {{ nav.submenu(
+            'Pipeline',
+            path('app_recrutamento_pipeline'),
+            route == 'app_recrutamento_pipeline' or route == 'app_rh_recrutamento_pipeline'
+        ) }}
+        {% endif %}
+    </ul>
+</li>
+{% endif %}
+{% if recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+<li class="nav-item">
+    <a href="{{ path('app_recrutamento_carreiras') }}" class="nav-link{{ route == 'app_recrutamento_carreiras' ? ' active' : '' }}">
+        <i class="fas fa-globe nav-icon"></i>
+        <p>Carreiras</p>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{{ path('app_recrutamento_talentos') }}" class="nav-link{{ route == 'app_recrutamento_talentos' ? ' active' : '' }}">
+        <i class="fas fa-gem nav-icon"></i>
+        <p>Banco de talentos</p>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{{ path('app_recrutamento_integracoes') }}" class="nav-link{{ route == 'app_recrutamento_integracoes' ? ' active' : '' }}">
+        <i class="fas fa-plug nav-icon"></i>
+        <p>Integrações</p>
+    </a>
+</li>
+{% endif %}

@@ -12,12 +12,13 @@
     disabled     (bool, opt)
     min_width    (string, opt)  ex.: '150px'
     group_id     (string, opt)  id no wrapper .filter-group
+    group_class  (string, opt)  classes extras no wrapper .filter-group
     select_attrs (array, opt)  atributos extras no select/input (data-*, etc.)
 #}
 {% set _type = type|default('select') %}
 {% set _id = id|default(name is defined and name ? 'filter-' ~ name : '') %}
 {% set _select_attrs = select_attrs|default({}) %}
-<div class="filter-group"{% if group_id is defined and group_id %} id="{{ group_id }}"{% endif %}>
+<div class="filter-group{% if group_class|default('') %} {{ group_class }}{% endif %}"{% if group_id is defined and group_id %} id="{{ group_id }}"{% endif %}>
     {% if show_label|default(false) and label is defined and label %}
         <label class="filter-label"{% if _id %} for="{{ _id }}"{% endif %}>{{ label }}</label>
     {% endif %}

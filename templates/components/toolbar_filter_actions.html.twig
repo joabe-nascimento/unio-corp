@@ -9,12 +9,15 @@
     has_filters   (bool, opt)        true quando há algum filtro ativo; exibe o link limpar
     submit_label  (string, opt)      label do botão; default: 'Filtrar'
     submit_icon   (string, opt)      ícone FA; default: 'fa-search'
+    show_submit   (bool, opt)        exibe botão Filtrar; default: true
 #}
 {% set _label = submit_label|default('Filtrar') %}
 {% set _icon  = submit_icon|default('fa-search') %}
+{% if show_submit|default(true) %}
 <button type="submit" class="btn-unio btn-sm" title="{{ _label }}">
     <i class="fas {{ _icon }} mr-1" aria-hidden="true"></i> {{ _label }}
 </button>
+{% endif %}
 {% if has_filters|default(false) %}
 <a href="{{ clear_href }}" class="btn-unio-ghost btn-sm" title="Limpar filtros">
     <i class="fas fa-xmark" aria-hidden="true"></i>

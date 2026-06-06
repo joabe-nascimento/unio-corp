@@ -1,0 +1,35 @@
+{#
+  unio/toggle_switch — interruptor pill (on/off)
+
+  Props:
+    id          (string, required)
+    name        (string, required)
+    label       (string, required)
+    hint        (string, opt)
+    icon        (string, opt)  classe Font Awesome, ex: fab fa-linkedin
+    checked     (bool, opt)
+    value       (string, opt, default '1')
+    disabled    (bool, opt)
+    extra_class (string, opt)
+#}
+<div class="unio-toggle-row{% if extra_class|default('') %} {{ extra_class }}{% endif %}">
+    {% if icon is defined and icon %}
+    <span class="unio-toggle-row-icon" aria-hidden="true"><i class="{{ icon }}"></i></span>
+    {% endif %}
+    <div class="unio-toggle-row-copy">
+        <span class="unio-toggle-row-label" id="{{ id }}-label">{{ label }}</span>
+        {% if hint is defined and hint %}
+        <span class="unio-toggle-row-hint">{{ hint }}</span>
+        {% endif %}
+    </div>
+    <label class="unio-toggle" for="{{ id }}" aria-labelledby="{{ id }}-label">
+        <input type="checkbox"
+               class="unio-toggle-input"
+               id="{{ id }}"
+               name="{{ name }}"
+               value="{{ value|default('1') }}"
+               {% if checked|default(false) %}checked{% endif %}
+               {% if disabled|default(false) %}disabled{% endif %}>
+        <span class="unio-toggle-track" aria-hidden="true"></span>
+    </label>
+</div>

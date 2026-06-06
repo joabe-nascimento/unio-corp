@@ -18,12 +18,6 @@ class ExtendedHubController extends AbstractController
         return $this->renderPlannedHub('portal');
     }
 
-    #[Route('/recrutamento', name: 'app_hub_recrutamento')]
-    public function recrutamento(): Response
-    {
-        return $this->renderPlannedHub('recrutamento');
-    }
-
     #[Route('/esg', name: 'app_esg')]
     public function esg(): Response
     {

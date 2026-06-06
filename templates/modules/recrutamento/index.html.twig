@@ -1,0 +1,256 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Núcleo de Recrutamento{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set hub_page_title = 'Núcleo de Recrutamento' %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · Visão geral' %}
+{% set can_manage_hub = can_manage_vagas|default(false) %}
+
+{% block hub_toolbar_actions %}
+{% if recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+<a href="{{ path('app_recrutamento_vagas', { open_vaga: 1 }) }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova vaga
+</a>
+{% endif %}
+{% if recrutamento_grant('pipeline') %}
+<a href="{{ path('app_recrutamento_pipeline') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Pipeline
+</a>
+{% endif %}
+{% endblock %}
+
+{% block hub_kpis %}
+{% if recrutamento_has_products() %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: vagas_abertas|default(0), label: 'Vagas abertas', sub: vagas_publicadas|default(0) ~ ' publicadas', route: 'app_recrutamento_vagas', route_params: { status: constant('App\\Entity\\RhVaga::STATUS_ABERTA') } },
+        { value: total_candidatos|default(0), label: 'No funil', sub: reprovados|default(0) ~ ' reprovados', route: 'app_recrutamento_candidatos' },
+        { value: contratados|default(0), label: 'Contratados', sub: hire_rate is not null ? hire_rate ~ '% taxa' : 'Sem taxa', route: 'app_recrutamento_candidatos', route_params: { etapa: 'CONTRATADO' } },
+        { value: time_to_hire_days is not null ? time_to_hire_days ~ 'd' : '—', label: 'Time-to-hire', sub: 'Média até contratação', route: 'app_recrutamento_candidatos', route_params: { etapa: 'CONTRATADO' } },
+        { value: talentos_count|default(0), label: 'Banco de talentos', sub: 'Perfis reutilizáveis', route: 'app_recrutamento_talentos' },
+        { value: entrevistas_proximas_count|default(0), label: 'Entrevistas', sub: 'Próx. 14 dias', route: 'app_recrutamento_candidatos', route_params: { etapa: 'ENTREVISTA' } },
+    ], mb: 'mb-0' } %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block hub_content %}
+{% if recrutamento_has_products() %}
+<div class="recrutamento-shell">
+    {% if aprovacoes_pendentes_count|default(0) > 0 or emails_pendentes|default(0) > 0 %}
+    <div class="recrutamento-hub-alerts mb-4">
+        {% if aprovacoes_pendentes_count|default(0) > 0 %}
+        <a href="{{ path('app_recrutamento_integracoes') }}" class="recrutamento-hub-alert recrutamento-hub-alert--warning">
+            <i class="fas fa-user-check" aria-hidden="true"></i>
+            <span><strong>{{ aprovacoes_pendentes_count }}</strong> aprovação(ões) aguardando decisão</span>
+            <i class="fas fa-arrow-right recrutamento-hub-alert-arrow" aria-hidden="true"></i>
+        </a>
+        {% endif %}
+        {% if emails_pendentes|default(0) > 0 %}
+        <div class="recrutamento-hub-alert recrutamento-hub-alert--info">
+            <i class="fas fa-envelope" aria-hidden="true"></i>
+            <span><strong>{{ emails_pendentes }}</strong> e-mail(s) na fila — processe com <code>app:rh-email-process-queue</code></span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="row recrutamento-hub-grid">
+        <div class="col-xl-8 recrutamento-hub-main">
+            {% set module_items = [] %}
+            {% if recrutamento_grant('vagas') %}
+                {% set module_items = module_items|merge([{
+                    icon: 'fa-briefcase',
+                    title: 'Vagas',
+                    subtitle: vagas_abertas|default(0) ~ ' abertas · ' ~ total_vagas|default(0) ~ ' total',
+                    route: 'app_recrutamento_vagas'
+                }]) %}
+            {% endif %}
+            {% if recrutamento_grant('pipeline') %}
+                {% set module_items = module_items|merge([
+                    { icon: 'fa-diagram-project', title: 'Pipeline', subtitle: 'Kanban por etapa', route: 'app_recrutamento_pipeline' },
+                    { icon: 'fa-users', title: 'Candidatos', subtitle: total_candidatos|default(0) ~ ' no funil', route: 'app_recrutamento_candidatos' },
+                ]) %}
+            {% endif %}
+            {% if can_manage_hub %}
+                {% set module_items = module_items|merge([
+                    { icon: 'fa-globe', title: 'Carreiras', subtitle: carreiras_ativo|default(false) ? 'Portal ativo' : 'Configurar portal', route: 'app_recrutamento_carreiras' },
+                    { icon: 'fa-gem', title: 'Banco de talentos', subtitle: talentos_count|default(0) ~ ' perfis', route: 'app_recrutamento_talentos' },
+                    { icon: 'fa-plug', title: 'Integrações', subtitle: 'LinkedIn · HRIS · e-mail', route: 'app_recrutamento_integracoes' },
+                ]) %}
+            {% endif %}
+            {% set module_items = module_items|merge([
+                { icon: 'fa-chart-pie', title: 'Analytics', subtitle: 'Origem, funil e vagas', route: 'app_recrutamento_analytics' },
+            ]) %}
+            {% if module_items|length > 0 %}
+            {% include 'components/module_grid.html.twig' with {
+                title: 'Módulos',
+                subtitle: 'Acesso rápido às áreas do núcleo',
+                items: module_items,
+                cols: 2
+            } %}
+            {% endif %}
+        </div>
+
+        <div class="col-xl-4 recrutamento-hub-sidebar">
+            <div class="recrutamento-hub-sidebar-inner">
+                {% if can_manage_hub %}
+                <section class="unio-card mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Portal de carreiras',
+                        subtitle: carreiras_ativo|default(false) ? 'Página pública ativa' : 'Inativo'
+                    } %}
+                    <div class="px-3 pb-3">
+                        <div class="recrutamento-hub-status-pill mb-3">
+                            {% include 'components/status_badge.html.twig' with {
+                                label: carreiras_ativo|default(false) ? 'Ativo' : 'Inativo',
+                                variant: carreiras_ativo|default(false) ? 'success' : 'secondary',
+                                extra_class: 'ti-badge-health'
+                            } %}
+                            <span class="recrutamento-hub-status-meta">{{ vagas_publicadas|default(0) }} vaga(s) publicada(s)</span>
+                        </div>
+                        {% if carreiras_url %}
+                        <p class="recrutamento-hub-url small text-muted mb-3">{{ carreiras_url }}</p>
+                        {% endif %}
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ path('app_recrutamento_carreiras') }}" class="btn-unio-ghost btn-sm">Configurar</a>
+                            {% if carreiras_url %}
+                            <a href="{{ carreiras_url }}" class="btn-unio btn-sm" target="_blank" rel="noopener noreferrer">Abrir portal</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
+
+                {% set _hub_sidebar_limit = 5 %}
+                {% if entrevistas_proximas|default([])|length > 0 %}
+                <section class="unio-card mb-4 recrutamento-hub-widget">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Próximas entrevistas',
+                        subtitle: 'Agenda dos próximos 14 dias'
+                    } %}
+                    <ul class="recrutamento-hub-agenda px-3">
+                        {% for c in entrevistas_proximas|slice(0, _hub_sidebar_limit) %}
+                        <li class="recrutamento-hub-agenda-item">
+                            <a href="{{ path('app_recrutamento_candidatos_show', { id: c.id, tab: 'entrevista' }) }}" class="recrutamento-hub-agenda-link">
+                                <span class="recrutamento-hub-agenda-when">
+                                    <span class="recrutamento-hub-agenda-when-date">{{ c.entrevistaEm|date('d/m') }}</span>
+                                    <span class="recrutamento-hub-agenda-when-time">{{ c.entrevistaEm|date('H:i') }}</span>
+                                </span>
+                                <span class="recrutamento-hub-agenda-body">
+                                    <span class="recrutamento-hub-agenda-head">
+                                        <span class="recrutamento-hub-agenda-who">{{ c.nome|recrutamento_nome }}</span>
+                                        {% include 'components/status_badge.html.twig' with {
+                                            label: c.entrevistaTipoLabel,
+                                            variant: c.entrevistaTipo == constant('App\\Rh\\RhEntrevistaTipo::PRESENCIAL') ? 'warning' : 'info',
+                                            extra_class: 'ti-badge-metric recrutamento-hub-inline-badge'
+                                        } %}
+                                    </span>
+                                    <span class="recrutamento-hub-agenda-vaga">{{ c.vaga.titulo }}</span>
+                                    {% if c.entrevistaEntrevistador %}
+                                    <span class="recrutamento-hub-agenda-meta">
+                                        <i class="fas fa-user-check" aria-hidden="true"></i>{{ c.entrevistaEntrevistador.nome }}
+                                    </span>
+                                    {% endif %}
+                                </span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% include 'components/recrutamento/hub_section_more.html.twig' with {
+                        href: path('app_recrutamento_candidatos', { etapa: 'ENTREVISTA' }),
+                        total: entrevistas_proximas_count|default(entrevistas_proximas|length),
+                        shown: entrevistas_proximas|slice(0, _hub_sidebar_limit)|length
+                    } %}
+                </section>
+                {% endif %}
+
+                {% if aprovacoes_pendentes|default([])|length > 0 and can_manage_hub %}
+                <section class="unio-card mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Aprovações pendentes',
+                        subtitle: 'Movimentações aguardando gestor'
+                    } %}
+                    <div class="px-3 pb-3">
+                        {% include 'components/recrutamento/aprovacoes_pendentes_list.html.twig' with {
+                            aprovacoes: aprovacoes_pendentes|slice(0, 4),
+                            can_manage: true,
+                            redirect_to: 'integracoes',
+                            compact: true
+                        } %}
+                        {% if aprovacoes_pendentes_count > 4 %}
+                        <a href="{{ path('app_recrutamento_integracoes') }}" class="btn-unio-ghost btn-sm btn-block mt-2">Ver todas ({{ aprovacoes_pendentes_count }})</a>
+                        {% endif %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if recent_vagas|default([])|length > 0 %}
+                <section class="unio-card mb-4 recrutamento-hub-widget">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Vagas recentes',
+                        subtitle: 'Últimas cadastradas'
+                    } %}
+                    <ul class="recrutamento-hub-link-list px-3">
+                        {% for v in recent_vagas|slice(0, _hub_sidebar_limit) %}
+                        <li>
+                            <a href="{{ path('app_recrutamento_vagas_show', { id: v.id }) }}" class="recrutamento-hub-link-row">
+                                <span class="recrutamento-hub-link-main">
+                                    <span class="recrutamento-hub-link-title">{{ v.titulo }}</span>
+                                </span>
+                                {% include 'components/recrutamento/vaga_status_badge.html.twig' with {
+                                    vaga: v,
+                                    extra_class: 'recrutamento-hub-inline-badge'
+                                } %}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% include 'components/recrutamento/hub_section_more.html.twig' with {
+                        href: path('app_recrutamento_vagas'),
+                        total: recent_vagas_total|default(recent_vagas|length),
+                        shown: recent_vagas|slice(0, _hub_sidebar_limit)|length
+                    } %}
+                </section>
+                {% endif %}
+
+                {% if recent_candidatos|default([])|length > 0 %}
+                <section class="unio-card mb-4 recrutamento-hub-widget">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Inscrições recentes',
+                        subtitle: 'Últimos candidatos no funil'
+                    } %}
+                    <ul class="recrutamento-hub-link-list px-3">
+                        {% for c in recent_candidatos|slice(0, _hub_sidebar_limit) %}
+                        <li>
+                            <a href="{{ path('app_recrutamento_candidatos_show', { id: c.id }) }}" class="recrutamento-hub-link-row">
+                                <span class="recrutamento-hub-link-main">
+                                    <span class="recrutamento-hub-link-title">{{ c.nome|recrutamento_nome }}</span>
+                                    <span class="recrutamento-hub-link-sub">{{ c.vaga.titulo }}</span>
+                                </span>
+                                {% include 'components/recrutamento/candidato_etapa_badge.html.twig' with {
+                                    candidato: c,
+                                    extra_class: 'recrutamento-hub-inline-badge'
+                                } %}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% include 'components/recrutamento/hub_section_more.html.twig' with {
+                        href: path('app_recrutamento_candidatos'),
+                        total: recent_candidatos_total|default(recent_candidatos|length),
+                        shown: recent_candidatos|slice(0, _hub_sidebar_limit)|length
+                    } %}
+                </section>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+    {% include 'components/hub_scope_empty.html.twig' with {
+        icon: 'fa-user-tie',
+        title: 'Nenhuma área disponível em Recrutamento',
+        text: 'Você ainda não tem permissão para acessar Vagas ou Pipeline. Solicite ao gestor da equipe.'
+    } %}
+{% endif %}
+{% endblock %}

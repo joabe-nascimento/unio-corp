@@ -1,0 +1,135 @@
+{% extends 'public/carreiras/layout.html.twig' %}
+{% block title %}{{ vaga.titulo }}{% endblock %}
+{% block meta_description %}{{ vaga.descricao|default(vaga.titulo)|striptags|slice(0, 160) }}{% endblock %}
+
+{% block hero %}
+<section class="carreiras-hero carreiras-hero--vaga" aria-label="Resumo da vaga">
+    {% include 'public/carreiras/_hero_bg.html.twig' with { empresa: empresa } %}
+    <div class="container carreiras-hero-inner carreiras-hero-inner--vaga">
+        <nav class="carreiras-breadcrumb" aria-label="Navegação">
+            <a href="{{ path('app_carreiras_index', { empresaSlug: empresa.slug }) }}">
+                <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i>
+                Todas as vagas
+            </a>
+        </nav>
+        <div class="carreiras-vaga-hero-head">
+            <div>
+                <span class="carreiras-hero-eyebrow">{{ empresa.nome }}</span>
+                <h1 class="carreiras-hero-title carreiras-hero-title--vaga">{{ vaga.titulo }}</h1>
+                {% include 'public/carreiras/_vaga_meta.html.twig' with { vaga: vaga } %}
+            </div>
+            <a href="#candidatar" class="carreiras-btn carreiras-btn--primary carreiras-hero-cta">
+                Candidatar-se
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<div class="carreiras-vaga-layout carreiras-vaga-page">
+    <div class="carreiras-vaga-main">
+        {% include 'public/carreiras/_vaga_highlights.html.twig' with { vaga: vaga } %}
+
+        {% embed 'public/carreiras/_content_panel.html.twig' with {
+            icon: 'briefcase',
+            title: 'Sobre a vaga',
+            subtitle: 'Descrição da posição e contexto do time'
+        } %}
+            {% block panel_content %}
+            {% if vaga.descricao %}
+            <div class="carreiras-prose">{{ vaga.descricao|nl2br }}</div>
+            {% else %}
+            <div class="carreiras-prose carreiras-prose--placeholder">
+                <p>Buscamos profissionais talentosos para a posição de <strong>{{ vaga.titulo }}</strong>.</p>
+                <p class="mb-0">Se identifica com a oportunidade, envie sua candidatura — nossa equipe analisará seu perfil e retornará em breve.</p>
+            </div>
+            {% endif %}
+            {% endblock %}
+        {% endembed %}
+
+        {% if vaga.requisitos %}
+        {% set req_lines = vaga.requisitos|split('\n')|filter(line => line|trim != '') %}
+        {% embed 'public/carreiras/_content_panel.html.twig' with {
+            icon: 'list-check',
+            title: 'Requisitos',
+            subtitle: 'O que valorizamos nesta posição'
+        } %}
+            {% block panel_content %}
+            {% if req_lines|length > 1 %}
+            <ul class="carreiras-check-list">
+                {% for line in req_lines %}
+                <li>{{ line|trim }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="carreiras-prose">{{ vaga.requisitos|nl2br }}</div>
+            {% endif %}
+            {% endblock %}
+        {% endembed %}
+        {% endif %}
+
+        {% embed 'public/carreiras/_content_panel.html.twig' with {
+            icon: 'route',
+            title: 'Etapas do processo seletivo',
+            subtitle: 'Transparência do início ao feedback final',
+            variant: 'muted'
+        } %}
+            {% block panel_content %}
+            {% include 'public/carreiras/_process_timeline.html.twig' with { mode: 'timeline' } %}
+            {% endblock %}
+        {% endembed %}
+
+        {% if empresa.carreirasDescricao %}
+        {% embed 'public/carreiras/_content_panel.html.twig' with {
+            icon: 'building',
+            title: 'Sobre ' ~ empresa.nome,
+            subtitle: 'Conheça quem somos',
+            variant: 'company'
+        } %}
+            {% block panel_content %}
+            <div class="carreiras-company-block">
+                {% import 'macros/empresa.html.twig' as empresa_macro %}
+                {{ empresa_macro.logo(empresa, 'carreiras-company-logo') }}
+                <div class="carreiras-prose mb-0">{{ empresa.carreirasDescricao|nl2br }}</div>
+            </div>
+            {% endblock %}
+        {% endembed %}
+        {% endif %}
+    </div>
+
+    <aside class="carreiras-vaga-aside" id="candidatar">
+        <div class="carreiras-apply-card">
+            <div class="carreiras-apply-card-head">
+                <span class="carreiras-apply-card-badge">
+                    <i class="fas fa-circle-check mr-1" aria-hidden="true"></i> Vaga aberta
+                </span>
+                <h2 class="carreiras-apply-card-title">Candidatar-se</h2>
+                <p class="carreiras-apply-card-sub">
+                    Preencha o formulário para a vaga <strong>{{ vaga.titulo }}</strong>.
+                </p>
+                {% include 'public/carreiras/_vaga_meta.html.twig' with { vaga: vaga, variant: 'compact' } %}
+            </div>
+            {% include 'public/carreiras/_apply_form.html.twig' with { vaga: vaga, empresaSlug: empresa.slug } %}
+        </div>
+
+        <div class="carreiras-share-card">
+            <div class="carreiras-share-copy">
+                <span class="carreiras-share-label">Compartilhar vaga</span>
+                <span class="carreiras-share-hint">Indique a alguém que se encaixe no perfil</span>
+            </div>
+            <button type="button"
+                    class="carreiras-share-btn"
+                    data-carreiras-copy-url
+                    data-copy-text="{{ url('app_carreiras_vaga', { empresaSlug: empresa.slug, vagaSlug: vaga.slug }) }}">
+                <i class="fas fa-link" aria-hidden="true"></i>
+                Copiar link
+            </button>
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}

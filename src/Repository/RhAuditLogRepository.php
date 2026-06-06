@@ -33,6 +33,26 @@ class RhAuditLogRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /** @return list<RhAuditLog> */
+    public function findForEntity(Empresa $empresa, string $modulo, string $entidade, int $entidadeId, int $limit = 50): array
+    {
+        return $this->createQueryBuilder('a')
+            ->leftJoin('a.user', 'u')
+            ->addSelect('u')
+            ->andWhere('a.empresa = :empresa')
+            ->andWhere('a.modulo = :modulo')
+            ->andWhere('a.entidade = :entidade')
+            ->andWhere('a.entidadeId = :entidadeId')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('modulo', $modulo)
+            ->setParameter('entidade', $entidade)
+            ->setParameter('entidadeId', $entidadeId)
+            ->orderBy('a.criadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countByEmpresa(Empresa $empresa): int
     {
         return (int) $this->createQueryBuilder('a')

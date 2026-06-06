@@ -1,0 +1,38 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Analytics — Recrutamento{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set hub_page_title = 'Analytics' %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · Origem, funil e vagas' %}
+
+{% block hub_toolbar_actions %}
+{% include 'components/recrutamento/hub_back_link.html.twig' %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="recrutamento-shell recrutamento-shell--analytics">
+    {% if chart_sections|default([])|length > 0 %}
+    {% include 'components/charts/panel.html.twig' with {
+        sections: chart_sections,
+        chart_executive: chart_executive|default({ kpis: [] }),
+        panel_id: 'recrutamento-analytics',
+        title: 'Inteligência de recrutamento',
+        subtitle: 'Origem dos candidatos, funil de seleção e distribuição das vagas',
+        title_icon: 'fa-chart-pie',
+        class: 'recrutamento-hub-charts-panel'
+    } only %}
+    {% else %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-chart-pie',
+        title: 'Sem dados para analytics ainda',
+        text: 'Cadastre vagas e candidatos para visualizar origem, funil de seleção e distribuição das posições.'
+    } %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% if chart_sections|default([])|length > 0 %}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections, version: 5 } only %}
+{% endif %}
+{% endblock %}

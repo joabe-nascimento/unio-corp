@@ -1,0 +1,52 @@
+{#
+  recrutamento/candidato_offcanvas — adicionar ou editar candidato
+#}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'recrutamento-candidato-form',
+    title: 'Adicionar candidato',
+    subtitle: 'Selecione uma vaga na listagem.',
+    icon: 'fa-user-plus',
+    size: 'md'
+} %}
+    {% block offcanvas_body %}
+        <p class="unio-offcanvas-context text-muted small mb-3" id="recrutamentoCandidatoVagaLabel"></p>
+        <form method="post"
+              action="{{ path('app_recrutamento_candidato', { id: 0 }) }}"
+              id="recrutamentoCandidatoForm"
+              class="unio-form unio-offcanvas-form"
+              data-recrutamento-candidato-action="{{ path('app_recrutamento_candidato', { id: 0 }) }}"
+              data-recrutamento-candidato-edit-action="{{ path('app_recrutamento_candidato_edit', { id: 0 }) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato') }}" id="recrutamentoCandidatoToken">
+            <input type="hidden" name="redirect_to" id="recrutamento-candidato-redirect" value="list">
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'candidato-nome', name: 'nome', label: 'Nome', placeholder: 'Nome completo', required: true
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'candidato-email', name: 'email', label: 'E-mail', placeholder: 'email@empresa.com',
+                type: 'email', required: true
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'candidato-telefone', name: 'telefone', label: 'Telefone', placeholder: '(00) 00000-0000'
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'candidato-linkedin', name: 'linkedin', label: 'LinkedIn (opcional)',
+                placeholder: 'https://linkedin.com/in/…', type: 'url'
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'candidato-origem',
+                name: 'origem',
+                label: 'Origem / canal',
+                type: 'select',
+                value: constant('App\\Rh\\RhCandidatoOrigem::MANUAL'),
+                options: recrutamento_origem_options(),
+                help_text: 'De onde veio este candidato — usado nos relatórios de sourcing.'
+            } %}
+            <div class="unio-form-actions unio-offcanvas-form-actions">
+                <button type="submit" class="btn-unio" id="recrutamentoCandidatoSubmitBtn">
+                    <i class="fas fa-check mr-1" aria-hidden="true"></i> <span id="recrutamentoCandidatoSubmitLabel">Adicionar</span>
+                </button>
+                <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}

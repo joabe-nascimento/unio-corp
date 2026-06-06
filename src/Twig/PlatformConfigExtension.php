@@ -2,6 +2,8 @@
 
 namespace App\Twig;
 
+use App\Entity\Empresa;
+use App\Service\EmpresaBrandingService;
 use App\Service\PlatformConfigService;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
@@ -12,7 +14,10 @@ use Twig\TwigFunction;
  */
 class PlatformConfigExtension extends AbstractExtension implements GlobalsInterface
 {
-    public function __construct(private PlatformConfigService $config) {}
+    public function __construct(
+        private PlatformConfigService $config,
+        private EmpresaBrandingService $empresaBranding,
+    ) {}
 
     /** @return array<string,mixed> */
     public function getGlobals(): array
@@ -29,6 +34,8 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
             new TwigFunction('platform_asset_src', [$this, 'assetSrc']),
             new TwigFunction('platform_asset_custom', [$this, 'assetCustom']),
             new TwigFunction('public_asset_href', [$this, 'publicAssetHref']),
+            new TwigFunction('empresa_logo_src', [$this, 'empresaLogoSrc']),
+            new TwigFunction('empresa_logo_custom', [$this, 'empresaLogoCustom']),
         ];
     }
 
@@ -71,5 +78,16 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
         };
 
         return $this->config->hasCustomAsset($key);
+    }
+
+    /** Logo efetivo da empresa (cadastro ou fallback de Configurações). */
+    public function empresaLogoSrc(?Empresa $empresa, string $variant = 'full'): string
+    {
+        return $this->empresaBranding->resolveLogoSrc($empresa, $variant);
+    }
+
+    public function empresaLogoCustom(?Empresa $empresa, string $variant = 'full'): bool
+    {
+        return $this->empresaBranding->hasDisplayLogo($empresa, $variant);
     }
 }

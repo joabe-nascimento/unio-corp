@@ -1,0 +1,42 @@
+{#
+  Meta chips da vaga — portal de carreiras
+
+  Props:
+    vaga     RhVaga
+    variant  hero | card | compact  (default hero)
+#}
+{% set variant = variant|default('hero') %}
+{% set list_class = variant == 'card' ? 'carreiras-vaga-card-meta' : (variant == 'compact' ? 'carreiras-apply-card-meta' : 'carreiras-vaga-meta') %}
+{% set item_class = variant == 'hero' ? 'carreiras-vaga-meta-item' : '' %}
+<ul class="{{ list_class }}" aria-label="Informações da vaga">
+    {% if vaga.departamento %}
+    <li{% if item_class %} class="{{ item_class }}"{% endif %}>
+        <i class="fas fa-building" aria-hidden="true"></i>
+        {{ vaga.departamento }}
+    </li>
+    {% endif %}
+    {% if vaga.localTrabalho %}
+    <li{% if item_class %} class="{{ item_class }}"{% endif %}>
+        <i class="fas fa-location-dot" aria-hidden="true"></i>
+        {{ vaga.localTrabalho }}
+    </li>
+    {% endif %}
+    {% if vaga.tipoContrato %}
+    <li{% if item_class %} class="{{ item_class }}"{% endif %}>
+        <i class="fas fa-file-contract" aria-hidden="true"></i>
+        {{ recrutamento_tipo_contrato_label(vaga.tipoContrato) }}
+    </li>
+    {% endif %}
+    {% if variant != 'compact' and vaga.vagasQuantidade > 1 %}
+    <li{% if item_class %} class="{{ item_class }}"{% endif %}>
+        <i class="fas fa-users" aria-hidden="true"></i>
+        {{ vaga.vagasQuantidade }} vagas
+    </li>
+    {% endif %}
+    {% if variant == 'hero' and vaga.publicadaEm %}
+    <li class="carreiras-vaga-meta-item">
+        <i class="fas fa-calendar-day" aria-hidden="true"></i>
+        Publicada em {{ vaga.publicadaEm|date('d/m/Y') }}
+    </li>
+    {% endif %}
+</ul>

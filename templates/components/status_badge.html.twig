@@ -1,11 +1,11 @@
 {#
-  status_badge — badge de status (substitui badge Bootstrap)
+  status_badge — badge de status sólida (padrão Núcleo TI / NOC)
 
   Props:
     label        (string)
     variant      (string)  info | success | warning | secondary | danger | accent  (default: secondary)
-    extra_class  (string)  classes adicionais
+    extra_class  (string)  classes adicionais (ex.: ti-badge-health, ti-badge-priority--p1)
     attrs        (object)  atributos HTML extras, ex.: { 'data-ti-status-badge': 'novo' }
 #}
-<span class="status-badge status-badge--{{ variant|default('secondary') }}{% if extra_class|default('') %} {{ extra_class }}{% endif %}"
+<span class="status-badge status-badge--{{ variant|default('secondary') }} ti-badge{% if extra_class|default('') %} {{ extra_class }}{% endif %}"
       {% for k, v in attrs|default({}) %} {{ k }}="{{ v }}"{% endfor %}>{{ label }}</span>

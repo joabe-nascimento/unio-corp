@@ -1,0 +1,32 @@
+{# Kanban do pipeline de recrutamento #}
+{% set can_manage = recrutamento_grant_at_least('pipeline', 'GESTOR_EQUIPE')
+    or recrutamento_grant_at_least('product_rh', 'recrutamento', 'GESTOR_EQUIPE') %}
+{% set can_view_admissoes = product_grant('product_rh', 'admissoes') %}
+<div class="kanban-board" data-recrutamento-pipeline-board{% if can_manage %} data-recrutamento-pipeline-dnd{% endif %}>
+    {% for stage in pipeline_stages %}
+    {% set cards = pipeline_board[stage.id]|default([]) %}
+    <div class="kanban-column" data-recrutamento-pipeline-col="{{ stage.id }}">
+        <div class="kanban-column-header">
+            <span class="kanban-column-title">
+                <i class="fas {{ stage.icon }} mr-1" aria-hidden="true"></i>{{ stage.label }}
+            </span>
+            <span class="kanban-column-count">{{ cards|length }}</span>
+        </div>
+        <div class="kanban-column-body">
+            <div class="kanban-column-cards"{% if can_manage %} data-recrutamento-pipeline-sort-col="{{ stage.id }}"{% endif %}>
+                {% for candidato in cards %}
+                {% include 'components/recrutamento/pipeline_card.html.twig' with {
+                    candidato: candidato,
+                    filter_vaga_id: filter_vaga_id,
+                    filter_q: filter_q|default(''),
+                    can_manage: can_manage,
+                    can_view_admissoes: can_view_admissoes
+                } %}
+                {% else %}
+                <p class="text-muted small mb-0 px-1 py-2 recrutamento-pipeline-empty">Nenhum candidato</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>

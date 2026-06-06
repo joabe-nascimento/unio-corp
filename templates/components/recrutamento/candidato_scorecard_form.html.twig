@@ -1,0 +1,40 @@
+{% set etapa = etapa|default(candidato.etapa) %}
+{% set criteria = recrutamento_scorecard_criteria(etapa) %}
+{% set saved = candidato.scorecards[etapa]|default(null) %}
+<form method="post" action="{{ path('app_recrutamento_candidato_scorecard', { id: candidato.id }) }}" class="recrutamento-scorecard-form">
+    <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_scorecard_' ~ candidato.id) }}">
+    <input type="hidden" name="etapa" value="{{ etapa }}">
+    <div class="recrutamento-scorecard-head">
+        {% include 'components/recrutamento/candidato_etapa_badge.html.twig' with { candidato: candidato } %}
+        {% if saved %}
+        <span class="recrutamento-scorecard-media">
+            <i class="fas fa-chart-simple mr-1" aria-hidden="true"></i>
+            Média {{ saved.media }}/5
+            {% if saved.autor %}<span class="recrutamento-scorecard-media-sub">· {{ saved.autor }}</span>{% endif %}
+        </span>
+        {% endif %}
+    </div>
+    <div class="recrutamento-scorecard-grid">
+        {% for item in criteria %}
+        <div class="recrutamento-scorecard-row">
+            <span class="recrutamento-scorecard-criterion">{{ item.label }}</span>
+            {% include 'components/recrutamento/rating_pills.html.twig' with {
+                name: 'scores[' ~ item.id ~ ']',
+                value: saved ? saved.scores[item.id]|default(null) : null,
+                aria_label: item.label
+            } %}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="recrutamento-scorecard-comment">
+        <label class="recrutamento-scorecard-comment-label" for="scorecard_comentario">Comentário</label>
+        <textarea class="form-control form-control-sm"
+                  id="scorecard_comentario"
+                  name="comentario"
+                  rows="3"
+                  placeholder="Observações sobre a avaliação desta etapa…">{{ saved.comentario|default('') }}</textarea>
+    </div>
+    <button type="submit" class="btn-unio btn-sm">
+        <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar scorecard
+    </button>
+</form>

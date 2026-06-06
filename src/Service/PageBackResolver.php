@@ -15,6 +15,16 @@ final class PageBackResolver
         'app_engenharia' => 'app_hub_operacoes',
         'app_talentos' => 'app_dashboard',
         'app_maturidade' => 'app_dashboard',
+        'app_recrutamento' => 'app_dashboard',
+        'app_recrutamento_vagas' => 'app_recrutamento',
+        'app_recrutamento_vagas_show' => 'app_recrutamento_vagas',
+        'app_recrutamento_candidatos' => 'app_recrutamento',
+        'app_recrutamento_candidatos_show' => 'app_recrutamento_candidatos',
+        'app_recrutamento_pipeline' => 'app_recrutamento',
+        'app_recrutamento_analytics' => 'app_recrutamento',
+        'app_recrutamento_carreiras' => 'app_recrutamento',
+        'app_recrutamento_talentos' => 'app_recrutamento',
+        'app_recrutamento_integracoes' => 'app_recrutamento',
         'app_comercial' => 'app_dashboard',
         'app_beneficios' => 'app_dashboard',
         'app_academy' => 'app_dashboard',
@@ -27,7 +37,6 @@ final class PageBackResolver
         'app_sst' => 'app_dashboard',
         'app_comunicacao' => 'app_dashboard',
         'app_hub_portal' => 'app_dashboard',
-        'app_hub_recrutamento' => 'app_dashboard',
         'app_esg' => 'app_dashboard',
         'app_suprimentos' => 'app_dashboard',
         'app_ti' => 'app_dashboard',
@@ -157,6 +166,10 @@ final class PageBackResolver
             return null;
         }
 
+        if (str_starts_with($currentRoute, 'app_recrutamento_')) {
+            return ['route' => 'app_recrutamento', 'params' => []];
+        }
+
         if (str_starts_with($currentRoute, 'app_pessoas_')) {
             return $this->resolvePrefixedHub('app_pessoas', $currentRoute, [
                 'membro' => 'app_pessoas_membros',
@@ -178,6 +191,14 @@ final class PageBackResolver
     {
         if ($route === 'app_rh_esocial_retry') {
             return ['route' => 'app_rh_esocial', 'params' => []];
+        }
+
+        if ($route === 'app_rh_recrutamento_pipeline') {
+            return ['route' => 'app_recrutamento_pipeline', 'params' => []];
+        }
+
+        if ($route === 'app_rh_recrutamento' || $route === 'app_rh_recrutamento_candidato') {
+            return ['route' => 'app_recrutamento_vagas', 'params' => []];
         }
 
         if (preg_match('/^app_rh_(.+?)_(nova|show|editar|gerar|export|candidato)$/', $route, $m)) {

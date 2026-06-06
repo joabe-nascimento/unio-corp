@@ -1,0 +1,30 @@
+{% if anexos is not empty %}
+<ul class="recrutamento-anexo-list mb-3">
+    {% for a in anexos %}
+    <li class="recrutamento-anexo-item">
+        <span class="recrutamento-anexo-icon" aria-hidden="true"><i class="fas fa-file-pdf"></i></span>
+        <span class="recrutamento-anexo-info">
+            <span class="recrutamento-anexo-name">{{ a.nomeOriginal }}</span>
+            <span class="recrutamento-anexo-size">{{ (a.tamanho / 1024)|round }} KB</span>
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+<form method="post"
+      action="{{ path('app_recrutamento_candidato_curriculo', { id: candidato.id }) }}"
+      enctype="multipart/form-data"
+      class="recrutamento-anexo-form">
+    <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_curriculo_' ~ candidato.id) }}">
+    {% include 'components/unio/file_upload.html.twig' with {
+        id: 'candidato-curriculo-' ~ candidato.id,
+        name: 'curriculo',
+        accept: 'application/pdf,.pdf',
+        hint: 'Apenas PDF — máx. 10 MB',
+        required: anexos is empty,
+        compact: true
+    } %}
+    <button type="submit" class="btn-unio btn-sm mt-3">
+        <i class="fas fa-paperclip mr-1" aria-hidden="true"></i> Anexar PDF
+    </button>
+</form>

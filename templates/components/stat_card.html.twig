@@ -14,7 +14,7 @@
         <i class="fas {{ icon|default('fa-chart-line') }}"></i>
     </div>
     <div class="stat-card-body">
-        <div class="card-value">{{ value }}</div>
+        <div class="card-value"{% if kpi_key|default('') %} data-recrutamento-pipeline-kpi="{{ kpi_key }}"{% endif %}>{{ value }}</div>
         <div class="card-label">{{ label }}</div>
         {% if sub is defined and sub %}
             <div class="card-sub">{{ sub }}</div>
@@ -29,7 +29,7 @@
 {% endset %}
 
 {% if route is defined and route %}
-    <a href="{{ path(route) }}" class="text-decoration-none d-flex w-100">{{ card_html }}</a>
+    <a href="{{ path(route, route_params|default({})) }}" class="text-decoration-none d-flex w-100">{{ card_html }}</a>
 {% else %}
     {{ card_html }}
 {% endif %}

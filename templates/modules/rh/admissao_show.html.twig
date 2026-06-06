@@ -1,6 +1,6 @@
 {% extends 'layout/page_list.html.twig' %}
-{% block title %}Admissão — {{ process.nome }}{% endblock %}
-{% set page_list_title = process.nome %}
+{% block title %}Admissão — {{ process.nome|rh_colaborador_nome(process.email, empresa.nome|default('')) }}{% endblock %}
+{% set page_list_title = process.nome|rh_colaborador_nome(process.email, empresa.nome|default('')) %}
 
 {% block page_list_toolbar_actions %}
 {% include 'components/page_back_link.html.twig' with {
@@ -61,7 +61,7 @@
     complete_label: 'Concluir onboarding',
     confirm_message: 'Concluir onboarding e cadastrar o funcionário?',
     profile: {
-        name: process.nome,
+        name: process.nome|rh_colaborador_nome(process.email, empresa.nome|default('')),
         subtitle: process.email,
         badge: process.statusLabel,
         badge_tone: process.status == 'CONCLUIDO' ? 'success' : 'info'

@@ -1,0 +1,30 @@
+{#
+  recrutamento/candidato_row_actions — ações compactas do candidato
+
+  Props:
+    candidato           RhCandidato
+    can_view_pipeline   (bool)
+    can_view_admissoes  (bool)
+#}
+{% set _c = candidato %}
+<div class="recrutamento-candidato-row-actions">
+    <a href="{{ path('app_recrutamento_candidatos_show', { id: _c.id }) }}"
+       class="btn-unio-ghost btn-xs"
+       title="Ver perfil">
+        <i class="fas fa-eye" aria-hidden="true"></i>
+    </a>
+    {% if can_view_pipeline %}
+    <a href="{{ path('app_recrutamento_pipeline', { vaga: _c.vaga.id }) }}"
+       class="btn-unio-ghost btn-xs"
+       title="Ver no pipeline">
+        <i class="fas fa-diagram-project" aria-hidden="true"></i>
+    </a>
+    {% endif %}
+    {% if _c.onboardingProcess and can_view_admissoes %}
+    <a href="{{ path('app_rh_admissoes_show', { id: _c.onboardingProcess.id }) }}"
+       class="btn-unio-ghost btn-xs"
+       title="Admissão #{{ _c.onboardingProcess.id }}">
+        <i class="fas fa-user-plus" aria-hidden="true"></i>
+    </a>
+    {% endif %}
+</div>

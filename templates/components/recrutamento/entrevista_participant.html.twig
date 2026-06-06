@@ -1,0 +1,39 @@
+{#
+  recrutamento/entrevista_participant — contexto de quem é a entrevista
+
+  Props:
+    candidato (RhCandidato, required)
+    show_ficha_link (bool, opt, default true)
+#}
+{% set vaga = candidato.vaga %}
+<div class="recrutamento-entrevista-participant">
+    <span class="recrutamento-entrevista-participant-eyebrow">Entrevista com</span>
+    <div class="recrutamento-entrevista-participant-body">
+        <span class="recrutamento-entrevista-participant-icon" aria-hidden="true">
+            <i class="fas fa-user-tie"></i>
+        </span>
+        <div class="recrutamento-entrevista-participant-copy">
+            <strong class="recrutamento-entrevista-participant-name">{{ candidato.nome|recrutamento_nome }}</strong>
+            <span class="recrutamento-entrevista-participant-contact">
+                <a href="mailto:{{ candidato.email }}">{{ candidato.email }}</a>
+                {% if candidato.telefone %}
+                <span class="recrutamento-entrevista-participant-sep">·</span>
+                <span>{{ candidato.telefone }}</span>
+                {% endif %}
+            </span>
+            <span class="recrutamento-entrevista-participant-vaga">
+                Para a vaga
+                <a href="{{ path('app_recrutamento_vagas_show', { id: vaga.id }) }}">{{ vaga.titulo }}</a>
+            </span>
+        </div>
+        <div class="recrutamento-entrevista-participant-aside">
+            {% include 'components/recrutamento/candidato_etapa_badge.html.twig' with { candidato: candidato } %}
+            {% if show_ficha_link|default(true) %}
+            <a href="{{ path('app_recrutamento_candidatos_show', { id: candidato.id }) }}"
+               class="recrutamento-entrevista-participant-ficha btn-unio-ghost btn-sm">
+                Ver ficha
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>

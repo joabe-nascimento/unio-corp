@@ -1,0 +1,147 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Candidatos{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set hub_page_title = 'Candidatos' %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · Base de candidatos' %}
+{% set can_manage = recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+{% set can_view_pipeline = recrutamento_grant('pipeline') %}
+
+{% set vaga_filter_options = [{ value: '', label: 'Todas as vagas' }] %}
+{% for v in vagas %}
+    {% set vaga_filter_options = vaga_filter_options|merge([{ value: v.id ~ '', label: v.titulo }]) %}
+{% endfor %}
+{% set etapa_filter_options = [] %}
+{% for value, label in etapa_options %}
+    {% set etapa_filter_options = etapa_filter_options|merge([{ value: value, label: label }]) %}
+{% endfor %}
+{% set can_view_admissoes = product_grant('product_rh', 'admissoes') %}
+{% block hub_toolbar_actions %}
+{% include 'components/recrutamento/hub_back_link.html.twig' %}
+{% if can_view_pipeline %}
+<a href="{{ path('app_recrutamento_pipeline', filter_vaga_id|default(null) ? { vaga: filter_vaga_id } : {}) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Pipeline
+</a>
+{% endif %}
+<a href="{{ path('app_recrutamento_candidatos_export', {
+    vaga: filter_vaga_id|default(''),
+    etapa: filter_etapa|default(''),
+    origem: filter_origem|default(''),
+    q: filter_q|default('')
+}) }}" class="btn-unio-ghost btn-sm" title="Exportar CSV">
+    <i class="fas fa-file-export" aria-hidden="true"></i>
+</a>
+{% endblock %}
+
+{% block hub_section_toolbar %}
+<form method="get" action="{{ path('app_recrutamento_candidatos') }}" style="display:contents">
+{% if filter_origem|default('') %}
+<input type="hidden" name="origem" value="{{ filter_origem }}">
+{% endif %}
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: '',
+    search_in_section: true,
+    search_placeholder: 'Buscar candidato…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Vaga',
+            show_label: true,
+            name: 'vaga',
+            id: 'candidatos-vaga',
+            min_width: '180px',
+            group_class: 'mb-0',
+            value: filter_vaga_id ? filter_vaga_id ~ '' : '',
+            options: vaga_filter_options,
+            select_attrs: { onchange: 'this.form.submit()' }
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Etapa',
+            show_label: true,
+            name: 'etapa',
+            id: 'candidatos-etapa',
+            min_width: '150px',
+            group_class: 'mb-0',
+            value: filter_etapa|default(''),
+            options: etapa_filter_options,
+            select_attrs: { onchange: 'this.form.submit()' }
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_recrutamento_candidatos'),
+            has_filters: has_filters|default(false),
+            show_submit: false
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block hub_content %}
+<div class="recrutamento-shell">
+{% set list_subtitle = candidatos|length ~ ' candidato' ~ (candidatos|length != 1 ? 's' : '') ~ ' encontrado' ~ (candidatos|length != 1 ? 's' : '') %}
+{% if filter_origem|default('') %}
+    {% set list_subtitle = list_subtitle ~ ' · Origem: ' ~ recrutamento_origem_label(filter_origem) %}
+{% endif %}
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Base de candidatos',
+        subtitle: list_subtitle
+    } %}
+    {% if candidatos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-users',
+            title: has_filters|default(false) ? 'Nenhum candidato encontrado' : 'Nenhum candidato',
+            text: has_filters|default(false)
+                ? 'Ajuste os filtros ou adicione candidatos em Vagas.'
+                : 'Adicione candidatos em Vagas para iniciar o funil.',
+            btn_label: 'Ir para Vagas',
+            btn_href: path('app_recrutamento_vagas'),
+            compact: false
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-unio mb-0">
+            <thead>
+                <tr>
+                    <th>Candidato</th>
+                    <th>Vaga</th>
+                    <th>Origem</th>
+                    <th>Etapa</th>
+                    <th>Cadastro</th>
+                    <th class="text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for c in candidatos %}
+            <tr>
+                <td>
+                    <a href="{{ path('app_recrutamento_candidatos_show', { id: c.id }) }}" class="text-reset text-decoration-none">
+                        {% include 'components/person_cell.html.twig' with {
+                            name: c.nome|recrutamento_nome,
+                            subtitle: c.email
+                        } %}
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ path('app_recrutamento_vagas_show', { id: c.vaga.id }) }}" class="text-reset">{{ c.vaga.titulo }}</a>
+                </td>
+                <td class="text-muted small">{{ c.origemLabel }}</td>
+                <td>{% include 'components/recrutamento/candidato_etapa_badge.html.twig' with { candidato: c } %}</td>
+                <td class="text-muted">{{ c.criadoEm|date('d/m/Y') }}</td>
+                <td class="text-right">
+                    {% include 'components/recrutamento/candidato_row_actions.html.twig' with {
+                        candidato: c,
+                        can_view_pipeline: can_view_pipeline,
+                        can_view_admissoes: can_view_admissoes
+                    } %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

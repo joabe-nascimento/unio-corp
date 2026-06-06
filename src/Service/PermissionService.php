@@ -269,7 +269,10 @@ class PermissionService
         'hub_recrutamento' => [
             'label' => 'Núcleo Recrutamento',
             'subtitle' => 'Seleção e pipeline de talentos',
-            'products' => [],
+            'products' => [
+                ['id' => 'vagas', 'label' => 'Vagas'],
+                ['id' => 'pipeline', 'label' => 'Pipeline'],
+            ],
         ],
         'hub_esg' => [
             'label' => 'Núcleo ESG',
@@ -619,7 +622,10 @@ class PermissionService
             'id' => 'hub_recrutamento',
             'label' => 'Núcleo Recrutamento',
             'scope' => 'hub_recrutamento',
-            'products' => [],
+            'products' => [
+                ['id' => 'vagas', 'label' => 'Vagas'],
+                ['id' => 'pipeline', 'label' => 'Pipeline'],
+            ],
         ],
         [
             'id' => 'hub_esg',
@@ -864,6 +870,11 @@ class PermissionService
             'gestor' => ['avaliacao' => 'GESTOR', 'plano' => 'GESTOR', 'historico' => 'GESTOR_EQUIPE', 'radar' => 'GESTOR_EQUIPE'],
             'supervisor' => ['avaliacao' => 'SUPERVISOR', 'plano' => 'SUPERVISOR_EQUIPE'],
             'membro' => ['avaliacao' => 'MEMBRO'],
+        ],
+        'hub_recrutamento' => [
+            'gestor' => ['vagas' => 'GESTOR', 'pipeline' => 'GESTOR'],
+            'gestor-eq' => ['vagas' => 'GESTOR_EQUIPE', 'pipeline' => 'SUPERVISOR'],
+            'supervisor' => ['vagas' => 'SUPERVISOR', 'pipeline' => 'SUPERVISOR_EQUIPE'],
         ],
         'hub_admin' => [
             'gestor' => ['usuarios' => 'GESTOR', 'empresas' => 'GESTOR', 'configuracoes' => 'GESTOR_EQUIPE'],

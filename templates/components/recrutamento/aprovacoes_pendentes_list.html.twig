@@ -1,0 +1,26 @@
+{# aprovacoes: list, can_manage: bool, redirect_to: string, compact: bool opt #}
+{% if aprovacoes is empty %}
+<p class="text-muted small mb-0">Nenhuma solicitação pendente.</p>
+{% else %}
+<ul class="recrutamento-aprovacoes-list{% if compact|default(false) %} recrutamento-aprovacoes-list--compact{% endif %}">
+{% for a in aprovacoes %}
+<li class="recrutamento-aprovacao-item">
+    <div class="recrutamento-aprovacao-item-head">
+        <a href="{{ path('app_recrutamento_candidatos_show', { id: a.candidato.id }) }}" class="recrutamento-aprovacao-nome">{{ a.candidato.nome|recrutamento_nome }}</a>
+        <span class="recrutamento-aprovacao-etapa">→ {{ recrutamento_etapa_label(a.etapaDestino) }}</span>
+    </div>
+    <p class="recrutamento-aprovacao-meta small text-muted mb-0">
+        {{ a.solicitante.nome|default(a.solicitante.userIdentifier) }} · {{ a.criadoEm|date('d/m/Y H:i') }}
+    </p>
+    {% if can_manage|default(false) %}
+    <form method="post" action="{{ path('app_recrutamento_aprovacao_decidir', { id: a.id }) }}" class="recrutamento-aprovacao-actions">
+        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_aprovacao_' ~ a.id) }}">
+        <input type="hidden" name="redirect_to" value="{{ redirect_to|default('integracoes') }}">
+        <button type="submit" name="aprovar" value="1" class="btn-unio btn-sm">Aprovar</button>
+        <button type="submit" name="aprovar" value="0" class="btn-unio-ghost btn-sm">Rejeitar</button>
+    </form>
+    {% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endif %}

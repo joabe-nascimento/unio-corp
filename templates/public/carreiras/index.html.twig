@@ -1,0 +1,117 @@
+{% extends 'public/carreiras/layout.html.twig' %}
+{% block title %}Vagas abertas{% endblock %}
+
+{% block hero %}
+<section class="carreiras-hero carreiras-hero--index" aria-label="Introdução">
+    {% include 'public/carreiras/_hero_bg.html.twig' with { empresa: empresa } %}
+    <div class="container carreiras-hero-inner">
+        <div class="carreiras-hero-copy">
+            <span class="carreiras-hero-eyebrow">{{ empresa.nome }}</span>
+            <h1 class="carreiras-hero-title">{{ empresa.carreirasTitulo|default('Trabalhe conosco') }}</h1>
+            {% if empresa.carreirasDescricao %}
+            <p class="carreiras-hero-desc">{{ empresa.carreirasDescricao }}</p>
+            {% else %}
+            <p class="carreiras-hero-desc">Encontre oportunidades alinhadas ao seu perfil e faça parte do nosso time.</p>
+            {% endif %}
+        </div>
+        <div class="carreiras-hero-stats">
+            <div class="carreiras-hero-stat">
+                <span class="carreiras-hero-stat-value" data-carreiras-stat-count>{{ vagas|length }}</span>
+                <span class="carreiras-hero-stat-label">{{ vagas|length == 1 ? 'Vaga aberta' : 'Vagas abertas' }}</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+{% set departamentos = [] %}
+{% set contratos = [] %}
+{% for v in vagas %}
+    {% if v.departamento and v.departamento not in departamentos %}
+        {% set departamentos = departamentos|merge([v.departamento]) %}
+    {% endif %}
+    {% if v.tipoContrato and v.tipoContrato not in contratos %}
+        {% set contratos = contratos|merge([v.tipoContrato]) %}
+    {% endif %}
+{% endfor %}
+
+<section class="carreiras-section" aria-labelledby="carreiras-vagas-heading">
+    <div class="carreiras-section-head">
+        <h2 id="carreiras-vagas-heading" class="carreiras-section-title">Oportunidades disponíveis</h2>
+        <p class="carreiras-section-subtitle">Selecione uma vaga para ver detalhes e enviar sua candidatura.</p>
+    </div>
+
+    {% if vagas is empty %}
+    <div class="carreiras-empty">
+        <span class="carreiras-empty-icon" aria-hidden="true"><i class="fas fa-briefcase"></i></span>
+        <h3 class="carreiras-empty-title">Nenhuma vaga aberta no momento</h3>
+        <p class="carreiras-empty-text">Volte em breve — publicamos novas oportunidades regularmente.</p>
+    </div>
+    {% else %}
+    <div class="carreiras-filters" data-carreiras-filters>
+        <div class="carreiras-filters-row">
+            <label class="carreiras-filter carreiras-filter--search">
+                <span class="sr-only">Buscar vagas</span>
+                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search"
+                       class="carreiras-filter-input"
+                       placeholder="Buscar por título, área ou palavra-chave…"
+                       data-carreiras-filter-search
+                       autocomplete="off">
+            </label>
+            {% if departamentos|length > 0 %}
+            <label class="carreiras-filter">
+                <span class="carreiras-filter-label">Departamento</span>
+                <select class="carreiras-filter-select" data-carreiras-filter-dept>
+                    <option value="">Todos</option>
+                    {% for dept in departamentos|sort %}
+                    <option value="{{ dept|e('html_attr') }}">{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% endif %}
+            {% if contratos|length > 0 %}
+            <label class="carreiras-filter">
+                <span class="carreiras-filter-label">Contrato</span>
+                <select class="carreiras-filter-select" data-carreiras-filter-contrato>
+                    <option value="">Todos</option>
+                    {% for ct in contratos|sort %}
+                    <option value="{{ ct|e('html_attr') }}">{{ recrutamento_tipo_contrato_label(ct) }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% endif %}
+        </div>
+        <p class="carreiras-filters-count" data-carreiras-filter-count>{{ vagas|length }} vaga{{ vagas|length != 1 ? 's' : '' }}</p>
+    </div>
+
+    <div class="carreiras-vagas-grid">
+        {% for vaga in vagas %}
+        {% include 'public/carreiras/_vaga_card.html.twig' with { vaga: vaga, empresa: empresa } %}
+        {% endfor %}
+    </div>
+
+    <div class="carreiras-empty carreiras-empty--filter" data-carreiras-filter-empty hidden>
+        <span class="carreiras-empty-icon" aria-hidden="true"><i class="fas fa-filter"></i></span>
+        <h3 class="carreiras-empty-title">Nenhuma vaga com esses filtros</h3>
+        <p class="carreiras-empty-text">Tente outro termo ou remova os filtros aplicados.</p>
+    </div>
+    {% endif %}
+</section>
+
+{% if empresa.carreirasDescricao %}
+<section class="carreiras-about" aria-labelledby="carreiras-about-heading">
+    <div class="carreiras-about-inner">
+        {% import 'macros/empresa.html.twig' as empresa_macro %}
+        {{ empresa_macro.logo(empresa, 'carreiras-about-logo') }}
+        <div>
+            <h2 id="carreiras-about-heading" class="carreiras-about-title">Sobre {{ empresa.nome }}</h2>
+            <div class="carreiras-prose carreiras-about-desc">{{ empresa.carreirasDescricao|nl2br }}</div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% include 'public/carreiras/_process_timeline.html.twig' with { mode: 'grid' } %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{#
+  Marca d'água do logo no hero — portal de carreiras
+
+  Props: empresa (Empresa, required)
+#}
+<div class="carreiras-hero-bg" aria-hidden="true">
+    {% set _logo_src = empresa_logo_src(empresa) %}
+    {% if _logo_src %}
+    <img src="{{ public_asset_href(_logo_src) }}"
+         alt=""
+         class="carreiras-hero-bg-logo"
+         loading="lazy"
+         decoding="async">
+    {% else %}
+    <span class="carreiras-hero-bg-monogram">{{ empresa.nome|default('E')|slice(0, 1)|upper }}</span>
+    {% endif %}
+</div>

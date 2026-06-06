@@ -17,9 +17,12 @@
         <div class="wr-severity-gauge-val" id="wrSeverityVal">{{ severity_score }}</div>
     </div>
     <span class="wr-live-dot" title="Monitoramento ao vivo"></span>
-    <span id="wrP1Badge" class="status-badge status-badge--{{ p1_count > 0 ? 'danger' : 'success' }}">
-        {% if p1_count > 0 %}{{ p1_count }} P1 ATIVO{{ p1_count != 1 ? 'S' : '' }}{% else %}SISTEMA ESTÁVEL{% endif %}
-    </span>
+    {% include 'components/status_badge.html.twig' with {
+        label: p1_count > 0 ? (p1_count ~ ' P1 ATIVO' ~ (p1_count != 1 ? 'S' : '')) : 'SISTEMA ESTÁVEL',
+        variant: p1_count > 0 ? 'danger' : 'success',
+        extra_class: 'ti-badge-priority ti-badge-priority--p1',
+        attrs: { id: 'wrP1Badge' }
+    } %}
     <span class="wr-clock" id="wrClock">--:--:--</span>
     {% include 'components/status_badge.html.twig' with { label: 'Live · 15s', variant: 'info' } %}
     <a href="{{ path('app_ti_chamados') }}" class="btn-unio-ghost btn-sm">

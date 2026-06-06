@@ -98,7 +98,7 @@ class SeedDevProjetosCommand extends Command
         );
 
         $this->service->createTarefa($hub, 'Revisar page_list em todos os módulos', null, DevTarefa::STATUS_EM_ANDAMENTO, 'ALTA', $meta);
-        $this->service->createTarefa($hub, 'Card RH / Pessoas / Eng no hub Operações', null, DevTarefa::STATUS_A_FAZER, 'MEDIA');
+        $this->service->createTarefa($hub, 'Card RH / Pessoas / Eng no núcleo de Operações', null, DevTarefa::STATUS_A_FAZER, 'MEDIA');
         $this->service->createTarefa($hub, 'KPIs reais no dashboard Operações', null, DevTarefa::STATUS_BACKLOG, 'BAIXA');
         $this->service->createTarefa($hub, 'Documentar padrão de list_toolbar', 'README interno', DevTarefa::STATUS_CONCLUIDO, 'MEDIA');
 

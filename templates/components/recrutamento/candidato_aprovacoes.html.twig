@@ -1,0 +1,27 @@
+{% if aprovacoes is empty %}
+<p class="recrutamento-aprovacao-empty mb-0">Nenhuma solicitação de aprovação.</p>
+{% else %}
+<ul class="recrutamento-aprovacao-list mb-0">
+{% for a in aprovacoes %}
+<li class="recrutamento-aprovacao-card">
+    <div class="recrutamento-aprovacao-card-head">
+        {% include 'components/recrutamento/aprovacao_status_badge.html.twig' with { aprovacao: a } %}
+        <span class="recrutamento-aprovacao-destino">
+            <i class="fas fa-arrow-right mx-1" aria-hidden="true"></i>
+            {{ recrutamento_etapa_label(a.etapaDestino) }}
+        </span>
+    </div>
+    <p class="recrutamento-aprovacao-meta mb-0">
+        {{ a.criadoEm|date('d/m/Y H:i') }} · {{ a.solicitante.nome|default(a.solicitante.userIdentifier) }}
+    </p>
+    {% if a.status == 'PENDENTE' and can_approve|default(false) %}
+    <form method="post" action="{{ path('app_recrutamento_aprovacao_decidir', { id: a.id }) }}" class="recrutamento-aprovacao-actions">
+        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_aprovacao_' ~ a.id) }}">
+        <button type="submit" name="aprovar" value="1" class="btn-unio btn-sm">Aprovar</button>
+        <button type="submit" name="aprovar" value="0" class="btn-unio-ghost btn-sm">Rejeitar</button>
+    </form>
+    {% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endif %}

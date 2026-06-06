@@ -1,6 +1,13 @@
-{# Ícone padronizado de área de trabalho: cabeça de usuário em azul #}
-{% macro logo(empresa, class) %}
+{# Logotipo da empresa — cadastro ou fallback de Admin → Configurações #}
+{% macro logo(empresa, class, variant) %}
+    {% set _src = empresa_logo_src(empresa, variant|default('full')) %}
+    {% if _src %}
+    <img src="{{ public_asset_href(_src) }}"
+         alt="{{ empresa.nome }}"
+         class="{{ class }} empresa-logo-img">
+    {% else %}
     <span class="{{ class }} empresa-logo-fallback empresa-icon-user" aria-hidden="true" title="{{ empresa.nome }}">
         <i class="fas fa-circle-user"></i>
     </span>
+    {% endif %}
 {% endmacro %}

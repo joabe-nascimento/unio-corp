@@ -4,7 +4,9 @@
 {% block permissions_scope %}{% endblock %}
 {% block content_lead %}
 {% set perm_scope = block('permissions_scope')|trim %}
-<div class="page-lead-zone{% if perm_scope and can_manage_permissions(perm_scope) %} page-lead-zone--hub-tabs{% endif %}">
+{% set _has_perm_tab = perm_scope and can_manage_permissions(perm_scope) %}
+{% set _show_hub_tabs = hub_show_tabs|default(_has_perm_tab) %}
+<div class="page-lead-zone{% if _show_hub_tabs %} page-lead-zone--hub-tabs{% endif %}">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: hub_page_title|default(''),
         page_subtitle: hub_page_subtitle|default(''),
@@ -17,15 +19,18 @@
         {% block toolbar_actions %}{% block hub_toolbar_actions %}{% endblock %}{% endblock %}
         {% block toolbar_filters %}{% block hub_toolbar_filters %}{% endblock %}{% endblock %}
         {% block toolbar_subnav %}
-            {% if perm_scope and can_manage_permissions(perm_scope) %}
+            {% if _show_hub_tabs %}
                 <div class="list-toolbar-subnav">
                     <div class="hub-overview-tabs" data-hub-tabs role="tablist" aria-label="Visão do núcleo">
                         <button type="button" class="hub-overview-tab hub-overview-tab--active" data-hub-tab="overview" role="tab" aria-selected="true">
                             Visão geral
                         </button>
+                        {% block hub_extra_tabs %}{% endblock %}
+                        {% if _has_perm_tab %}
                         <button type="button" class="hub-overview-tab" data-hub-tab="permissions" role="tab" aria-selected="false">
-                            <i class="fas fa-shield-halved mr-1"></i> Permissões
+                            <i class="fas fa-shield-halved mr-1" aria-hidden="true"></i> Permissões
                         </button>
+                        {% endif %}
                     </div>
                 </div>
                 <hr class="hub-toolbar-tabs-divider">
@@ -37,13 +42,17 @@
 {% endblock %}
 {% block content %}
 {% set perm_scope = block('permissions_scope')|trim %}
-<div class="page-body-inner{% if perm_scope and can_manage_permissions(perm_scope) %} page-body-inner--hub-tabs{% endif %}">
+{% set _has_perm_tab = perm_scope and can_manage_permissions(perm_scope) %}
+{% set _show_hub_tabs = hub_show_tabs|default(_has_perm_tab) %}
+<div class="page-body-inner{% if _show_hub_tabs %} page-body-inner--hub-tabs{% endif %}{% if perm_scope == 'hub_recrutamento' %} recrutamento-hub{% endif %}">
     <div class="hub-tab-panel hub-tab-panel--active" data-hub-panel="overview" role="tabpanel">
         {% block hub_section_toolbar %}{% endblock %}
         {% block hub_content %}{% endblock %}
     </div>
 
-    {% if perm_scope and can_manage_permissions(perm_scope) %}
+    {% block hub_extra_panels %}{% endblock %}
+
+    {% if _has_perm_tab %}
         {% set permission_data = permissions_scope(perm_scope) %}
         <div class="hub-tab-panel" data-hub-panel="permissions" role="tabpanel" hidden>
             {% if permission_data %}
@@ -57,29 +66,4 @@
     {% endif %}
 </div>
 
-{% if perm_scope and can_manage_permissions(perm_scope) %}
-<script>
-(function () {
-    var tabs = document.querySelector('.page-lead-zone--hub-tabs [data-hub-tabs]');
-    var root = document.querySelector('.page-body-inner--hub-tabs');
-    if (!tabs || !root) return;
-
-    tabs.querySelectorAll('[data-hub-tab]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var name = btn.getAttribute('data-hub-tab');
-            tabs.querySelectorAll('[data-hub-tab]').forEach(function (b) {
-                var active = b === btn;
-                b.classList.toggle('hub-overview-tab--active', active);
-                b.setAttribute('aria-selected', active ? 'true' : 'false');
-            });
-            root.querySelectorAll('[data-hub-panel]').forEach(function (panel) {
-                var active = panel.getAttribute('data-hub-panel') === name;
-                panel.hidden = !active;
-                panel.classList.toggle('hub-tab-panel--active', active);
-            });
-        });
-    });
-})();
-</script>
-{% endif %}
 {% endblock %}

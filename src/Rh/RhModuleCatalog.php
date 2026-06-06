@@ -74,7 +74,7 @@ final class RhModuleCatalog
 
             ['id' => 'organograma', 'grant' => 'organograma', 'route' => 'app_rh_organograma', 'icon' => 'fa-sitemap', 'title' => 'Organograma', 'short' => 'Organograma', 'subtitle' => 'Hierarquia da equipe', 'tone' => 'green', 'phase' => 1, 'group' => self::GROUP_OPERACAO],
 
-            ['id' => 'recrutamento', 'grant' => 'recrutamento', 'route' => 'app_rh_recrutamento', 'icon' => 'fa-briefcase', 'title' => 'Recrutamento', 'short' => 'Vagas', 'subtitle' => 'Vagas e candidatos', 'tone' => 'blue', 'phase' => 1, 'group' => self::GROUP_OPERACAO, 'activity_pulse' => true],
+            ['id' => 'recrutamento', 'grant' => 'recrutamento', 'route' => 'app_recrutamento_vagas', 'icon' => 'fa-briefcase', 'title' => 'Recrutamento', 'short' => 'Vagas', 'subtitle' => 'Vagas e candidatos', 'tone' => 'blue', 'phase' => 1, 'group' => self::GROUP_OPERACAO, 'activity_pulse' => true],
 
             ['id' => 'ponto', 'grant' => 'ponto', 'route' => 'app_rh_ponto', 'icon' => 'fa-clock', 'title' => 'Ponto', 'short' => 'Ponto', 'subtitle' => 'Batidas e espelho', 'tone' => 'amber', 'phase' => 1, 'group' => self::GROUP_OPERACAO],
 
@@ -135,6 +135,11 @@ final class RhModuleCatalog
 
         if ($moduleRoute === 'app_rh') {
             return $currentRoute === 'app_rh';
+        }
+
+        if ($moduleRoute === 'app_recrutamento_vagas') {
+            return str_starts_with($currentRoute, 'app_recrutamento')
+                || str_starts_with($currentRoute, 'app_rh_recrutamento');
         }
 
         return str_starts_with($currentRoute, $moduleRoute);

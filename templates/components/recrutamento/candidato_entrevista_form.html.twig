@@ -1,0 +1,150 @@
+{% set entrevista_valor = candidato.entrevistaEm ? candidato.entrevistaEm|date('Y-m-d\\TH:i') : '' %}
+{% set link_valor = candidato.entrevistaLink|default('') %}
+{% set vaga = candidato.vaga %}
+{% set participante_nome = candidato.nome|recrutamento_nome %}
+{% set entrevista_tipo = candidato.entrevistaTipo|default(constant('App\\Rh\\RhEntrevistaTipo::ONLINE')) %}
+{% set entrevista_titulo = recrutamento_entrevista_titulo(candidato) %}
+{% set entrevistador_atual = candidato.entrevistaEntrevistador %}
+
+<form method="post"
+      action="{{ path('app_recrutamento_candidato_entrevista', { id: candidato.id }) }}"
+      class="unio-form recrutamento-entrevista-form"
+      data-recrutamento-entrevista-form>
+    <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_candidato_entrevista_' ~ candidato.id) }}">
+
+    {% include 'components/recrutamento/entrevista_participant.html.twig' with {
+        candidato: candidato,
+        show_ficha_link: false
+    } %}
+
+    <div class="recrutamento-entrevista-meeting-head">
+        <span class="recrutamento-entrevista-meeting-label">Título da reunião</span>
+        <strong class="recrutamento-entrevista-meeting-title">{{ entrevista_titulo }}</strong>
+        <span class="recrutamento-entrevista-meeting-note">Gerado automaticamente a partir do candidato e da vaga.</span>
+    </div>
+
+    {% if candidato.entrevistaEm %}
+    {% include 'components/recrutamento/candidato_entrevista_booking.html.twig' with { candidato: candidato } %}
+    {% else %}
+    <div class="recrutamento-entrevista-empty">
+        <span class="recrutamento-entrevista-empty-icon" aria-hidden="true">
+            <i class="fas fa-calendar-plus"></i>
+        </span>
+        <div>
+            <strong>Nenhuma entrevista agendada para {{ participante_nome }}</strong>
+            <p class="mb-0">Defina tipo, entrevistador, data e local/link abaixo.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="recrutamento-entrevista-editor">
+        <span class="recrutamento-entrevista-editor-label">
+            {{ candidato.entrevistaEm ? 'Alterar agendamento' : 'Novo agendamento' }}
+        </span>
+
+        <div class="recrutamento-entrevista-options-grid mb-3">
+            <div class="unio-form-group recrutamento-entrevista-field mb-0">
+                <span class="unio-form-label d-block">Tipo</span>
+                <div class="recrutamento-entrevista-tipo-options" role="radiogroup" aria-label="Tipo de entrevista">
+                    {% for opt in recrutamento_entrevista_tipo_options() %}
+                    <label class="recrutamento-entrevista-tipo-option">
+                        <input type="radio"
+                               name="entrevista_tipo"
+                               value="{{ opt.value }}"
+                               data-recrutamento-entrevista-tipo
+                               {% if entrevista_tipo == opt.value %}checked{% endif %}>
+                        <span>
+                            <i class="fas fa-{{ opt.value == constant('App\\Rh\\RhEntrevistaTipo::PRESENCIAL') ? 'building' : 'video' }} mr-1" aria-hidden="true"></i>
+                            {{ opt.label }}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="unio-form-group recrutamento-entrevista-field mb-0">
+                <label class="unio-form-label" for="entrevista_entrevistador_{{ candidato.id }}">Entrevistador</label>
+                <div class="recrutamento-entrevista-input-icon">
+                    <i class="fas fa-user-check" aria-hidden="true"></i>
+                    <select class="unio-form-control"
+                            id="entrevista_entrevistador_{{ candidato.id }}"
+                            name="entrevista_entrevistador">
+                        <option value="">Eu ({{ app.user.nome }}) — padrão ao salvar</option>
+                        {% for u in entrevistadores|default([]) %}
+                        <option value="{{ u.id }}"
+                                {% if entrevistador_atual and entrevistador_atual.id == u.id %}selected{% elseif not entrevistador_atual and app.user and app.user.id == u.id %}selected{% endif %}>
+                            {{ u.nome }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="recrutamento-entrevista-grid">
+            <div class="unio-form-group recrutamento-entrevista-field">
+                <label class="unio-form-label" for="entrevista_em_{{ candidato.id }}">
+                    Data e hora <span class="unio-form-required">*</span>
+                </label>
+                <div class="recrutamento-entrevista-input-icon">
+                    <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                    <input type="datetime-local"
+                           class="unio-form-control recrutamento-entrevista-datetime"
+                           id="entrevista_em_{{ candidato.id }}"
+                           name="entrevista_em"
+                           value="{{ entrevista_valor }}"
+                           required>
+                </div>
+            </div>
+
+            <div class="unio-form-group recrutamento-entrevista-field">
+                <label class="unio-form-label" for="entrevista_link_{{ candidato.id }}"
+                       data-recrutamento-entrevista-link-label>
+                    {{ entrevista_tipo == constant('App\\Rh\\RhEntrevistaTipo::PRESENCIAL') ? 'Local / endereço' : 'Link da reunião' }}
+                </label>
+                <div class="recrutamento-entrevista-input-icon">
+                    <i class="fas fa-{{ entrevista_tipo == constant('App\\Rh\\RhEntrevistaTipo::PRESENCIAL') ? 'location-dot' : 'link' }}"
+                       aria-hidden="true"
+                       data-recrutamento-entrevista-link-icon></i>
+                    <input type="text"
+                           class="unio-form-control"
+                           id="entrevista_link_{{ candidato.id }}"
+                           name="entrevista_link"
+                           value="{{ link_valor }}"
+                           data-recrutamento-entrevista-link-input
+                           placeholder="{{ entrevista_tipo == constant('App\\Rh\\RhEntrevistaTipo::PRESENCIAL') ? 'Sala, andar ou endereço completo' : 'https://meet.google.com/...' }}">
+                </div>
+                <p class="recrutamento-entrevista-field-hint mb-0"
+                   data-recrutamento-entrevista-link-hint>
+                    {{ entrevista_tipo == constant('App\\Rh\\RhEntrevistaTipo::PRESENCIAL')
+                        ? 'Informe onde o candidato deve comparecer.'
+                        : 'Google Meet, Teams, Zoom ou similar.' }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="recrutamento-entrevista-notify-preview">
+        <span class="recrutamento-entrevista-notify-preview-label">
+            <i class="fas fa-paper-plane mr-1" aria-hidden="true"></i> Notificação ao candidato
+        </span>
+        <p class="recrutamento-entrevista-notify-preview-text mb-0">
+            E-mail para <strong>{{ candidato.email }}</strong> com assunto
+            “<strong>{{ entrevista_titulo }}</strong>”.
+        </p>
+    </div>
+
+    <div class="recrutamento-entrevista-footer">
+        <p class="recrutamento-entrevista-footer-note mb-0">
+            {% if candidato.entrevistaEm %}
+            Ao salvar, {{ participante_nome }} receberá a confirmação por e-mail.
+            {% else %}
+            {{ participante_nome }} será notificado automaticamente ao agendar.
+            {% endif %}
+        </p>
+        <button type="submit" class="btn-unio btn-sm">
+            <i class="fas fa-calendar-check mr-1" aria-hidden="true"></i>
+            {{ candidato.entrevistaEm ? 'Reagendar e notificar' : 'Agendar e notificar' }}
+        </button>
+    </div>
+</form>

@@ -1,0 +1,166 @@
+{#
+  Formulário de candidatura — portal de carreiras
+
+  Props: vaga, empresaSlug
+#}
+<form method="post"
+      enctype="multipart/form-data"
+      class="carreiras-apply-form"
+      id="carreiras-apply-form"
+      data-carreiras-apply-form>
+    <input type="hidden" name="_token" value="{{ csrf_token('carreiras_apply_' ~ vaga.id) }}">
+
+    <div class="carreiras-apply-steps" role="tablist" aria-label="Etapas da candidatura" data-carreiras-apply-steps>
+        <button type="button"
+                class="carreiras-apply-step is-active"
+                role="tab"
+                id="carreiras-tab-dados"
+                aria-controls="carreiras-panel-dados"
+                aria-selected="true"
+                data-carreiras-step="dados">
+            <i class="fas fa-user" aria-hidden="true"></i> Seus dados
+        </button>
+        <button type="button"
+                class="carreiras-apply-step"
+                role="tab"
+                id="carreiras-tab-curriculo"
+                aria-controls="carreiras-panel-curriculo"
+                aria-selected="false"
+                data-carreiras-step="curriculo">
+            <i class="fas fa-file-pdf" aria-hidden="true"></i> Currículo
+        </button>
+    </div>
+
+    <fieldset class="carreiras-apply-group is-active"
+              id="carreiras-panel-dados"
+              role="tabpanel"
+              aria-labelledby="carreiras-tab-dados"
+              data-carreiras-panel="dados">
+
+        <div class="carreiras-apply-field">
+            <label class="carreiras-apply-label" for="carreiras_nome">
+                Nome completo <span class="carreiras-apply-required">*</span>
+            </label>
+            <div class="carreiras-apply-input-wrap">
+                <i class="fas fa-user carreiras-apply-input-icon" aria-hidden="true"></i>
+                <input type="text"
+                       class="carreiras-apply-input"
+                       id="carreiras_nome"
+                       name="nome"
+                       required
+                       maxlength="150"
+                       autocomplete="name"
+                       placeholder="Como consta no documento">
+            </div>
+        </div>
+
+        <div class="carreiras-apply-field">
+            <label class="carreiras-apply-label" for="carreiras_email">
+                E-mail <span class="carreiras-apply-required">*</span>
+            </label>
+            <div class="carreiras-apply-input-wrap">
+                <i class="fas fa-envelope carreiras-apply-input-icon" aria-hidden="true"></i>
+                <input type="email"
+                       class="carreiras-apply-input"
+                       id="carreiras_email"
+                       name="email"
+                       required
+                       maxlength="180"
+                       autocomplete="email"
+                       placeholder="seu@email.com">
+            </div>
+            <p class="carreiras-apply-hint">Usaremos este e-mail para confirmação e retorno do processo.</p>
+        </div>
+
+        <div class="carreiras-apply-field">
+            <label class="carreiras-apply-label" for="carreiras_telefone">Telefone</label>
+            <div class="carreiras-apply-input-wrap">
+                <i class="fas fa-phone carreiras-apply-input-icon" aria-hidden="true"></i>
+                <input type="tel"
+                       class="carreiras-apply-input"
+                       id="carreiras_telefone"
+                       name="telefone"
+                       maxlength="24"
+                       autocomplete="tel"
+                       placeholder="(00) 00000-0000">
+            </div>
+        </div>
+
+        <div class="carreiras-apply-field">
+            <label class="carreiras-apply-label" for="carreiras_linkedin">
+                LinkedIn <span class="carreiras-apply-optional">opcional</span>
+            </label>
+            <div class="carreiras-apply-input-wrap">
+                <i class="fab fa-linkedin carreiras-apply-input-icon" aria-hidden="true"></i>
+                <input type="url"
+                       class="carreiras-apply-input"
+                       id="carreiras_linkedin"
+                       name="linkedin"
+                       placeholder="https://linkedin.com/in/seu-perfil">
+            </div>
+            <p class="carreiras-apply-hint">Ajuda a equipe a conhecer sua trajetória profissional.</p>
+        </div>
+    </fieldset>
+
+    <fieldset class="carreiras-apply-group"
+              id="carreiras-panel-curriculo"
+              role="tabpanel"
+              aria-labelledby="carreiras-tab-curriculo"
+              data-carreiras-panel="curriculo"
+              hidden>
+
+        <div class="carreiras-apply-field">
+            <div class="carreiras-apply-file" data-carreiras-file>
+                <input type="file"
+                       class="carreiras-apply-file-input"
+                       id="carreiras_curriculo"
+                       name="curriculo"
+                       accept="application/pdf,.pdf">
+                <label for="carreiras_curriculo" class="carreiras-apply-file-drop">
+                    <span class="carreiras-apply-file-drop-icon" aria-hidden="true">
+                        <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span class="carreiras-apply-file-text" data-carreiras-file-text>
+                        Arraste seu currículo aqui
+                    </span>
+                    <span class="carreiras-apply-file-or">ou</span>
+                    <span class="carreiras-apply-file-btn">Selecionar arquivo PDF</span>
+                    <span class="carreiras-apply-file-hint" data-carreiras-file-hint>
+                        Formato PDF · até 5 MB · opcional
+                    </span>
+                </label>
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="carreiras-apply-trust" data-carreiras-step-footer hidden>
+        <span><i class="fas fa-shield-halved" aria-hidden="true"></i> Dados protegidos (LGPD)</span>
+        <span><i class="fas fa-clock" aria-hidden="true"></i> ~2 min para concluir</span>
+    </div>
+
+    <p class="carreiras-apply-privacy" data-carreiras-step-footer hidden>
+        Ao enviar, você autoriza o uso dos dados informados exclusivamente para esta vaga.
+    </p>
+
+    <div class="carreiras-apply-nav">
+        <button type="button"
+                class="carreiras-btn carreiras-btn--ghost carreiras-btn--back"
+                data-carreiras-back
+                hidden>
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar
+        </button>
+        <button type="button"
+                class="carreiras-btn carreiras-btn--primary carreiras-btn--block"
+                data-carreiras-next>
+            Continuar
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+        <button type="submit"
+                class="carreiras-btn carreiras-btn--primary carreiras-btn--block carreiras-btn--submit"
+                data-carreiras-submit
+                hidden>
+            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+            Enviar candidatura
+        </button>
+    </div>
+</form>

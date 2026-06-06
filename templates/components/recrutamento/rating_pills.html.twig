@@ -1,0 +1,29 @@
+{#
+  recrutamento/rating_pills — seleção numérica 1–5 (scorecard / avaliação)
+
+  Props:
+    name          (string, required)
+    value         (int|string|null, opt)  valor selecionado
+    include_clear (bool, opt)             opção "—" para limpar
+    aria_label    (string, opt)
+#}
+<div class="recrutamento-scorecard-ratings" role="radiogroup"{% if aria_label|default('') %} aria-label="{{ aria_label }}"{% endif %}>
+    {% if include_clear|default(false) %}
+    <label class="recrutamento-scorecard-pill recrutamento-scorecard-pill--clear">
+        <input type="radio"
+               name="{{ name }}"
+               value=""
+               {% if value is not defined or value is null or value == '' %}checked{% endif %}>
+        <span>—</span>
+    </label>
+    {% endif %}
+    {% for i in 1..5 %}
+    <label class="recrutamento-scorecard-pill">
+        <input type="radio"
+               name="{{ name }}"
+               value="{{ i }}"
+               {% if value is defined and value is not null and value != '' and value == i %}checked{% endif %}>
+        <span>{{ i }}</span>
+    </label>
+    {% endfor %}
+</div>

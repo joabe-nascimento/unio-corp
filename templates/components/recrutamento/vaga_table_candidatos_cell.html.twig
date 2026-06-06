@@ -1,0 +1,24 @@
+{#
+  recrutamento/vaga_table_candidatos_cell — coluna Candidatos na listagem de vagas
+
+  Props:
+    vaga                RhVaga
+    candidatos          (iterable, opcional — só usado no backend)
+    total               (int)
+    can_view_pipeline   (bool)
+#}
+{% set _total = total|default(0) %}
+{% set _vaga_show = path('app_recrutamento_vagas_show', { id: vaga.id }) %}
+{% set _pipeline = path('app_recrutamento_pipeline', { vaga: vaga.id }) %}
+{% set _count_href = can_view_pipeline ? _pipeline : _vaga_show %}
+
+<div class="recrutamento-vaga-table-candidatos">
+    {% if _total > 0 %}
+    <a href="{{ _count_href }}" class="recrutamento-vaga-table-candidatos-count" title="Ver candidatos desta vaga">
+        <strong>{{ _total }}</strong>
+        {{ _total == 1 ? 'candidato' : 'candidatos' }}
+    </a>
+    {% else %}
+    <span class="recrutamento-vaga-table-candidatos-empty">—</span>
+    {% endif %}
+</div>

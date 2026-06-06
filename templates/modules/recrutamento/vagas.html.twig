@@ -1,0 +1,164 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Vagas{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set hub_page_title = 'Vagas' %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · Gestão de vagas' %}
+{% set can_manage_vagas = recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+{% set can_view_pipeline = recrutamento_grant('pipeline') %}
+{% set status_filter_options = [] %}
+{% for value, label in status_options %}
+    {% set status_filter_options = status_filter_options|merge([{ value: value, label: label }]) %}
+{% endfor %}
+
+{% block hub_toolbar_actions %}
+{% include 'components/recrutamento/hub_back_link.html.twig' %}
+{% endblock %}
+
+{% block hub_section_toolbar %}
+<form method="get" action="{{ path('app_recrutamento_vagas') }}" style="display:contents">
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: can_manage_vagas ? 'Nova vaga' : '',
+    btn_opens: can_manage_vagas ? 'recrutamento-vaga-form' : '',
+    btn_icon: 'fa-plus',
+    btn_sm: true,
+    btn_align: 'left',
+    search_in_section: true,
+    search_placeholder: 'Buscar vaga…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            show_label: true,
+            name: 'status',
+            id: 'filter-status',
+            min_width: '140px',
+            group_class: 'mb-0',
+            value: filter_status,
+            options: status_filter_options,
+            select_attrs: { onchange: 'this.form.submit()' }
+        } %}
+        <div class="section-toolbar-actions">
+            {% include 'components/toolbar_filter_actions.html.twig' with {
+                clear_href: path('app_recrutamento_vagas'),
+                has_filters: has_filters|default(false),
+                show_submit: false
+            } %}
+            {% if can_view_pipeline %}
+            <a href="{{ path('app_recrutamento_pipeline') }}" class="btn-unio-ghost btn-sm">
+                <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Ver pipeline
+            </a>
+            {% endif %}
+        </div>
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block hub_content %}
+<div class="recrutamento-shell">
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Vagas',
+        subtitle: vagas|length ~ ' vaga' ~ (vagas|length != 1 ? 's' : '') ~ ' encontrada' ~ (vagas|length != 1 ? 's' : '')
+    } %}
+    {% if vagas is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-briefcase',
+            title: has_filters|default(false) ? 'Nenhuma vaga encontrada' : 'Nenhuma vaga',
+            text: has_filters|default(false)
+                ? 'Ajuste os filtros ou cadastre uma nova vaga.'
+                : 'Cadastre vagas para receber candidatos.',
+            btn_label: can_manage_vagas ? 'Nova vaga' : null,
+            btn_opens: can_manage_vagas ? 'recrutamento-vaga-form' : null
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-unio mb-0">
+            <thead>
+                <tr>
+                    <th>Vaga</th>
+                    <th>Status</th>
+                    <th>Candidatos</th>
+                    <th class="text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for v in vagas %}
+            {% set vaga_total = candidatos_por_vaga[v.id]|default(0) %}
+            {% set vaga_candidatos = candidatos_lista[v.id]|default([]) %}
+            <tr>
+                <td>
+                    <a href="{{ path('app_recrutamento_vagas_show', { id: v.id }) }}" class="text-reset text-decoration-none">
+                        {% include 'components/person_cell.html.twig' with {
+                            name: v.titulo,
+                            subtitle: v.departamento|default('—')
+                        } %}
+                    </a>
+                </td>
+                <td>{% include 'components/recrutamento/vaga_status_badge.html.twig' with { vaga: v } %}</td>
+                <td>
+                    {% include 'components/recrutamento/vaga_table_candidatos_cell.html.twig' with {
+                        vaga: v,
+                        candidatos: vaga_candidatos,
+                        total: vaga_total,
+                        can_view_pipeline: can_view_pipeline
+                    } %}
+                </td>
+                <td class="text-right">
+                    {% if can_manage_vagas or can_view_pipeline %}
+                    {% include 'components/recrutamento/vaga_row_actions.html.twig' with {
+                        vaga: v,
+                        filter_status: filter_status,
+                        filter_q: filter_q|default(''),
+                        can_manage: can_manage_vagas,
+                        can_pipeline: can_view_pipeline
+                    } %}
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% if can_manage_vagas %}
+{% include 'components/recrutamento/vaga_offcanvas.html.twig' with {
+    filter_status: filter_status,
+    filter_q: filter_q|default(''),
+    departamentos: departamentos|default([])
+} %}
+{% include 'components/recrutamento/candidato_offcanvas.html.twig' %}
+{% include 'components/recrutamento/vaga_edit_offcanvas.html.twig' with {
+    departamentos: departamentos|default([])
+} %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/recrutamento-hub.js') }}"></script>
+<script>
+(function () {
+    if (window.UnioOffcanvas && typeof window.UnioOffcanvas.refresh === 'function') {
+        window.UnioOffcanvas.refresh();
+    }
+    if (window.RecrutamentoHub && typeof window.RecrutamentoHub.initVagasList === 'function') {
+        window.RecrutamentoHub.initVagasList();
+    }
+    {% if app.request.query.getBoolean('open_vaga') %}
+    if (window.UnioOffcanvas && typeof window.UnioOffcanvas.open === 'function') {
+        window.UnioOffcanvas.open('recrutamento-vaga-form');
+    }
+    {% endif %}
+})();
+</script>
+{% endblock %}

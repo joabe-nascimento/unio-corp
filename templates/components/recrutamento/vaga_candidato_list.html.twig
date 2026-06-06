@@ -1,0 +1,53 @@
+{#
+  recrutamento/vaga_candidato_list — lista compacta de candidatos na ficha da vaga
+
+  Props:
+    candidatos          (iterable)
+    can_view_admissoes  (bool)
+    compact             (bool, opt) modo enxuto na ficha da vaga
+#}
+{% set _compact = compact|default(false) %}
+<div class="recrutamento-vaga-candidato-list{% if _compact %} recrutamento-vaga-candidato-list--compact{% endif %}">
+    {% for c in candidatos %}
+    {% if _compact %}
+    <div class="recrutamento-vaga-candidato-row recrutamento-vaga-candidato-row--compact">
+        <a href="{{ path('app_recrutamento_candidatos_show', { id: c.id }) }}"
+           class="recrutamento-vaga-candidato-name">{{ c.nome|recrutamento_nome }}</a>
+        <div class="recrutamento-vaga-candidato-row-foot">
+            <div class="recrutamento-vaga-candidato-meta">
+                {% include 'components/recrutamento/candidato_etapa_badge.html.twig' with { candidato: c } %}
+            </div>
+            {% if c.onboardingProcess and can_view_admissoes %}
+            <a href="{{ path('app_rh_admissoes_show', { id: c.onboardingProcess.id }) }}"
+               class="recrutamento-vaga-candidato-admissao-link">
+                Admissão #{{ c.onboardingProcess.id }} <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+            </a>
+            {% else %}
+            <a href="{{ path('app_recrutamento_candidatos_show', { id: c.id }) }}"
+               class="recrutamento-vaga-candidato-admissao-link recrutamento-vaga-candidato-admissao-link--muted"
+               aria-label="Ver candidato">
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="recrutamento-vaga-candidato-row">
+        <div class="recrutamento-vaga-candidato-row-main">
+            <a href="{{ path('app_recrutamento_candidatos_show', { id: c.id }) }}"
+               class="recrutamento-vaga-candidato-name">{{ c.nome|recrutamento_nome }}</a>
+            <div class="recrutamento-vaga-candidato-meta">
+                {% include 'components/recrutamento/candidato_etapa_badge.html.twig' with { candidato: c } %}
+                <span class="recrutamento-vaga-candidato-date">{{ c.criadoEm|date('d/m/Y') }}</span>
+                <span class="recrutamento-vaga-candidato-origem">{{ c.origemLabel }}</span>
+            </div>
+        </div>
+        {% include 'components/recrutamento/candidato_row_actions.html.twig' with {
+            candidato: c,
+            can_view_pipeline: can_view_pipeline|default(false),
+            can_view_admissoes: can_view_admissoes
+        } %}
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>

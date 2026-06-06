@@ -81,7 +81,9 @@
 
         .ws-card .empresa-icon-user,
         .ws-card .empresa-logo-fallback {
-            width: 44px; height: 44px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
             border-radius: 11px;
             flex-shrink: 0;
             display: flex;
@@ -164,7 +166,7 @@
     <i class="fas fa-sun" id="themeIcon"></i>
 </button>
 
-{% import 'macros/empresa.html.twig' as empresa_macro %}
+
 <div class="ws-wrap">
     <div class="ws-header">
         <div class="logo">
@@ -193,7 +195,9 @@
         <a href="{{ path('app_workspace_switch', {id: emp.id}) }}"
            class="ws-card {% if current and current.id == emp.id %}ws-active{% endif %}">
 
-            {{ empresa_macro.logo(emp, 'wc-logo') }}
+            <span class="empresa-logo-fallback empresa-icon-user" aria-hidden="true" title="{{ emp.nome }}">
+                <i class="fas fa-circle-user"></i>
+            </span>
 
             <div class="wc-info">
                 <div class="wc-name">{{ emp.nome }}</div>

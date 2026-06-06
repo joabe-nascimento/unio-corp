@@ -1,0 +1,105 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Banco de talentos{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set hub_page_title = 'Banco de talentos' %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · Perfis reutilizáveis entre vagas' %}
+{% set can_manage = recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+
+{% block hub_toolbar_actions %}
+{% include 'components/recrutamento/hub_back_link.html.twig' %}
+{% endblock %}
+
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: talentos_count|default(0), label: 'Talentos', sub: 'No banco da empresa' },
+        { value: vagas_abertas_count|default(0), label: 'Vagas abertas', sub: 'Para inscrição rápida', route: 'app_recrutamento_vagas', route_params: { status: constant('App\\Entity\\RhVaga::STATUS_ABERTA') } },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block hub_section_toolbar %}
+<form method="get" action="{{ path('app_recrutamento_talentos') }}" style="display:contents">
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: '',
+    search_in_section: true,
+    search_placeholder: 'Buscar por nome, e-mail ou tag…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+    <div class="section-toolbar-actions">
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_recrutamento_talentos'),
+            has_filters: has_filters|default(false),
+            show_submit: false
+        } %}
+    </div>
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block hub_content %}
+<div class="recrutamento-shell recrutamento-admin recrutamento-admin--talentos">
+{% if talentos is empty %}
+<div class="unio-card">
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-gem',
+        title: has_filters|default(false) ? 'Nenhum resultado' : 'Banco vazio',
+        text: has_filters|default(false) ? 'Tente outro termo de busca.' : 'Adicione candidatos pela ficha ou receba inscrições pelo portal de carreiras.',
+        btn_label: can_manage ? 'Ver candidatos' : null,
+        btn_href: can_manage ? path('app_recrutamento_candidatos') : null
+    } %}
+</div>
+{% else %}
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Perfis cadastrados',
+        subtitle: talentos|length ~ ' talento(s)' ~ (has_filters|default(false) ? ' encontrado(s)' : '')
+    } %}
+    <div class="recrutamento-talentos-list px-3 pb-3">
+        {% for t in talentos %}
+        <div class="recrutamento-talento-row">
+            <div class="recrutamento-talento-main">
+                <div class="recrutamento-talento-name">{{ t.nome|recrutamento_nome }}</div>
+                <a href="mailto:{{ t.email }}" class="recrutamento-talento-email">{{ t.email }}</a>
+                {% if t.telefone %}
+                <span class="recrutamento-talento-phone small text-muted">{{ t.telefone }}</span>
+                {% endif %}
+                {% if t.tags|default([])|length > 0 %}
+                <div class="recrutamento-talento-tags">
+                    {% for tag in t.tags %}
+                    <span class="recrutamento-talento-tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% if can_manage %}
+            {% if vagas_inscricao|default([])|length > 0 %}
+            <form method="post" action="{{ path('app_recrutamento_talento_inscrever', { id: t.id }) }}" class="recrutamento-talento-inscribe">
+                <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_talento_inscrever_' ~ t.id) }}">
+                <select name="vaga_id" class="unio-form-control unio-form-control-sm" required aria-label="Vaga">
+                    <option value="">Inscrever em…</option>
+                    {% for v in vagas_inscricao %}
+                    <option value="{{ v.id }}">
+                        {{ v.titulo }}{% if v.status != constant('App\\Entity\\RhVaga::STATUS_ABERTA') %} ({{ v.statusLabel }}){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-unio btn-sm">Inscrever</button>
+            </form>
+            {% else %}
+            <p class="recrutamento-talento-inscribe-empty small text-muted mb-0">
+                Nenhuma vaga disponível.
+                <a href="{{ path('app_recrutamento_vagas') }}">Abrir vagas</a>
+            </p>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+</div>
+{% endblock %}

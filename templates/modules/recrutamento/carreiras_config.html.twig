@@ -1,0 +1,221 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Página de carreiras{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set hub_page_title = 'Página de carreiras' %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · Portal público de vagas e candidaturas' %}
+{% set can_manage = recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+{% set portal_ativo = empresa.carreirasAtivo %}
+{% set slug_valor = empresa.slug|default('') %}
+{% set titulo_valor = empresa.carreirasTitulo|default('Trabalhe conosco') %}
+{% set descricao_valor = empresa.carreirasDescricao|default('') %}
+
+{% block hub_toolbar_actions %}
+{% include 'components/recrutamento/hub_back_link.html.twig' %}
+{% if public_url and portal_ativo %}
+<a href="{{ public_url }}" class="btn-unio btn-sm" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt mr-1"></i> Ver página pública</a>
+{% endif %}
+{% endblock %}
+
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: portal_ativo ? 'Ativo' : 'Inativo', label: 'Portal', sub: slug_valor ? 'Slug configurado' : 'Defina o slug' },
+        { value: vagas_publicadas_count|default(0), label: 'Publicadas', sub: 'Na página pública' },
+        { value: vagas_abertas_count|default(0), label: 'Vagas abertas', sub: 'Disponíveis para publicar', route: 'app_recrutamento_vagas', route_params: { status: constant('App\\Entity\\RhVaga::STATUS_ABERTA') } },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block hub_content %}
+<div class="recrutamento-shell recrutamento-admin recrutamento-admin--carreiras">
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <form method="post" class="recrutamento-admin-form-stack">
+                <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_carreiras') }}">
+
+                <div class="unio-card recrutamento-admin-panel mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Configurações do portal',
+                        subtitle: 'URL, título e descrição exibidos aos candidatos'
+                    } %}
+                    <div class="px-3 pb-4">
+                        {% include 'components/unio/toggle_switch.html.twig' with {
+                            id: 'carreiras_ativo',
+                            name: 'carreiras_ativo',
+                            label: 'Página de carreiras ativa',
+                            hint: 'Quando ativa, candidatos acessam vagas publicadas sem login.',
+                            icon: 'fas fa-globe',
+                            checked: portal_ativo,
+                            disabled: not can_manage,
+                            extra_class: 'unio-toggle-row--featured mb-4'
+                        } %}
+
+                        {% if public_url or slug_valor %}
+                        <div class="recrutamento-admin-url-preview mb-4">
+                            <span class="recrutamento-admin-url-preview-label">URL pública</span>
+                            <div class="recrutamento-admin-url-preview-row">
+                                <code class="recrutamento-admin-url-preview-value" id="carreiras-public-url">{{ public_url ?: app.request.schemeAndHttpHost ~ '/carreiras/' ~ slug_valor }}</code>
+                                <div class="recrutamento-admin-url-preview-actions">
+                                    <button type="button"
+                                            class="btn-unio-ghost btn-sm recrutamento-admin-copy-url"
+                                            data-copy-text="{{ (public_url ?: app.request.schemeAndHttpHost ~ '/carreiras/' ~ slug_valor)|e('html_attr') }}"
+                                            title="Copiar URL">
+                                        <i class="fas fa-copy" aria-hidden="true"></i>
+                                    </button>
+                                    {% if public_url and portal_ativo %}
+                                    <a href="{{ public_url }}" class="btn-unio btn-sm" target="_blank" rel="noopener noreferrer">
+                                        Abrir <i class="fas fa-arrow-up-right-from-square ml-1" aria-hidden="true"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="unio-form-group recrutamento-admin-field mb-3">
+                            <label class="unio-form-label" for="slug">Slug da URL</label>
+                            <div class="recrutamento-admin-slug-input">
+                                <span class="recrutamento-admin-slug-prefix">/carreiras/</span>
+                                <input type="text"
+                                       class="unio-form-control"
+                                       id="slug"
+                                       name="slug"
+                                       value="{{ slug_valor }}"
+                                       placeholder="minha-empresa"
+                                       pattern="[a-z0-9\-]+"
+                                       title="Use apenas letras minúsculas, números e hífens"
+                                       {% if not can_manage %}readonly{% endif %}>
+                            </div>
+                            <p class="recrutamento-admin-hint mb-0">Identificador único da empresa na URL pública.</p>
+                        </div>
+
+                        <div class="unio-form-group recrutamento-admin-field mb-3">
+                            <label class="unio-form-label" for="carreiras_titulo">Título da página</label>
+                            <input type="text"
+                                   class="unio-form-control"
+                                   id="carreiras_titulo"
+                                   name="carreiras_titulo"
+                                   value="{{ empresa.carreirasTitulo|default('') }}"
+                                   maxlength="180"
+                                   placeholder="Trabalhe conosco"
+                                   {% if not can_manage %}readonly{% endif %}>
+                        </div>
+
+                        <div class="unio-form-group recrutamento-admin-field mb-0">
+                            <label class="unio-form-label" for="carreiras_descricao">Descrição</label>
+                            <textarea class="unio-form-control"
+                                      id="carreiras_descricao"
+                                      name="carreiras_descricao"
+                                      rows="4"
+                                      placeholder="Apresente a empresa aos candidatos…"
+                                      {% if not can_manage %}readonly{% endif %}>{{ descricao_valor }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                {% if can_manage %}
+                <div class="recrutamento-admin-form-footer">
+                    <button type="submit" class="btn-unio">
+                        <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar configurações
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="col-lg-5 mb-4">
+            <div class="unio-card recrutamento-admin-panel recrutamento-admin-portal-preview mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Pré-visualização',
+                    subtitle: 'Como o portal aparece aos candidatos'
+                } %}
+                <div class="px-3 pb-3">
+                    <div class="recrutamento-admin-portal-mock">
+                        <div class="recrutamento-admin-portal-mock-bar">
+                            {% include 'components/status_badge.html.twig' with {
+                                label: portal_ativo ? 'Portal ativo' : 'Portal inativo',
+                                variant: portal_ativo ? 'success' : 'secondary'
+                            } %}
+                            {% if slug_valor %}
+                            <span class="recrutamento-admin-portal-mock-slug">/carreiras/{{ slug_valor }}</span>
+                            {% endif %}
+                        </div>
+                        <h3 class="recrutamento-admin-portal-mock-title">{{ titulo_valor ?: 'Trabalhe conosco' }}</h3>
+                        {% if descricao_valor %}
+                        <p class="recrutamento-admin-portal-mock-desc">{{ descricao_valor|length > 160 ? descricao_valor|slice(0, 160) ~ '…' : descricao_valor }}</p>
+                        {% else %}
+                        <p class="recrutamento-admin-portal-mock-desc recrutamento-admin-portal-mock-desc--placeholder">Adicione uma descrição para apresentar a empresa aos candidatos.</p>
+                        {% endif %}
+                        <div class="recrutamento-admin-portal-mock-jobs">
+                            <span class="recrutamento-admin-portal-mock-jobs-label">Vagas publicadas</span>
+                            <strong>{{ vagas_publicadas_count|default(0) }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="unio-card recrutamento-admin-panel mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Vagas publicadas',
+                    subtitle: 'Visíveis no portal público'
+                } %}
+                <div class="px-3 pb-3">
+                    {% if vagas_publicadas is empty %}
+                    {% include 'components/empty_state.html.twig' with {
+                        icon: 'fa-globe',
+                        title: 'Nenhuma vaga publicada',
+                        text: 'Abra uma vaga e use "Publicar" na ficha para exibi-la no portal.',
+                        compact: true
+                    } %}
+                    {% else %}
+                    <ul class="recrutamento-admin-vaga-list">
+                        {% for v in vagas_publicadas %}
+                        <li class="recrutamento-admin-vaga-item">
+                            <div class="recrutamento-admin-vaga-item-head">
+                                <a href="{{ path('app_recrutamento_vagas_show', { id: v.id }) }}" class="recrutamento-admin-vaga-title">{{ v.titulo }}</a>
+                                {% if empresa.slug and v.slug and portal_ativo %}
+                                <a href="/carreiras/{{ empresa.slug }}/{{ v.slug }}"
+                                   class="recrutamento-admin-vaga-open"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   title="Abrir no portal">
+                                    <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% if empresa.slug and v.slug %}
+                            <code class="recrutamento-admin-vaga-url">/carreiras/{{ empresa.slug }}/{{ v.slug }}</code>
+                            {% endif %}
+                            {% if v.departamento %}
+                            <span class="recrutamento-admin-vaga-meta"><i class="fas fa-building" aria-hidden="true"></i> {{ v.departamento }}</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="unio-card recrutamento-admin-callout px-3 py-3">
+                <span class="recrutamento-admin-callout-icon recrutamento-admin-callout-icon--tip" aria-hidden="true"><i class="fas fa-lightbulb"></i></span>
+                <div>
+                    <strong>Candidaturas públicas</strong>
+                    <p class="recrutamento-admin-hint mb-0">Entram no funil com origem <strong>Site / carreiras</strong> e vão para o banco de talentos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/recrutamento-hub.js') }}"></script>
+<script>
+(function () {
+    if (window.RecrutamentoHub && typeof RecrutamentoHub.initCopyButtons === 'function') {
+        RecrutamentoHub.initCopyButtons();
+    }
+})();
+</script>
+{% endblock %}

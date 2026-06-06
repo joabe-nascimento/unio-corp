@@ -1,0 +1,55 @@
+{#
+  recrutamento/candidato_reject_offcanvas — reprovar com motivo
+#}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'recrutamento-candidato-reject-form',
+    title: 'Reprovar candidato',
+    subtitle: 'Registre o motivo para histórico e relatórios.',
+    icon: 'fa-ban',
+    size: 'md'
+} %}
+    {% block offcanvas_body %}
+        <p class="unio-offcanvas-context text-muted small mb-3" id="recrutamentoCandidatoRejectLabel"></p>
+        <form method="post"
+              action="{{ path('app_recrutamento_candidato_reprovar', { id: 0 }) }}"
+              id="recrutamentoCandidatoRejectForm"
+              class="unio-form unio-offcanvas-form"
+              data-recrutamento-candidato-reject-action="{{ path('app_recrutamento_candidato_reprovar', { id: 0 }) }}">
+            <input type="hidden" name="_token" value="" id="recrutamentoCandidatoRejectToken">
+            <input type="hidden" name="redirect_to" id="recrutamento-candidato-reject-redirect" value="pipeline">
+            <input type="hidden" name="vaga" id="recrutamento-candidato-reject-vaga" value="">
+            <input type="hidden" name="q" id="recrutamento-candidato-reject-q" value="">
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'candidato-motivo-reprovacao',
+                name: 'motivo_reprovacao',
+                label: 'Motivo da reprovação',
+                type: 'select',
+                required: true,
+                options: [
+                    { value: '', label: 'Selecione…' },
+                    { value: 'Perfil incompatível com a vaga', label: 'Perfil incompatível com a vaga' },
+                    { value: 'Expectativa salarial fora da faixa', label: 'Expectativa salarial fora da faixa' },
+                    { value: 'Não compareceu à entrevista', label: 'Não compareceu à entrevista' },
+                    { value: 'Desistiu do processo', label: 'Desistiu do processo' },
+                    { value: 'Aprovado em outra vaga', label: 'Aprovado em outra vaga' },
+                    { value: 'Outro', label: 'Outro' },
+                ],
+                help_text: 'Aparece no histórico do candidato e nos relatórios.'
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'candidato-motivo-detalhe',
+                name: 'motivo_detalhe',
+                label: 'Detalhes (opcional)',
+                type: 'textarea',
+                rows: 3,
+                placeholder: 'Complemento ou contexto adicional…'
+            } %}
+            <div class="unio-form-actions unio-offcanvas-form-actions">
+                <button type="submit" class="btn-unio btn-danger">
+                    <i class="fas fa-ban mr-1" aria-hidden="true"></i> Confirmar reprovação
+                </button>
+                <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}

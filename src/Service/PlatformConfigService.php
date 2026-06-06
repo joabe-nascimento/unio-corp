@@ -50,7 +50,7 @@ class PlatformConfigService
         'logo_mark_url'       => '',
         'logo_full_url'       => '',
         'favicon_url'         => '',
-        'cor_primaria'        => '#4F7FFF',
+        'cor_primaria'        => '#3D5AE8',
         'tema'                => 'dark',
         'suporte_email'       => '',
         'suporte_telefone'    => '',

@@ -1,0 +1,24 @@
+{#
+  Card de vaga — listagem do portal
+
+  Props: vaga, empresa
+#}
+<a href="{{ path('app_carreiras_vaga', { empresaSlug: empresa.slug, vagaSlug: vaga.slug }) }}"
+   class="carreiras-vaga-card"
+   data-carreiras-vaga-card
+   data-search="{{ (vaga.titulo ~ ' ' ~ vaga.descricao|default('') ~ ' ' ~ vaga.departamento|default(''))|lower|e('html_attr') }}"
+   data-departamento="{{ vaga.departamento|default('')|e('html_attr') }}"
+   data-contrato="{{ vaga.tipoContrato|default('')|e('html_attr') }}">
+    <div class="carreiras-vaga-card-head">
+        <h3 class="carreiras-vaga-card-title">{{ vaga.titulo }}</h3>
+        <span class="carreiras-vaga-card-badge">Aberta</span>
+    </div>
+    {% include 'public/carreiras/_vaga_meta.html.twig' with { vaga: vaga, variant: 'card' } %}
+    {% if vaga.descricao %}
+    <p class="carreiras-vaga-card-desc">{{ vaga.descricao|length > 160 ? vaga.descricao|slice(0, 160) ~ '…' : vaga.descricao }}</p>
+    {% endif %}
+    <span class="carreiras-vaga-card-cta">
+        Ver detalhes e candidatar-se
+        <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+    </span>
+</a>

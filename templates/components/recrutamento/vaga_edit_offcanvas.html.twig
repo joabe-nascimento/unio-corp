@@ -1,0 +1,79 @@
+{#
+  recrutamento/vaga_edit_offcanvas — editar vaga existente
+#}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'recrutamento-vaga-edit-form',
+    title: 'Editar vaga',
+    subtitle: 'Atualize os dados da oportunidade.',
+    icon: 'fa-pen',
+    size: 'md'
+} %}
+    {% block offcanvas_body %}
+        <p class="unio-offcanvas-context text-muted small mb-3" id="recrutamentoVagaEditLabel"></p>
+        <form method="post"
+              action="{{ path('app_recrutamento_vaga_edit', { id: 0 }) }}"
+              id="recrutamentoVagaEditForm"
+              class="unio-form unio-offcanvas-form"
+              data-recrutamento-vaga-edit-action="{{ path('app_recrutamento_vaga_edit', { id: 0 }) }}">
+            <input type="hidden" name="_token" value="">
+            <input type="hidden" name="redirect_to" id="recrutamento-vaga-edit-redirect" value="list">
+            <input type="hidden" name="redirect_status" id="recrutamento-vaga-edit-redirect-status" value="">
+            <input type="hidden" name="redirect_q" id="recrutamento-vaga-edit-redirect-q" value="">
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'edit-vaga-titulo', name: 'titulo', label: 'Título da vaga', placeholder: 'Ex.: Analista de People Ops · Pleno', required: true, maxlength: 150
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'edit-vaga-departamento', name: 'departamento', label: 'Departamento / área', placeholder: 'Ex.: People, Comercial, TI',
+                maxlength: 100,
+                attrs: { list: 'edit-vaga-departamentos-datalist', autocomplete: 'organization' }
+            } %}
+            <datalist id="edit-vaga-departamentos-datalist">
+                {% for d in departamentos|default([]) %}
+                <option value="{{ d.nome }}"></option>
+                {% endfor %}
+            </datalist>
+            <div class="row">
+                <div class="col-md-6">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'edit-vaga-tipo-contrato', name: 'tipo_contrato', label: 'Tipo de contrato', type: 'select',
+                        options: recrutamento_tipo_contrato_options()
+                    } %}
+                </div>
+                <div class="col-md-6">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'edit-vaga-quantidade', name: 'vagas_quantidade', label: 'Vagas abertas', type: 'number',
+                        value: '1', attrs: { min: 1, max: 99 }
+                    } %}
+                </div>
+            </div>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'edit-vaga-local', name: 'local_trabalho', label: 'Local / modelo',
+                placeholder: 'Ex.: Remoto · São Paulo · Híbrido', maxlength: 120
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'edit-vaga-descricao', name: 'descricao', label: 'Descrição da vaga',
+                placeholder: 'Resumo da oportunidade…',
+                type: 'textarea', rows: 4
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'edit-vaga-requisitos', name: 'requisitos', label: 'Requisitos e responsabilidades',
+                placeholder: 'Experiência, skills, formação…',
+                type: 'textarea', rows: 5
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'edit-vaga-status', name: 'status', label: 'Status', type: 'select',
+                options: [
+                    { value: constant('App\\Entity\\RhVaga::STATUS_ABERTA'), label: 'Aberta' },
+                    { value: constant('App\\Entity\\RhVaga::STATUS_PAUSADA'), label: 'Pausada' },
+                    { value: constant('App\\Entity\\RhVaga::STATUS_FECHADA'), label: 'Fechada' },
+                ]
+            } %}
+            <div class="unio-form-actions unio-offcanvas-form-actions">
+                <button type="submit" class="btn-unio">
+                    <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar
+                </button>
+                <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}

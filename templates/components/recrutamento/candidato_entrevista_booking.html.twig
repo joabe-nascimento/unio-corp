@@ -1,0 +1,71 @@
+{#
+  recrutamento/candidato_entrevista_booking — card de agendamento (leitura)
+
+  Props:
+    candidato (RhCandidato, required)
+#}
+{% set meses_curto = ['', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'] %}
+{% set dias_semana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'] %}
+{% set link_valor = candidato.entrevistaLink|default('') %}
+{% set entrevista_tipo = candidato.entrevistaTipo|default(constant('App\\Rh\\RhEntrevistaTipo::ONLINE')) %}
+{% set entrevistador_atual = candidato.entrevistaEntrevistador %}
+
+{% if candidato.entrevistaEm %}
+<div class="recrutamento-entrevista-booking">
+    <div class="recrutamento-entrevista-booking-meta">
+        {% include 'components/status_badge.html.twig' with {
+            label: candidato.entrevistaTipoLabel,
+            variant: entrevista_tipo == constant('App\\Rh\\RhEntrevistaTipo::PRESENCIAL') ? 'warning' : 'info'
+        } %}
+        {% if entrevistador_atual %}
+        <span class="recrutamento-entrevista-booking-interviewer">
+            <i class="fas fa-user-check mr-1" aria-hidden="true"></i>
+            {{ entrevistador_atual.nome }}
+        </span>
+        {% endif %}
+    </div>
+    <div class="recrutamento-entrevista-booking-main">
+        <div class="recrutamento-entrevista-date-block" aria-hidden="true">
+            <span class="recrutamento-entrevista-date-day">{{ candidato.entrevistaEm|date('d') }}</span>
+            <span class="recrutamento-entrevista-date-month">{{ meses_curto[candidato.entrevistaEm|date('n')|number_format(0, '', '')] }}</span>
+        </div>
+        <div class="recrutamento-entrevista-booking-info">
+            <span class="recrutamento-entrevista-badge">
+                <i class="fas fa-circle-check" aria-hidden="true"></i> Agendada
+            </span>
+            <strong class="recrutamento-entrevista-time">{{ candidato.entrevistaEm|date('H:i') }}</strong>
+            <span class="recrutamento-entrevista-weekday">
+                {{ dias_semana[candidato.entrevistaEm|date('w')|number_format(0, '', '')] }}
+                · {{ candidato.entrevistaEm|date('d/m/Y') }}
+            </span>
+        </div>
+    </div>
+    {% if link_valor %}
+    <div class="recrutamento-entrevista-link-row">
+        <span class="recrutamento-entrevista-link-icon" aria-hidden="true">
+            <i class="fas fa-{{ entrevista_tipo == constant('App\\Rh\\RhEntrevistaTipo::PRESENCIAL') ? 'location-dot' : 'video' }}"></i>
+        </span>
+        <span class="recrutamento-entrevista-link-url" title="{{ link_valor }}">
+            {{ link_valor|length > 48 ? link_valor|slice(0, 48) ~ '…' : link_valor }}
+        </span>
+        <div class="recrutamento-entrevista-link-actions">
+            <button type="button"
+                    class="btn-unio-ghost btn-sm recrutamento-entrevista-copy"
+                    data-copy-text="{{ link_valor|e('html_attr') }}"
+                    title="Copiar">
+                <i class="fas fa-copy" aria-hidden="true"></i>
+                <span class="sr-only">Copiar</span>
+            </button>
+            {% if entrevista_tipo == constant('App\\Rh\\RhEntrevistaTipo::ONLINE') %}
+            <a href="{{ link_valor }}"
+               class="btn-unio btn-sm"
+               target="_blank"
+               rel="noopener noreferrer">
+                Entrar <i class="fas fa-arrow-up-right-from-square ml-1" aria-hidden="true"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}

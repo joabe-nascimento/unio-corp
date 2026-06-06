@@ -37,6 +37,24 @@ class RhOnboardingProcessRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function findOpenByEmail(Empresa $empresa, string $email): ?RhOnboardingProcess
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('LOWER(p.email) = :email')
+            ->andWhere('p.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('email', mb_strtolower(trim($email)))
+            ->setParameter('statuses', [
+                RhOnboardingProcess::STATUS_RASCUNHO,
+                RhOnboardingProcess::STATUS_EM_ANDAMENTO,
+            ])
+            ->orderBy('p.criadoEm', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function countOpenByEmpresa(Empresa $empresa): int
     {
         return (int) $this->createQueryBuilder('p')

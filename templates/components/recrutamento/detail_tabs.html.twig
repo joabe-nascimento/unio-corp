@@ -1,0 +1,29 @@
+{#
+  recrutamento/detail_tabs — abas reutilizáveis (padrão hub-overview-tab)
+
+  Props:
+    tabs           [{ key, label, icon?, badge? }]
+    active_tab     (string)
+    tabs_attr      (string) ex: data-candidato-tabs
+    tab_attr       (string) ex: data-candidato-tab
+    aria_label     (string)
+#}
+<div class="recrutamento-detail-tabs-bar mb-4">
+    <div class="hub-overview-tabs" {{ tabs_attr|default('') }} role="tablist" aria-label="{{ aria_label|default('Seções') }}">
+        {% for tab in tabs %}
+        <button type="button"
+                class="hub-overview-tab{% if tab.key == active_tab %} hub-overview-tab--active{% endif %}"
+                {{ tab_attr|default('data-tab') }}="{{ tab.key }}"
+                role="tab"
+                aria-selected="{{ tab.key == active_tab ? 'true' : 'false' }}">
+            {% if tab.icon %}
+            <i class="fas fa-{{ tab.icon }} mr-1" aria-hidden="true"></i>
+            {% endif %}
+            {{ tab.label }}
+            {% if tab.badge|default('') %}
+            <span class="recrutamento-detail-tab-badge">{{ tab.badge }}</span>
+            {% endif %}
+        </button>
+        {% endfor %}
+    </div>
+</div>

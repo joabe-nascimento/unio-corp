@@ -1,0 +1,255 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}{{ vaga.titulo }} — Vaga{% endblock %}
+{% block permissions_scope %}hub_recrutamento{% endblock %}
+{% set hub_page_title = vaga.titulo %}
+{% set hub_page_subtitle = 'Núcleo de Recrutamento · Detalhe da vaga' %}
+{% set can_manage_vagas = recrutamento_grant_at_least('vagas', 'GESTOR_EQUIPE') %}
+{% set can_view_pipeline = recrutamento_grant('pipeline') %}
+{% set can_view_admissoes = product_grant('product_rh', 'admissoes') %}
+
+{% block hub_toolbar_actions %}
+{% include 'components/recrutamento/hub_back_link.html.twig' %}
+<a href="{{ path('app_recrutamento_vagas') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Vagas
+</a>
+{% if can_view_pipeline %}
+<a href="{{ path('app_recrutamento_pipeline', { vaga: vaga.id }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Pipeline
+</a>
+{% endif %}
+{% endblock %}
+
+{% block hub_section_toolbar %}
+{% if can_manage_vagas %}
+<div class="section-toolbar section-toolbar--compact">
+    <div class="section-toolbar-start">
+        <div class="section-toolbar-actions">
+            {% if vaga.status != constant('App\\Entity\\RhVaga::STATUS_FECHADA') %}
+            <button type="button"
+                    class="btn-unio btn-sm"
+                    data-unio-offcanvas-open="recrutamento-candidato-form"
+                    data-recrutamento-candidato-vaga="{{ vaga.id }}"
+                    data-recrutamento-candidato-titulo="{{ vaga.titulo|e('html_attr') }}"
+                    data-recrutamento-candidato-redirect="show">
+                <i class="fas fa-user-plus mr-1" aria-hidden="true"></i> Adicionar candidato
+            </button>
+            {% endif %}
+            <button type="button"
+                    class="btn-unio-ghost btn-sm"
+                    data-unio-offcanvas-open="recrutamento-vaga-edit-form"
+                    data-recrutamento-vaga-edit="{{ vaga.id }}"
+                    data-recrutamento-vaga-titulo="{{ vaga.titulo|e('html_attr') }}"
+                    data-recrutamento-vaga-departamento="{{ vaga.departamento|default('')|e('html_attr') }}"
+                    data-recrutamento-vaga-descricao="{{ vaga.descricao|default('')|e('html_attr') }}"
+                    data-recrutamento-vaga-requisitos="{{ vaga.requisitos|default('')|e('html_attr') }}"
+                    data-recrutamento-vaga-tipo-contrato="{{ vaga.tipoContrato|default('')|e('html_attr') }}"
+                    data-recrutamento-vaga-local="{{ vaga.localTrabalho|default('')|e('html_attr') }}"
+                    data-recrutamento-vaga-quantidade="{{ vaga.vagasQuantidade|default(1) }}"
+                    data-recrutamento-vaga-status="{{ vaga.status }}"
+                    data-recrutamento-vaga-edit-redirect="show"
+                    data-recrutamento-vaga-edit-token="{{ csrf_token('recrutamento_vaga_edit_' ~ vaga.id) }}">
+                <i class="fas fa-pen mr-1" aria-hidden="true"></i> Editar vaga
+            </button>
+        </div>
+    </div>
+    <div class="section-toolbar-end">
+        {% include 'components/recrutamento/vaga_row_actions.html.twig' with {
+            vaga: vaga,
+            filter_status: '',
+            can_manage: can_manage_vagas,
+            can_pipeline: false,
+            redirect_to: 'show',
+            show_nav: false,
+            lifecycle_only: true
+        } %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block hub_content %}
+{% set candidatos_count = candidatos|length %}
+<div class="recrutamento-shell">
+<div class="recrutamento-vaga-show">
+    <div class="unio-card recrutamento-vaga-show-card">
+        <div class="recrutamento-vaga-show-head px-3 pt-3 pb-2">
+            <div class="recrutamento-vaga-show-status">
+                {% include 'components/recrutamento/vaga_status_badge.html.twig' with { vaga: vaga } %}
+                <span class="recrutamento-vaga-show-date">Desde {{ vaga.criadoEm|date('d/m/Y') }}</span>
+            </div>
+        </div>
+
+        {% if can_manage_vagas %}
+        <div class="recrutamento-vaga-show-portal px-3 pb-3">
+            <div class="recrutamento-vaga-show-portal-inner">
+                <div class="recrutamento-vaga-show-portal-info">
+                    <span class="recrutamento-vaga-show-portal-label">Portal de carreiras</span>
+                    {% if vaga.publicadaEm %}
+                    <span class="recrutamento-vaga-show-portal-status text-success">
+                        <i class="fas fa-check-circle mr-1" aria-hidden="true"></i>
+                        Publicada desde {{ vaga.publicadaEm|date('d/m/Y') }}
+                    </span>
+                    {% if vaga.slug and vaga.empresa.slug %}
+                    <a href="/carreiras/{{ vaga.empresa.slug }}/{{ vaga.slug }}"
+                       class="recrutamento-vaga-show-portal-url"
+                       target="_blank"
+                       rel="noopener noreferrer">/carreiras/{{ vaga.empresa.slug }}/{{ vaga.slug }}</a>
+                    {% endif %}
+                    {% elseif vaga.status == constant('App\\Entity\\RhVaga::STATUS_ABERTA') %}
+                    <span class="recrutamento-vaga-show-portal-status text-muted">Não publicada no site de carreiras</span>
+                    {% else %}
+                    <span class="recrutamento-vaga-show-portal-status text-muted">Vaga {{ vaga.statusLabel|lower }} — publique quando estiver aberta</span>
+                    {% endif %}
+                </div>
+                {% if vaga.status == constant('App\\Entity\\RhVaga::STATUS_ABERTA') %}
+                <div class="recrutamento-vaga-show-portal-actions">
+                    {% if vaga.publicadaEm %}
+                    <form method="post" action="{{ path('app_recrutamento_vaga_despublicar', { id: vaga.id }) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_vaga_despublicar_' ~ vaga.id) }}">
+                        <button type="submit" class="btn-unio-ghost btn-sm">Despublicar</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{{ path('app_recrutamento_vaga_publicar', { id: vaga.id }) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('recrutamento_vaga_publicar_' ~ vaga.id) }}">
+                        <button type="submit" class="btn-unio btn-sm">
+                            <i class="fas fa-globe mr-1" aria-hidden="true"></i> Publicar
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% elseif vaga.publicadaEm %}
+        <div class="recrutamento-vaga-show-portal px-3 pb-3">
+            <div class="recrutamento-vaga-show-portal-inner recrutamento-vaga-show-portal-inner--readonly">
+                <span class="recrutamento-vaga-show-portal-label">Portal de carreiras</span>
+                <span class="recrutamento-vaga-show-portal-status text-success">
+                    <i class="fas fa-check-circle mr-1" aria-hidden="true"></i> Publicada
+                </span>
+                {% if vaga.slug and vaga.empresa.slug %}
+                <a href="/carreiras/{{ vaga.empresa.slug }}/{{ vaga.slug }}"
+                   class="recrutamento-vaga-show-portal-url"
+                   target="_blank"
+                   rel="noopener noreferrer">Ver no portal</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% set vaga_has_details = vaga.descricao or vaga.requisitos or vaga.departamento or vaga.tipoContrato or vaga.localTrabalho or vaga.vagasQuantidade > 1 %}
+        {% if vaga_has_details %}
+        <div class="recrutamento-vaga-show-details-wrap px-3 pb-3">
+            <details class="recrutamento-vaga-show-details">
+                <summary class="recrutamento-vaga-show-details-toggle">
+                    <span class="recrutamento-vaga-show-details-toggle-icon" aria-hidden="true">
+                        <i class="fas fa-file-alt"></i>
+                    </span>
+                    <span class="recrutamento-vaga-show-details-toggle-text">
+                        <span class="recrutamento-vaga-show-details-toggle-title">Detalhes da vaga</span>
+                        <span class="recrutamento-vaga-show-details-toggle-hint">
+                            {% if vaga.descricao and vaga.requisitos %}
+                                Descrição e requisitos
+                            {% elseif vaga.descricao %}
+                                Descrição da posição
+                            {% elseif vaga.requisitos %}
+                                Requisitos do cargo
+                            {% else %}
+                                Informações complementares
+                            {% endif %}
+                        </span>
+                    </span>
+                    <span class="recrutamento-vaga-show-details-chevron" aria-hidden="true">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </summary>
+                <div class="recrutamento-vaga-show-details-body">
+                    {% if vaga.departamento or vaga.tipoContrato or vaga.localTrabalho or vaga.vagasQuantidade > 1 %}
+                    <ul class="recrutamento-vaga-show-details-meta">
+                        {% if vaga.departamento %}
+                        <li><i class="fas fa-building" aria-hidden="true"></i> {{ vaga.departamento }}</li>
+                        {% endif %}
+                        {% if vaga.tipoContrato %}
+                        <li><i class="fas fa-briefcase" aria-hidden="true"></i> {{ recrutamento_tipo_contrato_label(vaga.tipoContrato) }}</li>
+                        {% endif %}
+                        {% if vaga.localTrabalho %}
+                        <li><i class="fas fa-location-dot" aria-hidden="true"></i> {{ vaga.localTrabalho }}</li>
+                        {% endif %}
+                        {% if vaga.vagasQuantidade > 1 %}
+                        <li><i class="fas fa-users" aria-hidden="true"></i> {{ vaga.vagasQuantidade }} posições</li>
+                        {% endif %}
+                    </ul>
+                    {% endif %}
+                    {% if vaga.descricao %}
+                    <div class="recrutamento-vaga-show-details-section">
+                        <p class="recrutamento-vaga-show-text-label mb-1">Descrição</p>
+                        <p class="recrutamento-vaga-show-text-body text-muted mb-0">{{ vaga.descricao|nl2br }}</p>
+                    </div>
+                    {% endif %}
+                    {% if vaga.requisitos %}
+                    <div class="recrutamento-vaga-show-details-section{% if vaga.descricao %} recrutamento-vaga-show-details-section--spaced{% endif %}">
+                        <p class="recrutamento-vaga-show-text-label mb-1">Requisitos</p>
+                        <p class="recrutamento-vaga-show-text-body text-muted mb-0">{{ vaga.requisitos|nl2br }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </details>
+        </div>
+        {% endif %}
+
+        <hr class="recrutamento-vaga-show-divider">
+
+        <div class="recrutamento-vaga-show-candidatos px-3 pb-3">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Candidatos',
+                subtitle: candidatos_count ~ ' no funil'
+            } %}
+            {% if candidatos is empty %}
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-users',
+                    title: 'Nenhum candidato',
+                    text: 'Adicione o primeiro candidato para iniciar o funil de seleção.',
+                    btn_label: can_manage_vagas and vaga.status != constant('App\\Entity\\RhVaga::STATUS_FECHADA') ? 'Adicionar candidato' : null,
+                    btn_opens: can_manage_vagas ? 'recrutamento-candidato-form' : null,
+                    compact: true
+                } %}
+            {% else %}
+                {% include 'components/recrutamento/vaga_candidato_list.html.twig' with {
+                    candidatos: candidatos,
+                    can_view_admissoes: can_view_admissoes,
+                    compact: true
+                } %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% if can_manage_vagas %}
+{% include 'components/recrutamento/candidato_offcanvas.html.twig' %}
+{% include 'components/recrutamento/vaga_edit_offcanvas.html.twig' with {
+    departamentos: departamentos|default([])
+} %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/recrutamento-hub.js') }}"></script>
+<script>
+(function () {
+    if (window.UnioOffcanvas && typeof window.UnioOffcanvas.refresh === 'function') {
+        window.UnioOffcanvas.refresh();
+    }
+    if (window.RecrutamentoHub && typeof window.RecrutamentoHub.initVagaShow === 'function') {
+        window.RecrutamentoHub.initVagaShow({
+            vagaId: {{ vaga.id }},
+            redirectTo: 'show',
+            openCandidato: {{ app.request.query.getBoolean('open_candidato') ? 'true' : 'false' }}
+        });
+    }
+})();
+</script>
+{% endblock %}

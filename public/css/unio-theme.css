@@ -1,142 +1,149 @@
 /**
  * Unio — design tokens (cores e variáveis de layout)
  *
- * Fonte única da paleta por tema. Componentes em unio-app.css consomem
- * apenas var(--accent), var(--sidebar-bg), var(--banner-*), etc.
- *
- * Override dinâmico (cor_primaria da plataforma no escuro): injetado via
- * templates/components/unio_theme_vars.html.twig
+ * Paleta da marca: ciano luminoso (#2DD4FF) → azul Unio (#3D5AE8) → azul profundo (#2B46D4).
+ * Fundos leves em família azul-cinza; acentos e CTAs no degradê da marca.
+ * Override dinâmico (cor_primaria): unio_theme_vars.html.twig
  */
+
+/* ── Marca (ambos os temas) ───────────────────────────────────────── */
+:root {
+    --brand-cyan:           #2DD4FF;
+    --brand-cyan-light:     #5CE4FF;
+    --brand-cyan-mid:       #4A8AFF;
+    --brand-cyan-strong:    #3350E0;
+    --brand-cyan-dark:      #2B46D4;
+    --brand-cyan-deep:      #243CB8;
+    --brand-blue:           #3D5AE8;
+    --brand-blue-muted:     #5A6B8A;
+
+    --accent-rgb:           61, 90, 232;
+
+    /* Degradê principal — ciano → azul Unio → azul profundo */
+    --brand-gradient:       linear-gradient(165deg, #2DD4FF 0%, #3D5AE8 52%, #2B46D4 100%);
+    --brand-gradient-hover: linear-gradient(165deg, #5CE4FF 0%, #3350E0 52%, #243CB8 100%);
+    /* Hero / card boas-vindas */
+    --brand-card-gradient:       linear-gradient(155deg, #2DD4FF 0%, #3D5AE8 42%, #2B46D4 100%);
+    --brand-card-gradient-dark:  linear-gradient(155deg, #243CB8 0%, #2B46D4 40%, #3D5AE8 100%);
+}
 
 /* ── Tema escuro (padrão) ─────────────────────────────────────────── */
 :root,
 [data-theme="dark"] {
-    /* Marca / ações */
-    --accent:       #4F7FFF;
-    --accent-dim:   rgba(79, 127, 255, 0.10);
-    --accent-line:  rgba(79, 127, 255, 0.18);
-    --action:       var(--accent);
-    --action-hover: #3D6AE8;
+    --accent:       #5B7CF5;
+    --accent-dim:   rgba(91, 124, 245, 0.14);
+    --accent-line:  rgba(91, 124, 245, 0.28);
+    --accent-rgb:   91, 124, 245;
+    --action:       var(--brand-gradient);
+    --action-hover: var(--brand-gradient-hover);
+    --action-solid: var(--brand-blue);
+    --action-solid-hover: var(--brand-cyan-strong);
     --action-dim:   var(--accent-dim);
     --action-line:  var(--accent-line);
 
-    /* Layout */
-    --bg:           #080A12;
-    --sidebar-bg:   #060810;
-    --surface:      #0D0F1A;
-    --surface-2:    #111424;
+    --bg:           #0A0E18;
+    --sidebar-bg:   #080C14;
+    --surface:      #0E1320;
+    --surface-2:    #121828;
     --layout-bg:    var(--surface-2);
     --card-bg:      var(--surface-2);
 
-    /* Texto */
-    --text-1:       #E2E4EA;
-    --text-2:       rgba(226, 228, 234, 0.50);
-    --text-3:       rgba(226, 228, 234, 0.24);
+    --text-1:       #E8ECF4;
+    --text-2:       rgba(232, 236, 244, 0.62);
+    --text-3:       rgba(232, 236, 244, 0.40);
     --text-primary: var(--text-1);
     --text-muted:   var(--text-2);
 
-    /* Bordas */
     --border:       rgba(255, 255, 255, 0.06);
     --border-2:     rgba(255, 255, 255, 0.10);
     --border-subtle:rgba(255, 255, 255, 0.04);
 
-    /* Navegação */
-    --nav-hover-bg: rgba(255, 255, 255, 0.04);
-    --nav-active-bg:rgba(79, 127, 255, 0.10);
-    --nav-active-icon-bg: rgba(79, 127, 255, 0.18);
+    --nav-hover-bg: rgba(255, 255, 255, 0.05);
+    --nav-active-bg:rgba(91, 124, 245, 0.14);
+    --nav-active-icon-bg: rgba(91, 124, 245, 0.22);
 
-    /* Banners / hero (escuro — sutil) */
     --banner-bg:        var(--surface-2);
     --banner-bg-soft:   var(--surface);
     --banner-heading:   var(--text-1);
     --banner-sub:       var(--text-2);
-    --banner-eyebrow:   var(--accent);
+    --banner-eyebrow:   var(--brand-cyan);
     --banner-border:    var(--border);
     --banner-pattern:   none;
 
-    /* Métricas / layout */
     --layout-header-h:      54px;
     --sidebar-width:        280px;
     --sidebar-width-hover:  304px;
-    --kpi-bottom-glow:      rgba(79, 127, 255, 0.14);
+    --kpi-bottom-glow:      rgba(91, 124, 245, 0.22);
     --sidebar-nav-item-h:   36px;
     --sidebar-nav-icon-box: 24px;
 
-    /* Carrosséis / progresso */
     --ticker-dot-bg:        rgba(255, 255, 255, 0.18);
     --ticker-dot-hover:     rgba(255, 255, 255, 0.35);
     --ticker-track-bg:      rgba(255, 255, 255, 0.08);
     --progress-track-bg:    var(--border);
 
-    /* Controles (inputs, botões de chrome) */
     --control-bg:           var(--surface-2);
     --control-bg-hover:     var(--nav-hover-bg);
     --input-bg:             var(--surface);
 }
 
-/* ── Tema claro (editorial teal) ──────────────────────────────────── */
+/* ── Tema claro ───────────────────────────────────────────────────── */
 [data-theme="light"] {
-    /* Marca / ações */
-    --accent:       #12616E;
-    --accent-dim:   rgba(18, 97, 110, 0.10);
-    --accent-line:  rgba(18, 97, 110, 0.22);
-    --action:       var(--accent);
-    --action-hover: #0E4F59;
+    --accent:       var(--brand-blue);
+    --accent-dim:   rgba(61, 90, 232, 0.12);
+    --accent-line:  rgba(61, 90, 232, 0.22);
+    --accent-rgb:   61, 90, 232;
+    --action:       var(--brand-gradient);
+    --action-hover: var(--brand-gradient-hover);
+    --action-solid: var(--brand-blue);
+    --action-solid-hover: var(--brand-cyan-strong);
     --action-dim:   var(--accent-dim);
     --action-line:  var(--accent-line);
 
-    /* Layout */
-    --bg:           #EEF2F3;
-    --sidebar-bg:   #DDE8EA;
-    --surface:      #E8EFF0;
-    --surface-2:    #FFFFFF;
-    --layout-bg:    #FFFFFF;
+    --bg:           #F0F4F8;
+    --sidebar-bg:   #E8EDF5;
+    --surface:      #EEF2F8;
+    --surface-2:    #F8FAFD;
+    --layout-bg:    #F0F4F8;
     --card-bg:      #FFFFFF;
 
-    /* Texto */
-    --text-1:       #0D3B44;
-    --text-2:       #3F5560;
-    --text-3:       #6A808A;
+    --text-1:       #1A3060;
+    --text-2:       #3D4F6F;
+    --text-3:       #5A6B8A;
     --text-primary: var(--text-1);
     --text-muted:   var(--text-2);
 
-    /* Bordas */
-    --border:       rgba(13, 59, 68, 0.12);
-    --border-2:     rgba(13, 59, 68, 0.18);
-    --border-subtle:rgba(13, 59, 68, 0.08);
+    --border:       rgba(61, 90, 232, 0.10);
+    --border-2:     rgba(61, 90, 232, 0.16);
+    --border-subtle:rgba(61, 90, 232, 0.06);
 
-    /* Navegação */
-    --nav-hover-bg: rgba(13, 59, 68, 0.06);
-    --nav-active-bg:rgba(18, 97, 110, 0.12);
-    --nav-active-icon-bg: rgba(18, 97, 110, 0.18);
+    --nav-hover-bg: rgba(61, 90, 232, 0.08);
+    --nav-active-bg: #DDE4F8;
+    --nav-active-icon-bg: rgba(61, 90, 232, 0.18);
 
-    /* Banners / hero */
-    --banner-bg:        #CFDADB;
-    --banner-bg-soft:   #D8E4E6;
-    --banner-heading:   #0D3B44;
-    --banner-sub:       #4A6670;
-    --banner-eyebrow:   #12616E;
-    --banner-border:    rgba(13, 59, 68, 0.12);
-    --banner-pattern:   radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.55) 0%, transparent 42%),
-                        radial-gradient(circle at 8% 92%, rgba(255, 255, 255, 0.35) 0%, transparent 38%),
-                        linear-gradient(125deg, rgba(255, 255, 255, 0.22) 0%, transparent 55%);
+    --banner-bg:        #D8E2F6;
+    --banner-bg-soft:   #E8EEF8;
+    --banner-heading:   #1A3060;
+    --banner-sub:       #3D4F6F;
+    --banner-eyebrow:   var(--brand-blue);
+    --banner-border:    rgba(61, 90, 232, 0.14);
+    --banner-pattern:   radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.65) 0%, transparent 42%),
+                        radial-gradient(circle at 8% 92%, rgba(61, 90, 232, 0.10) 0%, transparent 38%),
+                        linear-gradient(125deg, rgba(45, 212, 255, 0.06) 0%, transparent 55%);
 
-    /* Métricas / layout */
     --layout-header-h:      54px;
     --sidebar-width:        280px;
     --sidebar-width-hover:  304px;
-    --kpi-bottom-glow:      rgba(18, 97, 110, 0.14);
+    --kpi-bottom-glow:      rgba(61, 90, 232, 0.18);
     --sidebar-nav-item-h:   36px;
     --sidebar-nav-icon-box: 24px;
 
-    /* Carrosséis / progresso */
-    --ticker-dot-bg:        rgba(13, 59, 68, 0.22);
-    --ticker-dot-hover:     rgba(13, 59, 68, 0.38);
-    --ticker-track-bg:      rgba(13, 59, 68, 0.14);
-    --progress-track-bg:    rgba(13, 59, 68, 0.16);
+    --ticker-dot-bg:        rgba(61, 90, 232, 0.18);
+    --ticker-dot-hover:     rgba(61, 90, 232, 0.30);
+    --ticker-track-bg:      rgba(61, 90, 232, 0.10);
+    --progress-track-bg:    rgba(61, 90, 232, 0.12);
 
-    /* Controles — azul/teal fraco integrado ao header */
-    --control-bg:           rgba(18, 97, 110, 0.12);
-    --control-bg-hover:     rgba(18, 97, 110, 0.20);
-    --input-bg:             #D6E6EA;
+    --control-bg:           rgba(61, 90, 232, 0.06);
+    --control-bg-hover:     rgba(61, 90, 232, 0.11);
+    --input-bg:             #FFFFFF;
 }

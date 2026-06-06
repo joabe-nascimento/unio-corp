@@ -41,4 +41,32 @@ class PageBackResolverTest extends TestCase
         $this->assertNotNull($back);
         $this->assertSame('app_rh_portal', $back['route']);
     }
+
+    public function testRecrutamentoCarreirasBackToHub(): void
+    {
+        $back = $this->resolver->resolve('app_recrutamento_carreiras');
+        $this->assertNotNull($back);
+        $this->assertSame('app_recrutamento', $back['route']);
+    }
+
+    public function testRecrutamentoAnalyticsBackToHub(): void
+    {
+        $back = $this->resolver->resolve('app_recrutamento_analytics');
+        $this->assertNotNull($back);
+        $this->assertSame('app_recrutamento', $back['route']);
+    }
+
+    public function testRhRecrutamentoPipelineBackToHubPipeline(): void
+    {
+        $back = $this->resolver->resolve('app_rh_recrutamento_pipeline');
+        $this->assertNotNull($back);
+        $this->assertSame('app_recrutamento_pipeline', $back['route']);
+    }
+
+    public function testRecrutamentoUnknownSubrouteBackToHub(): void
+    {
+        $back = $this->resolver->resolve('app_recrutamento_candidatos_export');
+        $this->assertNotNull($back);
+        $this->assertSame('app_recrutamento', $back['route']);
+    }
 }
