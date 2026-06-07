@@ -25,6 +25,7 @@ final class RhRecruitmentExtendedService
         private RhCandidatoAprovacaoRepository $aprovacaoRepo,
         private RhAuditService $audit,
         private ProductGrantAccess $grants,
+        private RhRecruitmentNotificationService $recruitmentNotifications,
     ) {}
 
     public function scheduleEntrevista(
@@ -66,6 +67,7 @@ final class RhRecruitmentExtendedService
         $this->em->flush();
 
         $this->emails->queueEntrevistaAgendada($candidato);
+        $this->recruitmentNotifications->notifyEntrevistaAgendada($candidato, $actor);
         $this->audit->log(
             $candidato->getVaga()->getEmpresa(),
             $actor,
@@ -160,6 +162,7 @@ final class RhRecruitmentExtendedService
         $from = $candidato->getEtapa();
         $updated = $this->recrutamento->moveCandidatoEtapa($candidato, $etapa, $actor, $motivo);
         $this->emails->queueEtapaMudanca($updated, $from, $etapa);
+        $this->recruitmentNotifications->notifyEtapaMudanca($updated, $from, $etapa, $actor);
 
         return $updated;
     }
@@ -187,6 +190,7 @@ final class RhRecruitmentExtendedService
         $this->em->persist($aprovacao);
         $this->em->flush();
 
+        $this->recruitmentNotifications->notifyAprovacaoPendente($aprovacao);
         $this->audit->log(
             $candidato->getVaga()->getEmpresa(),
             $solicitante,
@@ -226,9 +230,12 @@ final class RhRecruitmentExtendedService
             $from = $candidato->getEtapa();
             $this->recrutamento->moveCandidatoEtapa($candidato, $aprovacao->getEtapaDestino(), $aprovador);
             $this->emails->queueEtapaMudanca($candidato, $from, $aprovacao->getEtapaDestino());
+            $this->recruitmentNotifications->notifyEtapaMudanca($candidato, $from, $aprovacao->getEtapaDestino(), $aprovador);
         }
 
         $this->em->flush();
+
+        $this->recruitmentNotifications->notifyAprovacaoDecidida($aprovacao, $aprovar, $aprovador);
 
         return $candidato;
     }

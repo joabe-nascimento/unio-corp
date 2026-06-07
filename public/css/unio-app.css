@@ -8200,6 +8200,12 @@
             border: 1px solid var(--border);
             color: var(--text-3);
             background: transparent;
+            text-decoration: none;
+            display: inline-block;
+        }
+        a.notif-filter-chip:hover {
+            color: var(--accent);
+            border-color: var(--accent-line);
         }
         .notif-filter-chip--active {
             color: var(--accent);
@@ -11666,8 +11672,8 @@
 .cfg-section-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--border-subtle,rgba(255,255,255,.07)); }
 .cfg-section-icon { width: 38px; height: 38px; border-radius: 9px; background: var(--accent-dim,rgba(79,127,255,.12)); display: flex; align-items: center; justify-content: center; color: var(--accent,#4F7FFF); font-size: 15px; flex-shrink: 0; }
 .cfg-section-icon--warning { background: rgba(255,180,0,.12); color: #ffb400; }
-.cfg-section-title { font-size: 15px; font-weight: 700; color: var(--text-primary,#D6DDE8); margin: 0 0 3px; }
-.cfg-section-sub { font-size: 12.5px; color: var(--text-muted,#8A96A3); margin: 0; }
+.cfg-section-title { font-size: 15px; font-weight: 700; color: var(--text-1); margin: 0 0 3px; }
+.cfg-section-sub { font-size: 12.5px; color: var(--text-2); margin: 0; line-height: 1.45; font-weight: 500; }
 .cfg-fields { display: flex; flex-direction: column; gap: 0; }
 .cfg-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .cfg-form-section-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted,#8A96A3); margin: 16px 0 8px; }
@@ -11675,20 +11681,27 @@
 .cfg-color-input { width: 44px; height: 36px; border-radius: 8px; border: 1px solid var(--border-subtle,rgba(255,255,255,.1)); padding: 2px; cursor: pointer; background: none; }
 .cfg-color-hex { width: 100px; font-family: monospace; }
 .cfg-toggles { display: flex; flex-direction: column; gap: 0; }
-.cfg-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border-subtle,rgba(255,255,255,.06)); }
+.cfg-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
 .cfg-toggle-row:last-child { border-bottom: none; }
-.cfg-toggle-row--card { background: var(--accent-dim,rgba(79,127,255,.04)); border: 1px solid var(--border-subtle,rgba(255,255,255,.07)); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+.cfg-toggle-row--card { background: var(--accent-dim,rgba(79,127,255,.04)); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
 .cfg-toggle-row--danger-active { background: rgba(240,80,80,.06); border-color: rgba(240,80,80,.2); }
-.cfg-toggle-info { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-.cfg-toggle-label { font-size: 13.5px; font-weight: 600; color: var(--text-primary,#D6DDE8); }
-.cfg-toggle-sub { font-size: 12px; color: var(--text-muted,#8A96A3); }
+.cfg-toggle-info { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.cfg-toggle-label { font-size: 14px; font-weight: 600; color: var(--text-1); line-height: 1.35; }
+.cfg-toggle-sub { font-size: 12.5px; line-height: 1.45; color: var(--text-2); font-weight: 500; }
 .cfg-switch { position: relative; display: inline-flex; cursor: pointer; flex-shrink: 0; }
 .cfg-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
-.cfg-switch-track { display: block; width: 44px; height: 24px; border-radius: 12px; background: rgba(255,255,255,.12); transition: background .2s; position: relative; }
-.cfg-switch-track::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
-.cfg-switch input:checked + .cfg-switch-track { background: var(--accent,#4F7FFF); }
+.cfg-switch-track { display: block; width: 44px; height: 24px; border-radius: 12px; background: #c5cad3; transition: background .2s; position: relative; box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08); }
+.cfg-switch-track::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.18); }
+.cfg-switch input:checked + .cfg-switch-track { background: var(--accent,#4F7FFF); box-shadow: none; }
 .cfg-switch input:checked + .cfg-switch-track--danger { background: #e05050; }
 .cfg-switch input:checked + .cfg-switch-track::after { transform: translateX(20px); }
+.cfg-switch input:focus-visible + .cfg-switch-track { box-shadow: 0 0 0 3px var(--accent-dim); }
+[data-theme="dark"] .cfg-switch-track { background: #4b5563; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+[data-theme="dark"] .cfg-switch-track::after { background: #e5e7eb; }
+[data-theme="light"] .cfg-section { border-color: var(--border); }
+[data-theme="light"] .cfg-section-header { border-bottom-color: var(--border); }
+[data-theme="light"] .cfg-section-sub,
+[data-theme="light"] .cfg-toggle-sub { color: var(--text-2); }
 .cfg-preview-banner { background: rgba(255,180,0,.1); border: 1px solid rgba(255,180,0,.25); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #ffb400; margin-top: 12px; }
 .cfg-preview-banner.hidden { display: none; }
 .cfg-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -23928,10 +23941,19 @@ a.recrutamento-hub-alert:hover {
 }
 .unio-toggle-row-hint {
     display: block;
-    margin-top: 3px;
-    font-size: 12px;
+    margin-top: 4px;
+    font-size: 12.5px;
     line-height: 1.45;
-    color: var(--text-3);
+    color: var(--text-2);
+    font-weight: 500;
+}
+[data-theme="light"] .unio-toggle-row {
+    background: var(--card-bg);
+    border-color: var(--border);
+}
+[data-theme="light"] .unio-toggle-row--featured {
+    background: color-mix(in srgb, var(--accent) 5%, var(--card-bg));
+    border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
 }
 .unio-toggle {
     position: relative;

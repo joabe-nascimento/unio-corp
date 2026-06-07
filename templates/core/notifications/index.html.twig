@@ -15,14 +15,19 @@
 } %}
     {% block toolbar_actions %}
         <span class="notif-toolbar-badge">{{ unread_count }} não lida{{ unread_count != 1 ? 's' : '' }}</span>
-        <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="Em breve">
-            <i class="fas fa-check-double mr-1"></i> Marcar todas como lidas
-        </button>
+        {% if unread_count > 0 %}
+        <form method="post" action="{{ path('app_notifications_mark_all') }}" class="d-inline">
+            <input type="hidden" name="_token" value="{{ csrf_token('notifications_mark_all') }}">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-check-double mr-1"></i> Marcar todas como lidas
+            </button>
+        </form>
+        {% endif %}
     {% endblock %}
     {% block toolbar_filters %}
         <div class="notif-filter-chips" role="group" aria-label="Filtrar notificações">
-            <span class="notif-filter-chip notif-filter-chip--active">Todas ({{ total_count }})</span>
-            <span class="notif-filter-chip">Não lidas ({{ unread_count }})</span>
+            <a href="{{ path('app_notifications', { filtro: 'todas' }) }}" class="notif-filter-chip {{ filtro|default('todas') == 'todas' ? 'notif-filter-chip--active' : '' }}">Todas ({{ total_count }})</a>
+            <a href="{{ path('app_notifications', { filtro: 'nao_lidas' }) }}" class="notif-filter-chip {{ filtro|default('todas') == 'nao_lidas' ? 'notif-filter-chip--active' : '' }}">Não lidas ({{ unread_count }})</a>
         </div>
     {% endblock %}
 {% endembed %}

@@ -29,6 +29,7 @@ class RhRecrutamentoService
         private RhAuditLogRepository $auditLogRepo,
         private RhOnboardingService $onboarding,
         private RhAuditService $audit,
+        private RhRecruitmentNotificationService $recruitmentNotifications,
     ) {}
 
     /** @return list<RhVaga> */
@@ -186,6 +187,8 @@ class RhRecrutamentoService
             $candidato->getId(),
             ['origem' => $origem],
         );
+
+        $this->recruitmentNotifications->notifyNovaCandidatura($candidato);
 
         return $candidato;
     }

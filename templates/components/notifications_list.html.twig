@@ -1,18 +1,13 @@
-{# Lista de notificações — dados mock por enquanto #}
 {% if notifications is empty %}
     {% include 'components/empty_state.html.twig' with {
         icon: 'fa-bell-slash',
         title: 'Nenhuma notificação',
-        text: 'Quando houver novidades, elas aparecerão aqui.'
+        text: 'Quando houver novidades no recrutamento e nos módulos da plataforma, elas aparecerão aqui.'
     } %}
 {% else %}
     <div class="notif-list" role="list">
         {% for n in notifications %}
-            {% if n.route %}
-            <a href="{{ path(n.route) }}" class="notif-item notif-item--link notif-item--{{ n.type }} {{ n.read ? 'notif-item--read' : 'notif-item--unread' }}" role="listitem">
-            {% else %}
-            <div class="notif-item notif-item--{{ n.type }} {{ n.read ? 'notif-item--read' : 'notif-item--unread' }}" role="listitem">
-            {% endif %}
+            <a href="{{ path(n.open_url|default('app_notifications_open'), { id: n.id }) }}" class="notif-item notif-item--link notif-item--{{ n.type }} {{ n.read ? 'notif-item--read' : 'notif-item--unread' }}" role="listitem">
                 <div class="notif-item-icon" aria-hidden="true">
                     <i class="fas {{ n.icon }}"></i>
                 </div>
@@ -26,14 +21,8 @@
                     <p class="notif-item-text">{{ n.body }}</p>
                     <span class="notif-item-time">{{ n.time_label }}</span>
                 </div>
-                {% if n.route %}
-                    <i class="fas fa-chevron-right notif-item-arrow" aria-hidden="true"></i>
-                {% endif %}
-            {% if n.route %}
+                <i class="fas fa-chevron-right notif-item-arrow" aria-hidden="true"></i>
             </a>
-            {% else %}
-            </div>
-            {% endif %}
         {% endfor %}
     </div>
 {% endif %}

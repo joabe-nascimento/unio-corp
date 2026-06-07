@@ -7,7 +7,7 @@ use App\Service\ChatService;
 use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
 use App\Service\PageBackResolver;
-use App\Service\NotificationMockService;
+use App\Service\PlatformNotificationService;
 use App\Service\WorkspaceService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -34,7 +34,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private TokenStorageInterface $tokenStorage,
         private WorkspaceService $workspaceService,
         private NavigationService $navigation,
-        private NotificationMockService $notifications,
+        private PlatformNotificationService $notifications,
         private ChatService $chat,
         private GlobalSearchService $globalSearch,
         private PageBackResolver $pageBackResolver,
@@ -63,19 +63,23 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->twig->addGlobal('empresa', $this->workspaceService->getActiveEmpresa($user));
+        $empresa = $this->workspaceService->getActiveEmpresa($user);
+        $this->twig->addGlobal('empresa', $empresa);
         $this->twig->addGlobal('empresas', $this->workspaceService->getAvailableEmpresas($user));
 
         foreach ($this->navigation->getNavGlobals($user, $route) as $name => $value) {
             $this->twig->addGlobal($name, $value);
         }
 
-        $this->twig->addGlobal('nav_notifications_unread', $this->notifications->getUnreadCount());
-        $this->twig->addGlobal('nav_chat_unread', $this->chat->getUnreadCount($user, $this->workspaceService->getActiveEmpresa($user) ?? $user->getEmpresa()));
+        $this->twig->addGlobal(
+            'nav_notifications_unread',
+            $empresa !== null ? $this->notifications->countUnread($empresa, $user) : 0,
+        );
+        $this->twig->addGlobal('nav_chat_unread', $this->chat->getUnreadCount($user, $empresa ?? $user->getEmpresa()));
         $this->twig->addGlobal(
             'global_search_members_json',
             json_encode(
-                $this->globalSearch->getMemberItems($user, $this->workspaceService->getActiveEmpresa($user)),
+                $this->globalSearch->getMemberItems($user, $empresa),
                 \JSON_UNESCAPED_UNICODE,
             ) ?: '[]',
         );
