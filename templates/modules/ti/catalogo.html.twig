@@ -1,5 +1,6 @@
 {% extends 'modules/ti/_base.html.twig' %}
 {% block ti_section_content %}
+{% set ti_novo_chamado_route = ti_can('operate_chamados') ? 'app_ti_chamados' : 'app_ti_meus_chamados' %}
 
 {# Banner for static catalog #}
 {% set has_custom = catalog|filter(i => i.is_custom|default(false))|length > 0 %}
@@ -8,7 +9,7 @@
     <i class="fas fa-circle-info" aria-hidden="true"></i>
     <div>
         <strong>Configure seu catálogo</strong> — você está usando o catálogo padrão.
-        {% if product_grant('hub_ti', 'gestao') %}
+        {% if ti_can('manage_catalog') %}
         Adicione itens personalizados usando o botão abaixo.
         {% endif %}
     </div>
@@ -21,7 +22,7 @@
         subtitle: 'Solicitações padronizadas com SLA definido'
     } %}
 
-    {% if product_grant('hub_ti', 'gestao') %}
+    {% if ti_can('manage_catalog') %}
     <div class="mb-3">
         <button type="button"
                 class="btn-unio btn-sm btn-unio-primary"
@@ -112,7 +113,7 @@
     <div class="row">
     {% for item in catalog %}
     <div class="col-md-6 col-xl-4 mb-3 d-flex flex-column">
-        <a href="{{ path('app_ti_chamados', { open_novo: 1, catalog: item.item_id|default(item.id) }) }}"
+        <a href="{{ path(ti_novo_chamado_route, { open_novo: 1, catalog: item.item_id|default(item.id) }) }}"
            class="ti-catalog-card flex-fill">
             <div class="ti-catalog-icon"><i class="fas {{ item.icon|default('fa-cog') }}" aria-hidden="true"></i></div>
             <div class="section-title mb-2">{{ item.titulo|default(item.title) }}</div>
@@ -130,7 +131,7 @@
             </div>
         </a>
 
-        {% if product_grant('hub_ti', 'gestao') and item.is_custom|default(false) %}
+        {% if ti_can('manage_catalog') and item.is_custom|default(false) %}
         <div class="d-flex gap-1 mt-1">
             <button type="button"
                     class="btn-unio btn-xs btn-unio-ghost flex-fill ti-catalogo-edit-btn"

@@ -95,6 +95,22 @@ final class TiReferenceData
         ];
     }
 
+    /** @return array<string, string> Opções de status que o solicitante pode escolher ao responder. */
+    public static function solicitanteReplyStatusOptions(?string $currentStatus = null): array
+    {
+        if ($currentStatus === 'resolvido') {
+            return [
+                '' => 'Manter resolvido',
+                'em_analise' => 'Reabrir chamado',
+            ];
+        }
+
+        return [
+            '' => 'Manter status atual',
+            'resolvido' => 'Confirmar como resolvido',
+        ];
+    }
+
     /** @return array<string, string> */
     public static function statusLabels(): array
     {

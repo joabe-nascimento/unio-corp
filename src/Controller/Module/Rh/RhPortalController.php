@@ -4,6 +4,7 @@ namespace App\Controller\Module\Rh;
 
 use App\Entity\User;
 use App\Exception\RhProcessException;
+use App\Service\OnboardingProgressService;
 use App\Service\Rh\RhPortalService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,6 +24,7 @@ class RhPortalController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private RhPortalService $portal,
+        private OnboardingProgressService $onboardingProgress,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -37,6 +39,10 @@ class RhPortalController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $funcionario = $this->portal->resolveFuncionarioForUser($empresa, $user);
+
+        if ($funcionario) {
+            $this->onboardingProgress->markStepComplete('portal');
+        }
 
         if ($request->isMethod('POST') && $funcionario) {
             try {

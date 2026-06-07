@@ -4,6 +4,7 @@ namespace App\Service\Ti;
 
 use App\Config\TiModuleRegistry;
 use App\Entity\Empresa;
+use App\Platform\AiAssistant;
 use App\Entity\TiChamado;
 use App\Entity\User;
 use App\Service\WorkspaceService;
@@ -96,6 +97,7 @@ final class TiService
                 'name' => $u->getNome() ?: $u->getEmail() ?: 'Usuário',
             ], $this->chamados->technicians($empresa)),
             'status_labels' => TiReferenceData::statusLabels(),
+            'solicitante_status_options' => TiReferenceData::solicitanteReplyStatusOptions($ticket['status'] ?? null),
             'categories' => TiReferenceData::categories(),
             'category_label' => $this->categoryLabel((string) ($ticket['category'] ?? '')),
             'problemas' => $this->problemas->list($empresa),
@@ -154,7 +156,6 @@ final class TiService
                     'name' => $u->getNome() ?: $u->getEmail() ?: 'Usuário',
                 ], $this->chamados->technicians($empresa)),
             ]),
-            'novo_chamado' => array_merge($base, $this->chamadoFormData()),
             'ativos' => array_merge($base, [
                 'assets' => array_map(function (array $asset) use ($empresa): array {
                     $tickets = $this->chamados->ticketsForAsset($empresa, (int) ($asset['db_id'] ?? 0));
@@ -371,7 +372,7 @@ final class TiService
         return [
             [
                 'icon' => 'fa-brain',
-                'title' => 'Triagem Helia',
+                'title' => 'Triagem ' . AiAssistant::NAME,
                 'summary' => $auto . '% dos chamados receberam pré-triagem automática.',
                 'confidence' => min(98, max(60, $auto)),
                 'action' => 'Ver Cortex',
@@ -379,7 +380,7 @@ final class TiService
             [
                 'icon' => 'fa-triangle-exclamation',
                 'title' => 'Alertas operacionais',
-                'summary' => $critical . ' SLA crítico · ' . $unassigned . ' sem responsável · ' . $pendingReview . ' aguardando Helia.',
+                'summary' => $critical . ' SLA crítico · ' . $unassigned . ' sem responsável · ' . $pendingReview . ' aguardando ' . AiAssistant::NAME . '.',
                 'confidence' => $critical > 0 ? 95 : 78,
                 'action' => 'NOC Center',
             ],

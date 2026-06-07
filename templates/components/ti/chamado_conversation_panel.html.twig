@@ -1,0 +1,289 @@
+{# Conversa + anexos + formulário — layout normal; abas só no modo flutuante #}
+{% set attachments = ticket.attachments|default([]) %}
+{% set ti_has_thread = false %}
+{% set ti_message_count = 0 %}
+{% for ev in ticket.timeline|default([]) %}
+    {% set ev_text = ev.event|default('') %}
+    {% if ev_text starts with 'Resposta do solicitante:' or ev_text starts with 'Resposta da TI:' %}
+        {% set ti_has_thread = true %}
+        {% set ti_message_count = ti_message_count + 1 %}
+    {% endif %}
+{% endfor %}
+{% set is_resolved = ticket.status|default('') == 'resolvido' %}
+{% set can_operator_reply = ti_can('operate_chamados') %}
+{% set can_requester_reply = ti_can('reply_chamado', { ticket: ticket }) %}
+{% set can_reopen = ti_can('reopen_chamado', { ticket: ticket }) %}
+{% set can_send_message = can_operator_reply or (can_requester_reply and not is_resolved) %}
+{% set can_gestao = can_operator_reply or can_requester_reply or can_reopen %}
+{% set show_panel = can_send_message or can_gestao or ti_has_thread or attachments|length > 0 %}
+{% set show_anexos_tab = attachments|length > 0 or can_send_message %}
+{% set message_form_id_docked = 'tiChamadoMessageForm-docked-' ~ ticket.id|default('') %}
+{% set message_form_id_float = 'tiChamadoMessageForm-float-' ~ ticket.id|default('') %}
+{% set manage_form_id_docked = 'tiChamadoManageForm-docked-' ~ ticket.id|default('') %}
+{% set manage_form_id_float = 'tiChamadoManageForm-float-' ~ ticket.id|default('') %}
+{% set upload_id_docked = can_operator_reply ? 'tiChamadoOperatorMessageAttachments' : 'tiChamadoMessageAttachments' %}
+{% set upload_id_float = can_operator_reply ? 'tiChamadoOperatorMessageAttachmentsFloat' : 'tiChamadoMessageAttachmentsFloat' %}
+{% set conv_subtitle = can_send_message
+    ? (can_operator_reply
+        ? 'Envie mensagens na conversa · status e técnico na aba Responder'
+        : 'Envie mensagens · confirme ou reabra na aba Responder')
+    : (can_reopen and not can_operator_reply
+        ? 'Chamado resolvido — use a aba Responder para reabrir'
+        : 'Histórico da conversa com a equipe de TI') %}
+{% set viewer_role = can_operator_reply ? 'ti' : 'solicitante' %}
+
+{% if show_panel %}
+<div class="ti-chamado-conversation-slot" data-ti-chat-slot>
+    <div class="ti-chamado-conversation-placeholder unio-card mb-4" data-ti-chat-placeholder hidden>
+        <div class="ti-chamado-conversation-placeholder-inner">
+            <i class="fas fa-comments ti-chamado-conversation-placeholder-icon" aria-hidden="true"></i>
+            <div>
+                <strong>Conversa fixada no canto da tela</strong>
+                <p class="mb-0 text-muted small">Continue respondendo pela janela flutuante ou traga de volta ao painel.</p>
+            </div>
+            <button type="button" class="btn-unio-ghost btn-sm" data-ti-chat-float-toggle>
+                <i class="fas fa-compress-arrows-alt mr-1" aria-hidden="true"></i> Voltar ao painel
+            </button>
+        </div>
+    </div>
+
+    <section class="unio-card mb-4 ti-chamado-conversation"
+             data-ti-chat-panel
+             data-ticket-id="{{ ticket.id|default('')|e('html_attr') }}"
+             data-ti-chat-viewer="{{ viewer_role|e('html_attr') }}"
+             data-ti-chat-requester="{{ ticket.requester|default('Solicitante')|e('html_attr') }}"
+             data-ti-chat-initial-count="{{ ti_message_count }}">
+        <div class="section-header section-header--in-card ti-chamado-conversation-head">
+            <div class="section-header-text">
+                <div class="section-title">Conversa com a TI</div>
+                <div class="section-subtitle ti-chamado-conversation-subtitle">{{ conv_subtitle }}</div>
+            </div>
+            <div class="ti-chamado-conversation-actions">
+                <a href="{{ path('app_ti_chamado_show', { id: ticket.id|default('') }) }}"
+                   class="ti-chat-float-btn ti-chat-goto-ticket"
+                   data-ti-chat-goto-ticket
+                   title="Ver chamado completo"
+                   aria-label="Ver chamado completo">
+                    {% include 'components/ti/icon_ticket_chat.svg.twig' with { kind: 'ticket' } %}
+                </a>
+                <button type="button"
+                        class="ti-chat-float-btn ti-chat-minimize-btn"
+                        data-ti-chat-minimize
+                        aria-label="Minimizar conversa"
+                        title="Minimizar">
+                    <i class="fas fa-minus" aria-hidden="true"></i>
+                </button>
+                <button type="button"
+                        class="ti-chat-float-btn"
+                        data-ti-chat-float-toggle
+                        aria-pressed="false"
+                        aria-label="Fixar conversa no canto da tela"
+                        title="Fixar no canto da tela">
+                    <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
+        <button type="button"
+                class="ti-chamado-chat-minimized"
+                data-ti-chat-restore
+                hidden
+                aria-hidden="true"
+                tabindex="-1">
+        </button>
+
+        {# Layout normal (painel fixo na página) #}
+        <div class="ti-chamado-conversation-body ti-chamado-conversation-docked" data-ti-chat-docked>
+            {% if can_send_message or ti_has_thread %}
+            <div class="ti-chat-box" data-ti-chat-box>
+                <div class="ti-chat-box-scroll" data-ti-chat-box-scroll>
+                    {% include 'components/ti/chamado_thread.html.twig' with { viewer_role: viewer_role } %}
+                    {% if not ti_has_thread %}
+                    <div class="ti-chat-empty" data-ti-chat-empty>
+                        <p class="mb-0 text-muted small">Nenhuma mensagem ainda. Escreva abaixo para iniciar a conversa.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if can_send_message %}
+                {% include 'components/ti/chamado_message_form.html.twig' with {
+                    ticket: ticket,
+                    helix_composer: true,
+                    form_id: message_form_id_docked,
+                    upload_id: upload_id_docked
+                } %}
+                {% endif %}
+            </div>
+            {% else %}
+            {% include 'components/ti/chamado_thread.html.twig' with { viewer_role: viewer_role } %}
+            {% endif %}
+
+            {% if attachments|length > 0 %}
+            {% embed 'components/unio/disclosure.html.twig' with {
+                label: 'Ver anexos',
+                icon: 'fa-paperclip',
+                badge: attachments|length,
+                variant: 'ti',
+                modifier: 'attachments'
+            } %}
+                {% block disclosure_body %}
+                    {% include 'components/ti/chamado_attachments_grid.html.twig' with { attachments: attachments } %}
+                {% endblock %}
+            {% endembed %}
+            {% endif %}
+
+            {% if can_gestao %}
+            {% embed 'components/unio/disclosure.html.twig' with {
+                label: 'Responder / gestão',
+                icon: 'fa-sliders-h',
+                variant: 'ti',
+                modifier: 'reply',
+                open: can_reopen and not can_send_message
+            } %}
+                {% block disclosure_body %}
+                    {% include 'components/ti/chamado_manage_form.html.twig' with {
+                        ticket: ticket,
+                        status_labels: status_labels|default({}),
+                        solicitante_status_options: solicitante_status_options|default({}),
+                        technicians: technicians|default([]),
+                        can_reopen: can_reopen,
+                        can_requester_reply: can_requester_reply,
+                        form_id: manage_form_id_docked,
+                        embedded: true
+                    } %}
+                {% endblock %}
+            {% endembed %}
+            {% endif %}
+        </div>
+
+        {# Layout flutuante — padrão Helix (Vitória) #}
+        <div class="ti-chamado-conversation-float"
+             data-ti-chat-float-layout
+             data-ti-conv-tabs
+             hidden>
+            <div class="helix-body ti-chamado-helix-body">
+                <aside class="helix-sidebar ti-chamado-helix-sidebar" aria-label="Seções da conversa">
+                    <div class="helix-sidebar-head">
+                        <span class="helix-sidebar-label">Seções</span>
+                        {% if attachments|length > 0 %}
+                        <span class="helix-history-count">{{ attachments|length }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="ti-chamado-helix-nav" role="tablist">
+                        <button type="button"
+                                class="helix-sidebar-btn ti-chamado-helix-nav-btn is-active"
+                                role="tab"
+                                id="ti-conv-tab-mensagens"
+                                data-ti-conv-tab="mensagens"
+                                aria-selected="true"
+                                aria-controls="ti-conv-pane-mensagens">
+                            <i class="fas fa-comments" aria-hidden="true"></i> Mensagens
+                        </button>
+                        {% if show_anexos_tab %}
+                        <button type="button"
+                                class="helix-sidebar-btn ti-chamado-helix-nav-btn"
+                                role="tab"
+                                id="ti-conv-tab-anexos"
+                                data-ti-conv-tab="anexos"
+                                aria-selected="false"
+                                aria-controls="ti-conv-pane-anexos">
+                            <i class="fas fa-paperclip" aria-hidden="true"></i> Anexos
+                        </button>
+                        {% endif %}
+                        {% if can_gestao %}
+                        <button type="button"
+                                class="helix-sidebar-btn ti-chamado-helix-nav-btn"
+                                role="tab"
+                                id="ti-conv-tab-responder"
+                                data-ti-conv-tab="responder"
+                                aria-selected="false"
+                                aria-controls="ti-conv-pane-responder">
+                            <i class="fas fa-reply" aria-hidden="true"></i> Responder
+                        </button>
+                        {% endif %}
+                    </div>
+                </aside>
+
+                <div class="helix-main ti-chamado-helix-main">
+                    <div class="ti-chamado-helix-panes">
+                        <div class="ti-chamado-helix-pane is-active"
+                             role="tabpanel"
+                             id="ti-conv-pane-mensagens"
+                             data-ti-conv-pane="mensagens"
+                             aria-labelledby="ti-conv-tab-mensagens">
+                            {% include 'components/ti/chamado_thread.html.twig' with { variant: 'helix', viewer_role: viewer_role } %}
+                            {% if not ti_has_thread %}
+                            <div class="helix-messages ti-chamado-helix-messages" data-ti-chat-thread="helix">
+                                <div class="helix-msg helix-msg--assistant">
+                                    <div class="helix-msg-bubble">
+                                        <p class="mb-0 helix-msg-muted">Nenhuma mensagem ainda. Escreva abaixo para iniciar a conversa.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if show_anexos_tab %}
+                        <div class="ti-chamado-helix-pane"
+                             role="tabpanel"
+                             id="ti-conv-pane-anexos"
+                             data-ti-conv-pane="anexos"
+                             hidden
+                             aria-labelledby="ti-conv-tab-anexos">
+                            <div class="ti-chamado-helix-pane-scroll">
+                                {% if attachments|length > 0 %}
+                                    {% include 'components/ti/chamado_attachments_grid.html.twig' with { attachments: attachments } %}
+                                {% else %}
+                                <p class="helix-msg-muted mb-3">Nenhum anexo neste chamado.</p>
+                                {% endif %}
+                                {% if can_send_message %}
+                                <div class="ti-chamado-helix-upload">
+                                    <span class="helix-sidebar-label d-block mb-2">Anexar à mensagem</span>
+                                    {% include 'components/ti/chamado_attachments_upload.html.twig' with {
+                                        upload_id: upload_id_float,
+                                        compact: true,
+                                        form_id: message_form_id_float
+                                    } %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if can_gestao %}
+                        <div class="ti-chamado-helix-pane"
+                             role="tabpanel"
+                             id="ti-conv-pane-responder"
+                             data-ti-conv-pane="responder"
+                             hidden
+                             aria-labelledby="ti-conv-tab-responder">
+                            <div class="ti-chamado-helix-pane-scroll">
+                                <p class="helix-sidebar-label mb-3">Gestão do chamado</p>
+                                <p class="helix-msg-muted mb-3">Altere status, técnico ou situação. Mensagens de chat ficam na aba <strong>Mensagens</strong>.</p>
+                                {% include 'components/ti/chamado_manage_form.html.twig' with {
+                                    ticket: ticket,
+                                    status_labels: status_labels|default({}),
+                                    solicitante_status_options: solicitante_status_options|default({}),
+                                    technicians: technicians|default([]),
+                                    can_reopen: can_reopen,
+                                    can_requester_reply: can_requester_reply,
+                                    form_id: manage_form_id_float
+                                } %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if can_send_message %}
+                    {% include 'components/ti/chamado_message_form.html.twig' with {
+                        ticket: ticket,
+                        helix_composer: true,
+                        form_id: message_form_id_float,
+                        upload_id: upload_id_float
+                    } %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endif %}

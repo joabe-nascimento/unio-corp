@@ -1,0 +1,91 @@
+{# Mensagens públicas do chamado (solicitante ↔ TI) #}
+{% set variant = variant|default('default') %}
+{% set messages = [] %}
+{% for ev in ticket.timeline|default([]) %}
+    {% set text = ev.event|default('') %}
+    {% if text starts with 'Resposta do solicitante:' or text starts with 'Resposta da TI:' %}
+        {% set messages = messages|merge([{
+            role: text starts with 'Resposta da TI:' ? 'ti' : 'solicitante',
+            body: text|replace({'Resposta do solicitante: ': '', 'Resposta da TI: ': ''}),
+            at: ev.at|default(''),
+            actor: ev.actor|default('')
+        }]) %}
+    {% endif %}
+{% endfor %}
+{% set av_palette = ['av-c1', 'av-c2', 'av-c3', 'av-c4', 'av-c5', 'av-c6', 'av-c7', 'av-c8'] %}
+{% set viewer_role = viewer_role|default('solicitante') %}
+
+{% if messages|length > 0 %}
+    {% if variant == 'helix' %}
+<div class="helix-messages ti-chamado-helix-messages" role="log" aria-label="Histórico da conversa" data-ti-chat-thread="helix">
+    {% set prev_date = null %}
+    {% for msg in messages %}
+        {% set is_mine = (viewer_role == 'ti' and msg.role == 'ti') or (viewer_role == 'solicitante' and msg.role == 'solicitante') %}
+        {% set helix_role = is_mine ? 'user' : 'assistant' %}
+        {% set msg_parts = msg.at|split(' ') %}
+        {% set msg_date = msg_parts|first|default('') %}
+        {% set msg_time = msg_parts|length > 1 ? msg_parts|last : msg.at %}
+        {% if msg_date != '' and msg_date != prev_date %}
+        <div class="chat-date-sep" aria-hidden="true"><span>{{ msg_date }}</span></div>
+        {% endif %}
+        {% set avatar_nome = msg.role == 'ti' ? (msg.actor|default('Equipe TI')) : ticket.requester|default('Solicitante') %}
+        {% set display_name = msg.role == 'ti'
+            ? (msg.actor|default('Equipe de TI'))
+            : ticket.requester|default('Solicitante') %}
+        {% set av_color = av_palette[(avatar_nome|length + loop.index0) % av_palette|length] %}
+        <div class="helix-msg helix-msg--{{ helix_role }}" data-ti-chat-msg data-ti-chat-role="{{ msg.role }}" data-chat-seq="{{ loop.index0 }}">
+            {% if helix_role == 'assistant' %}
+                {% include 'components/member_avatar.html.twig' with { nome: avatar_nome, size: 'sm', class: av_color } %}
+            {% endif %}
+            <div class="helix-msg-bubble">
+                <p class="mb-1"><strong>{{ display_name }}</strong></p>
+                <p class="mb-1">{{ msg.body }}</p>
+                <p class="mb-0 helix-msg-muted">{{ msg_time }}</p>
+            </div>
+            {% if helix_role == 'user' %}
+                {% include 'components/member_avatar.html.twig' with { nome: avatar_nome, size: 'sm', class: av_color } %}
+            {% endif %}
+        </div>
+        {% set prev_date = msg_date %}
+    {% endfor %}
+</div>
+    {% else %}
+<div class="ti-chat-thread" role="log" aria-label="Histórico da conversa" data-ti-chat-thread="default">
+    {% set prev_date = null %}
+    {% for msg in messages %}
+        {% set is_mine = (viewer_role == 'ti' and msg.role == 'ti') or (viewer_role == 'solicitante' and msg.role == 'solicitante') %}
+        {% set side = is_mine ? 'right' : 'left' %}
+        {% set msg_parts = msg.at|split(' ') %}
+        {% set msg_date = msg_parts|first|default('') %}
+        {% set msg_time = msg_parts|length > 1 ? msg_parts|last : msg.at %}
+        {% if msg_date != '' and msg_date != prev_date %}
+        <div class="ti-chat-date-sep" aria-hidden="true">
+            <span>{{ msg_date }}</span>
+        </div>
+        {% endif %}
+        {% set avatar_nome = msg.role == 'ti' ? (msg.actor|default('Equipe TI')) : ticket.requester|default('Solicitante') %}
+        {% set display_name = msg.role == 'ti'
+            ? (msg.actor|default('Equipe de TI'))
+            : ticket.requester|default('Solicitante') %}
+        {% set av_color = av_palette[(avatar_nome|length + loop.index0) % av_palette|length] %}
+        <div class="ti-chat-msg ti-chat-msg--{{ side }}" data-ti-chat-msg data-ti-chat-role="{{ msg.role }}" data-chat-seq="{{ loop.index0 }}">
+            <div class="ti-chat-msg-row">
+                {% include 'components/member_avatar.html.twig' with {
+                    nome: avatar_nome,
+                    size: 'sm',
+                    class: av_color
+                } %}
+                <div class="ti-chat-bubble">
+                    <div class="ti-chat-bubble-header">
+                        <span class="ti-chat-sender">{{ display_name }}</span>
+                        <time class="ti-chat-time" datetime="{{ msg.at }}">{{ msg_time }}</time>
+                    </div>
+                    <p class="ti-chat-text mb-0">{{ msg.body }}</p>
+                </div>
+            </div>
+        </div>
+        {% set prev_date = msg_date %}
+    {% endfor %}
+</div>
+    {% endif %}
+{% endif %}

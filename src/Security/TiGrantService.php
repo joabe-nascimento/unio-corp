@@ -64,6 +64,41 @@ final class TiGrantService
         return $requesterId !== null && (int) $requesterId === $user->getId();
     }
 
+    public function canReplyAsSolicitante(User $user, array $ticket): bool
+    {
+        if (!$this->isTicketRequester($user, $ticket)) {
+            return false;
+        }
+
+        return ($ticket['status'] ?? '') !== \App\Entity\TiChamado::STATUS_RESOLVIDO;
+    }
+
+    public function canReopenChamado(User $user, array $ticket): bool
+    {
+        if (($ticket['status'] ?? '') !== \App\Entity\TiChamado::STATUS_RESOLVIDO) {
+            return false;
+        }
+
+        if ($this->isTicketRequester($user, $ticket)) {
+            return true;
+        }
+
+        return $this->canOperateChamados($user);
+    }
+
+    public function canRateCsat(User $user, array $ticket): bool
+    {
+        if (!$this->isTicketRequester($user, $ticket)) {
+            return false;
+        }
+
+        if (($ticket['status'] ?? '') !== \App\Entity\TiChamado::STATUS_RESOLVIDO) {
+            return false;
+        }
+
+        return ($ticket['csat_score'] ?? null) === null && ($ticket['csat_em'] ?? null) === null;
+    }
+
     public function canManageKb(User $user): bool
     {
         return $this->atLeast($user, 'kb', TiGrantPolicy::MANAGE_KB);
@@ -114,6 +149,11 @@ final class TiGrantService
         return $this->atLeast($user, 'manutencoes', TiGrantPolicy::VIEW_OPS);
     }
 
+    public function canManageCatalog(User $user): bool
+    {
+        return $this->atLeast($user, 'catalogo', TiGrantPolicy::MANAGE_INFRA);
+    }
+
     public function canApplyHelia(User $user): bool
     {
         return $this->canOperateChamados($user)
@@ -150,5 +190,12 @@ final class TiGrantService
         if (!$allowed && !$user->isTenant()) {
             throw new \Symfony\Component\Security\Core\Exception\AccessDeniedException($message);
         }
+    }
+
+    private function isTicketRequester(User $user, array $ticket): bool
+    {
+        $requesterId = $ticket['requester_id'] ?? $ticket['solicitante_id'] ?? null;
+
+        return $requesterId !== null && (int) $requesterId === $user->getId();
     }
 }

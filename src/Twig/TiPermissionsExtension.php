@@ -59,7 +59,11 @@ class TiPermissionsExtension extends AbstractExtension
             'pause_sla' => $this->tiGrants->canPauseSla($user),
             'export_analytics' => $this->tiGrants->canExportAnalytics($user),
             'manage_novidades' => $this->tiGrants->canManageNovidades($user),
+            'manage_catalog' => $this->tiGrants->canManageCatalog($user),
             'view_chamado' => $this->tiGrants->canViewChamado($user, $context['ticket'] ?? []),
+            'reply_chamado' => $this->tiGrants->canReplyAsSolicitante($user, $context['ticket'] ?? []),
+            'reopen_chamado' => $this->tiGrants->canReopenChamado($user, $context['ticket'] ?? []),
+            'rate_csat' => $this->tiGrants->canRateCsat($user, $context['ticket'] ?? []),
             default => false,
         };
     }

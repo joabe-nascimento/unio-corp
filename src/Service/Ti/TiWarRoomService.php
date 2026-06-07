@@ -10,6 +10,8 @@ use App\Entity\Empresa;
 
 use App\Entity\TiChamado;
 
+use App\Platform\AiAssistant;
+
 use App\Repository\TiChamadoRepository;
 
 use App\Repository\TiManutencaoRepository;
@@ -798,7 +800,7 @@ final class TiWarRoomService
 
             'summary' => sprintf(
 
-                'Helia detectou %d incidente(s) P1 com SLA médio em %d%%. Sistemas afetados: %s. Estimativa de ~%d usuários impactados. %s',
+                AiAssistant::NAME . ' detectou %d incidente(s) P1 com SLA médio em %d%%. Sistemas afetados: %s. Estimativa de ~%d usuários impactados. %s',
 
                 \count($p1Tickets),
 

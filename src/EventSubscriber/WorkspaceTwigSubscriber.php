@@ -3,6 +3,7 @@
 namespace App\EventSubscriber;
 
 use App\Entity\User;
+use App\Security\TiGrantService;
 use App\Service\ChatService;
 use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
@@ -38,6 +39,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private ChatService $chat,
         private GlobalSearchService $globalSearch,
         private PageBackResolver $pageBackResolver,
+        private TiGrantService $tiGrants,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -86,6 +88,9 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         $this->twig->addGlobal('platform_modules', $this->navigation->getPlatformModules($user));
 
         $pageBack = $this->pageBackResolver->resolve(\is_string($route) ? $route : null);
+        if (\is_string($route) && $route === 'app_ti_chamado_show' && !$this->tiGrants->canOperateChamados($user)) {
+            $pageBack = ['route' => 'app_ti_meus_chamados', 'params' => []];
+        }
         $this->twig->addGlobal('page_back_route', $pageBack['route'] ?? null);
         $this->twig->addGlobal('page_back_route_params', $pageBack['params'] ?? []);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Twig;
 
+use App\Platform\AiAssistant;
 use App\Entity\Empresa;
 use App\Service\EmpresaBrandingService;
 use App\Service\PlatformConfigService;
@@ -24,6 +25,7 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
     {
         return [
             'platform_config' => $this->config->all(),
+            'ai_assistant_name' => AiAssistant::NAME,
         ];
     }
 

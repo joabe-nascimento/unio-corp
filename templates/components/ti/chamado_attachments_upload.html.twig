@@ -1,22 +1,23 @@
 {#
   chamado_attachments_upload — múltiplos anexos com prévia (imagens, PDF, logs)
 #}
-<div class="ti-chamado-attachments unio-file-upload unio-file-upload--compact"
+{% set upload_id = upload_id|default('tiChamadoAttachments') %}
+<div class="ti-chamado-attachments unio-file-upload unio-file-upload--compact{% if compact|default(false) %} unio-file-upload--inline{% endif %}"
      data-ti-chamado-attachments
      data-ti-attachments-max="5">
     <input type="file"
-           id="tiChamadoAttachments"
+           id="{{ upload_id }}"
            name="attachments[]"
            class="unio-file-upload-input ti-chamado-attachments-input"
            accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain,.log,.txt"
-           multiple>
-    <label class="unio-file-upload-drop ti-chamado-attachments-drop" for="tiChamadoAttachments">
+           multiple{% if form_id|default('') %} form="{{ form_id }}"{% endif %}>
+    <label class="unio-file-upload-drop ti-chamado-attachments-drop" for="{{ upload_id }}">
         <span class="unio-file-upload-icon" aria-hidden="true">
             <i class="fas fa-paperclip"></i>
         </span>
         <span class="unio-file-upload-text">
-            <span class="unio-file-upload-label">Clique ou arraste arquivos</span>
-            <span class="unio-file-upload-hint">JPG, PNG, PDF, TXT ou LOG · até 5 arquivos · máx. 10 MB cada</span>
+            <span class="unio-file-upload-label">{{ compact|default(false) ? 'Anexar arquivos' : 'Clique ou arraste arquivos' }}</span>
+            <span class="unio-file-upload-hint">JPG, PNG, PDF, TXT ou LOG · até 5 · máx. 10 MB</span>
         </span>
     </label>
     <ul class="ti-chamado-attachments-list" data-ti-attachments-list hidden></ul>

@@ -1,0 +1,39 @@
+{# Playbook interativo — marca passos via app_ti_chamado_playbook_step #}
+{% set pb_steps = ticket.playbook_steps|default([]) %}
+{% if pb_steps is empty and playbook.steps|default([])|length > 0 %}
+    {% set pb_steps = [] %}
+    {% for text in playbook.steps|default([]) %}
+        {% set pb_steps = pb_steps|merge([{ step: loop.index, titulo: text, feito: false, evidencia: null, feito_em: null }]) %}
+    {% endfor %}
+{% endif %}
+
+{% if pb_steps|length > 0 and ti_can('operate_chamados') %}
+<section class="unio-card mb-4 ti-playbook-panel"
+         data-ti-playbook
+         data-url="{{ path('app_ti_chamado_playbook_step', { id: ticket.id }) }}"
+         data-csrf="{{ csrf_token('ti_playbook_' ~ ticket.id) }}">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Playbook operacional',
+        subtitle: playbook.title|default(playbook.titulo|default('Runbook Cortex'))
+    } %}
+    <div class="ti-playbook-steps" role="list">
+        {% for step in pb_steps %}
+        {% set step_num = step.step|default(loop.index) %}
+        <div class="ti-playbook-step{% if step.feito|default(false) %} is-done{% endif %}" role="listitem">
+            <label class="ti-playbook-step-label">
+                <span class="ti-playbook-step-num" aria-hidden="true">{{ step_num }}</span>
+                <input type="checkbox"
+                       class="ti-playbook-step-check"
+                       data-ti-playbook-step="{{ step_num }}"
+                       {% if step.feito|default(false) %}checked{% endif %}
+                       aria-label="Marcar passo {{ step_num }}">
+                <span class="ti-playbook-step-text">{{ step.titulo|default('Passo ' ~ step_num) }}</span>
+            </label>
+            {% if step.feito_em|default(null) %}
+            <span class="ti-playbook-step-meta text-muted small">{{ step.feito_em }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

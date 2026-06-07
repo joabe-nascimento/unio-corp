@@ -1,28 +1,11 @@
 {% extends 'layout/hub.html.twig' %}
 {% block title %}Ficha Técnica{% endblock %}
-
-{# ── Banco de membros mock ── #}
-{% set all = {
-    1:  { nome: 'Ana Carolina Silva',    cargo: 'Desenvolvedora Full Stack',    dept: 'Tecnologia',  email: 'ana.silva@empresa.com',       tel: '(11) 98765-4321', admissao: '15/03/2023', status: 'ativo',   bio: 'Desenvolvedora apaixonada por soluções robustas e escaláveis. Especialista em back-end PHP/Symfony e front-end React.', skills: ['PHP','Symfony','React','PostgreSQL','Docker','Git','REST API'], certs: ['AWS Certified Developer','Symfony 6 Professional'], equipes: [{nome:'Squad Backend',papel:'Líder Técnica'}], historico: [{data:'Mar/2023',evento:'Admissão na empresa',tipo:'admissao'},{data:'Jun/2023',evento:'Onboarding técnico concluído',tipo:'treinamento'},{data:'Dez/2023',evento:'Avaliação de desempenho — 4.5/5',tipo:'avaliacao'},{data:'Jan/2024',evento:'Promoção para Sênior',tipo:'promocao'},{data:'Mar/2024',evento:'Certificação AWS obtida',tipo:'certificacao'}] },
-    2:  { nome: 'Bruno Mendes Teixeira', cargo: 'Designer UX/UI Sênior',        dept: 'Design',      email: 'bruno.mendes@empresa.com',    tel: '(21) 97654-3210', admissao: '10/05/2022', status: 'ativo',   bio: 'Designer com foco em experiência do usuário e identidade visual. Trabalha com Figma, Framer e Motion design.', skills: ['Figma','Framer','Motion','Adobe CC','Branding','HTML/CSS'], certs: ['Google UX Design','Figma Professional'], equipes: [{nome:'Design & Marca',papel:'Lead Designer'},{nome:'Squad Backend',papel:'Consultor Front'}], historico: [{data:'Mai/2022',evento:'Admissão na empresa',tipo:'admissao'},{data:'Nov/2022',evento:'Avaliação de desempenho — 5.0/5',tipo:'avaliacao'},{data:'Jan/2023',evento:'Promoção para Sênior',tipo:'promocao'}] },
-    3:  { nome: 'Carla Rodrigues',       cargo: 'Gestora de Projetos',           dept: 'PMO',         email: 'carla.rodrigues@empresa.com', tel: '(11) 96543-2109', admissao: '01/02/2021', status: 'ferias',  bio: 'Gestora de projetos certificada em PMP e Scrum. Responsável pelo escritório de projetos e metodologias ágeis.', skills: ['Scrum','Kanban','MS Project','Jira','PMP','Power BI'], certs: ['PMP — PMI','PSM I — Scrum.org'], equipes: [{nome:'PMO',papel:'Project Manager'},{nome:'Design & Marca',papel:'Coordenadora'}], historico: [{data:'Fev/2021',evento:'Admissão na empresa',tipo:'admissao'},{data:'Ago/2022',evento:'Certificação PMP obtida',tipo:'certificacao'},{data:'Dez/2022',evento:'Avaliação de desempenho — 4.8/5',tipo:'avaliacao'}] },
-    4:  { nome: 'Diego Fonseca',         cargo: 'Engenheiro Civil Sr.',          dept: 'Engenharia',  email: 'diego.fonseca@empresa.com',   tel: '(31) 95432-1098', admissao: '20/08/2020', status: 'ativo',   bio: 'Engenheiro civil especializado em estruturas e gestão de obras. Responsável por grandes projetos de construção civil.', skills: ['AutoCAD','Revit','MS Project','CYPE','Excel Avançado','NBR'], certs: ['CREA Ativo','MBA Gestão de Obras'], equipes: [{nome:'Obras e Projetos',papel:'Gestor de Obras'}], historico: [{data:'Ago/2020',evento:'Admissão na empresa',tipo:'admissao'},{data:'Fev/2022',evento:'MBA concluído',tipo:'certificacao'},{data:'Jan/2023',evento:'Avaliação de desempenho — 4.7/5',tipo:'avaliacao'},{data:'Mar/2023',evento:'Promoção para Sênior',tipo:'promocao'}] },
-    5:  { nome: 'Eduardo Gonçalves',     cargo: 'DevOps Engineer',               dept: 'Tecnologia',  email: 'eduardo.g@empresa.com',       tel: '(41) 94321-0987', admissao: '05/11/2022', status: 'ferias',  bio: 'Engenheiro DevOps com foco em infraestrutura como código, CI/CD e observabilidade de sistemas.', skills: ['Docker','Kubernetes','Terraform','AWS','GitHub Actions','Datadog'], certs: ['AWS Solutions Architect','CKA — Kubernetes'], equipes: [{nome:'Squad Backend',papel:'DevOps'},{nome:'Obras e Projetos',papel:'Supervisor de Campo'}], historico: [{data:'Nov/2022',evento:'Admissão na empresa',tipo:'admissao'},{data:'Jun/2023',evento:'Certificação Kubernetes (CKA)',tipo:'certificacao'},{data:'Dez/2023',evento:'Avaliação de desempenho — 4.3/5',tipo:'avaliacao'}] },
-    6:  { nome: 'Fernanda Lima',         cargo: 'Desenvolvedora Back-end',       dept: 'Tecnologia',  email: 'fernanda.lima@empresa.com',   tel: '(11) 93210-9876', admissao: '14/01/2024', status: 'ativo',   bio: 'Desenvolvedora back-end com background em Java e PHP. Focada em performance e design de APIs RESTful.', skills: ['PHP','Java','Spring Boot','MySQL','RabbitMQ','Redis'], certs: ['Oracle Java SE'], equipes: [{nome:'Squad Backend',papel:'Dev Back-end Pleno'},{nome:'Obras e Projetos',papel:'Suporte Técnico'}], historico: [{data:'Jan/2024',evento:'Admissão na empresa',tipo:'admissao'},{data:'Abr/2024',evento:'Onboarding concluído',tipo:'treinamento'}] },
-    7:  { nome: 'Gabriel Souza',         cargo: 'Engenheiro de Estruturas',      dept: 'Engenharia',  email: 'gabriel.souza@empresa.com',   tel: '(62) 92109-8765', admissao: '03/04/2021', status: 'ativo',   bio: 'Engenheiro especializado em cálculo estrutural e fundações. Atua em projetos residenciais e comerciais.', skills: ['AutoCAD','SAP2000','CYPECAD','Excel Avançado','BIM'], certs: ['CREA Ativo','Especialização em Estruturas'], equipes: [{nome:'Obras e Projetos',papel:'Engenheiro de Estruturas'}], historico: [{data:'Abr/2021',evento:'Admissão na empresa',tipo:'admissao'},{data:'Nov/2022',evento:'Especialização concluída',tipo:'certificacao'},{data:'Dez/2023',evento:'Avaliação de desempenho — 4.6/5',tipo:'avaliacao'}] },
-    8:  { nome: 'Helena Martins',        cargo: 'Analista de Marketing',         dept: 'Design',      email: 'helena.martins@empresa.com',  tel: '(11) 91098-7654', admissao: '22/09/2023', status: 'ativo',   bio: 'Analista de marketing digital com foco em métricas, SEO e campanhas de performance.', skills: ['Google Ads','Meta Ads','SEO','GA4','Data Studio','Canva'], certs: ['Google Analytics Certified','Meta Blueprint'], equipes: [{nome:'Design & Marca',papel:'Analista de Marketing'}], historico: [{data:'Set/2023',evento:'Admissão na empresa',tipo:'admissao'},{data:'Dez/2023',evento:'Onboarding concluído',tipo:'treinamento'},{data:'Mar/2024',evento:'Certificação Google Analytics',tipo:'certificacao'}] },
-    9:  { nome: 'Igor Teixeira',         cargo: 'Scrum Master',                  dept: 'PMO',         email: 'igor.teixeira@empresa.com',   tel: '(85) 90987-6543', admissao: '17/06/2022', status: 'ativo',   bio: 'Scrum Master certificado com experiência em transformação ágil e facilitação de times de alta performance.', skills: ['Scrum','Kanban','SAFe','Jira','Confluence','Coaching'], certs: ['PSM II — Scrum.org','SAFe Agilist'], equipes: [{nome:'PMO',papel:'Scrum Master'}], historico: [{data:'Jun/2022',evento:'Admissão na empresa',tipo:'admissao'},{data:'Nov/2022',evento:'Certificação PSM II',tipo:'certificacao'},{data:'Dez/2023',evento:'Avaliação de desempenho — 4.9/5',tipo:'avaliacao'}] },
-    10: { nome: 'Juliana Castro',        cargo: 'Arquiteta de Software',         dept: 'Tecnologia',  email: 'juliana.castro@empresa.com',  tel: '(11) 99876-5432', admissao: '08/03/2020', status: 'ativo',   bio: 'Arquiteta de software com foco em sistemas distribuídos, microsserviços e cloud-native. Mentora técnica do time.', skills: ['Arquitetura Hexagonal','Microsserviços','AWS','Kafka','Go','DDD'], certs: ['AWS Solutions Architect Pro','CKAD'], equipes: [{nome:'Squad Backend',papel:'Arquiteta de Software'}], historico: [{data:'Mar/2020',evento:'Admissão na empresa',tipo:'admissao'},{data:'Jun/2021',evento:'Promoção para Sênior',tipo:'promocao'},{data:'Jan/2023',evento:'Promoção para Arquiteta',tipo:'promocao'},{data:'Dez/2023',evento:'Avaliação de desempenho — 5.0/5',tipo:'avaliacao'}] },
-    11: { nome: 'Kleber Araújo',         cargo: 'Orçamentista',                  dept: 'Engenharia',  email: 'kleber.araujo@empresa.com',   tel: '(71) 98765-1234', admissao: '11/07/2019', status: 'inativo', bio: 'Orçamentista com vasta experiência em composição de custos para obras civis de médio e grande porte.', skills: ['Excel Avançado','SINAPI','Volare','AutoCAD','Orçamento de Obras'], certs: ['Curso Orçamento de Obras SENAI'], equipes: [{nome:'Obras e Projetos',papel:'Orçamentista'}], historico: [{data:'Jul/2019',evento:'Admissão na empresa',tipo:'admissao'},{data:'Dez/2022',evento:'Avaliação de desempenho — 3.8/5',tipo:'avaliacao'},{data:'Nov/2024',evento:'Afastamento temporário',tipo:'treinamento'}] },
-    12: { nome: 'Larissa Neves',         cargo: 'Product Designer',              dept: 'Design',      email: 'larissa.neves@empresa.com',   tel: '(11) 97654-0123', admissao: '29/10/2023', status: 'ativo',   bio: 'Product designer com abordagem centrada no usuário. Especialista em sistemas de design e acessibilidade.', skills: ['Figma','Storybook','Design System','WCAG','Prototipagem','Research'], certs: ['Figma Config Certified','Design for Accessibility'], equipes: [{nome:'Design & Marca',papel:'Product Designer'}], historico: [{data:'Out/2023',evento:'Admissão na empresa',tipo:'admissao'},{data:'Jan/2024',evento:'Onboarding concluído',tipo:'treinamento'},{data:'Mar/2024',evento:'Certificação Figma obtida',tipo:'certificacao'}] },
-} %}
-
-{% set m = all[membro_id] ?? all[1] %}
+{% block permissions_scope %}product_pessoas{% endblock %}
 
 {% block content_lead %}
 <div class="page-lead-zone">
     {% embed 'components/list_toolbar.html.twig' with {
-        page_title: m.nome,
+        page_title: membro.nome,
         search_disabled: true,
         actions_in_top: true
     } %}
@@ -30,70 +13,72 @@
             <a href="{{ path('app_pessoas_membros') }}" class="btn-unio-ghost btn-sm">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
+            {% if grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') %}
+            <a href="{{ path('app_pessoas_membro_editar', { id: membro.id }) }}" class="btn-unio btn-sm">
+                <i class="fas fa-pen"></i> Editar
+            </a>
+            {% endif %}
         {% endblock %}
     {% endembed %}
 </div>
 {% endblock %}
 
 {% block hub_content %}
-<div class="ficha-stub-banner mb-3">
-    <i class="fas fa-circle-info"></i>
-    Dados fictícios de demonstração — ficha de <strong>{{ m.nome }}</strong> (ID #{{ membro_id }}).
-</div>
+{% set status_slug = membro.pessoasStatusSlug %}
+{% set competencias = membro.competencias|default([]) %}
 
-{# ── Hero do perfil ── #}
 <div class="unio-card ficha-hero mb-3">
     <div class="ficha-hero-avatar">
-        {% include 'components/member_avatar.html.twig' with { nome: m.nome, size: 'xl' } %}
+        {% if membro.foto %}
+        <img src="{{ asset(membro.foto) }}" alt="" class="member-avatar member-avatar--xl" style="object-fit:cover;">
+        {% else %}
+        {% include 'components/member_avatar.html.twig' with { nome: membro.nome, size: 'xl' } %}
+        {% endif %}
     </div>
     <div class="ficha-hero-info">
-        <div class="ficha-hero-name">{{ m.nome }}</div>
-        <div class="ficha-hero-role">{{ m.cargo }}
-            <span class="ficha-hero-dept">· {{ m.dept }}</span>
+        <div class="ficha-hero-name">{{ membro.nome }}</div>
+        <div class="ficha-hero-role">{{ membro.cargo|default('—') }}
+            {% if membro.departamento %}
+            <span class="ficha-hero-dept">· {{ membro.departamento.nome }}</span>
+            {% endif %}
         </div>
         <div class="ficha-hero-meta">
-            <span><i class="fas fa-envelope"></i> {{ m.email }}</span>
-            <span><i class="fas fa-phone"></i> {{ m.tel }}</span>
-            <span><i class="fas fa-calendar-check"></i> Desde {{ m.admissao }}</span>
+            <span><i class="fas fa-envelope"></i> {{ membro.email }}</span>
+            {% if membro.telefone %}<span><i class="fas fa-phone"></i> {{ membro.telefone }}</span>{% endif %}
+            {% if membro.dataAdmissao %}<span><i class="fas fa-calendar-check"></i> Desde {{ membro.dataAdmissao|date('d/m/Y') }}</span>{% endif %}
         </div>
     </div>
     <div class="ficha-hero-actions">
-        <span class="member-status member-status--{{ m.status }}">
-            {{ m.status == 'ativo' ? 'Ativo' : (m.status == 'ferias' ? 'Férias' : 'Inativo') }}
-        </span>
-        {% if grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') %}
-        <a href="#" class="btn-unio-ghost btn-sm mt-2 d-block text-center">
-            <i class="fas fa-pen mr-1"></i> Editar
-        </a>
+        <span class="member-status member-status--{{ status_slug }}">{{ membro.statusLabel }}</span>
+        {% if membro.gestor %}
+        <div class="text-muted small mt-2">
+            <i class="fas fa-user-tie"></i> Gestor: {{ membro.gestor.nome }}
+        </div>
         {% endif %}
-        <a href="{{ path('app_pessoas_membros') }}" class="btn-unio-ghost btn-sm mt-1 d-block text-center">
-            <i class="fas fa-arrow-left mr-1"></i> Voltar
-        </a>
     </div>
 </div>
 
-{# ── Corpo da ficha ── #}
 <div class="row">
-
-    {# Coluna principal #}
     <div class="col-lg-8 mb-3">
-
+        {% if membro.observacoes %}
         <div class="unio-card mb-3">
             {% include 'components/section_header.html.twig' with { title: 'Sobre' } %}
-            <p class="ficha-bio">{{ m.bio }}</p>
+            <p class="ficha-bio mb-0">{{ membro.observacoes|nl2br }}</p>
         </div>
+        {% endif %}
 
         <div class="unio-card mb-3">
             {% include 'components/section_header.html.twig' with { title: 'Dados do Colaborador' } %}
             <div class="ficha-fields-grid">
                 {% for f in [
-                    { label: 'Nome completo',    value: m.nome },
-                    { label: 'Cargo',            value: m.cargo },
-                    { label: 'Departamento',     value: m.dept },
-                    { label: 'E-mail',           value: m.email },
-                    { label: 'Telefone',         value: m.tel },
-                    { label: 'Data de admissão', value: m.admissao },
-                    { label: 'Status',           value: m.status == 'ativo' ? 'Ativo' : (m.status == 'ferias' ? 'Em Férias' : 'Inativo') },
+                    { label: 'Nome completo', value: membro.nome },
+                    { label: 'Cargo', value: membro.cargo|default('—') },
+                    { label: 'Equipe', value: membro.departamento ? membro.departamento.nome : '—' },
+                    { label: 'E-mail', value: membro.email },
+                    { label: 'Telefone', value: membro.telefone|default('—') },
+                    { label: 'Data de admissão', value: membro.dataAdmissao ? membro.dataAdmissao|date('d/m/Y') : '—' },
+                    { label: 'Nível', value: membro.nivelMaturidade|default('—') },
+                    { label: 'Status', value: membro.statusLabel },
                 ] %}
                 <div class="ficha-field">
                     <div class="ficha-field-label">{{ f.label }}</div>
@@ -104,65 +89,73 @@
         </div>
 
         <div class="unio-card mb-3">
-            {% include 'components/section_header.html.twig' with { title: 'Habilidades Técnicas' } %}
+            {% include 'components/section_header.html.twig' with { title: 'Competências' } %}
+            {% if competencias|length > 0 %}
             <div class="skill-tags">
-                {% for s in m.skills %}
+                {% for s in competencias %}
                     <span class="skill-tag">{{ s }}</span>
                 {% endfor %}
             </div>
-        </div>
-
-        <div class="unio-card">
-            {% include 'components/section_header.html.twig' with { title: 'Certificações' } %}
-            {% if m.certs %}
-                <div class="d-flex flex-column gap-1">
-                    {% for c in m.certs %}
-                    <div class="ficha-cert-item">
-                        <i class="fas fa-certificate ficha-cert-icon"></i>
-                        <span>{{ c }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
             {% else %}
-                {% include 'components/empty_state.html.twig' with { icon: 'fa-certificate', title: 'Nenhuma certificação', compact: true } %}
+                {% include 'components/empty_state.html.twig' with { icon: 'fa-lightbulb', title: 'Nenhuma competência registrada', compact: true } %}
             {% endif %}
         </div>
-    </div>
 
-    {# Coluna lateral #}
-    <div class="col-lg-4">
-
-        <div class="unio-card mb-3">
-            {% include 'components/section_header.html.twig' with {
-                title: 'Equipes',
-                btn_label: 'Ver equipes',
-                btn_href: path('app_pessoas_equipes'),
-                btn_ghost: true
-            } %}
-            <div class="d-flex flex-column gap-2">
-                {% for eq in m.equipes %}
-                <a href="{{ path('app_pessoas_equipes') }}" class="ficha-equipe-item text-decoration-none">
-                    {% include 'components/member_avatar.html.twig' with { nome: eq.nome, size: 'sm' } %}
-                    <div>
-                        <div class="ficha-equipe-nome">{{ eq.nome }}</div>
-                        <div class="ficha-equipe-papel">{{ eq.papel }}</div>
-                    </div>
-                </a>
-                {% endfor %}
+        {% if avaliacoes|length > 0 %}
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Avaliações de desempenho' } %}
+            <div class="table-responsive">
+                <table class="table table-unio mb-0">
+                    <thead>
+                        <tr><th>Período</th><th>Nota</th><th>Avaliador</th><th>Data</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for av in avaliacoes %}
+                        <tr>
+                            <td>{{ av.periodo }}</td>
+                            <td><strong>{{ av.nota }}</strong>/5</td>
+                            <td>{{ av.avaliador ? av.avaliador.email : '—' }}</td>
+                            <td>{{ av.criadoEm|date('d/m/Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        {% if membro.departamento %}
+        <div class="unio-card mb-3">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Equipe',
+                btn_label: 'Ver equipe',
+                btn_href: path('app_pessoas_equipe_detalhe', { id: membro.departamento.id }),
+                btn_ghost: true
+            } %}
+            <a href="{{ path('app_pessoas_equipe_detalhe', { id: membro.departamento.id }) }}" class="ficha-equipe-item text-decoration-none">
+                {% include 'components/member_avatar.html.twig' with { nome: membro.departamento.nome, size: 'sm' } %}
+                <div>
+                    <div class="ficha-equipe-nome">{{ membro.departamento.nome }}</div>
+                    <div class="ficha-equipe-papel">{{ membro.cargo|default('Membro') }}</div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
 
         <div class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Histórico', subtitle: 'Linha do tempo' } %}
+            {% if historico|length > 0 %}
             <div class="ficha-timeline">
                 {% set type_icons = {
-                    admissao:     'fa-door-open',
-                    treinamento:  'fa-graduation-cap',
-                    avaliacao:    'fa-star',
-                    promocao:     'fa-arrow-up',
+                    admissao: 'fa-door-open',
+                    treinamento: 'fa-graduation-cap',
+                    avaliacao: 'fa-star',
+                    promocao: 'fa-arrow-up',
                     certificacao: 'fa-certificate'
                 } %}
-                {% for ev in m.historico|reverse %}
+                {% for ev in historico|reverse %}
                 <div class="timeline-item">
                     <div class="timeline-dot">
                         <i class="fas {{ type_icons[ev.tipo]|default('fa-circle') }}"></i>
@@ -174,8 +167,10 @@
                 </div>
                 {% endfor %}
             </div>
+            {% else %}
+                {% include 'components/empty_state.html.twig' with { icon: 'fa-clock', title: 'Sem eventos registrados', compact: true } %}
+            {% endif %}
         </div>
-
     </div>
 </div>
 {% endblock %}

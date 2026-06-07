@@ -4,6 +4,7 @@ namespace App\Controller\Module\Ti;
 
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Security\TiGrantService;
 use App\Service\Ti\TiKbService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,11 +19,15 @@ final class TiKbManageController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private TiKbService $kb,
+        private TiGrantService $tiGrants,
     ) {}
 
     #[Route('/ti/kb/novo', name: 'app_ti_kb_novo_submit', methods: ['POST'])]
     public function novo(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageKb($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_kb_form');
         try {
@@ -38,6 +43,9 @@ final class TiKbManageController extends AbstractController
     #[Route('/ti/kb/{id}/editar', name: 'app_ti_kb_editar_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function editar(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageKb($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_kb_form');
         try {
@@ -53,6 +61,9 @@ final class TiKbManageController extends AbstractController
     #[Route('/ti/kb/{id}/excluir', name: 'app_ti_kb_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function excluir(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageKb($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_kb_delete_' . $id);
         $this->kb->delete($this->kb->load($empresa, $id));

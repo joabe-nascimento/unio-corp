@@ -106,5 +106,29 @@
         if (pollUrl) {
             setInterval(poll, pollInterval);
         }
+
+        document.querySelectorAll('[data-ti-playbook]').forEach(function (root) {
+            var url = root.getAttribute('data-url');
+            var csrf = root.getAttribute('data-csrf');
+            if (!url || !csrf) return;
+            root.querySelectorAll('[data-ti-playbook-step]').forEach(function (input) {
+                input.addEventListener('change', function () {
+                    var row = input.closest('.ti-playbook-step, .wr-runbook-step, li');
+                    if (row) row.classList.toggle('is-done', input.checked);
+                    var body = new URLSearchParams();
+                    body.set('_token', csrf);
+                    body.set('step', input.getAttribute('data-ti-playbook-step'));
+                    body.set('done', input.checked ? '1' : '0');
+                    fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: body.toString(),
+                    }).catch(function () {
+                        input.checked = !input.checked;
+                        if (row) row.classList.toggle('is-done', input.checked);
+                    });
+                });
+            });
+        });
     });
 })();

@@ -66,6 +66,12 @@ final class ProductGrantAccess
     /** Rotas TI com regra própria (além do produto primário no mapa). */
     private const TI_ROUTE_FALLBACK = [
         'app_ti_chamado_show' => 'view_chamado',
+        'app_ti_chamado_comentario' => 'view_chamado',
+        'app_ti_chamado_mensagem' => 'view_chamado',
+        'app_ti_chamado_conversa_mensagens' => 'view_chamado',
+        'app_ti_chamado_gestao' => 'view_chamado',
+        'app_ti_chamado_csat' => 'view_chamado',
+        'app_ti_chamado_anexo_download' => 'view_chamado',
         'app_ti_chamado_novo_submit' => 'create_chamado',
         'app_ti_helia_analyze' => 'create_chamado',
     ];
@@ -101,14 +107,22 @@ final class ProductGrantAccess
         'app_ti_chamado_status' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
         'app_ti_chamado_atribuir' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
         'app_ti_chamado_nota' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_gestao' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
         'app_ti_chamado_prioridade' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
         'app_ti_chamado_helia_aplicar' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
         'app_ti_chamado_helia_revisar' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
-        'app_ti_chamado_helia_feedback' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_comentario' => ['scope' => 'hub_ti', 'product' => 'meus_chamados', 'min' => 'MEMBRO'],
+        'app_ti_chamado_csat' => ['scope' => 'hub_ti', 'product' => 'meus_chamados', 'min' => 'MEMBRO'],
         'app_ti_chamado_sla_pausa' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR'],
         'app_ti_chamado_problema' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR'],
         'app_ti_chamado_excluir' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_chamado_playbook_step' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_chamado_helia_feedback' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
         'app_ti_helia_analyze' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
+        'app_ti_catalogo_novo' => ['scope' => 'hub_ti', 'product' => 'catalogo', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_catalogo_editar' => ['scope' => 'hub_ti', 'product' => 'catalogo', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_catalogo_excluir' => ['scope' => 'hub_ti', 'product' => 'catalogo', 'min' => 'GESTOR_EQUIPE'],
+        'app_ti_manutencao_aprovar' => ['scope' => 'hub_ti', 'product' => 'manutencoes', 'min' => 'GESTOR'],
         // Núcleo TI — KB, problemas, infra, novidades, analytics
         'app_ti_kb_novo_submit' => ['scope' => 'hub_ti', 'product' => 'kb', 'min' => 'GESTOR_EQUIPE'],
         'app_ti_kb_editar_submit' => ['scope' => 'hub_ti', 'product' => 'kb', 'min' => 'GESTOR_EQUIPE'],
@@ -247,6 +261,12 @@ final class ProductGrantAccess
 
         if ($routeName === 'app_ti_chamado_novo_submit' || $routeName === 'app_ti_helia_analyze') {
             return $this->tiCanCreateChamado($user);
+        }
+
+        if ($routeName === 'app_ti_chamado_comentario' || $routeName === 'app_ti_chamado_csat'
+            || $routeName === 'app_ti_chamado_mensagem' || $routeName === 'app_ti_chamado_conversa_mensagens'
+            || $routeName === 'app_ti_chamado_gestao') {
+            return $this->tiRouteAllowed($user, 'view_chamado');
         }
 
         if (!isset(self::MANAGE_ROUTES[$routeName])) {

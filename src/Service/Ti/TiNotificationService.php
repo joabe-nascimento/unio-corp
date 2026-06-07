@@ -104,6 +104,30 @@ HTML;
         return $this->repository->countUnread($empresa, $user);
     }
 
+    /** @return array{count: int, notifications: list<array<string, mixed>>, latest_id: int, new_count: int} */
+    public function pollUnread(Empresa $empresa, User $user, int $sinceId = 0, int $limit = 8): array
+    {
+        $all = $this->repository->findUnreadByUser($empresa, $user, $limit);
+        $new = $sinceId > 0
+            ? $this->repository->findUnreadSince($empresa, $user, $sinceId, $limit)
+            : [];
+
+        $latestId = 0;
+        foreach ($all as $n) {
+            $id = (int) ($n->getId() ?? 0);
+            if ($id > $latestId) {
+                $latestId = $id;
+            }
+        }
+
+        return [
+            'count' => $this->repository->countUnread($empresa, $user),
+            'notifications' => array_map(static fn (TiNotificacao $n) => $n->toArray(), $all),
+            'latest_id' => $latestId,
+            'new_count' => \count($new),
+        ];
+    }
+
     public function markRead(Empresa $empresa, User $user, int $id): void
     {
         $n = $this->repository->find($id);

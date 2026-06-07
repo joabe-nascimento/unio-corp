@@ -7,16 +7,16 @@
 <div class="page-lead-kpis">
     {% set kpi_items = [] %}
     {% if product_grant('product_pessoas', 'membros') %}
-        {% set kpi_items = kpi_items|merge([{ value: '0', label: 'Total de Membros', sub: 'Cadastrados', route: 'app_pessoas_membros' }]) %}
+        {% set kpi_items = kpi_items|merge([{ value: stats.total_membros, label: 'Total de Membros', sub: 'Cadastrados', route: 'app_pessoas_membros' }]) %}
     {% endif %}
     {% if product_grant('product_pessoas', 'equipes') %}
-        {% set kpi_items = kpi_items|merge([{ value: '0', label: 'Equipes Ativas', sub: 'Formadas', route: 'app_pessoas_equipes' }]) %}
+        {% set kpi_items = kpi_items|merge([{ value: stats.equipes, label: 'Equipes Ativas', sub: 'Formadas', route: 'app_pessoas_equipes' }]) %}
     {% endif %}
     {% if product_grant('product_pessoas', 'cargos') %}
-        {% set kpi_items = kpi_items|merge([{ value: '0', label: 'Cargos', sub: 'Registrados', route: 'app_pessoas_cargos' }]) %}
+        {% set kpi_items = kpi_items|merge([{ value: stats.cargos, label: 'Cargos', sub: 'Registrados', route: 'app_pessoas_cargos' }]) %}
     {% endif %}
     {% if product_grant('product_pessoas', 'avaliacao') %}
-        {% set kpi_items = kpi_items|merge([{ value: '0', label: 'Avaliações', sub: 'Realizadas', route: 'app_pessoas_avaliacao' }]) %}
+        {% set kpi_items = kpi_items|merge([{ value: stats.avaliacoes, label: 'Avaliações', sub: 'Realizadas', route: 'app_pessoas_avaliacao' }]) %}
     {% endif %}
     {% if kpi_items|length > 0 %}
         {% include 'components/kpi_row.html.twig' with { items: kpi_items, mb: 'mb-0' } %}

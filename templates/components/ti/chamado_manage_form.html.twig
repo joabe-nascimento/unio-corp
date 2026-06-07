@@ -1,0 +1,93 @@
+{# Gestão do chamado — status, técnico, reabertura (sem mensagem de chat) #}
+{% set is_operator = ti_can('operate_chamados') %}
+{% set is_requester = can_requester_reply|default(ti_can('reply_chamado', { ticket: ticket })) %}
+{% set is_reopen_only = can_reopen|default(false) and not is_requester and not is_operator %}
+{% set can_use_member_form = is_requester or is_reopen_only %}
+{% set st_key = ticket.status|default('novo') %}
+{% set technicians = technicians|default([]) %}
+{% set assignee_id = ticket.assignee_id|default(null) %}
+{% set form_dom_id = form_id|default('tiChamadoManageForm-' ~ ticket.id) %}
+{% set status_field_id = form_dom_id ~ '-status' %}
+{% set tech_field_id = form_dom_id ~ '-technician' %}
+{% set status_member_field_id = form_dom_id ~ '-status-member' %}
+{% set motivo_field_id = form_dom_id ~ '-motivo' %}
+{% set upload_id = upload_id|default('tiChamadoManageAttachments-' ~ ticket.id) %}
+{% set member_status_options = solicitante_status_options|default({
+    '': 'Manter status atual',
+    'resolvido': 'Confirmar como resolvido',
+    'em_analise': 'Reabrir chamado'
+}) %}
+{% set embedded = embedded|default(false) %}
+
+<form method="post"
+      id="{{ form_dom_id }}"
+      action="{{ path('app_ti_chamado_gestao', { id: ticket.id }) }}"
+      enctype="multipart/form-data"
+      class="ti-chamado-manage-form unio-form{% if embedded %} ti-chamado-manage-form--embedded{% endif %}"
+      data-ti-chamado-gestao>
+    <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_gestao_' ~ ticket.id) }}">
+
+    {% if is_operator %}
+    <div class="ti-chamado-reply-toolbar">
+        <div class="ti-chamado-reply-toolbar-field">
+            <label class="unio-form-label" for="{{ status_field_id }}">Status</label>
+            <select id="{{ status_field_id }}" name="status" class="unio-form-control">
+                {% for key, label in status_labels|default({}) %}
+                <option value="{{ key }}"{% if key == st_key %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="ti-chamado-reply-toolbar-field">
+            <label class="unio-form-label" for="{{ tech_field_id }}">Técnico</label>
+            {% if technicians is empty %}
+            <select id="{{ tech_field_id }}" name="technician_id" class="unio-form-control" disabled>
+                <option value="">Nenhum usuário ativo</option>
+            </select>
+            {% else %}
+            <select id="{{ tech_field_id }}" name="technician_id" class="unio-form-control">
+                <option value=""{% if not assignee_id %} selected{% endif %}>— Sem alteração —</option>
+                {% for tech in technicians %}
+                <option value="{{ tech.id }}"{% if assignee_id == tech.id %} selected{% endif %}>{{ tech.name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </div>
+    </div>
+    {% elseif can_use_member_form %}
+    <div class="ti-chamado-reply-toolbar ti-chamado-reply-toolbar--member">
+        <div class="ti-chamado-reply-toolbar-field">
+            <label class="unio-form-label" for="{{ status_member_field_id }}">Situação</label>
+            <select id="{{ status_member_field_id }}" name="status" class="unio-form-control" data-ti-manage-situacao>
+                {% for key, label in member_status_options %}
+                <option value="{{ key }}"{% if is_reopen_only and key == 'em_analise' %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="ti-chamado-manage-motivo" data-ti-manage-motivo hidden>
+        <label class="unio-form-label" for="{{ motivo_field_id }}">Motivo da reabertura</label>
+        <textarea id="{{ motivo_field_id }}"
+                  name="motivo"
+                  class="unio-form-control"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="Explique por que o problema persiste ou voltou…"></textarea>
+    </div>
+    {% endif %}
+
+    {% if is_operator and not embedded %}
+    <div class="ti-chamado-reply-attachments mt-3">
+        {% include 'components/ti/chamado_attachments_upload.html.twig' with {
+            upload_id: upload_id,
+            compact: true
+        } %}
+    </div>
+    {% endif %}
+
+    <div class="ti-chamado-reply-actions mt-3">
+        <button type="submit" class="btn-unio btn-sm">
+            <i class="fas fa-check mr-1" aria-hidden="true"></i>
+            {{ is_operator ? 'Aplicar alterações' : (is_reopen_only ? 'Reabrir chamado' : 'Atualizar situação') }}
+        </button>
+    </div>
+</form>

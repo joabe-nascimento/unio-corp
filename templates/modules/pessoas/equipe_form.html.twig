@@ -1,4 +1,58 @@
-{% extends 'layout/stub.html.twig' %}
-{% block title %}{{ modo == 'nova' ? 'Nova Equipe' : 'Editar Equipe' }}{% endblock %}
-{% set stub_page_title = modo == 'nova' ? 'Nova Equipe' : 'Editar Equipe' %}
-{% set stub_empty_icon = 'fa-user-group' %}
+{% extends 'layout/page_list.html.twig' %}
+{% set eq = equipe|default(null) %}
+{% set fd = form_data|default({}) %}
+{% set is_edit = modo == 'editar' %}
+{% block title %}{{ is_edit ? 'Editar Equipe' : 'Nova Equipe' }}{% endblock %}
+{% block permissions_scope %}product_pessoas{% endblock %}
+{% set page_list_title = is_edit ? 'Editar — ' ~ eq.nome : 'Nova Equipe' %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ is_edit ? path('app_pessoas_equipe_detalhe', { id: eq.id }) : path('app_pessoas_equipes') }}" class="btn-unio-ghost btn-sm">Voltar</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card p-4">
+    <form method="post"
+          action="{{ is_edit ? path('app_pessoas_equipe_editar', { id: eq.id }) : path('app_pessoas_equipe_nova') }}"
+          class="unio-form">
+        <input type="hidden" name="_token" value="{{ csrf_token('pessoas_equipe_form') }}">
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nome da equipe *</label>
+                <input type="text" name="nome" class="form-control" required
+                       value="{{ fd.nome|default(eq ? eq.nome : '') }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Código</label>
+                <input type="text" name="codigo" class="form-control"
+                       value="{{ fd.codigo|default(eq ? eq.codigo : '') }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Área</label>
+                <input type="text" name="area" class="form-control"
+                       placeholder="Tecnologia, Design…"
+                       value="{{ fd.area|default(eq ? eq.area : '') }}">
+            </div>
+            <div class="col-12 mb-3">
+                <label class="form-label">Descrição</label>
+                <textarea name="descricao" class="form-control" rows="3">{{ fd.descricao|default(eq ? eq.descricao : '') }}</textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Líder / responsável</label>
+                <select name="lider_id" class="form-control">
+                    <option value="">—</option>
+                    {% for g in gestores|default([]) %}
+                    <option value="{{ g.id }}" {% if (fd.lider_id|default(eq and eq.lider ? eq.lider.id : '')) == g.id %}selected{% endif %}>{{ g.nome }}{% if g.cargo %} · {{ g.cargo }}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+            <a href="{{ is_edit ? path('app_pessoas_equipe_detalhe', { id: eq.id }) : path('app_pessoas_equipes') }}" class="btn-unio-ghost">Cancelar</a>
+            <button type="submit" class="btn-unio">{{ is_edit ? 'Salvar equipe' : 'Criar equipe' }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{#
+  unio/disclosure — bloco expansível reutilizável (<details>)
+
+  Props:
+    label         (string, obrigatório)
+    hint          (string, opcional)
+    icon          (string, opcional — classe FA, ex.: fa-paperclip)
+    badge         (scalar, opcional — contador no summary)
+    badge_variant (string, opcional — info | secondary | …)
+    open          (bool, opcional)
+    variant       (string, opcional — ex.: ti)
+    modifier      (string, opcional — ex.: attachments, reply)
+    class         (string, opcional — classes extras no <details>)
+    body_class    (string, opcional)
+
+  Block: disclosure_body
+#}
+<details class="unio-disclosure{% if variant|default('') %} unio-disclosure--{{ variant }}{% endif %}{% if modifier|default('') %} unio-disclosure--{{ modifier }}{% endif %}{% if class|default('') %} {{ class }}{% endif %}"{% if open|default(false) %} open{% endif %}>
+    <summary class="unio-disclosure__summary">
+        {% if icon|default('') %}
+            {% include 'components/unio/disclosure_icon.html.twig' with { icon: icon } %}
+        {% endif %}
+        <span class="unio-disclosure__content">
+            <span class="unio-disclosure__label">{{ label }}</span>
+            {% if hint|default('') %}
+            <span class="unio-disclosure__hint">{{ hint }}</span>
+            {% endif %}
+        </span>
+        {% if badge is defined and badge is not same as(null) and badge is not same as(false) and badge != '' %}
+        <span class="unio-disclosure__badge">
+            {% include 'components/ti/ti_metric_badge.html.twig' with {
+                label: badge,
+                variant: badge_variant|default('info')
+            } %}
+        </span>
+        {% endif %}
+        {% include 'components/unio/disclosure_chevron.html.twig' %}
+    </summary>
+    <div class="unio-disclosure__body{% if body_class|default('') %} {{ body_class }}{% endif %}">
+        {% block disclosure_body %}{% endblock %}
+    </div>
+</details>

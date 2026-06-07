@@ -1,0 +1,58 @@
+{# Painel: vincular ou criar conta na plataforma #}
+{# Props: platformAccount, email, csrf_token_name, form_action (hidden action value), show_create (bool) #}
+
+{% set platform_state = platformAccount.state|default('create') %}
+{% set platform_user = platformAccount.user|default(null) %}
+{% set show_create = show_create|default(false) %}
+
+{% if platform_state == 'linked' %}
+<p class="text-success small mb-0">
+    <i class="fas fa-circle-check mr-1" aria-hidden="true"></i>
+    Conta vinculada{% if platform_user %} — {{ platform_user.email }}{% endif %}.
+</p>
+
+{% elseif platform_state == 'blocked' %}
+<p class="text-danger small mb-2">
+    <i class="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i>
+    {{ platformAccount.reason|default('Não é possível vincular esta conta.') }}
+</p>
+<p class="text-muted small mb-0">
+    E-mail cadastrado: <strong>{{ platform_user.email|default(email) }}</strong>.
+    Peça ao tenant para ajustar a conta ou use outro e-mail no cadastro.
+</p>
+
+{% elseif platform_state == 'link' %}
+<p class="text-muted small mb-3">
+    Já existe uma conta com <strong>{{ email }}</strong>{% if platform_user and platform_user.empresa is null %} aguardando vínculo com a empresa{% else %} nesta empresa{% endif %}.
+    Vincule ao colaborador em vez de criar uma nova senha.
+</p>
+<form method="post" class="unio-form">
+    <input type="hidden" name="_token" value="{{ csrf_token(csrf_token_name) }}">
+    <input type="hidden" name="action" value="{{ form_action }}">
+    {% include 'components/unio_form_field.html.twig' with { id: 'perfil_link_' ~ form_action, name: 'perfil', label: 'Perfil', type: 'select', value: 'MEMBRO', options: [
+        { value: 'MEMBRO', label: 'Membro' },
+        { value: 'SUPERVISOR_EQUIPE', label: 'Supervisor equipe' },
+        { value: 'GESTOR_EQUIPE', label: 'Gestor equipe' },
+    ]} %}
+    <button type="submit" class="btn-unio btn-sm mt-2">
+        <i class="fas fa-link mr-1" aria-hidden="true"></i> Vincular conta existente
+    </button>
+</form>
+
+{% elseif show_create %}
+<p class="text-muted small mb-3">Nenhuma conta com este e-mail. Crie o acesso na plataforma.</p>
+<form method="post" class="unio-form">
+    <input type="hidden" name="_token" value="{{ csrf_token(csrf_token_name) }}">
+    <input type="hidden" name="action" value="provision_user">
+    {% include 'components/unio_form_field.html.twig' with { id: 'senha', name: 'senha', label: 'Senha inicial', type: 'password', required: true } %}
+    {% include 'components/unio_form_field.html.twig' with { id: 'perfil', name: 'perfil', label: 'Perfil', type: 'select', value: 'MEMBRO', options: [
+        { value: 'MEMBRO', label: 'Membro' },
+        { value: 'SUPERVISOR_EQUIPE', label: 'Supervisor equipe' },
+        { value: 'GESTOR_EQUIPE', label: 'Gestor equipe' },
+    ]} %}
+    <button type="submit" class="btn-unio btn-sm mt-2">Criar usuário</button>
+</form>
+
+{% else %}
+<p class="text-muted small mb-0">Nenhuma conta cadastrada com o e-mail deste colaborador.</p>
+{% endif %}

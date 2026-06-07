@@ -191,6 +191,18 @@ class Funcionario
         return strtoupper(substr($parts[0] ?? '', 0, 1) . substr($parts[1] ?? '', 0, 1)) ?: 'FN';
     }
 
+    /** Slug de status para componentes do módulo Pessoas. */
+    public function getPessoasStatusSlug(): string
+    {
+        return match ($this->status) {
+            'ATIVO' => 'ativo',
+            'INATIVO' => 'inativo',
+            'FERIAS' => 'ferias',
+            'AFASTADO' => 'afastado',
+            default => 'ativo',
+        };
+    }
+
     public function getCpf(): ?string { return $this->cpf; }
     public function setCpf(?string $v): static { $this->cpf = $v; return $this; }
     public function getRg(): ?string { return $this->rg; }

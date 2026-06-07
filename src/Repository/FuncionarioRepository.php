@@ -93,7 +93,20 @@ class FuncionarioRepository extends ServiceEntityRepository
     /** @return list<Funcionario> */
     public function findForEmpresa(Empresa $empresa, ?string $status = null, ?string $q = null): array
     {
+        return $this->findForEmpresaFiltered($empresa, $status, $q, null, null);
+    }
+
+    /** @return list<Funcionario> */
+    public function findForEmpresaFiltered(
+        Empresa $empresa,
+        ?string $status = null,
+        ?string $q = null,
+        ?int $departamentoId = null,
+        ?string $cargo = null,
+    ): array {
         $qb = $this->createQueryBuilder('f')
+            ->leftJoin('f.departamento', 'd')
+            ->addSelect('d')
             ->andWhere('f.empresa = :empresa')
             ->setParameter('empresa', $empresa)
             ->orderBy('f.nome', 'ASC');
@@ -103,11 +116,65 @@ class FuncionarioRepository extends ServiceEntityRepository
         }
 
         if ($q !== null && trim($q) !== '') {
-            $qb->andWhere('f.nome LIKE :q OR f.email LIKE :q OR f.cargo LIKE :q')
+            $qb->andWhere('f.nome LIKE :q OR f.email LIKE :q OR f.cargo LIKE :q OR d.nome LIKE :q')
                 ->setParameter('q', '%' . trim($q) . '%');
         }
 
+        if ($departamentoId !== null && $departamentoId > 0) {
+            $qb->andWhere('f.departamento = :dept')->setParameter('dept', $departamentoId);
+        }
+
+        if ($cargo !== null && trim($cargo) !== '') {
+            $qb->andWhere('f.cargo = :cargo')->setParameter('cargo', trim($cargo));
+        }
+
         return $qb->getQuery()->getResult();
+    }
+
+    public function countWithoutDepartamento(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('f')
+            ->select('COUNT(f.id)')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.departamento IS NULL')
+            ->andWhere('f.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('statuses', ['ATIVO', 'FERIAS', 'AFASTADO'])
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /** @return list<string> */
+    public function findDistinctCargos(Empresa $empresa): array
+    {
+        $rows = $this->createQueryBuilder('f')
+            ->select('DISTINCT f.cargo AS cargo')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.cargo IS NOT NULL')
+            ->andWhere('f.cargo != :empty')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('empty', '')
+            ->orderBy('f.cargo', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_values(array_filter(array_map(
+            static fn (array $row): string => (string) ($row['cargo'] ?? ''),
+            $rows
+        )));
+    }
+
+    /** @return list<Funcionario> */
+    public function findByDepartamento(Empresa $empresa, int $departamentoId): array
+    {
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.empresa = :empresa')
+            ->andWhere('f.departamento = :dept')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('dept', $departamentoId)
+            ->orderBy('f.nome', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     public function countByEmpresaAndStatus(Empresa $empresa, string $status): int

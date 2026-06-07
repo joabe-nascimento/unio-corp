@@ -1,17 +1,14 @@
-{# Helia insight — painel IA na visualização do chamado #}
+{# Vitória insight — painel IA na visualização do chamado #}
 {% set helia = helia|default({}) %}
 <section class="unio-card ti-helia-insight mb-4">
     <div class="ti-helia-insight-head">
-        <div class="ti-helia-assist-avatar ti-helia-assist-avatar--lg" aria-hidden="true">
-            <i class="fas fa-brain"></i>
+        <div class="section-header-text">
+            <div class="section-title">{{ ai_assistant_name }} · Cortex Ops</div>
+            <div class="ti-helia-insight-confidence">
+                {% include 'components/ti/ti_helia_badge.html.twig' with { confidence: helia.confidence|default(0) } %}
+            </div>
+            <div class="section-subtitle">Triagem inteligente · exclusivo Unio</div>
         </div>
-        <div class="flex-fill">
-            {% include 'components/section_header.html.twig' with {
-                title: 'Helia · Cortex Ops',
-                subtitle: 'Triagem inteligente · exclusivo Unio'
-            } %}
-        </div>
-        {% include 'components/ti/ti_helia_badge.html.twig' with { confidence: helia.confidence|default(0) } %}
     </div>
 
     <div class="ti-helia-insight-body">
@@ -19,7 +16,7 @@
 
         {% if helia.suggested_priority|default(null) %}
         <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
-            <span class="perm-label mb-0">Helia sugere:</span>
+            <span class="perm-label mb-0">{{ ai_assistant_name }} sugere:</span>
             {% include 'components/ti/ti_priority_badge.html.twig' with { priority: helia.suggested_priority } %}
             {% include 'components/ti/ti_tag_badge.html.twig' with { tag: helia.suggested_category|replace({'_': ' '})|capitalize } %}
         </div>
@@ -61,7 +58,7 @@
                 kind: 'mode',
                 mode: ticket.helia_applied|default(false) ? 'auto' : 'review'
             } %}
-            {% if product_grant('hub_ti', 'chamados') %}
+            {% if ti_can('apply_helia') %}
             {% include 'components/ti/chamado_helia_apply_form.html.twig' with { ticket: ticket } %}
             {% if ticket.helia_reviewed|default(false) == false and ticket.helia_confidence|default(null) %}
             <form method="post" action="{{ path('app_ti_chamado_helia_revisar', { id: ticket.id }) }}" class="m-0 d-inline">

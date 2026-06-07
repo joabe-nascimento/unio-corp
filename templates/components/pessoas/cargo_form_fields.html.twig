@@ -1,0 +1,73 @@
+{#
+  Campos compartilhados do formulário de cargo (offcanvas + página de edição)
+
+  Props: prefix (id prefix), fd (form_data), cargo (optional entity), areas_sugestoes, nivel_options
+#}
+{% set p = prefix|default('cargo') %}
+{% set fd = form_data|default({}) %}
+{% set c = cargo|default(null) %}
+
+{% include 'components/section_header.html.twig' with {
+    title: 'Identificação',
+    subtitle: 'Nome e descrição usados no catálogo e na alocação de membros.'
+} %}
+
+{% include 'components/unio_form_field.html.twig' with {
+    id: p ~ '-titulo',
+    name: 'titulo',
+    label: 'Título do cargo',
+    placeholder: 'Ex.: Analista de People Ops · Pleno',
+    value: fd.titulo|default(c ? c.titulo : ''),
+    required: true,
+    maxlength: 120,
+    help_text: 'Este título pode ser selecionado ao cadastrar ou editar membros.'
+} %}
+
+{% include 'components/unio_form_field.html.twig' with {
+    id: p ~ '-descricao',
+    name: 'descricao',
+    label: 'Descrição',
+    type: 'textarea',
+    rows: 4,
+    placeholder: 'Responsabilidades, escopo, competências esperadas…',
+    value: fd.descricao|default(c ? c.descricao : ''),
+    help_text: 'Opcional, mas ajuda gestores e RH na padronização de funções.'
+} %}
+
+{% include 'components/section_header.html.twig' with {
+    title: 'Classificação',
+    subtitle: 'Área e senioridade para relatórios e organograma.'
+} %}
+
+<div class="row">
+    <div class="col-md-6">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: p ~ '-area',
+            name: 'area',
+            label: 'Área / departamento',
+            placeholder: 'Ex.: Tecnologia, People, Comercial',
+            value: fd.area|default(c ? c.area : ''),
+            maxlength: 80,
+            attrs: { list: p ~ '-areas-datalist', autocomplete: 'organization' },
+            help_text: areas_sugestoes|default([]) is not empty
+                ? 'Sugestões com base nas equipes e cargos já cadastrados.'
+                : 'Informe a área ou squad responsável por esta função.'
+        } %}
+        <datalist id="{{ p }}-areas-datalist">
+            {% for area in areas_sugestoes|default([]) %}
+            <option value="{{ area }}"></option>
+            {% endfor %}
+        </datalist>
+    </div>
+    <div class="col-md-6">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: p ~ '-nivel',
+            name: 'nivel',
+            label: 'Nível de senioridade',
+            type: 'select',
+            value: fd.nivel|default(c ? c.nivel : ''),
+            options: nivel_options|default([]),
+            help_text: 'Referência para trilhas de carreira e avaliações de desempenho.'
+        } %}
+    </div>
+</div>

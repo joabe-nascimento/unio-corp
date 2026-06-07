@@ -4,6 +4,7 @@ namespace App\Service\Ti;
 
 use App\Entity\Empresa;
 use App\Entity\TiKbArtigo;
+use App\Platform\AiAssistant;
 use App\Repository\TiKbArtigoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -26,7 +27,7 @@ final class TiKbService
                 ->setCodigo((string) $item['id'])
                 ->setTitulo((string) $item['title'])
                 ->setResumo((string) $item['title'])
-                ->setConteudo('Artigo de referência para triagem Helia. Palavras-chave: ' . implode(', ', $item['keywords'] ?? []))
+                ->setConteudo('Artigo de referência para triagem ' . AiAssistant::NAME . '. Palavras-chave: ' . implode(', ', $item['keywords'] ?? []))
                 ->setCategoria('geral')
                 ->setTags($item['keywords'] ?? []);
             $this->em->persist($kb);

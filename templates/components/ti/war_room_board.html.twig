@@ -48,7 +48,7 @@
                     <span><i class="fas fa-clock" aria-hidden="true"></i> {{ inc.elapsed_label }}</span>
                     <span><i class="fas fa-users" aria-hidden="true"></i> ~{{ inc.affected_users }} usuários</span>
                     {% if inc.helia_analysis %}
-                    <span><i class="fas fa-brain" aria-hidden="true"></i> Helia</span>
+                    <span><i class="fas fa-brain" aria-hidden="true"></i> {{ ai_assistant_name }}</span>
                     {% endif %}
                 </div>
                 <div class="wr-sla-bar mt-2">
@@ -66,11 +66,22 @@
                         <i class="fas fa-book-open" aria-hidden="true"></i>
                         Runbook: {{ inc.playbook.titulo|default('P1') }}
                     </div>
-                    <ol class="wr-runbook-steps">
-                        {% for step in inc.playbook_steps|slice(0, 4) %}
-                        <li{% if step.feito %} class="is-done"{% endif %}>{{ step.titulo }}</li>
+                    <div class="wr-runbook-steps" data-ti-playbook data-url="{{ path('app_ti_chamado_playbook_step', { id: inc.id }) }}" data-csrf="{{ csrf_token('ti_playbook_' ~ inc.id) }}">
+                        {% for step in inc.playbook_steps|slice(0, 6) %}
+                        {% set step_num = step.step|default(loop.index) %}
+                        <div class="wr-runbook-step{% if step.feito|default(false) %} is-done{% endif %}">
+                            <label class="wr-runbook-step-label mb-0">
+                                <span class="ti-playbook-step-num" aria-hidden="true">{{ step_num }}</span>
+                                <input type="checkbox"
+                                       class="ti-playbook-step-check"
+                                       data-ti-playbook-step="{{ step_num }}"
+                                       {% if step.feito|default(false) %}checked{% endif %}
+                                       aria-label="Marcar passo {{ step_num }}">
+                                <span>{{ step.titulo }}</span>
+                            </label>
+                        </div>
                         {% endfor %}
-                    </ol>
+                    </div>
                 </div>
                 {% endif %}
                 <div class="wr-incident-actions d-flex flex-wrap gap-2 mt-2">

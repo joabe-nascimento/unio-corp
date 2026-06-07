@@ -4,6 +4,7 @@ namespace App\Controller\Module\Ti;
 
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Security\TiGrantService;
 use App\Service\Ti\TiNovidadeService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,7 @@ final class TiNovidadeManageController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private TiNovidadeService $novidades,
+        private TiGrantService $tiGrants,
     ) {}
 
     #[Route('/ti/novidades/novo', name: 'app_ti_novidade_novo_submit', methods: ['POST'])]
@@ -25,6 +27,7 @@ final class TiNovidadeManageController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageNovidades($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_novidade_form');
 
@@ -43,6 +46,9 @@ final class TiNovidadeManageController extends AbstractController
     #[Route('/ti/novidades/{id}/editar', name: 'app_ti_novidade_editar_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function editar(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageNovidades($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_novidade_form');
 
@@ -62,6 +68,9 @@ final class TiNovidadeManageController extends AbstractController
     #[Route('/ti/novidades/{id}/excluir', name: 'app_ti_novidade_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function excluir(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageNovidades($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_novidade_delete_' . $id);
         $this->novidades->delete($this->novidades->loadForEmpresa($empresa, $id));

@@ -41,6 +41,7 @@ final class PageBackResolver
         'app_suprimentos' => 'app_dashboard',
         'app_ti' => 'app_dashboard',
         'app_ti_chamados' => 'app_ti',
+        'app_ti_meus_chamados' => 'app_ti',
         'app_ti_chamado_novo' => 'app_ti_chamados',
         'app_ti_chamado_show' => 'app_ti_chamados',
         'app_ti_chamado_status' => 'app_ti_chamado_show',

@@ -19,9 +19,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap4.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=264">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=267">
 
     {% block stylesheets %}{% endblock %}
+    {% if app.user %}
+    <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=3">
+    {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -131,6 +134,10 @@
     {% block page_overlays %}{% endblock %}
 
     {% include 'components/unio_toast_stack.html.twig' %}
+
+    {% if app.user %}
+    {% include 'components/ti/chamado_chat_global.html.twig' %}
+    {% endif %}
 
     {% if platform_config.manutencao ?? false %}
     <div class="manut-tenant-banner" role="alert">
@@ -282,6 +289,9 @@ window.addEventListener('load', function () {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
 {{ importmap('rh_ux') }}
 {% block javascripts %}{% endblock %}
+{% if app.user %}
+<script src="{{ asset('js/ti-chamado-chat.js') }}?v=6" defer></script>
+{% endif %}
 
 {# ── View Toggle — JS genérico, carregado uma vez no base ── #}
 <script>

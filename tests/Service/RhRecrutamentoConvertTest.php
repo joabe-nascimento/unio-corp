@@ -11,13 +11,37 @@ use App\Repository\RhOnboardingProcessRepository;
 use App\Repository\RhVagaRepository;
 use App\Rh\RhCandidatoEtapa;
 use App\Service\Rh\RhAuditService;
+use App\Service\Rh\RhRecruitmentNotificationService;
 use App\Service\Rh\RhRecrutamentoService;
 use App\Service\RhOnboardingService;
+use App\Service\PlatformNotificationService;
+use App\Service\PlatformNotificationPresenter;
+use App\Security\ProductGrantAccess;
+use App\Repository\UserRepository;
+use App\Repository\PlatformNotificacaoRepository;
+use Symfony\Bundle\SecurityBundle\Security;
+use App\Repository\UserProductGrantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class RhRecrutamentoConvertTest extends TestCase
 {
+    private function recruitmentNotifications(): RhRecruitmentNotificationService
+    {
+        return new RhRecruitmentNotificationService(
+            new PlatformNotificationService(
+                $this->createMock(EntityManagerInterface::class),
+                $this->createMock(PlatformNotificacaoRepository::class),
+                new PlatformNotificationPresenter(),
+            ),
+            $this->createMock(UserRepository::class),
+            new ProductGrantAccess(
+                $this->createMock(Security::class),
+                $this->createMock(UserProductGrantRepository::class),
+            ),
+        );
+    }
+
     public function testConvertToOnboardingCreatesProcessAndLinksCandidato(): void
     {
         $empresa = $this->createMock(Empresa::class);
@@ -72,6 +96,7 @@ class RhRecrutamentoConvertTest extends TestCase
             $this->createMock(\App\Repository\RhAuditLogRepository::class),
             $onboarding,
             $audit,
+            $this->recruitmentNotifications(),
         );
 
         self::assertSame($process, $service->convertToOnboarding($candidato, null));
@@ -112,6 +137,7 @@ class RhRecrutamentoConvertTest extends TestCase
             $this->createMock(\App\Repository\RhAuditLogRepository::class),
             $onboarding,
             $this->createMock(RhAuditService::class),
+            $this->recruitmentNotifications(),
         );
 
         self::assertSame($existing, $service->convertToOnboarding($candidato, null));
@@ -162,6 +188,7 @@ class RhRecrutamentoConvertTest extends TestCase
             $this->createMock(\App\Repository\RhAuditLogRepository::class),
             $onboarding,
             $this->createMock(RhAuditService::class),
+            $this->recruitmentNotifications(),
         );
 
         $service->moveCandidatoEtapa($candidato, RhCandidatoEtapa::CONTRATADO, null);

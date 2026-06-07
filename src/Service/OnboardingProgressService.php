@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Security\ProductGrantAccess;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -14,12 +15,13 @@ class OnboardingProgressService
     public const SESSION_COMPLETED = 'onboarding.completed_steps';
 
     /** @var list<string> */
-    public const STEP_IDS = ['workspace', 'funcionario', 'invite_user', 'hub'];
+    public const STEP_IDS = ['workspace', 'funcionario', 'portal', 'invite_user', 'hub'];
 
     public function __construct(
         private RequestStack $requestStack,
         private NavigationService $navigation,
         private WelcomeService $welcome,
+        private ProductGrantAccess $grants,
     ) {}
 
     /**
@@ -105,7 +107,7 @@ class OnboardingProgressService
             'done' => $workspaceDone,
         ];
 
-        if ($empresa !== null && $this->navigation->showModuloRh($user)) {
+        if ($empresa !== null && $this->canManageAdmissoes($user)) {
             $funcDone = $this->isStepComplete('funcionario');
             $steps[] = [
                 'id' => 'funcionario',
@@ -117,6 +119,21 @@ class OnboardingProgressService
                 'route' => 'app_rh_admissoes_nova',
                 'route_params' => [],
                 'done' => $funcDone,
+            ];
+        }
+
+        if ($empresa !== null && !$this->canManageAdmissoes($user) && $this->grants->grantAtLeast($user, 'product_rh', 'portal', 'MEMBRO')) {
+            $portalDone = $this->isStepComplete('portal');
+            $steps[] = [
+                'id' => 'portal',
+                'label' => 'Conhecer o portal do colaborador',
+                'hint' => $portalDone
+                    ? 'Você já acessou o portal do colaborador.'
+                    : 'Veja holerites, férias e comunicados da empresa.',
+                'icon' => 'fa-id-badge',
+                'route' => 'app_rh_portal',
+                'route_params' => [],
+                'done' => $portalDone,
             ];
         }
 
@@ -153,5 +170,10 @@ class OnboardingProgressService
         }
 
         return $steps;
+    }
+
+    private function canManageAdmissoes(User $user): bool
+    {
+        return $this->grants->grantAtLeast($user, 'product_rh', 'admissoes', 'GESTOR_EQUIPE');
     }
 }

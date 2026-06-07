@@ -1,3 +1,111 @@
-{% extends 'layout/stub.html.twig' %}
+{% extends 'layout/page_list.html.twig' %}
 {% block title %}Avaliação{% endblock %}
-{% set stub_page_title = 'Avaliação' %}
+{% block permissions_scope %}product_pessoas{% endblock %}
+{% set page_list_title = 'Avaliação de Desempenho' %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: total, label: 'Avaliações', sub: 'Registradas' },
+        { value: avaliacoes|length, label: 'Nesta lista', sub: 'Exibidas' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: grant_at_least('product_pessoas', 'avaliacao', 'GESTOR_EQUIPE') ? 'Nova Avaliação' : '',
+    btn_opens: grant_at_least('product_pessoas', 'avaliacao', 'GESTOR_EQUIPE') ? 'pessoas-avaliacao-nova' : '',
+    btn_icon: 'fa-star'
+} %}{% endembed %}
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if avaliacoes is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-star',
+            title: 'Nenhuma avaliação registrada',
+            text: 'Registre ciclos de feedback e desempenho dos colaboradores.',
+            btn_label: grant_at_least('product_pessoas', 'avaliacao', 'GESTOR_EQUIPE') ? 'Nova Avaliação' : '',
+            btn_opens: grant_at_least('product_pessoas', 'avaliacao', 'GESTOR_EQUIPE') ? 'pessoas-avaliacao-nova' : ''
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-unio mb-0">
+            <thead>
+                <tr>
+                    <th>Colaborador</th>
+                    <th>Período</th>
+                    <th>Nota</th>
+                    <th>Avaliador</th>
+                    <th>Data</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for av in avaliacoes %}
+                <tr>
+                    <td>{% include 'components/person_cell.html.twig' with { name: av.funcionario.nome, subtitle: av.funcionario.cargo|default('') } %}</td>
+                    <td>{{ av.periodo }}</td>
+                    <td><strong>{{ av.nota }}</strong>/5</td>
+                    <td>{{ av.avaliador ? av.avaliador.email : '—' }}</td>
+                    <td>{{ av.criadoEm|date('d/m/Y') }}</td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pessoas_membro_ficha', { id: av.funcionario.id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% if grant_at_least('product_pessoas', 'avaliacao', 'GESTOR_EQUIPE') %}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'pessoas-avaliacao-nova',
+    title: 'Nova avaliação',
+    subtitle: 'Registro de desempenho',
+    icon: 'fa-star',
+    size: 'md'
+} %}
+    {% block offcanvas_body %}
+    <form method="post" action="{{ path('app_pessoas_avaliacao_nova') }}" class="unio-form" id="pessoasAvaliacaoForm">
+        <input type="hidden" name="_token" value="{{ csrf_token('pessoas_avaliacao_form') }}">
+        <div class="mb-3">
+            <label class="form-label">Colaborador *</label>
+            <select name="funcionario_id" class="form-control" required>
+                <option value="">Selecione…</option>
+                {% for f in funcionarios|default([]) %}
+                <option value="{{ f.id }}">{{ f.nome }}{% if f.cargo %} · {{ f.cargo }}{% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-6 mb-3">
+                <label class="form-label">Período *</label>
+                <input type="text" name="periodo" class="form-control" required placeholder="2026-S1">
+            </div>
+            <div class="col-6 mb-3">
+                <label class="form-label">Nota (0–5) *</label>
+                <input type="number" name="nota" class="form-control" min="0" max="5" step="0.1" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Comentário</label>
+            <textarea name="comentario" class="form-control" rows="3"></textarea>
+        </div>
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="unio-offcanvas-footer">
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+        <button type="submit" form="pessoasAvaliacaoForm" class="btn-unio">Registrar avaliação</button>
+    </div>
+    {% endblock %}
+{% endembed %}
+{% endif %}
+{% endblock %}

@@ -31,6 +31,25 @@ class TiNotificacaoRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return list<TiNotificacao> */
+    public function findUnreadSince(Empresa $empresa, User $user, int $sinceId, int $limit = 20): array
+    {
+        $qb = $this->createQueryBuilder('n')
+            ->andWhere('n.empresa = :empresa')
+            ->andWhere('n.user = :user')
+            ->andWhere('n.lida = false')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('user', $user)
+            ->orderBy('n.id', 'DESC')
+            ->setMaxResults($limit);
+
+        if ($sinceId > 0) {
+            $qb->andWhere('n.id > :sinceId')->setParameter('sinceId', $sinceId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function countUnread(Empresa $empresa, User $user): int
     {
         return (int) $this->createQueryBuilder('n')

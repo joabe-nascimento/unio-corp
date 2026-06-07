@@ -1,85 +1,109 @@
 {% extends 'layout/page_list.html.twig' %}
 {% block title %}Membros{% endblock %}
+{% block permissions_scope %}product_pessoas{% endblock %}
 {% set page_list_title = 'Membros' %}
 
 {% block page_list_kpis %}
     <div class="page-lead-kpis">
         {% include 'components/kpi_row.html.twig' with { items: [
-            { value: '12', label: 'Total de Membros',  sub: 'Cadastrados' },
-            { value: '10', label: 'Ativos',            sub: 'Trabalhando agora' },
-            { value: '1',  label: 'Em Férias',         sub: 'Este mês' },
-            { value: '4',  label: 'Equipes',           sub: 'Formadas', route: 'app_pessoas_equipes' },
+            { value: stats.total, label: 'Total de Membros',  sub: 'Cadastrados' },
+            { value: stats.ativos, label: 'Ativos',            sub: 'Trabalhando agora' },
+            { value: stats.ferias, label: 'Em Férias',         sub: 'Este mês' },
+            { value: stats.equipes, label: 'Equipes',           sub: 'Formadas', route: 'app_pessoas_equipes' },
         ], mb: 'mb-0' } %}
     </div>
 {% endblock %}
 
 {% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_pessoas_membros') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
     btn_label: grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') ? 'Novo Membro' : '',
     btn_href: path('app_pessoas_membro_novo'),
     btn_icon: 'fa-user-plus',
     search_in_section: true,
     search_placeholder: 'Buscar por nome, cargo ou equipe…',
-    search_disabled: true
+    search_name: 'q',
+    search_value: filter_q|default('')
 } %}
     {% block section_toolbar_filters %}
+        {% set status_options = [{ value: '', label: 'Todos' }] %}
+        {% for s in [
+            { value: 'ATIVO', label: 'Ativo' },
+            { value: 'INATIVO', label: 'Inativo' },
+            { value: 'FERIAS', label: 'Férias' },
+            { value: 'AFASTADO', label: 'Afastado' },
+        ] %}
+            {% set status_options = status_options|merge([s]) %}
+        {% endfor %}
         {% include 'components/filter_group.html.twig' with {
             label: 'Status',
             name: 'status',
-            disabled: true,
-            options: ['Todos', 'Ativo', 'Inativo', 'Férias']
+            value: filter_status|default(''),
+            min_width: '140px',
+            options: status_options
         } %}
+        {% set equipe_options = [{ value: '', label: 'Todas' }] %}
+        {% for d in departamentos|default([]) %}
+            {% set equipe_options = equipe_options|merge([{ value: d.id, label: d.nome }]) %}
+        {% endfor %}
         {% include 'components/filter_group.html.twig' with {
             label: 'Equipe',
             name: 'equipe',
-            disabled: true,
-            options: ['Todas', 'Squad Backend', 'Design & Marca', 'Obras e Projetos', 'PMO']
+            value: filter_equipe|default(''),
+            min_width: '160px',
+            options: equipe_options
         } %}
+        {% set cargo_options = [{ value: '', label: 'Todos' }] %}
+        {% for c in cargos_opcoes|default([]) %}
+            {% set cargo_options = cargo_options|merge([{ value: c, label: c }]) %}
+        {% endfor %}
         {% include 'components/filter_group.html.twig' with {
             label: 'Cargo',
             name: 'cargo',
-            disabled: true,
-            options: ['Todos', 'Desenvolvedor', 'Designer', 'Engenheiro', 'Gestor']
+            value: filter_cargo|default(''),
+            min_width: '160px',
+            options: cargo_options
         } %}
         {% include 'components/view_toggle.html.twig' with {
             container_id: 'members-container',
             storage_key:  'membros_view'
         } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_pessoas_membros'),
+            has_filters: filter_q|default('') or filter_status|default('') or filter_equipe|default('') or filter_cargo|default('')
+        } %}
     {% endblock %}
 {% endembed %}
+</form>
 {% endblock %}
 
 {% block page_list_content %}
 <div class="unio-card">
-    <div class="ficha-stub-banner mb-3">
-        <i class="fas fa-circle-info"></i>
-        Dados fictícios de demonstração — clique em qualquer membro para ver a ficha técnica completa.
-    </div>
-
+    {% if membros is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-users',
+            title: 'Nenhum membro encontrado',
+            text: filter_q|default('') or filter_status|default('') or filter_equipe|default('') or filter_cargo|default('')
+                ? 'Nenhum resultado para os filtros aplicados.'
+                : 'Cadastre colaboradores ou conclua uma admissão no RH.',
+            btn_label: grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') ? 'Novo Membro' : '',
+            btn_href: grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') ? path('app_pessoas_membro_novo') : ''
+        } %}
+    {% else %}
     {% set av_palette = ['av-c1','av-c2','av-c3','av-c4','av-c5','av-c6','av-c7','av-c8'] %}
-
     <div id="members-container" data-view-mode="list">
-        {% for m in [
-            { id:1,  nome: 'Ana Carolina Silva',    cargo: 'Desenvolvedora Full Stack',     equipe: 'Squad Backend',    status: 'ativo'   },
-            { id:2,  nome: 'Bruno Mendes Teixeira', cargo: 'Designer UX/UI Sênior',         equipe: 'Design & Marca',   status: 'ativo'   },
-            { id:3,  nome: 'Carla Rodrigues',       cargo: 'Gestora de Projetos',           equipe: 'PMO',              status: 'ferias'  },
-            { id:4,  nome: 'Diego Fonseca',         cargo: 'Engenheiro Civil Sr.',          equipe: 'Obras e Projetos', status: 'ativo'   },
-            { id:5,  nome: 'Eduardo Gonçalves',     cargo: 'DevOps Engineer',               equipe: 'Squad Backend',    status: 'ativo'   },
-            { id:6,  nome: 'Fernanda Lima',         cargo: 'Desenvolvedora Back-end',       equipe: 'Squad Backend',    status: 'ativo'   },
-            { id:7,  nome: 'Gabriel Souza',         cargo: 'Engenheiro de Estruturas',      equipe: 'Obras e Projetos', status: 'ativo'   },
-            { id:8,  nome: 'Helena Martins',        cargo: 'Analista de Marketing',         equipe: 'Design & Marca',   status: 'ativo'   },
-            { id:9,  nome: 'Igor Teixeira',         cargo: 'Scrum Master',                  equipe: 'PMO',              status: 'ativo'   },
-            { id:10, nome: 'Juliana Castro',        cargo: 'Arquiteta de Software',         equipe: 'Squad Backend',    status: 'ativo'   },
-            { id:11, nome: 'Kleber Araújo',         cargo: 'Orçamentista',                  equipe: 'Obras e Projetos', status: 'inativo' },
-            { id:12, nome: 'Larissa Neves',         cargo: 'Product Designer',              equipe: 'Design & Marca',   status: 'ativo'   },
-        ] %}
+        {% for m in membros %}
+        {% set status_slug = m.pessoasStatusSlug %}
         <div class="view-list-only">
             {% include 'components/member_card.html.twig' with {
-                nome: m.nome, cargo: m.cargo, equipe: m.equipe, status: m.status,
-                route: 'app_pessoas_membro_ficha', route_params: { id: m.id }
+                nome: m.nome,
+                cargo: m.cargo|default('—'),
+                equipe: m.departamento ? m.departamento.nome : 'Sem equipe',
+                status: status_slug,
+                route: 'app_pessoas_membro_ficha',
+                route_params: { id: m.id }
             } %}
         </div>
-
         {% set ci = (loop.index - 1) % av_palette|length %}
         <a href="{{ path('app_pessoas_membro_ficha', {id: m.id}) }}"
            class="view-grid-only text-decoration-none">
@@ -90,21 +114,21 @@
                         size:  'lg',
                         class: av_palette[ci]
                     } %}
-                    <span class="member-status member-status--{{ m.status }} member-grid-status">
-                        {{ m.status == 'ativo' ? 'Ativo' : (m.status == 'ferias' ? 'Férias' : 'Inativo') }}
+                    <span class="member-status member-status--{{ status_slug }} member-grid-status">
+                        {{ m.statusLabel }}
                     </span>
                 </div>
                 <div class="member-grid-info">
                     <div class="member-grid-name">{{ m.nome }}</div>
-                    <div class="member-grid-role">{{ m.cargo }}</div>
+                    <div class="member-grid-role">{{ m.cargo|default('—') }}</div>
                     <div class="member-grid-team">
-                        <i class="fas fa-user-group"></i> {{ m.equipe }}
+                        <i class="fas fa-user-group"></i> {{ m.departamento ? m.departamento.nome : 'Sem equipe' }}
                     </div>
                 </div>
             </div>
         </a>
-
         {% endfor %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}

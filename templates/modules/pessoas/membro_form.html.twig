@@ -1,4 +1,120 @@
-{% extends 'layout/stub.html.twig' %}
-{% block title %}{{ modo == 'novo' ? 'Novo Membro' : 'Editar Membro' }}{% endblock %}
-{% set stub_page_title = modo == 'novo' ? 'Novo Membro' : 'Editar Membro' %}
-{% set stub_empty_icon = 'fa-user-plus' %}
+{% extends 'layout/page_list.html.twig' %}
+{% set m = membro|default(null) %}
+{% set fd = form_data|default({}) %}
+{% set is_edit = m is not null %}
+{% block title %}{{ is_edit ? 'Editar Membro' : 'Novo Membro' }}{% endblock %}
+{% block permissions_scope %}product_pessoas{% endblock %}
+{% set page_list_title = is_edit ? 'Editar — ' ~ m.nome : 'Novo Membro' %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ is_edit ? path('app_pessoas_membro_ficha', { id: m.id }) : path('app_pessoas_membros') }}" class="btn-unio-ghost btn-sm">Voltar</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card p-4">
+    <form method="post"
+          action="{{ is_edit ? path('app_pessoas_membro_editar', { id: m.id }) : path('app_pessoas_membro_novo') }}"
+          enctype="multipart/form-data"
+          class="unio-form">
+        <input type="hidden" name="_token" value="{{ csrf_token('pessoas_membro_form') }}">
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nome completo *</label>
+                <input type="text" name="nome" class="form-control" required
+                       value="{{ fd.nome|default(m ? m.nome : '') }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">E-mail *</label>
+                <input type="email" name="email" class="form-control" required
+                       value="{{ fd.email|default(m ? m.email : '') }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Telefone</label>
+                <input type="text" name="telefone" class="form-control"
+                       value="{{ fd.telefone|default(m ? m.telefone : '') }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Cargo</label>
+                <input type="text" name="cargo" class="form-control" list="cargos-list"
+                       value="{{ fd.cargo|default(m ? m.cargo : '') }}">
+                <datalist id="cargos-list">
+                    {% for c in cargos_catalogo|default([]) %}
+                    <option value="{{ c.titulo }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-control">
+                    {% for s in [
+                        { v: 'ATIVO', l: 'Ativo' },
+                        { v: 'INATIVO', l: 'Inativo' },
+                        { v: 'FERIAS', l: 'Férias' },
+                        { v: 'AFASTADO', l: 'Afastado' },
+                    ] %}
+                    <option value="{{ s.v }}" {% if (fd.status|default(m ? m.status : 'ATIVO')) == s.v %}selected{% endif %}>{{ s.l }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Equipe</label>
+                <select name="departamento_id" class="form-control">
+                    <option value="">—</option>
+                    {% for d in departamentos|default([]) %}
+                    <option value="{{ d.id }}" {% if (fd.departamento_id|default(m and m.departamento ? m.departamento.id : '')) == d.id %}selected{% endif %}>{{ d.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Gestor</label>
+                <select name="gestor_id" class="form-control">
+                    <option value="">—</option>
+                    {% for g in gestores|default([]) %}
+                    <option value="{{ g.id }}" {% if (fd.gestor_id|default(m and m.gestor ? m.gestor.id : '')) == g.id %}selected{% endif %}>{{ g.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Data de admissão</label>
+                <input type="date" name="data_admissao" class="form-control"
+                       value="{{ fd.data_admissao|default(m and m.dataAdmissao ? m.dataAdmissao|date('Y-m-d') : '') }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Nível de maturidade</label>
+                <select name="nivel_maturidade" class="form-control">
+                    <option value="">—</option>
+                    {% for n in ['INICIANTE','JUNIOR','PLENO','SENIOR','ESPECIALISTA'] %}
+                    <option value="{{ n }}" {% if (fd.nivel_maturidade|default(m ? m.nivelMaturidade : '')) == n %}selected{% endif %}>{{ n|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label class="form-label">Competências</label>
+                <input type="text" name="competencias" class="form-control"
+                       placeholder="Separe por vírgula: PHP, Symfony, Liderança…"
+                       value="{{ fd.competencias|default(m and m.competencias ? m.competencias|join(', ') : '') }}">
+            </div>
+            <div class="col-12 mb-3">
+                <label class="form-label">Sobre / observações</label>
+                <textarea name="observacoes" class="form-control" rows="3">{{ fd.observacoes|default(m ? m.observacoes : '') }}</textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Foto</label>
+                <input type="file" name="foto" class="form-control" accept="image/jpeg,image/png,image/webp">
+                {% if is_edit and m.foto %}
+                <div class="form-check mt-2">
+                    <input type="checkbox" name="remove_foto" value="1" class="form-check-input" id="remove_foto">
+                    <label class="form-check-label" for="remove_foto">Remover foto atual</label>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+            <a href="{{ is_edit ? path('app_pessoas_membro_ficha', { id: m.id }) : path('app_pessoas_membros') }}" class="btn-unio-ghost">Cancelar</a>
+            <button type="submit" class="btn-unio">{{ is_edit ? 'Salvar alterações' : 'Cadastrar membro' }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -92,36 +92,25 @@
 
 
 
-{% if variant|default('onboarding') == 'onboarding' and is_open and can_manage %}
+{% if variant|default('onboarding') == 'onboarding' and can_manage %}
 
+{% set platform_state = platformAccount.state|default('create') %}
+{% set show_platform_panel = is_open or platform_state in ['link', 'blocked', 'linked'] %}
+
+{% if show_platform_panel %}
 <div class="rh-process-show-section unio-card">
-
     <h3 class="unio-detail-section-title">Conta na plataforma</h3>
-
-    <form method="post" class="unio-form">
-
-        <input type="hidden" name="_token" value="{{ csrf_token('rh_process_action') }}">
-
-        <input type="hidden" name="action" value="provision_user">
-
-        {% include 'components/unio_form_field.html.twig' with { id: 'senha', name: 'senha', label: 'Senha inicial', type: 'password', required: true } %}
-
-        {% include 'components/unio_form_field.html.twig' with { id: 'perfil', name: 'perfil', label: 'Perfil', type: 'select', value: 'MEMBRO', options: [
-
-            { value: 'MEMBRO', label: 'Membro' },
-
-            { value: 'SUPERVISOR_EQUIPE', label: 'Supervisor equipe' },
-
-            { value: 'GESTOR_EQUIPE', label: 'Gestor equipe' },
-
-        ]} %}
-
-        <button type="submit" class="btn-unio btn-sm mt-2">Criar usuário</button>
-
-    </form>
-
+    {% include 'components/rh/platform_account_panel.html.twig' with {
+        platformAccount: platformAccount,
+        email: process.email,
+        csrf_token_name: 'rh_process_action',
+        form_action: 'link_existing_user',
+        show_create: is_open and platform_state == 'create'
+    } %}
 </div>
+{% endif %}
 
+{% if is_open %}
 <div class="rh-process-show-section unio-card rh-process-show-actions">
 
     <h3 class="unio-detail-section-title">Ações</h3>
@@ -141,6 +130,8 @@
     </form>
 
 </div>
+
+{% endif %}
 
 {% endif %}
 

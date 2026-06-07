@@ -207,11 +207,16 @@ class RhController extends AbstractController
                         $this->addFlash('success', 'Dados atualizados.');
                     })(),
                     'provision_user' => (function () use ($process, $request) {
-                        /** @var User $user */
-                        $user = $this->getUser();
                         $senha = (string) $request->request->get('senha', '');
                         $this->userProvisioning->provisionFromOnboarding($process, $senha, (string) $request->request->get('perfil', 'MEMBRO'));
                         $this->addFlash('success', 'Usuário da plataforma criado e checklist atualizado.');
+                    })(),
+                    'link_existing_user' => (function () use ($process, $request) {
+                        $this->userProvisioning->linkExistingUserFromOnboarding(
+                            $process,
+                            (string) $request->request->get('perfil', 'MEMBRO'),
+                        );
+                        $this->addFlash('success', 'Conta existente vinculada à empresa e checklist atualizado.');
                     })(),
                     'upload_doc' => (function () use ($process, $request) {
                         $file = $request->files->get('documento');
@@ -249,6 +254,7 @@ class RhController extends AbstractController
         return $this->render(self::T . 'admissao_show.html.twig', [
             'process' => $process,
             'documentos' => $this->documents->listOnboarding($process),
+            'platformAccount' => $this->userProvisioning->resolvePlatformAccountState($process),
         ]);
     }
 
@@ -549,6 +555,7 @@ class RhController extends AbstractController
                 : 'Onboarding cancelado.',
             'update' => 'Dados atualizados.',
             'provision_user' => 'Usuário da plataforma criado e checklist atualizado.',
+            'link_existing_user' => 'Conta existente vinculada à empresa e checklist atualizado.',
             'upload_doc' => 'Documento anexado.',
             default => 'Ação concluída.',
         };

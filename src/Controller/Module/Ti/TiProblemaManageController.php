@@ -4,6 +4,7 @@ namespace App\Controller\Module\Ti;
 
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Security\TiGrantService;
 use App\Service\Ti\TiProblemaService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,11 +19,15 @@ final class TiProblemaManageController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private TiProblemaService $problemas,
+        private TiGrantService $tiGrants,
     ) {}
 
     #[Route('/ti/problemas/novo', name: 'app_ti_problema_novo_submit', methods: ['POST'])]
     public function novo(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageProblemas($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_problema_form');
         try {
@@ -38,6 +43,9 @@ final class TiProblemaManageController extends AbstractController
     #[Route('/ti/problemas/{id}/editar', name: 'app_ti_problema_editar_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function editar(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageProblemas($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_problema_form');
         try {
@@ -53,6 +61,9 @@ final class TiProblemaManageController extends AbstractController
     #[Route('/ti/problemas/{id}/excluir', name: 'app_ti_problema_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function excluir(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageProblemas($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_problema_delete_' . $id);
         $this->problemas->delete($this->problemas->load($empresa, $id));

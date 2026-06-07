@@ -4,6 +4,7 @@ namespace App\Controller\Module\Rh;
 
 use App\Exception\RhProcessException;
 use App\Service\FuncionarioService;
+use App\Service\RhUserProvisioningService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +23,7 @@ class RhFuncionarioController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private FuncionarioService $funcionarios,
+        private RhUserProvisioningService $userProvisioning,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -62,13 +64,36 @@ class RhFuncionarioController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'app_rh_funcionario_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(int $id): Response
+    #[Route('/{id}', name: 'app_rh_funcionario_show', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    public function show(int $id, Request $request): Response
     {
         $empresa = $this->requireEmpresa();
         $f = $this->funcionarios->loadForEmpresa($empresa, $id);
 
-        return $this->render(self::T . 'funcionario_show.html.twig', ['funcionario' => $f]);
+        if ($request->isMethod('POST')) {
+            try {
+                $this->requireCsrf($request, 'rh_funcionario_action');
+                $action = (string) $request->request->get('action');
+                if ($action === 'link_existing_user') {
+                    $this->userProvisioning->linkExistingUserForFuncionario(
+                        $f,
+                        (string) $request->request->get('perfil', 'MEMBRO'),
+                    );
+                    $this->addFlash('success', 'Conta vinculada ao funcionário e empresa atualizada.');
+                } else {
+                    throw new RhProcessException('Ação inválida.');
+                }
+            } catch (RhProcessException $e) {
+                $this->addFlash('error', $e->getMessage());
+            }
+
+            return $this->redirectToRoute('app_rh_funcionario_show', ['id' => $id]);
+        }
+
+        return $this->render(self::T . 'funcionario_show.html.twig', [
+            'funcionario' => $f,
+            'platformAccount' => $this->userProvisioning->resolvePlatformAccountStateForFuncionario($f),
+        ]);
     }
 
     #[Route('/{id}/editar', name: 'app_rh_funcionario_editar', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]

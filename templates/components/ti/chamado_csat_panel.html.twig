@@ -1,0 +1,61 @@
+{# Avaliação CSAT — solicitante após chamado resolvido #}
+<section class="unio-card mb-4 ti-csat-panel">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Como foi o atendimento?',
+        subtitle: 'Sua avaliação ajuda a melhorar o suporte de TI'
+    } %}
+    <form method="post"
+          action="{{ path('app_ti_chamado_csat', { id: ticket.id }) }}"
+          class="ti-csat-form unio-form">
+        <input type="hidden" name="_token" value="{{ csrf_token('ti_csat_' ~ ticket.id) }}">
+        <input type="hidden" name="score" id="tiCsatScore" value="" required>
+        <div class="ti-csat-stars mb-3" role="group" aria-label="Nota de 1 a 5 estrelas">
+            {% for n in 1..5 %}
+            <button type="button"
+                    class="ti-csat-star btn-unio-ghost btn-sm"
+                    data-score="{{ n }}"
+                    title="{{ n }} estrela{{ n > 1 ? 's' : '' }}"
+                    aria-label="{{ n }} de 5">
+                <i class="far fa-star" aria-hidden="true"></i>
+            </button>
+            {% endfor %}
+        </div>
+        <label class="unio-form-label" for="tiCsatComentario">Comentário (opcional)</label>
+        <textarea id="tiCsatComentario"
+                  name="comentario"
+                  class="unio-form-control mb-3"
+                  rows="2"
+                  maxlength="500"
+                  placeholder="Conte como foi a experiência…"></textarea>
+        <button type="submit" class="btn-unio btn-sm" id="tiCsatSubmit" disabled>
+            <i class="fas fa-star mr-1" aria-hidden="true"></i> Enviar avaliação
+        </button>
+    </form>
+</section>
+<script>
+(function () {
+    var form = document.querySelector('.ti-csat-form');
+    if (!form) return;
+    var scoreInput = form.querySelector('#tiCsatScore');
+    var submitBtn = form.querySelector('#tiCsatSubmit');
+    form.querySelectorAll('.ti-csat-star').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var score = parseInt(btn.getAttribute('data-score'), 10);
+            scoreInput.value = score;
+            submitBtn.disabled = false;
+            form.querySelectorAll('.ti-csat-star').forEach(function (b, i) {
+                var icon = b.querySelector('i');
+                if (i < score) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    b.classList.add('ti-csat-star--active');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    b.classList.remove('ti-csat-star--active');
+                }
+            });
+        });
+    });
+})();
+</script>

@@ -3,9 +3,14 @@
 namespace App\Controller\Module\Ti;
 
 use App\Entity\User;
+use App\Security\TiGrantService;
+use App\Service\Ti\TiNotificationService;
 use App\Service\Ti\TiService;
+use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -16,7 +21,34 @@ final class TiController extends AbstractController
 {
     private const T = 'modules/ti/';
 
-    public function __construct(private TiService $service) {}
+    public function __construct(
+        private TiService $service,
+        private TiGrantService $tiGrants,
+        private TiNotificationService $notifications,
+        private WorkspaceService $workspace,
+    ) {}
+
+    #[Route('/notificacoes/poll', name: 'app_ti_notificacoes_poll', methods: ['GET'])]
+    public function notificacoesPoll(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
+        if (!$empresa) {
+            return new JsonResponse(['ok' => false, 'error' => 'Sem workspace.'], 400);
+        }
+
+        $sinceId = max(0, (int) $request->query->get('since', 0));
+        $payload = $this->notifications->pollUnread($empresa, $user, $sinceId);
+
+        return new JsonResponse([
+            'ok' => true,
+            'count' => $payload['count'],
+            'latest_id' => $payload['latest_id'],
+            'new_count' => $payload['new_count'],
+            'notifications' => $payload['notifications'],
+        ]);
+    }
 
     #[Route('', name: 'app_ti')]
     public function overview(): Response
@@ -161,6 +193,12 @@ final class TiController extends AbstractController
     #[Route('/chamados/novo', name: 'app_ti_chamado_novo', methods: ['GET'])]
     public function novoChamado(): RedirectResponse
     {
-        return $this->redirectToRoute('app_ti_chamados', ['open_novo' => 1]);
+        /** @var User $user */
+        $user = $this->getUser();
+
+        return $this->redirectToRoute(
+            $this->tiGrants->canOperateChamados($user) ? 'app_ti_chamados' : 'app_ti_meus_chamados',
+            ['open_novo' => 1],
+        );
     }
 }

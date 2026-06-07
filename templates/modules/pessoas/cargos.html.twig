@@ -1,3 +1,121 @@
-{% extends 'layout/stub.html.twig' %}
+{% extends 'layout/page_list.html.twig' %}
 {% block title %}Cargos{% endblock %}
-{% set stub_page_title = 'Cargos' %}
+{% block permissions_scope %}product_pessoas{% endblock %}
+{% set page_list_title = 'Cargos' %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: stats.total|default(0), label: 'Cargos', sub: 'No catálogo' },
+        { value: stats.membros|default(0), label: 'Membros', sub: 'Com cargo vinculado', route: 'app_pessoas_membros' },
+        { value: stats.areas|default(0), label: 'Áreas', sub: 'Classificadas' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_pessoas_cargos') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    btn_label: grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') ? 'Novo cargo' : '',
+    btn_opens: grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') ? 'pessoas-cargo-novo' : '',
+    btn_icon: 'fa-plus',
+    search_in_section: true,
+    search_placeholder: 'Buscar por título ou área…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_pessoas_cargos'),
+            has_filters: has_filters|default(false)
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Catálogo de funções',
+        subtitle: cargos|length ~ ' cargo' ~ (cargos|length != 1 ? 's' : '') ~ ' encontrado' ~ (cargos|length != 1 ? 's' : '')
+    } %}
+
+    {% if cargos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-briefcase',
+            title: has_filters|default(false) ? 'Nenhum cargo encontrado' : 'Nenhum cargo registrado',
+            text: has_filters|default(false)
+                ? 'Ajuste a busca ou cadastre um novo cargo no catálogo.'
+                : 'Crie cargos padronizados para alocar membros, montar equipes e alimentar o organograma.',
+            btn_label: grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') ? 'Novo cargo' : '',
+            btn_opens: grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') ? 'pessoas-cargo-novo' : ''
+        } %}
+    {% else %}
+    <div class="pessoas-cargo-grid">
+        {% for c in cargos %}
+        {% set membros = membros_por_cargo[c.id]|default(0) %}
+        {% set nivel_label = c.nivel ? (c.nivel|replace({
+            'INICIANTE': 'Iniciante',
+            'JUNIOR': 'Júnior',
+            'PLENO': 'Pleno',
+            'SENIOR': 'Sênior',
+            'ESPECIALISTA': 'Especialista',
+            'GESTAO': 'Gestão'
+        })) : null %}
+        <div class="pessoas-cargo-card unio-card">
+            <div class="pessoas-cargo-card-head">
+                <div class="pessoas-cargo-card-icon" aria-hidden="true">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="pessoas-cargo-card-titles">
+                    <div class="pessoas-cargo-card-name">{{ c.titulo }}</div>
+                    {% if c.descricao %}
+                    <div class="pessoas-cargo-card-desc">{{ c.descricao|slice(0, 100) }}{% if c.descricao|length > 100 %}…{% endif %}</div>
+                    {% else %}
+                    <div class="pessoas-cargo-card-desc text-muted">Sem descrição cadastrada</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="pessoas-cargo-card-meta">
+                {% if c.area %}
+                <span class="team-card-area-badge">{{ c.area }}</span>
+                {% endif %}
+                {% if nivel_label %}
+                {% include 'components/status_badge.html.twig' with {
+                    label: nivel_label,
+                    variant: c.nivel == 'SENIOR' ? 'accent' : (c.nivel == 'PLENO' ? 'success' : (c.nivel == 'GESTAO' ? 'info' : 'secondary'))
+                } %}
+                {% endif %}
+                <span class="pessoas-cargo-card-membros">
+                    <i class="fas fa-users"></i> {{ membros }} membro{{ membros != 1 ? 's' : '' }}
+                </span>
+            </div>
+            <div class="pessoas-cargo-card-actions">
+                {% if grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') %}
+                <a href="{{ path('app_pessoas_cargo_editar', { id: c.id }) }}" class="btn-unio-ghost btn-sm">
+                    <i class="fas fa-pen mr-1"></i> Editar
+                </a>
+                {% endif %}
+                {% if membros > 0 %}
+                <a href="{{ path('app_pessoas_membros', { cargo: c.titulo }) }}" class="btn-unio-ghost btn-sm">
+                    <i class="fas fa-user-group mr-1"></i> Ver membros
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% if grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') %}
+{% include 'components/pessoas/cargo_offcanvas.html.twig' with {
+    areas_sugestoes: areas_sugestoes|default([]),
+    nivel_options: nivel_options|default([]),
+    filter_q: filter_q|default('')
+} %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,54 @@
+{#
+  pessoas/cargo_offcanvas — cadastro de cargo no catálogo
+#}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'pessoas-cargo-novo',
+    title: 'Novo cargo',
+    subtitle: 'Padronize funções e facilite a alocação de membros.',
+    icon: 'fa-briefcase',
+    size: 'lg'
+} %}
+    {% block offcanvas_body %}
+    <div class="pessoas-cargo-offcanvas">
+        <div class="pessoas-cargo-offcanvas-hint unio-card p-3 mb-3">
+            <i class="fas fa-circle-info text-info mr-2" aria-hidden="true"></i>
+            <span class="section-subtitle mb-0">
+                Cargos do catálogo aparecem como sugestão ao cadastrar membros.
+                Membros já existentes com o mesmo título são contabilizados automaticamente.
+            </span>
+        </div>
+
+        <form method="post"
+              action="{{ path('app_pessoas_cargo_novo') }}"
+              class="unio-form unio-offcanvas-form"
+              id="pessoasCargoNovoForm">
+            <input type="hidden" name="_token" value="{{ csrf_token('pessoas_cargo_form') }}">
+            {% if filter_q|default('') %}
+            <input type="hidden" name="redirect_q" value="{{ filter_q }}">
+            {% endif %}
+
+            {% include 'components/pessoas/cargo_form_fields.html.twig' with {
+                prefix: 'cargo-novo',
+                areas_sugestoes: areas_sugestoes|default([]),
+                nivel_options: nivel_options|default([])
+            } %}
+
+            <div class="pessoas-cargo-offcanvas-steps unio-card p-3 mb-3">
+                <div class="section-title mb-2">Como usar este cargo</div>
+                <ol class="pessoas-cargo-offcanvas-steps-list mb-0 pl-3">
+                    <li>Selecione o título ao criar ou editar um membro.</li>
+                    <li>Use área e nível para filtros e relatórios de Pessoas.</li>
+                    <li>Mantenha descrições claras para onboarding e avaliações.</li>
+                </ol>
+            </div>
+
+            <div class="unio-form-actions unio-offcanvas-form-actions">
+                <button type="submit" class="btn-unio">
+                    <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar cargo
+                </button>
+                <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+            </div>
+        </form>
+    </div>
+    {% endblock %}
+{% endembed %}

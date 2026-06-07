@@ -5,6 +5,7 @@ namespace App\Controller\Module\Ti;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Security\TiGrantService;
 use App\Service\Ti\TiCatalogoService;
 use App\Service\Ti\TiInfraManageService;
 use App\Service\Ti\TiNotificationService;
@@ -24,6 +25,7 @@ final class TiInfraManageController extends AbstractController
         private TiNotificationService $notifications,
         private UserRepository $userRepository,
         private TiCatalogoService $catalogo,
+        private TiGrantService $tiGrants,
     ) {}
 
     // ── Ativos ───────────────────────────────────────────────────────────────
@@ -31,6 +33,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/ativos/novo', name: 'app_ti_ativo_novo_submit', methods: ['POST'])]
     public function ativoNovo(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'ativos');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_ativo_form');
 
@@ -49,6 +54,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/ativos/{id}/editar', name: 'app_ti_ativo_editar_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function ativoEditar(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'ativos');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_ativo_form');
 
@@ -68,6 +76,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/ativos/{id}/excluir', name: 'app_ti_ativo_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function ativoExcluir(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'ativos');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_ativo_delete_' . $id);
         $this->infra->deleteAtivo($this->infra->loadAtivo($empresa, $id));
@@ -81,6 +92,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/licencas/novo', name: 'app_ti_licenca_novo_submit', methods: ['POST'])]
     public function licencaNovo(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'licencas');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_licenca_form');
 
@@ -99,6 +113,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/licencas/{id}/editar', name: 'app_ti_licenca_editar_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function licencaEditar(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'licencas');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_licenca_form');
 
@@ -118,6 +135,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/licencas/{id}/excluir', name: 'app_ti_licenca_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function licencaExcluir(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'licencas');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_licenca_delete_' . $id);
         $this->infra->deleteLicenca($this->infra->loadLicenca($empresa, $id));
@@ -131,6 +151,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/integracoes/novo', name: 'app_ti_integracao_novo_submit', methods: ['POST'])]
     public function integracaoNovo(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'integracoes');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_integracao_form');
 
@@ -149,6 +172,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/integracoes/{id}/editar', name: 'app_ti_integracao_editar_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function integracaoEditar(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'integracoes');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_integracao_form');
 
@@ -168,6 +194,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/integracoes/{id}/excluir', name: 'app_ti_integracao_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function integracaoExcluir(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'integracoes');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_integracao_delete_' . $id);
         $this->infra->deleteIntegracao($this->infra->loadIntegracao($empresa, $id));
@@ -181,6 +210,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/manutencoes/novo', name: 'app_ti_manutencao_novo_submit', methods: ['POST'])]
     public function manutencaoNovo(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'manutencoes');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_manutencao_form');
 
@@ -199,6 +231,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/manutencoes/{id}/editar', name: 'app_ti_manutencao_editar_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function manutencaoEditar(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'manutencoes');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_manutencao_form');
 
@@ -218,6 +253,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/manutencoes/{id}/excluir', name: 'app_ti_manutencao_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function manutencaoExcluir(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertInfraManage($user, 'manutencoes');
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_manutencao_delete_' . $id);
         $this->infra->deleteManutencao($this->infra->loadManutencao($empresa, $id));
@@ -229,12 +267,13 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/manutencoes/{id}/aprovar', name: 'app_ti_manutencao_aprovar', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function aprovarManutencao(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canApproveManutencao($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_manutencao_aprovar_' . $id);
 
-        /** @var User $actor */
-        $actor = $this->getUser();
-        $actorName = $actor->getNome() ?: $actor->getEmail() ?: 'Gestor';
+        $actorName = $user->getNome() ?: $user->getEmail() ?: 'Gestor';
 
         $man = $this->infra->loadManutencao($empresa, $id);
         $this->infra->approveManutencao($man, $actorName);
@@ -260,6 +299,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/catalogo/novo', name: 'app_ti_catalogo_novo', methods: ['POST'])]
     public function catalogoNovo(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageCatalog($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_catalogo_form');
 
@@ -276,6 +318,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/catalogo/{id}/editar', name: 'app_ti_catalogo_editar', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function catalogoEditar(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageCatalog($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_catalogo_form');
 
@@ -293,6 +338,9 @@ final class TiInfraManageController extends AbstractController
     #[Route('/ti/catalogo/{id}/excluir', name: 'app_ti_catalogo_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function catalogoExcluir(int $id, Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canManageCatalog($user));
         $empresa = $this->requireEmpresa();
         $this->requireCsrf($request, 'ti_catalogo_delete_' . $id);
 
@@ -305,6 +353,11 @@ final class TiInfraManageController extends AbstractController
         }
 
         return $this->redirectToRoute('app_ti_catalogo');
+    }
+
+    private function assertInfraManage(User $user, string $product): void
+    {
+        $this->tiGrants->assert($user, $this->tiGrants->canManageInfra($user, $product));
     }
 
     private function requireEmpresa(): Empresa

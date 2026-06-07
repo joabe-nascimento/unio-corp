@@ -1,69 +1,11 @@
 {% extends 'layout/hub.html.twig' %}
 {% block title %}Detalhe da Equipe{% endblock %}
-
-{# ── Banco de equipes mock ── #}
-{% set all_teams = {
-    1: {
-        nome: 'Squad Backend',
-        area: 'Tecnologia',
-        descricao: 'Responsável pelo desenvolvimento e manutenção das APIs, serviços back-end e integrações da plataforma.',
-        lider: 'Ana Carolina Silva',
-        criada_em: 'Jan/2023',
-        membros: [
-            { id:1,  nome: 'Ana Carolina Silva',  cargo: 'Líder Técnica',         status: 'ativo' },
-            { id:5,  nome: 'Eduardo Gonçalves',   cargo: 'DevOps Engineer',        status: 'ferias' },
-            { id:6,  nome: 'Fernanda Lima',       cargo: 'Dev Back-end Pleno',     status: 'ativo' },
-            { id:10, nome: 'Juliana Castro',      cargo: 'Arquiteta de Software',  status: 'ativo' },
-            { id:2,  nome: 'Bruno Mendes',        cargo: 'Dev Front-end Sênior',   status: 'ativo' },
-        ]
-    },
-    2: {
-        nome: 'Design & Marca',
-        area: 'Design',
-        descricao: 'Cuida da identidade visual, UX/UI, materiais de comunicação e branding da empresa.',
-        lider: 'Bruno Mendes Teixeira',
-        criada_em: 'Mar/2023',
-        membros: [
-            { id:2,  nome: 'Bruno Mendes Teixeira', cargo: 'Lead Designer',         status: 'ativo' },
-            { id:8,  nome: 'Helena Martins',        cargo: 'Analista de Marketing', status: 'ativo' },
-            { id:12, nome: 'Larissa Neves',         cargo: 'Product Designer',       status: 'ativo' },
-            { id:3,  nome: 'Carla Rodrigues',       cargo: 'Especialista de Marca',  status: 'ferias' },
-        ]
-    },
-    3: {
-        nome: 'Obras e Projetos',
-        area: 'Engenharia',
-        descricao: 'Gestão e execução de obras civis, cronogramas, orçamentos e equipes de campo.',
-        lider: 'Diego Fonseca',
-        criada_em: 'Fev/2023',
-        membros: [
-            { id:4,  nome: 'Diego Fonseca',    cargo: 'Gestor de Obras',             status: 'ativo' },
-            { id:7,  nome: 'Gabriel Souza',    cargo: 'Engenheiro de Estruturas',    status: 'ativo' },
-            { id:11, nome: 'Kleber Araújo',    cargo: 'Orçamentista',                status: 'inativo' },
-            { id:5,  nome: 'Eduardo Gonçalves',cargo: 'Supervisor de Campo',          status: 'ativo' },
-            { id:6,  nome: 'Fernanda Lima',    cargo: 'Arquiteta',                   status: 'ativo' },
-        ]
-    },
-    4: {
-        nome: 'PMO',
-        area: 'Gestão',
-        descricao: 'Escritório de projetos responsável pela gestão de portfólio, riscos, prazos e metodologias.',
-        lider: 'Carla Rodrigues',
-        criada_em: 'Abr/2023',
-        membros: [
-            { id:3,  nome: 'Carla Rodrigues', cargo: 'Project Manager',  status: 'ativo' },
-            { id:9,  nome: 'Igor Teixeira',   cargo: 'Scrum Master',     status: 'ativo' },
-        ]
-    }
-} %}
-
-{# Seleciona a equipe pelo ID ou usa a 1 como fallback #}
-{% set eq = all_teams[equipe_id] ?? all_teams[1] %}
+{% block permissions_scope %}product_pessoas{% endblock %}
 
 {% block content_lead %}
 <div class="page-lead-zone">
     {% embed 'components/list_toolbar.html.twig' with {
-        page_title: eq.nome,
+        page_title: equipe.nome,
         search_disabled: true,
         actions_in_top: true
     } %}
@@ -71,57 +13,51 @@
             <a href="{{ path('app_pessoas_equipes') }}" class="btn-unio-ghost btn-sm">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
+            {% if grant_at_least('product_pessoas', 'equipes', 'GESTOR_EQUIPE') %}
+            <a href="{{ path('app_pessoas_equipe_editar', { id: equipe.id }) }}" class="btn-unio btn-sm">
+                <i class="fas fa-pen"></i> Editar
+            </a>
+            {% endif %}
         {% endblock %}
     {% endembed %}
     <div class="page-lead-kpis">
         {% include 'components/kpi_row.html.twig' with { items: [
-            { value: eq.membros|length,                                   label: 'Total de Membros' },
-            { value: eq.membros|filter(m => m.status == 'ativo')|length,  label: 'Ativos' },
-            { value: eq.membros|filter(m => m.status == 'ferias')|length, label: 'Em Férias' },
-            { value: eq.membros|filter(m => m.status == 'inativo')|length, label: 'Inativos' },
+            { value: stats.total, label: 'Total de Membros' },
+            { value: stats.ativos, label: 'Ativos' },
+            { value: stats.ferias, label: 'Em Férias' },
+            { value: stats.inativos, label: 'Inativos' },
         ], mb: 'mb-0' } %}
     </div>
 </div>
 {% endblock %}
 
 {% block hub_content %}
-<div class="ficha-stub-banner mb-3">
-    <i class="fas fa-circle-info"></i>
-    Dados fictícios de demonstração — equipe <strong>{{ eq.nome }}</strong>
-    (ID #{{ equipe_id }}).
-</div>
-
-{# Hero da equipe #}
 <div class="unio-card ficha-hero mb-3">
-    <div class="team-hero-icon">{{ eq.nome|slice(0,2)|upper }}</div>
+    <div class="team-hero-icon">{{ equipe.nome|slice(0,2)|upper }}</div>
     <div class="ficha-hero-info">
-        <div class="ficha-hero-name">{{ eq.nome }}</div>
-        <div class="ficha-hero-role">{{ eq.descricao }}</div>
+        <div class="ficha-hero-name">{{ equipe.nome }}</div>
+        <div class="ficha-hero-role">{{ equipe.descricao|default('Equipe da empresa') }}</div>
         <div class="ficha-hero-meta">
-            <span><i class="fas fa-user-tie"></i> {{ eq.lider }}</span>
-            <span><i class="fas fa-users"></i> {{ eq.membros|length }} membros</span>
-            <span><i class="fas fa-tag"></i> {{ eq.area }}</span>
-            <span><i class="fas fa-calendar"></i> Criada em {{ eq.criada_em }}</span>
+            <span><i class="fas fa-user-tie"></i> {{ equipe.lider ? equipe.lider.nome : 'Sem líder definido' }}</span>
+            <span><i class="fas fa-users"></i> {{ stats.total }} membros</span>
+            {% if equipe.area %}<span><i class="fas fa-tag"></i> {{ equipe.area }}</span>{% endif %}
+            {% if equipe.codigo %}<span><i class="fas fa-hashtag"></i> {{ equipe.codigo }}</span>{% endif %}
         </div>
     </div>
     {% if grant_at_least('product_pessoas', 'equipes', 'GESTOR_EQUIPE') %}
     <div class="ficha-hero-actions">
-        <a href="#" class="btn-unio-ghost btn-sm">
-            <i class="fas fa-pen mr-1"></i> Editar equipe
-        </a>
-        <a href="{{ path('app_pessoas_membros') }}" class="btn-unio btn-sm mt-2 d-block text-center">
+        <a href="{{ path('app_pessoas_membro_novo') }}" class="btn-unio btn-sm d-block text-center">
             <i class="fas fa-user-plus mr-1"></i> Adicionar membro
         </a>
     </div>
     {% endif %}
 </div>
 
-{# Lista de membros com toggle lista/grid #}
 {% set av_palette = ['av-c1','av-c2','av-c3','av-c4','av-c5','av-c6','av-c7','av-c8'] %}
 
 {% embed 'components/section_toolbar.html.twig' with {
     btn_label: 'Ver todos os membros',
-    btn_href: path('app_pessoas_membros'),
+    btn_href: path('app_pessoas_membros', { equipe: equipe.id }),
     btn_icon: 'fa-users',
     btn_ghost: true
 } %}
@@ -134,47 +70,51 @@
 {% endembed %}
 
 <div class="unio-card">
+    {% if membros is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-users',
+            title: 'Nenhum membro nesta equipe',
+            text: 'Alocar colaboradores editando o cadastro ou criando um novo membro.',
+            btn_label: grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') ? 'Novo membro' : '',
+            btn_href: grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') ? path('app_pessoas_membro_novo') : ''
+        } %}
+    {% else %}
     <div id="equipe-membros-container" data-view-mode="list">
-        {% for mb in eq.membros %}
+        {% for mb in membros %}
+        {% set status_slug = mb.pessoasStatusSlug %}
         {% set ci = (loop.index - 1) % av_palette|length %}
-
-        {# Modo lista #}
         <div class="view-list-only">
             {% include 'components/member_card.html.twig' with {
-                nome:         mb.nome,
-                cargo:        mb.cargo,
-                equipe:       eq.nome,
-                status:       mb.status,
-                route:        'app_pessoas_membro_ficha',
+                nome: mb.nome,
+                cargo: mb.cargo|default('—'),
+                equipe: equipe.nome,
+                status: status_slug,
+                route: 'app_pessoas_membro_ficha',
                 route_params: { id: mb.id }
             } %}
         </div>
-
-        {# Modo grid #}
         <a href="{{ path('app_pessoas_membro_ficha', {id: mb.id}) }}"
            class="view-grid-only text-decoration-none">
             <div class="member-grid-card">
                 <div class="member-grid-avatar">
                     {% include 'components/member_avatar.html.twig' with {
-                        nome:  mb.nome,
-                        size:  'lg',
-                        class: av_palette[ci]
+                        nome: mb.nome, size: 'lg', class: av_palette[ci]
                     } %}
-                    <span class="member-status member-status--{{ mb.status }} member-grid-status">
-                        {{ mb.status == 'ativo' ? 'Ativo' : (mb.status == 'ferias' ? 'Férias' : 'Inativo') }}
+                    <span class="member-status member-status--{{ status_slug }} member-grid-status">
+                        {{ mb.statusLabel }}
                     </span>
                 </div>
                 <div class="member-grid-info">
                     <div class="member-grid-name">{{ mb.nome }}</div>
-                    <div class="member-grid-role">{{ mb.cargo }}</div>
+                    <div class="member-grid-role">{{ mb.cargo|default('—') }}</div>
                     <div class="member-grid-team">
-                        <i class="fas fa-user-group"></i> {{ eq.nome }}
+                        <i class="fas fa-user-group"></i> {{ equipe.nome }}
                     </div>
                 </div>
             </div>
         </a>
-
         {% endfor %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}

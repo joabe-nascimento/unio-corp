@@ -214,7 +214,7 @@ final class InovacaoSeedService
             ['codigo' => 'P01', 'title' => 'Cortex integrado ao pipeline de projetos', 'summary' => 'Resumo automático de tarefas atrasadas e sugestão de reatribuição.', 'owner' => 'Marcos Ribeiro', 'tags' => ['IA', 'Projetos'], 'progress' => 65, 'stage' => InovIdeia::STAGE_POC, 'days' => 22, 'metric' => 'NPS gestor ≥ 7', 'rigor' => 85],
             ['codigo' => 'P02', 'title' => 'Mapa de calor de carga operacional', 'summary' => 'Visualizar sobrecarga por equipe em tempo real; priorizar contratações.', 'owner' => 'Luana Pereira', 'tags' => ['Analytics', 'Pessoas'], 'progress' => 55, 'stage' => InovIdeia::STAGE_POC, 'days' => 18, 'metric' => '↓ 15 % rotatividade', 'rigor' => 85],
             ['codigo' => 'T01', 'title' => 'Oferta de treinamento por análise de performance', 'summary' => 'Sugerir cursos com base em lacunas detectadas nas avaliações 180°.', 'owner' => 'Roberto Alves', 'tags' => ['Academy', 'IA'], 'progress' => 80, 'stage' => InovIdeia::STAGE_PILOTO, 'days' => 34, 'metric' => '+25 % conclusão curso'],
-            ['codigo' => 'S01', 'title' => 'Helia como assistente padrão do hub RH', 'summary' => 'IA conversacional ativa em todos os fluxos do módulo RH.', 'owner' => 'Time Produto', 'tags' => ['IA', 'RH', 'Escala'], 'progress' => 100, 'stage' => InovIdeia::STAGE_ESCALA, 'days' => 62, 'metric' => '97 % satisfaction'],
+            ['codigo' => 'S01', 'title' => 'Vitória como assistente padrão do hub RH', 'summary' => 'IA conversacional ativa em todos os fluxos do módulo RH.', 'owner' => 'Time Produto', 'tags' => ['IA', 'RH', 'Escala'], 'progress' => 100, 'stage' => InovIdeia::STAGE_ESCALA, 'days' => 62, 'metric' => '97 % satisfaction'],
         ];
     }
 
@@ -245,7 +245,7 @@ final class InovacaoSeedService
     private function impactSeed(): array
     {
         return [
-            ['title' => 'Helia no Núcleo RH', 'stage' => 'Escala', 'value' => 'R$ 87 k', 'roi' => '3,4×', 'status' => 'active', 'ideia_codigo' => 'S01'],
+            ['title' => 'Vitória no Núcleo RH', 'stage' => 'Escala', 'value' => 'R$ 87 k', 'roi' => '3,4×', 'status' => 'active', 'ideia_codigo' => 'S01'],
             ['title' => 'Treinamento por performance', 'stage' => 'Piloto', 'value' => 'R$ 42 k', 'roi' => '2,1×', 'status' => 'piloting', 'ideia_codigo' => 'T01'],
             ['title' => 'Cortex × Projetos', 'stage' => 'POC', 'value' => 'R$ 13 k', 'roi' => '—', 'status' => 'testing', 'ideia_codigo' => 'P01'],
             ['title' => 'OCR onboarding', 'stage' => 'Hipótese', 'value' => '—', 'roi' => '—', 'status' => 'hypothesis', 'ideia_codigo' => 'H01'],
@@ -276,7 +276,7 @@ final class InovacaoSeedService
             ['title' => 'Framework Kill · Pivot · Scale', 'summary' => 'Metodologia unificada para encerrar ciclos de experimentação.', 'icon' => 'fa-vial', 'route' => 'app_inovacao_experimentos', 'badge' => 'Metodologia', 'variant' => 'info'],
             ['title' => '6 ideias no backlog', 'summary' => 'Sessão de priorização recomendada para Quick Wins identificados.', 'icon' => 'fa-inbox', 'route' => 'app_inovacao_backlog', 'badge' => 'Alerta', 'variant' => 'warning'],
             ['title' => 'Radar de maturidade atualizado', 'summary' => '6 dimensões com dados em tempo real dos hubs conectados.', 'icon' => 'fa-chart-pie', 'route' => 'app_inovacao_analytics', 'badge' => 'Update', 'variant' => 'secondary'],
-            ['title' => 'Helia escalada globalmente', 'summary' => 'Assistente IA do RH disponível em todos os tenants da plataforma.', 'icon' => 'fa-rocket', 'route' => 'app_inovacao_portfolio', 'badge' => 'Scale', 'variant' => 'success'],
+            ['title' => 'Vitória escalada globalmente', 'summary' => 'Assistente IA do RH disponível em todos os tenants da plataforma.', 'icon' => 'fa-rocket', 'route' => 'app_inovacao_portfolio', 'badge' => 'Scale', 'variant' => 'success'],
             ['title' => '4 sinergias cross-núcleo detectadas', 'summary' => 'Conexões entre RH, Projetos, Cortex e Talentos prontas para POC.', 'icon' => 'fa-share-nodes', 'route' => 'app_inovacao_conexoes', 'badge' => 'Insight', 'variant' => 'info'],
         ];
     }

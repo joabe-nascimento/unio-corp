@@ -529,18 +529,40 @@
         });
     }
 
-    function initCatalogPickLegacy() {
-        var form = document.getElementById('tiChamadoForm');
-        if (!form || form.hasAttribute('data-ti-chamado-form')) return;
+    function initPlaybookSteps() {
+        document.querySelectorAll('[data-ti-playbook]').forEach(function (root) {
+            var url = root.getAttribute('data-url');
+            var csrf = root.getAttribute('data-csrf');
+            if (!url || !csrf) return;
 
-        document.querySelectorAll('[data-ti-catalog-pick]').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var title = btn.getAttribute('data-ti-catalog-pick') || btn.getAttribute('data-ti-catalog-title');
-                var cat = btn.getAttribute('data-ti-catalog-cat');
-                var titleEl = form.querySelector('[name="title"]');
-                var catEl = form.querySelector('[name="category"]');
-                if (titleEl && title) titleEl.value = title;
-                if (catEl && cat) catEl.value = cat;
+            root.querySelectorAll('[data-ti-playbook-step]').forEach(function (input) {
+                input.addEventListener('change', function () {
+                    var step = input.getAttribute('data-ti-playbook-step');
+                    var row = input.closest('.ti-playbook-step, .wr-runbook-step, li');
+                    if (row) row.classList.toggle('is-done', input.checked);
+
+                    var body = new URLSearchParams();
+                    body.set('_token', csrf);
+                    body.set('step', step);
+                    body.set('done', input.checked ? '1' : '0');
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: body.toString(),
+                    }).then(function (res) {
+                        if (!res.ok) {
+                            input.checked = !input.checked;
+                            if (row) row.classList.toggle('is-done', input.checked);
+                        }
+                    }).catch(function () {
+                        input.checked = !input.checked;
+                        if (row) row.classList.toggle('is-done', input.checked);
+                    });
+                });
             });
         });
     }
@@ -617,7 +639,7 @@
             if (panel) {
                 panel.hidden = false;
                 var status = panel.querySelector('[data-ti-helia-status]');
-                if (status) status.textContent = 'Helia analisando…';
+                if (status) status.textContent = 'Vitória analisando…';
             }
 
             var body = new FormData();
@@ -1024,6 +1046,203 @@
         });
     }
 
+    function initChamadoConvTabs(panel) {
+        var root = panel ? panel.querySelector('[data-ti-conv-tabs]') : null;
+        if (!root) return null;
+
+        var ticketId = panel.getAttribute('data-ticket-id') || 'default';
+        var storageKey = 'ti-chat-tab-' + ticketId;
+        var tabs = root.querySelectorAll('[data-ti-conv-tab]');
+        var panes = root.querySelectorAll('[data-ti-conv-pane]');
+
+        function scrollThreadToBottom() {
+            var thread = root.querySelector('[data-ti-conv-pane="mensagens"] .helix-messages, [data-ti-conv-pane="mensagens"] .ti-chat-thread');
+            if (thread) thread.scrollTop = thread.scrollHeight;
+        }
+
+        function activate(tabId) {
+            if (!root.querySelector('[data-ti-conv-tab="' + tabId + '"]')) {
+                tabId = 'mensagens';
+            }
+
+            tabs.forEach(function (tab) {
+                var on = tab.getAttribute('data-ti-conv-tab') === tabId;
+                tab.classList.toggle('is-active', on);
+                tab.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+
+            panes.forEach(function (pane) {
+                var on = pane.getAttribute('data-ti-conv-pane') === tabId;
+                pane.hidden = !on;
+                pane.classList.toggle('is-active', on);
+            });
+
+            try { sessionStorage.setItem(storageKey, tabId); } catch (e) { /* ignore */ }
+
+            if (tabId === 'mensagens') {
+                scrollThreadToBottom();
+                var composer = panel.querySelector('[data-ti-chamado-message] .helix-input');
+                if (composer && panel.classList.contains('ti-chamado-conversation--float') && !panel.classList.contains('ti-chamado-conversation--minimized')) {
+                    composer.focus();
+                }
+            }
+            if (tabId === 'responder') {
+                var textarea = root.querySelector('[data-ti-conv-pane="responder"] select, [data-ti-conv-pane="responder"] .unio-form-control');
+                if (textarea) textarea.focus();
+            }
+        }
+
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                activate(tab.getAttribute('data-ti-conv-tab'));
+            });
+        });
+
+        return {
+            activate: activate,
+            storageKey: storageKey,
+        };
+    }
+
+    function initChamadoChatFloat() {
+        var panel = document.querySelector('[data-ti-chat-panel]');
+        var slot = document.querySelector('[data-ti-chat-slot]');
+        if (!panel || !slot) return;
+
+        var ticketId = panel.getAttribute('data-ticket-id') || 'default';
+        var storageKey = 'ti-chat-float-' + ticketId;
+        var placeholder = slot.querySelector('[data-ti-chat-placeholder]');
+        var docked = panel.querySelector('[data-ti-chat-docked]');
+        var floatLayout = panel.querySelector('[data-ti-chat-float-layout]');
+        var convTabs = initChamadoConvTabs(panel);
+        var floating = false;
+        var minimized = false;
+        var minStorageKey = storageKey + '-min';
+        var restoreBtn = panel.querySelector('[data-ti-chat-restore]');
+
+        function getComposerInput() {
+            return panel.querySelector('[data-ti-chamado-message] .helix-input');
+        }
+
+        function scrollThreadToBottom() {
+            var scope = floating ? floatLayout : docked;
+            var thread = scope ? scope.querySelector('.helix-messages, .ti-chat-thread') : null;
+            if (!thread) return;
+            var scrollHost = thread.closest('[data-ti-chat-box-scroll]');
+            if (scrollHost) scrollHost.scrollTop = scrollHost.scrollHeight;
+            else thread.scrollTop = thread.scrollHeight;
+        }
+
+        function setMinimized(on) {
+            minimized = !!on && floating;
+            panel.classList.toggle('ti-chamado-conversation--minimized', minimized);
+            if (restoreBtn) restoreBtn.hidden = !minimized;
+            try { sessionStorage.setItem(minStorageKey, minimized ? '1' : '0'); } catch (e) { /* ignore */ }
+            if (window.TiChamadoChat && window.TiChamadoChat.syncSession) {
+                window.TiChamadoChat.syncSession({ minimized: minimized, float: floating });
+            }
+            if (window.TiChamadoChat && window.TiChamadoChat.syncGlobalLauncher) {
+                window.TiChamadoChat.syncGlobalLauncher();
+            }
+        }
+
+        function updateToggleUi(isFloat) {
+            panel.querySelectorAll('[data-ti-chat-float-toggle]').forEach(function (btn) {
+                btn.setAttribute('aria-pressed', isFloat ? 'true' : 'false');
+                btn.setAttribute('aria-label', isFloat ? 'Voltar conversa ao painel' : 'Fixar conversa no canto da tela');
+                btn.setAttribute('title', isFloat ? 'Voltar ao painel' : 'Fixar no canto da tela');
+                var icon = btn.querySelector('i.fas');
+                if (icon && !btn.textContent.trim()) {
+                    icon.className = isFloat ? 'fas fa-compress-arrows-alt' : 'fas fa-external-link-alt';
+                }
+            });
+        }
+
+        function setFloating(on) {
+            floating = !!on;
+            panel.classList.toggle('ti-chamado-conversation--float', floating);
+            updateToggleUi(floating);
+
+            if (!floating) setMinimized(false);
+
+            if (docked) docked.hidden = floating;
+            if (floatLayout) floatLayout.hidden = !floating;
+
+            if (floating) {
+                document.body.appendChild(panel);
+                if (placeholder) placeholder.hidden = minimized;
+                if (convTabs) {
+                    var savedTab = null;
+                    try { savedTab = sessionStorage.getItem(convTabs.storageKey); } catch (e) { /* ignore */ }
+                    convTabs.activate(savedTab || 'mensagens');
+                }
+                var wasMin = false;
+                try { wasMin = sessionStorage.getItem(minStorageKey) === '1'; } catch (e) { /* ignore */ }
+                setMinimized(wasMin);
+            } else {
+                slot.appendChild(panel);
+                if (placeholder) placeholder.hidden = true;
+            }
+
+            try { sessionStorage.setItem(storageKey, floating ? '1' : '0'); } catch (e) { /* ignore */ }
+            if (window.TiChamadoChat && window.TiChamadoChat.syncSession) {
+                window.TiChamadoChat.syncSession({ float: floating, minimized: minimized });
+            } else if (!floating && window.TiChamadoChat && window.TiChamadoChat.clearSession) {
+                window.TiChamadoChat.clearSession();
+            }
+            if (window.TiChamadoChat && window.TiChamadoChat.syncGlobalLauncher) {
+                window.TiChamadoChat.syncGlobalLauncher();
+            }
+            scrollThreadToBottom();
+        }
+
+        document.addEventListener('ti-chat-restore-request', function () {
+            if (!floating) setFloating(true);
+            setMinimized(false);
+            if (placeholder) placeholder.hidden = false;
+            scrollThreadToBottom();
+            var input = getComposerInput();
+            if (input) input.focus();
+            if (window.TiChamadoChat && window.TiChamadoChat.syncSession) {
+                window.TiChamadoChat.syncSession({ minimized: false, float: true, unread: 0 });
+            }
+            if (window.TiChamadoChat && window.TiChamadoChat.syncGlobalLauncher) {
+                window.TiChamadoChat.syncGlobalLauncher();
+            }
+        });
+
+        document.addEventListener('click', function (ev) {
+            var minBtn = ev.target.closest('[data-ti-chat-minimize]');
+            if (minBtn && panel.contains(minBtn) && floating) {
+                setMinimized(true);
+                if (placeholder) placeholder.hidden = true;
+                return;
+            }
+            var restore = ev.target.closest('[data-ti-chat-restore]');
+            if (restore && panel.contains(restore) && floating) {
+                setMinimized(false);
+                if (placeholder) placeholder.hidden = false;
+                scrollThreadToBottom();
+                var input = getComposerInput();
+                if (input) input.focus();
+                return;
+            }
+            var btn = ev.target.closest('[data-ti-chat-float-toggle]');
+            if (!btn || !panel.contains(btn) && !(placeholder && placeholder.contains(btn))) return;
+            setFloating(!floating);
+        });
+
+        try {
+            if (sessionStorage.getItem(storageKey) === '1') setFloating(true);
+            var chatParam = new URLSearchParams(window.location.search).get('chat');
+            if (chatParam === 'restore' || chatParam === 'open') {
+                setFloating(true);
+                setMinimized(false);
+                if (placeholder) placeholder.hidden = false;
+            }
+        } catch (e) { /* ignore */ }
+    }
+
     function boot() {
         var payload = getPayload();
         initChamadoWizard();
@@ -1033,8 +1252,9 @@
         initKanbanDragDrop();
         initTicketAssign();
         initTicketRowMenus();
-        initCatalogPickLegacy();
+        initPlaybookSteps();
         initInfraCrud();
+        initChamadoChatFloat();
         if (payload && payload.section === 'analytics') {
             initVolumeChart(payload);
         }

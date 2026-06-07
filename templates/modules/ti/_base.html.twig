@@ -195,7 +195,7 @@
                     <section class="unio-card mb-4">
                         {% include 'components/section_header.html.twig' with {
                             title: 'Padrões recorrentes',
-                            subtitle: 'Helia detectou similaridade',
+                            subtitle: ai_assistant_name ~ ' detectou similaridade',
                             btn_label: 'Ver problemas',
                             btn_href: path('app_ti_problemas'),
                             btn_ghost: true,
@@ -302,7 +302,7 @@
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/ti-hub.css') }}?v=42">
+<link rel="stylesheet" href="{{ asset('css/ti-hub.css') }}?v=67">
 {% endblock %}
 
 {% block javascripts %}
@@ -310,12 +310,30 @@
 {% if ti_section in ['overview', 'analytics'] %}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 {% endif %}
-<script src="{{ asset('js/ti-hub.js') }}?v=40" defer></script>
+<script src="{{ asset('js/ti-hub.js') }}?v=56" defer></script>
+<script type="application/json" id="tiHubRealtimeConfig">{{ {
+    notificationsPollUrl: path('app_ti_notificacoes_poll')
+}|json_encode|raw }}</script>
 {% if ti_section == 'overview' and app.request.query.getBoolean('open_novo') %}
 <script>
 (function () {
     window.UnioOffcanvas && window.UnioOffcanvas.open('ti-chamado-novo');
 })();
+</script>
+{% endif %}
+{% if ti_section in ['chamados', 'meus_chamados', 'catalogo'] and app.request.query.getBoolean('open_novo') and ti_section != 'overview' %}
+<script>
+(function () {
+    window.UnioOffcanvas && window.UnioOffcanvas.open('ti-chamado-novo');
+})();
+</script>
+{% endif %}
+{% if ti_section == 'catalogo' and app.request.query.get('catalog') %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var pick = document.querySelector('[data-ti-catalog-id="{{ app.request.query.get('catalog')|e('js') }}"]');
+    if (pick) pick.click();
+});
 </script>
 {% endif %}
 {% if ti_section in ['ativos', 'licencas', 'integracoes', 'manutencoes', 'novidades', 'kb', 'problemas'] and app.request.query.get('open_edit') %}

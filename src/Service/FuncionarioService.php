@@ -102,6 +102,17 @@ class FuncionarioService
         return $this->repo->findForEmpresa($empresa, $status, $q);
     }
 
+    /** @return list<Funcionario> */
+    public function findForPessoas(
+        Empresa $empresa,
+        ?string $status = null,
+        ?string $q = null,
+        ?int $departamentoId = null,
+        ?string $cargo = null,
+    ): array {
+        return $this->repo->findForEmpresaFiltered($empresa, $status, $q, $departamentoId, $cargo);
+    }
+
     public function loadForEmpresa(Empresa $empresa, int $id): Funcionario
     {
         $f = $this->repo->findOneBy(['id' => $id, 'empresa' => $empresa]);
@@ -122,6 +133,12 @@ class FuncionarioService
     public function listGestores(Empresa $empresa, ?int $excludeId = null): array
     {
         return $this->repo->findGestoresForSelect($empresa, $excludeId);
+    }
+
+    /** @return list<string> */
+    public function listDistinctCargos(Empresa $empresa): array
+    {
+        return $this->repo->findDistinctCargos($empresa);
     }
 
     /**
@@ -145,6 +162,14 @@ class FuncionarioService
         $f->setConta($this->nullIfEmpty($data['conta'] ?? null));
         $f->setPix($this->nullIfEmpty($data['pix'] ?? null));
         $f->setObservacoes($this->nullIfEmpty($data['observacoes'] ?? null));
+
+        $competenciasRaw = trim((string) ($data['competencias'] ?? ''));
+        if ($competenciasRaw !== '') {
+            $items = array_values(array_filter(array_map('trim', preg_split('/[,;\n]+/', $competenciasRaw) ?: [])));
+            $f->setCompetencias($items !== [] ? $items : null);
+        } elseif (\array_key_exists('competencias', $data)) {
+            $f->setCompetencias(null);
+        }
 
         $uf = strtoupper(trim((string) ($data['uf'] ?? '')));
         $f->setUf($uf !== '' ? $uf : null);

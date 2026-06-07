@@ -1,0 +1,61 @@
+{# Composer de mensagem — envio via AJAX, separado da gestão do chamado #}
+{% set is_operator = ti_can('operate_chamados') %}
+{% set upload_id = upload_id|default(is_operator ? 'tiChamadoOperatorReplyAttachments' : 'tiChamadoReplyAttachments') %}
+{% set helix_composer = helix_composer|default(false) %}
+{% set form_dom_id = form_id|default('tiChamadoMessageForm-' ~ ticket.id) %}
+{% set message_field_id = form_dom_id ~ '-message' %}
+{% set message_label = is_operator ? 'Mensagem para o solicitante' : 'Sua mensagem' %}
+{% set message_placeholder = is_operator ? 'Escreva uma mensagem…' : 'Informe detalhes, testes ou dúvidas para a TI…' %}
+
+<form method="post"
+      id="{{ form_dom_id }}"
+      action="{{ path('app_ti_chamado_mensagem', { id: ticket.id }) }}"
+      enctype="multipart/form-data"
+      class="{% if helix_composer %}helix-composer ti-chamado-helix-composer{% else %}ti-chamado-message-form unio-form{% endif %}"
+      data-ti-chamado-message>
+    <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_mensagem_' ~ ticket.id) }}">
+
+    {% if helix_composer %}
+    <div class="helix-composer-inner">
+        <button type="button"
+                class="ti-chat-emoji-btn"
+                data-ti-chat-emoji-toggle
+                aria-label="Inserir emoji"
+                title="Emoji">😊</button>
+        <textarea id="{{ message_field_id }}"
+                  name="message"
+                  class="helix-input"
+                  rows="1"
+                  maxlength="2000"
+                  placeholder="{{ message_placeholder }}"
+                  aria-label="{{ message_label }}"></textarea>
+        <button type="submit" class="helix-send-btn" aria-label="Enviar mensagem">
+            <i class="fas fa-arrow-up" aria-hidden="true"></i>
+        </button>
+    </div>
+    {% include 'components/ti/chamado_message_emoji_picker.html.twig' %}
+    {% else %}
+    <div class="ti-chamado-message-compose">
+        <label class="unio-form-label" for="{{ message_field_id }}">{{ message_label }}</label>
+        <div class="ti-chamado-message-field">
+            <textarea id="{{ message_field_id }}"
+                      name="message"
+                      class="unio-form-control ti-chamado-reply-textarea ti-chamado-message-textarea"
+                      rows="3"
+                      maxlength="2000"
+                      placeholder="{{ message_placeholder }}"></textarea>
+            <button type="button"
+                    class="ti-chat-emoji-btn ti-chat-emoji-btn--in-field"
+                    data-ti-chat-emoji-toggle
+                    aria-label="Inserir emoji"
+                    title="Emoji">😊</button>
+            {% include 'components/ti/chamado_message_emoji_picker.html.twig' %}
+        </div>
+        <div class="ti-chamado-reply-actions">
+            <button type="submit" class="btn-unio btn-sm">
+                <i class="fas fa-paper-plane mr-1" aria-hidden="true"></i> Enviar mensagem
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</form>

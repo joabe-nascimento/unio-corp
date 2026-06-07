@@ -8,9 +8,10 @@ namespace App\Service\Ti;
 
 use App\Entity\Empresa;
 use App\Entity\TiChamado;
+use App\Platform\AiAssistant;
 use App\Repository\TiChamadoRepository;
 
-/** Triagem Helia / Cortex — regras inteligentes sobre dados reais. */
+/** Triagem Vitória / Cortex — regras inteligentes sobre dados reais. */
 final class TiHeliaService
 {
     public function __construct(
@@ -228,7 +229,9 @@ final class TiHeliaService
 
         $impact = 'medio';
 
-        $analysis = 'Helia classificou como solicitação genérica de TI. Revise categoria e prioridade antes de confirmar.';
+        $ai = AiAssistant::NAME;
+
+        $analysis = $ai . ' classificou como solicitação genérica de TI. Revise categoria e prioridade antes de confirmar.';
 
         $titleHint = 'Descreva o problema em uma linha';
 
@@ -246,7 +249,7 @@ final class TiHeliaService
 
             $impact = 'alto';
 
-            $analysis = 'Padrão recorrente de conectividade remota detectado. Helia recomenda KB-042 e validação MFA antes de escalar.';
+            $analysis = 'Padrão recorrente de conectividade remota detectado. ' . $ai . ' recomenda KB-042 e validação MFA antes de escalar.';
 
             $titleHint = 'Problema de VPN / conectividade';
 
@@ -262,7 +265,7 @@ final class TiHeliaService
 
             $impact = 'medio';
 
-            $analysis = 'Solicitação de acesso ou credencial. Helia sugere fluxo de reset AD/MFA padronizado.';
+            $analysis = 'Solicitação de acesso ou credencial. ' . $ai . ' sugere fluxo de reset AD/MFA padronizado.';
 
             $titleHint = 'Reset de senha ou acesso';
 
@@ -278,7 +281,7 @@ final class TiHeliaService
 
             $impact = 'critico';
 
-            $analysis = 'Incidente de integração/API identificado. Helia correlaciona com falhas de webhook e recomenda reprocessamento com backoff.';
+            $analysis = 'Incidente de integração/API identificado. ' . $ai . ' correlaciona com falhas de webhook e recomenda reprocessamento com backoff.';
 
             $titleHint = 'Falha de integração';
 
@@ -294,7 +297,7 @@ final class TiHeliaService
 
             $impact = 'critico';
 
-            $analysis = 'Incidente de infraestrutura/backup. Helia sugere verificar quota de disco e jobs noturnos.';
+            $analysis = 'Incidente de infraestrutura/backup. ' . $ai . ' sugere verificar quota de disco e jobs noturnos.';
 
             $titleHint = 'Falha de backup ou infra';
 
@@ -310,7 +313,7 @@ final class TiHeliaService
 
             $impact = 'medio';
 
-            $analysis = 'Solicitação de hardware/periférico. Helia indica verificar estoque e ciclo de vida do ativo.';
+            $analysis = 'Solicitação de hardware/periférico. ' . $ai . ' indica verificar estoque e ciclo de vida do ativo.';
 
             $titleHint = 'Equipamento ou periférico';
 
@@ -324,7 +327,7 @@ final class TiHeliaService
 
             $impact = 'baixo';
 
-            $analysis = 'Questão de licenciamento ou software. Helia identifica renovação ou instalação homologada.';
+            $analysis = 'Questão de licenciamento ou software. ' . $ai . ' identifica renovação ou instalação homologada.';
 
             $titleHint = 'Licença ou software';
 

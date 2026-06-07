@@ -2,10 +2,10 @@
 {% set can_escalate = ticket.priority|default('P3') != 'P1' and ticket.status|default('') != 'resolvido' %}
 <form method="post"
       action="{{ path('app_ti_chamado_prioridade', { id: ticket.id }) }}"
-      class="ti-chamado-quick-form m-0">
+      class="ti-chamado-quick-form m-0{% if inline|default(false) %} d-inline{% endif %}">
     <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_prioridade_' ~ ticket.id) }}">
     <button type="submit"
-            class="btn-unio-ghost btn-sm w-100 text-left"
+            class="btn-unio-ghost btn-sm{% if not inline|default(false) %} w-100 text-left{% endif %}"
             {% if not can_escalate %}disabled title="Prioridade máxima ou chamado resolvido"{% endif %}>
         <i class="fas fa-arrow-up mr-1" aria-hidden="true"></i> Escalar prioridade
     </button>

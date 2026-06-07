@@ -550,11 +550,14 @@ class TiChamado
 
     public function addTimelineEvent(string $event, string $actor): static
     {
-        $this->timeline[] = [
+        $timeline = $this->timeline;
+        $timeline[] = [
             'at' => (new \DateTimeImmutable())->format('d/m H:i'),
             'event' => $event,
             'actor' => $actor,
         ];
+        // Reatribuição necessária: Doctrine não detecta mutação in-place em colunas JSON.
+        $this->timeline = $timeline;
         $this->atualizadoEm = new \DateTimeImmutable();
 
         return $this;

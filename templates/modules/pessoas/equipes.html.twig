@@ -1,87 +1,101 @@
 {% extends 'layout/page_list.html.twig' %}
 {% block title %}Equipes{% endblock %}
+{% block permissions_scope %}product_pessoas{% endblock %}
 {% set page_list_title = 'Equipes' %}
 
 {% block page_list_kpis %}
     <div class="page-lead-kpis">
         {% include 'components/kpi_row.html.twig' with { items: [
-            { value: '4',  label: 'Equipes',          sub: 'Formadas' },
-            { value: '12', label: 'Total de Membros', sub: 'Em equipes', route: 'app_pessoas_membros' },
-            { value: '4',  label: 'Gestores',         sub: 'Responsáveis' },
-            { value: '0',  label: 'Sem equipe',       sub: 'Membros a alocar' },
+            { value: stats.equipes, label: 'Equipes', sub: 'Formadas' },
+            { value: stats.total_membros, label: 'Total de Membros', sub: 'Em equipes', route: 'app_pessoas_membros' },
+            { value: stats.gestores, label: 'Gestores', sub: 'Responsáveis' },
+            { value: stats.sem_equipe, label: 'Sem equipe', sub: 'Membros a alocar' },
         ], mb: 'mb-0' } %}
     </div>
 {% endblock %}
 
 {% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_pessoas_equipes') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
     btn_label: grant_at_least('product_pessoas', 'equipes', 'GESTOR_EQUIPE') ? 'Nova Equipe' : '',
     btn_href: path('app_pessoas_equipe_nova'),
     btn_icon: 'fa-plus',
     search_in_section: true,
     search_placeholder: 'Buscar equipe por nome ou responsável…',
-    search_disabled: true
+    search_name: 'q',
+    search_value: filter_q|default('')
 } %}
     {% block section_toolbar_filters %}
+        {% set area_options = [{ value: '', label: 'Todas' }] %}
+        {% for a in areas|default([]) %}
+            {% set area_options = area_options|merge([{ value: a, label: a }]) %}
+        {% endfor %}
         {% include 'components/filter_group.html.twig' with {
             label: 'Área',
             name: 'area',
-            disabled: true,
-            options: ['Todas', 'Tecnologia', 'Engenharia', 'Design', 'Gestão']
+            value: filter_area|default(''),
+            min_width: '150px',
+            options: area_options
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_pessoas_equipes'),
+            has_filters: filter_q|default('') or filter_area|default('')
         } %}
     {% endblock %}
 {% endembed %}
+</form>
 {% endblock %}
 
 {% block page_list_content %}
 <div class="unio-card">
-    <div class="ficha-stub-banner mb-3">
-        <i class="fas fa-circle-info"></i>
-        Dados fictícios de demonstração — clique em qualquer equipe para ver os detalhes e membros.
-    </div>
-
+    {% if equipes is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-user-group',
+            title: 'Nenhuma equipe cadastrada',
+            text: filter_q|default('') or filter_area|default('')
+                ? 'Nenhum resultado para os filtros aplicados.'
+                : 'Crie equipes para organizar colaboradores por área ou projeto.',
+            btn_label: grant_at_least('product_pessoas', 'equipes', 'GESTOR_EQUIPE') ? 'Nova Equipe' : '',
+            btn_href: grant_at_least('product_pessoas', 'equipes', 'GESTOR_EQUIPE') ? path('app_pessoas_equipe_nova') : ''
+        } %}
+    {% else %}
     <div class="team-grid">
         {% set av_palette = ['av-c1','av-c2','av-c3','av-c4','av-c5','av-c6','av-c7','av-c8'] %}
         {% set av_max = 4 %}
-
-        {% set teams = [
-            { id:1, nome: 'Squad Backend',    descricao: 'Desenvolvimento back-end e APIs',         lider: 'Ana Silva',       membros: ['A','B','C','E','F'], count: 5,  area: 'Tecnologia'  },
-            { id:2, nome: 'Design & Marca',   descricao: 'UX, UI e identidade visual da empresa',   lider: 'Bruno Mendes',    membros: ['B','C','D','H'],     count: 4,  area: 'Design'      },
-            { id:3, nome: 'Obras e Projetos', descricao: 'Equipe de campo e gestão de obras civis',  lider: 'Diego Fonseca',   membros: ['D','E','F','G','K'], count: 5,  area: 'Engenharia'  },
-            { id:4, nome: 'PMO',              descricao: 'Gestão de portfólio, projetos e riscos',   lider: 'Carla Rodrigues', membros: ['C','I'],             count: 2,  area: 'Gestão'      },
-        ] %}
-        {% for team in teams %}
+        {% for team in equipes %}
+        {% set membros = team.funcionarios|default([]) %}
+        {% set count = membros|length %}
         <a href="{{ path('app_pessoas_equipe_detalhe', {id: team.id}) }}" class="team-card text-decoration-none">
             <div class="team-card-header">
                 <div class="team-card-icon">{{ team.nome|slice(0,2)|upper }}</div>
                 <div class="team-card-titles">
                     <div class="team-card-name">{{ team.nome }}</div>
-                    <div class="team-card-desc">{{ team.descricao }}</div>
+                    <div class="team-card-desc">{{ team.descricao|default('Sem descrição')|slice(0, 80) }}{% if (team.descricao|default(''))|length > 80 %}…{% endif %}</div>
                 </div>
             </div>
             <div class="team-card-body">
                 <div class="team-avatars">
-                    {% for ini in team.membros %}
+                    {% for mb in membros %}
                         {% if loop.index <= av_max %}
                         {% set ci = (loop.index - 1) % av_palette|length %}
                         <div class="member-avatar member-avatar--sm team-avatar-sm {{ av_palette[ci] }}"
-                             title="{{ ini }}">{{ ini|slice(0,1)|upper }}</div>
+                             title="{{ mb.nome }}">{{ mb.initials }}</div>
                         {% endif %}
                     {% endfor %}
-                    {% set hidden = team.count - (team.membros|length < av_max ? team.membros|length : av_max) %}
-                    {% if hidden > 0 %}
-                    <div class="team-avatars-more" title="{{ hidden }} membros adicionais">+{{ hidden }}</div>
+                    {% if count > av_max %}
+                    <div class="team-avatars-more" title="{{ count - av_max }} membros adicionais">+{{ count - av_max }}</div>
                     {% endif %}
                 </div>
                 <div class="team-card-footer">
-                    <span class="team-card-area-badge">{{ team.area }}</span>
+                    {% if team.area %}<span class="team-card-area-badge">{{ team.area }}</span>{% endif %}
                     <span class="team-card-meta">
-                        <i class="fas fa-user-tie"></i> {{ team.lider }}
+                        <i class="fas fa-user-tie"></i> {{ team.lider ? team.lider.nome : 'Sem líder' }}
                     </span>
                 </div>
             </div>
         </a>
         {% endfor %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -37,6 +37,18 @@
                 { label: 'Usuário plataforma', value: funcionario.user ? funcionario.user.email : 'Não vinculado', icon: 'fa-user-lock' },
             ]} only %}
         </div>
+        {% if grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') and platformAccount.state|default('create') != 'linked' %}
+        <div class="rh-process-show-section unio-card">
+            <h3 class="unio-detail-section-title">Conta na plataforma</h3>
+            {% include 'components/rh/platform_account_panel.html.twig' with {
+                platformAccount: platformAccount,
+                email: funcionario.email,
+                csrf_token_name: 'rh_funcionario_action',
+                form_action: 'link_existing_user',
+                show_create: false
+            } %}
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

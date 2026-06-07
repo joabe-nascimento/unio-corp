@@ -66,6 +66,10 @@ final class TiChamadoController extends AbstractController
     #[Route('/helia/analyze', name: 'app_ti_helia_analyze', methods: ['POST'])]
     public function heliaAnalyze(Request $request): JsonResponse
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->tiGrants->assert($user, $this->tiGrants->canCreateChamado($user));
+
         if (!$this->isCsrfTokenValid('ti_helia_analyze', (string) $request->request->get('_token'))) {
             return new JsonResponse(['error' => 'Token inválido.'], 403);
         }
@@ -92,14 +96,54 @@ final class TiChamadoController extends AbstractController
         } catch (\InvalidArgumentException $e) {
             $this->addFlash('error', $e->getMessage());
 
-            return $this->redirectToRoute('app_ti_chamados', ['open_novo' => 1]);
+            return $this->redirectToRoute($this->listRouteFor($user), ['open_novo' => 1]);
         }
 
         if ($request->request->get('redirect') === 'list') {
-            return $this->redirectToRoute('app_ti_chamados');
+            return $this->redirectToRoute($this->listRouteFor($user));
         }
 
         return $this->redirectToRoute('app_ti_chamado_show', ['id' => $ticket['id']]);
+    }
+
+    #[Route('/{id}/comentario', name: 'app_ti_chamado_comentario', requirements: ['id' => 'TK-\d+'], methods: ['POST'])]
+    public function comentario(string $id, Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $empresa = $this->requireEmpresa();
+        $ticket = $this->chamados->find($empresa, $id);
+        if ($ticket === null) {
+            throw $this->createNotFoundException('Chamado não encontrado.');
+        }
+
+        $this->tiGrants->assert(
+            $user,
+            $this->tiGrants->canReplyAsSolicitante($user, $ticket)
+                || $this->tiGrants->canReopenChamado($user, $ticket),
+        );
+
+        if (!$this->isCsrfTokenValid('ti_chamado_comentario_' . $id, (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token inválido.');
+        }
+
+        try {
+            $files = $this->normalizeUploadedFiles($request->files->get('attachments'));
+            $status = trim((string) $request->request->get('status', ''));
+            $this->chamados->addReply(
+                $empresa,
+                $id,
+                (string) $request->request->get('message', ''),
+                $user,
+                $files,
+                $status !== '' ? $status : null,
+            );
+            $this->addFlash('success', 'Resposta enviada à equipe de TI.');
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_ti_chamado_show', ['id' => $id]);
     }
 
     #[Route('/{id}/status', name: 'app_ti_chamado_status', requirements: ['id' => 'TK-\d+'], methods: ['POST'])]
@@ -169,7 +213,7 @@ final class TiChamadoController extends AbstractController
         if ($ticket === null) {
             throw $this->createNotFoundException('Chamado não encontrado.');
         }
-        $this->tiGrants->assert($user, $this->tiGrants->canViewChamado($user, $ticket));
+        $this->tiGrants->assert($user, $this->tiGrants->canApplyHelia($user));
         if (!$this->isCsrfTokenValid('ti_chamado_helia_feedback_' . $id, (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Token inválido.');
         }
@@ -201,7 +245,7 @@ final class TiChamadoController extends AbstractController
             $this->addFlash('error', $e->getMessage());
         }
 
-        return $this->redirectToRoute('app_ti_chamados');
+        return $this->redirectToRoute($this->listRouteFor($user));
     }
 
     #[Route('/{id}/atribuir', name: 'app_ti_chamado_atribuir', requirements: ['id' => 'TK-\d+'], methods: ['POST'])]
@@ -240,7 +284,7 @@ final class TiChamadoController extends AbstractController
         }
 
         if ((string) $request->request->get('redirect') === 'list') {
-            return $this->redirectToRoute('app_ti_chamados');
+            return $this->redirectToRoute($this->listRouteFor($user));
         }
 
         return $this->redirectToRoute('app_ti_chamado_show', ['id' => $id]);
@@ -317,36 +361,43 @@ final class TiChamadoController extends AbstractController
     }
 
     #[Route('/{id}/csat', name: 'app_ti_chamado_csat', requirements: ['id' => 'TK-\d+'], methods: ['POST'])]
-    public function csat(string $id, Request $request): JsonResponse
+    public function csat(string $id, Request $request): Response|JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
         $empresa = $this->requireEmpresa();
 
         if (!$this->isCsrfTokenValid('ti_csat_' . $id, (string) $request->request->get('_token'))) {
-            return new JsonResponse(['ok' => false, 'error' => 'Token inválido.'], 403);
+            if ($this->wantsJson($request)) {
+                return new JsonResponse(['ok' => false, 'error' => 'Token inválido.'], 403);
+            }
+            throw $this->createAccessDeniedException('Token inválido.');
         }
 
         $chamado = $this->chamados->findEntity($empresa, $id);
         if ($chamado === null) {
-            return new JsonResponse(['ok' => false, 'error' => 'Chamado não encontrado.'], 404);
+            if ($this->wantsJson($request)) {
+                return new JsonResponse(['ok' => false, 'error' => 'Chamado não encontrado.'], 404);
+            }
+            throw $this->createNotFoundException('Chamado não encontrado.');
         }
 
-        if ($chamado->getSolicitante()->getId() !== $user->getId()) {
-            return new JsonResponse(['ok' => false, 'error' => 'Apenas o solicitante pode avaliar.'], 403);
-        }
-
-        if ($chamado->getStatus() !== \App\Entity\TiChamado::STATUS_RESOLVIDO) {
-            return new JsonResponse(['ok' => false, 'error' => 'CSAT disponível apenas para chamados resolvidos.'], 422);
-        }
-
-        if ($chamado->getCsatEm() !== null) {
-            return new JsonResponse(['ok' => false, 'error' => 'CSAT já registrado.'], 422);
+        $ticket = $this->chamados->find($empresa, $id) ?? [];
+        if (!$this->tiGrants->canRateCsat($user, $ticket)) {
+            if ($this->wantsJson($request)) {
+                return new JsonResponse(['ok' => false, 'error' => 'Apenas o solicitante pode avaliar chamados resolvidos.'], 403);
+            }
+            $this->addFlash('error', 'Não é possível avaliar este chamado.');
+            return $this->redirectToRoute('app_ti_chamado_show', ['id' => $id]);
         }
 
         $score = (int) $request->request->get('score', 0);
         if ($score < 1 || $score > 5) {
-            return new JsonResponse(['ok' => false, 'error' => 'Score deve ser entre 1 e 5.'], 422);
+            if ($this->wantsJson($request)) {
+                return new JsonResponse(['ok' => false, 'error' => 'Score deve ser entre 1 e 5.'], 422);
+            }
+            $this->addFlash('error', 'Selecione uma nota de 1 a 5.');
+            return $this->redirectToRoute('app_ti_chamado_show', ['id' => $id]);
         }
 
         $comentario = trim((string) $request->request->get('comentario', ''));
@@ -357,7 +408,12 @@ final class TiChamadoController extends AbstractController
             ->touch();
         $this->em->flush();
 
-        return new JsonResponse(['ok' => true, 'score' => $score]);
+        if ($this->wantsJson($request)) {
+            return new JsonResponse(['ok' => true, 'score' => $score]);
+        }
+
+        $this->addFlash('success', 'Obrigado pela avaliação!');
+        return $this->redirectToRoute('app_ti_chamado_show', ['id' => $id]);
     }
 
     #[Route('/{id}/playbook/step', name: 'app_ti_chamado_playbook_step', requirements: ['id' => 'TK-\d+'], methods: ['POST'])]
@@ -427,6 +483,140 @@ final class TiChamadoController extends AbstractController
         return new JsonResponse(['ok' => true, 'steps' => $chamado->getPlaybookSteps()]);
     }
 
+    #[Route('/{id}/mensagem', name: 'app_ti_chamado_mensagem', requirements: ['id' => 'TK-\d+'], methods: ['POST'])]
+    public function mensagem(string $id, Request $request): Response|JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $empresa = $this->requireEmpresa();
+        $ticket = $this->chamados->find($empresa, $id);
+        if ($ticket === null) {
+            if ($this->wantsJson($request)) {
+                return new JsonResponse(['ok' => false, 'error' => 'Chamado não encontrado.'], 404);
+            }
+            throw $this->createNotFoundException('Chamado não encontrado.');
+        }
+
+        $asOperator = $this->tiGrants->canOperateChamados($user);
+        $canRequester = $this->tiGrants->canReplyAsSolicitante($user, $ticket);
+        $this->tiGrants->assert($user, $asOperator || $canRequester);
+
+        if (!$this->isCsrfTokenValid('ti_chamado_mensagem_' . $id, (string) $request->request->get('_token'))) {
+            if ($this->wantsJson($request)) {
+                return new JsonResponse(['ok' => false, 'error' => 'Token inválido.'], 403);
+            }
+            throw $this->createAccessDeniedException('Token inválido.');
+        }
+
+        try {
+            $files = $this->normalizeUploadedFiles($request->files->get('attachments'));
+            $beforeCount = \count($this->chamados->extractChatMessages($ticket));
+            $ticket = $this->chamados->sendChatMessage(
+                $empresa,
+                $id,
+                $user,
+                (string) $request->request->get('message', ''),
+                $files,
+                $asOperator,
+            );
+            $messages = $this->chamados->extractChatMessages($ticket);
+            $payload = [
+                'ok' => true,
+                'messages' => $messages,
+                'total' => \count($messages),
+                'new_messages' => \array_values(\array_slice($messages, $beforeCount)),
+            ];
+            if ($this->wantsJson($request)) {
+                return new JsonResponse($payload);
+            }
+            $this->addFlash('success', 'Mensagem enviada.');
+        } catch (\InvalidArgumentException $e) {
+            if ($this->wantsJson($request)) {
+                return new JsonResponse(['ok' => false, 'error' => $e->getMessage()], 422);
+            }
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_ti_chamado_show', ['id' => $id]);
+    }
+
+    #[Route('/{id}/conversa/mensagens', name: 'app_ti_chamado_conversa_mensagens', requirements: ['id' => 'TK-\d+'], methods: ['GET'])]
+    public function conversaMensagens(string $id, Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $empresa = $this->requireEmpresa();
+        $ticket = $this->chamados->find($empresa, $id);
+        if ($ticket === null) {
+            return new JsonResponse(['ok' => false, 'error' => 'Chamado não encontrado.'], 404);
+        }
+
+        $this->tiGrants->assert($user, $this->tiGrants->canViewChamado($user, $ticket));
+
+        $after = max(0, (int) $request->query->get('after', 0));
+        $all = $this->chamados->extractChatMessages($ticket);
+
+        return new JsonResponse([
+            'ok' => true,
+            'messages' => $this->chamados->chatMessagesSince($ticket, $after),
+            'total' => \count($all),
+        ]);
+    }
+
+    #[Route('/{id}/gestao', name: 'app_ti_chamado_gestao', requirements: ['id' => 'TK-\d+'], methods: ['POST'])]
+    public function gestao(string $id, Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $empresa = $this->requireEmpresa();
+        $ticket = $this->chamados->find($empresa, $id);
+        if ($ticket === null) {
+            throw $this->createNotFoundException('Chamado não encontrado.');
+        }
+
+        if (!$this->isCsrfTokenValid('ti_chamado_gestao_' . $id, (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token inválido.');
+        }
+
+        try {
+            if ($this->tiGrants->canOperateChamados($user)) {
+                $status = trim((string) $request->request->get('status', ''));
+                $techRaw = $request->request->get('technician_id');
+                $technicianId = ($techRaw !== null && $techRaw !== '') ? (int) $techRaw : null;
+                $files = $this->normalizeUploadedFiles($request->files->get('attachments'));
+                $this->chamados->operatorRespond(
+                    $empresa,
+                    $id,
+                    $user,
+                    '',
+                    $status !== '' ? $status : null,
+                    $technicianId,
+                    $files,
+                );
+                $this->addFlash('success', 'Alterações aplicadas.');
+            } elseif (
+                $this->tiGrants->canReplyAsSolicitante($user, $ticket)
+                || $this->tiGrants->canReopenChamado($user, $ticket)
+            ) {
+                $status = trim((string) $request->request->get('status', ''));
+                $this->chamados->requesterGestao(
+                    $empresa,
+                    $id,
+                    $user,
+                    $status !== '' ? $status : null,
+                    (string) $request->request->get('motivo', $request->request->get('message', '')),
+                );
+                $this->addFlash('success', 'Situação atualizada.');
+            } else {
+                throw $this->createAccessDeniedException('Sem permissão.');
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_ti_chamado_show', ['id' => $id]);
+    }
+
     #[Route('/{id}/nota', name: 'app_ti_chamado_nota', requirements: ['id' => 'TK-\d+'], methods: ['POST'])]
     public function nota(string $id, Request $request): Response
     {
@@ -440,8 +630,22 @@ final class TiChamadoController extends AbstractController
         }
 
         try {
-            $this->chamados->addNote($empresa, $id, (string) $request->request->get('note', ''), $user);
-            $this->addFlash('success', 'Nota registrada.');
+            $message = (string) $request->request->get('message', $request->request->get('note', ''));
+            $status = trim((string) $request->request->get('status', ''));
+            $techRaw = $request->request->get('technician_id');
+            $technicianId = ($techRaw !== null && $techRaw !== '') ? (int) $techRaw : null;
+            $files = $this->normalizeUploadedFiles($request->files->get('attachments'));
+
+            $this->chamados->operatorRespond(
+                $empresa,
+                $id,
+                $user,
+                $message,
+                $status !== '' ? $status : null,
+                $technicianId,
+                $files,
+            );
+            $this->addFlash('success', 'Resposta enviada.');
         } catch (\InvalidArgumentException $e) {
             $this->addFlash('error', $e->getMessage());
         }
@@ -485,7 +689,7 @@ final class TiChamadoController extends AbstractController
 
         try {
             $this->chamados->applyHeliaSuggestion($empresa, $id, $user);
-            $this->addFlash('success', 'Sugestão Helia aplicada.');
+            $this->addFlash('success', 'Sugestão ' . \App\Platform\AiAssistant::NAME . ' aplicada.');
         } catch (\InvalidArgumentException $e) {
             $this->addFlash('error', $e->getMessage());
         }
@@ -511,7 +715,7 @@ final class TiChamadoController extends AbstractController
 
         try {
             $this->chamados->markHeliaReviewed($empresa, $id, $user);
-            $this->addFlash('success', 'Triagem Helia marcada como revisada.');
+            $this->addFlash('success', 'Triagem ' . \App\Platform\AiAssistant::NAME . ' marcada como revisada.');
         } catch (\InvalidArgumentException $e) {
             $this->addFlash('error', $e->getMessage());
         }
@@ -549,5 +753,10 @@ final class TiChamadoController extends AbstractController
         }
 
         return $empresa;
+    }
+
+    private function listRouteFor(User $user): string
+    {
+        return $this->tiGrants->canOperateChamados($user) ? 'app_ti_chamados' : 'app_ti_meus_chamados';
     }
 }

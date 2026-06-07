@@ -5,7 +5,10 @@ namespace App\Service\Ti;
 use App\Entity\Empresa;
 use App\Entity\TiChamado;
 use App\Entity\User;
+use App\Platform\AiAssistant;
 use App\Repository\TiAtivoRepository;
+use App\Security\ProductGrantAccess;
+use App\Security\TiGrantPolicy;
 use App\Repository\TiChamadoRepository;
 use App\Repository\TiProblemaRepository;
 use App\Repository\UserRepository;
@@ -24,6 +27,7 @@ final class TiChamadoService
         private TiPlaybookService $playbooks,
         private TiAtivoRepository $ativoRepository,
         private TiProblemaRepository $problemaRepository,
+        private ProductGrantAccess $grants,
     ) {}
 
     /** @return array<string, mixed> */
@@ -44,7 +48,19 @@ final class TiChamadoService
     /** @return list<array<string, mixed>> */
     public function allSorted(Empresa $empresa): array
     {
-        return $this->all($empresa);
+        $priorityOrder = ['P1' => 1, 'P2' => 2, 'P3' => 3, 'P4' => 4];
+        $tickets = $this->all($empresa);
+        usort($tickets, static function (array $a, array $b) use ($priorityOrder): int {
+            $pa = $priorityOrder[$a['priority'] ?? 'P4'] ?? 5;
+            $pb = $priorityOrder[$b['priority'] ?? 'P4'] ?? 5;
+            if ($pa !== $pb) {
+                return $pa <=> $pb;
+            }
+
+            return strcmp($b['opened_at'] ?? '', $a['opened_at'] ?? '');
+        });
+
+        return $tickets;
     }
 
     /** @return array<string, list<array<string, mixed>>> */
@@ -130,20 +146,410 @@ final class TiChamadoService
 
     public function addNote(Empresa $empresa, string $codigo, string $note, User $actor): array
     {
-        $note = trim($note);
-        if ($note === '') {
-            throw new \InvalidArgumentException('A nota não pode estar vazia.');
-        }
-        if (mb_strlen($note) > 2000) {
-            throw new \InvalidArgumentException('Nota muito longa (máx. 2000 caracteres).');
+        return $this->operatorRespond($empresa, $codigo, $actor, $note);
+    }
+
+    /**
+     * Resposta da TI com mensagem, anexos, status e atribuição opcionais num único envio.
+     *
+     * @param list<UploadedFile> $files
+     */
+    public function operatorRespond(
+        Empresa $empresa,
+        string $codigo,
+        User $actor,
+        string $message = '',
+        ?string $status = null,
+        ?int $technicianId = null,
+        array $files = [],
+    ): array {
+        $message = trim($message);
+        if ($message !== '' && mb_strlen($message) > 2000) {
+            throw new \InvalidArgumentException('Mensagem muito longa (máx. 2000 caracteres).');
         }
 
         $chamado = $this->requireEntity($empresa, $codigo);
-        $chamado->addTimelineEvent('Nota: ' . $note, $this->actorName($actor));
+        $actorName = $this->actorName($actor);
+        $didSomething = false;
+        $notifyReply = false;
+        $notifyResolved = false;
+
+        if ($message !== '') {
+            $chamado->addTimelineEvent('Resposta da TI: ' . $message, $actorName);
+            $didSomething = true;
+            $notifyReply = true;
+        }
+
+        if ($status !== null && $status !== '' && $status !== $chamado->getStatus()) {
+            $valid = [
+                TiChamado::STATUS_NOVO,
+                TiChamado::STATUS_EM_ANALISE,
+                TiChamado::STATUS_EM_EXECUCAO,
+                TiChamado::STATUS_AGUARDANDO,
+                TiChamado::STATUS_RESOLVIDO,
+            ];
+            if (!\in_array($status, $valid, true)) {
+                throw new \InvalidArgumentException('Status inválido.');
+            }
+
+            $wasResolved = $chamado->getStatus() === TiChamado::STATUS_RESOLVIDO;
+            $labels = TiReferenceData::statusLabels();
+            $chamado->setStatus($status);
+            if ($status === TiChamado::STATUS_RESOLVIDO) {
+                $chamado->setResolvidoEm(new \DateTimeImmutable());
+                if (!$chamado->isHeliaRevisado()) {
+                    $chamado->setHeliaRevisado(true);
+                }
+                $notifyResolved = true;
+            } else {
+                $chamado->setResolvidoEm(null);
+            }
+            if ($wasResolved && $status !== TiChamado::STATUS_RESOLVIDO) {
+                $chamado->addTimelineEvent('Chamado reaberto', $actorName);
+            }
+            $chamado->addTimelineEvent(
+                'Status alterado para ' . ($labels[$status] ?? $status),
+                $actorName,
+            );
+            $didSomething = true;
+        }
+
+        if ($technicianId !== null && $technicianId > 0) {
+            $currentId = $chamado->getResponsavel()?->getId();
+            if ($currentId !== $technicianId) {
+                $technician = $this->userRepository->find($technicianId);
+                if (
+                    !$technician instanceof User
+                    || !$technician->isAtivo()
+                    || $technician->getEmpresa()?->getId() !== $empresa->getId()
+                ) {
+                    throw new \InvalidArgumentException('Técnico inválido.');
+                }
+
+                $techName = $technician->getNome() ?: $technician->getEmail() ?: 'Técnico';
+                $chamado->setResponsavel($technician);
+                if ($chamado->getStatus() === TiChamado::STATUS_NOVO) {
+                    $chamado->setStatus(TiChamado::STATUS_EM_ANALISE);
+                    $chamado->addTimelineEvent('Status alterado para Em análise', $actorName);
+                }
+                $chamado->addTimelineEvent('Atribuído a ' . $techName, $actorName);
+                $didSomething = true;
+
+                $this->notifications->notify(
+                    $empresa,
+                    $technician,
+                    'atribuicao',
+                    'Chamado ' . $codigo . ' atribuído',
+                    'Você foi designado para: ' . $chamado->getTitulo(),
+                    '/ti/chamados/' . $codigo,
+                );
+            }
+        }
+
+        if ($files !== []) {
+            $uploaded = $this->attachments->uploadForChamado($chamado, $files, $actor);
+            if ($uploaded !== []) {
+                $chamado->addTimelineEvent(
+                    \count($uploaded) . ' anexo(s) adicionado(s)',
+                    $actorName,
+                );
+                $didSomething = true;
+            }
+        }
+
+        if (!$didSomething) {
+            throw new \InvalidArgumentException('Escreva uma mensagem, altere o status, atribua um técnico ou anexe arquivos.');
+        }
+
         $chamado->touch();
         $this->em->flush();
 
+        if ($notifyReply) {
+            $this->notifySolicitante(
+                $chamado,
+                'Nova resposta no chamado',
+                sprintf('A equipe de TI respondeu em %s.', $chamado->getCodigo()),
+            );
+        }
+        if ($notifyResolved) {
+            $this->notifySolicitante(
+                $chamado,
+                'Chamado resolvido',
+                sprintf('%s foi marcado como resolvido. Avalie o atendimento quando puder.', $chamado->getCodigo()),
+            );
+        }
+
         return $this->mapTicket($chamado);
+    }
+
+    /**
+     * @param list<UploadedFile> $files
+     */
+    public function addReply(
+        Empresa $empresa,
+        string $codigo,
+        string $message,
+        User $actor,
+        array $files = [],
+        ?string $status = null,
+    ): array {
+        $message = trim($message);
+        if ($message !== '' && mb_strlen($message) > 2000) {
+            throw new \InvalidArgumentException('Mensagem muito longa (máx. 2000 caracteres).');
+        }
+
+        $chamado = $this->requireEntity($empresa, $codigo);
+        if ($chamado->getSolicitante()->getId() !== $actor->getId()) {
+            throw new \InvalidArgumentException('Apenas o solicitante pode enviar esta resposta.');
+        }
+
+        $actorName = $this->actorName($actor);
+        $wasResolved = $chamado->getStatus() === TiChamado::STATUS_RESOLVIDO;
+        $confirmResolved = $status === TiChamado::STATUS_RESOLVIDO;
+        $reopen = $status === TiChamado::STATUS_EM_ANALISE && $wasResolved;
+
+        if ($wasResolved && !$reopen) {
+            throw new \InvalidArgumentException('Chamado resolvido. Selecione "Reabrir chamado" e descreva o motivo.');
+        }
+
+        if ($status !== null && $status !== '' && !$confirmResolved && !$reopen) {
+            throw new \InvalidArgumentException('Você só pode confirmar o chamado como resolvido ou reabri-lo.');
+        }
+
+        if ($reopen && $message === '') {
+            throw new \InvalidArgumentException('Descreva o motivo ao reabrir o chamado.');
+        }
+
+        if ($message === '' && $files === [] && !$confirmResolved && !$reopen) {
+            throw new \InvalidArgumentException('Escreva uma mensagem, anexe um arquivo ou confirme a resolução.');
+        }
+
+        if ($message !== '') {
+            $chamado->addTimelineEvent('Resposta do solicitante: ' . $message, $actorName);
+        }
+        if ($files !== []) {
+            $uploaded = $this->attachments->uploadForChamado($chamado, $files, $actor);
+            if ($uploaded !== []) {
+                $chamado->addTimelineEvent(
+                    \count($uploaded) . ' anexo(s) adicionado(s)',
+                    $actorName,
+                );
+            }
+        }
+
+        if ($reopen) {
+            $this->applyReopen($chamado, $actorName);
+        } elseif ($confirmResolved) {
+            $labels = TiReferenceData::statusLabels();
+            $chamado->setStatus(TiChamado::STATUS_RESOLVIDO);
+            $chamado->setResolvidoEm(new \DateTimeImmutable());
+            if (!$chamado->isHeliaRevisado()) {
+                $chamado->setHeliaRevisado(true);
+            }
+            $chamado->addTimelineEvent(
+                'Status alterado para ' . ($labels[TiChamado::STATUS_RESOLVIDO] ?? 'Resolvido'),
+                $actorName,
+            );
+        } elseif ($chamado->getStatus() === TiChamado::STATUS_AGUARDANDO && $message !== '') {
+            $chamado->setStatus(TiChamado::STATUS_EM_ANALISE);
+            $chamado->addTimelineEvent('Status alterado para Em análise', 'Sistema');
+        }
+
+        $chamado->touch();
+        $this->em->flush();
+
+        $this->notifyOperatorsOnReply($chamado, $actor);
+
+        return $this->mapTicket($chamado);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function extractChatMessages(array $ticket): array
+    {
+        $out = [];
+        $seq = 0;
+        foreach ($ticket['timeline'] ?? [] as $ev) {
+            if (!\is_array($ev)) {
+                continue;
+            }
+            $text = (string) ($ev['event'] ?? '');
+            if (str_starts_with($text, 'Resposta do solicitante:')) {
+                $out[] = $this->formatChatMessage($seq++, 'solicitante', $text, $ev, $ticket);
+            } elseif (str_starts_with($text, 'Resposta da TI:')) {
+                $out[] = $this->formatChatMessage($seq++, 'ti', $text, $ev, $ticket);
+            }
+        }
+
+        return $out;
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function chatMessagesSince(array $ticket, int $after): array
+    {
+        return array_values(array_filter(
+            $this->extractChatMessages($ticket),
+            static fn (array $m): bool => ($m['seq'] ?? 0) >= $after,
+        ));
+    }
+
+    /**
+     * Envia mensagem de chat (sem alterar status ou atribuição).
+     *
+     * @param list<UploadedFile> $files
+     */
+    public function sendChatMessage(
+        Empresa $empresa,
+        string $codigo,
+        User $actor,
+        string $message,
+        array $files = [],
+        bool $asOperator = false,
+    ): array {
+        $message = trim($message);
+        if ($message !== '' && mb_strlen($message) > 2000) {
+            throw new \InvalidArgumentException('Mensagem muito longa (máx. 2000 caracteres).');
+        }
+
+        $chamado = $this->requireEntity($empresa, $codigo);
+        $actorName = $this->actorName($actor);
+
+        if ($asOperator) {
+            if ($message === '' && $files === []) {
+                throw new \InvalidArgumentException('Escreva uma mensagem ou anexe arquivos.');
+            }
+            if ($message !== '') {
+                $chamado->addTimelineEvent('Resposta da TI: ' . $message, $actorName);
+            }
+            if ($files !== []) {
+                $uploaded = $this->attachments->uploadForChamado($chamado, $files, $actor);
+                if ($uploaded !== []) {
+                    $chamado->addTimelineEvent(
+                        \count($uploaded) . ' anexo(s) adicionado(s)',
+                        $actorName,
+                    );
+                }
+            }
+            $chamado->touch();
+            $this->em->flush();
+            $this->notifySolicitante(
+                $chamado,
+                'Nova resposta no chamado',
+                sprintf('A equipe de TI respondeu em %s.', $chamado->getCodigo()),
+            );
+
+            return $this->mapTicket($chamado);
+        }
+
+        if ($chamado->getSolicitante()->getId() !== $actor->getId()) {
+            throw new \InvalidArgumentException('Apenas o solicitante pode enviar esta mensagem.');
+        }
+        if ($chamado->getStatus() === TiChamado::STATUS_RESOLVIDO) {
+            throw new \InvalidArgumentException('Chamado resolvido. Use a aba Responder para reabrir.');
+        }
+        if ($message === '' && $files === []) {
+            throw new \InvalidArgumentException('Escreva uma mensagem ou anexe arquivos.');
+        }
+
+        if ($message !== '') {
+            $chamado->addTimelineEvent('Resposta do solicitante: ' . $message, $actorName);
+        }
+        if ($files !== []) {
+            $uploaded = $this->attachments->uploadForChamado($chamado, $files, $actor);
+            if ($uploaded !== []) {
+                $chamado->addTimelineEvent(
+                    \count($uploaded) . ' anexo(s) adicionado(s)',
+                    $actorName,
+                );
+            }
+        }
+        if ($chamado->getStatus() === TiChamado::STATUS_AGUARDANDO && $message !== '') {
+            $chamado->setStatus(TiChamado::STATUS_EM_ANALISE);
+            $chamado->addTimelineEvent('Status alterado para Em análise', 'Sistema');
+        }
+
+        $chamado->touch();
+        $this->em->flush();
+        $this->notifyOperatorsOnReply($chamado, $actor);
+
+        return $this->mapTicket($chamado);
+    }
+
+    /**
+     * Gestão do chamado pelo solicitante (confirmar resolução ou reabrir).
+     */
+    public function requesterGestao(
+        Empresa $empresa,
+        string $codigo,
+        User $actor,
+        ?string $status,
+        string $motivo = '',
+    ): array {
+        $motivo = trim($motivo);
+        $chamado = $this->requireEntity($empresa, $codigo);
+        if ($chamado->getSolicitante()->getId() !== $actor->getId()) {
+            throw new \InvalidArgumentException('Apenas o solicitante pode executar esta ação.');
+        }
+
+        $actorName = $this->actorName($actor);
+        $wasResolved = $chamado->getStatus() === TiChamado::STATUS_RESOLVIDO;
+        $confirmResolved = $status === TiChamado::STATUS_RESOLVIDO;
+        $reopen = $status === TiChamado::STATUS_EM_ANALISE && $wasResolved;
+
+        if ($status === null || $status === '') {
+            throw new \InvalidArgumentException('Selecione uma situação.');
+        }
+        if ($wasResolved && !$reopen) {
+            throw new \InvalidArgumentException('Chamado resolvido. Selecione "Reabrir chamado" e descreva o motivo.');
+        }
+        if (!$confirmResolved && !$reopen) {
+            throw new \InvalidArgumentException('Você só pode confirmar o chamado como resolvido ou reabri-lo.');
+        }
+        if ($reopen && $motivo === '') {
+            throw new \InvalidArgumentException('Descreva o motivo ao reabrir o chamado.');
+        }
+
+        if ($reopen) {
+            if ($motivo !== '') {
+                $chamado->addTimelineEvent('Resposta do solicitante: ' . $motivo, $actorName);
+            }
+            $this->applyReopen($chamado, $actorName);
+        } elseif ($confirmResolved) {
+            $labels = TiReferenceData::statusLabels();
+            $chamado->setStatus(TiChamado::STATUS_RESOLVIDO);
+            $chamado->setResolvidoEm(new \DateTimeImmutable());
+            if (!$chamado->isHeliaRevisado()) {
+                $chamado->setHeliaRevisado(true);
+            }
+            $chamado->addTimelineEvent(
+                'Status alterado para ' . ($labels[TiChamado::STATUS_RESOLVIDO] ?? 'Resolvido'),
+                $actorName,
+            );
+        }
+
+        $chamado->touch();
+        $this->em->flush();
+        $this->notifyOperatorsOnReply($chamado, $actor);
+
+        return $this->mapTicket($chamado);
+    }
+
+    /** @return array<string, mixed> */
+    private function formatChatMessage(int $seq, string $role, string $text, array $ev, array $ticket): array
+    {
+        $prefix = $role === 'ti' ? 'Resposta da TI: ' : 'Resposta do solicitante: ';
+        $body = str_starts_with($text, $prefix) ? substr($text, \strlen($prefix)) : $text;
+        $actor = (string) ($ev['actor'] ?? '');
+
+        return [
+            'seq' => $seq,
+            'role' => $role,
+            'body' => $body,
+            'at' => (string) ($ev['at'] ?? ''),
+            'actor' => $actor,
+            'display_name' => $role === 'ti'
+                ? ($actor !== '' ? $actor : 'Equipe de TI')
+                : (string) ($ticket['requester'] ?? 'Solicitante'),
+        ];
     }
 
     public function escalatePriority(Empresa $empresa, string $codigo, User $actor): array
@@ -189,7 +595,7 @@ final class TiChamadoService
         $chamado->setHeliaAplicado(true);
 
         $events = [
-            'Helia aplicou triagem · ' . $oldCat . '→' . $chamado->getCategoria()
+            AiAssistant::NAME . ' aplicou triagem · ' . $oldCat . '→' . $chamado->getCategoria()
             . ' · ' . $oldPri . '→' . $chamado->getPrioridade(),
         ];
 
@@ -198,7 +604,7 @@ final class TiChamadoService
             if ($technician !== null) {
                 $chamado->setResponsavel($technician);
                 $techName = $technician->getNome() ?: $technician->getEmail() ?: 'Técnico';
-                $events[] = 'Helia atribuiu a ' . $techName;
+                $events[] = AiAssistant::NAME . ' atribuiu a ' . $techName;
             }
         }
 
@@ -208,7 +614,7 @@ final class TiChamadoService
         }
 
         foreach ($events as $event) {
-            $chamado->addTimelineEvent($event, 'Helia');
+            $chamado->addTimelineEvent($event, AiAssistant::NAME);
         }
 
         $playbook = $this->playbooks->matchForTicket($this->mapTicket($chamado), $empresa);
@@ -229,11 +635,11 @@ final class TiChamadoService
     {
         $chamado = $this->requireEntity($empresa, $codigo);
         if ($chamado->getHeliaConfianca() === null) {
-            throw new \InvalidArgumentException('Chamado sem triagem Helia.');
+            throw new \InvalidArgumentException('Chamado sem triagem ' . AiAssistant::NAME . '.');
         }
 
         $chamado->setHeliaRevisado(true);
-        $chamado->addTimelineEvent('Triagem Helia revisada', $this->actorName($actor));
+        $chamado->addTimelineEvent('Triagem ' . AiAssistant::NAME . ' revisada', $this->actorName($actor));
         $chamado->touch();
         $this->em->flush();
 
@@ -310,7 +716,7 @@ final class TiChamadoService
                     'helia_review',
                     'info',
                     'fa-brain',
-                    'Revisar Helia',
+                    'Revisar ' . AiAssistant::NAME,
                     $confidence . '% confiança',
                     null,
                     null,
@@ -411,6 +817,14 @@ final class TiChamadoService
         $chamado->touch();
         $this->em->flush();
 
+        if ($status === TiChamado::STATUS_RESOLVIDO) {
+            $this->notifySolicitante(
+                $chamado,
+                'Chamado resolvido',
+                sprintf('%s foi marcado como resolvido. Avalie o atendimento quando puder.', $chamado->getCodigo()),
+            );
+        }
+
         return $this->mapTicket($chamado);
     }
 
@@ -484,8 +898,8 @@ final class TiChamadoService
             ->setAbertoEm($now)
             ->setTimeline([
                 ['at' => $now->format('d/m H:i'), 'event' => 'Chamado aberto', 'actor' => $actor],
-                ['at' => $now->format('d/m H:i'), 'event' => 'Triagem Cortex agendada', 'actor' => 'Helia'],
-                ['at' => $now->format('d/m H:i'), 'event' => 'Helia classificou · ' . $analysis['confidence'] . '% confiança', 'actor' => 'Cortex'],
+                ['at' => $now->format('d/m H:i'), 'event' => 'Triagem Cortex agendada', 'actor' => AiAssistant::NAME],
+                ['at' => $now->format('d/m H:i'), 'event' => AiAssistant::NAME . ' classificou · ' . $analysis['confidence'] . '% confiança', 'actor' => 'Cortex'],
             ]);
 
         if ($assetTag !== '') {
@@ -518,6 +932,8 @@ final class TiChamadoService
                 $this->em->flush();
             }
         }
+
+        $this->notifyOperatorsOnCreate($chamado, $user);
 
         return $this->mapTicket($chamado);
     }
@@ -640,7 +1056,7 @@ final class TiChamadoService
             $queue[] = [
                 'ticket_id' => $chamado->getCodigo(),
                 'title' => $chamado->getCodigo() . ' — ' . $chamado->getTitulo(),
-                'result' => $chamado->getHeliaAnalise() ?? 'Triagem Helia concluída',
+                'result' => $chamado->getHeliaAnalise() ?? 'Triagem ' . AiAssistant::NAME . ' concluída',
                 'confidence' => $chamado->getHeliaConfianca(),
                 'status' => $chamado->isHeliaRevisado() && $chamado->isHeliaAplicado() ? 'done' : 'review',
                 'applied' => $chamado->isHeliaAplicado(),
@@ -829,9 +1245,83 @@ final class TiChamadoService
         return $chamado;
     }
 
+    private function applyReopen(TiChamado $chamado, string $actorName): void
+    {
+        $labels = TiReferenceData::statusLabels();
+        $chamado->setStatus(TiChamado::STATUS_EM_ANALISE);
+        $chamado->setResolvidoEm(null);
+        $chamado->addTimelineEvent('Chamado reaberto', $actorName);
+        $chamado->addTimelineEvent(
+            'Status alterado para ' . ($labels[TiChamado::STATUS_EM_ANALISE] ?? 'Em análise'),
+            $actorName,
+        );
+    }
+
     private function actorName(User $user): string
     {
         return $user->getNome() ?: $user->getEmail() ?: 'Usuário';
+    }
+
+    private function notifyOperatorsOnCreate(TiChamado $chamado, User $creator): void
+    {
+        $empresa = $chamado->getEmpresa();
+        $link = '/ti/chamados/' . $chamado->getCodigo();
+        $titulo = 'Novo chamado ' . $chamado->getCodigo();
+        $mensagem = sprintf(
+            '%s abriu: %s',
+            $this->actorName($creator),
+            $chamado->getTitulo(),
+        );
+
+        foreach ($this->operatorsForEmpresa($empresa, $creator) as $operator) {
+            $this->notifications->notify($empresa, $operator, 'chamado_novo', $titulo, $mensagem, $link);
+        }
+    }
+
+    private function notifyOperatorsOnReply(TiChamado $chamado, User $author): void
+    {
+        $empresa = $chamado->getEmpresa();
+        $link = '/ti/chamados/' . $chamado->getCodigo();
+        $titulo = 'Resposta em ' . $chamado->getCodigo();
+        $mensagem = sprintf('%s respondeu no chamado.', $this->actorName($author));
+
+        $recipients = $this->operatorsForEmpresa($empresa, $author);
+        $assignee = $chamado->getResponsavel();
+        if ($assignee !== null && $assignee->getId() !== $author->getId()) {
+            $recipients = [$assignee];
+        }
+
+        foreach ($recipients as $operator) {
+            $this->notifications->notify($empresa, $operator, 'chamado_resposta', $titulo, $mensagem, $link);
+        }
+    }
+
+    private function notifySolicitante(TiChamado $chamado, string $titulo, string $mensagem): void
+    {
+        $this->notifications->notify(
+            $chamado->getEmpresa(),
+            $chamado->getSolicitante(),
+            'chamado_atualizado',
+            $titulo,
+            $mensagem,
+            '/ti/chamados/' . $chamado->getCodigo(),
+        );
+    }
+
+    /** @return list<User> */
+    private function operatorsForEmpresa(Empresa $empresa, ?User $exclude = null): array
+    {
+        $operators = [];
+        foreach ($this->userRepository->findActiveByEmpresa($empresa) as $user) {
+            if ($exclude !== null && $user->getId() === $exclude->getId()) {
+                continue;
+            }
+            if ($this->grants->grantAtLeast($user, TiGrantPolicy::SCOPE, 'chamados', TiGrantPolicy::OPERATE_CHAMADOS)) {
+                $operators[] = $user;
+            }
+        }
+
+        return $operators;
     }
 
     private function suggestTechnician(Empresa $empresa, string $category): ?User
@@ -920,7 +1410,7 @@ final class TiChamadoService
         $chamado->setHeliaFeedback($feedback);
         $chamado->setHeliaFeedbackEm(new \DateTimeImmutable());
         $chamado->addTimelineEvent(
-            $feedback === 'correct' ? 'Helia: sugestão confirmada' : 'Helia: sugestão rejeitada',
+            $feedback === 'correct' ? AiAssistant::NAME . ': sugestão confirmada' : AiAssistant::NAME . ': sugestão rejeitada',
             $this->actorName($actor),
         );
         $chamado->touch();

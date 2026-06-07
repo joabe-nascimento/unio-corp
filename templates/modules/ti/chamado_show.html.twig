@@ -4,77 +4,103 @@
 {% set cat_label = category_label|default(ticket.category|default('')|capitalize) %}
 {% set st_key = ticket.status|default('novo') %}
 
-<div class="ti-ticket-detail">
+<div class="ti-ticket-detail" id="ti-ticket-detail" data-ti-ticket-top>
     <div class="ti-ticket-detail-top mb-4">
         {% include 'components/ti/ticket_stage_strip.html.twig' with { ticket: ticket } %}
+        {% include 'components/ti/chamado_detail_toolbar.html.twig' with { ticket: ticket } %}
     </div>
 
-    <div class="row">
-        <div class="col-xl-8 mb-4">
+    <section class="unio-card mb-4 ti-ticket-detail-card">
+        <div class="ti-ticket-detail-header">
+            <div>
+                <code class="ti-ticket-code ti-ticket-code--lg">{{ ticket.id }}</code>
+                <h1 class="ti-ticket-detail-title">{{ ticket.title }}</h1>
+                <p class="section-subtitle mb-0">Aberto em {{ ticket.opened_at }} · {{ ticket.channel|default('Portal') }}</p>
+            </div>
+            <div class="ti-ticket-detail-badges">
+                {% include 'components/ti/ti_priority_badge.html.twig' with { priority: ticket.priority|default('P4') } %}
+                {% include 'components/ti/ti_ticket_status_badge.html.twig' with {
+                    status: st_key,
+                    status_labels: status_labels
+                } %}
+                {% if ticket.helia_confidence|default(null) %}
+                {% include 'components/ti/ti_helia_badge.html.twig' with {
+                    confidence: ticket.helia_confidence,
+                    style: 'helia'
+                } %}
+                {% endif %}
+                {% for tag in ticket.tags|default([]) %}
+                {% include 'components/ti/ti_tag_badge.html.twig' with { tag: tag } %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="ti-ticket-detail-sla mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                <span class="section-title mb-0">SLA operacional</span>
+                {% if sla_rule %}
+                <span class="text-muted small">Resposta {{ sla_rule.response }} · Resolução {{ sla_rule.resolution }}</span>
+                {% endif %}
+            </div>
+            {% include 'components/progress_inline.html.twig' with {
+                percent: ticket.sla_pct|default(100),
+                variant: ticket.sla_pct|default(100) < 50 ? 'danger' : (ticket.sla_pct|default(100) < 75 ? 'warning' : 'success'),
+                show_label: true
+            } %}
+        </div>
+
+        <div class="ti-ticket-detail-body mt-4">
+            <span class="perm-label d-block mb-2">Descrição</span>
+            <p class="ti-ticket-detail-summary">{{ ticket.summary }}</p>
+        </div>
+
+        <div class="ti-ticket-detail-meta mt-4">
+            <div><span class="perm-label">Solicitante</span><br><strong>{{ ticket.requester }}</strong></div>
+            <div><span class="perm-label">Responsável</span><br><strong data-ti-ticket-assignee-display>{{ ticket.assignee|default('—') }}</strong></div>
+            <div><span class="perm-label">Categoria</span><br><strong>{{ cat_label }}</strong></div>
+            <div><span class="perm-label">Impacto</span><br><strong>{{ ticket.impact|default('—')|capitalize }}</strong></div>
+            <div><span class="perm-label">Local</span><br><strong>{{ ticket.location|default('—')|replace({'-': ' '})|capitalize }}</strong></div>
+            <div><span class="perm-label">Usuários afetados</span><br><strong>{{ ticket.affected_users|default(1) }}</strong></div>
+            {% if ticket.asset_tag|default(null) %}
+            <div><span class="perm-label">Ativo</span><br><strong>{{ ticket.asset_tag }}</strong></div>
+            {% endif %}
+            {% if ticket.contact_phone|default(null) %}
+            <div><span class="perm-label">Contato</span><br><strong>{{ ticket.contact_phone }}</strong></div>
+            {% endif %}
+            {% if ticket.preferred_time|default(null) %}
+            <div><span class="perm-label">Horário preferido</span><br><strong>{{ ticket.preferred_time }}</strong></div>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="row ti-ticket-detail-columns align-items-start">
+        <div class="col-xl-8 ti-ticket-detail-primary">
+            {% include 'components/ti/chamado_conversation_panel.html.twig' with {
+                ticket: ticket,
+                status_labels: status_labels|default({}),
+                solicitante_status_options: solicitante_status_options|default({}),
+                technicians: technicians|default([])
+            } %}
+
+            {% if ti_can('rate_csat', { ticket: ticket }) %}
+            {% include 'components/ti/chamado_csat_panel.html.twig' %}
+            {% elseif ticket.csat_score|default(null) %}
             <section class="unio-card mb-4">
-                <div class="ti-ticket-detail-header">
-                    <div>
-                        <code class="ti-ticket-code ti-ticket-code--lg">{{ ticket.id }}</code>
-                        <h1 class="ti-ticket-detail-title">{{ ticket.title }}</h1>
-                        <p class="section-subtitle mb-0">Aberto em {{ ticket.opened_at }} · {{ ticket.channel|default('Portal') }}</p>
-                    </div>
-                    <div class="ti-ticket-detail-badges">
-                        {% include 'components/ti/ti_priority_badge.html.twig' with { priority: ticket.priority|default('P4') } %}
-                        {% include 'components/ti/ti_ticket_status_badge.html.twig' with {
-                            status: st_key,
-                            status_labels: status_labels
-                        } %}
-                        {% if ticket.helia_confidence|default(null) %}
-                        {% include 'components/ti/ti_helia_badge.html.twig' with {
-                            confidence: ticket.helia_confidence,
-                            style: 'helia'
-                        } %}
-                        {% endif %}
-                        {% for tag in ticket.tags|default([]) %}
-                        {% include 'components/ti/ti_tag_badge.html.twig' with { tag: tag } %}
-                        {% endfor %}
-                    </div>
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Sua avaliação',
+                    subtitle: 'Registrada em ' ~ ticket.csat_em|default('—')
+                } %}
+                <div class="ti-csat-result mb-2">
+                    {% for n in 1..5 %}
+                    <i class="fas fa-star" style="color:{{ n <= ticket.csat_score ? '#F59E0B' : '#CBD5E1' }};"></i>
+                    {% endfor %}
+                    <span class="ms-2 text-muted">{{ ticket.csat_score }}/5</span>
                 </div>
-
-                <div class="ti-ticket-detail-sla mt-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                        <span class="section-title mb-0">SLA operacional</span>
-                        {% if sla_rule %}
-                        <span class="text-muted small">Resposta {{ sla_rule.response }} · Resolução {{ sla_rule.resolution }}</span>
-                        {% endif %}
-                    </div>
-                    {% include 'components/progress_inline.html.twig' with {
-                        percent: ticket.sla_pct|default(100),
-                        variant: ticket.sla_pct|default(100) < 50 ? 'danger' : (ticket.sla_pct|default(100) < 75 ? 'warning' : 'success'),
-                        show_label: true
-                    } %}
-                </div>
-
-                <div class="ti-ticket-detail-body mt-4">
-                    <span class="perm-label d-block mb-2">Descrição</span>
-                    <p class="ti-ticket-detail-summary">{{ ticket.summary }}</p>
-                </div>
-
-                <div class="ti-ticket-detail-meta mt-4">
-                    <div><span class="perm-label">Solicitante</span><br><strong>{{ ticket.requester }}</strong></div>
-                    <div><span class="perm-label">Responsável</span><br><strong data-ti-ticket-assignee-display>{{ ticket.assignee|default('—') }}</strong></div>
-                    <div><span class="perm-label">Categoria</span><br><strong>{{ cat_label }}</strong></div>
-                    <div><span class="perm-label">Impacto</span><br><strong>{{ ticket.impact|default('—')|capitalize }}</strong></div>
-                    <div><span class="perm-label">Local</span><br><strong>{{ ticket.location|default('—')|replace({'-': ' '})|capitalize }}</strong></div>
-                    <div><span class="perm-label">Usuários afetados</span><br><strong>{{ ticket.affected_users|default(1) }}</strong></div>
-                    {% if ticket.asset_tag|default(null) %}
-                    <div><span class="perm-label">Ativo</span><br><strong>{{ ticket.asset_tag }}</strong></div>
-                    {% endif %}
-                    {% if ticket.contact_phone|default(null) %}
-                    <div><span class="perm-label">Contato</span><br><strong>{{ ticket.contact_phone }}</strong></div>
-                    {% endif %}
-                    {% if ticket.preferred_time|default(null) %}
-                    <div><span class="perm-label">Horário preferido</span><br><strong>{{ ticket.preferred_time }}</strong></div>
-                    {% endif %}
-                </div>
+                {% if ticket.csat_comentario|default(null) %}
+                <p class="mb-0 text-muted">{{ ticket.csat_comentario }}</p>
+                {% endif %}
             </section>
-
-            {% include 'components/ti/chamado_attachments_panel.html.twig' with { attachments: ticket.attachments|default([]) } %}
+            {% endif %}
 
             {% if ticket.helia_analysis|default(null) %}
             <section class="unio-card mb-4 ti-helia-analysis-card">
@@ -110,7 +136,7 @@
             <section class="unio-card">
                 {% include 'components/section_header.html.twig' with {
                     title: 'Chamados similares',
-                    subtitle: 'Helia · similaridade semântica de título'
+                    subtitle: ai_assistant_name ~ ' · similaridade semântica de título'
                 } %}
                 <div class="ti-related-list">
                 {% for sim in similar_tickets %}
@@ -128,36 +154,10 @@
             {% endif %}
         </div>
 
-        <div class="col-xl-4 mb-4">
+        <div class="col-xl-4 ti-ticket-detail-aside">
             {% include 'components/ti/helia_ticket_insight.html.twig' with { helia: helia, ticket: ticket } %}
 
-            <section class="unio-card mb-4">
-                {% include 'components/section_header.html.twig' with { title: 'Ações rápidas', subtitle: 'Operações comuns' } %}
-                <div class="ti-quick-actions">
-                    {% if ti_can('operate_chamados') %}
-                    {% include 'components/ti/chamado_status_form.html.twig' %}
-                    {% include 'components/ti/chamado_assign_form.html.twig' with { technicians: technicians|default([]) } %}
-                    {% include 'components/ti/chamado_nota_form.html.twig' %}
-                    {% if ti_can('manage_chamados') %}
-                    {% include 'components/ti/chamado_escalar_form.html.twig' %}
-                    {% endif %}
-                    {% endif %}
-                    <a href="{{ path(ti_portal_view|default(false) ? 'app_ti_meus_chamados' : 'app_ti_chamados') }}" class="btn-unio-ghost btn-sm">
-                        <i class="fas fa-list mr-1"></i> Voltar à lista
-                    </a>
-                </div>
-            </section>
-
-            {% if playbook|default(null) and ti_can('operate_chamados') %}
-            <section class="unio-card mb-4">
-                {% include 'components/section_header.html.twig' with { title: 'Playbook Cortex', subtitle: playbook.title|default('') } %}
-                <ol class="ti-helia-steps mb-0">
-                    {% for step in playbook.steps|default([]) %}
-                    <li>{{ step }}</li>
-                    {% endfor %}
-                </ol>
-            </section>
-            {% endif %}
+            {% include 'components/ti/chamado_playbook_panel.html.twig' with { ticket: ticket, playbook: playbook|default(null) } %}
 
             {% if ti_can('link_problema') and problemas|default([])|length > 0 %}
             <section class="unio-card mb-4">
@@ -183,7 +183,7 @@
 
             {% if suggested_technicians|default([])|length > 0 and ti_can('operate_chamados') %}
             <section class="unio-card mb-4">
-                {% include 'components/section_header.html.twig' with { title: 'Sugestão de técnico', subtitle: 'Helia · carga de trabalho' } %}
+                {% include 'components/section_header.html.twig' with { title: 'Sugestão de técnico', subtitle: ai_assistant_name ~ ' · carga de trabalho' } %}
                 <div class="ti-card-list">
                 {% for tech in suggested_technicians|slice(0, 3) %}
                 <div class="ti-card-list-item d-flex justify-content-between align-items-center">
@@ -195,20 +195,23 @@
             </section>
             {% endif %}
 
+            {% if ti_can('apply_helia') or ti_can('pause_sla') %}
             <section class="unio-card mb-4">
-                {% include 'components/section_header.html.twig' with { title: 'Ações Helia & SLA', subtitle: 'Feedback e controle de prazo' } %}
+                {% include 'components/section_header.html.twig' with { title: 'Ações ' ~ ai_assistant_name ~ ' & SLA', subtitle: 'Feedback e controle de prazo' } %}
+                {% if ti_can('apply_helia') %}
                 <div class="d-flex flex-wrap gap-2 mb-3">
                     <form method="post" action="{{ path('app_ti_chamado_helia_feedback', { id: ticket.id }) }}" class="m-0">
                         <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_helia_feedback_' ~ ticket.id) }}">
                         <input type="hidden" name="feedback" value="correct">
-                        <button type="submit" class="btn-unio-ghost btn-sm"><i class="fas fa-thumbs-up mr-1"></i> Helia certa</button>
+                        <button type="submit" class="btn-unio-ghost btn-sm"><i class="fas fa-thumbs-up mr-1"></i> {{ ai_assistant_name }} certa</button>
                     </form>
                     <form method="post" action="{{ path('app_ti_chamado_helia_feedback', { id: ticket.id }) }}" class="m-0">
                         <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_helia_feedback_' ~ ticket.id) }}">
                         <input type="hidden" name="feedback" value="incorrect">
-                        <button type="submit" class="btn-unio-ghost btn-sm"><i class="fas fa-thumbs-down mr-1"></i> Helia errada</button>
+                        <button type="submit" class="btn-unio-ghost btn-sm"><i class="fas fa-thumbs-down mr-1"></i> {{ ai_assistant_name }} errada</button>
                     </form>
                 </div>
+                {% endif %}
                 {% if ti_can('pause_sla') %}
                 <form method="post" action="{{ path('app_ti_chamado_sla_pausa', { id: ticket.id }) }}" class="d-flex flex-wrap gap-2 align-items-end">
                     <input type="hidden" name="_token" value="{{ csrf_token('ti_chamado_sla_pausa_' ~ ticket.id) }}">
@@ -227,12 +230,15 @@
                 </form>
                 {% endif %}
             </section>
+            {% endif %}
 
-            <section class="unio-card">
+            <section class="unio-card ti-timeline-card">
                 {% include 'components/section_header.html.twig' with { title: 'Timeline', subtitle: 'Histórico completo' } %}
-                {% include 'components/ti/ticket_timeline.html.twig' with {
-                    events: ticket.timeline|default([{ at: ticket.opened_at, event: 'Chamado registrado', actor: ticket.requester }])
-                } %}
+                <div class="ti-timeline-scroll">
+                    {% include 'components/ti/ticket_timeline.html.twig' with {
+                        events: ticket.timeline|default([{ at: ticket.opened_at, event: 'Chamado registrado', actor: ticket.requester }])
+                    } %}
+                </div>
             </section>
         </div>
     </div>
@@ -241,7 +247,24 @@
 
 {% block hub_toolbar_actions %}
 {{ parent() }}
-<a href="{{ path('app_ti_chamados') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-arrow-left mr-1"></i> Lista
-</a>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% set _ti_msg_count = 0 %}
+{% for ev in ticket.timeline|default([]) %}
+    {% set _ev_text = ev.event|default('') %}
+    {% if _ev_text starts with 'Resposta do solicitante:' or _ev_text starts with 'Resposta da TI:' %}
+        {% set _ti_msg_count = _ti_msg_count + 1 %}
+    {% endif %}
+{% endfor %}
+<script type="application/json" id="tiChamadoChatConfig">{{ {
+    ticketId: ticket.id,
+    pollUrl: path('app_ti_chamado_conversa_mensagens', { id: ticket.id }),
+    messageUrl: path('app_ti_chamado_mensagem', { id: ticket.id }),
+    showUrl: path('app_ti_chamado_show', { id: ticket.id }),
+    viewerRole: ti_can('operate_chamados') ? 'ti' : 'solicitante',
+    requesterName: ticket.requester|default('Solicitante'),
+    initialCount: _ti_msg_count
+}|json_encode|raw }}</script>
 {% endblock %}
