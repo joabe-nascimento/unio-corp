@@ -1,0 +1,23 @@
+{# Exibe asset de imagem — SVG usa <object> para carregar dependências externas #}
+{% set _href = href|default('') %}
+{% set _alt = alt|default('') %}
+{% set _classes = class|default('') %}
+{% set _is_svg = _href|lower ends with '.svg' %}
+
+{% if _is_svg %}
+<object type="image/svg+xml"
+        data="{{ _href }}"
+        class="platform-asset-svg {{ _classes }}"
+        aria-label="{{ _alt }}"
+        {% if width is defined %}width="{{ width }}"{% endif %}
+        {% if height is defined %}height="{{ height }}"{% endif %}
+        {% if id is defined %}id="{{ id }}"{% endif %}></object>
+{% else %}
+<img src="{{ _href }}"
+     alt="{{ _alt }}"
+     {% if _classes %}class="{{ _classes }}"{% endif %}
+     {% if width is defined %}width="{{ width }}"{% endif %}
+     {% if height is defined %}height="{{ height }}"{% endif %}
+     {% if id is defined %}id="{{ id }}"{% endif %}
+     {% if crossorigin is defined %}crossorigin="{{ crossorigin }}"{% endif %}>
+{% endif %}

@@ -30,7 +30,14 @@
              data-custom="{{ _is_custom ? '1' : '0' }}">
 
             {% if _is_custom %}
+            {% if _custom_href|lower ends with '.svg' %}
+            <div class="cfg-preview-svg-host cfg-preview-img"
+                 data-role="preview-host"
+                 data-preview-src="{{ _custom_href }}"
+                 aria-label="{{ _alt }}"></div>
+            {% else %}
             <img src="{{ _custom_href }}" alt="{{ _alt }}" class="cfg-preview-img" data-role="preview-img">
+            {% endif %}
             {% else %}
             <div class="cfg-preview-default" data-role="preview-default" aria-label="{{ _alt }}">
                 {% include 'components/logo_placeholder_inline.html.twig' with { type: _placeholder_type } only %}

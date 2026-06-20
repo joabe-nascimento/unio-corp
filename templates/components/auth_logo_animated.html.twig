@@ -1,8 +1,8 @@
-{# Logotipo animado — tela de login #}
+{# Logotipo animado — tela de login (GSAP + SVG inline) #}
 {% set _variant = variant|default('full') %}
-{% set _src = platform_asset_src(_variant) %}
+{% set _src = src|default('')|trim != '' ? src : platform_asset_src(_variant) %}
 {% set _href = public_asset_href(_src) %}
-{% set _custom = platform_asset_custom(_variant) %}
+{% set _custom = src|default('')|trim != '' or platform_asset_custom(_variant) %}
 {% set _name = platform_config.plataforma_nome|default('Unio') %}
 {% set _classes = [
     'auth-logo-anim__img',
@@ -10,21 +10,28 @@
     _custom ? '' : 'platform-logo--placeholder',
 ]|filter(v => v)|join(' ') %}
 
-<div class="auth-logo-anim{{ _custom ? '' : ' auth-logo-anim--placeholder' }}" data-auth-logo-anim>
+{% if _custom %}
+<div class="auth-logo-anim auth-logo-anim--gsap"
+     data-auth-logo-anim
+     data-logo-src="{{ _href }}"
+     data-logo-label="{{ alt|default(_name) }}">
+    <div class="auth-logo-anim__fx" aria-hidden="true">
+        <span class="auth-logo-anim__ring auth-logo-anim__ring--1"></span>
+        <span class="auth-logo-anim__ring auth-logo-anim__ring--2"></span>
+        <span class="auth-logo-anim__ring auth-logo-anim__ring--3"></span>
+        <span class="auth-logo-anim__spark auth-logo-anim__spark--1"></span>
+        <span class="auth-logo-anim__spark auth-logo-anim__spark--2"></span>
+        <span class="auth-logo-anim__spark auth-logo-anim__spark--3"></span>
+    </div>
     <div class="auth-logo-anim__glow" aria-hidden="true"></div>
+    <div class="auth-logo-anim__stage" data-auth-logo-stage></div>
+</div>
+{% else %}
+<div class="auth-logo-anim auth-logo-anim--placeholder" data-auth-logo-anim>
     <div class="auth-logo-anim__stage">
-        {% if _custom %}
-        <img src="{{ _href }}"
-             alt="{{ alt|default(_name) }}"
-             class="{{ _classes }}"
-             width="945"
-             height="480"
-             decoding="async"
-             fetchpriority="high">
-        {% else %}
         <span class="platform-logo-placeholder-wrap {{ _classes }}" aria-label="{{ alt|default(_name) }}">
             {% include 'components/logo_placeholder_inline.html.twig' with { type: 'full' } only %}
         </span>
-        {% endif %}
     </div>
 </div>
+{% endif %}

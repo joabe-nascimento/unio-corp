@@ -217,6 +217,42 @@ class ConfiguracoesControllerTest extends WebTestCase
         self::assertSame('Unio Preservado', $config->get('plataforma_nome'));
     }
 
+    public function testLogoUploadNotClearedByClearFlag(): void
+    {
+        $this->loginAsTenant();
+        $crawler = $this->client->request('GET', '/admin/configuracoes');
+        $token   = $crawler->filter('#cfgForm input[name="_token"]')->attr('value');
+
+        $projectDir = static::getContainer()->getParameter('kernel.project_dir');
+        $fixture    = $projectDir . '/assets/unio-logotipo.png';
+        if (!is_file($fixture)) {
+            self::markTestSkipped('Fixture de logo não encontrado.');
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'logo');
+        copy($fixture, $tmp);
+        $upload = new UploadedFile($tmp, 'logo-test.png', 'image/png', null, true);
+
+        $this->client->request('POST', '/admin/configuracoes', [
+            '_token'          => $token,
+            'plataforma_nome' => 'Unio',
+            'logo_url'        => '',
+            'logo_url_clear'  => '1',
+            'cor_primaria'    => '#4F7FFF',
+            'tema'            => 'dark',
+            'senha_min'       => '8',
+            'sessao_timeout'  => '120',
+        ], [
+            'logo_file' => $upload,
+        ]);
+
+        self::assertResponseRedirects();
+        @unlink($tmp);
+
+        $logoUrl = static::getContainer()->get(PlatformConfigService::class)->get('logo_url');
+        self::assertStringStartsWith('/uploads/config/', $logoUrl);
+    }
+
     public function testInvalidCsrfRejected(): void
     {
         $this->loginAsTenant();

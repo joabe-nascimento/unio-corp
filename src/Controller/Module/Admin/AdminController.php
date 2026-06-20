@@ -11,6 +11,7 @@ use App\Repository\UserRepository;
 use App\Service\OnboardingProgressService;
 use App\Service\PermissionService;
 use App\Service\PlatformConfigService;
+use App\Service\SvgAssetBundlingService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -48,6 +49,7 @@ class AdminController extends AbstractController
         private EntityManagerInterface $em,
         private UserPasswordHasherInterface $passwordHasher,
         private PlatformConfigService $platformConfig,
+        private SvgAssetBundlingService $svgAssetBundling,
     ) {}
 
     // ────────────────────────── INDEX ──────────────────────────────────
@@ -432,8 +434,18 @@ class AdminController extends AbstractController
     public function configuracoes(Request $request): Response
     {
         if ($request->isMethod('POST')) {
-            if (!$this->isCsrfTokenValid('admin_config', (string) $request->request->get('_token'))) {
-                $this->addFlash('error', 'Token inválido.');
+            $token = (string) $request->request->get('_token');
+            if (!$this->isCsrfTokenValid('admin_config', $token)) {
+                $contentLength = (int) $request->headers->get('Content-Length', 0);
+                if ($contentLength > 0 && $token === '' && $request->request->count() === 0) {
+                    $this->addFlash('error', sprintf(
+                        'O envio excedeu o limite do PHP (post_max_size: %s). Reduza o tamanho dos arquivos ou aumente o limite no php.ini.',
+                        ini_get('post_max_size') ?: '8M'
+                    ));
+                } else {
+                    $this->addFlash('error', 'Sessão expirada ou token inválido. Recarregue a página e tente salvar novamente.');
+                }
+
                 return $this->redirectToRoute('app_admin_configuracoes');
             }
 
@@ -444,6 +456,7 @@ class AdminController extends AbstractController
                 'msg_manutencao',
             ];
             $newConfig = [];
+            $hadAssetErrors = false;
 
             // ── File uploads (logo, favicon, sidebar logos) ──
             $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/config';
@@ -469,6 +482,7 @@ class AdminController extends AbstractController
                             $label,
                             ini_get('upload_max_filesize') ?: '2M'
                         ));
+                        $hadAssetErrors = true;
                     }
                     continue;
                 }
@@ -486,6 +500,7 @@ class AdminController extends AbstractController
                         },
                         ini_get('upload_max_filesize') ?: '2M'
                     ));
+                    $hadAssetErrors = true;
                     continue;
                 }
 
@@ -513,7 +528,15 @@ class AdminController extends AbstractController
                                 default          => 'enviado',
                             }
                         ));
+                        $hadAssetErrors = true;
                         continue;
+                    }
+
+                    if (str_ends_with(strtolower($movedPath), '.svg')) {
+                        $this->svgAssetBundling->bundleExternalAssets(
+                            $movedPath,
+                            $this->getParameter('kernel.project_dir') . '/public'
+                        );
                     }
 
                     $old = $this->platformConfig->get($cfgKey, '');
@@ -526,27 +549,28 @@ class AdminController extends AbstractController
                     $newConfig[$cfgKey] = '/uploads/config/' . $safeName;
                 } catch (FileException) {
                     $this->addFlash('warning', "Não foi possível salvar o arquivo {$inputName}.");
+                    $hadAssetErrors = true;
                 }
             }
 
             foreach ($fields as $f) {
-                $value = trim((string) $request->request->get($f, ''));
-
                 if (\in_array($f, self::IMAGE_URL_FIELDS, true)) {
+                    // Upload neste request tem prioridade sobre _clear e URL vazia
+                    if (isset($newConfig[$f])) {
+                        continue;
+                    }
                     if ($request->request->getBoolean($f . '_clear')) {
                         $newConfig[$f] = '';
                         continue;
                     }
-                    if (isset($newConfig[$f])) {
-                        continue;
-                    }
+                    $value = trim((string) $request->request->get($f, ''));
                     if ($value !== '') {
                         $newConfig[$f] = $value;
                     }
                     continue;
                 }
 
-                $newConfig[$f] = $value;
+                $newConfig[$f] = trim((string) $request->request->get($f, ''));
             }
 
             $bools = ['manutencao', 'senha_maiuscula', 'senha_numero', 'registro_publico'];
@@ -559,13 +583,18 @@ class AdminController extends AbstractController
 
             $this->platformConfig->save($newConfig);
 
-            $this->addFlash('success', "Configura\u{00E7}\u{00F5}es salvas com sucesso.");
+            if ($hadAssetErrors) {
+                $this->addFlash('warning', 'Algumas configurações foram salvas, mas houve problemas com um ou mais arquivos de imagem.');
+            } else {
+                $this->addFlash('success', "Configura\u{00E7}\u{00F5}es salvas com sucesso.");
+            }
             return $this->redirectToRoute('app_admin_configuracoes', ['saved' => 1]);
         }
 
         $config = $this->platformConfig->all();
         $config['mem_limit']  = @ini_get('memory_limit') ?: '—';
         $config['upload_max'] = @ini_get('upload_max_filesize') ?: '—';
+        $config['post_max']   = @ini_get('post_max_size') ?: '—';
 
         return $this->render(self::T . 'configuracoes.html.twig', [
             'config' => $config,
@@ -658,11 +687,16 @@ class AdminController extends AbstractController
 
     private function isValidAssetFile(string $path): bool
     {
-        if (!is_file($path) || filesize($path) < 200) {
+        if (!is_file($path)) {
             return false;
         }
 
         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $minBytes = $ext === 'svg' ? 80 : 200;
+        if (filesize($path) < $minBytes) {
+            return false;
+        }
+
         if ($ext === 'svg') {
             return true;
         }

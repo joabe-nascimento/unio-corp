@@ -36,7 +36,9 @@
     <div class="cfg-content">
 
         <form method="post" action="{{ path('app_admin_configuracoes') }}" class="unio-form" id="cfgForm"
-              enctype="multipart/form-data">
+              enctype="multipart/form-data"
+              data-upload-max="{{ config.upload_max|default('32M') }}"
+              data-post-max="{{ config.post_max|default('48M') }}">
         <input type="hidden" name="_token" value="{{ csrf_token('admin_config') }}">
 
         {# ── 1. Identidade da Plataforma ── #}
@@ -66,6 +68,7 @@
                     placeholder: 'Ex.: Plataforma de Gestão de Pessoas'
                 } %}
 
+                {% set _upload_max = config.upload_max|default('32M') %}
                 <div class="cfg-row-2">
                     {% include 'components/cfg_asset_preview.html.twig' with {
                         variant: 'logo',
@@ -78,7 +81,7 @@
                         label: 'Logotipo',
                         alt: 'Logo atual',
                         url_placeholder: '/uploads/… ou https://…/logo.svg',
-                        file_hint: 'PNG, SVG, JPG, ICO — máx. 2 MB',
+                        file_hint: 'PNG, SVG, JPG, ICO — máx. ' ~ _upload_max,
                         file_accept: 'image/*,.ico,.svg'
                     } %}
 
@@ -94,7 +97,7 @@
                         label: 'Favicon',
                         alt: 'Favicon atual',
                         url_placeholder: '/uploads/… ou https://…/favicon.ico',
-                        file_hint: 'ICO, PNG, SVG — máx. 512 KB',
+                        file_hint: 'ICO, PNG, SVG — máx. ' ~ _upload_max,
                         file_accept: 'image/*,.ico'
                     } %}
                 </div>
@@ -118,7 +121,7 @@
                         label_style: 'font-size:11px;',
                         alt: 'Ícone atual',
                         url_placeholder: '/uploads/… ou https://…/mark.png',
-                        file_hint: 'PNG, SVG — máx. 2 MB',
+                        file_hint: 'PNG, SVG — máx. ' ~ _upload_max,
                         file_accept: 'image/*,.svg'
                     } %}
 
@@ -134,7 +137,7 @@
                         label_style: 'font-size:11px;',
                         alt: 'Logotipo atual',
                         url_placeholder: '/uploads/… ou https://…/logotipo.png',
-                        file_hint: 'PNG, SVG — máx. 2 MB',
+                        file_hint: 'PNG, SVG — máx. ' ~ _upload_max,
                         file_accept: 'image/*,.svg'
                     } %}
                 </div>
@@ -346,6 +349,7 @@
                         { label: 'Servidor',          value: constant('PHP_OS') },
                         { label: 'Memória máxima',    value: config.mem_limit|default('—') },
                         { label: 'Upload máximo',     value: config.upload_max|default('—') },
+                        { label: 'POST máximo',       value: config.post_max|default('—') },
                     ] %}
                     {% for item in info_items %}
                     <div class="cfg-info-item">
@@ -447,6 +451,7 @@
         var fileInputId = picker.dataset.fileInputId;
         var urlInput   = document.getElementById(urlInputId);
         var fileInput  = document.getElementById(fileInputId);
+        var clearInput = picker.querySelector('.cfg-img-panel[data-panel="url"] input[type="hidden"]');
         var preview    = picker.querySelector('.cfg-img-preview img') ||
                          picker.querySelector('.cfg-img-preview');
 
@@ -472,6 +477,9 @@
         // URL input: live preview
         if (urlInput) {
             urlInput.addEventListener('input', function () {
+                if (clearInput && urlInput.value.trim() !== '') {
+                    clearInput.value = '0';
+                }
                 refreshPreview(picker, urlInput.value);
             });
         }
@@ -480,9 +488,30 @@
         if (fileInput) {
             fileInput.addEventListener('change', function () {
                 if (!fileInput.files || !fileInput.files[0]) { return; }
+                if (clearInput) { clearInput.value = '0'; }
                 var file = fileInput.files[0];
                 var label = picker.querySelector('.cfg-file-drop-label');
                 if (label) { label.textContent = file.name; }
+                ensureRemoveButton(picker, urlInput, fileInput, clearInput);
+                var previewEl = picker.querySelector('.cfg-img-preview');
+                if (isSvgSrc(file.name)) {
+                    var textReader = new FileReader();
+                    textReader.onload = function (e) {
+                        if (!previewEl) { return; }
+                        previewEl.classList.remove('cfg-img-preview--default');
+                        previewEl.dataset.custom = '1';
+                        previewEl.innerHTML = '';
+                        var host = document.createElement('div');
+                        host.className = 'cfg-preview-svg-host cfg-preview-img';
+                        host.dataset.role = 'preview-host';
+                        previewEl.appendChild(host);
+                        if (!mountInlineSvg(host, e.target.result, '')) {
+                            showDefaultPreview(previewEl, picker);
+                        }
+                    };
+                    textReader.readAsText(file);
+                    return;
+                }
                 var reader = new FileReader();
                 reader.onload = function (e) { refreshPreview(picker, e.target.result); };
                 reader.readAsDataURL(file);
@@ -515,12 +544,124 @@
         });
     });
 
+    function fallbackAssetPreview(previewEl, src) {
+        if (!previewEl || !src) { return; }
+        var url = resolvePreviewSrc(src);
+        previewEl.innerHTML = '';
+        previewEl.classList.remove('cfg-img-preview--default');
+        previewEl.dataset.custom = '1';
+        if (isSvgSrc(src)) {
+            var obj = document.createElement('object');
+            obj.type = 'image/svg+xml';
+            obj.data = url;
+            obj.className = 'cfg-preview-img platform-asset-svg';
+            obj.setAttribute('aria-label', 'Preview');
+            previewEl.appendChild(obj);
+            return;
+        }
+        var img = document.createElement('img');
+        img.className = 'cfg-preview-img';
+        img.alt = 'Preview';
+        img.src = url;
+        previewEl.appendChild(img);
+    }
+
+    function ensureRemoveButton(picker, urlInput, fileInput, clearInput) {
+        if (!picker || picker.querySelector('.cfg-img-remove')) { return; }
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cfg-img-remove';
+        btn.dataset.picker = picker.id;
+        btn.dataset.urlInput = urlInput ? urlInput.id : '';
+        btn.dataset.fileInput = fileInput ? fileInput.id : '';
+        btn.dataset.clearInput = clearInput ? clearInput.id : '';
+        btn.innerHTML = '<i class="fas fa-trash-alt fa-xs mr-1"></i> Remover';
+        btn.addEventListener('click', function () {
+            if (urlInput) { urlInput.value = ''; }
+            if (fileInput) { fileInput.value = ''; }
+            if (clearInput) { clearInput.value = '1'; }
+            refreshPreview(picker, '');
+            btn.remove();
+        });
+        picker.querySelector('.cfg-img-controls').appendChild(btn);
+    }
+
     function resolvePreviewSrc(src) {
         if (!src) { return ''; }
         if (/^https?:\/\//i.test(src)) { return src; }
         if (/^data:/i.test(src)) { return src; }
         if (src.charAt(0) === '/') { return src; }
         return '/' + src.replace(/^\.\//, '');
+    }
+
+    function isSvgSrc(src) {
+        if (!src) { return false; }
+        if (/^data:image\/svg/i.test(src)) { return true; }
+        var clean = String(src).split('?')[0].split('#')[0];
+        return /\.svg$/i.test(clean);
+    }
+
+    function resolveSvgBase(src) {
+        if (/^data:/i.test(src)) { return ''; }
+        return resolvePreviewSrc(src).replace(/[^/]+$/, '');
+    }
+
+    function mountInlineSvg(host, svgText, base) {
+        host.innerHTML = svgText;
+        var svg = host.querySelector('svg');
+        if (!svg) { return false; }
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.display = 'block';
+        if (base) {
+            svg.querySelectorAll('[href], [xlink\\:href]').forEach(function (node) {
+                var attr = node.hasAttribute('href') ? 'href' : 'xlink:href';
+                var val = node.getAttribute(attr);
+                if (!val || /^(https?:|data:|#|\/)/i.test(val)) { return; }
+                node.setAttribute(attr, base + val.replace(/^\.\//, ''));
+            });
+        }
+        return true;
+    }
+
+    function renderAssetPreview(previewEl, src, onFail) {
+        previewEl.innerHTML = '';
+        if (isSvgSrc(src)) {
+            if (/^data:/i.test(src)) {
+                var dataImg = document.createElement('img');
+                dataImg.className = 'cfg-preview-img';
+                dataImg.alt = 'Preview';
+                dataImg.src = src;
+                dataImg.addEventListener('error', onFail);
+                previewEl.appendChild(dataImg);
+                return;
+            }
+            var host = document.createElement('div');
+            host.className = 'cfg-preview-svg-host cfg-preview-img';
+            host.dataset.role = 'preview-host';
+            previewEl.appendChild(host);
+            var url = resolvePreviewSrc(src);
+            fetch(url, { credentials: 'same-origin' })
+                .then(function (res) {
+                    if (!res.ok) { throw new Error('fetch failed'); }
+                    return res.text();
+                })
+                .then(function (text) {
+                    if (!mountInlineSvg(host, text, resolveSvgBase(src))) {
+                        throw new Error('invalid svg');
+                    }
+                })
+                .catch(onFail);
+            return;
+        }
+        var img = document.createElement('img');
+        img.className = 'cfg-preview-img';
+        img.alt = 'Preview';
+        img.src = resolvePreviewSrc(src);
+        img.addEventListener('error', onFail);
+        previewEl.appendChild(img);
     }
 
     function showDefaultPreview(previewEl, picker) {
@@ -541,16 +682,9 @@
         }
         previewEl.classList.remove('cfg-img-preview--default');
         previewEl.dataset.custom = '1';
-        previewEl.innerHTML = '';
-        var img = document.createElement('img');
-        img.className = 'cfg-preview-img';
-        img.dataset.role = 'preview-img';
-        img.alt = 'Preview';
-        img.src = resolvePreviewSrc(src);
-        img.addEventListener('error', function () {
-            showDefaultPreview(previewEl, picker);
+        renderAssetPreview(previewEl, src, function () {
+            fallbackAssetPreview(previewEl, src);
         });
-        previewEl.appendChild(img);
     }
 
     function refreshPreview(picker, src) {
@@ -563,9 +697,29 @@
         }
     }
 
+    document.querySelectorAll('.cfg-img-preview [data-preview-src]').forEach(function (host) {
+        var previewEl = host.closest('.cfg-img-preview');
+        var picker = host.closest('.cfg-img-picker');
+        if (!previewEl || !picker) { return; }
+        var src = host.dataset.previewSrc;
+        fetch(resolvePreviewSrc(src), { credentials: 'same-origin' })
+            .then(function (res) {
+                if (!res.ok) { throw new Error('fetch failed'); }
+                return res.text();
+            })
+            .then(function (text) {
+                if (!mountInlineSvg(host, text, resolveSvgBase(src))) {
+                    throw new Error('invalid svg');
+                }
+            })
+            .catch(function () {
+                fallbackAssetPreview(previewEl, src);
+            });
+    });
+
     document.querySelectorAll('.cfg-img-picker').forEach(function (picker) {
         var previewEl = picker.querySelector('.cfg-img-preview');
-        var img = previewEl && previewEl.querySelector('.cfg-preview-img[data-role="preview-img"]');
+        var img = previewEl && previewEl.querySelector('img.cfg-preview-img');
         if (img) {
             img.addEventListener('error', function () {
                 showDefaultPreview(previewEl, picker);
@@ -578,6 +732,64 @@
     if (hint && window.location.search.indexOf('saved=1') !== -1) {
         hint.hidden = false;
         setTimeout(function () { hint.hidden = true; }, 4000);
+    }
+
+    function parseIniSize(value) {
+        if (!value) { return 0; }
+        var v = String(value).trim().toLowerCase();
+        var n = parseFloat(v);
+        if (isNaN(n)) { return 0; }
+        if (v.endsWith('g')) { return n * 1024 * 1024 * 1024; }
+        if (v.endsWith('m')) { return n * 1024 * 1024; }
+        if (v.endsWith('k')) { return n * 1024; }
+        return n;
+    }
+
+    var cfgForm = document.getElementById('cfgForm');
+    if (cfgForm) {
+        cfgForm.addEventListener('submit', function (e) {
+            var uploadMax = parseIniSize(cfgForm.dataset.uploadMax);
+            var postMax = parseIniSize(cfgForm.dataset.postMax);
+            var total = 0;
+            var tooLarge = null;
+
+            cfgForm.querySelectorAll('input[type="file"]').forEach(function (input) {
+                if (!input.files || !input.files[0]) {
+                    input.disabled = true;
+                    return;
+                }
+                var picker = input.closest('.cfg-img-picker');
+                if (picker) {
+                    var clear = picker.querySelector('.cfg-img-panel[data-panel="url"] input[type="hidden"]');
+                    if (clear) { clear.value = '0'; }
+                }
+                var size = input.files[0].size;
+                total += size;
+                if (uploadMax > 0 && size > uploadMax) {
+                    tooLarge = input.files[0].name;
+                }
+            });
+
+            if (tooLarge) {
+                e.preventDefault();
+                cfgForm.querySelectorAll('input[type="file"]').forEach(function (input) {
+                    input.disabled = false;
+                });
+                window.alert('O arquivo "' + tooLarge + '" excede o limite por arquivo (' + cfgForm.dataset.uploadMax + '). Use um arquivo menor ou a opção URL.');
+                return;
+            }
+
+            if (postMax > 0 && total > postMax * 0.9) {
+                e.preventDefault();
+                cfgForm.querySelectorAll('input[type="file"]').forEach(function (input) {
+                    input.disabled = false;
+                });
+                window.alert(
+                    'Os arquivos selecionados somam ~' + Math.ceil(total / (1024 * 1024)) + ' MB e podem exceder o limite do servidor (' +
+                    cfgForm.dataset.postMax + '). Salve um logo por vez ou use arquivos SVG otimizados.'
+                );
+            }
+        });
     }
 }());
 </script>

@@ -153,8 +153,11 @@
             .auth-deco { animation: none !important; }
             .auth-logo-anim,
             .auth-logo-anim *,
-            .auth-left-tagline--anim { animation: none !important; }
-            .auth-logo-anim__img { opacity: 1 !important; clip-path: none !important; transform: none !important; filter: none !important; }
+            .auth-left-tagline--anim { animation: none !important; transition: none !important; }
+            .auth-logo-anim,
+            .auth-logo-anim--ready { opacity: 1 !important; }
+            .auth-logo-anim__fx,
+            .auth-logo-anim__glow { display: none !important; }
         }
 
         .auth-left-inner,
@@ -177,162 +180,105 @@
             padding-top: 32px;
         }
 
-        /* ── Logotipo animado ───────────────────────────── */
+        /* ── Logotipo animado (GSAP + SVG inline) ─────── */
         .auth-logo-anim {
             position: relative;
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             opacity: 0;
-            animation: authLogoWrapIn 0.5s ease forwards;
+            transition: opacity 0.25s ease;
+        }
+
+        .auth-logo-anim--ready {
+            opacity: 1;
+        }
+
+        .auth-logo-anim__fx {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .auth-logo-anim__ring {
+            position: absolute;
+            left: 21%;
+            top: 48%;
+            width: min(38%, 168px);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 1.5px solid rgba(79, 127, 255, 0.45);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            box-shadow: 0 0 24px rgba(79, 127, 255, 0.15);
+        }
+
+        .auth-logo-anim__ring--2 { border-color: rgba(45, 212, 191, 0.35); }
+        .auth-logo-anim__ring--3 { border-color: rgba(255, 255, 255, 0.2); }
+
+        .auth-logo-anim__spark {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(120, 180, 255, 0.9);
+            box-shadow: 0 0 10px rgba(79, 127, 255, 0.8);
+            opacity: 0;
+            left: 21%;
+            top: 48%;
+            margin: -2.5px 0 0 -2.5px;
         }
 
         .auth-logo-anim__glow {
             position: absolute;
-            left: 8%;
+            left: 21%;
             top: 50%;
-            width: 38%;
-            height: 72%;
-            transform: translateY(-50%);
+            width: min(36%, 150px);
+            aspect-ratio: 1;
+            transform: translate(-50%, -50%);
             border-radius: 50%;
-            background: radial-gradient(ellipse at center, rgba(79, 127, 255, 0.42) 0%, transparent 68%);
+            background: radial-gradient(circle, rgba(79, 127, 255, 0.38) 0%, rgba(45, 212, 191, 0.1) 45%, transparent 72%);
             opacity: 0;
             pointer-events: none;
-            animation: authLogoGlowPulse 2.8s ease-in-out 0.35s forwards;
+            z-index: 0;
         }
 
         [data-theme="light"] .auth-logo-anim__glow {
-            background: radial-gradient(ellipse at center, rgba(79, 127, 255, 0.28) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(79, 127, 255, 0.24) 0%, rgba(45, 212, 191, 0.06) 45%, transparent 72%);
         }
 
         .auth-logo-anim__stage {
             position: relative;
             z-index: 1;
-            overflow: hidden;
+            overflow: visible;
         }
 
-        .auth-logo-anim__stage::after {
-            content: '';
-            position: absolute;
-            inset: -4% -8%;
-            background: linear-gradient(
-                105deg,
-                transparent 38%,
-                rgba(255, 255, 255, 0.22) 48%,
-                rgba(255, 255, 255, 0.38) 50%,
-                rgba(255, 255, 255, 0.18) 52%,
-                transparent 62%
-            );
-            transform: translateX(-130%) skewX(-12deg);
-            pointer-events: none;
-            opacity: 0;
-            animation: authLogoShine 1.1s ease-in-out 1.15s forwards;
+        .auth-logo-anim--loading .auth-logo-anim__stage {
+            min-height: clamp(100px, 22vh, 200px);
         }
 
-        [data-theme="light"] .auth-logo-anim__stage::after {
-            background: linear-gradient(
-                105deg,
-                transparent 38%,
-                rgba(255, 255, 255, 0.55) 48%,
-                rgba(255, 255, 255, 0.75) 50%,
-                rgba(255, 255, 255, 0.45) 52%,
-                transparent 62%
-            );
-        }
-
-        @keyframes authLogoShine {
-            0% { opacity: 0; transform: translateX(-130%) skewX(-12deg); }
-            20% { opacity: 1; }
-            100% { opacity: 0; transform: translateX(130%) skewX(-12deg); }
-        }
-
+        .auth-logo-anim__svg,
         .auth-logo-anim__img,
         .auth-logo-anim .platform-logo-placeholder-wrap {
             display: block;
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             height: auto;
             max-height: min(52vh, 380px);
             object-fit: contain;
             object-position: left center;
+            overflow: visible;
         }
 
-        .auth-logo-anim__img {
-            opacity: 0;
-            transform: translateY(14px) scale(0.96);
-            filter: blur(6px);
-            clip-path: inset(0 56% 0 0 round 2px);
-            animation:
-                authLogoIconIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards,
-                authLogoReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
-        }
-
-        .auth-logo-anim--placeholder .auth-logo-anim__img,
         .auth-logo-anim--placeholder .platform-logo-placeholder-wrap {
-            clip-path: none;
+            opacity: 0;
             animation: authLogoFadeIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
         }
 
-        .auth-logo-anim--idle .auth-logo-anim__stage {
-            animation: authLogoFloat 5.5s ease-in-out infinite;
-        }
-
-        .auth-logo-anim--idle .auth-logo-anim__glow {
-            animation: authLogoGlowIdle 4s ease-in-out infinite;
-        }
-
-        @keyframes authLogoWrapIn {
+        @keyframes authLogoFadeIn {
             to { opacity: 1; }
         }
 
-        @keyframes authLogoIconIn {
-            0% {
-                opacity: 0;
-                transform: translateY(14px) scale(0.96);
-                filter: blur(6px);
-                clip-path: inset(0 56% 0 0 round 2px);
-            }
-            55% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-                clip-path: inset(0 56% 0 0 round 2px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-                clip-path: inset(0 56% 0 0 round 2px);
-            }
-        }
-
-        @keyframes authLogoReveal {
-            from { clip-path: inset(0 56% 0 0 round 2px); }
-            to { clip-path: inset(0 0 0 0 round 2px); }
-        }
-
-        @keyframes authLogoFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-            }
-        }
-
-        @keyframes authLogoGlowPulse {
-            0% { opacity: 0; transform: translateY(-50%) scale(0.85); }
-            45% { opacity: 0.85; transform: translateY(-50%) scale(1.05); }
-            100% { opacity: 0.55; transform: translateY(-50%) scale(1); }
-        }
-
-        @keyframes authLogoGlowIdle {
-            0%, 100% { opacity: 0.4; transform: translateY(-50%) scale(1); }
-            50% { opacity: 0.7; transform: translateY(-50%) scale(1.06); }
-        }
-
-        @keyframes authLogoFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
 
         .auth-left-tagline--anim {
             opacity: 0;
@@ -738,7 +684,7 @@
         </a>
 
         <div class="auth-left-inner">
-            {% include 'components/auth_logo_animated.html.twig' with { variant: 'full' } only %}
+            {% include 'components/auth_logo_animated.html.twig' with { src: '/images/logos/logo-completa.svg' } only %}
 
             {% set _auth_tagline = platform_config.plataforma_tagline|default('')|trim %}
             {% if _auth_tagline %}
@@ -896,32 +842,7 @@
     </div>{# /auth-right-inner #}
     </div>{# /auth-right #}
 </div>{# /auth-wrapper #}
-<script>
-(function () {
-    var root = document.querySelector('[data-auth-logo-anim]');
-    if (!root) return;
-    var img = root.querySelector('.auth-logo-anim__img');
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    function setIdle() { root.classList.add('auth-logo-anim--idle'); }
-    if (reduce) {
-        setIdle();
-        return;
-    }
-    if (!img) {
-        setTimeout(setIdle, 1200);
-        return;
-    }
-    var done = false;
-    function onEnd() {
-        if (done) return;
-        done = true;
-        setIdle();
-    }
-    img.addEventListener('animationend', function (e) {
-        if (e.animationName === 'authLogoReveal') onEnd();
-    });
-    setTimeout(onEnd, 1600);
-})();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+<script src="{{ asset('js/auth-logo-gsap.js') }}?v=4" defer></script>
 </body>
 </html>
