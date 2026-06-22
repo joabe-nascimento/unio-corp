@@ -189,8 +189,9 @@
         if (document.querySelector('[data-unio-offcanvas="' + id + '"]')) return;
 
         var root = document.createElement('div');
-        root.className = 'unio-offcanvas unio-offcanvas--end unio-offcanvas--md';
+        root.className = 'unio-offcanvas unio-offcanvas--bottom unio-offcanvas--toolbar-mobile unio-offcanvas--md';
         root.setAttribute('data-unio-offcanvas', id);
+        root.setAttribute('data-toolbar-mobile-offcanvas', '');
         root.setAttribute('aria-hidden', 'true');
 
         var backdrop = document.createElement('div');
@@ -208,6 +209,7 @@
         header.className = 'unio-offcanvas-header';
         header.innerHTML =
             '<div class="unio-offcanvas-header-main">' +
+                '<div class="unio-offcanvas-icon" aria-hidden="true"><i class="fas fa-sliders"></i></div>' +
                 '<div class="unio-offcanvas-heading">' +
                     '<h2 class="unio-offcanvas-title">' + (title || 'Filtros e busca') + '</h2>' +
                 '</div>' +
