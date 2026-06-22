@@ -1,46 +1,42 @@
-{# Hero do dashboard — saudação, perfil e data/hora #}
+{# Hero do dashboard — compacto (central de comando) #}
 {% set access_badge = user_access_badge() %}
 {% set headline = layout_headline|default({}) %}
+{% set _context_parts = [] %}
+{% if empresa %}
+    {% set _context_parts = _context_parts|merge([empresa.nome]) %}
+{% else %}
+    {% set _context_parts = _context_parts|merge([platform_config.plataforma_nome|default('Unio')]) %}
+{% endif %}
+{% set _context_parts = _context_parts|merge([access_badge.label]) %}
 
-<section class="dashboard-hero unio-card mb-4">
+<section class="dashboard-hero dashboard-hero--compact unio-card mb-4">
     <div class="dashboard-hero-bg" aria-hidden="true"></div>
-    <div class="dashboard-hero-inner">
-        <div class="dashboard-hero-main">
-            <h1 class="dashboard-hero-greeting">{{ greeting }}, {{ app.user.nome|split(' ')|first }}!</h1>
-            <div class="dashboard-hero-meta">
-                <span class="dashboard-hero-name">{{ app.user.nome }}</span>
-                <span class="badge-perfil {{ access_badge.class }}"
-                      {% if access_badge.elevated %}title="Conta global: {{ access_badge.global_label }}"{% endif %}>
-                    {{ access_badge.label }}
+    <div class="dashboard-hero-inner dashboard-hero-inner--compact">
+        <header class="dashboard-hero-top">
+            <p class="dashboard-hero-context-line">{{ _context_parts|join(' · ') }}</p>
+            <div class="dashboard-hero-datetime-compact" id="dashboardDateTime">
+                <span class="dashboard-hero-datetime-pill">
+                    <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                    <span>{{ weekday }}, {{ date_label }}</span>
+                </span>
+                <span class="dashboard-hero-datetime-pill dashboard-hero-datetime-pill--time">
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    <span data-dashboard-time>{{ time_label }}</span>
                 </span>
             </div>
-            {% if headline.title is defined %}
-            <p class="dashboard-hero-context">
-                <i class="fas {{ headline.icon|default('fa-gauge-high') }}" aria-hidden="true"></i>
-                <span>{{ headline.title }}</span>
-                {% if headline.subtitle is defined and headline.subtitle %}
-                <span class="dashboard-hero-context-sep">—</span>
-                <span class="dashboard-hero-context-sub">{{ headline.subtitle }}</span>
+        </header>
+
+        <div class="dashboard-hero-main">
+            <h1 class="dashboard-hero-greeting">{{ greeting }}, {{ app.user.nome|split(' ')|first }}!</h1>
+            <p class="dashboard-hero-subtitle">
+                {% if headline.title is defined and headline.subtitle is defined %}
+                    {{ headline.title }} — {{ headline.subtitle }}
+                {% elseif headline.title is defined %}
+                    {{ headline.title }}
+                {% else %}
+                    Visão geral da sua área de trabalho.
                 {% endif %}
             </p>
-            {% endif %}
-            {% if empresa %}
-            <p class="dashboard-hero-empresa">
-                <i class="fas fa-building" aria-hidden="true"></i>
-                {{ empresa.nome }}{% if empresa.setor %} · {{ empresa.setor }}{% endif %}
-            </p>
-            {% endif %}
-        </div>
-        <div class="dashboard-hero-datetime" id="dashboardDateTime">
-            <div class="dw-date">
-                <i class="fas fa-calendar-day" aria-hidden="true"></i>
-                <span data-dashboard-weekday>{{ weekday }}</span>,
-                <span data-dashboard-date>{{ date_label }}</span>
-            </div>
-            <div class="dw-time">
-                <i class="fas fa-clock" aria-hidden="true"></i>
-                <span data-dashboard-time>{{ time_label }}</span>
-            </div>
         </div>
     </div>
 </section>

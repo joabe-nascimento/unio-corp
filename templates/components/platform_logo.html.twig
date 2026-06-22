@@ -8,9 +8,10 @@
     class|default(''),
     _custom ? '' : 'platform-logo--placeholder',
 ]|filter(v => v)|join(' ') %}
-{% if _custom %}
+{% set _use_brand_asset = _href ends with '/logotipo.svg' %}
+{% if _custom or _use_brand_asset %}
 {% include 'components/platform_asset_display.html.twig' with {
-    href: _href,
+    href: _href ~ '?v=4',
     alt: alt|default(platform_config.plataforma_nome|default('Plataforma')),
     class: _classes,
     width: width|default(null),

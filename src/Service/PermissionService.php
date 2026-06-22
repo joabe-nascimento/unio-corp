@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Entity\UserProductGrant;
+use App\Repository\FuncionarioRepository;
 use App\Repository\UserProductGrantRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -974,6 +975,7 @@ class PermissionService
     public function __construct(
         private UserRepository $userRepo,
         private UserProductGrantRepository $grantRepo,
+        private FuncionarioRepository $funcionarioRepo,
         private WorkspaceService $workspace,
         private Security $security,
         private EntityManagerInterface $em,
@@ -1276,49 +1278,52 @@ class PermissionService
      */
     private function getMembers(?Empresa $empresa): array
     {
-        if ($empresa) {
-            $users = $this->userRepo->findBy(['empresa' => $empresa, 'ativo' => true], ['nome' => 'ASC']);
-            $members = [];
-            foreach ($users as $user) {
-                if ($user->getPerfil() === 'TENANT') {
-                    continue;
-                }
-                $members[] = $this->memberFromUser($user);
-            }
-            if ($members !== []) {
-                return $members;
-            }
+        if (!$empresa) {
+            return [];
         }
 
-        return $this->getFallbackMembers();
+        $users = $this->userRepo->findBy(['empresa' => $empresa, 'ativo' => true], ['nome' => 'ASC']);
+        $members = [];
+        foreach ($users as $user) {
+            if ($user->getPerfil() === 'TENANT') {
+                continue;
+            }
+            $members[] = $this->memberFromUser($user, $empresa);
+        }
+
+        return $members;
     }
 
-    /**
-     * @return list<array{id: string, nome: string, email: string, initials: string, equipe: string, cargo: string, perfil_global: string, perfil_label: string, perfil_class: string, ficha_id: int|null, user_id: int|null}>
-     */
-    private function getFallbackMembers(): array
-    {
-        return [
-            $this->member('gestor', 'Gestor Oliveira', 'gestor@unio.dev', 'GESTOR', 'PMO', 'Gestor de Operações', null),
-            $this->member('gestor-eq', 'Gestor Costa', 'gestor.eq@unio.dev', 'GESTOR_EQUIPE', 'Squad Backend', 'Gestor de Equipe', null),
-            $this->member('supervisor', 'Supervisor Geral', 'supervisor@unio.dev', 'SUPERVISOR', '—', 'Supervisor Geral', null),
-            $this->member('sup-eq', 'Supervisor Equipe', 'sup.eq@unio.dev', 'SUPERVISOR_EQUIPE', 'Obras e Projetos', 'Supervisor de Campo', null),
-            $this->member('membro', 'Membro Santos', 'membro@unio.dev', 'MEMBRO', 'Design & Marca', 'Analista', null),
-        ];
-    }
-
-    private function memberFromUser(User $user): array
+    private function memberFromUser(User $user, Empresa $empresa): array
     {
         $email = (string) $user->getEmail();
-        $meta = self::MEMBER_META[$email] ?? ['equipe' => '—', 'cargo' => $user->getPerfilLabel()];
+        $funcionario = $this->funcionarioRepo->findOneByUser($empresa, $user)
+            ?? $this->funcionarioRepo->findOneByEmail($empresa, $email);
+
+        $equipe = '—';
+        $cargo = $user->getPerfilLabel();
+        if ($funcionario) {
+            $cargo = $funcionario->getCargo() ?: $cargo;
+            $departamento = $funcionario->getDepartamento();
+            if ($departamento !== null && $departamento->getNome() !== '') {
+                $equipe = (string) $departamento->getNome();
+            }
+        } else {
+            $meta = self::MEMBER_META[$email] ?? null;
+            if ($meta !== null) {
+                $equipe = $meta['equipe'];
+                $cargo = $meta['cargo'];
+            }
+        }
 
         return $this->member(
             self::memberIdFromEmail($email),
             (string) $user->getNome(),
             $email,
             $user->getPerfil(),
-            $meta['equipe'],
-            $meta['cargo'],
+            $equipe,
+            $cargo,
+            $funcionario?->getId(),
             $user->getId(),
         );
     }
@@ -1351,7 +1356,7 @@ class PermissionService
     /**
      * @return array{id: string, nome: string, email: string, initials: string, equipe: string, cargo: string, perfil_global: string, perfil_label: string, perfil_class: string, ficha_id: int|null, user_id: int|null}
      */
-    private function member(string $id, string $nome, string $email, string $perfil, string $equipe, string $cargo, ?int $userId): array
+    private function member(string $id, string $nome, string $email, string $perfil, string $equipe, string $cargo, ?int $fichaId, ?int $userId): array
     {
         $parts = preg_split('/\s+/', trim($nome), 2);
         $initials = mb_strtoupper(mb_substr($parts[0] ?? 'U', 0, 1) . mb_substr($parts[1] ?? '', 0, 1));
@@ -1380,7 +1385,7 @@ class PermissionService
                 'GESTOR' => 'gestor',
                 default => 'default',
             },
-            'ficha_id' => $userId,
+            'ficha_id' => $fichaId,
             'user_id' => $userId,
         ];
     }

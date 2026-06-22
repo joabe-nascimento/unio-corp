@@ -11,16 +11,24 @@
     {% include 'components/account_pending_banner.html.twig' %}
 {% endif %}
 
+<div class="dashboard-page-toolbar">
+    <p class="dashboard-page-toolbar-label">Central do dashboard</p>
+</div>
+
 {% include 'components/dashboard_welcome.html.twig' %}
 
 {% include 'components/welcome/onboarding_checklist.html.twig' with {
     onboarding: onboarding|default({ visible: false })
 } only %}
 
-{% set dashboard_modules = platform_modules|default([]) %}
-
 {% if kpis|length > 0 %}
 <section class="dashboard-kpis-section mb-4" aria-label="Indicadores">
+    <header class="dashboard-section-head">
+        <div>
+            <h2 class="dashboard-section-title">Panorama em números</h2>
+            <p class="dashboard-section-sub">Indicadores da sua área de trabalho agora</p>
+        </div>
+    </header>
     <div class="dashboard-kpis-grid">
         {% for kpi in kpis %}
             {% if kpi.route is defined and kpi.route %}
@@ -43,19 +51,6 @@
             {% endif %}
         {% endfor %}
     </div>
-</section>
-{% endif %}
-
-{% if dashboard_modules|length > 0 %}
-<section class="welcome-section dashboard-modules-section unio-card mb-4" data-dashboard-section="modules">
-    <header class="welcome-section-header">
-        <div>
-            <h2 class="welcome-section-title">Módulos da plataforma</h2>
-            <p class="welcome-section-sub">Acesso rápido às funcionalidades</p>
-        </div>
-        <span class="welcome-section-count">{{ dashboard_modules|length }} módulos</span>
-    </header>
-    {% include 'components/hub_dock.html.twig' with { items: dashboard_modules } only %}
 </section>
 {% endif %}
 

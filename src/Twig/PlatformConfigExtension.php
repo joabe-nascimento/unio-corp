@@ -36,6 +36,7 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
             new TwigFunction('platform_asset_src', [$this, 'assetSrc']),
             new TwigFunction('platform_asset_custom', [$this, 'assetCustom']),
             new TwigFunction('public_asset_href', [$this, 'publicAssetHref']),
+            new TwigFunction('platform_accent_rgb', [$this, 'accentRgb']),
             new TwigFunction('empresa_logo_src', [$this, 'empresaLogoSrc']),
             new TwigFunction('empresa_logo_custom', [$this, 'empresaLogoCustom']),
         ];
@@ -80,6 +81,11 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
         };
 
         return $this->config->hasCustomAsset($key);
+    }
+
+    public function accentRgb(): string
+    {
+        return $this->config->getAccentRgbCsv();
     }
 
     /** Logo efetivo da empresa (cadastro ou fallback de Configurações). */

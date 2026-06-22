@@ -13,16 +13,14 @@
     var defaults = {
         layout: 'comfortable',
         sections: {
-            resumo: true,
+            onboarding: true,
+            hubs: true,
+            helix: true,
+            metrics: false,
             noticias: true,
             atualizacoes: true,
-            insights: true,
-            metrics: true,
-            highlights: true,
-            journey: true,
             novidades: true,
-            hubs: true,
-            graficos: true
+            graficos: false
         },
         pinnedHubs: [],
         hiddenNovidades: []

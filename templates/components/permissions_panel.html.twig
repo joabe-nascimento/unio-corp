@@ -10,13 +10,11 @@
     <div class="unio-card permissions-panel-card">
         {% include 'components/section_header.html.twig' with {
             title: 'Permissões',
-            subtitle: permission_data.subtitle
+            subtitle: permission_data.rows|length ~ ' membros · ' ~ permission_data.subtitle
         } %}
-
 
         <div class="permissions-panel-toolbar">
             <div class="permissions-panel-toolbar-start">
-                <span class="permissions-panel-toolbar-hint">{{ permission_data.rows|length }} membros com acesso configurável</span>
                 {% include 'components/perm_tags_legend.html.twig' with {
                     profiles: permission_data.profiles,
                     no_access_description: permission_data.no_access_description,
@@ -35,19 +33,17 @@
                 {% set member = row.member %}
                 {% set scope_summary = row.scope_summary %}
                 <div class="view-list-only perm-member-row">
-                    <div class="perm-member-row-main">
-                        <span class="permissions-avatar">{{ member.initials }}</span>
-                        <div class="permissions-member-info">
-                            <span class="permissions-member-name">{{ member.nome }}</span>
-                            <span class="permissions-member-email">{{ member.email }}</span>
-                        </div>
-                        <span class="unio-tooltip badge-perfil perm-scope-tag {{ scope_summary.class }}"
-                              data-perm-scope-badge="{{ member.id }}"
-                              tabindex="0">
-                            <span class="perm-scope-badge-label">{{ scope_summary.label }}</span>
-                            <span class="unio-tooltip-bubble" data-perm-scope-badge-tip="{{ member.id }}">{{ scope_summary.description }}</span>
-                        </span>
+                    <span class="permissions-avatar">{{ member.initials }}</span>
+                    <div class="permissions-member-info">
+                        <span class="permissions-member-name">{{ member.nome }}</span>
+                        <span class="permissions-member-email">{{ member.email }}</span>
                     </div>
+                    <span class="unio-tooltip badge-perfil perm-scope-tag {{ scope_summary.class }}"
+                          data-perm-scope-badge="{{ member.id }}"
+                          tabindex="0">
+                        <span class="perm-scope-badge-label">{{ scope_summary.label }}</span>
+                        <span class="unio-tooltip-bubble" data-perm-scope-badge-tip="{{ member.id }}">{{ scope_summary.description }}</span>
+                    </span>
                     <div class="perm-row-actions">
                         {% if can_edit %}
                         <div class="perm-picker-wrap perm-row-picker" data-perm-row-picker data-member-id="{{ member.id }}">
@@ -57,7 +53,7 @@
                                     data-value=""
                                     title="Aplicar perfil a todos os núcleos e produtos de uma vez">
                                 <i class="fas fa-tags"></i>
-                                <span class="perm-tags-btn-label">Definir todos</span>
+                                <span class="perm-tags-btn-label">Todos</span>
                                 <i class="fas fa-chevron-down perm-picker-chevron"></i>
                             </button>
                             <div class="perm-picker-menu" hidden>
@@ -75,8 +71,8 @@
                                 data-perm-open
                                 data-member-id="{{ member.id }}"
                                 aria-label="Editar permissões de {{ member.nome }}">
-                            <i class="fas fa-tags"></i>
-                            <span class="perm-tags-btn-label">Tags</span>
+                            <i class="fas fa-sliders"></i>
+                            <span class="perm-tags-btn-label">Editar</span>
                             <span class="perm-tags-btn-count" data-perm-count="{{ member.id }}">{{ row.grant_count }}</span>
                         </button>
                     </div>
@@ -95,8 +91,8 @@
                             data-perm-open
                             data-member-id="{{ member.id }}"
                             aria-label="Editar permissões de {{ member.nome }}">
-                        <i class="fas fa-tags"></i>
-                        Tags
+                        <i class="fas fa-sliders"></i>
+                        Editar
                         <span class="perm-tags-btn-count" data-perm-count="{{ member.id }}">{{ row.grant_count }}</span>
                     </button>
                 </div>
@@ -130,9 +126,12 @@
         <aside class="perm-offcanvas-drawer" role="dialog" aria-modal="true" aria-labelledby="permOffcanvasTitle">
             <header class="perm-offcanvas-header">
                 <div class="perm-offcanvas-profile" data-perm-drawer-profile></div>
-                <button type="button" class="perm-offcanvas-close" data-perm-close aria-label="Fechar">
-                    <i class="fas fa-xmark"></i>
-                </button>
+                <div class="perm-offcanvas-toolbar">
+                    <div class="perm-offcanvas-toolbar-actions" data-perm-drawer-actions></div>
+                    <button type="button" class="perm-offcanvas-close" data-perm-close aria-label="Fechar">
+                        <i class="fas fa-xmark"></i>
+                    </button>
+                </div>
             </header>
             <div class="perm-offcanvas-body">
                 <div data-perm-drawer-body></div>
@@ -161,6 +160,7 @@
     var offcanvas = panel.querySelector('[data-perm-offcanvas]');
     var drawerBody = panel.querySelector('[data-perm-drawer-body]');
     var drawerProfile = panel.querySelector('[data-perm-drawer-profile]');
+    var drawerActions = panel.querySelector('[data-perm-drawer-actions]');
     var activeMemberId = null;
     var fichaUrlTpl = {{ path('app_pessoas_membro_ficha', {id: 0})|json_encode|raw }};
     var apiUrlTpl = panel.getAttribute('data-perm-api-url') || '';
@@ -383,7 +383,7 @@
                 trigger.innerHTML = '<i class="fas fa-tags"></i> <span class="perm-tags-btn-label">' + esc(meta.label) + '</span> <i class="fas fa-chevron-down perm-picker-chevron"></i>';
             } else {
                 trigger.className = 'perm-tags-btn';
-                trigger.innerHTML = '<i class="fas fa-tags"></i><span class="perm-tags-btn-label">Definir todos</span><i class="fas fa-chevron-down perm-picker-chevron"></i>';
+                trigger.innerHTML = '<i class="fas fa-tags"></i><span class="perm-tags-btn-label">Todos</span><i class="fas fa-chevron-down perm-picker-chevron"></i>';
             }
         });
     }
@@ -521,44 +521,53 @@
         var grants = loadMemberGrants(member.id);
         var grantCount = countGrants(member.id);
         var viewMemberHtml = member.ficha_id
-            ? '<a href="' + esc(fichaUrl(member.ficha_id)) + '" class="perm-profile-view-btn btn-unio-ghost btn-sm">' +
-                '<i class="fas fa-user"></i> Ver membro' +
+            ? '<a href="' + esc(fichaUrl(member.ficha_id)) + '" class="perm-profile-view-btn" title="Ver membro" aria-label="Ver membro">' +
+                '<i class="fas fa-user"></i>' +
               '</a>'
             : '';
 
         drawerProfile.innerHTML =
             '<div class="perm-profile-card">' +
-                '<div class="perm-profile-top">' +
-                    '<span class="permissions-avatar permissions-avatar--lg">' + esc(member.initials) + '</span>' +
-                    '<div class="perm-profile-identity">' +
-                        '<h2 class="perm-offcanvas-title" id="permOffcanvasTitle">' + esc(member.nome) + '</h2>' +
-                        '<p class="perm-offcanvas-email">' + esc(member.email) + '</p>' +
+                '<span class="permissions-avatar permissions-avatar--lg">' + esc(member.initials) + '</span>' +
+                '<div class="perm-profile-identity">' +
+                    '<h2 class="perm-offcanvas-title" id="permOffcanvasTitle">' + esc(member.nome) + '</h2>' +
+                    '<p class="perm-offcanvas-email">' + esc(member.email) + '</p>' +
+                    '<div class="perm-profile-meta">' +
+                        '<span class="badge-perfil ' + member.perfil_class + '">' + esc(member.perfil_label) + '</span>' +
+                        '<span class="perm-profile-grant-count">' + grantCount + ' ativas</span>' +
                     '</div>' +
                 '</div>' +
-                '<div class="perm-profile-tags">' +
-                    '<span class="badge-perfil ' + member.perfil_class + '">' + esc(member.perfil_label) + ' (global)</span>' +
-                    '<span class="perm-profile-grant-count">' + grantCount + ' permissões ativas</span>' +
-                '</div>' +
-                viewMemberHtml +
             '</div>';
+        if (drawerActions) {
+            drawerActions.innerHTML = viewMemberHtml;
+        }
 
-        var html = '';
-        allHubs.forEach(function (hub) {
-            html += '<section class="perm-hub-block" data-hub-scope="' + esc(hub.scope) + '">';
-            html += '<div class="perm-hub-head">';
+        function renderHubBulk(scope) {
+            if (!canEdit) {
+                return '';
+            }
+            var hubSummary = computeScopeSummary(grants, scope);
+            return pickerHtml(hubSummary.value, ' data-perm-bulk-hub="' + esc(scope) + '" aria-label="Nível para todo o núcleo"', {
+                label: hubSummary.label,
+                class: hubSummary.class
+            });
+        }
+
+        function renderHubHead(hub) {
+            var html = '<div class="perm-hub-head">';
             html += '<h3 class="perm-hub-title">' + esc(hub.label) + '</h3>';
             if (canEdit) {
-                html += '<div class="perm-hub-bulk">';
-                html += '<span class="perm-hub-bulk-label">Aplicar neste hub</span>';
-                var hubSummary = computeScopeSummary(grants, hub.scope);
-                html += pickerHtml(hubSummary.value, ' data-perm-bulk-hub="' + esc(hub.scope) + '"', {
-                    label: hubSummary.label,
-                    class: hubSummary.class
-                });
-                html += '</div>';
+                html += '<div class="perm-hub-bulk">' + renderHubBulk(hub.scope) + '</div>';
             }
             html += '</div>';
-            html += '<ul class="perm-product-list">';
+            return html;
+        }
+
+        function renderProductList(hub) {
+            if (!hub.products || hub.products.length === 0) {
+                return '';
+            }
+            var html = '<ul class="perm-product-list">';
             hub.products.forEach(function (product) {
                 var grantKey = hub.scope + ':' + product.id;
                 var value = grants[grantKey] || '';
@@ -567,8 +576,71 @@
                 html += pickerHtml(value);
                 html += '</li>';
             });
-            html += '</ul></section>';
+            html += '</ul>';
+            return html;
+        }
+
+        function renderHubBlock(hub, opts) {
+            opts = opts || {};
+            var blockClass = 'perm-hub-block';
+            if (opts.current) {
+                blockClass += ' perm-hub-block--current';
+            }
+            var html = '<section class="' + blockClass + '" data-hub-scope="' + esc(hub.scope) + '">';
+            if (opts.current) {
+                html += '<p class="perm-hub-current-label">Núcleo atual</p>';
+            }
+            html += renderHubHead(hub);
+            html += renderProductList(hub);
+            html += '</section>';
+            return html;
+        }
+
+        function renderCompactRow(hub) {
+            var html = '<div class="perm-hub-compact-row" data-hub-scope="' + esc(hub.scope) + '">';
+            html += '<span class="perm-hub-compact-label">' + esc(hub.label) + '</span>';
+            if (canEdit) {
+                html += '<div class="perm-hub-bulk">' + renderHubBulk(hub.scope) + '</div>';
+            }
+            html += '</div>';
+            return html;
+        }
+
+        var currentHub = null;
+        var hubsWithProducts = [];
+        var hubsEmpty = [];
+        allHubs.forEach(function (hub) {
+            if (hub.scope === panelScope) {
+                currentHub = hub;
+            } else if (hub.products && hub.products.length > 0) {
+                hubsWithProducts.push(hub);
+            } else {
+                hubsEmpty.push(hub);
+            }
         });
+
+        var html = '';
+        if (currentHub) {
+            html += renderHubBlock(currentHub, { current: true });
+        }
+        if (hubsWithProducts.length > 0) {
+            html += '<details class="perm-hub-group">';
+            html += '<summary class="perm-hub-group-summary">Demais núcleos com módulos (' + hubsWithProducts.length + ')</summary>';
+            html += '<div class="perm-hub-group-body">';
+            hubsWithProducts.forEach(function (hub) {
+                html += renderHubBlock(hub);
+            });
+            html += '</div></details>';
+        }
+        if (hubsEmpty.length > 0) {
+            html += '<details class="perm-hub-group perm-hub-group--simple">';
+            html += '<summary class="perm-hub-group-summary">Outros núcleos (' + hubsEmpty.length + ')</summary>';
+            html += '<div class="perm-hub-group-body perm-hub-group-body--compact">';
+            hubsEmpty.forEach(function (hub) {
+                html += renderCompactRow(hub);
+            });
+            html += '</div></details>';
+        }
         drawerBody.innerHTML = html;
     }
 

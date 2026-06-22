@@ -90,7 +90,6 @@
             width: min(28vw, 200px);
             height: auto;
             opacity: 0.42;
-            animation: authDecoFloat 14s ease-in-out infinite;
         }
 
         [data-theme="light"] .auth-deco--orbit { opacity: 0.2; }
@@ -101,7 +100,6 @@
             width: min(18vw, 130px);
             height: auto;
             opacity: 0.36;
-            animation: authDecoFloat 11s ease-in-out infinite reverse;
         }
 
         [data-theme="light"] .auth-deco--chip { opacity: 0.16; }
@@ -112,7 +110,6 @@
             width: min(32vw, 220px);
             height: auto;
             opacity: 0.48;
-            animation: authDecoDrift 16s ease-in-out infinite;
         }
 
         [data-theme="light"] .auth-deco--nodes { opacity: 0.22; }
@@ -123,7 +120,6 @@
             width: min(22vw, 160px);
             height: auto;
             opacity: 0.32;
-            animation: authDecoFloat 13s ease-in-out infinite 1.5s;
         }
 
         [data-theme="light"] .auth-deco--circuit { opacity: 0.14; }
@@ -139,25 +135,8 @@
             opacity: 0.22;
         }
 
-        @keyframes authDecoFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-12px) rotate(1.5deg); }
-        }
-
-        @keyframes authDecoDrift {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(8px, -10px); }
-        }
-
         @media (prefers-reduced-motion: reduce) {
             .auth-deco { animation: none !important; }
-            .auth-logo-anim,
-            .auth-logo-anim *,
-            .auth-left-tagline--anim { animation: none !important; transition: none !important; }
-            .auth-logo-anim,
-            .auth-logo-anim--ready { opacity: 1 !important; }
-            .auth-logo-anim__fx,
-            .auth-logo-anim__glow { display: none !important; }
         }
 
         .auth-left-inner,
@@ -170,143 +149,65 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
             gap: 28px;
             min-height: 0;
+            text-align: center;
         }
 
         .auth-left-footer {
             flex-shrink: 0;
             padding-top: 32px;
+            align-self: stretch;
+            text-align: center;
         }
 
-        /* ── Logotipo animado (GSAP + SVG inline) ─────── */
-        .auth-logo-anim {
-            position: relative;
+        /* ── Logotipo estático ─────────────────────────── */
+        .auth-logo {
             width: 100%;
-            max-width: 440px;
-            opacity: 0;
-            transition: opacity 0.25s ease;
+            max-width: 420px;
+            margin-inline: auto;
+            line-height: 0;
         }
 
-        .auth-logo-anim--ready {
-            opacity: 1;
-        }
-
-        .auth-logo-anim__fx {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .auth-logo-anim__ring {
-            position: absolute;
-            left: 21%;
-            top: 48%;
-            width: min(38%, 168px);
-            aspect-ratio: 1;
-            border-radius: 50%;
-            border: 1.5px solid rgba(79, 127, 255, 0.45);
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            box-shadow: 0 0 24px rgba(79, 127, 255, 0.15);
-        }
-
-        .auth-logo-anim__ring--2 { border-color: rgba(45, 212, 191, 0.35); }
-        .auth-logo-anim__ring--3 { border-color: rgba(255, 255, 255, 0.2); }
-
-        .auth-logo-anim__spark {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: rgba(120, 180, 255, 0.9);
-            box-shadow: 0 0 10px rgba(79, 127, 255, 0.8);
-            opacity: 0;
-            left: 21%;
-            top: 48%;
-            margin: -2.5px 0 0 -2.5px;
-        }
-
-        .auth-logo-anim__glow {
-            position: absolute;
-            left: 21%;
-            top: 50%;
-            width: min(36%, 150px);
-            aspect-ratio: 1;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(79, 127, 255, 0.38) 0%, rgba(45, 212, 191, 0.1) 45%, transparent 72%);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        [data-theme="light"] .auth-logo-anim__glow {
-            background: radial-gradient(circle, rgba(79, 127, 255, 0.24) 0%, rgba(45, 212, 191, 0.06) 45%, transparent 72%);
-        }
-
-        .auth-logo-anim__stage {
-            position: relative;
-            z-index: 1;
-            overflow: visible;
-        }
-
-        .auth-logo-anim--loading .auth-logo-anim__stage {
-            min-height: clamp(100px, 22vh, 200px);
-        }
-
-        .auth-logo-anim__svg,
-        .auth-logo-anim__img,
-        .auth-logo-anim .platform-logo-placeholder-wrap {
+        .auth-logo__img,
+        .auth-logo img,
+        .auth-logo object,
+        .auth-logo svg {
             display: block;
             width: 100%;
-            max-width: 440px;
             height: auto;
             max-height: min(52vh, 380px);
             object-fit: contain;
-            object-position: left center;
-            overflow: visible;
         }
 
-        .auth-logo-anim--placeholder .platform-logo-placeholder-wrap {
-            opacity: 0;
-            animation: authLogoFadeIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+        .auth-slogan {
+            width: 100%;
+            max-width: min(88%, 400px);
+            margin-inline: auto;
+            line-height: 0;
         }
 
-        @keyframes authLogoFadeIn {
-            to { opacity: 1; }
+        .auth-slogan__img {
+            display: none;
+            width: 100%;
+            height: auto;
+            max-height: 40px;
+            object-fit: contain;
         }
 
-
-        .auth-left-tagline--anim {
-            opacity: 0;
-            transform: translateY(8px);
-            animation: authTaglineIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) 1.05s forwards;
+        [data-theme="dark"] .auth-slogan__img--dark,
+        :root:not([data-theme="light"]) .auth-slogan__img--dark {
+            display: block;
         }
 
-        @keyframes authTaglineIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        [data-theme="light"] .auth-slogan__img--light {
+            display: block;
         }
 
-        [data-theme="light"] .auth-left-tagline--anim {
-            animation-delay: 0.95s;
-        }
-
-        .auth-left-tagline {
-            color: rgba(255, 255, 255, 0.58);
-            font-size: 15px;
-            line-height: 1.6;
-            max-width: 380px;
-            font-weight: 400;
-        }
-
-        [data-theme="light"] .auth-left-tagline {
-            color: var(--text-2);
+        [data-theme="light"] .auth-slogan__img--dark {
+            display: none;
         }
 
         .auth-left .platform-support__item {
@@ -643,9 +544,12 @@
                 min-height: 280px;
                 padding: 32px 28px;
             }
-            .auth-logo-anim,
-            .auth-logo-anim__img,
-            .auth-logo-anim .platform-logo-placeholder-wrap { max-height: 200px; max-width: 320px; }
+            .auth-logo,
+            .auth-logo__img,
+            .auth-logo img,
+            .auth-logo object { max-height: 200px; max-width: 320px; }
+            .auth-slogan { max-width: 280px; }
+            .auth-slogan__img { max-height: 34px; }
             .auth-left { display: flex; }
         }
 
@@ -684,12 +588,8 @@
         </a>
 
         <div class="auth-left-inner">
-            {% include 'components/auth_logo_animated.html.twig' with { src: '/images/logos/logo-completa.svg' } only %}
-
-            {% set _auth_tagline = platform_config.plataforma_tagline|default('')|trim %}
-            {% if _auth_tagline %}
-            <p class="auth-left-tagline auth-left-tagline--anim">{{ _auth_tagline }}</p>
-            {% endif %}
+            {% include 'components/auth_logo_animated.html.twig' only %}
+            {% include 'components/auth_slogan.html.twig' only %}
         </div>
 
         <div class="auth-left-footer">
@@ -842,7 +742,5 @@
     </div>{# /auth-right-inner #}
     </div>{# /auth-right #}
 </div>{# /auth-wrapper #}
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
-<script src="{{ asset('js/auth-logo-gsap.js') }}?v=4" defer></script>
 </body>
 </html>

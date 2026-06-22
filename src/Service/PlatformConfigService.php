@@ -25,10 +25,13 @@ class PlatformConfigService
     /** @var list<string> */
     private const ASSET_URL_KEYS = ['logo_url', 'logo_mark_url', 'logo_full_url', 'favicon_url'];
 
+    /** Caminho público do logotipo padrão (fonte: assets/logotipo.svg). */
+    public const DEFAULT_LOGO_ASSET = '/images/logos/logotipo.svg';
+
     /** @var array<string,string> Placeholders exibidos quando nenhum asset foi configurado. */
     public const DEFAULT_ASSET_PATHS = [
-        'logo_url'      => '/images/logos/logo-placeholder-full.svg',
-        'logo_full_url' => '/images/logos/logo-placeholder-full.svg',
+        'logo_url'      => self::DEFAULT_LOGO_ASSET,
+        'logo_full_url' => self::DEFAULT_LOGO_ASSET,
         'logo_mark_url' => '/images/logos/logo-placeholder-mark.svg',
         'favicon_url'   => '/images/logos/favicon-placeholder.svg',
     ];
@@ -180,6 +183,32 @@ class PlatformConfigService
         return trim((string) $this->get('suporte_email')) !== ''
             || trim((string) $this->get('suporte_telefone')) !== ''
             || trim((string) $this->get('website')) !== '';
+    }
+
+    public function getAccentRgbCsv(): string
+    {
+        return self::hexToRgbCsv((string) $this->get('cor_primaria', '#4F7FFF'));
+    }
+
+    public static function hexToRgbCsv(string $hex): string
+    {
+        $hex = ltrim(trim($hex), '#');
+        if ($hex === '') {
+            return '79, 127, 255';
+        }
+        if (\strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+            return '79, 127, 255';
+        }
+
+        return sprintf(
+            '%d, %d, %d',
+            hexdec(substr($hex, 0, 2)),
+            hexdec(substr($hex, 2, 2)),
+            hexdec(substr($hex, 4, 2))
+        );
     }
 
     /** Caminho relativo (/…) ou URL absoluta do asset; usa placeholder quando vazio. */
