@@ -1,30 +1,7 @@
-{# Logotipo animado — tela de login #}
-{% set _variant = variant|default('full') %}
-{% set _src = platform_asset_src(_variant) %}
-{% set _href = public_asset_href(_src) %}
-{% set _custom = platform_asset_custom(_variant) %}
-{% set _name = platform_config.plataforma_nome|default('Unio') %}
-{% set _classes = [
-    'auth-logo-anim__img',
-    class|default(''),
-    _custom ? '' : 'platform-logo--placeholder',
-]|filter(v => v)|join(' ') %}
-
-<div class="auth-logo-anim{{ _custom ? '' : ' auth-logo-anim--placeholder' }}" data-auth-logo-anim>
-    <div class="auth-logo-anim__glow" aria-hidden="true"></div>
-    <div class="auth-logo-anim__stage">
-        {% if _custom %}
-        <img src="{{ _href }}"
-             alt="{{ alt|default(_name) }}"
-             class="{{ _classes }}"
-             width="945"
-             height="480"
-             decoding="async"
-             fetchpriority="high">
-        {% else %}
-        <span class="platform-logo-placeholder-wrap {{ _classes }}" aria-label="{{ alt|default(_name) }}">
-            {% include 'components/logo_placeholder_inline.html.twig' with { type: 'full' } only %}
-        </span>
-        {% endif %}
-    </div>
+{# Logotipo estático — login #}
+<div class="auth-logo">
+    {% include 'components/platform_logo.html.twig' with {
+        variant: 'full',
+        class: 'auth-logo__img'
+    } only %}
 </div>

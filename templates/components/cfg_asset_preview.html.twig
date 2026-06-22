@@ -1,9 +1,9 @@
 {# Preview de asset configurável (logo, favicon, mark, full) #}
 {% set _variant = variant|default('full') %}
 {% set _placeholder_type = placeholder_type|default(_variant == 'mark' ? 'mark' : (_variant == 'favicon' ? 'favicon' : 'full')) %}
-{% set _is_custom = platform_asset_custom(_variant) %}
 {% set _custom_path = platform_asset_src(_variant) %}
 {% set _custom_href = public_asset_href(_custom_path) %}
+{% set _is_custom = platform_asset_custom(_variant) or _custom_path ends with '/logotipo.svg' %}
 {% set _input_key = input_key|default('logo_url') %}
 {% set _file_key = file_key|default('logo_file') %}
 {% set _clear_key = clear_key|default('logo_url_clear') %}
@@ -30,7 +30,14 @@
              data-custom="{{ _is_custom ? '1' : '0' }}">
 
             {% if _is_custom %}
+            {% if _custom_href|lower ends with '.svg' %}
+            <div class="cfg-preview-svg-host cfg-preview-img"
+                 data-role="preview-host"
+                 data-preview-src="{{ _custom_href }}"
+                 aria-label="{{ _alt }}"></div>
+            {% else %}
             <img src="{{ _custom_href }}" alt="{{ _alt }}" class="cfg-preview-img" data-role="preview-img">
+            {% endif %}
             {% else %}
             <div class="cfg-preview-default" data-role="preview-default" aria-label="{{ _alt }}">
                 {% include 'components/logo_placeholder_inline.html.twig' with { type: _placeholder_type } only %}

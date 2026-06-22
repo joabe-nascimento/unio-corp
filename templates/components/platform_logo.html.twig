@@ -8,14 +8,17 @@
     class|default(''),
     _custom ? '' : 'platform-logo--placeholder',
 ]|filter(v => v)|join(' ') %}
-{% if _custom %}
-<img src="{{ _href }}"
-     alt="{{ alt|default(platform_config.plataforma_nome|default('Plataforma')) }}"
-     {% if _classes %}class="{{ _classes }}"{% endif %}
-     {% if width is defined %}width="{{ width }}"{% endif %}
-     {% if height is defined %}height="{{ height }}"{% endif %}
-     {% if id is defined %}id="{{ id }}"{% endif %}
-     {% if crossorigin is defined %}crossorigin="{{ crossorigin }}"{% endif %}>
+{% set _use_brand_asset = _href ends with '/logotipo.svg' %}
+{% if _custom or _use_brand_asset %}
+{% include 'components/platform_asset_display.html.twig' with {
+    href: _href ~ '?v=4',
+    alt: alt|default(platform_config.plataforma_nome|default('Plataforma')),
+    class: _classes,
+    width: width|default(null),
+    height: height|default(null),
+    id: id|default(null),
+    crossorigin: crossorigin|default(null),
+} only %}
 {% else %}
 <span class="platform-logo-placeholder-wrap {{ _classes }}"{% if width is defined %} style="max-width:{{ width }}px"{% endif %}{% if id is defined %} id="{{ id }}"{% endif %} aria-label="{{ alt|default(platform_config.plataforma_nome|default('Plataforma')) }}">
     {% include 'components/logo_placeholder_inline.html.twig' with {
