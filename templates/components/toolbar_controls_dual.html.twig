@@ -1,0 +1,28 @@
+{#
+  toolbar_controls_dual — controles inline no desktop + FAB/offcanvas no mobile
+
+  Props:
+    offcanvas_id (string)  id único do offcanvas
+    fab_label    (string, opt)
+    fab_icon     (string, opt)
+
+  Blocks:
+    toolbar_dual_filters
+    toolbar_dual_search
+#}
+<div class="toolbar-controls-dual" data-toolbar-controls-dual data-toolbar-offcanvas-id="{{ offcanvas_id }}">
+    <div class="toolbar-inline-controls">
+        {% block toolbar_dual_filters %}{% endblock %}
+        {% block toolbar_dual_search %}{% endblock %}
+    </div>
+    {% include 'components/toolbar_mobile_fab.html.twig' with {
+        offcanvas_id: offcanvas_id,
+        label: fab_label|default('Filtros e busca'),
+        icon: fab_icon|default('fa-sliders')
+    } %}
+</div>
+{% include 'components/toolbar_mobile_offcanvas.html.twig' with {
+    id: offcanvas_id,
+    title: fab_label|default('Filtros e busca'),
+    icon: fab_icon|default('fa-sliders')
+} %}

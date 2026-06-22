@@ -63,13 +63,24 @@
         </div>
         {% if _show_toolbar_end %}
             <div class="list-toolbar-end">
-                {% block toolbar_filters %}{% endblock %}
-                {% if not _search_hidden %}
-                    {% include 'components/toolbar_search.html.twig' with {
-                        search_placeholder: search_placeholder|default('Buscar…'),
-                        search_disabled: search_disabled|default(false)
-                    } %}
-                {% endif %}
+                {% set _route = app.request.attributes.get('_route')|default('page') %}
+                {% set _offcanvas_id = offcanvas_id|default('list-toolbar-filters-' ~ _route|replace({'.': '-'})) %}
+                {% embed 'components/toolbar_controls_dual.html.twig' with {
+                    offcanvas_id: _offcanvas_id,
+                    fab_label: fab_label|default('Filtros e busca')
+                } %}
+                    {% block toolbar_dual_filters %}
+                        {% block toolbar_filters %}{% endblock %}
+                    {% endblock %}
+                    {% block toolbar_dual_search %}
+                        {% if not _search_hidden %}
+                            {% include 'components/toolbar_search.html.twig' with {
+                                search_placeholder: search_placeholder|default('Buscar…'),
+                                search_disabled: search_disabled|default(false)
+                            } %}
+                        {% endif %}
+                    {% endblock %}
+                {% endembed %}
             </div>
         {% endif %}
     </div>
