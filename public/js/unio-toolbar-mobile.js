@@ -14,16 +14,37 @@
         '.carreiras-filters-row'
     ];
 
-    function copyValues(fromEl, toEl, silent) {
-        if (!fromEl || !toEl) return;
-        if (fromEl.type === 'checkbox' || fromEl.type === 'radio') {
-            toEl.checked = fromEl.checked;
-        } else {
-            toEl.value = fromEl.value;
+    var syncingFields = false;
+
+    function fieldValue(field) {
+        if (!field) return '';
+        if (field.type === 'checkbox' || field.type === 'radio') {
+            return field.checked ? '1' : '0';
         }
-        if (silent) return;
-        fromEl.dispatchEvent(new Event('input', { bubbles: true }));
-        fromEl.dispatchEvent(new Event('change', { bubbles: true }));
+        return String(field.value || '');
+    }
+
+    function copyValues(fromEl, toEl, silent) {
+        if (!fromEl || !toEl || fromEl === toEl || syncingFields) return;
+
+        var changed = false;
+        if (fromEl.type === 'checkbox' || fromEl.type === 'radio') {
+            changed = toEl.checked !== fromEl.checked;
+            if (changed) toEl.checked = fromEl.checked;
+        } else {
+            changed = fieldValue(toEl) !== fieldValue(fromEl);
+            if (changed) toEl.value = fromEl.value;
+        }
+
+        if (silent || !changed) return;
+
+        syncingFields = true;
+        try {
+            toEl.dispatchEvent(new Event('input', { bubbles: true }));
+            toEl.dispatchEvent(new Event('change', { bubbles: true }));
+        } finally {
+            syncingFields = false;
+        }
     }
 
     function findSourceField(inline, cloneField) {
@@ -94,16 +115,22 @@
 
         mount.querySelectorAll('input, select, textarea').forEach(function (cloneField) {
             var sourceField = findSourceField(inline, cloneField);
-            if (!sourceField) return;
+            if (!sourceField || sourceField === cloneField) return;
+
+            cloneField.setAttribute('data-toolbar-mobile-clone', '1');
+            if (cloneField.id) {
+                cloneField.setAttribute('data-toolbar-mobile-source-id', cloneField.id);
+                cloneField.removeAttribute('id');
+            }
 
             cloneField.addEventListener('input', function () {
                 copyValues(cloneField, sourceField, false);
+                syncFilterSelectSizer(sourceField);
             });
             cloneField.addEventListener('change', function () {
                 copyValues(cloneField, sourceField, false);
-                if (window.UnioFilterSelect && typeof window.UnioFilterSelect.sync === 'function') {
-                    window.UnioFilterSelect.sync(sourceField);
-                }
+                syncFilterSelectSizer(sourceField);
+                syncFilterSelectSizer(cloneField);
             });
         });
 
@@ -132,6 +159,51 @@
         });
     }
 
+    function syncFilterSelectSizer(field) {
+        if (window.UnioFilterSelect && typeof window.UnioFilterSelect.sync === 'function' && field) {
+            window.UnioFilterSelect.sync(field);
+        }
+    }
+
+    function reorderSearchFirst(container) {
+        if (!container) return;
+
+        var search = container.querySelector(
+            ':scope > .filter-group--search, :scope > .ti-ticket-table-search'
+        );
+        if (!search) {
+            var nested = container.querySelector(
+                ':scope > .ti-ticket-table-filters-row, :scope > .admin-filter-group, :scope > .carreiras-filters-row'
+            );
+            if (nested) {
+                search = nested.querySelector('.filter-group--search, .ti-ticket-table-search, [data-ti-filter-search]');
+                if (search && search.parentElement === nested) {
+                    nested.insertBefore(search, nested.firstChild);
+                }
+            }
+            return;
+        }
+        container.insertBefore(search, container.firstChild);
+    }
+
+    function bindSourceFields(host, mount) {
+        var inline = host.querySelector('.toolbar-inline-controls');
+        if (!inline || !mount) return;
+
+        inline.querySelectorAll('input, select, textarea').forEach(function (sourceField) {
+            var cloneField = findCloneField(mount, sourceField);
+            if (!cloneField) return;
+
+            function syncToClone() {
+                copyValues(sourceField, cloneField, true);
+                syncFilterSelectSizer(cloneField);
+            }
+
+            sourceField.addEventListener('input', syncToClone);
+            sourceField.addEventListener('change', syncToClone);
+        });
+    }
+
     function populate(host) {
         var offcanvasId = host.getAttribute('data-toolbar-offcanvas-id');
         var mount = document.querySelector('[data-toolbar-mobile-mount="' + offcanvasId + '"]');
@@ -149,9 +221,11 @@
         mount.appendChild(wrapper);
         mount.dataset.populated = '1';
 
+        reorderSearchFirst(wrapper);
         prepareSearchClone(mount);
         syncAllToClone(host, mount);
         bindCloneFields(host, mount);
+        bindSourceFields(host, mount);
 
         if (window.UnioFilterSelect && typeof window.UnioFilterSelect.initAll === 'function') {
             window.UnioFilterSelect.initAll(mount);

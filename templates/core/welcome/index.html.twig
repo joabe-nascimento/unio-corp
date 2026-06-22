@@ -12,7 +12,7 @@
      data-layout="comfortable">
 
     <div class="welcome-page-toolbar">
-        <p class="welcome-page-toolbar-label">Experiência de boas-vindas</p>
+        <p class="welcome-page-toolbar-label">Centro de partida</p>
         <span id="welcome-personalize">
             {{ offcanvas.open_button('welcome-personalize', 'Personalizar', { ghost: true, icon: 'fa-sliders', class: 'welcome-personalize-btn' }) }}
         </span>
@@ -21,89 +21,23 @@
     {% include 'components/welcome/presentation_hero.html.twig' with {
         presentation: presentation,
         greeting: greeting,
-        perfil_class: perfil_class,
         perfil_label: perfil_label,
         weekday: weekday,
         date_label: date_label,
         time_label: time_label,
-        empresas_count: empresas_count
-    } only %}
-
-    {% include 'components/welcome/ai_spotlight.html.twig' %}
-
-    {% include 'components/welcome/professional_summary.html.twig' with {
-        summary_cards: welcome_content.summary_cards
-    } only %}
-
-    {% include 'components/welcome/news_updates_panel.html.twig' with {
-        news: welcome_content.news,
-        news_meta: welcome_content.news_meta,
-        updates: welcome_content.updates,
-        updates_meta: welcome_content.updates_meta
-    } only %}
-
-    {% include 'components/welcome/insights_strip.html.twig' with {
-        insights: welcome_content.insights
+        empresas_count: empresas_count,
+        empresa: empresa
     } only %}
 
     {% include 'components/welcome/onboarding_checklist.html.twig' with {
         onboarding: onboarding
     } only %}
 
-    {% include 'components/welcome/metrics_showcase.html.twig' with {
-        metrics: presentation.metrics
-    } only %}
-
-    {% include 'components/welcome/highlights_grid.html.twig' with {
-        highlights: presentation.highlights
-    } only %}
-
-    {% include 'components/welcome/journey_steps.html.twig' with {
-        journey: presentation.journey
-    } only %}
-
     <div class="welcome-page-sections">
-
-        {% if novidades|length > 0 %}
-        <section class="welcome-section welcome-section--spotlight unio-card" data-welcome-section="novidades">
+        <section class="welcome-section unio-card" id="welcome-hubs" data-welcome-section="hubs">
             <header class="welcome-section-header">
                 <div>
-                    <h2 class="welcome-section-title">Em destaque para você</h2>
-                    <p class="welcome-section-sub">Novidades liberadas no seu perfil nesta área de trabalho</p>
-                </div>
-                <span class="welcome-section-count">{{ novidades|length }} novos</span>
-            </header>
-            <div class="welcome-novidades-track">
-                {% for n in novidades %}
-                <article class="welcome-novidade-card" data-novidade-id="{{ n.id }}">
-                    <button type="button"
-                            class="welcome-novidade-dismiss"
-                            data-welcome-dismiss-novidade="{{ n.id }}"
-                            title="Ocultar destaque"
-                            aria-label="Ocultar {{ n.title }}">
-                        <i class="fas fa-times" aria-hidden="true"></i>
-                    </button>
-                    <a href="{{ path(n.route) }}" class="welcome-novidade-link">
-                        <div class="welcome-novidade-icon"><i class="fas {{ n.icon }}" aria-hidden="true"></i></div>
-                        <div class="welcome-novidade-body">
-                            <div class="welcome-novidade-title">{{ n.title }}</div>
-                            <div class="welcome-novidade-desc">{{ n.description }}</div>
-                        </div>
-                        <div class="welcome-novidade-footer">
-                            <span class="welcome-badge-new">Novo</span>
-                            <i class="fas fa-arrow-right welcome-novidade-arrow" aria-hidden="true"></i>
-                        </div>
-                    </a>
-                </article>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
-
-        <section class="welcome-section unio-card" data-welcome-section="hubs">
-            <header class="welcome-section-header">
-                <div>
-                    <h2 class="welcome-section-title">Escolha seu ponto de partida</h2>
+                    <h2 class="welcome-section-title">Por onde começar</h2>
                     <p class="welcome-section-sub">Núcleos disponíveis — fixe favoritos com a estrela</p>
                 </div>
                 <span class="welcome-section-count">{{ hubs|length }} núcleos</span>
@@ -125,6 +59,12 @@
         </section>
     </div>
 
+    {% include 'components/welcome/ai_spotlight.html.twig' %}
+
+    {% include 'components/welcome/metrics_showcase.html.twig' with {
+        metrics: presentation.metrics
+    } only %}
+
     {% if chart_sections|length > 0 %}
     <div id="welcome-analytics" data-welcome-section="graficos">
         {% include 'components/charts/panel.html.twig' with {
@@ -137,6 +77,49 @@
             data_section_attr: 'graficos'
         } %}
     </div>
+    {% endif %}
+
+    {% include 'components/welcome/news_updates_panel.html.twig' with {
+        news: welcome_content.news,
+        news_meta: welcome_content.news_meta,
+        updates: welcome_content.updates,
+        updates_meta: welcome_content.updates_meta
+    } only %}
+
+    {% if novidades|length > 0 %}
+    <section class="welcome-section welcome-section--spotlight unio-card" data-welcome-section="novidades">
+        <header class="welcome-section-header">
+            <div>
+                <h2 class="welcome-section-title">Em destaque para você</h2>
+                <p class="welcome-section-sub">Novidades liberadas no seu perfil nesta área de trabalho</p>
+            </div>
+            <span class="welcome-section-count">{{ novidades|length }} novos</span>
+        </header>
+        <div class="welcome-novidades-track">
+            {% for n in novidades %}
+            <article class="welcome-novidade-card" data-novidade-id="{{ n.id }}">
+                <button type="button"
+                        class="welcome-novidade-dismiss"
+                        data-welcome-dismiss-novidade="{{ n.id }}"
+                        title="Ocultar destaque"
+                        aria-label="Ocultar {{ n.title }}">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+                <a href="{{ path(n.route) }}" class="welcome-novidade-link">
+                    <div class="welcome-novidade-icon"><i class="fas {{ n.icon }}" aria-hidden="true"></i></div>
+                    <div class="welcome-novidade-body">
+                        <div class="welcome-novidade-title">{{ n.title }}</div>
+                        <div class="welcome-novidade-desc">{{ n.description }}</div>
+                    </div>
+                    <div class="welcome-novidade-footer">
+                        <span class="welcome-badge-new">Novo</span>
+                        <i class="fas fa-arrow-right welcome-novidade-arrow" aria-hidden="true"></i>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
     {% endif %}
 </div>
 
@@ -171,7 +154,7 @@
 <script>document.body.dataset.unioChartsJs = {{ (asset('js/unio-charts.js') ~ '?v=5')|json_encode|raw }};</script>
 <script src="{{ asset('js/welcome-charts-lazy.js') }}?v=1" defer></script>
 {% endif %}
-<script src="{{ asset('js/welcome-home.js') }}?v=5"></script>
+<script src="{{ asset('js/welcome-home.js') }}?v=6"></script>
 <script src="{{ asset('js/welcome-news.js') }}?v=5" defer></script>
 <script src="{{ asset('js/onboarding-checklist.js') }}?v=1"></script>
 {% endblock %}
