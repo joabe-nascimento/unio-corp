@@ -9,7 +9,13 @@
     {% set cat_filter_options = cat_filter_options|merge([{ value: c.id, label: c.label }]) %}
 {% endfor %}
 <div class="ti-ticket-table-filters" data-ti-ticket-filters>
-    <div class="ti-ticket-table-filters-row">
+    {% set _ti_filters_id = 'ti-ticket-filters-' ~ app.request.attributes.get('_route')|default('ti')|replace({'.': '-'}) %}
+    {% embed 'components/toolbar_controls_dual.html.twig' with {
+        offcanvas_id: _ti_filters_id,
+        fab_label: 'Filtros de chamados'
+    } %}
+        {% block toolbar_dual_filters %}
+            <div class="ti-ticket-table-filters-row">
         {% include 'components/filter_group.html.twig' with {
             label: 'Status',
             name: 'ti_table_status',
@@ -61,5 +67,7 @@
                    aria-label="Buscar chamados"
                    autocomplete="off">
         </div>
-    </div>
+        </div>
+        {% endblock %}
+    {% endembed %}
 </div>
