@@ -1933,18 +1933,9 @@
                 margin-left: 0;
                 justify-content: flex-start;
             }
-            .section-toolbar-end:has(.toolbar-mobile-fab:not([hidden])),
-            .list-toolbar-end:has(.toolbar-mobile-fab:not([hidden])) {
-                flex-basis: 0;
-                width: auto;
-                min-height: 0;
-                overflow: visible;
-                margin: 0;
-                padding: 0;
-            }
         }
 
-        /* Toolbar dual — desktop inline + FAB/offcanvas mobile */
+        /* Toolbar dual — inline sempre visível + FAB/offcanvas extra no mobile */
         .toolbar-controls-dual {
             display: contents;
         }
@@ -1970,21 +1961,27 @@
         @media (max-width: 767.98px) {
             .toolbar-controls-dual:not(.toolbar-controls-dual--empty) {
                 display: flex;
-                align-items: center;
-                justify-content: flex-end;
-                flex: 0 0 auto;
-                width: auto;
+                flex-direction: column;
+                align-items: stretch;
+                width: 100%;
+                flex: 1 1 100%;
+                gap: 10px;
             }
-            .toolbar-inline-controls {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                white-space: nowrap;
-                border: 0;
+            .toolbar-controls-dual .toolbar-inline-controls {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                justify-content: flex-start;
+                width: 100%;
+                gap: 10px;
+            }
+            .toolbar-controls-dual .toolbar-inline-controls .filter-group {
+                flex: 1 1 auto;
+                min-width: calc(50% - 6px);
+            }
+            .toolbar-controls-dual .toolbar-inline-controls .filter-group--search {
+                flex: 0 0 auto;
+                min-width: 36px;
             }
             .toolbar-mobile-fab {
                 display: inline-flex;
@@ -2087,6 +2084,12 @@
                 min-width: 100%;
             }
             .list-toolbar-end .filter-group--search {
+                min-width: 100%;
+            }
+            .toolbar-controls-dual .toolbar-inline-controls .filter-group {
+                min-width: 100%;
+            }
+            .toolbar-controls-dual .toolbar-inline-controls .filter-group--search {
                 min-width: 100%;
             }
             .filter-group--search .list-search-expand.is-expanded,
