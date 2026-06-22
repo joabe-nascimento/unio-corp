@@ -40,8 +40,18 @@
 
         syncingFields = true;
         try {
+            if (toEl.tagName === 'SELECT') {
+                syncFilterSelectSizer(toEl);
+            }
             toEl.dispatchEvent(new Event('input', { bubbles: true }));
             toEl.dispatchEvent(new Event('change', { bubbles: true }));
+            var host = toEl.closest('[data-toolbar-controls-dual]');
+            if (host) {
+                document.dispatchEvent(new CustomEvent('unio-toolbar-mobile-synced', {
+                    bubbles: true,
+                    detail: { host: host }
+                }));
+            }
         } finally {
             syncingFields = false;
         }

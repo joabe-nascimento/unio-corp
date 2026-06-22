@@ -289,6 +289,32 @@
 
         var filterRoot = root.querySelector('[data-ti-ticket-filters]');
 
+        function getFilterScope() {
+            if (!filterRoot) return null;
+            return filterRoot.querySelector('.toolbar-inline-controls') || filterRoot;
+        }
+
+        function getFilterElements() {
+            var scope = getFilterScope();
+            if (!scope) {
+                return { status: null, priority: null, category: null, search: null };
+            }
+            return {
+                status: scope.querySelector('[data-ti-filter="status"]'),
+                priority: scope.querySelector('[data-ti-filter="priority"]'),
+                category: scope.querySelector('[data-ti-filter="category"]'),
+                search: scope.querySelector('[data-ti-filter-search]'),
+            };
+        }
+
+        function syncFilterSizerUi() {
+            if (!window.UnioFilterSelect || typeof window.UnioFilterSelect.sync !== 'function') return;
+            var els = getFilterElements();
+            [els.status, els.priority, els.category].forEach(function (el) {
+                if (el) window.UnioFilterSelect.sync(el);
+            });
+        }
+
         function getTableWrap() {
             return root.querySelector('[data-ti-ticket-table]');
         }
@@ -309,26 +335,16 @@
 
         function readFilterValue(el) {
             if (!el) return '';
-            if (el.tagName === 'SELECT' && el.selectedIndex <= 0) {
-                var first = el.options[0];
-                if (first && String(first.value || '') === '') return '';
-            }
-            return String(el.value || '').trim();
+            return String(el.value ?? '').trim();
         }
 
         function getFilters() {
-            if (!filterRoot) {
-                return { status: '', priority: '', category: '', q: '' };
-            }
-            var statusEl = filterRoot.querySelector('[data-ti-filter="status"]');
-            var priEl = filterRoot.querySelector('[data-ti-filter="priority"]');
-            var catEl = filterRoot.querySelector('[data-ti-filter="category"]');
-            var searchEl = filterRoot.querySelector('[data-ti-filter-search]');
+            var els = getFilterElements();
             return {
-                status: readFilterValue(statusEl),
-                priority: readFilterValue(priEl),
-                category: readFilterValue(catEl),
-                q: searchEl ? searchEl.value.trim().toLowerCase() : '',
+                status: readFilterValue(els.status),
+                priority: readFilterValue(els.priority),
+                category: readFilterValue(els.category),
+                q: els.search ? els.search.value.trim().toLowerCase() : '',
             };
         }
 
@@ -366,14 +382,17 @@
         }
 
         function showAllRows() {
-            getTableRows().forEach(function (row) { setFilteredState(row, false); });
-            getKanbanCards().forEach(function (card) { setFilteredState(card, false); });
+            root.querySelectorAll('[data-ti-ticket-row], [data-ti-ticket-card]').forEach(function (el) {
+                el.classList.remove('is-filter-hidden');
+                el.removeAttribute('hidden');
+            });
             updateKanbanColEmpty();
         }
 
         function applyFilters() {
             if (!anyFilterActive()) {
                 showAllRows();
+                syncFilterSizerUi();
                 return;
             }
 
@@ -385,6 +404,16 @@
                 setFilteredState(card, !matchesFilters(card));
             });
             updateKanbanColEmpty();
+            syncFilterSizerUi();
+        }
+
+        function onFilterInputEvent(e) {
+            var el = e.target;
+            if (!el || !filterRoot || !filterRoot.contains(el)) return;
+            if (el.hasAttribute('data-toolbar-mobile-clone')) return;
+            if (!el.closest('.toolbar-inline-controls')) return;
+            if (!el.matches('[data-ti-filter], [data-ti-filter-search]')) return;
+            applyFilters();
         }
 
         function applyViewPanels(view) {
@@ -427,11 +456,12 @@
         }
 
         if (filterRoot) {
-            filterRoot.querySelectorAll('[data-ti-filter]').forEach(function (el) {
-                el.addEventListener('change', applyFilters);
+            filterRoot.addEventListener('change', onFilterInputEvent);
+            filterRoot.addEventListener('input', onFilterInputEvent);
+            document.addEventListener('unio-toolbar-mobile-synced', function (e) {
+                if (!e.detail || !filterRoot.contains(e.detail.host)) return;
+                applyFilters();
             });
-            var searchEl = filterRoot.querySelector('[data-ti-filter-search]');
-            if (searchEl) searchEl.addEventListener('input', applyFilters);
         }
 
         applyViewPanels(getSavedView());
