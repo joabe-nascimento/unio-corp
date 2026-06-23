@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=9">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=14">
 </head>
 <body class="marketing-home">
 
@@ -378,34 +378,156 @@
     </section>
 
     {# ── Experiência ── #}
+    {% set exp_screens = [
+        {
+            id: 'workspace',
+            icon: 'fa-building',
+            title: 'Multi-empresa nativo',
+            desc: 'Após o login, escolha a empresa ou unidade em que vai operar — troca instantânea, dados e permissões isolados por workspace.',
+            url: 'unio.app / workspace',
+            image: 'workspace.png',
+            caption: 'Seleção de área de trabalho com RH, Tecnologia, Vendas e demais contextos.'
+        },
+        {
+            id: 'welcome',
+            icon: 'fa-compass',
+            title: 'Centro de partida',
+            desc: 'Onboarding guiado, checklist de primeiros passos, atalhos aos núcleos liberados e spotlight compacto da Vitória.',
+            url: 'unio.app / bem-vindo',
+            image: 'hub-dock.png',
+            caption: 'Centro de partida com atalhos aos núcleos liberados para o perfil do colaborador.'
+        },
+        {
+            id: 'hubs',
+            icon: 'fa-layer-group',
+            title: 'Navegação por núcleos',
+            desc: 'Sidebar com 30+ hubs agrupados por categoria, busca global e dock de favoritos — mesma identidade em toda a jornada.',
+            url: 'unio.app · Núcleo selecionado',
+            image: 'hubs-sidebar.png',
+            caption: 'Picker modular: Operação, Negócios, Tecnologia, Finanças e Inteligência.'
+        },
+        {
+            id: 'ti',
+            icon: 'fa-headset',
+            title: 'Núcleo TI operacional',
+            desc: 'Service desk, fila prioritária, filtros responsivos no mobile e chat de chamados integrado à operação.',
+            url: 'unio.app / ti',
+            image: 'hub-ti.png',
+            caption: 'Service desk com KPIs, filtros responsivos, fila P1→P4 e SLA em tempo real.'
+        },
+        {
+            id: 'vitoria',
+            icon: 'fa-wand-magic-sparkles',
+            title: 'Vitória — copiloto IA',
+            desc: 'Assistente contextual para módulos, fluxos e indicadores — respostas no contexto do workspace e do perfil.',
+            url: 'unio.app · Assistente',
+            image: 'vitoria-chat.png',
+            caption: 'Vitória integrada ao dashboard — contexto do workspace, perfil e módulo ativo.'
+        }
+    ] %}
     <div class="mkt-section-wrap mkt-section-wrap--alt">
-        <section class="mkt-section" id="experiencia" aria-labelledby="mkt-exp-title">
+        <section class="mkt-section mkt-section--exp" id="experiencia" aria-labelledby="mkt-exp-title">
             <div class="mkt-section-head">
                 <p class="mkt-section-eyebrow">Experiência</p>
-                <h2 class="mkt-section-title" id="mkt-exp-title">Interface pensada para o dia a dia</h2>
-                <p class="mkt-section-sub">Dashboard, busca global, sidebar inteligente e componentes consistentes em toda a jornada.</p>
+                <h2 class="mkt-section-title" id="mkt-exp-title">A plataforma por dentro</h2>
+                <p class="mkt-section-sub">
+                    Multi-empresa, centro de partida, núcleos modulares, TI operacional e Vitória integrada —
+                    interface consistente do desktop ao mobile.
+                </p>
             </div>
-            <div class="mkt-showcase">
-                <article class="mkt-showcase-card">
-                    <div class="mkt-showcase-icon"><i class="fas fa-gauge-high" aria-hidden="true"></i></div>
-                    <h3>Dashboard adaptável</h3>
-                    <p>KPIs, gráficos e atalhos conforme o layout e o perfil do usuário logado.</p>
-                </article>
-                <article class="mkt-showcase-card">
-                    <div class="mkt-showcase-icon"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
-                    <h3>Busca global</h3>
-                    <p>Encontre núcleos, apps e membros da equipe em segundos — sem perder o contexto.</p>
-                </article>
-                <article class="mkt-showcase-card">
-                    <div class="mkt-showcase-icon"><i class="fas fa-sliders" aria-hidden="true"></i></div>
-                    <h3>Tema claro e escuro</h3>
-                    <p>Conforto visual em qualquer ambiente, com identidade configurável pelo admin.</p>
-                </article>
-                <article class="mkt-showcase-card">
-                    <div class="mkt-showcase-icon"><i class="fas fa-hand-sparkles" aria-hidden="true"></i></div>
-                    <h3>Boas-vindas guiadas</h3>
-                    <p>Onboarding, checklist de primeiros passos e spotlight da Vitória na entrada.</p>
-                </article>
+
+            <div class="mkt-exp" id="mktExp" data-mkt-exp>
+                <div class="mkt-exp-layout">
+                    <div class="mkt-exp-stage">
+                        <div class="mkt-exp-browser-shell">
+                            <div class="mkt-exp-browser">
+                                <div class="mkt-exp-browser-chrome">
+                                    <div class="mkt-exp-browser-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                    <div class="mkt-exp-browser-url" id="mktExpUrl">{{ exp_screens[0].url }}</div>
+                                </div>
+                                <div class="mkt-exp-browser-body">
+                                    {% for screen in exp_screens %}
+                                    <img class="mkt-exp-shot{% if loop.first %} is-active{% endif %}{% if screen.id in ['vitoria', 'ti', 'hubs', 'workspace', 'welcome'] %} mkt-exp-shot--scene{% endif %}"
+                                         id="mkt-exp-shot-{{ screen.id }}"
+                                         data-mkt-exp-shot="{{ screen.id }}"
+                                         src="{{ asset('images/apresentacao/' ~ screen.image) }}?v=9"
+                                         alt="{{ screen.title }}"
+                                         width="1200"
+                                         height="750"
+                                         loading="{{ loop.first ? 'eager' : 'lazy' }}"
+                                         decoding="async">
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mkt-exp-caption" id="mktExpCaption">{{ exp_screens[0].caption }}</p>
+                    </div>
+
+                    <div class="mkt-exp-nav" role="tablist" aria-label="Capturas da plataforma">
+                        {% for screen in exp_screens %}
+                        <button type="button"
+                                class="mkt-exp-nav-item{% if loop.first %} is-active{% endif %}"
+                                role="tab"
+                                id="mkt-exp-tab-{{ screen.id }}"
+                                aria-selected="{{ loop.first ? 'true' : 'false' }}"
+                                aria-controls="mkt-exp-shot-{{ screen.id }}"
+                                data-mkt-exp-trigger="{{ screen.id }}"
+                                data-mkt-exp-url="{{ screen.url }}"
+                                data-mkt-exp-caption="{{ screen.caption }}">
+                            <span class="mkt-exp-nav-icon"><i class="fas {{ screen.icon }}" aria-hidden="true"></i></span>
+                            <span class="mkt-exp-nav-copy">
+                                <strong>{{ screen.title }}</strong>
+                                <span>{{ screen.desc }}</span>
+                            </span>
+                            <span class="mkt-exp-nav-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mkt-exp-thumbs" aria-label="Outras telas do sistema">
+                    <figure class="mkt-exp-thumb">
+                        <div class="mkt-exp-thumb-frame">
+                            <img src="{{ asset('images/apresentacao/hub-rh.png') }}?v=9" alt="Módulo RH operacional" loading="lazy" decoding="async">
+                        </div>
+                        <figcaption>RH operacional</figcaption>
+                    </figure>
+                    <figure class="mkt-exp-thumb">
+                        <div class="mkt-exp-thumb-frame">
+                            <img src="{{ asset('images/apresentacao/workspace.png') }}?v=9" alt="Seleção de área de trabalho" loading="lazy" decoding="async">
+                        </div>
+                        <figcaption>Multi-empresa</figcaption>
+                    </figure>
+                    <figure class="mkt-exp-thumb">
+                        <div class="mkt-exp-thumb-frame">
+                            <img src="{{ asset('images/apresentacao/login.png') }}?v=9" alt="Login seguro da plataforma" loading="lazy" decoding="async">
+                        </div>
+                        <figcaption>Acesso seguro</figcaption>
+                    </figure>
+                </div>
+
+                <div class="mkt-exp-highlights">
+                    <article class="mkt-exp-highlight">
+                        <div class="mkt-exp-highlight-icon"><i class="fas fa-mobile-screen-button" aria-hidden="true"></i></div>
+                        <h3>Layout responsivo</h3>
+                        <p>Filtros em bottom sheet no mobile, toolbars adaptáveis e componentes consistentes em qualquer tela.</p>
+                    </article>
+                    <article class="mkt-exp-highlight">
+                        <div class="mkt-exp-highlight-icon"><i class="fas fa-sliders" aria-hidden="true"></i></div>
+                        <h3>Tema e white-label</h3>
+                        <p>Claro ou escuro, logo e cores configuráveis pelo admin — identidade da sua empresa em cada workspace.</p>
+                    </article>
+                    <article class="mkt-exp-highlight">
+                        <div class="mkt-exp-highlight-icon"><i class="fas fa-user-shield" aria-hidden="true"></i></div>
+                        <h3>Permissões granulares</h3>
+                        <p>Grants por hub e módulo, com perfis de Tenant, Admin, Gestor e Supervisor — controle fino por área.</p>
+                    </article>
+                    <article class="mkt-exp-highlight">
+                        <div class="mkt-exp-highlight-icon"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
+                        <h3>Busca global</h3>
+                        <p>Encontre núcleos, apps e membros em segundos, sem perder o contexto da operação.</p>
+                    </article>
+                </div>
             </div>
         </section>
     </div>
@@ -532,6 +654,34 @@
             var next = cur === 'dark' ? 'light' : 'dark';
             localStorage.setItem('unio-theme', next);
             applyTheme(next);
+        });
+    }
+
+    var expRoot = document.getElementById('mktExp');
+    if (expRoot) {
+        var expUrl = document.getElementById('mktExpUrl');
+        var expCaption = document.getElementById('mktExpCaption');
+        var expTriggers = expRoot.querySelectorAll('[data-mkt-exp-trigger]');
+        var expShots = expRoot.querySelectorAll('[data-mkt-exp-shot]');
+
+        expTriggers.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = btn.getAttribute('data-mkt-exp-trigger');
+                expTriggers.forEach(function (item) {
+                    var active = item === btn;
+                    item.classList.toggle('is-active', active);
+                    item.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+                expShots.forEach(function (shot) {
+                    shot.classList.toggle('is-active', shot.getAttribute('data-mkt-exp-shot') === id);
+                });
+                if (expUrl) {
+                    expUrl.textContent = btn.getAttribute('data-mkt-exp-url') || '';
+                }
+                if (expCaption) {
+                    expCaption.textContent = btn.getAttribute('data-mkt-exp-caption') || '';
+                }
+            });
         });
     }
 })();

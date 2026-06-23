@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Preview — Núcleo RH | Unio</title>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/unio-app.min.css') }}?v=276">
+    <style>
+        html, body { height: 100%; overflow: hidden; margin: 0; }
+        body { background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 28px; }
+        #capture-root {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-2);
+            box-shadow: 0 8px 40px rgba(15,23,42,0.12);
+        }
+        .preview-shell {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            width: 1340px;
+            height: 620px;
+            overflow: hidden;
+        }
+        .preview-sidebar {
+            background: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--border);
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .preview-brand {
+            padding: 16px 18px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .preview-brand img { height: 26px; width: auto; }
+        .preview-nav { flex: 1; padding: 8px 0; overflow: hidden; }
+        .preview-nav-section {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            padding: 10px 16px 4px;
+        }
+        .preview-main {
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .preview-topbar {
+            height: 54px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+        .preview-topbar-title { flex: 1; min-width: 0; }
+        .preview-topbar-title h1 {
+            font-family: 'Sora', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-1);
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+        .preview-topbar-title p { font-size: 11px; color: var(--text-3); margin: 1px 0 0; }
+        .preview-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .preview-content {
+            flex: 1;
+            padding: 16px 20px 20px;
+            overflow: hidden;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 16px;
+            height: calc(100% - 120px);
+        }
+        /* Avatares de pessoa */
+        .rh-person-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-line);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .rh-flow-status {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-3);
+        }
+    </style>
+</head>
+<body>
+<div class="preview-shell" id="capture-root">
+    <aside class="preview-sidebar">
+        <div class="preview-brand">
+            {% include 'components/platform_logo.html.twig' with { variant: 'full' } only %}
+        </div>
+        <nav class="preview-nav">
+            <span class="preview-nav-section">Navegação</span>
+            <ul class="nav nav-sidebar flex-column" role="menu">
+                <li class="nav-item sidebar-hub-pick-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-gauge-high nav-icon"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item sidebar-hub-pick-item">
+                    <a href="#" class="nav-link active">
+                        <i class="fas fa-id-card nav-icon"></i>
+                        <p>Recursos Humanos</p>
+                    </a>
+                </li>
+                <li class="nav-item sidebar-hub-pick-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-tower-broadcast nav-icon"></i>
+                        <p>Núcleo TI</p>
+                    </a>
+                </li>
+            </ul>
+            <span class="preview-nav-section">Módulos RH</span>
+            <ul class="nav nav-sidebar flex-column" role="menu">
+                <li class="nav-item sidebar-hub-pick-item">
+                    <a href="#" class="nav-link active">
+                        <i class="fas fa-users nav-icon"></i>
+                        <p>Funcionários</p>
+                    </a>
+                </li>
+                <li class="nav-item sidebar-hub-pick-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-user-plus nav-icon"></i>
+                        <p>Admissão &amp; Offboarding</p>
+                    </a>
+                </li>
+                <li class="nav-item sidebar-hub-pick-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calendar-days nav-icon"></i>
+                        <p>Férias &amp; Ausências</p>
+                    </a>
+                </li>
+                <li class="nav-item sidebar-hub-pick-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-file-signature nav-icon"></i>
+                        <p>Documentos</p>
+                    </a>
+                </li>
+                <li class="nav-item sidebar-hub-pick-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-chart-bar nav-icon"></i>
+                        <p>Relatórios</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="preview-main">
+        <header class="preview-topbar">
+            <div class="preview-topbar-title">
+                <h1>Recursos Humanos</h1>
+                <p>Núcleo RH · Colaboradores, admissões e fluxos · Unio 2 · Tecnologia</p>
+            </div>
+            <div class="preview-topbar-actions">
+                <button type="button" class="btn-unio btn-sm">
+                    <i class="fas fa-user-plus mr-1"></i> Nova admissão
+                </button>
+            </div>
+        </header>
+
+        <div class="preview-content">
+            {# KPIs #}
+            <div class="row stats-row mb-3">
+                <div class="col-lg-3 col-md-6 d-flex">
+                    <div class="unio-card stat-card w-100">
+                        <div class="card-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-card-body">
+                            <div class="card-value">142</div>
+                            <div class="card-label">Funcionários ativos</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 d-flex">
+                    <div class="unio-card stat-card w-100">
+                        <div class="card-icon"><i class="fas fa-user-plus"></i></div>
+                        <div class="stat-card-body">
+                            <div class="card-value">5</div>
+                            <div class="card-label">Admissões em curso</div>
+                        </div>
+                        <div class="stat-trend stat-trend--up"><i class="fas fa-arrow-up"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 d-flex">
+                    <div class="unio-card stat-card w-100">
+                        <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-card-body">
+                            <div class="card-value">18</div>
+                            <div class="card-label">Férias no mês</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 d-flex">
+                    <div class="unio-card stat-card w-100">
+                        <div class="card-icon"><i class="fas fa-file-signature"></i></div>
+                        <div class="stat-card-body">
+                            <div class="card-value">7</div>
+                            <div class="card-label">Docs pendentes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-grid">
+                {# Admissões em andamento #}
+                <div class="unio-card" style="padding: 0; overflow: hidden; align-self: start;">
+                    <div style="padding: 16px 18px 0;">
+                        <div class="section-header section-header--in-card" style="margin-bottom:12px;">
+                            <div class="section-header-text">
+                                <div class="section-title">Admissões em andamento</div>
+                                <div class="section-subtitle">5 fluxos ativos · próxima integração em 2 dias</div>
+                            </div>
+                            <a href="#" class="section-header-action btn-unio-ghost" style="font-size:11px;">Ver todos</a>
+                        </div>
+                    </div>
+                    <div style="padding: 0 18px 18px; display:flex; flex-direction:column; gap:10px;">
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);">
+                            <div class="rh-person-avatar">LC</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:13px;font-weight:600;color:var(--text-1);">Lucas Carvalho</div>
+                                <div style="font-size:11px;color:var(--text-3);">Dev Back-end · TI · Integração em 25/06</div>
+                            </div>
+                            <span class="status-badge status-badge--info ti-badge">Documentação</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);">
+                            <div class="rh-person-avatar">AM</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:13px;font-weight:600;color:var(--text-1);">Ana Melo</div>
+                                <div style="font-size:11px;color:var(--text-3);">UX Designer · Produto · Integração em 30/06</div>
+                            </div>
+                            <span class="status-badge status-badge--warning ti-badge">Assinatura</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);">
+                            <div class="rh-person-avatar">RS</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:13px;font-weight:600;color:var(--text-1);">Rafael Silva</div>
+                                <div style="font-size:11px;color:var(--text-3);">Analista Financeiro · Financeiro · 05/07</div>
+                            </div>
+                            <span class="status-badge status-badge--secondary ti-badge">Triagem RH</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);">
+                            <div class="rh-person-avatar">JP</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:13px;font-weight:600;color:var(--text-1);">Juliana Prado</div>
+                                <div style="font-size:11px;color:var(--text-3);">Analista de QA · TI · Integração em 10/07</div>
+                            </div>
+                            <span class="status-badge status-badge--success ti-badge">Concluído</span>
+                        </div>
+                    </div>
+                </div>
+
+                {# Equipe recente #}
+                <div class="unio-card" style="padding: 0; overflow: hidden; align-self: start;">
+                    <div style="padding: 16px 18px 12px;">
+                        <div class="section-title">Equipe · destaques</div>
+                        <div class="section-subtitle">Ativos · ordenado por área</div>
+                    </div>
+                    <table class="table table-unio table-hover mb-0" style="font-size:12px;">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Cargo</th>
+                                <th>Área</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <div class="rh-person-avatar" style="width:24px;height:24px;font-size:9px;">FO</div>
+                                        <span style="color:var(--text-1);font-weight:500;">Felipe Oliveira</span>
+                                    </div>
+                                </td>
+                                <td style="color:var(--text-2);">Tech Lead</td>
+                                <td><span class="status-badge status-badge--secondary ti-badge" style="font-size:9px;">TI</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <div class="rh-person-avatar" style="width:24px;height:24px;font-size:9px;">CB</div>
+                                        <span style="color:var(--text-1);font-weight:500;">Carla Borges</span>
+                                    </div>
+                                </td>
+                                <td style="color:var(--text-2);">HRBP</td>
+                                <td><span class="status-badge status-badge--secondary ti-badge" style="font-size:9px;">RH</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <div class="rh-person-avatar" style="width:24px;height:24px;font-size:9px;">MN</div>
+                                        <span style="color:var(--text-1);font-weight:500;">Marcos Nunes</span>
+                                    </div>
+                                </td>
+                                <td style="color:var(--text-2);">Product Manager</td>
+                                <td><span class="status-badge status-badge--secondary ti-badge" style="font-size:9px;">Produto</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <div class="rh-person-avatar" style="width:24px;height:24px;font-size:9px;">TF</div>
+                                        <span style="color:var(--text-1);font-weight:500;">Tatiana Faria</span>
+                                    </div>
+                                </td>
+                                <td style="color:var(--text-2);">CFO</td>
+                                <td><span class="status-badge status-badge--secondary ti-badge" style="font-size:9px;">Financeiro</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
