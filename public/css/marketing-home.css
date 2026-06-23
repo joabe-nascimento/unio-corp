@@ -233,6 +233,8 @@ body.marketing-home {
 }
 @media (prefers-reduced-motion: reduce) {
     .mkt-hero-deco { animation: none !important; }
+    .mkt-dash-live-dot,
+    .mkt-dash-kpi-pulse { animation: none !important; }
 }
 .mkt-hero-inner {
     position: relative;
@@ -1493,70 +1495,255 @@ body.marketing-home {
 .mkt-bar-pct { font-size: 12px; font-weight: 700; color: var(--accent); text-align: right; }
 .mkt-chart-note { font-size: 11px; color: var(--text-3); margin: 20px 0 0; font-style: italic; }
 
-/* ── Dashboard preview ── */
+/* ── Dashboard preview (app mockup) ── */
 .mkt-dashboard-preview {
+    position: relative;
+}
+.mkt-dash-window {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 24px 64px rgba(0, 0, 0, 0.18),
+        0 8px 24px rgba(25, 45, 162, 0.08);
+}
+[data-theme="light"] .mkt-dash-window {
+    box-shadow:
+        0 0 0 1px rgba(0,0,0,0.04),
+        0 24px 64px rgba(25, 45, 162, 0.10),
+        0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Chrome bar */
+.mkt-dash-chrome {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+}
+.mkt-dash-chrome-dots {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+.mkt-dash-chrome-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border-2);
+}
+.mkt-dash-chrome-dots span:nth-child(1) { background: #f87171; }
+.mkt-dash-chrome-dots span:nth-child(2) { background: #fbbf24; }
+.mkt-dash-chrome-dots span:nth-child(3) { background: #4ade80; }
+.mkt-dash-chrome-title {
+    flex: 1;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mkt-dash-chrome-title i { color: var(--accent); font-size: 13px; }
+.mkt-dash-live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #4ade80;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+}
+.mkt-dash-live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: mktPulse 2s ease-in-out infinite;
+}
+@keyframes mktPulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(74,222,128,0); }
+}
+
+/* Toolbar */
+.mkt-dash-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 96%, var(--accent-dim));
+    flex-wrap: wrap;
+}
+.mkt-dash-toolbar-left,
+.mkt-dash-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.mkt-dash-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    padding: 5px 12px;
+    border-radius: 8px;
     background: var(--surface-2);
     border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 32px;
-    overflow: hidden;
 }
+.mkt-dash-pill i { color: var(--accent); font-size: 10px; }
+.mkt-dash-pill--muted { color: var(--text-3); font-weight: 500; }
+.mkt-dash-pill--muted i { color: var(--text-3); }
+.mkt-dash-pill--action {
+    color: #f87171;
+    border-color: rgba(239,68,68,0.3);
+    background: rgba(239,68,68,0.06);
+}
+.mkt-dash-pill--action i { color: #f87171; }
+
+/* KPIs */
 .mkt-dash-kpis {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 12px;
+    padding: 16px 20px 0;
 }
 .mkt-dash-kpi {
-    background: var(--surface);
+    background: var(--surface-2);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px 18px;
+    border-radius: 14px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
+    transition: border-color 0.15s, transform 0.15s;
 }
-.mkt-dash-kpi--good { border-color: rgba(45,212,255,0.25); }
-.mkt-dash-kpi--crit { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.05); }
+.mkt-dash-kpi:hover {
+    border-color: var(--accent-line);
+    transform: translateY(-1px);
+}
+.mkt-dash-kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.mkt-dash-kpi-icon {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-line);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 13px;
+}
+.mkt-dash-kpi-icon--cyan { background: rgba(45,212,255,0.12); border-color: rgba(45,212,255,0.3); color: #2DD4FF; }
+.mkt-dash-kpi-icon--red { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171; }
+.mkt-dash-spark {
+    width: 56px; height: 22px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.45;
+}
+.mkt-dash-spark--up { stroke: #4ade80; }
+.mkt-dash-kpi-pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #f87171;
+    animation: mktPulse 1.5s ease-in-out infinite;
+}
+.mkt-dash-kpi--good { border-color: rgba(45,212,255,0.2); }
+.mkt-dash-kpi--crit {
+    border-color: rgba(239,68,68,0.35);
+    background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, var(--surface-2) 100%);
+}
 .mkt-dash-kpi-val {
     font-family: 'Sora', sans-serif;
-    font-size: 28px; font-weight: 800;
+    font-size: 26px; font-weight: 800;
     color: var(--text-1);
-    line-height: 1;
+    line-height: 1.1;
 }
 .mkt-dash-kpi-val small { font-size: 14px; font-weight: 600; }
 .mkt-dash-kpi--good .mkt-dash-kpi-val { color: #2DD4FF; }
 .mkt-dash-kpi--crit .mkt-dash-kpi-val { color: #f87171; }
-.mkt-dash-kpi-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
-.mkt-dash-kpi-delta { font-size: 11px; color: var(--text-3); }
+.mkt-dash-kpi-label { font-size: 11.5px; font-weight: 600; color: var(--text-2); margin-top: 2px; }
+.mkt-dash-kpi-delta { font-size: 10.5px; color: var(--text-3); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 .mkt-dash-kpi-delta--ok { color: #4ade80; }
 .mkt-dash-kpi-delta--warn { color: #fb923c; }
 .mkt-dash-kpi-delta--crit { color: #f87171; }
 
-.mkt-dash-charts {
+/* Main grid */
+.mkt-dash-main {
     display: grid;
-    grid-template-columns: 2fr 1.2fr 1.4fr;
-    gap: 16px;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 12px;
+    padding: 16px 20px 20px;
+    align-items: start;
 }
+.mkt-dash-main-left,
+.mkt-dash-main-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* Chart cards */
 .mkt-dash-chart-card {
-    background: var(--surface);
+    background: var(--surface-2);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 14px;
+    padding: 18px;
 }
+.mkt-dash-chart-card--wide { flex: 1; }
 .mkt-dash-chart-head {
     font-size: 12px; font-weight: 600; color: var(--text-2);
     margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; flex-wrap: wrap;
+}
+.mkt-dash-chart-head > span:first-child {
     display: flex; align-items: center; gap: 7px;
 }
 .mkt-dash-chart-head i { color: var(--accent); }
+.mkt-dash-chart-badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-line);
+}
+.mkt-dash-chart-link {
+    font-size: 11px;
+    color: var(--accent);
+    cursor: default;
+    display: flex; align-items: center; gap: 4px;
+}
 
-/* Bar chart vertical */
+/* Bar chart */
 .mkt-dash-bar-chart {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
-    height: 120px;
+    gap: 10px;
+    height: 140px;
+    padding-top: 8px;
 }
 .mkt-dash-bar-col {
     flex: 1;
@@ -1564,37 +1751,110 @@ body.marketing-home {
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
+    gap: 8px;
     height: 100%;
+    position: relative;
+    cursor: default;
 }
-.mkt-dash-bar-col span { font-size: 10px; color: var(--text-3); }
+.mkt-dash-bar-col::before {
+    content: attr(data-val);
+    position: absolute;
+    top: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.mkt-dash-bar-col:hover::before { opacity: 1; }
+.mkt-dash-bar-col span { font-size: 10px; font-weight: 600; color: var(--text-3); }
 .mkt-dash-bar-fill {
     width: 100%;
+    max-width: 36px;
     height: 0;
-    border-radius: 5px 5px 0 0;
-    background: linear-gradient(180deg, var(--accent), #2B46D4);
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, #4F6BF5 0%, var(--accent) 100%);
     transition: height 1s cubic-bezier(0.22,1,0.36,1);
 }
 .mkt-bars--visible .mkt-dash-bar-fill { height: var(--h); }
-.mkt-dash-bar-col--dim .mkt-dash-bar-fill { background: var(--border-2); }
-.mkt-dash-bar-col--peak .mkt-dash-bar-fill { background: linear-gradient(180deg, #2DD4FF, var(--accent)); }
+.mkt-dash-bar-col--dim .mkt-dash-bar-fill { background: var(--border-2); opacity: 0.6; }
+.mkt-dash-bar-col--peak .mkt-dash-bar-fill {
+    background: linear-gradient(180deg, #2DD4FF 0%, var(--accent) 100%);
+    box-shadow: 0 -4px 16px rgba(45,212,255,0.25);
+}
+.mkt-dash-bar-col--peak span { color: var(--accent); font-weight: 700; }
 
-/* Donut chart (CSS conic-gradient) */
+/* Ticket feed */
+.mkt-dash-tickets {
+    list-style: none;
+    padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.mkt-dash-ticket {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color 0.15s, background 0.15s;
+}
+.mkt-dash-ticket:hover { border-color: var(--accent-line); background: var(--nav-hover-bg); }
+.mkt-dash-ticket--p1 { border-left: 3px solid #f87171; }
+.mkt-dash-ticket--p2 { border-left: 3px solid #fb923c; }
+.mkt-dash-ticket-pri {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 6px;
+    border-radius: 5px;
+    background: rgba(239,68,68,0.12);
+    color: #f87171;
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+}
+.mkt-dash-ticket--p2 .mkt-dash-ticket-pri { background: rgba(251,146,60,0.12); color: #fb923c; }
+.mkt-dash-ticket-pri--p3 { background: rgba(45,212,255,0.12); color: #2DD4FF; }
+.mkt-dash-ticket-body { flex: 1; min-width: 0; }
+.mkt-dash-ticket-body strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mkt-dash-ticket-body span { font-size: 10.5px; color: var(--text-3); }
+.mkt-dash-ticket-status {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 100px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.mkt-dash-ticket-status--open { background: rgba(239,68,68,0.1); color: #f87171; }
+.mkt-dash-ticket-status--prog { background: rgba(45,212,255,0.1); color: #2DD4FF; }
+.mkt-dash-ticket-status--done { background: rgba(74,222,128,0.1); color: #4ade80; }
+
+/* Donut */
 .mkt-dash-donut-wrap {
     position: relative;
-    width: 120px; height: 120px;
-    margin: 0 auto 12px;
+    width: 110px; height: 110px;
+    margin: 0 auto 14px;
 }
 .mkt-dash-donut {
-    width: 120px; height: 120px;
+    width: 110px; height: 110px;
     border-radius: 50%;
     background: conic-gradient(
         var(--accent) 0% 58%,
         #2DD4FF 58% 85%,
         var(--border-2) 85% 100%
     );
-    -webkit-mask: radial-gradient(transparent 44px, #000 45px);
-    mask: radial-gradient(transparent 44px, #000 45px);
+    -webkit-mask: radial-gradient(transparent 40px, #000 41px);
+    mask: radial-gradient(transparent 40px, #000 41px);
 }
 .mkt-dash-donut-center {
     position: absolute;
@@ -1603,19 +1863,24 @@ body.marketing-home {
     align-items: center; justify-content: center;
     gap: 1px;
 }
-.mkt-dash-donut-center strong { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800; color: var(--text-1); }
-.mkt-dash-donut-center span { font-size: 10px; color: var(--text-3); }
+.mkt-dash-donut-center strong { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: var(--text-1); }
+.mkt-dash-donut-center span { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; }
 .mkt-dash-legend {
-    display: flex; flex-direction: column; gap: 6px;
+    display: flex; flex-direction: column; gap: 8px;
 }
-.mkt-dash-legend span { font-size: 11px; color: var(--text-2); display: flex; align-items: center; gap: 7px; }
+.mkt-dash-legend span {
+    font-size: 11.5px; color: var(--text-2);
+    display: flex; align-items: center; gap: 8px;
+    justify-content: space-between;
+}
+.mkt-dash-legend b { color: var(--text-1); font-weight: 700; }
 .mkt-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
 /* SLA bars */
-.mkt-sla-bars { display: flex; flex-direction: column; gap: 14px; }
+.mkt-sla-bars { display: flex; flex-direction: column; gap: 12px; }
 .mkt-sla-row {
     display: grid;
-    grid-template-columns: 90px 1fr 36px;
+    grid-template-columns: 36px 1fr 36px;
     align-items: center;
     gap: 10px;
 }
@@ -1638,6 +1903,154 @@ body.marketing-home {
 .mkt-sla-val { font-size: 11.5px; font-weight: 700; color: var(--accent); text-align: right; }
 .mkt-sla-fill--warn ~ .mkt-sla-val,
 .mkt-sla-row:first-child .mkt-sla-val { color: #fb923c; }
+
+/* Vitória insight card */
+.mkt-dash-vitoria {
+    border-radius: 14px;
+    padding: 16px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent-dim) 80%, var(--surface-2)) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--accent-line);
+    position: relative;
+    overflow: hidden;
+}
+.mkt-dash-vitoria::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(45,212,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+.mkt-dash-vitoria-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.mkt-dash-vitoria-avatar {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), #2DD4FF);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+.mkt-dash-vitoria-head strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-1);
+}
+.mkt-dash-vitoria-head span { font-size: 10px; color: var(--text-3); }
+.mkt-dash-vitoria p {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin: 0 0 12px;
+}
+.mkt-dash-vitoria-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.mkt-dash-vitoria-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: default;
+}
+.mkt-dash-vitoria-btn--ghost {
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--border);
+}
+
+/* CSAT + Team row */
+.mkt-dash-mini-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.mkt-dash-csat,
+.mkt-dash-team {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+}
+.mkt-dash-csat-ring {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 3px solid #4ade80;
+    border-top-color: var(--border-2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transform: rotate(-45deg);
+}
+.mkt-dash-csat-ring span {
+    transform: rotate(45deg);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: #4ade80;
+}
+.mkt-dash-csat strong,
+.mkt-dash-team strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-1);
+}
+.mkt-dash-csat span,
+.mkt-dash-team span { font-size: 10px; color: var(--text-3); }
+.mkt-dash-team-avatars {
+    display: flex;
+    flex-shrink: 0;
+}
+.mkt-dash-team-avatars span {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 2px solid var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-left: -8px;
+}
+.mkt-dash-team-avatars span:first-child { margin-left: 0; }
+.mkt-dash-team-more {
+    background: var(--accent) !important;
+    color: #fff !important;
+    font-size: 8px !important;
+}
+
+/* Footnote */
+.mkt-dash-footnote {
+    font-size: 11px;
+    color: var(--text-3);
+    text-align: center;
+    padding: 12px 20px;
+    margin: 0;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.mkt-dash-footnote i { color: var(--accent); font-size: 11px; }
 
 /* ── Comparação ── */
 .mkt-compare-wrap {
@@ -1937,7 +2350,8 @@ body.marketing-home {
     .mkt-rh-banner-grid, .mkt-tab-panel .mkt-rh-banner-grid { grid-template-columns: 1fr; }
     .mkt-metric-grid { grid-template-columns: repeat(2, 1fr); }
     .mkt-dash-kpis { grid-template-columns: repeat(2, 1fr); }
-    .mkt-dash-charts { grid-template-columns: 1fr; }
+    .mkt-dash-main { grid-template-columns: 1fr; }
+    .mkt-dash-mini-row { grid-template-columns: 1fr; }
     .mkt-bar-row { grid-template-columns: 130px 1fr 40px; }
     .mkt-testimonials { grid-template-columns: 1fr; }
     .mkt-who-strip { gap: 8px; }
@@ -1962,7 +2376,13 @@ body.marketing-home {
     .mkt-rh-banner { padding: 28px 22px; }
     .mkt-metric-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .mkt-metric-val { font-size: 32px; }
-    .mkt-dash-kpis { grid-template-columns: 1fr 1fr; }
+    .mkt-dash-kpis { grid-template-columns: 1fr 1fr; padding: 12px 16px 0; }
+    .mkt-dash-main { padding: 12px 16px 16px; }
+    .mkt-dash-chrome { padding: 10px 16px; }
+    .mkt-dash-toolbar { padding: 8px 16px; }
+    .mkt-dash-bar-chart { height: 110px; gap: 6px; }
+    .mkt-dash-vitoria-actions { flex-direction: column; }
+    .mkt-dash-vitoria-btn { justify-content: center; }
     .mkt-bar-row { grid-template-columns: 100px 1fr 36px; gap: 8px; }
     .mkt-coverage-chart { padding: 24px 18px; }
     .mkt-compare-table thead th, .mkt-compare-table tbody td { padding: 12px 14px; font-size: 12px; }

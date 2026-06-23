@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=14">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=15">
 </head>
 <body class="marketing-home">
 
@@ -439,94 +439,216 @@
             <p class="mkt-section-sub mkt-section-sub--left">Indicadores, chamados, SLA e anomalias — tudo no mesmo painel, integrado ao restante da plataforma.</p>
         </div>
         <div class="mkt-dashboard-preview">
-            <div class="mkt-dash-kpis">
-                <div class="mkt-dash-kpi">
-                    <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="247">0</span></span>
-                    <span class="mkt-dash-kpi-label">Chamados abertos</span>
-                    <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--warn"><i class="fas fa-arrow-up" aria-hidden="true"></i> +12% esta semana</span>
-                </div>
-                <div class="mkt-dash-kpi mkt-dash-kpi--good">
-                    <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="94">0</span>.<small>2%</small></span>
-                    <span class="mkt-dash-kpi-label">SLA cumprido</span>
-                    <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--ok"><i class="fas fa-bullseye" aria-hidden="true"></i> Meta: 90%</span>
-                </div>
-                <div class="mkt-dash-kpi mkt-dash-kpi--good">
-                    <span class="mkt-dash-kpi-val">1h <small>23m</small></span>
-                    <span class="mkt-dash-kpi-label">MTTR médio</span>
-                    <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--ok"><i class="fas fa-arrow-down" aria-hidden="true"></i> −18% vs. mês passado</span>
-                </div>
-                <div class="mkt-dash-kpi mkt-dash-kpi--crit">
-                    <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="3">0</span></span>
-                    <span class="mkt-dash-kpi-label">Incidentes P1 ativos</span>
-                    <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--crit"><i class="fas fa-fire" aria-hidden="true"></i> War Room ativo</span>
-                </div>
-            </div>
-
-            <div class="mkt-dash-charts">
-                {# Gráfico de barras: volume por dia #}
-                <div class="mkt-dash-chart-card">
-                    <div class="mkt-dash-chart-head">
-                        <span><i class="fas fa-chart-column" aria-hidden="true"></i> Volume de chamados — últimos 7 dias</span>
+            {# Chrome do app #}
+            <div class="mkt-dash-window">
+                <div class="mkt-dash-chrome">
+                    <div class="mkt-dash-chrome-dots" aria-hidden="true">
+                        <span></span><span></span><span></span>
                     </div>
-                    <div class="mkt-dash-bar-chart" aria-label="Gráfico de barras: volume de chamados por dia da semana">
-                        <div class="mkt-dash-bar-col"><div class="mkt-dash-bar-fill" style="--h:55%"></div><span>Seg</span></div>
-                        <div class="mkt-dash-bar-col"><div class="mkt-dash-bar-fill" style="--h:72%"></div><span>Ter</span></div>
-                        <div class="mkt-dash-bar-col"><div class="mkt-dash-bar-fill" style="--h:48%"></div><span>Qua</span></div>
-                        <div class="mkt-dash-bar-col mkt-dash-bar-col--peak"><div class="mkt-dash-bar-fill" style="--h:91%"></div><span>Qui</span></div>
-                        <div class="mkt-dash-bar-col"><div class="mkt-dash-bar-fill" style="--h:65%"></div><span>Sex</span></div>
-                        <div class="mkt-dash-bar-col mkt-dash-bar-col--dim"><div class="mkt-dash-bar-fill" style="--h:22%"></div><span>Sáb</span></div>
-                        <div class="mkt-dash-bar-col mkt-dash-bar-col--dim"><div class="mkt-dash-bar-fill" style="--h:18%"></div><span>Dom</span></div>
+                    <div class="mkt-dash-chrome-title">
+                        <i class="fas fa-headset" aria-hidden="true"></i>
+                        Hub TI — Painel Operacional
+                    </div>
+                    <div class="mkt-dash-live">
+                        <span class="mkt-dash-live-dot" aria-hidden="true"></span>
+                        Ao vivo
                     </div>
                 </div>
 
-                {# Donut: status dos chamados #}
-                <div class="mkt-dash-chart-card">
-                    <div class="mkt-dash-chart-head">
-                        <span><i class="fas fa-circle-half-stroke" aria-hidden="true"></i> Status dos chamados</span>
+                <div class="mkt-dash-toolbar">
+                    <div class="mkt-dash-toolbar-left">
+                        <span class="mkt-dash-pill"><i class="fas fa-building" aria-hidden="true"></i> Workspace Alpha</span>
+                        <span class="mkt-dash-pill mkt-dash-pill--muted"><i class="fas fa-calendar" aria-hidden="true"></i> Últimos 7 dias</span>
                     </div>
-                    <div class="mkt-dash-donut-wrap">
-                        <div class="mkt-dash-donut" aria-hidden="true"></div>
-                        <div class="mkt-dash-donut-center">
-                            <strong>247</strong>
-                            <span>total</span>
-                        </div>
-                    </div>
-                    <div class="mkt-dash-legend">
-                        <span><i class="mkt-legend-dot" style="background:var(--accent)"></i> Resolvidos (58%)</span>
-                        <span><i class="mkt-legend-dot" style="background:#2DD4FF"></i> Em andamento (27%)</span>
-                        <span><i class="mkt-legend-dot" style="background:var(--border-2)"></i> Abertos (15%)</span>
+                    <div class="mkt-dash-toolbar-right">
+                        <span class="mkt-dash-pill mkt-dash-pill--action"><i class="fas fa-fire" aria-hidden="true"></i> War Room</span>
+                        <span class="mkt-dash-pill mkt-dash-pill--muted"><i class="fas fa-rotate" aria-hidden="true"></i> Atualizado agora</span>
                     </div>
                 </div>
 
-                {# SLA por prioridade #}
-                <div class="mkt-dash-chart-card">
-                    <div class="mkt-dash-chart-head">
-                        <span><i class="fas fa-gauge" aria-hidden="true"></i> SLA por prioridade</span>
+                {# KPIs #}
+                <div class="mkt-dash-kpis">
+                    <div class="mkt-dash-kpi">
+                        <div class="mkt-dash-kpi-top">
+                            <span class="mkt-dash-kpi-icon"><i class="fas fa-ticket" aria-hidden="true"></i></span>
+                            <svg class="mkt-dash-spark" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,20 10,14 20,16 30,8 40,12 50,4 60,6"/></svg>
+                        </div>
+                        <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="247">0</span></span>
+                        <span class="mkt-dash-kpi-label">Chamados abertos</span>
+                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--warn"><i class="fas fa-arrow-trend-up" aria-hidden="true"></i> +12% esta semana</span>
                     </div>
-                    <div class="mkt-sla-bars">
-                        <div class="mkt-sla-row">
-                            <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p1"></span>P1 Crítico</span>
-                            <div class="mkt-sla-track"><div class="mkt-sla-fill mkt-sla-fill--warn" style="--pct:88%"></div></div>
-                            <span class="mkt-sla-val">88%</span>
+                    <div class="mkt-dash-kpi mkt-dash-kpi--good">
+                        <div class="mkt-dash-kpi-top">
+                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--cyan"><i class="fas fa-bullseye" aria-hidden="true"></i></span>
+                            <svg class="mkt-dash-spark mkt-dash-spark--up" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,18 12,16 24,12 36,10 48,6 60,2"/></svg>
                         </div>
-                        <div class="mkt-sla-row">
-                            <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p2"></span>P2 Alto</span>
-                            <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:96%"></div></div>
-                            <span class="mkt-sla-val">96%</span>
-                        </div>
-                        <div class="mkt-sla-row">
-                            <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p3"></span>P3 Médio</span>
-                            <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:99%"></div></div>
-                            <span class="mkt-sla-val">99%</span>
-                        </div>
-                        <div class="mkt-sla-row">
-                            <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p4"></span>P4 Baixo</span>
-                            <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:100%"></div></div>
-                            <span class="mkt-sla-val">100%</span>
-                        </div>
+                        <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="94">0</span>.<small>2%</small></span>
+                        <span class="mkt-dash-kpi-label">SLA cumprido</span>
+                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--ok"><i class="fas fa-check" aria-hidden="true"></i> Meta: 90%</span>
                     </div>
-                    <p class="mkt-chart-note" style="margin-top:12px">Dados ilustrativos com base em operação típica.</p>
+                    <div class="mkt-dash-kpi mkt-dash-kpi--good">
+                        <div class="mkt-dash-kpi-top">
+                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--cyan"><i class="fas fa-clock" aria-hidden="true"></i></span>
+                            <svg class="mkt-dash-spark mkt-dash-spark--up" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,6 10,8 20,12 30,14 40,16 50,18 60,20"/></svg>
+                        </div>
+                        <span class="mkt-dash-kpi-val">1h <small>23m</small></span>
+                        <span class="mkt-dash-kpi-label">MTTR médio</span>
+                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--ok"><i class="fas fa-arrow-down" aria-hidden="true"></i> −18% vs. mês passado</span>
+                    </div>
+                    <div class="mkt-dash-kpi mkt-dash-kpi--crit">
+                        <div class="mkt-dash-kpi-top">
+                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--red"><i class="fas fa-fire" aria-hidden="true"></i></span>
+                            <span class="mkt-dash-kpi-pulse" aria-hidden="true"></span>
+                        </div>
+                        <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="3">0</span></span>
+                        <span class="mkt-dash-kpi-label">Incidentes P1 ativos</span>
+                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--crit"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> War Room ativo</span>
+                    </div>
                 </div>
+
+                {# Corpo principal #}
+                <div class="mkt-dash-main">
+                    <div class="mkt-dash-main-left">
+                        {# Gráfico de barras #}
+                        <div class="mkt-dash-chart-card mkt-dash-chart-card--wide">
+                            <div class="mkt-dash-chart-head">
+                                <span><i class="fas fa-chart-column" aria-hidden="true"></i> Volume de chamados — últimos 7 dias</span>
+                                <span class="mkt-dash-chart-badge">Pico: Qui · 91 tickets</span>
+                            </div>
+                            <div class="mkt-dash-bar-chart" aria-label="Gráfico de barras: volume de chamados por dia da semana">
+                                <div class="mkt-dash-bar-col" data-val="42"><div class="mkt-dash-bar-fill" style="--h:55%"></div><span>Seg</span></div>
+                                <div class="mkt-dash-bar-col" data-val="55"><div class="mkt-dash-bar-fill" style="--h:72%"></div><span>Ter</span></div>
+                                <div class="mkt-dash-bar-col" data-val="37"><div class="mkt-dash-bar-fill" style="--h:48%"></div><span>Qua</span></div>
+                                <div class="mkt-dash-bar-col mkt-dash-bar-col--peak" data-val="91"><div class="mkt-dash-bar-fill" style="--h:91%"></div><span>Qui</span></div>
+                                <div class="mkt-dash-bar-col" data-val="49"><div class="mkt-dash-bar-fill" style="--h:65%"></div><span>Sex</span></div>
+                                <div class="mkt-dash-bar-col mkt-dash-bar-col--dim" data-val="17"><div class="mkt-dash-bar-fill" style="--h:22%"></div><span>Sáb</span></div>
+                                <div class="mkt-dash-bar-col mkt-dash-bar-col--dim" data-val="14"><div class="mkt-dash-bar-fill" style="--h:18%"></div><span>Dom</span></div>
+                            </div>
+                        </div>
+
+                        {# Feed de chamados recentes #}
+                        <div class="mkt-dash-chart-card">
+                            <div class="mkt-dash-chart-head">
+                                <span><i class="fas fa-list" aria-hidden="true"></i> Chamados recentes</span>
+                                <span class="mkt-dash-chart-link">Ver todos <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                            </div>
+                            <ul class="mkt-dash-tickets">
+                                <li class="mkt-dash-ticket mkt-dash-ticket--p1">
+                                    <span class="mkt-dash-ticket-pri">P1</span>
+                                    <div class="mkt-dash-ticket-body">
+                                        <strong>Servidor de e-mail indisponível</strong>
+                                        <span>#TI-4821 · há 12 min · Carlos M.</span>
+                                    </div>
+                                    <span class="mkt-dash-ticket-status mkt-dash-ticket-status--open">Aberto</span>
+                                </li>
+                                <li class="mkt-dash-ticket mkt-dash-ticket--p2">
+                                    <span class="mkt-dash-ticket-pri">P2</span>
+                                    <div class="mkt-dash-ticket-body">
+                                        <strong>VPN lenta para filial SP</strong>
+                                        <span>#TI-4819 · há 34 min · Ana L.</span>
+                                    </div>
+                                    <span class="mkt-dash-ticket-status mkt-dash-ticket-status--prog">Em andamento</span>
+                                </li>
+                                <li class="mkt-dash-ticket">
+                                    <span class="mkt-dash-ticket-pri mkt-dash-ticket-pri--p3">P3</span>
+                                    <div class="mkt-dash-ticket-body">
+                                        <strong>Reset de senha — novo colaborador</strong>
+                                        <span>#TI-4815 · há 1h · Fernanda R.</span>
+                                    </div>
+                                    <span class="mkt-dash-ticket-status mkt-dash-ticket-status--done">Resolvido</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mkt-dash-main-right">
+                        {# Donut #}
+                        <div class="mkt-dash-chart-card">
+                            <div class="mkt-dash-chart-head">
+                                <span><i class="fas fa-chart-pie" aria-hidden="true"></i> Status dos chamados</span>
+                            </div>
+                            <div class="mkt-dash-donut-wrap">
+                                <div class="mkt-dash-donut" aria-hidden="true"></div>
+                                <div class="mkt-dash-donut-center">
+                                    <strong>247</strong>
+                                    <span>total</span>
+                                </div>
+                            </div>
+                            <div class="mkt-dash-legend">
+                                <span><i class="mkt-legend-dot" style="background:var(--accent)"></i> Resolvidos <b>58%</b></span>
+                                <span><i class="mkt-legend-dot" style="background:#2DD4FF"></i> Em andamento <b>27%</b></span>
+                                <span><i class="mkt-legend-dot" style="background:var(--border-2)"></i> Abertos <b>15%</b></span>
+                            </div>
+                        </div>
+
+                        {# SLA #}
+                        <div class="mkt-dash-chart-card">
+                            <div class="mkt-dash-chart-head">
+                                <span><i class="fas fa-gauge-high" aria-hidden="true"></i> SLA por prioridade</span>
+                            </div>
+                            <div class="mkt-sla-bars">
+                                <div class="mkt-sla-row">
+                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p1"></span>P1</span>
+                                    <div class="mkt-sla-track"><div class="mkt-sla-fill mkt-sla-fill--warn" style="--pct:88%"></div></div>
+                                    <span class="mkt-sla-val">88%</span>
+                                </div>
+                                <div class="mkt-sla-row">
+                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p2"></span>P2</span>
+                                    <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:96%"></div></div>
+                                    <span class="mkt-sla-val">96%</span>
+                                </div>
+                                <div class="mkt-sla-row">
+                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p3"></span>P3</span>
+                                    <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:99%"></div></div>
+                                    <span class="mkt-sla-val">99%</span>
+                                </div>
+                                <div class="mkt-sla-row">
+                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p4"></span>P4</span>
+                                    <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:100%"></div></div>
+                                    <span class="mkt-sla-val">100%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Vitória insight #}
+                        <div class="mkt-dash-vitoria">
+                            <div class="mkt-dash-vitoria-head">
+                                <span class="mkt-dash-vitoria-avatar"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i></span>
+                                <div>
+                                    <strong>Vitória · Insight</strong>
+                                    <span>Há 2 min</span>
+                                </div>
+                            </div>
+                            <p>3 incidentes P1 abertos há mais de 30 min. Recomendo acionar o War Room e verificar o cluster de e-mail — padrão similar ao incidente #TI-4790 da semana passada.</p>
+                            <div class="mkt-dash-vitoria-actions">
+                                <span class="mkt-dash-vitoria-btn"><i class="fas fa-fire" aria-hidden="true"></i> Abrir War Room</span>
+                                <span class="mkt-dash-vitoria-btn mkt-dash-vitoria-btn--ghost">Ver histórico</span>
+                            </div>
+                        </div>
+
+                        {# CSAT + equipe online #}
+                        <div class="mkt-dash-mini-row">
+                            <div class="mkt-dash-csat">
+                                <div class="mkt-dash-csat-ring" aria-hidden="true"><span>4.8</span></div>
+                                <div>
+                                    <strong>CSAT médio</strong>
+                                    <span>+0.3 vs. mês passado</span>
+                                </div>
+                            </div>
+                            <div class="mkt-dash-team">
+                                <div class="mkt-dash-team-avatars" aria-hidden="true">
+                                    <span>CM</span><span>AL</span><span>FR</span><span class="mkt-dash-team-more">+5</span>
+                                </div>
+                                <div>
+                                    <strong>8 online</strong>
+                                    <span>Equipe de plantão</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="mkt-dash-footnote"><i class="fas fa-circle-info" aria-hidden="true"></i> Dados ilustrativos com base em operação típica — preview do Hub TI integrado à {{ _pnome }}.</p>
             </div>
         </div>
     </section>
