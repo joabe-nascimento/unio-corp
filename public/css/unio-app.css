@@ -7669,10 +7669,21 @@
         }
 
         /* ?????? Tela de boas-vindas (home) ?????? */
-        .welcome-page { animation: welcomePageIn .45s ease both; }
+        .welcome-page {
+            opacity: 1;
+            animation: welcomePageIn .45s ease both;
+        }
         @keyframes welcomePageIn {
             from { opacity: 0; transform: translateY(8px); }
             to   { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .welcome-page,
+            .dashboard-page {
+                animation: none;
+                opacity: 1;
+                transform: none;
+            }
         }
         .welcome-page-toolbar {
             display: flex;
@@ -11770,6 +11781,12 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+        .perm-members-empty {
+            padding: 12px 0 4px;
+        }
+        .perm-members-empty .empty-state--compact {
+            padding: 24px 16px;
         }
         #perm-members-container[data-view-mode="grid"] {
             display: grid;
