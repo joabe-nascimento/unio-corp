@@ -6,7 +6,7 @@ Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Mat
 
 - **PHP 8.2** + **Symfony 7.4**
 - **Doctrine ORM** + **MySQL**
-- **AdminLTE 3** (UI via CDN)
+- **AdminLTE 3** + **Bootstrap 4** (assets locais em `public/vendor/`, sincronizados via npm)
 - **Twig** (templates)
 
 ## Perfis de Acesso
@@ -52,10 +52,14 @@ php bin/console doctrine:migrations:migrate
 # 4. Criar usuário admin inicial
 php bin/console doctrine:fixtures:load  # (quando disponível)
 
-# 5. Iniciar servidor
+# 5. Sincronizar assets de UI (Bootstrap, AdminLTE, Font Awesome, etc.)
+npm install
+npm run vendor:sync
+
+# 6. Iniciar servidor
 symfony server:start
 
-# 6. (Opcional) Qualidade e CSS de produção
+# 7. (Opcional) Qualidade e CSS de produção
 composer phpstan
 composer minify-css
 ```
