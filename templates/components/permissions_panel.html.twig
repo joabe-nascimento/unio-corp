@@ -97,6 +97,16 @@
                     </button>
                 </div>
             {% endfor %}
+            {% if permission_data.rows|length == 0 %}
+            <div class="perm-members-empty">
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-users',
+                    title: 'Nenhum membro nesta área de trabalho',
+                    text: 'Usuários ativos da empresa aparecem aqui para definir o acesso por produto deste núcleo. Contas tenant não entram na lista.',
+                    compact: true
+                } %}
+            </div>
+            {% endif %}
         </div>
 
         {% if can_edit %}

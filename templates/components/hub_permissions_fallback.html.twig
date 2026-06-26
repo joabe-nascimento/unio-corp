@@ -1,0 +1,16 @@
+{# hub_permissions_fallback — estados vazios da aba Permissões em hubs #}
+{% if reason == 'readonly' %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-lock',
+        title: 'Visualização restrita',
+        text: 'Você pode consultar quem tem acesso a este núcleo, mas apenas gestores podem alterar permissões. Solicite elevação ao administrador da área de trabalho.',
+        compact: true
+    } %}
+{% else %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-shield-halved',
+        title: 'Permissões indisponíveis',
+        text: 'Não foi possível carregar a matriz de acesso deste núcleo. Selecione um workspace válido ou tente recarregar a página.',
+        compact: true
+    } %}
+{% endif %}

@@ -46,6 +46,7 @@ class OnboardingHubVisitSubscriber implements EventSubscriberInterface
         'app_holdings',
         'app_seguros',
         'app_saude_ocupacional',
+        'app_pos_operatorio',
         'app_licitacoes',
         'app_marketing',
         'app_lakehouse',

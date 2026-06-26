@@ -299,6 +299,7 @@ final class ProductGrantRouteMap
         'app_holdings' => ['scope' => 'hub_holdings', 'product' => '_hub'],
         'app_seguros' => ['scope' => 'hub_seguros', 'product' => '_hub'],
         'app_saude_ocupacional' => ['scope' => 'hub_saude_ocupacional', 'product' => '_hub'],
+        'app_pos_operatorio' => ['scope' => 'hub_pos_operatorio', 'product' => '_hub'],
         'app_licitacoes' => ['scope' => 'hub_licitacoes', 'product' => '_hub'],
         'app_marketing' => ['scope' => 'hub_marketing', 'product' => '_hub'],
         'app_lakehouse' => ['scope' => 'hub_lakehouse', 'product' => '_hub'],
