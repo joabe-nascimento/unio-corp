@@ -147,6 +147,56 @@ class PermissionService
         'membro@unio.dev' => ['equipe' => 'Design & Marca', 'cargo' => 'Analista'],
     ];
 
+    /**
+     * Membros ilustrativos quando a empresa ativa não tem usuários no banco (preview de hubs).
+     *
+     * @var array<string, list<array{id: string, nome: string, email: string, perfil: string, equipe: string, cargo: string}>>
+     */
+    private const SCOPE_MOCK_MEMBERS = [
+        'hub_pos_operatorio' => [
+            [
+                'id' => 'gestor',
+                'nome' => 'Dr. Renato Almeida',
+                'email' => 'gestor@unio.dev',
+                'perfil' => 'GESTOR',
+                'equipe' => 'Coordenação Pós-Op',
+                'cargo' => 'Coordenador clínico',
+            ],
+            [
+                'id' => 'gestor-eq',
+                'nome' => 'Enf. Camila Ribeiro',
+                'email' => 'gestor.eq@unio.dev',
+                'perfil' => 'GESTOR_EQUIPE',
+                'equipe' => 'Enfermagem clínica',
+                'cargo' => 'Enfermeira responsável',
+            ],
+            [
+                'id' => 'supervisor',
+                'nome' => 'Dr. Paulo Menezes',
+                'email' => 'supervisor@unio.dev',
+                'perfil' => 'SUPERVISOR',
+                'equipe' => 'Cirurgia geral',
+                'cargo' => 'Médico supervisor',
+            ],
+            [
+                'id' => 'sup-eq',
+                'nome' => 'Enf. Lucas Ferreira',
+                'email' => 'sup.eq@unio.dev',
+                'perfil' => 'SUPERVISOR_EQUIPE',
+                'equipe' => 'Plantão noturno',
+                'cargo' => 'Supervisor de plantão',
+            ],
+            [
+                'id' => 'membro',
+                'nome' => 'Ana Beatriz Santos',
+                'email' => 'membro@unio.dev',
+                'perfil' => 'MEMBRO',
+                'equipe' => 'Acompanhamento',
+                'cargo' => 'Assistente de pós-operatório',
+            ],
+        ],
+    ];
+
     /** @var array<string, array{label: string, subtitle: string, products: list<array{id: string, label: string}>}> */
     public const SCOPES = [
         'hub_operacoes' => [
@@ -377,7 +427,26 @@ class PermissionService
         'hub_saude_ocupacional' => [
             'label' => 'Núcleo Saúde Ocupacional',
             'subtitle' => 'PCMSO, exames e medicina do trabalho',
-            'products' => [],
+            'products' => [
+                ['id' => 'pcmso', 'label' => 'PCMSO'],
+                ['id' => 'exames', 'label' => 'Exames ocupacionais'],
+                ['id' => 'aso', 'label' => 'ASO'],
+                ['id' => 'agendamentos', 'label' => 'Agendamentos'],
+                ['id' => 'afastamentos', 'label' => 'Afastamentos'],
+                ['id' => 'prontuario', 'label' => 'Prontuário ocupacional'],
+            ],
+        ],
+        'hub_pos_operatorio' => [
+            'label' => 'Núcleo Pós-Operatório',
+            'subtitle' => 'Acompanhamento clínico pós-cirúrgico',
+            'products' => [
+                ['id' => 'pacientes', 'label' => 'Pacientes'],
+                ['id' => 'protocolos', 'label' => 'Protocolos'],
+                ['id' => 'questionarios', 'label' => 'Questionários'],
+                ['id' => 'alertas', 'label' => 'Alertas clínicos'],
+                ['id' => 'painel', 'label' => 'Painel médico'],
+                ['id' => 'portal_paciente', 'label' => 'Portal do paciente'],
+            ],
         ],
         'hub_licitacoes' => [
             'label' => 'Núcleo Licitações',
@@ -744,7 +813,27 @@ class PermissionService
             'id' => 'hub_saude_ocupacional',
             'label' => 'Núcleo Saúde Ocupacional',
             'scope' => 'hub_saude_ocupacional',
-            'products' => [],
+            'products' => [
+                ['id' => 'pcmso', 'label' => 'PCMSO'],
+                ['id' => 'exames', 'label' => 'Exames ocupacionais'],
+                ['id' => 'aso', 'label' => 'ASO'],
+                ['id' => 'agendamentos', 'label' => 'Agendamentos'],
+                ['id' => 'afastamentos', 'label' => 'Afastamentos'],
+                ['id' => 'prontuario', 'label' => 'Prontuário ocupacional'],
+            ],
+        ],
+        [
+            'id' => 'hub_pos_operatorio',
+            'label' => 'Núcleo Pós-Operatório',
+            'scope' => 'hub_pos_operatorio',
+            'products' => [
+                ['id' => 'pacientes', 'label' => 'Pacientes'],
+                ['id' => 'protocolos', 'label' => 'Protocolos'],
+                ['id' => 'questionarios', 'label' => 'Questionários'],
+                ['id' => 'alertas', 'label' => 'Alertas clínicos'],
+                ['id' => 'painel', 'label' => 'Painel médico'],
+                ['id' => 'portal_paciente', 'label' => 'Portal do paciente'],
+            ],
         ],
         [
             'id' => 'hub_licitacoes',
@@ -949,6 +1038,47 @@ class PermissionService
                 'catalogo' => 'MEMBRO', 'meus_chamados' => 'MEMBRO', 'novidades' => 'MEMBRO',
             ],
         ],
+        'hub_pos_operatorio' => [
+            'gestor' => [
+                'pacientes' => 'GESTOR', 'protocolos' => 'GESTOR', 'questionarios' => 'GESTOR',
+                'alertas' => 'GESTOR', 'painel' => 'GESTOR', 'portal_paciente' => 'GESTOR',
+            ],
+            'gestor-eq' => [
+                'pacientes' => 'GESTOR_EQUIPE', 'protocolos' => 'GESTOR_EQUIPE', 'questionarios' => 'GESTOR_EQUIPE',
+                'alertas' => 'GESTOR_EQUIPE', 'painel' => 'GESTOR_EQUIPE',
+            ],
+            'supervisor' => [
+                'pacientes' => 'SUPERVISOR', 'alertas' => 'SUPERVISOR', 'painel' => 'SUPERVISOR',
+                'questionarios' => 'SUPERVISOR_EQUIPE',
+            ],
+            'sup-eq' => [
+                'pacientes' => 'SUPERVISOR_EQUIPE', 'alertas' => 'SUPERVISOR_EQUIPE', 'painel' => 'SUPERVISOR_EQUIPE',
+            ],
+            'membro' => [
+                'portal_paciente' => 'MEMBRO', 'questionarios' => 'MEMBRO',
+            ],
+        ],
+        'hub_saude_ocupacional' => [
+            'gestor' => [
+                'pcmso' => 'GESTOR', 'exames' => 'GESTOR', 'aso' => 'GESTOR',
+                'agendamentos' => 'GESTOR', 'afastamentos' => 'GESTOR', 'prontuario' => 'GESTOR',
+            ],
+            'gestor-eq' => [
+                'pcmso' => 'GESTOR_EQUIPE', 'exames' => 'GESTOR_EQUIPE', 'aso' => 'GESTOR_EQUIPE',
+                'agendamentos' => 'GESTOR_EQUIPE', 'afastamentos' => 'GESTOR_EQUIPE', 'prontuario' => 'GESTOR_EQUIPE',
+            ],
+            'supervisor' => [
+                'pcmso' => 'SUPERVISOR', 'exames' => 'SUPERVISOR', 'aso' => 'SUPERVISOR',
+                'agendamentos' => 'SUPERVISOR_EQUIPE', 'afastamentos' => 'SUPERVISOR', 'prontuario' => 'SUPERVISOR_EQUIPE',
+            ],
+            'sup-eq' => [
+                'exames' => 'SUPERVISOR_EQUIPE', 'aso' => 'SUPERVISOR_EQUIPE',
+                'agendamentos' => 'SUPERVISOR_EQUIPE', 'afastamentos' => 'SUPERVISOR_EQUIPE',
+            ],
+            'membro' => [
+                'agendamentos' => 'MEMBRO', 'aso' => 'MEMBRO',
+            ],
+        ],
         'hub_integracoes' => [
             'gestor' => [
                 'observatorio' => 'GESTOR', 'catalogo' => 'GESTOR', 'conectores' => 'GESTOR', 'webhooks' => 'GESTOR',
@@ -1000,6 +1130,9 @@ class PermissionService
 
         $empresa = $this->getActiveEmpresa();
         $members = $this->getMembers($empresa);
+        if ($members === [] && isset(self::SCOPE_MOCK_MEMBERS[$scope])) {
+            $members = $this->buildMockMembers($scope);
+        }
 
         $rows = [];
         foreach ($members as $member) {
@@ -1289,6 +1422,28 @@ class PermissionService
                 continue;
             }
             $members[] = $this->memberFromUser($user, $empresa);
+        }
+
+        return $members;
+    }
+
+    /**
+     * @return list<array{id: string, nome: string, email: string, initials: string, equipe: string, cargo: string, perfil_global: string, perfil_label: string, perfil_class: string, ficha_id: int|null, user_id: int|null}>
+     */
+    private function buildMockMembers(string $scope): array
+    {
+        $members = [];
+        foreach (self::SCOPE_MOCK_MEMBERS[$scope] ?? [] as $def) {
+            $members[] = $this->member(
+                $def['id'],
+                $def['nome'],
+                $def['email'],
+                $def['perfil'],
+                $def['equipe'],
+                $def['cargo'],
+                null,
+                null,
+            );
         }
 
         return $members;

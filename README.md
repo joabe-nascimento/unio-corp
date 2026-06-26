@@ -33,6 +33,7 @@ Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Mat
 | [docs/ESTRUTURA.md](docs/ESTRUTURA.md) | Pastas, convenções, módulos |
 | [docs/QUALIDADE_PERFORMANCE_E_HUBS.md](docs/QUALIDADE_PERFORMANCE_E_HUBS.md) | Empty states, hubs planejados, performance, Redis, PHPStan |
 | [docs/RH.md](docs/RH.md) | Módulo RH (implementado e roadmap) |
+| [docs/HUB_POS_OPERATORIO_INTEGRACAO.md](docs/HUB_POS_OPERATORIO_INTEGRACAO.md) | Hub Pós-Operatório — integração na plataforma ([PDF](docs/HUB_POS_OPERATORIO_INTEGRACAO.pdf)) |
 
 ## Instalação
 
@@ -58,6 +59,11 @@ symfony server:start
 # 6. (Opcional) Qualidade e CSS de produção
 composer phpstan
 composer minify-css
+
+# 7. (Opcional) Regenerar PDF da doc Hub Pós-Operatório
+npm install
+npx puppeteer browsers install chrome   # só na primeira vez
+npm run docs:pos-operatorio-pdf
 ```
 
 ### Serviços Docker opcionais

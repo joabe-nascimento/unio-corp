@@ -1,0 +1,32 @@
+{# pos_operatorio/hub_vitoria_copilot — insight da Vitória integrado ao hero #}
+{% import 'macros/helix.html.twig' as helix %}
+{% set insight = vitoria_insight|default({}) %}
+
+<div class="pos-op-hero-vitoria" aria-label="Vitória — copiloto clínico">
+    <div class="pos-op-hero-vitoria-avatar-wrap">
+        {{ helix.avatar('sm', true) }}
+        <span class="pos-op-hero-vitoria-live" title="Copiloto ativo" aria-hidden="true"></span>
+    </div>
+    <div class="pos-op-hero-vitoria-body">
+        <div class="pos-op-hero-vitoria-head">
+            <strong class="pos-op-hero-vitoria-name">Vitória · Insight</strong>
+            <span class="pos-op-hero-vitoria-role">Copiloto clínico</span>
+        </div>
+        {% if insight.text|default('') %}
+            <p class="pos-op-hero-vitoria-lead">{{ insight.text }}</p>
+        {% endif %}
+        {% if insight.bullets|default([])|length > 0 %}
+            <ul class="pos-op-hero-vitoria-points">
+                {% for bullet in insight.bullets %}
+                    <li>{{ bullet }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div class="pos-op-hero-vitoria-action">
+        <button type="button" class="btn-unio btn-sm pos-op-hero-vitoria-btn" data-pos-op-helix-open>
+            <i class="fas fa-wand-magic-sparkles mr-1" aria-hidden="true"></i>
+            {{ insight.action|default('Abrir copiloto') }}
+        </button>
+    </div>
+</div>

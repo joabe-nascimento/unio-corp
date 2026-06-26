@@ -115,6 +115,7 @@ final class PageBackResolver
         'app_holdings' => 'app_dashboard',
         'app_seguros' => 'app_dashboard',
         'app_saude_ocupacional' => 'app_dashboard',
+        'app_pos_operatorio' => 'app_dashboard',
         'app_licitacoes' => 'app_dashboard',
         'app_marketing' => 'app_dashboard',
         'app_lakehouse' => 'app_dashboard',

@@ -4,8 +4,9 @@
 {% block permissions_scope %}{% endblock %}
 {% block content_lead %}
 {% set perm_scope = block('permissions_scope')|trim %}
-{% set _has_perm_tab = perm_scope and can_manage_permissions(perm_scope) %}
-{% set _show_hub_tabs = hub_show_tabs|default(_has_perm_tab) %}
+{% set _can_manage_perm = perm_scope != '' and can_manage_permissions(perm_scope) %}
+{% set _show_perm_tab = _can_manage_perm or (hub_permissions_tab|default(false) and perm_scope != '') %}
+{% set _show_hub_tabs = hub_show_tabs|default(_can_manage_perm or _show_perm_tab) %}
 <div class="page-lead-zone{% if _show_hub_tabs %} page-lead-zone--hub-tabs{% endif %}">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: hub_page_title|default(''),
@@ -26,7 +27,7 @@
                             Visão geral
                         </button>
                         {% block hub_extra_tabs %}{% endblock %}
-                        {% if _has_perm_tab %}
+                        {% if _show_perm_tab %}
                         <button type="button" class="hub-overview-tab" data-hub-tab="permissions" role="tab" aria-selected="false">
                             <i class="fas fa-shield-halved mr-1" aria-hidden="true"></i> Permissões
                         </button>
@@ -42,8 +43,9 @@
 {% endblock %}
 {% block content %}
 {% set perm_scope = block('permissions_scope')|trim %}
-{% set _has_perm_tab = perm_scope and can_manage_permissions(perm_scope) %}
-{% set _show_hub_tabs = hub_show_tabs|default(_has_perm_tab) %}
+{% set _can_manage_perm = perm_scope != '' and can_manage_permissions(perm_scope) %}
+{% set _show_perm_tab = _can_manage_perm or (hub_permissions_tab|default(false) and perm_scope != '') %}
+{% set _show_hub_tabs = hub_show_tabs|default(_can_manage_perm or _show_perm_tab) %}
 <div class="page-body-inner{% if _show_hub_tabs %} page-body-inner--hub-tabs{% endif %}{% if perm_scope == 'hub_recrutamento' %} recrutamento-hub{% endif %}">
     <div class="hub-tab-panel hub-tab-panel--active" data-hub-panel="overview" role="tabpanel">
         {% block hub_section_toolbar %}{% endblock %}
@@ -52,14 +54,14 @@
 
     {% block hub_extra_panels %}{% endblock %}
 
-    {% if _has_perm_tab %}
+    {% if _show_perm_tab %}
         {% set permission_data = permissions_scope(perm_scope) %}
         <div class="hub-tab-panel" data-hub-panel="permissions" role="tabpanel" hidden>
             {% if permission_data %}
                 {% include 'components/permissions_panel.html.twig' with { permission_data: permission_data } %}
             {% else %}
                 <div class="unio-card">
-                    <p class="text-muted mb-0">Permissões indisponíveis para este escopo.</p>
+                    {% include 'components/hub_permissions_fallback.html.twig' with { reason: 'unavailable' } %}
                 </div>
             {% endif %}
         </div>

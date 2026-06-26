@@ -1,0 +1,67 @@
+{#
+  table_pagination — rodapé de paginação (design system Unio)
+  Layout: faixa esquerda (contagem) · navegação central · limite à direita
+
+  Props:
+    pagination        (array)       { page, per_page, total }
+    route             (string)      nome da rota Symfony
+    route_params      (array)       parâmetros extras da rota (opt)
+    query             (array)       query string extras (opt)
+    per_page_options  (array)       opções de limite, ex. [10, 15] (opt)
+    per_page_label    (string)      rótulo do seletor (opt)
+#}
+{% if pagination.total > 0 %}
+{% set cur = pagination.page %}
+{% set limit = pagination.per_page %}
+{% set total = pagination.total %}
+{% set total_pages = max(1, (total / limit)|round(0, 'ceil')) %}
+{% set from = (cur - 1) * limit + 1 %}
+{% set to = cur * limit < total ? cur * limit : total %}
+{% set _route_params = route_params|default({}) %}
+{% set _query = query|default({}) %}
+{% set _limit_opts = per_page_options|default([10, 15]) %}
+{% set _page_query = _query|merge({ per_page: limit }) %}
+
+<div class="unio-table-pager">
+    <span class="unio-table-pager-range">{{ from }}–{{ to }} de {{ total }}</span>
+
+    <nav class="unio-table-pager-nav" aria-label="Paginação">
+        <a href="{{ path(route, _route_params|merge(_page_query)|merge({ page: cur > 1 ? cur - 1 : 1 })) }}"
+           class="unio-table-pager-btn{% if cur == 1 %} is-disabled{% endif %}"
+           {% if cur == 1 %}aria-disabled="true" tabindex="-1"{% endif %}
+           aria-label="Página anterior">‹</a>
+        {% for p in 1..total_pages %}
+            {% if p == cur or p == 1 or p == total_pages or (p >= cur - 1 and p <= cur + 1) %}
+            <a href="{{ path(route, _route_params|merge(_page_query)|merge({ page: p })) }}"
+               class="unio-table-pager-btn{% if p == cur %} is-active{% endif %}"
+               {% if p == cur %}aria-current="page"{% endif %}>{{ p }}</a>
+            {% elseif p == cur - 2 or p == cur + 2 %}
+            <span class="unio-table-pager-ellipsis" aria-hidden="true">…</span>
+            {% endif %}
+        {% endfor %}
+        <a href="{{ path(route, _route_params|merge(_page_query)|merge({ page: cur < total_pages ? cur + 1 : total_pages })) }}"
+           class="unio-table-pager-btn{% if cur >= total_pages %} is-disabled{% endif %}"
+           {% if cur >= total_pages %}aria-disabled="true" tabindex="-1"{% endif %}
+           aria-label="Próxima página">›</a>
+    </nav>
+
+    {% if _limit_opts|length > 0 %}
+    <div class="unio-table-pager-limit-wrap">
+        <label class="unio-table-pager-limit-label" for="unio-table-pager-limit-{{ route|replace({'.': '-'}) }}">
+            {{ per_page_label|default('Itens por página') }}
+        </label>
+        <select id="unio-table-pager-limit-{{ route|replace({'.': '-'}) }}"
+                class="unio-table-pager-limit"
+                aria-label="{{ per_page_label|default('Itens por página') }}"
+                data-unio-table-pager-limit>
+            {% for opt in _limit_opts %}
+            <option value="{{ path(route, _route_params|merge(_query)|merge({ page: 1, per_page: opt })) }}"
+                    {% if opt == limit %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% else %}
+    <span class="unio-table-pager-spacer" aria-hidden="true"></span>
+    {% endif %}
+</div>
+{% endif %}
