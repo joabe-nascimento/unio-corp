@@ -30,10 +30,12 @@ Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Mat
 
 | Documento | Conteúdo |
 |-----------|----------|
+| [docs/ROADMAP_90_DIAS.md](docs/ROADMAP_90_DIAS.md) | Roadmap 30/60/90 dias + backlog por módulo |
 | [docs/ESTRUTURA.md](docs/ESTRUTURA.md) | Pastas, convenções, módulos |
 | [docs/QUALIDADE_PERFORMANCE_E_HUBS.md](docs/QUALIDADE_PERFORMANCE_E_HUBS.md) | Empty states, hubs planejados, performance, Redis, PHPStan |
 | [docs/RH.md](docs/RH.md) | Módulo RH (implementado e roadmap) |
 | [docs/HUB_POS_OPERATORIO_INTEGRACAO.md](docs/HUB_POS_OPERATORIO_INTEGRACAO.md) | Hub Pós-Operatório — integração na plataforma ([PDF](docs/HUB_POS_OPERATORIO_INTEGRACAO.pdf)) |
+| [docs/DEPLOY_HOSTGATOR.md](docs/DEPLOY_HOSTGATOR.md) | Deploy na HostGator (`uniowork.com.br` / `.online`) |
 
 ## Instalação
 
@@ -50,8 +52,9 @@ cp .env.local.example .env.local
 php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
 
-# 4. Criar usuário admin inicial
-php bin/console doctrine:fixtures:load  # (quando disponível)
+# 4. Usuários e grants de demonstração
+php bin/console app:seed-users
+php bin/console app:seed-product-grants
 
 # 5. Sincronizar assets de UI (Bootstrap, AdminLTE, Font Awesome, etc.)
 npm install
@@ -72,8 +75,11 @@ npm run docs:pos-operatorio-pdf
 ### Serviços Docker opcionais
 
 ```bash
-docker compose up -d mercure   # tempo real (kanban)
-docker compose up -d redis     # cache em produção
+# Vitória AI (assistente) — serviço definido em docker-compose.yml
+docker compose up -d vitoria-ai
+
+# Mercure e Redis: configure no .env para produção (ver config/packages/prod/cache.yaml).
+# Não há serviços mercure/redis no compose local neste repositório.
 ```
 
 ## Estrutura
