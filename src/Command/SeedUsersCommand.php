@@ -8,11 +8,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-#[AsCommand(name: 'app:seed-users', description: 'Cria empresas e usuarios de teste')]
+#[AsCommand(name: 'app:seed-users', description: 'Cria/atualiza empresas e usuários de teste (idempotente — nunca apaga dados)')]
 class SeedUsersCommand extends Command
 {
     public const DEMO_EMPRESA_NOME = 'Unio Demo';
@@ -20,48 +21,61 @@ class SeedUsersCommand extends Command
 
     public function __construct(
         private EntityManagerInterface $em,
-        private UserPasswordHasherInterface $hasher
+        private UserPasswordHasherInterface $hasher,
+        private string $appEnv = 'dev',
     ) {
         parent::__construct();
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption(
+            'allow-prod',
+            null,
+            InputOption::VALUE_NONE,
+            'Permite execução em produção (use com cautela)'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        // Apaga dados existentes
-        $this->em->createQuery('DELETE FROM App\Entity\User u')->execute();
-        $this->em->createQuery('DELETE FROM App\Entity\Empresa e')->execute();
+        if ($this->appEnv === 'prod' && !$input->getOption('allow-prod')) {
+            $io->error('Recusado em produção. Use --allow-prod se realmente necessário.');
+            return Command::FAILURE;
+        }
 
-        // Empresas
+        $empresaRepo = $this->em->getRepository(Empresa::class);
+        $userRepo    = $this->em->getRepository(User::class);
+
         $empresas = [];
         foreach ([
             ['nome' => self::DEMO_EMPRESA_NOME, 'cnpj' => '11.111.111/0001-11', 'setor' => 'Tecnologia', 'logo' => 'images/logos/unio-demo.svg'],
-            ['nome' => 'Nexus Saúde S/A', 'cnpj' => '22.222.222/0001-22', 'setor' => 'Saúde',      'logo' => 'images/logos/nexus-saude.svg'],
-            ['nome' => 'Edu360 Ensino',   'cnpj' => '33.333.333/0001-33', 'setor' => 'Educação',   'logo' => 'images/logos/edu360.svg'],
+            ['nome' => 'Nexus Saúde S/A',        'cnpj' => '22.222.222/0001-22', 'setor' => 'Saúde',      'logo' => 'images/logos/nexus-saude.svg'],
+            ['nome' => 'Edu360 Ensino',           'cnpj' => '33.333.333/0001-33', 'setor' => 'Educação',   'logo' => 'images/logos/edu360.svg'],
         ] as $data) {
-            $emp = new Empresa();
+            $emp = $empresaRepo->findOneBy(['cnpj' => $data['cnpj']]) ?? new Empresa();
             $emp->setNome($data['nome'])->setCnpj($data['cnpj'])->setSetor($data['setor'])->setLogo($data['logo']);
             $this->em->persist($emp);
             $empresas[] = $emp;
         }
         $this->em->flush();
-        $io->text('3 empresas criadas.');
+        $io->text('Empresas: 3 sincronizadas (IDs preservados).');
 
-        // Usuarios
-        $users = [
-            ['nome' => 'Tenant Master',      'email' => 'tenant@unio.dev',     'perfil' => 'TENANT',            'empresa' => null],
-            ['nome' => 'Gestor Oliveira',     'email' => 'gestor@unio.dev',     'perfil' => 'GESTOR',            'empresa' => $empresas[0]],
-            ['nome' => 'Gestor Costa',        'email' => 'gestor.eq@unio.dev',  'perfil' => 'GESTOR_EQUIPE',     'empresa' => $empresas[0]],
-            ['nome' => 'Supervisor Geral',    'email' => 'supervisor@unio.dev', 'perfil' => 'SUPERVISOR',        'empresa' => $empresas[0]],
-            ['nome' => 'Supervisor Equipe',   'email' => 'sup.eq@unio.dev',     'perfil' => 'SUPERVISOR_EQUIPE', 'empresa' => $empresas[0]],
-            ['nome' => 'Membro Santos',       'email' => 'membro@unio.dev',     'perfil' => 'MEMBRO',            'empresa' => $empresas[0]],
-            ['nome' => 'Gestor Nexus',        'email' => 'gestor@nexus.dev',      'perfil' => 'GESTOR',            'empresa' => $empresas[1]],
-            ['nome' => 'Gestor Edu360',       'email' => 'gestor@edu360.dev',     'perfil' => 'GESTOR',            'empresa' => $empresas[2]],
+        $seedUsers = [
+            ['nome' => 'Tenant Master',    'email' => 'tenant@unio.dev',     'perfil' => 'TENANT',            'empresa' => null],
+            ['nome' => 'Gestor Oliveira',   'email' => 'gestor@unio.dev',     'perfil' => 'GESTOR',            'empresa' => $empresas[0]],
+            ['nome' => 'Gestor Costa',      'email' => 'gestor.eq@unio.dev',  'perfil' => 'GESTOR_EQUIPE',     'empresa' => $empresas[0]],
+            ['nome' => 'Supervisor Geral',  'email' => 'supervisor@unio.dev', 'perfil' => 'SUPERVISOR',        'empresa' => $empresas[0]],
+            ['nome' => 'Supervisor Equipe', 'email' => 'sup.eq@unio.dev',     'perfil' => 'SUPERVISOR_EQUIPE', 'empresa' => $empresas[0]],
+            ['nome' => 'Membro Santos',     'email' => 'membro@unio.dev',     'perfil' => 'MEMBRO',            'empresa' => $empresas[0]],
+            ['nome' => 'Gestor Nexus',      'email' => 'gestor@nexus.dev',    'perfil' => 'GESTOR',            'empresa' => $empresas[1]],
+            ['nome' => 'Gestor Edu360',     'email' => 'gestor@edu360.dev',   'perfil' => 'GESTOR',            'empresa' => $empresas[2]],
         ];
 
-        foreach ($users as $data) {
-            $user = new User();
+        foreach ($seedUsers as $data) {
+            $user = $userRepo->findOneBy(['email' => $data['email']]) ?? new User();
             $user->setNome($data['nome'])->setEmail($data['email'])->setPerfil($data['perfil']);
             $user->setRoles([$user->getRolePrincipal()]);
             $user->setPassword($this->hasher->hashPassword($user, self::SEED_PASSWORD));
@@ -74,7 +88,7 @@ class SeedUsersCommand extends Command
         }
 
         $this->em->flush();
-        $io->success('Seed concluido. Senha: ' . self::SEED_PASSWORD);
+        $io->success('Seed concluído. Senha: ' . self::SEED_PASSWORD);
 
         return Command::SUCCESS;
     }

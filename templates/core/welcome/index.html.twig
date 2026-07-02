@@ -6,10 +6,17 @@
 
 {% block content %}
 
-<div class="welcome-page welcome-page--present"
+<div class="inset-page-shell welcome-page-shell">
+    <div class="inset-page-bg welcome-page-bg" aria-hidden="true">
+        {% include 'components/inset_geometric_background.html.twig' with { geo_id: 'welcome' } only %}
+    </div>
+
+<div class="inset-page-content welcome-page welcome-page--present"
      id="welcomePage"
      data-user-id="{{ app.user.id }}"
      data-layout="comfortable">
+
+    <div class="welcome-page-inner">
 
     <div class="welcome-page-toolbar">
         <p class="welcome-page-toolbar-label">Centro de partida</p>
@@ -121,7 +128,9 @@
         </div>
     </section>
     {% endif %}
-</div>
+    </div>{# .welcome-page-inner #}
+</div>{# .welcome-page #}
+</div>{# .welcome-page-shell #}
 
 {% endblock %}
 
@@ -156,5 +165,5 @@
 {% endif %}
 <script src="{{ asset('js/welcome-home.js') }}?v=6"></script>
 <script src="{{ asset('js/welcome-news.js') }}?v=5" defer></script>
-<script src="{{ asset('js/onboarding-checklist.js') }}?v=1"></script>
+<script src="{{ asset('js/onboarding-checklist.js') }}?v=2"></script>
 {% endblock %}

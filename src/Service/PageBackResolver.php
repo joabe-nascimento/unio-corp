@@ -116,6 +116,17 @@ final class PageBackResolver
         'app_seguros' => 'app_dashboard',
         'app_saude_ocupacional' => 'app_dashboard',
         'app_pos_operatorio' => 'app_dashboard',
+        'app_pos_operatorio_alertas' => 'app_pos_operatorio',
+        'app_pos_operatorio_sala_critica' => 'app_pos_operatorio',
+        'app_pos_operatorio_portal' => 'app_pos_operatorio',
+        'app_pos_operatorio_pacientes' => 'app_pos_operatorio',
+        'app_pos_operatorio_paciente_novo' => 'app_pos_operatorio_pacientes',
+        'app_pos_operatorio_paciente_show' => 'app_pos_operatorio_pacientes',
+        'app_pos_operatorio_paciente_editar' => 'app_pos_operatorio_pacientes',
+        'app_pos_operatorio_protocolos' => 'app_pos_operatorio',
+        'app_pos_operatorio_protocolo_novo' => 'app_pos_operatorio_protocolos',
+        'app_pos_operatorio_protocolo_editar' => 'app_pos_operatorio_protocolos',
+        'app_pos_operatorio_questionarios' => 'app_pos_operatorio',
         'app_licitacoes' => 'app_dashboard',
         'app_marketing' => 'app_dashboard',
         'app_lakehouse' => 'app_dashboard',
@@ -140,16 +151,23 @@ final class PageBackResolver
     ];
 
     /**
+     * @param array<string, mixed> $routeParams
+     *
      * @return array{route: string, params: array<string, mixed>}|null
      */
-    public function resolve(?string $currentRoute): ?array
+    public function resolve(?string $currentRoute, array $routeParams = []): ?array
     {
         if ($currentRoute === null || $currentRoute === '') {
             return null;
         }
 
         if (isset(self::HUB_PARENT[$currentRoute])) {
-            return ['route' => self::HUB_PARENT[$currentRoute], 'params' => []];
+            $parentRoute = self::HUB_PARENT[$currentRoute];
+
+            return [
+                'route' => $parentRoute,
+                'params' => $this->inheritRouteParams($parentRoute, $routeParams),
+            ];
         }
 
         if (str_starts_with($currentRoute, 'app_rh_portal')) {
@@ -238,5 +256,26 @@ final class PageBackResolver
         }
 
         return null;
+    }
+
+    /**
+     * @param array<string, mixed> $routeParams
+     *
+     * @return array<string, mixed>
+     */
+    private function inheritRouteParams(string $parentRoute, array $routeParams): array
+    {
+        if (!str_ends_with($parentRoute, '_show')) {
+            return [];
+        }
+
+        $inherited = [];
+        foreach (['id', 'slug', 'uuid'] as $key) {
+            if (array_key_exists($key, $routeParams)) {
+                $inherited[$key] = $routeParams[$key];
+            }
+        }
+
+        return $inherited;
     }
 }

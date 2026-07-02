@@ -8,22 +8,31 @@
          {% if dismissible|default(true) %}data-onboarding-dismissible{% endif %}
          aria-label="Primeiros passos na plataforma">
     <header class="onboarding-checklist__head">
-        <div>
+        <div class="onboarding-checklist__intro">
             <p class="onboarding-checklist__eyebrow">Primeiros passos</p>
             <h2 class="onboarding-checklist__title">Deixe sua área pronta para usar</h2>
             <p class="onboarding-checklist__sub">
                 {{ onboarding.completed }} de {{ onboarding.total }} concluídos
             </p>
         </div>
-        {% if dismissible|default(true) %}
-        <button type="button"
-                class="onboarding-checklist__dismiss"
-                data-onboarding-dismiss
-                title="Ocultar checklist"
-                aria-label="Não mostrar checklist de primeiros passos">
-            <i class="fas fa-times" aria-hidden="true"></i>
-        </button>
-        {% endif %}
+        <div class="onboarding-checklist__actions">
+            <button type="button"
+                    class="btn-unio btn-unio--ghost btn-unio--sm onboarding-checklist__tour"
+                    data-shell-tour-start
+                    aria-label="Iniciar tour da interface">
+                <i class="fas fa-route" aria-hidden="true"></i>
+                Tour da interface
+            </button>
+            {% if dismissible|default(true) %}
+            <button type="button"
+                    class="onboarding-checklist__dismiss"
+                    data-onboarding-dismiss
+                    title="Ocultar checklist"
+                    aria-label="Não mostrar checklist de primeiros passos">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            {% endif %}
+        </div>
     </header>
 
     <div class="onboarding-checklist__progress" role="progressbar"
@@ -36,7 +45,8 @@
 
     <ul class="onboarding-checklist__steps">
         {% for step in onboarding.steps %}
-        <li class="onboarding-checklist__step{% if step.done %} is-done{% endif %}">
+        <li class="onboarding-checklist__step{% if step.done %} is-done{% endif %}"
+            data-onboarding-step="{{ step.id }}">
             <span class="onboarding-checklist__check" aria-hidden="true">
                 {% if step.done %}
                     <i class="fas fa-check"></i>
@@ -48,7 +58,14 @@
                 <span class="onboarding-checklist__label">{{ step.label }}</span>
                 <span class="onboarding-checklist__hint">{{ step.hint }}</span>
             </div>
-            {% if not step.done %}
+            {% if not step.done and step.id == 'shell_tour' %}
+            <button type="button"
+                    class="onboarding-checklist__cta onboarding-checklist__cta--tour"
+                    data-shell-help-open
+                    aria-label="Abrir ajuda e iniciar tour">
+                Ajuda <i class="fas fa-circle-question" aria-hidden="true"></i>
+            </button>
+            {% elseif not step.done %}
             <a href="{{ path(step.route, step.route_params|default({})) }}"
                class="onboarding-checklist__cta">
                 Ir <i class="fas fa-arrow-right" aria-hidden="true"></i>

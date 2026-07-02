@@ -122,6 +122,12 @@
 
         initHubBack(sidebar);
         initModuleTrees(sidebar);
+
+        window.unioSidebarHubs = {
+            showPicker: function () {
+                setHubMode(false);
+            },
+        };
     }
 
     if (document.readyState === 'loading') {

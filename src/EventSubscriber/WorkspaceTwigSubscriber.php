@@ -7,6 +7,7 @@ use App\Security\TiGrantService;
 use App\Service\ChatService;
 use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
+use App\Service\OnboardingTourService;
 use App\Service\PageBackResolver;
 use App\Service\PlatformNotificationService;
 use App\Service\WorkspaceService;
@@ -40,6 +41,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private GlobalSearchService $globalSearch,
         private PageBackResolver $pageBackResolver,
         private TiGrantService $tiGrants,
+        private OnboardingTourService $onboardingTour,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -66,8 +68,9 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         }
 
         $empresa = $this->workspaceService->getActiveEmpresa($user);
+        $empresas = $this->workspaceService->getAvailableEmpresas($user);
         $this->twig->addGlobal('empresa', $empresa);
-        $this->twig->addGlobal('empresas', $this->workspaceService->getAvailableEmpresas($user));
+        $this->twig->addGlobal('empresas', $empresas);
 
         foreach ($this->navigation->getNavGlobals($user, $route) as $name => $value) {
             $this->twig->addGlobal($name, $value);
@@ -86,13 +89,37 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             ) ?: '[]',
         );
         $this->twig->addGlobal('platform_modules', $this->navigation->getPlatformModules($user));
+        $tourConfig = $this->onboardingTour->build($user, $empresa, \count($empresas), \is_string($route) ? $route : null);
+        $this->twig->addGlobal(
+            'onboarding_tour_json',
+            json_encode($tourConfig, \JSON_UNESCAPED_UNICODE) ?: '{}',
+        );
+        $this->twig->addGlobal('onboarding_help_flows', $tourConfig['flows'] ?? []);
 
-        $pageBack = $this->pageBackResolver->resolve(\is_string($route) ? $route : null);
+        $pageBack = $this->pageBackResolver->resolve(
+            \is_string($route) ? $route : null,
+            $this->extractRouteParams($event->getRequest()),
+        );
         if (\is_string($route) && $route === 'app_ti_chamado_show' && !$this->tiGrants->canOperateChamados($user)) {
             $pageBack = ['route' => 'app_ti_meus_chamados', 'params' => []];
         }
         $this->twig->addGlobal('page_back_route', $pageBack['route'] ?? null);
         $this->twig->addGlobal('page_back_route_params', $pageBack['params'] ?? []);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function extractRouteParams(\Symfony\Component\HttpFoundation\Request $request): array
+    {
+        $params = [];
+        foreach (['id', 'slug', 'uuid'] as $key) {
+            if ($request->attributes->has($key)) {
+                $params[$key] = $request->attributes->get($key);
+            }
+        }
+
+        return $params;
     }
 
     private function shouldSkip(?string $route): bool

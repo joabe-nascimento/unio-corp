@@ -7,23 +7,27 @@
 <div class="welcome-hubs-dock"{% if _dock_id %} id="{{ _dock_id }}"{% endif %}>
     {% for item in _items %}
     {% set _id = item.id|default(item.route|default('item-' ~ loop.index)) %}
+    {% set _title = item.title|default(item.label|default('')) %}
     <div class="welcome-hub-tile welcome-hub-dock-tile" data-hub-id="{{ _id }}">
         {% if _show_pin %}
         <button type="button"
                 class="welcome-hub-pin"
                 data-welcome-pin-hub="{{ _id }}"
                 title="Fixar núcleo"
-                aria-label="Fixar {{ item.title }}">
+                aria-label="Fixar {{ _title }}">
             <i class="far fa-star" aria-hidden="true"></i>
         </button>
         {% endif %}
         <a href="{{ path(item.route) }}"
            class="welcome-hub-dock-link"
-           title="{{ item.subtitle|default(item.title) }}">
+           title="{{ item.subtitle|default(_title) }}">
             <span class="welcome-hub-dock-icon" aria-hidden="true">
                 <i class="fas {{ item.icon }}"></i>
             </span>
-            <span class="welcome-hub-dock-label">{{ item.title }}</span>
+            <span class="welcome-hub-dock-label">{{ _title }}</span>
+            {% if item.maturity_label|default('') and item.maturity_level|default('') not in ['mature', 'operational'] %}
+            <span class="hub-maturity-badge hub-maturity-badge--{{ item.maturity_badge|default('default') }}">{{ item.maturity_label }}</span>
+            {% endif %}
         </a>
     </div>
     {% endfor %}

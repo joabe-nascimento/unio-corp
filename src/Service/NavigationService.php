@@ -2,8 +2,10 @@
 
 namespace App\Service;
 
+use App\Config\HubMaturity;
 use App\Config\PlannedHubRegistry;
 use App\Entity\User;
+use App\PosOperatorio\PosOperatorioModuleCatalog;
 use App\Security\ProductGrantAccess;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -208,7 +210,7 @@ class NavigationService
             if (!$this->isRouteRegistered($hub['route'])) {
                 continue;
             }
-            $visible[] = $hub;
+            $visible[] = HubMaturity::enrichHub($hub);
         }
 
         return $visible;
@@ -316,6 +318,12 @@ class NavigationService
         }
 
         return \in_array($user->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE', 'SUPERVISOR'], true);
+    }
+
+    /** Guia visual de componentes — mesma audiência de ferramentas internas. */
+    public function showDevComponents(User $user): bool
+    {
+        return $this->showProjetosMetas($user);
     }
 
     /** Unio Cortex — disponível para qualquer usuário autenticado. */
@@ -580,6 +588,30 @@ class NavigationService
         ], true);
     }
 
+    public function isModuloPosOpClinicaActive(?string $route): bool
+    {
+        return PosOperatorioModuleCatalog::isGroupActive(
+            PosOperatorioModuleCatalog::GROUP_CLINICA,
+            $route,
+        );
+    }
+
+    public function isModuloPosOpMonitoramentoActive(?string $route): bool
+    {
+        return PosOperatorioModuleCatalog::isGroupActive(
+            PosOperatorioModuleCatalog::GROUP_MONITORAMENTO,
+            $route,
+        );
+    }
+
+    public function isModuloPosOpPacienteActive(?string $route): bool
+    {
+        return PosOperatorioModuleCatalog::isGroupActive(
+            PosOperatorioModuleCatalog::GROUP_PACIENTE,
+            $route,
+        );
+    }
+
     /**
      * Globais Twig de navegação (uma passagem por request).
      *
@@ -593,6 +625,7 @@ class NavigationService
             'nav_layout' => $this->getLayout($user),
             'nav_show_cortex' => $this->showCortex($user),
             'nav_show_projetos_metas' => $this->showProjetosMetas($user),
+            'nav_show_dev_components' => $this->showDevComponents($user),
             'nav_show_hub_operacoes' => $this->showHubOperacoes($user),
             'nav_show_hub_talentos' => $this->showHubTalentos($user),
             'nav_show_hub_maturidade' => $this->showHubMaturidade($user),
@@ -624,6 +657,9 @@ class NavigationService
             'nav_modulo_recrutamento_selecao_active' => $this->isModuloRecrutamentoSelecaoActive($route),
             'nav_modulo_ti_infra_open' => $this->isModuloTiInfraActive($route),
             'nav_modulo_ti_intel_open' => $this->isModuloTiIntelActive($route),
+            'nav_modulo_pos_op_clinica_open' => $this->isModuloPosOpClinicaActive($route),
+            'nav_modulo_pos_op_monitoramento_open' => $this->isModuloPosOpMonitoramentoActive($route),
+            'nav_modulo_pos_op_paciente_open' => $this->isModuloPosOpPacienteActive($route),
             'nav_active_hub' => $this->getActiveHubId($route),
             'nav_has_hubs' => $this->hasAnyHub($user),
         ];
@@ -632,75 +668,69 @@ class NavigationService
     /**
      * Módulos principais para dashboard e launcher de apps no header.
      *
-     * @return list<array{id: string, icon: string, title: string, subtitle: string, route: string}>
+     * @return list<array{id: string, icon: string, title: string, subtitle: string, route: string, maturity_level?: string, maturity_label?: string, maturity_badge?: string}>
      */
     public function getPlatformModules(User $user): array
     {
         $modules = [];
 
         if ($this->showCortex($user)) {
-            $modules[] = [
+            $modules[] = HubMaturity::enrichHub([
                 'id' => 'cortex',
                 'icon' => 'fa-brain',
                 'title' => 'Unio Cortex',
                 'subtitle' => 'Malha neural e insights',
                 'route' => 'app_cortex',
-            ];
+            ]);
         }
 
         if ($this->showHubOperacoes($user)) {
-            $modules[] = [
+            $modules[] = HubMaturity::enrichHub([
                 'id' => 'operacoes',
                 'icon' => 'fa-briefcase',
                 'title' => 'Núcleo de Operações',
                 'subtitle' => 'RH e Gestão de Pessoas',
                 'route' => 'app_hub_operacoes',
-            ];
+            ]);
         }
         if ($this->showHubTalentos($user)) {
-            $modules[] = [
+            $modules[] = HubMaturity::enrichHub([
                 'id' => 'talentos',
                 'icon' => 'fa-gem',
                 'title' => 'Núcleo de Talentos',
-                'subtitle' => 'Banco, vagas e trilhas',
+                'subtitle' => 'Desenvolvimento e trilhas',
                 'route' => 'app_talentos',
-            ];
+            ]);
         }
         if ($this->showHubMaturidade($user)) {
-            $modules[] = [
+            $modules[] = HubMaturity::enrichHub([
                 'id' => 'maturidade',
                 'icon' => 'fa-gauge-high',
                 'title' => 'Núcleo de Maturidade',
                 'subtitle' => 'Radar e plano de ação',
                 'route' => 'app_maturidade',
-            ];
+            ]);
         }
         if ($this->showHubRecrutamento($user)) {
-            $modules[] = [
+            $modules[] = HubMaturity::enrichHub([
                 'id' => 'recrutamento',
                 'icon' => 'fa-user-tie',
                 'title' => 'Núcleo de Recrutamento',
                 'subtitle' => 'Vagas e pipeline',
                 'route' => 'app_recrutamento',
-            ];
+            ]);
         }
         foreach ($this->getVisiblePlannedHubs($user) as $hub) {
-            $modules[] = [
-                'id' => $hub['id'],
-                'icon' => $hub['icon'],
-                'title' => $hub['label'],
-                'subtitle' => $hub['subtitle'],
-                'route' => $hub['route'],
-            ];
+            $modules[] = $hub;
         }
         if ($this->showPlataforma($user)) {
-            $modules[] = [
+            $modules[] = HubMaturity::enrichHub([
                 'id' => 'admin',
                 'icon' => 'fa-shield-halved',
                 'title' => 'Plataforma',
                 'subtitle' => 'Usuários, empresas e configurações',
                 'route' => 'app_admin',
-            ];
+            ]);
         }
 
         return $modules;

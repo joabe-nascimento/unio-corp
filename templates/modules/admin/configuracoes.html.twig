@@ -3,6 +3,7 @@
 {% block permissions_scope %}hub_admin{% endblock %}
 {% set hub_page_title = 'Configurações' %}
 {% set hub_actions_before_title = true %}
+{% set hub_page_body_mode = 'scroll' %}
 
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_admin') }}" class="btn-unio-ghost btn-sm">
@@ -42,7 +43,7 @@
         <input type="hidden" name="_token" value="{{ csrf_token('admin_config') }}">
 
         {# ── 1. Identidade da Plataforma ── #}
-        <section class="cfg-section" id="cfg-plataforma" data-cfg-section="plataforma">
+        <section class="cfg-section cfg-section--visible" id="cfg-plataforma" data-cfg-section="plataforma">
             <div class="cfg-section-header">
                 <div class="cfg-section-icon"><i class="fas fa-paint-brush" aria-hidden="true"></i></div>
                 <div>
@@ -395,35 +396,40 @@
 (function () {
     'use strict';
 
-    /* ── Sidebar navigation ── */
+    /* ── Sidebar navigation — uma seção visível por vez ── */
     var sidebarItems = document.querySelectorAll('[data-cfg-nav]');
     var sections     = document.querySelectorAll('[data-cfg-section]');
+
+    function showSection(navId) {
+        sections.forEach(function (section) {
+            var visible = section.dataset.cfgSection === navId;
+            section.classList.toggle('cfg-section--visible', visible);
+            section.hidden = !visible;
+        });
+    }
 
     function setActive(navId) {
         sidebarItems.forEach(function (el) {
             el.classList.toggle('cfg-sidebar-item--active', el.dataset.cfgNav === navId);
         });
+        showSection(navId);
     }
 
     sidebarItems.forEach(function (item) {
         item.addEventListener('click', function (e) {
             e.preventDefault();
-            var target = document.querySelector('[data-cfg-section="' + item.dataset.cfgNav + '"]');
-            if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
             setActive(item.dataset.cfgNav);
         });
     });
 
-    /* Intersection observer to highlight sidebar on scroll */
-    if (typeof IntersectionObserver !== 'undefined') {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    setActive(entry.target.dataset.cfgSection);
-                }
-            });
-        }, { threshold: 0.3 });
-        sections.forEach(function (s) { observer.observe(s); });
+    if (sidebarItems.length && sections.length) {
+        var hash = (window.location.hash || '').replace('#', '');
+        var hashNav = hash.indexOf('cfg-') === 0 ? hash.replace(/^cfg-/, '') : '';
+        var hashSection = hashNav && document.querySelector('[data-cfg-section="' + hashNav + '"]') ? hashNav : null;
+        var initial = hashSection
+            ? hashNav
+            : (document.querySelector('.cfg-sidebar-item--active') || sidebarItems[0]).dataset.cfgNav;
+        setActive(initial);
     }
 
     /* ── Maintenance toggle ── */

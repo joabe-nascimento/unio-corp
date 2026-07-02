@@ -1,8 +1,10 @@
-﻿# Módulo RH — Unio
+# Módulo RH — Unio
 
 Documentação do **pacote operacional de RH** na plataforma Unio: o que está pronto, o que é opcional (polimento) e o que ainda **não foi implementado** (roadmap / mercado avançado).
 
-> **Resumo:** a base operacional de RH por empresa está **funcional** para uso interno (gestores/RH). Itens como eSocial, ponto ou portal do colaborador são **fases futuras**, não bugs do módulo atual.
+> **Resumo:** a base operacional de RH por empresa está **funcional** para uso interno (gestores/RH). O **portal do colaborador** e o **ATS (Recrutamento)** existem em núcleos dedicados; eSocial, ponto legal e folha contábil completa seguem como fases futuras.
+
+Para o roadmap detalhado por fase, veja também **[RH_ROADMAP.md](RH_ROADMAP.md)** e **[ROADMAP_90_DIAS.md](ROADMAP_90_DIAS.md)**.
 
 ---
 
@@ -309,10 +311,13 @@ Itens **pequenos** que melhoram UX mas **não impedem** o RH de funcionar:
 
 Estes itens são comuns em **RH de mercado** e foram **deliberadamente deixados fora** do pacote operacional atual. Não significam que o sistema está “quebrado” — são **novos produtos / integrações**.
 
-### Portal do colaborador
+### Portal do colaborador ✅
 
-- Área logada para o **próprio funcionário**: holerite, solicitar férias, atualizar dados, comunicados.
-- Hoje o RH é voltado ao **gestor/RH interno**.
+Implementado em **`/rh/portal`** (`RhPortalController`): dashboard, férias, holerites, comunicados e auto-vínculo por e-mail. Grant `product_rh` → `portal`. Ver [RH_ROADMAP.md](RH_ROADMAP.md) fase 1.
+
+### Recrutamento e seleção (ATS) ✅
+
+Hub dedicado **`/recrutamento`**: vagas, candidatos, pipeline, analytics, carreiras. Integração com admissão RH em evolução (`RhRecrutamentoService::convertToOnboarding`). O núcleo **Talentos** redireciona vagas para Recrutamento.
 
 ### eSocial e obrigações legais
 
@@ -320,14 +325,9 @@ Estes itens são comuns em **RH de mercado** e foram **deliberadamente deixados 
 - Certificado digital, retornos, reconciliação.
 - Layouts e versões do governo.
 
-### Ponto eletrônico
+### Ponto eletrônico 🟡
 
-- Batidas, espelho, banco de horas, integração com folha e férias.
-- REP, geolocalização, ajustes de jornada.
-
-### Recrutamento e seleção (ATS)
-
-- Vagas, candidatos, etapas, entrevistas, integração com admissão.
+MVP web em **`/rh/ponto`** (batidas). REP, geolocalização e integração folha legal — fases futuras.
 
 ### Assinatura digital
 

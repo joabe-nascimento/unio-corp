@@ -22,36 +22,36 @@ class EngenhariaController extends AbstractController
     #[Route('/projetos', name: 'app_engenharia_projetos')]
     public function projetos(): Response
     {
-        return $this->render(self::T . 'projetos.html.twig');
+        return $this->redirectToRoute('app_engenharia');
     }
 
     #[Route('/cronograma', name: 'app_engenharia_cronograma')]
     public function cronograma(): Response
     {
-        return $this->render(self::T . 'cronograma.html.twig');
+        return $this->redirectToRoute('app_engenharia');
     }
 
     #[Route('/orcamentos', name: 'app_engenharia_orcamentos')]
     public function orcamentos(): Response
     {
-        return $this->render(self::T . 'orcamentos.html.twig');
+        return $this->redirectToRoute('app_engenharia');
     }
 
     #[Route('/equipes', name: 'app_engenharia_equipes')]
     public function equipes(): Response
     {
-        return $this->render(self::T . 'equipes.html.twig');
+        return $this->redirectToRoute('app_engenharia');
     }
 
     #[Route('/documentacao', name: 'app_engenharia_documentacao')]
     public function documentacao(): Response
     {
-        return $this->render(self::T . 'documentacao.html.twig');
+        return $this->redirectToRoute('app_engenharia');
     }
 
     #[Route('/normas', name: 'app_engenharia_normas')]
     public function normas(): Response
     {
-        return $this->render(self::T . 'normas.html.twig');
+        return $this->redirectToRoute('app_engenharia');
     }
 }

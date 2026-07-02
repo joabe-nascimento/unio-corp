@@ -5,7 +5,12 @@
 
 {% block content %}
 
-<div class="dashboard-page" id="dashboardPage">
+<div class="inset-page-shell dashboard-page-shell">
+    <div class="inset-page-bg" aria-hidden="true">
+        {% include 'components/inset_geometric_background.html.twig' with { geo_id: 'dashboard' } only %}
+    </div>
+
+<div class="inset-page-content dashboard-page" id="dashboardPage">
 
 {% if account_pending|default(false) %}
     {% include 'components/account_pending_banner.html.twig' %}
@@ -60,11 +65,12 @@
 } %}
 
 </div>
+</div>{# .inset-page-shell #}
 
 {% endblock %}
 
 {% block javascripts %}
 {% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 2 } only %}
 <script src="{{ asset('js/dashboard-home.js') }}?v=1"></script>
-<script src="{{ asset('js/onboarding-checklist.js') }}?v=1"></script>
+<script src="{{ asset('js/onboarding-checklist.js') }}?v=2"></script>
 {% endblock %}

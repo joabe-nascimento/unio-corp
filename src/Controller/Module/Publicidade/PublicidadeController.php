@@ -22,36 +22,36 @@ class PublicidadeController extends AbstractController
     #[Route('/campanhas', name: 'app_publicidade_campanhas')]
     public function campanhas(): Response
     {
-        return $this->render(self::T . 'campanhas.html.twig');
+        return $this->redirectToRoute('app_publicidade');
     }
 
     #[Route('/clientes', name: 'app_publicidade_clientes')]
     public function clientes(): Response
     {
-        return $this->render(self::T . 'clientes.html.twig');
+        return $this->redirectToRoute('app_publicidade');
     }
 
     #[Route('/criativos', name: 'app_publicidade_criativos')]
     public function criativos(): Response
     {
-        return $this->render(self::T . 'criativos.html.twig');
+        return $this->redirectToRoute('app_publicidade');
     }
 
     #[Route('/midia', name: 'app_publicidade_midia')]
     public function midia(): Response
     {
-        return $this->render(self::T . 'midia.html.twig');
+        return $this->redirectToRoute('app_publicidade');
     }
 
     #[Route('/briefings', name: 'app_publicidade_briefings')]
     public function briefings(): Response
     {
-        return $this->render(self::T . 'briefings.html.twig');
+        return $this->redirectToRoute('app_publicidade');
     }
 
     #[Route('/metricas', name: 'app_publicidade_metricas')]
     public function metricas(): Response
     {
-        return $this->render(self::T . 'metricas.html.twig');
+        return $this->redirectToRoute('app_publicidade');
     }
 }

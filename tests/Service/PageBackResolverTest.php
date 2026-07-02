@@ -69,4 +69,12 @@ class PageBackResolverTest extends TestCase
         $this->assertNotNull($back);
         $this->assertSame('app_recrutamento', $back['route']);
     }
+
+    public function testPosOperatorioPacienteEditarBackToPacientesList(): void
+    {
+        $back = $this->resolver->resolve('app_pos_operatorio_paciente_editar', ['id' => 2]);
+        $this->assertNotNull($back);
+        $this->assertSame('app_pos_operatorio_pacientes', $back['route']);
+        $this->assertSame([], $back['params']);
+    }
 }

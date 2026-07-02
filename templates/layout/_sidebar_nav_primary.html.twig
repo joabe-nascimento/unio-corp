@@ -1,14 +1,14 @@
 {# Itens principais acima da zona de hubs #}
-<li class="nav-item">
-    <a href="{{ path('app_dashboard') }}" class="nav-link {{ route starts with 'app_dashboard' ? 'active' : '' }}">
+<li class="nav-item nav-item--home">
+    <a href="{{ path('app_dashboard') }}" class="nav-link {{ route starts with 'app_dashboard' ? 'active' : '' }}"{{ route starts with 'app_dashboard' ? ' aria-current="page"' : '' }}>
         <i class="fas fa-house nav-icon"></i>
         <p>Dashboard</p>
     </a>
 </li>
 
 {% if nav_show_cortex|default(true) %}
-<li class="nav-item">
-    <a href="{{ path('app_cortex') }}" class="nav-link {{ route starts with 'app_cortex' ? 'active' : '' }}">
+<li class="nav-item nav-item--cortex">
+    <a href="{{ path('app_cortex') }}" class="nav-link {{ route starts with 'app_cortex' ? 'active' : '' }}"{{ route starts with 'app_cortex' ? ' aria-current="page"' : '' }} data-tour="cortex">
         <i class="fas fa-brain nav-icon"></i>
         <p>Unio Cortex</p>
     </a>
@@ -16,34 +16,39 @@
 {% endif %}
 
 {% if nav_show_projetos_metas|default(false) %}
-<li class="nav-item">
-    <a href="{{ path('app_core_projetos') }}" class="nav-link {{ route starts with 'app_core_projetos' or route == 'app_core_metas_nova' or route == 'app_core_tarefa_mover' ? 'active' : '' }}">
+<li class="nav-item nav-item--projetos">
+    <a href="{{ path('app_core_projetos') }}" class="nav-link {{ route starts with 'app_core_projetos' or route == 'app_core_metas_nova' or route == 'app_core_tarefa_mover' ? 'active' : '' }}"{{ route starts with 'app_core_projetos' or route == 'app_core_metas_nova' or route == 'app_core_tarefa_mover' ? ' aria-current="page"' : '' }}>
         <i class="fas fa-diagram-project nav-icon"></i>
         <p>Projetos e Metas</p>
     </a>
 </li>
 {% endif %}
 
-<li class="nav-item">
-    <a href="{{ path('app_chat') }}" class="nav-link {{ route starts with 'app_chat' ? 'active' : '' }}">
+{% if nav_show_dev_components|default(false) %}
+<li class="nav-item nav-item--devtools">
+    <a href="{{ path('app_dev_components') }}" class="nav-link {{ route == 'app_dev_components' ? 'active' : '' }}"{{ route == 'app_dev_components' ? ' aria-current="page"' : '' }}>
+        <i class="fas fa-palette nav-icon"></i>
+        <p>Guia de componentes</p>
+    </a>
+</li>
+{% endif %}
+
+<li class="nav-item nav-item--chat">
+    <a href="{{ path('app_chat') }}" class="nav-link {{ route starts with 'app_chat' ? 'active' : '' }}"{{ route starts with 'app_chat' ? ' aria-current="page"' : '' }}>
         <i class="fas fa-comments nav-icon"></i>
-        <p>
-            Chat Bate Papo
-            {% if nav_chat_unread|default(0) > 0 %}
-                <span class="nav-unread-badge">{{ nav_chat_unread }}</span>
-            {% endif %}
-        </p>
+        <p>Chat Bate Papo</p>
+        {% if nav_chat_unread|default(0) > 0 %}
+            <span class="nav-unread-badge">{{ nav_chat_unread }}</span>
+        {% endif %}
     </a>
 </li>
 
-<li class="nav-item">
-    <a href="{{ path('app_notifications') }}" class="nav-link {{ route starts with 'app_notifications' ? 'active' : '' }}">
+<li class="nav-item nav-item--notif">
+    <a href="{{ path('app_notifications') }}" class="nav-link {{ route starts with 'app_notifications' ? 'active' : '' }}"{{ route starts with 'app_notifications' ? ' aria-current="page"' : '' }} data-tour="notifications">
         <i class="fas fa-bell nav-icon"></i>
-        <p>
-            Notificações
-            {% if nav_notifications_unread|default(0) > 0 %}
-                <span class="nav-notif-badge">{{ nav_notifications_unread }}</span>
-            {% endif %}
-        </p>
+        <p>Notificações</p>
+        {% if nav_notifications_unread|default(0) > 0 %}
+            <span class="nav-notif-badge">{{ nav_notifications_unread }}</span>
+        {% endif %}
     </a>
 </li>

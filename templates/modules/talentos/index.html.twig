@@ -6,16 +6,24 @@
 {% if scope_has_products('hub_talentos') %}
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
-        { value: '0', label: 'Banco de Talentos', sub: 'Cadastrados' },
-        { value: '0', label: 'Vagas Abertas',     sub: 'Disponíveis' },
-        { value: '0', label: 'Trilhas Ativas',    sub: 'Em progresso' },
-        { value: '0', label: 'Mentorias Ativas',  sub: 'Em andamento' },
+        { value: '—', label: 'Banco de Talentos', sub: 'Em desenvolvimento' },
+        { value: show_recrutamento|default(false) ? vagas_abertas : '—', label: 'Vagas Abertas', sub: show_recrutamento|default(false) ? 'No Recrutamento' : 'Ver núcleo Recrutamento', route: show_recrutamento|default(false) ? 'app_recrutamento_vagas' : null },
+        { value: '—', label: 'Trilhas Ativas', sub: 'Em desenvolvimento' },
+        { value: '—', label: 'Mentorias Ativas', sub: 'Em desenvolvimento' },
     ], mb: 'mb-0' } %}
 </div>
 {% endif %}
 {% endblock %}
 {% block hub_content %}
 {% if scope_has_products('hub_talentos') %}
+{% if show_recrutamento|default(false) %}
+<div class="alert alert-info unio-alert mb-4" role="status">
+    <i class="fas fa-circle-info mr-2" aria-hidden="true"></i>
+    <strong>Vagas e pipeline</strong> estão no
+    <a href="{{ path('app_recrutamento') }}" class="alert-link">Núcleo de Recrutamento</a>
+    ({{ vagas_abertas }} aberta{{ vagas_abertas != 1 ? 's' : '' }} · {{ total_vagas }} no total).
+</div>
+{% endif %}
 <div class="row">
     {% if product_grant('hub_talentos', 'banco') %}
     <div class="col-md-6 mb-4 d-flex">
@@ -29,10 +37,40 @@
             } %}
             {% include 'components/empty_state.html.twig' with {
                 icon: 'fa-star',
-                title: 'Banco de talentos vazio',
-                text: 'Identifique talentos a partir das avaliações de desempenho.',
+                title: 'Em desenvolvimento',
+                text: 'O banco de talentos será alimentado por avaliações e pelo pipeline de Recrutamento.',
                 compact: true
             } %}
+        </div>
+    </div>
+    {% endif %}
+    {% if product_grant('hub_talentos', 'vagas') %}
+    <div class="col-md-6 mb-4 d-flex">
+        <div class="unio-card flex-fill">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Vagas',
+                subtitle: show_recrutamento|default(false) ? 'Gerenciadas no Núcleo de Recrutamento' : 'Disponível com grant de Recrutamento',
+                btn_label: show_recrutamento|default(false) ? 'Abrir vagas' : '',
+                btn_href: show_recrutamento|default(false) ? path('app_recrutamento_vagas') : '',
+                btn_ghost: true
+            } %}
+            {% if show_recrutamento|default(false) %}
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-briefcase',
+                title: vagas_abertas > 0 ? vagas_abertas ~ ' vaga' ~ (vagas_abertas != 1 ? 's' : '') ~ ' aberta' ~ (vagas_abertas != 1 ? 's' : '') : 'Nenhuma vaga aberta',
+                text: 'Crie e acompanhe vagas, candidatos e pipeline no núcleo dedicado.',
+                btn_label: 'Ir para Recrutamento',
+                btn_href: path('app_recrutamento'),
+                compact: true
+            } %}
+            {% else %}
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-briefcase',
+                title: 'Recrutamento não disponível',
+                text: 'Solicite acesso ao Núcleo de Recrutamento para gerenciar vagas.',
+                compact: true
+            } %}
+            {% endif %}
         </div>
     </div>
     {% endif %}
@@ -48,8 +86,8 @@
             } %}
             {% include 'components/empty_state.html.twig' with {
                 icon: 'fa-route',
-                title: 'Nenhuma trilha criada',
-                text: 'Crie trilhas de carreira personalizadas para cada cargo.',
+                title: 'Em desenvolvimento',
+                text: 'Trilhas de carreira estarão disponíveis em breve.',
                 compact: true
             } %}
         </div>

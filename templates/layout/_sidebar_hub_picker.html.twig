@@ -1,12 +1,12 @@
 {# Lista de núcleos (modo seleção) — agrupada por domínio #}
 {% set _pick_hidden = hub_picker_hidden|default(false) ? ' is-hidden' : '' %}
 
-<li class="sidebar-hub-group sidebar-hub-group--core{{ _pick_hidden }}">
+<li class="sidebar-hub-group sidebar-hub-group--core{{ _pick_hidden }}" data-tour="hub-picker-core">
     <span class="sidebar-hub-group-label">Operação</span>
     <ul class="sidebar-hub-group-list">
         {% if nav_show_hub_operacoes|default(false) %}
         <li class="nav-item sidebar-hub-pick-item">
-            <a href="{{ path('app_hub_operacoes') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="operacoes">
+            <a href="{{ path('app_hub_operacoes') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="operacoes" data-tour="hub-operacoes">
                 <i class="fas fa-building nav-icon"></i>
                 <p>Núcleo de Operações</p>
             </a>
@@ -45,7 +45,7 @@
     <ul class="sidebar-hub-group-list">
         {% for hub in group.hubs %}
         <li class="nav-item sidebar-hub-pick-item">
-            <a href="{{ path(hub.route) }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="{{ hub.id }}" title="{{ hub.label }}">
+            <a href="{{ path(hub.route) }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="{{ hub.id }}">
                 <i class="fas {{ hub.icon }} nav-icon"></i>
                 <p>{{ hub.label }}</p>
             </a>
@@ -56,11 +56,11 @@
 {% endfor %}
 
 {% if nav_show_plataforma|default(false) %}
-<li class="sidebar-hub-group sidebar-hub-group--platform{{ _pick_hidden }}">
+<li class="sidebar-hub-group sidebar-hub-group--platform{{ _pick_hidden }}" data-tour="hub-platform">
     <span class="sidebar-hub-group-label">Plataforma</span>
     <ul class="sidebar-hub-group-list">
         <li class="nav-item sidebar-hub-pick-item">
-            <a href="{{ path('app_admin') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="admin">
+            <a href="{{ path('app_admin') }}" class="nav-link sidebar-hub-pick-link" data-hub-pick="admin" data-tour="hub-admin">
                 <i class="fas fa-shield-halved nav-icon"></i>
                 <p>Plataforma</p>
             </a>

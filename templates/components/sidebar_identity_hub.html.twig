@@ -1,16 +1,21 @@
 {# Núcleo de identidade — topo da sidebar: conta e atalhos #}
 {% set _first_name = app.user.nome|split(' ')|first %}
 
-<div class="sidebar-identity">
+<div class="sidebar-identity" data-tour="identity">
     <button type="button"
             class="sidebar-identity__trigger"
             id="sidebarIdentityBtn"
             aria-expanded="false"
             aria-controls="sidebarIdentityPanel"
             aria-haspopup="dialog"
-            title="{{ app.user.nome }}">
+            aria-label="{{ app.user.nome }}">
         <span class="sidebar-identity__avatar-wrap" aria-hidden="true">
-            <span class="avatar-circle sidebar-identity__avatar">{{ app.user.initials }}</span>
+            {% include 'components/member_avatar.html.twig' with {
+                nome: app.user.nome,
+                foto: app.user.avatar,
+                size: 'sm',
+                class: 'sidebar-identity__avatar'
+            } %}
         </span>
         <span class="sidebar-identity__text">
             <span class="sidebar-identity__name">{{ _first_name }}</span>
@@ -31,7 +36,12 @@
             <div class="sidebar-identity-panel__hero-inner">
                 <div class="sidebar-identity-panel__user">
                     <span class="sidebar-identity-panel__avatar-wrap" aria-hidden="true">
-                        <span class="avatar-circle sidebar-identity-panel__avatar">{{ app.user.initials }}</span>
+                        {% include 'components/member_avatar.html.twig' with {
+                            nome: app.user.nome,
+                            foto: app.user.avatar,
+                            size: 'md',
+                            class: 'sidebar-identity-panel__avatar'
+                        } %}
                         <span class="sidebar-identity-panel__status"></span>
                     </span>
                     <div class="sidebar-identity-panel__user-meta">
@@ -69,6 +79,12 @@
             {% endif %}
 
             <p class="sidebar-identity-panel__section-label">Preferências</p>
+
+            <a class="sidebar-identity-panel__link" href="{{ path('app_profile') }}">
+                <span class="sidebar-identity-panel__link-icon"><i class="fas fa-user" aria-hidden="true"></i></span>
+                <span class="sidebar-identity-panel__link-text">Meu perfil</span>
+                <i class="fas fa-chevron-right sidebar-identity-panel__link-arrow" aria-hidden="true"></i>
+            </a>
 
             <button type="button" class="sidebar-identity-panel__link sidebar-identity-panel__link--btn" onclick="toggleTheme()">
                 <span class="sidebar-identity-panel__link-icon"><i class="fas fa-adjust" id="themeMenuIcon" aria-hidden="true"></i></span>

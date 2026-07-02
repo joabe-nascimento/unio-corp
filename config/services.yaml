@@ -8,9 +8,14 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.mailer_from: '%env(MAILER_FROM_ADDRESS)%'
+    vitoria_ai_url_default: ''
+    vitoria_ai_key_default: 'dev-vitoria-key-change-me'
+    vitoria_ai_enabled_default: 'true'
+    default_uri_default: 'http://127.0.0.1:8000'
     mercure_url_default: 'http://localhost:3000/.well-known/mercure'
     mercure_jwt_default: '!ChangeMe!UnioMercureJwtDevSecret32!'
     app.chat_mercure_topic_base_default: 'https://localhost/chat'
+    app.pos_op_mercure_topic_base_default: 'https://localhost/pos-operatorio'
 
 services:
     # default configuration for services in *this* file
@@ -37,6 +42,10 @@ services:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
+    App\Service\UserProfileService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
     App\Service\RhDocumentService:
         arguments:
             $projectDir: '%kernel.project_dir%'
@@ -48,6 +57,10 @@ services:
     App\Service\ChatMercureTopics:
         arguments:
             $topicBase: '%env(default:app.chat_mercure_topic_base_default:MERCURE_CHAT_TOPIC_BASE)%'
+
+    App\Service\PosOperatorio\PosOperatorioMercureTopics:
+        arguments:
+            $topicBase: '%env(default:app.pos_op_mercure_topic_base_default:POS_OP_MERCURE_TOPIC_BASE)%'
 
     App\Service\Ti\TiChamadoAttachmentService:
         arguments:
@@ -64,6 +77,20 @@ services:
     App\Controller\Module\Admin\AdminController:
         arguments:
             $passwordHasher: '@security.user_password_hasher'
+
+    App\Service\Vitoria\VitoriaClient:
+        arguments:
+            $enabled: '%env(bool:default:vitoria_ai_enabled_default:VITORIA_AI_ENABLED)%'
+            $baseUrl: '%env(default:vitoria_ai_url_default:VITORIA_AI_URL)%'
+            $apiKey: '%env(default:vitoria_ai_key_default:VITORIA_AI_KEY)%'
+
+    App\Command\VitoriaSmokeTestCommand:
+        arguments:
+            $defaultUri: '%env(default:default_uri_default:DEFAULT_URI)%'
+
+    App\Command\SeedUsersCommand:
+        arguments:
+            $appEnv: '%kernel.environment%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

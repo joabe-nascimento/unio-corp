@@ -60,6 +60,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private \DateTimeImmutable $criadoEm;
 
+    /** @var list<string> IDs concluídos no checklist de primeiros passos (persistente por usuário). */
+    #[ORM\Column(type: 'json')]
+    private array $onboardingCompletedSteps = [];
+
     #[ORM\ManyToOne(targetEntity: Empresa::class, inversedBy: 'usuarios')]
     private ?Empresa $empresa = null;
 
@@ -113,6 +117,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAtivo(bool $ativo): static { $this->ativo = $ativo; return $this; }
 
     public function getCriadoEm(): \DateTimeImmutable { return $this->criadoEm; }
+
+    /** @return list<string> */
+    public function getOnboardingCompletedSteps(): array
+    {
+        return $this->onboardingCompletedSteps;
+    }
+
+    /** @param list<string> $steps */
+    public function setOnboardingCompletedSteps(array $steps): static
+    {
+        $this->onboardingCompletedSteps = array_values(array_unique(array_values(array_filter(
+            $steps,
+            static fn (mixed $step): bool => \is_string($step) && $step !== '',
+        ))));
+
+        return $this;
+    }
+
+    public function isOnboardingStepComplete(string $stepId): bool
+    {
+        return \in_array($stepId, $this->onboardingCompletedSteps, true);
+    }
+
+    public function addOnboardingCompletedStep(string $stepId): static
+    {
+        if ($stepId === '' || $this->isOnboardingStepComplete($stepId)) {
+            return $this;
+        }
+
+        $this->onboardingCompletedSteps[] = $stepId;
+
+        return $this;
+    }
 
     public function getEmpresa(): ?Empresa { return $this->empresa; }
     public function setEmpresa(?Empresa $empresa): static { $this->empresa = $empresa; return $this; }

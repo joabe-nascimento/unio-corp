@@ -2,12 +2,19 @@
 
 namespace App\Service\PosOperatorio;
 
+use App\Entity\Empresa;
+use App\Entity\PosOperatorioAlerta;
+use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
+use App\Repository\PosOperatorioAlertaRepository;
+use App\Repository\PosOperatorioPacienteRepository;
+use App\Repository\PosOperatorioProtocoloRepository;
+use App\Service\Vitoria\VitoriaClient;
 use App\Service\WorkspaceService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Hub Pós-Operatório — dashboard e dados ilustrativos (MVP em desenvolvimento).
+ * Hub Pós-Operatório — dashboard clínico (dados reais ou preview ilustrativo).
  */
 final class PosOperatorioService
 {
@@ -18,6 +25,10 @@ final class PosOperatorioService
 
     public function __construct(
         private WorkspaceService $workspace,
+        private PosOperatorioPacienteRepository $pacienteRepo,
+        private PosOperatorioAlertaRepository $alertaRepo,
+        private PosOperatorioProtocoloRepository $protocoloRepo,
+        private VitoriaClient $vitoria,
     ) {}
 
     /** @return array<string, mixed> */
@@ -29,6 +40,67 @@ final class PosOperatorioService
         }
 
         $perPage = $this->normalizePerPage($perPage);
+        $totalPatients = $this->pacienteRepo->countRecentByEmpresa($empresa);
+        $useRealData = $totalPatients > 0;
+
+        if ($useRealData) {
+            return $this->buildRealDashboard($empresa, $user, $page, $perPage, $totalPatients);
+        }
+
+        return $this->buildMockDashboard($empresa, $page, $perPage);
+    }
+
+    /** @return array<string, mixed> */
+    private function buildRealDashboard(Empresa $empresa, User $user, int $page, int $perPage, int $totalPatients): array
+    {
+        $totalPages = max(1, (int) ceil($totalPatients / $perPage));
+        $page = max(1, min($page, $totalPages));
+        $offset = ($page - 1) * $perPage;
+
+        $pacientes = $this->pacienteRepo->findRecentByEmpresa($empresa, $perPage, $offset);
+        $alertas = $this->alertaRepo->findAbertosByEmpresa($empresa, 10);
+        $alertCount = $this->alertaRepo->countAbertosByEmpresa($empresa);
+        $protocolCount = $this->protocoloRepo->countAtivosByEmpresa($empresa);
+
+        $recentPatients = array_map(fn (PosOperatorioPaciente $p) => $this->mapPacienteRow($p), $pacientes);
+        $activeAlerts = array_map(fn (PosOperatorioAlerta $a) => $this->mapAlertaRow($a), $alertas);
+
+        $pendentes = array_values(array_filter($recentPatients, static fn (array $r) => $r['status'] === 'pendente'));
+
+        $vitoriaInsight = $this->vitoria->hubInsight(
+            'hub_pos_operatorio',
+            ['adesao_pct' => $this->estimateAdesao($empresa, $totalPatients)],
+            array_map(static fn (array $a) => ['pri' => $a['pri'], 'titulo' => $a['titulo']], $activeAlerts),
+            array_map(static fn (array $p) => ['codigo' => $p['codigo'], 'nome' => $p['nome']], $pendentes),
+        ) ?? $this->vitoriaInsightFallback($alertCount, $pendentes);
+
+        return [
+            'empresa' => $empresa,
+            'pos_section' => 'overview',
+            'pos_dev_mode' => false,
+            'pos_pulse' => $this->buildClinicalPulseFromCounts($alertCount, \count($pendentes)),
+            'pos_ticker' => $this->buildTickerFromCounts($totalPatients, $alertCount, $pendentes),
+            'kpis' => $this->buildKpisFromCounts($totalPatients, $alertCount, $protocolCount),
+            'module_cards' => $this->moduleCardsFromCounts($totalPatients, $protocolCount, $alertCount),
+            'recent_patients' => $recentPatients,
+            'patients_pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $totalPatients,
+            ],
+            'patients_per_page_options' => self::PATIENTS_PER_PAGE_OPTIONS,
+            'active_alerts' => $activeAlerts,
+            'timeline_events' => $this->buildTimelineFromPacientes($pacientes),
+            'team_online' => $this->teamOnline(),
+            'protocol_phases' => $this->protocolPhasesFromPacientes($pacientes),
+            'vitoria_insight' => $vitoriaInsight,
+            'vitoria_online' => $this->vitoria->isAvailable(),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function buildMockDashboard(Empresa $empresa, int $page, int $perPage): array
+    {
         $allPatients = $this->recentPatients();
         $totalPatients = \count($allPatients);
         $totalPages = max(1, (int) ceil($totalPatients / $perPage));
@@ -55,7 +127,268 @@ final class PosOperatorioService
             'team_online' => $this->teamOnline(),
             'protocol_phases' => $this->protocolPhases(),
             'vitoria_insight' => $this->vitoriaInsight(),
+            'vitoria_online' => $this->vitoria->isAvailable(),
         ];
+    }
+
+    /** @return array{codigo: string, nome: string, procedimento: string, dia: string, medico: string, ultima_resposta: string, status: string, pri?: string} */
+    private function mapPacienteRow(PosOperatorioPaciente $p): array
+    {
+        $medico = $p->getMedicoResponsavel();
+        $ultima = $p->getUltimaResposta();
+        $dia = $p->getDiaPosOperatorio();
+
+        $row = [
+            'id' => $p->getId(),
+            'codigo' => $p->getCodigo(),
+            'nome' => $this->shortName($p->getNome()),
+            'procedimento' => $p->getProcedimento() ?? '—',
+            'dia' => $dia !== null ? 'D+' . $dia : '—',
+            'medico' => $medico ? $this->shortName($medico->getNome() ?? 'Médico') : '—',
+            'ultima_resposta' => $ultima ? $this->relativeTime($ultima->getRespondidoEm()) : 'pendente',
+            'status' => $p->getStatus(),
+        ];
+
+        $alertaAberto = $p->getAlertas()->filter(
+            static fn (PosOperatorioAlerta $a) => \in_array($a->getStatus(), [
+                PosOperatorioAlerta::STATUS_ABERTO,
+                PosOperatorioAlerta::STATUS_EM_ATENDIMENTO,
+            ], true),
+        )->first();
+
+        if ($alertaAberto instanceof PosOperatorioAlerta) {
+            $row['pri'] = $alertaAberto->getPrioridade();
+        }
+
+        return $row;
+    }
+
+    /** @return array{titulo: string, paciente: string, pri: string, tempo: string, tone: string, sla_pct: int|null, detail?: string} */
+    private function mapAlertaRow(PosOperatorioAlerta $a): array
+    {
+        $paciente = $a->getPaciente();
+        $tone = match ($a->getPrioridade()) {
+            'P1' => 'critical',
+            'P2' => 'warn',
+            default => 'info',
+        };
+
+        return [
+            'titulo' => $a->getMotivo(),
+            'paciente' => sprintf('%s · %s', $this->shortName($paciente->getNome()), $paciente->getCodigo()),
+            'paciente_id' => $paciente->getId(),
+            'pri' => $a->getPrioridade(),
+            'tempo' => $this->relativeTime($a->getCriadoEm()),
+            'tone' => $tone,
+            'sla_pct' => $this->slaPercent($a),
+            'detail' => 'Fila clínica · ' . $a->getStatus(),
+        ];
+    }
+
+    private function slaPercent(PosOperatorioAlerta $a): ?int
+    {
+        $limite = $a->getSlaLimiteEm();
+        if (!$limite) {
+            return null;
+        }
+        $total = $limite->getTimestamp() - $a->getCriadoEm()->getTimestamp();
+        if ($total <= 0) {
+            return 0;
+        }
+        $elapsed = time() - $a->getCriadoEm()->getTimestamp();
+
+        return min(100, max(0, (int) round(($elapsed / $total) * 100)));
+    }
+
+    private function shortName(string $nome): string
+    {
+        $parts = preg_split('/\s+/', trim($nome)) ?: [];
+        if (\count($parts) <= 1) {
+            return $nome;
+        }
+
+        return $parts[0] . ' ' . mb_substr($parts[\count($parts) - 1], 0, 1) . '.';
+    }
+
+    private function relativeTime(\DateTimeImmutable $dt): string
+    {
+        $diff = time() - $dt->getTimestamp();
+        if ($diff < 60) {
+            return 'há ' . $diff . ' seg';
+        }
+        if ($diff < 3600) {
+            return 'há ' . (int) floor($diff / 60) . ' min';
+        }
+        if ($diff < 86400) {
+            return 'há ' . (int) floor($diff / 3600) . 'h';
+        }
+
+        return 'ontem';
+    }
+
+    private function estimateAdesao(Empresa $empresa, int $totalAtivos): int
+    {
+        if ($totalAtivos === 0) {
+            return 0;
+        }
+        $pendentes = 0;
+        foreach ($this->pacienteRepo->findRecentByEmpresa($empresa, min(50, $totalAtivos), 0) as $p) {
+            $ultima = $p->getUltimaResposta();
+            if (!$ultima || $ultima->getDataReferencia()->format('Y-m-d') !== (new \DateTimeImmutable('today'))->format('Y-m-d')) {
+                ++$pendentes;
+            }
+        }
+
+        return (int) round((($totalAtivos - $pendentes) / $totalAtivos) * 100);
+    }
+
+    /** @param list<PosOperatorioPaciente> $pacientes */
+    private function buildTimelineFromPacientes(array $pacientes): array
+    {
+        $events = [];
+        foreach ($pacientes as $p) {
+            foreach ($p->getEventos()->slice(0, 2) as $ev) {
+                $events[] = [
+                    'time' => $ev->getCriadoEm()->format('H:i'),
+                    'label' => ucfirst($ev->getTipo()),
+                    'detail' => $ev->getDescricao(),
+                    'icon' => 'fa-file-medical',
+                    'sort' => $ev->getCriadoEm()->getTimestamp(),
+                ];
+            }
+        }
+        usort($events, static fn (array $a, array $b) => $b['sort'] <=> $a['sort']);
+
+        return array_map(static function (array $e) {
+            unset($e['sort']);
+
+            return $e;
+        }, \array_slice($events, 0, 5));
+    }
+
+    /** @param list<PosOperatorioPaciente> $pacientes */
+    private function protocolPhasesFromPacientes(array $pacientes): array
+    {
+        $d0 = $dMid = $dLate = 0;
+        foreach ($pacientes as $p) {
+            $dia = $p->getDiaPosOperatorio();
+            if ($dia === null) {
+                continue;
+            }
+            if ($dia <= 1) {
+                ++$d0;
+            } elseif ($dia <= 7) {
+                ++$dMid;
+            } else {
+                ++$dLate;
+            }
+        }
+
+        return [
+            ['label' => 'D+0 / D+1', 'count' => $d0, 'tone' => 'accent'],
+            ['label' => 'D+2 a D+7', 'count' => $dMid, 'tone' => 'default'],
+            ['label' => 'D+8+', 'count' => $dLate, 'tone' => 'muted'],
+        ];
+    }
+
+    /** @return array{score: int, label: string, tone: string, hint: string} */
+    private function buildClinicalPulseFromCounts(int $alertas, int $pendentes): array
+    {
+        $score = 100 - min(18, $alertas * 5) - min(10, $pendentes * 4);
+        $score = min(100, max(40, $score));
+
+        if ($score >= 85) {
+            return ['score' => $score, 'label' => 'Acompanhamento estável', 'tone' => 'success', 'hint' => 'Poucas pendências críticas.'];
+        }
+        if ($score >= 65) {
+            return ['score' => $score, 'label' => 'Atenção clínica', 'tone' => 'info', 'hint' => 'Alertas e questionários pedem acompanhamento.'];
+        }
+
+        return ['score' => $score, 'label' => 'Priorize alertas', 'tone' => 'warning', 'hint' => 'Ação imediata recomendada.'];
+    }
+
+    /** @param list<array<string, mixed>> $pendentes */
+    private function buildTickerFromCounts(int $ativos, int $alertas, array $pendentes): array
+    {
+        return [
+            [
+                'tag' => 'Alertas',
+                'title' => $alertas . ' alerta(s) clínico(s) aberto(s)',
+                'text' => $alertas > 0 ? 'Priorize P1 e P2 na fila clínica.' : 'Nenhum alerta aberto no momento.',
+                'icon' => 'fa-triangle-exclamation',
+                'tone' => $alertas > 0 ? 'amber' : 'blue',
+            ],
+            [
+                'tag' => 'Questionários',
+                'title' => \count($pendentes) . ' paciente(s) sem resposta hoje',
+                'text' => 'Envie lembretes pelo portal do paciente.',
+                'icon' => 'fa-file-medical',
+                'tone' => 'blue',
+            ],
+            [
+                'tag' => 'Operação',
+                'title' => $ativos . ' paciente(s) em acompanhamento',
+                'text' => 'Dados em tempo real do núcleo Pós-Operatório.',
+                'icon' => 'fa-user-injured',
+                'tone' => 'blue',
+            ],
+        ];
+    }
+
+    /** @return list<array{value: string, label: string, sub?: string, trend?: string, icon?: string}> */
+    private function buildKpisFromCounts(int $ativos, int $alertas, int $protocolos): array
+    {
+        return [
+            ['value' => (string) $ativos, 'label' => 'Pacientes ativos', 'sub' => 'Em acompanhamento', 'icon' => 'fa-user-injured'],
+            ['value' => (string) $alertas, 'label' => 'Alertas abertos', 'sub' => 'Requerem atenção', 'icon' => 'fa-triangle-exclamation'],
+            ['value' => (string) $protocolos, 'label' => 'Protocolos ativos', 'sub' => 'Modelos clínicos', 'icon' => 'fa-clipboard-list'],
+            ['value' => '—', 'label' => 'Tempo médio de resposta', 'sub' => 'Fase 2', 'icon' => 'fa-clock'],
+        ];
+    }
+
+    /** @return list<array{icon: string, title: string, subtitle: string, metric: string}> */
+    private function moduleCardsFromCounts(int $ativos, int $protocolos, int $alertas): array
+    {
+        return [
+            ['icon' => 'fa-user-injured', 'title' => 'Pacientes', 'subtitle' => 'Cadastro pós-cirúrgico', 'metric' => $ativos . ' ativos', 'href' => 'app_pos_operatorio_pacientes'],
+            ['icon' => 'fa-clipboard-list', 'title' => 'Protocolos', 'subtitle' => 'Checklists por procedimento', 'metric' => $protocolos . ' modelos', 'href' => 'app_pos_operatorio_protocolos'],
+            ['icon' => 'fa-file-medical', 'title' => 'Questionários', 'subtitle' => 'Respostas diárias', 'metric' => 'Portal paciente', 'href' => 'app_pos_operatorio_questionarios'],
+            ['icon' => 'fa-triangle-exclamation', 'title' => 'Alertas clínicos', 'subtitle' => 'Prioridade P1–P4', 'metric' => $alertas . ' abertos', 'href' => 'app_pos_operatorio_alertas'],
+            ['icon' => 'fa-chart-line', 'title' => 'Painel médico', 'subtitle' => 'KPIs e linha do tempo', 'metric' => 'Ao vivo', 'href' => 'app_pos_operatorio'],
+            ['icon' => 'fa-mobile-screen', 'title' => 'Portal do paciente', 'subtitle' => 'Acesso mobile', 'metric' => '/portal', 'href' => 'app_pos_operatorio_portal'],
+        ];
+    }
+
+    /**
+     * @param list<array<string, mixed>> $pendentes
+     *
+     * @return array{text: string, action: string, bullets: list<string>}
+     */
+    private function vitoriaInsightFallback(int $alertCount, array $pendentes): array
+    {
+        $bullets = [];
+        if ($alertCount > 0) {
+            $bullets[] = sprintf('%d alerta(s) aberto(s) na fila clínica', $alertCount);
+        }
+        if (\count($pendentes) > 0) {
+            $bullets[] = sprintf('%d paciente(s) sem questionário hoje', \count($pendentes));
+        }
+        if ($bullets === []) {
+            $bullets[] = 'Operação estável — manter monitoramento de rotina';
+        }
+
+        return [
+            'text' => 'Insight operacional gerado localmente (serviço Vitória offline).',
+            'action' => 'Ver plano sugerido',
+            'bullets' => $bullets,
+        ];
+    }
+
+    private function normalizePerPage(int $perPage): int
+    {
+        return \in_array($perPage, self::PATIENTS_PER_PAGE_OPTIONS, true)
+            ? $perPage
+            : self::PATIENTS_PER_PAGE_DEFAULT;
     }
 
     /** @return list<array{value: string, label: string, sub?: string, trend?: string, icon?: string}> */
@@ -73,12 +406,12 @@ final class PosOperatorioService
     private function moduleCards(): array
     {
         return [
-            ['icon' => 'fa-user-injured', 'title' => 'Pacientes', 'subtitle' => 'Cadastro pós-cirúrgico e evolução', 'metric' => '20 ativos'],
-            ['icon' => 'fa-clipboard-list', 'title' => 'Protocolos', 'subtitle' => 'Checklists por tipo de procedimento', 'metric' => '8 modelos'],
-            ['icon' => 'fa-file-medical', 'title' => 'Questionários', 'subtitle' => 'Respostas diárias do paciente', 'metric' => '94% hoje'],
-            ['icon' => 'fa-triangle-exclamation', 'title' => 'Alertas clínicos', 'subtitle' => 'Prioridade P1–P4 e SLA de resposta', 'metric' => '3 abertos'],
-            ['icon' => 'fa-chart-line', 'title' => 'Painel médico', 'subtitle' => 'KPIs, CSAT e linha do tempo', 'metric' => 'CSAT 4,8'],
-            ['icon' => 'fa-mobile-screen', 'title' => 'Portal do paciente', 'subtitle' => 'Acesso mobile ao acompanhamento', 'metric' => '18 acessos hoje'],
+            ['icon' => 'fa-user-injured', 'title' => 'Pacientes', 'subtitle' => 'Cadastro pós-cirúrgico e evolução', 'metric' => '20 ativos', 'href' => 'app_pos_operatorio_pacientes'],
+            ['icon' => 'fa-clipboard-list', 'title' => 'Protocolos', 'subtitle' => 'Checklists por tipo de procedimento', 'metric' => '8 modelos', 'href' => 'app_pos_operatorio_protocolos'],
+            ['icon' => 'fa-file-medical', 'title' => 'Questionários', 'subtitle' => 'Respostas diárias do paciente', 'metric' => '94% hoje', 'href' => 'app_pos_operatorio_questionarios'],
+            ['icon' => 'fa-triangle-exclamation', 'title' => 'Alertas clínicos', 'subtitle' => 'Prioridade P1–P4 e SLA de resposta', 'metric' => '3 abertos', 'href' => 'app_pos_operatorio_alertas'],
+            ['icon' => 'fa-chart-line', 'title' => 'Painel médico', 'subtitle' => 'KPIs, CSAT e linha do tempo', 'metric' => 'CSAT 4,8', 'href' => 'app_pos_operatorio'],
+            ['icon' => 'fa-mobile-screen', 'title' => 'Portal do paciente', 'subtitle' => 'Acesso mobile ao acompanhamento', 'metric' => '18 acessos hoje', 'href' => 'app_pos_operatorio_portal'],
         ];
     }
 
@@ -112,51 +445,9 @@ final class PosOperatorioService
     private function activeAlerts(): array
     {
         return [
-            [
-                'titulo' => 'Dor intensa (8/10)',
-                'paciente' => 'Carlos M. · PO-1040',
-                'pri' => 'P1',
-                'tempo' => 'há 6 min',
-                'tone' => 'critical',
-                'sla_pct' => 18,
-                'detail' => 'Escalar para médico plantonista',
-            ],
-            [
-                'titulo' => 'Febre reportada (38,2°C)',
-                'paciente' => 'João P. · PO-1041',
-                'pri' => 'P2',
-                'tempo' => 'há 18 min',
-                'tone' => 'warn',
-                'sla_pct' => 42,
-                'detail' => 'Questionário D+1 · protocolo apendicectomia',
-            ],
-            [
-                'titulo' => 'Questionário não respondido',
-                'paciente' => 'Juliana M. · PO-1035',
-                'pri' => 'P3',
-                'tempo' => 'há 4h',
-                'tone' => 'info',
-                'sla_pct' => null,
-                'detail' => 'Lembrete automático às 20h',
-            ],
-            [
-                'titulo' => 'Sangramento leve no curativo',
-                'paciente' => 'Pedro L. · PO-1038',
-                'pri' => 'P3',
-                'tempo' => 'há 52 min',
-                'tone' => 'warn',
-                'sla_pct' => 65,
-                'detail' => 'Enfermagem solicitou foto',
-            ],
-            [
-                'titulo' => 'Náusea persistente',
-                'paciente' => 'Fernanda K. · PO-1037',
-                'pri' => 'P4',
-                'tempo' => 'há 2h',
-                'tone' => 'info',
-                'sla_pct' => null,
-                'detail' => 'Orientação Vitória enviada',
-            ],
+            ['titulo' => 'Dor intensa (8/10)', 'paciente' => 'Carlos M. · PO-1040', 'pri' => 'P1', 'tempo' => 'há 6 min', 'tone' => 'critical', 'sla_pct' => 18, 'detail' => 'Escalar para médico plantonista'],
+            ['titulo' => 'Febre reportada (38,2°C)', 'paciente' => 'João P. · PO-1041', 'pri' => 'P2', 'tempo' => 'há 18 min', 'tone' => 'warn', 'sla_pct' => 42, 'detail' => 'Questionário D+1'],
+            ['titulo' => 'Questionário não respondido', 'paciente' => 'Juliana M. · PO-1035', 'pri' => 'P3', 'tempo' => 'há 4h', 'tone' => 'info', 'sla_pct' => null, 'detail' => 'Lembrete automático'],
         ];
     }
 
@@ -164,11 +455,9 @@ final class PosOperatorioService
     private function timelineEvents(): array
     {
         return [
-            ['time' => '17:04', 'label' => 'Alerta P1 aberto', 'detail' => 'Carlos M. — dor intensa reportada', 'icon' => 'fa-triangle-exclamation'],
-            ['time' => '16:48', 'label' => 'Questionário respondido', 'detail' => 'Ana R. · PO-1039 · D+7', 'icon' => 'fa-file-medical'],
-            ['time' => '16:12', 'label' => 'Alta pós-operatória registrada', 'detail' => 'Maria S. · PO-1042 · artroscopia', 'icon' => 'fa-user-check'],
-            ['time' => '15:30', 'label' => 'Lembrete enviado', 'detail' => '2 pacientes D+1 sem resposta', 'icon' => 'fa-bell'],
-            ['time' => '14:05', 'label' => 'Protocolo atualizado', 'detail' => 'Apendicectomia — checklist D+3', 'icon' => 'fa-clipboard-list'],
+            ['time' => '17:04', 'label' => 'Alerta P1 aberto', 'detail' => 'Carlos M. — dor intensa', 'icon' => 'fa-triangle-exclamation'],
+            ['time' => '16:48', 'label' => 'Questionário respondido', 'detail' => 'Ana R. · PO-1039', 'icon' => 'fa-file-medical'],
+            ['time' => '16:12', 'label' => 'Alta registrada', 'detail' => 'Maria S. · PO-1042', 'icon' => 'fa-user-check'],
         ];
     }
 
@@ -178,8 +467,6 @@ final class PosOperatorioService
         return [
             ['initials' => 'DL', 'nome' => 'Dra. Lima', 'role' => 'Cirurgia geral', 'status' => 'online'],
             ['initials' => 'RA', 'nome' => 'Dr. Almeida', 'role' => 'Ortopedia', 'status' => 'online'],
-            ['initials' => 'EN', 'nome' => 'Enf. Paula', 'role' => 'Enfermagem', 'status' => 'online'],
-            ['initials' => 'MC', 'nome' => 'Dra. Costa', 'role' => 'Endocrino', 'status' => 'ausente'],
         ];
     }
 
@@ -197,93 +484,28 @@ final class PosOperatorioService
     private function vitoriaInsight(): array
     {
         return [
-            'text' => 'Identifiquei 2 pacientes em D+1 sem questionário respondido e 1 alerta P1 próximo do estouro de SLA.',
+            'text' => 'Identifiquei 2 pacientes em D+1 sem questionário e 1 alerta P1 próximo do SLA.',
             'action' => 'Ver plano sugerido',
             'bullets' => [
-                'Enviar lembrete para Juliana M. (PO-1035) antes das 20h',
-                'Priorizar contato com Carlos M. (PO-1040) — dor 8/10',
-                '94% de adesão nas últimas 24h — acima da meta de 90%',
+                'Enviar lembrete para Juliana M. (PO-1035)',
+                'Priorizar Carlos M. (PO-1040) — dor 8/10',
+                '94% de adesão nas últimas 24h',
             ],
         ];
-    }
-
-    private function normalizePerPage(int $perPage): int
-    {
-        return \in_array($perPage, self::PATIENTS_PER_PAGE_OPTIONS, true)
-            ? $perPage
-            : self::PATIENTS_PER_PAGE_DEFAULT;
     }
 
     /** @return array{score: int, label: string, tone: string, hint: string} */
     private function buildClinicalPulse(): array
     {
-        $alerts = 3;
-        $pendingResponses = 2;
-        $responseRate = 94;
-
-        $score = 100;
-        $score -= min(18, $alerts * 5);
-        $score -= min(10, $pendingResponses * 4);
-        if ($responseRate >= 90) {
-            $score += 4;
-        }
-        $score = min(100, max(40, $score));
-
-        if ($score >= 85) {
-            return [
-                'score' => $score,
-                'label' => 'Acompanhamento estável',
-                'tone' => 'success',
-                'hint' => 'Poucas pendências críticas no pós-operatório.',
-            ];
-        }
-        if ($score >= 65) {
-            return [
-                'score' => $score,
-                'label' => 'Atenção clínica',
-                'tone' => 'info',
-                'hint' => 'Alguns alertas e questionários pedem acompanhamento hoje.',
-            ];
-        }
-
-        return [
-            'score' => $score,
-            'label' => 'Priorize alertas',
-            'tone' => 'warning',
-            'hint' => 'Há pacientes e SLAs que precisam de ação imediata.',
-        ];
+        return ['score' => 88, 'label' => 'Acompanhamento estável', 'tone' => 'success', 'hint' => 'Preview ilustrativo — execute app:pos-operatorio:seed para dados reais.'];
     }
 
-    /**
-     * @return list<array{tag: string, title: string, text: string, icon: string, tone: string, route_label?: string}>
-     */
+    /** @return list<array{tag: string, title: string, text: string, icon: string, tone: string, route_label?: string}> */
     private function buildTickerSlides(): array
     {
         return [
-            [
-                'tag' => 'Alertas',
-                'title' => '3 alertas clínicos abertos',
-                'text' => 'Priorize P1 e P2 — Carlos M. (PO-1040) está próximo do estouro de SLA.',
-                'icon' => 'fa-triangle-exclamation',
-                'tone' => 'amber',
-                'route_label' => 'Ver alertas',
-            ],
-            [
-                'tag' => 'Questionários',
-                'title' => '2 pacientes sem resposta hoje',
-                'text' => 'Envie lembrete para Juliana M. e Gabriel W. antes do fechamento do plantão.',
-                'icon' => 'fa-file-medical',
-                'tone' => 'blue',
-                'route_label' => 'Ver pendências',
-            ],
-            [
-                'tag' => 'Operação',
-                'title' => '20 pacientes em acompanhamento ativo',
-                'text' => '94% de adesão nas últimas 24h — acima da meta de 90% do núcleo.',
-                'icon' => 'fa-user-injured',
-                'tone' => 'blue',
-                'route_label' => 'Ver pacientes',
-            ],
+            ['tag' => 'Preview', 'title' => 'Modo demonstração', 'text' => 'Rode php bin/console app:pos-operatorio:seed para popular dados clínicos.', 'icon' => 'fa-flask', 'tone' => 'blue'],
+            ['tag' => 'Vitória', 'title' => 'IA multifuncional', 'text' => 'Serviço Python em services/vitoria-ai — chat, triagem e insights.', 'icon' => 'fa-robot', 'tone' => 'blue'],
         ];
     }
 }

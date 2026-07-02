@@ -16,6 +16,7 @@ namespace App\Config;
  *     empty_icon: string,
  *     empty_title: string,
  *     empty_text: string,
+ *     maturity_level?: string,
  * }
  */
 final class PlannedHubRegistry
@@ -432,6 +433,7 @@ final class PlannedHubRegistry
             'empty_icon' => 'fa-heart-pulse',
             'empty_title' => 'Núcleo Pós-Operatório',
             'empty_text' => 'Acompanhamento de pacientes, protocolos, questionários e alertas clínicos integrados à plataforma.',
+            'maturity_level' => 'mvp',
         ],
         [
             'id' => 'licitacoes',
@@ -595,7 +597,7 @@ final class PlannedHubRegistry
             $out[] = [
                 'key' => $key,
                 'label' => self::GROUP_LABELS[$key],
-                'hubs' => $buckets[$key],
+                'hubs' => array_map(HubMaturity::enrichHub(...), $buckets[$key]),
             ];
             unset($buckets[$key]);
         }
@@ -604,7 +606,7 @@ final class PlannedHubRegistry
             $out[] = [
                 'key' => $key,
                 'label' => self::GROUP_LABELS[$key] ?? $key,
-                'hubs' => $items,
+                'hubs' => array_map(static fn (array $h) => HubMaturity::enrichHub($h), $items),
             ];
         }
 

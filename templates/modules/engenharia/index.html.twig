@@ -2,34 +2,27 @@
 {% block title %}Obras e Projetos{% endblock %}
 {% block permissions_scope %}product_engenharia{% endblock %}
 {% set hub_page_title = 'Obras e Projetos' %}
+{% set hub_page_subtitle = 'Preview · em desenvolvimento' %}
 {% set eng_items = [
-    { icon:'fa-building',        title:'Projetos e Obras',      subtitle:'Cadastro e status das obras',       route:'app_engenharia_projetos',     product:'projetos' },
-    { icon:'fa-calendar-days',   title:'Cronograma',            subtitle:'Marcos, entregas e prazos',         route:'app_engenharia_cronograma',   product:'cronograma' },
-    { icon:'fa-calculator',      title:'Orçamentos',            subtitle:'Custos, medições e aditivos',       route:'app_engenharia_orcamentos',   product:'orcamentos' },
-    { icon:'fa-hard-hat',        title:'Equipes de Campo',      subtitle:'Alocação e produtividade',          route:'app_engenharia_equipes',      product:'equipes' },
-    { icon:'fa-file-lines',      title:'Documentação Técnica',  subtitle:'Plantas, ART e relatórios',         route:'app_engenharia_documentacao', product:'projetos' },
-    { icon:'fa-clipboard-check', title:'Normas e Conformidade', subtitle:'NBRs, licenças e inspeções',        route:'app_engenharia_normas',       product:'projetos' },
+    { icon:'fa-building',        title:'Projetos e Obras',      subtitle:'Cadastro e status das obras',       product:'projetos' },
+    { icon:'fa-calendar-days',   title:'Cronograma',            subtitle:'Marcos, entregas e prazos',         product:'cronograma' },
+    { icon:'fa-calculator',      title:'Orçamentos',            subtitle:'Custos, medições e aditivos',       product:'orcamentos' },
+    { icon:'fa-hard-hat',        title:'Equipes de Campo',      subtitle:'Alocação e produtividade',          product:'equipes' },
+    { icon:'fa-file-lines',      title:'Documentação Técnica',  subtitle:'Plantas, ART e relatórios',         product:'projetos' },
+    { icon:'fa-clipboard-check', title:'Normas e Conformidade', subtitle:'NBRs, licenças e inspeções',        product:'projetos' },
 ] %}
 {% set eng_visible_items = [] %}
 {% for item in eng_items %}
     {% if product_grant('product_engenharia', item.product) %}
-        {% set eng_visible_items = eng_visible_items|merge([item]) %}
+        {% set eng_visible_items = eng_visible_items|merge([item|merge({ preview: true })]) %}
     {% endif %}
 {% endfor %}
-{% block hub_kpis %}
-{% if eng_visible_items|length > 0 %}
-<div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: '0', label: 'Obras Ativas',     sub: 'Em execução' },
-        { value: '0', label: 'Marcos no Prazo',  sub: 'Este mês' },
-        { value: '—', label: 'Orçamento Total',  sub: 'Acumulado' },
-        { value: '0', label: 'Equipes em Campo', sub: 'Alocadas' },
-    ], mb: 'mb-0' } %}
-</div>
-{% endif %}
-{% endblock %}
 {% block hub_content %}
 {% if eng_visible_items|length > 0 %}
+<div class="alert alert-info unio-alert mb-4" role="status">
+    <i class="fas fa-circle-info mr-2" aria-hidden="true"></i>
+    <strong>Núcleo em preview.</strong> As áreas abaixo estão planejadas; você verá funcionalidades conforme forem liberadas.
+</div>
 {% include 'components/module_grid.html.twig' with {
     title: 'Funções do módulo',
     subtitle: 'Gestão de obras, prazos, custos e conformidade técnica',

@@ -1,6 +1,23 @@
 {# Tile de módulo — variant: horizontal (padrão) | dock (ícone + nome, dashboard) #}
 {% set _variant = variant|default('horizontal') %}
+{% set _preview = preview|default(false) %}
 {% set _href = href is defined and href ? href : (route is defined ? path(route, route_params|default({})) : '#') %}
+{% if _preview %}
+<div class="module-item module-item--preview" aria-disabled="true">
+    <div class="mi-icon" aria-hidden="true"><i class="fas {{ icon }}"></i></div>
+    {% if _variant == 'dock' %}
+        <div class="mi-title">{{ title }}</div>
+    {% else %}
+        <div class="module-item-body">
+            <div class="mi-title">{{ title }}</div>
+            {% if subtitle is defined and subtitle %}
+            <div class="mi-sub">{{ subtitle }}</div>
+            {% endif %}
+        </div>
+        <span class="hub-maturity-badge hub-maturity-badge--default">Preview</span>
+    {% endif %}
+</div>
+{% else %}
 <a href="{{ _href }}"
    class="module-item{% if _variant == 'dock' %} module-item--dock{% endif %}"
    {% if _variant == 'dock' %}style="--module-i: {{ index|default(0) }}"{% endif %}>
@@ -17,3 +34,4 @@
         <i class="fas fa-chevron-right mi-arrow" aria-hidden="true"></i>
     {% endif %}
 </a>
+{% endif %}

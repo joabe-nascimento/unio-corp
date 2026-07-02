@@ -15,46 +15,21 @@
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=277">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=293">
+    {% set _shell_polish_css = app.debug ? 'css/unio-shell-polish.css' : 'css/unio-shell-polish.min.css' %}
+    <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=27">
 
     {% block stylesheets %}{% endblock %}
     {% if app.user %}
-    <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=4">
     {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed layout-inset-shell"{% block body_attrs %}{% endblock %}>
+<a href="#main-content-focus" class="skip-link">Pular para o conteúdo</a>
 <div class="wrapper">
 
-    {# ── Top Navbar (Vitória, apps) ── #}
-    <nav class="main-header navbar navbar-expand navbar-dark">
-        <a class="nav-link nav-toggle-btn" data-widget="pushmenu" href="#" role="button" aria-label="Alternar menu lateral">
-            <span class="nav-toggle-icon" aria-hidden="true">
-                <span class="nav-toggle-line"></span>
-                <span class="nav-toggle-line"></span>
-                <span class="nav-toggle-line"></span>
-            </span>
-        </a>
-
-        <div class="main-header-search d-none d-md-flex">
-            {% include 'components/global_search.html.twig' %}
-        </div>
-
-        <ul class="navbar-nav ml-auto align-items-center mb-0">
-            <li class="nav-item d-flex align-items-center">
-                <button type="button" class="helix-trigger" id="helixOpenBtn" aria-expanded="false" aria-controls="helixPanel" title="Vitória — Assistente virtual">
-                    {{ helix.avatar('sm') }}
-                </button>
-            </li>
-            {% if platform_modules|default([])|length > 0 %}
-            <li class="nav-item d-flex align-items-center">
-                {% include 'components/platform_apps_launcher.html.twig' %}
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
-
-    {# ── Sidebar ── #}
+    {# ── Sidebar (fundo do shell, integrada ao inset) ── #}
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <div class="sidebar-top">
             {% if app.user %}
@@ -93,38 +68,102 @@
         {% endif %}
     </aside>
 
+    <div class="app-inset-main">
+    <div class="app-inset-panel">
+
+    {# ── Top Navbar (Vitória, apps) — dentro do painel branco ── #}
+    <nav class="main-header navbar navbar-expand navbar-dark">
+        <a class="nav-link nav-toggle-btn" data-widget="pushmenu" href="#" role="button" aria-label="Alternar menu lateral">
+            <span class="nav-toggle-icon" aria-hidden="true">
+                <span class="nav-toggle-bars">
+                    <span class="nav-toggle-line"></span>
+                    <span class="nav-toggle-line"></span>
+                    <span class="nav-toggle-line"></span>
+                </span>
+                <svg class="nav-toggle-collapse" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M4.75 5.5A1.75 1.75 0 0 1 6.5 3.75h11A1.75 1.75 0 0 1 19.25 5.5v13a1.75 1.75 0 0 1-1.75 1.75h-11A1.75 1.75 0 0 1 4.75 18.5v-13Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                    <path d="M9.25 3.75v16.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                    <path d="M15.25 12H12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                    <path d="M14 9.25 11.25 12 14 14.75" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+        </a>
+
+        <div class="main-header-search d-none d-md-flex" data-tour="search">
+            {% include 'components/global_search.html.twig' %}
+        </div>
+
+        <ul class="navbar-nav ml-auto align-items-center mb-0">
+            <li class="nav-item d-flex align-items-center">
+                {% include 'components/shell_help_hub.html.twig' %}
+            </li>
+            <li class="nav-item d-flex align-items-center">
+                <button type="button" class="helix-trigger" id="helixOpenBtn" aria-expanded="false" aria-controls="helixPanel" title="Vitória — Assistente virtual" data-tour="helix">
+                    {{ helix.avatar('sm') }}
+                </button>
+            </li>
+            {% if platform_modules|default([])|length > 0 %}
+            <li class="nav-item d-flex align-items-center">
+                {% include 'components/platform_apps_launcher.html.twig' %}
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
     {# ── Content ── #}
-    <div class="content-wrapper">
+    <div class="content-wrapper" id="main-content">
+        <span id="main-content-focus" class="sr-only" tabindex="-1">Início do conteúdo principal</span>
         {# Bloco só para flag — nunca renderizar aqui (evita exibir "1" na página) #}
         {% if false %}{% block page_toolbar_layout %}{% endblock %}{% endif %}
         {% set show_page_header = block('page_toolbar_layout')|trim is empty and (block('page_show_title')|trim or block('breadcrumb')|trim) %}
-        {% if show_page_header %}
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2 align-items-center">
-                    <div class="col-12 col-sm-6">
-                        {% if false %}{% block page_show_title %}{% endblock %}{% endif %}
-                        {% if block('page_show_title')|trim %}
-                        <h1 class="m-0">{% block page_title '' %}</h1>
-                        {% endif %}
-                    </div>
-                    <div class="col-12 col-sm-6 text-sm-right">
-                        <ol class="breadcrumb breadcrumb--page mb-0 d-inline-block">
-                            <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Início</a></li>
-                            {% block breadcrumb %}{% endblock %}
-                        </ol>
+
+        {# Chrome fixo: breadcrumb legado + toolbar/título/abas/KPIs (não rola com o conteúdo) #}
+        <div class="app-page-chrome">
+            {% if show_page_header %}
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-12 col-sm-6">
+                            {% if false %}{% block page_show_title %}{% endblock %}{% endif %}
+                            {% if block('page_show_title')|trim %}
+                            <h1 class="m-0">{% block page_title '' %}</h1>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-sm-6 text-sm-right">
+                            <ol class="breadcrumb breadcrumb--page mb-0 d-inline-block">
+                                <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Início</a></li>
+                                {% block breadcrumb %}{% endblock %}
+                            </ol>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        {% endif %}
-
-        <section class="content{% if block('page_toolbar_layout')|trim %} content--with-toolbar{% elseif not show_page_header %} content--no-header{% endif %}">
+            {% endif %}
             {% block content_lead %}{% endblock %}
+        </div>
+
+        <div class="app-page-scroll">
+        <section class="content{% if block('page_toolbar_layout')|trim %} content--with-toolbar{% elseif not show_page_header %} content--no-header{% endif %}">
             <div class="container-fluid container-fluid--page-body">
                 {% block content %}{% endblock %}
             </div>
         </section>
+
+        {% if platform_config.manutencao ?? false %}
+        <div class="manut-tenant-banner" role="alert">
+            <i class="fas fa-triangle-exclamation mr-2" aria-hidden="true"></i>
+            <strong>Modo manutenção ativo</strong> — outros usuários não estão conseguindo acessar a plataforma.
+            <a href="{{ path('app_admin_configuracoes') }}#cfg-manutencao" class="ml-2" style="color:inherit;text-decoration:underline;">Desativar</a>
+        </div>
+        {% endif %}
+
+        <footer class="main-footer">
+            <p class="main-footer__line">
+                <span class="main-footer__brand">{{ _pnome }}</span><span class="main-footer__dot" aria-hidden="true">·</span><span class="main-footer__copy">&copy; {{ "now"|date("Y") }}</span><span class="main-footer__dot" aria-hidden="true">·</span><span class="main-footer__tagline">{{ platform_config.rodape_texto|default(platform_config.plataforma_tagline|default('Plataforma de Gestão de Pessoas')) }}</span>
+            </p>
+            {% include 'components/platform_support.html.twig' with { extra_class: ' platform-support--footer' } %}
+        </footer>
+        </div>
     </div>
 
     {% block page_overlays %}{% endblock %}
@@ -135,23 +174,14 @@
     {% include 'components/ti/chamado_chat_global.html.twig' %}
     {% endif %}
 
-    {% if platform_config.manutencao ?? false %}
-    <div class="manut-tenant-banner" role="alert">
-        <i class="fas fa-triangle-exclamation mr-2" aria-hidden="true"></i>
-        <strong>Modo manutenção ativo</strong> — outros usuários não estão conseguindo acessar a plataforma.
-        <a href="{{ path('app_admin_configuracoes') }}#cfg-manutencao" class="ml-2" style="color:inherit;text-decoration:underline;">Desativar</a>
-    </div>
-    {% endif %}
-
-    <footer class="main-footer text-center">
-        <div class="main-footer__line">
-            <strong>{{ _pnome }}</strong> &copy; {{ "now"|date("Y") }} — {{ platform_config.rodape_texto|default(platform_config.plataforma_tagline|default('Plataforma de Gestão de Pessoas')) }}
-        </div>
-        {% include 'components/platform_support.html.twig' with { extra_class: ' platform-support--footer' } %}
-    </footer>
+    </div>{# .app-inset-panel #}
+    </div>{# .app-inset-main #}
 </div>
 
 {% include 'components/helix_assistant.html.twig' %}
+{% if app.user %}
+{% include 'components/shell_tour.html.twig' %}
+{% endif %}
 
 {% include 'components/vendor_scripts_core.html.twig' %}
 <script>
@@ -165,10 +195,21 @@ window.addEventListener('load', function () {
         return window.innerWidth < MOBILE_BP;
     }
 
+    var desktopSidebarCollapsed = null;
+
     function applyMobileSidebar() {
         if (isMobile()) {
+            if (desktopSidebarCollapsed === null) {
+                desktopSidebarCollapsed = $body.hasClass('sidebar-collapse');
+            }
             $body.addClass('sidebar-collapse');
             $body.removeClass('sidebar-open');
+        } else {
+            $body.removeClass('sidebar-open');
+            if (desktopSidebarCollapsed !== null) {
+                $body.toggleClass('sidebar-collapse', desktopSidebarCollapsed);
+                desktopSidebarCollapsed = null;
+            }
         }
     }
 
@@ -273,13 +314,45 @@ window.addEventListener('load', function () {
 <script src="{{ asset('js/unio-filter-select.js') }}?v=3"></script>
 <script src="{{ asset('js/unio-color-picker.js') }}?v=2"></script>
 <script src="{{ asset('js/unio-toast.js') }}?v=3"></script>
-<script src="{{ asset('js/global-search.js') }}?v=1"></script>
-<script src="{{ asset('js/sidebar-hubs.js') }}?v=9"></script>
+<script src="{{ asset('js/global-search.js') }}?v=4"></script>
+<script src="{{ asset('js/unio-shell-a11y.js') }}?v=1"></script>
+<script src="{{ asset('js/sidebar-hubs.js') }}?v=10"></script>
+<script src="{{ asset('js/unio-shell-tour.js') }}?v=8"></script>
+<script src="{{ asset('js/unio-shell-help.js') }}?v=2"></script>
 <script src="{{ asset('js/unio-nav-progress.js') }}?v=1"></script>
 <script src="{{ asset('js/unio-apps-launcher.js') }}?v=1"></script>
 <script src="{{ asset('js/unio-sidebar-identity.js') }}?v=3"></script>
 <script src="{{ asset('js/unio-ambient-sound.js') }}?v=3"></script>
 <script src="{{ asset('js/hub-tabs.js') }}?v=3"></script>
+<script>
+(function () {
+    'use strict';
+    var scrollEl = document.querySelector('.app-page-scroll');
+    var chromeEl = document.querySelector('.app-page-chrome');
+    if (!scrollEl) return;
+
+    function findScrollTarget() {
+        if (scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+            return scrollEl;
+        }
+        var inner = scrollEl.querySelector('.chat-messages, .chat-colleague-list, .empty-state-panel .empty-state');
+        return inner || scrollEl;
+    }
+
+    var scrollTarget = findScrollTarget();
+
+    function syncPageScrollChrome() {
+        var scrolled = scrollTarget.scrollTop > 2;
+        scrollEl.classList.toggle('is-scrolled', scrolled);
+        if (chromeEl) {
+            chromeEl.classList.toggle('is-scrolled-below', scrolled);
+        }
+    }
+
+    scrollTarget.addEventListener('scroll', syncPageScrollChrome, { passive: true });
+    syncPageScrollChrome();
+})();
+</script>
 {% include 'components/vendor_scripts_extra.html.twig' %}
 {{ importmap('rh_ux') }}
 {% block javascripts %}{% endblock %}
@@ -432,7 +505,7 @@ window.addEventListener('load', function () {
             '<div class="helix-msg helix-msg--assistant">' + FACE_SM +
             '<div class="helix-msg-bubble">' +
             '<p>' + greeting + ' Sou a Vitória — sua assistente na Unio.</p>' +
-            '<p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens já ficam salvas no histórico.</p>' +
+            '<p class="mb-0 helix-msg-muted">Posso ajudar com operação, alertas clínicos e fluxos dos núcleos.</p>' +
             '</div></div>';
         if (suggestions) suggestions.style.display = '';
     }
@@ -469,8 +542,8 @@ window.addEventListener('load', function () {
             .replace(/"/g, '&quot;');
     }
 
-    function assistantReply() {
-        return 'Obrigado pela mensagem! A inteligência artificial da Vitória está em desenvolvimento — em breve responderei de forma automática. Sua conversa foi salva no histórico.';
+    function assistantReplyFallback() {
+        return 'Não consegui contactar a Vitória agora. Sua mensagem foi salva — tente novamente em instantes.';
     }
 
     function sendMessage(text) {
@@ -485,16 +558,62 @@ window.addEventListener('load', function () {
         if (session.title === 'Nova conversa') {
             session.title = text.length > 48 ? text.slice(0, 48) + '…' : text;
         }
-        session.messages.push({ role: 'assistant', text: assistantReply(), at: new Date().toISOString() });
         session.updatedAt = new Date().toISOString();
         upsertSession(session);
         renderMessages(session);
         renderHistory();
+
         if (input) {
             input.value = '';
             input.style.height = '';
             updateSendState();
         }
+
+        var chatUrl = panel.dataset.vitoriaChatUrl || '';
+        if (!chatUrl) {
+            session.messages.push({ role: 'assistant', text: assistantReplyFallback(), at: new Date().toISOString() });
+            upsertSession(session);
+            renderMessages(session);
+            renderHistory();
+            return;
+        }
+
+        var history = session.messages.slice(0, -1).map(function (m) {
+            return { role: m.role, content: m.text };
+        });
+
+        fetch(chatUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                message: text,
+                history: history,
+                context: {
+                    hub: document.body.dataset.activeHub || document.querySelector('[data-sidebar-hubs]')?.dataset.activeHub || '',
+                    patient_codigo: document.body.dataset.patientCodigo || null
+                }
+            })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                session.messages.push({
+                    role: 'assistant',
+                    text: data.reply || assistantReplyFallback(),
+                    at: new Date().toISOString()
+                });
+                session.updatedAt = new Date().toISOString();
+                upsertSession(session);
+                renderMessages(session);
+                renderHistory();
+            })
+            .catch(function () {
+                session.messages.push({ role: 'assistant', text: assistantReplyFallback(), at: new Date().toISOString() });
+                session.updatedAt = new Date().toISOString();
+                upsertSession(session);
+                renderMessages(session);
+                renderHistory();
+            });
     }
 
     function renderHistory() {

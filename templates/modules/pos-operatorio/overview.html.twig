@@ -10,8 +10,28 @@
 {% set hub_permissions_tab = true %}
 
 {% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_pacientes') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-user-injured mr-1"></i> Pacientes
+</a>
+<a href="{{ path('app_pos_operatorio_protocolos') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-clipboard-list mr-1"></i> Protocolos
+</a>
+<a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-triangle-exclamation mr-1"></i> Fila de alertas
+</a>
+<a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-heart-pulse mr-1"></i> Sala Crítica
+</a>
+<a href="{{ path('app_pos_operatorio_questionarios') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-file-medical mr-1"></i> Questionários
+</a>
+<a href="{{ path('app_pos_operatorio_portal') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-mobile-screen mr-1"></i> Portal
+</a>
 {% if pos_dev_mode %}
-<span class="badge-perfil default"><i class="fas fa-flask mr-1" aria-hidden="true"></i> Preview — dados ilustrativos</span>
+<span class="badge-perfil default"><i class="fas fa-flask mr-1" aria-hidden="true"></i> Preview</span>
+{% else %}
+<span class="badge-perfil success"><i class="fas fa-circle-check mr-1"></i> MVP</span>
 {% endif %}
 {% endblock %}
 
@@ -54,7 +74,8 @@
                         </thead>
                         <tbody>
                             {% for p in recent_patients %}
-                            <tr class="admin-table-row{% if p.status == 'pendente' %} admin-table-row--inactive{% endif %}">
+                            <tr class="admin-table-row{% if p.status == 'pendente' %} admin-table-row--inactive{% endif %}{% if p.id|default(null) %} admin-table-row--clickable{% endif %}"
+                                {% if p.id|default(null) %}onclick="window.location='{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id }) }}'" style="cursor:pointer"{% endif %}>
                                 <td><code class="admin-table-mono">{{ p.codigo }}</code></td>
                                 <td><strong class="pos-op-cell-name">{{ p.nome }}</strong></td>
                                 <td class="pos-op-cell-truncate" title="{{ p.procedimento }}">{{ p.procedimento }}</td>
@@ -88,7 +109,7 @@
                     icon: card.icon,
                     title: card.title,
                     subtitle: card.subtitle ~ ' · ' ~ card.metric,
-                    href: '#'
+                    href: card.href|default('#') is same as('#') ? '#' : path(card.href)
                 }]) %}
             {% endfor %}
             {% include 'components/module_grid.html.twig' with {
@@ -109,7 +130,9 @@
                     } %}
                     <div class="pos-op-alerts-feed" role="list">
                         {% for alert in active_alerts %}
-                        <div class="pos-op-alert-row pos-op-alert-row--{{ alert.tone }}" role="listitem">
+                        <div class="pos-op-alert-row pos-op-alert-row--{{ alert.tone }}{% if alert.paciente_id|default(null) %} pos-op-alert-row--clickable{% endif %}"
+                             role="listitem"
+                             {% if alert.paciente_id|default(null) %}onclick="window.location='{{ path('app_pos_operatorio_pacientes', { open_ficha: alert.paciente_id }) }}'" style="cursor:pointer"{% endif %}>
                             <span class="pos-op-alert-icon" aria-hidden="true">
                                 <i class="fas fa-triangle-exclamation"></i>
                             </span>

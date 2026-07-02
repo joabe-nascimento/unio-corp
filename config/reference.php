@@ -1571,6 +1571,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         framework?: FrameworkConfig,
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         debug?: DebugConfig,
  *         twig?: TwigConfig,
  *         stimulus?: StimulusConfig,
  *         turbo?: TurboConfig,
