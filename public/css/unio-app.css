@@ -25950,11 +25950,20 @@ body.layout-inset-shell .app-page-scroll {
     border-radius: 0 0 var(--inset-radius-br) 0;
 }
 
-/* Páginas curtas — footer ancorado (NÃO aplicar em dashboard/welcome com scroll longo) */
+/* Páginas curtas — footer ancorado no painel (fora do scroll) */
+body.layout-inset-shell .content-wrapper:has(.page-body-fill),
+body.layout-inset-shell .content-wrapper:has(.empty-state-panel) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
 body.layout-inset-shell .app-page-scroll:has(.page-body-fill),
 body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 body.layout-inset-shell .app-page-scroll:has(.page-body-fill) > .content,
@@ -25965,8 +25974,8 @@ body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) > .content {
     flex-direction: column;
 }
 
-body.layout-inset-shell .app-page-scroll:has(.page-body-fill) > .main-footer,
-body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) > .main-footer {
+body.layout-inset-shell .content-wrapper:has(.page-body-fill) > .main-footer,
+body.layout-inset-shell .content-wrapper:has(.empty-state-panel) > .main-footer {
     margin-top: auto;
     flex-shrink: 0;
 }
@@ -26016,14 +26025,17 @@ body.layout-inset-shell .page-body-fill:has(.cfg-layout) > .hub-tab-panel:not([h
 }
 
 /* Hub overview com cards (ex.: /admin) — conteúdo em fluxo natural, sem esmagar o rodapé */
-body.layout-inset-shell .page-body-fill:has(.stats-row) {
+body.layout-inset-shell .page-body-fill:has(.stats-row),
+body.layout-inset-shell .page-body-fill:has(.hub-action-grid) {
     flex: 0 1 auto;
     display: block;
     min-height: auto;
 }
 
 body.layout-inset-shell .page-body-fill:has(.stats-row) > .hub-tab-panel--active,
-body.layout-inset-shell .page-body-fill:has(.stats-row) > .hub-tab-panel:not([hidden]) {
+body.layout-inset-shell .page-body-fill:has(.stats-row) > .hub-tab-panel:not([hidden]),
+body.layout-inset-shell .page-body-fill:has(.hub-action-grid) > .hub-tab-panel--active,
+body.layout-inset-shell .page-body-fill:has(.hub-action-grid) > .hub-tab-panel:not([hidden]) {
     flex: none;
     display: block;
     min-height: auto;
@@ -26043,8 +26055,8 @@ body.layout-inset-shell .page-body-fill:has(.section-toolbar) > .hub-tab-panel:n
     min-height: auto;
 }
 
-body.layout-inset-shell .page-body-fill:not(:has(.cfg-layout)):not(:has(.stats-row)):not(:has(.section-toolbar)) > .hub-tab-panel--active,
-body.layout-inset-shell .page-body-fill:not(:has(.cfg-layout)):not(:has(.stats-row)):not(:has(.section-toolbar)) > .hub-tab-panel:not([hidden]),
+body.layout-inset-shell .page-body-fill:not(:has(.cfg-layout)):not(:has(.stats-row)):not(:has(.hub-action-grid)):not(:has(.section-toolbar)) > .hub-tab-panel--active,
+body.layout-inset-shell .page-body-fill:not(:has(.cfg-layout)):not(:has(.stats-row)):not(:has(.hub-action-grid)):not(:has(.section-toolbar)) > .hub-tab-panel:not([hidden]),
 body.layout-inset-shell .page-body-inner:has(.empty-state-panel) > .hub-tab-panel--active,
 body.layout-inset-shell .page-body-inner:has(.empty-state-panel) > .hub-tab-panel:not([hidden]) {
     flex: 1 1 auto;
@@ -26064,7 +26076,8 @@ body.layout-inset-shell .page-body-fill .hub-tab-panel > .unio-card:has(.empty-s
 /* Empty state em listas — não esticar até cobrir o rodapé */
 body.layout-inset-shell .page-body-scroll .unio-card > .empty-state:not(.empty-state--compact),
 body.layout-inset-shell .page-body-fill:has(.section-toolbar) .unio-card > .empty-state:not(.empty-state--compact),
-body.layout-inset-shell .page-body-fill:has(.stats-row) .unio-card > .empty-state:not(.empty-state--compact) {
+body.layout-inset-shell .page-body-fill:has(.stats-row) .unio-card > .empty-state:not(.empty-state--compact),
+body.layout-inset-shell .page-body-fill:has(.hub-action-grid) .unio-card > .empty-state:not(.empty-state--compact) {
     flex: none;
     min-height: auto;
     justify-content: center;
@@ -26080,7 +26093,7 @@ body.layout-inset-shell .page-body-fill:has(.section-toolbar) .hub-tab-panel > .
 
 body.layout-inset-shell .page-body-fill .empty-state-panel .empty-state,
 body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) .empty-state-panel .empty-state,
-body.layout-inset-shell .page-body-fill:not(:has(.section-toolbar)):not(:has(.stats-row)) .unio-card > .empty-state:not(.empty-state--compact) {
+body.layout-inset-shell .page-body-fill:not(:has(.section-toolbar)):not(:has(.stats-row)):not(:has(.hub-action-grid)) .unio-card > .empty-state:not(.empty-state--compact) {
     flex: 1 1 auto;
     justify-content: center;
     min-height: min(420px, calc(100dvh - var(--layout-header-h) - 220px));
@@ -26099,13 +26112,12 @@ body.layout-inset-shell.layout-footer-fixed .wrapper .main-footer {
     bottom: auto !important;
     flex-shrink: 0;
     margin-left: 0 !important;
-    margin-top: 0;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     background: var(--inset-panel-bg) !important;
     border-top: 1px solid var(--border);
-    border-radius: 0;
+    border-radius: 0 0 var(--inset-radius-br) 0;
     padding: 10px clamp(16px, 3vw, 32px) 12px !important;
     text-align: center;
 }
