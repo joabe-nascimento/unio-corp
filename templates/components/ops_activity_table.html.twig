@@ -1,0 +1,52 @@
+{#
+  ops_activity_table — trilha de auditoria da plataforma
+#}
+<div class="table-responsive">
+    <table class="table table-sm table-unio mb-0 ops-activity-table">
+        <thead>
+            <tr>
+                <th style="width: 11rem;">Quando</th>
+                <th style="width: 6rem;">Resultado</th>
+                <th style="width: 7rem;">Categoria</th>
+                <th style="width: 7rem;">Ação</th>
+                <th style="width: 11rem;">Quem</th>
+                <th style="width: 9rem;">Alvo</th>
+                <th>Mensagem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if rows is empty %}
+            <tr>
+                <td colspan="7" class="text-muted text-center py-4">{{ empty_message|default('Nenhum evento registrado ainda.') }}</td>
+            </tr>
+            {% else %}
+            {% for row in rows %}
+            <tr>
+                <td><small class="text-muted">{{ row.at|slice(0, 19)|replace({'T': ' '}) }}</small></td>
+                <td>
+                    {% set res = row.resultado %}
+                    <span class="badge badge-{{ res == 'success' ? 'success' : (res == 'failure' ? 'danger' : 'warning') }}">{{ res }}</span>
+                </td>
+                <td><code class="small">{{ row.categoria }}</code></td>
+                <td><code class="small">{{ row.acao }}</code></td>
+                <td>
+                    <div class="small">{{ row.actor_nome|default(row.actor_email|default('—')) }}</div>
+                    {% if row.ip %}<small class="text-muted">{{ row.ip }}</small>{% endif %}
+                </td>
+                <td>
+                    {% if row.alvo_rotulo %}
+                    <small>{{ row.alvo_tipo }} · {{ row.alvo_rotulo|slice(0, 24) }}</small>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="ops-activity-msg">{{ row.mensagem }}</div>
+                    {% if row.rota %}<small class="text-muted d-block">{{ row.rota }}</small>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>

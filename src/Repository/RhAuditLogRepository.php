@@ -53,12 +53,26 @@ class RhAuditLogRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function countByEmpresa(Empresa $empresa): int
+    /** @return list<RhAuditLog> */
+    public function findRecentGlobal(int $limit = 50): array
+    {
+        return $this->createQueryBuilder('a')
+            ->leftJoin('a.user', 'u')
+            ->addSelect('u')
+            ->leftJoin('a.empresa', 'e')
+            ->addSelect('e')
+            ->orderBy('a.criadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countSince(\DateTimeImmutable $since): int
     {
         return (int) $this->createQueryBuilder('a')
             ->select('COUNT(a.id)')
-            ->andWhere('a.empresa = :empresa')
-            ->setParameter('empresa', $empresa)
+            ->andWhere('a.criadoEm >= :since')
+            ->setParameter('since', $since)
             ->getQuery()
             ->getSingleScalarResult();
     }

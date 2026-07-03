@@ -3,7 +3,10 @@
 namespace App\Service;
 
 use App\Repository\EmpresaRepository;
+use App\Repository\PlatformAuditLogRepository;
+use App\Repository\RhAuditLogRepository;
 use App\Repository\UserRepository;
+use App\Service\Platform\PlatformAuditService;
 use App\Service\Platform\PlatformOpsLogParser;
 use App\Service\Platform\PlatformOpsLogReader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,6 +32,9 @@ final class PlatformOpsService
         private PlatformConfigService $platformConfig,
         private PlatformOpsLogParser $logParser,
         private PlatformOpsLogReader $logReader,
+        private PlatformAuditService $platformAudit,
+        private RhAuditLogRepository $rhAuditRepo,
+        private PlatformAuditLogRepository $platformAuditRepo,
         private string $appEnv,
         private string $mercureUrl,
         private string $mercurePublicUrl,
@@ -37,8 +43,16 @@ final class PlatformOpsService
     /**
      * @return array<string, mixed>
      */
-    public function buildView(string $tab, int $page, int $perPage, string $levelFilter = ''): array
-    {
+    public function buildView(
+        string $tab,
+        int $page,
+        int $perPage,
+        string $levelFilter = '',
+        string $auditCategory = '',
+        string $auditAction = '',
+        string $auditOutcome = '',
+        string $auditSearch = '',
+    ): array {
         $projectDir = $this->kernel->getProjectDir();
         $logDir = $projectDir . '/var/log';
         $prodLogPath = $logDir . '/prod.log';
@@ -65,8 +79,39 @@ final class PlatformOpsService
         $pagination = ['page' => 1, 'per_page' => $perPage, 'total' => 0];
         $listItems = [];
         $logMeta = null;
+        $auditSummary = null;
+        $rhActivity = [];
 
-        if (isset(self::LOG_FILE_MAP[$tab])) {
+        if ($tab === 'activity') {
+            $auditPage = $this->platformAudit->paginateRows(
+                $page,
+                $perPage,
+                $auditCategory,
+                $auditAction,
+                $auditOutcome,
+                $auditSearch,
+            );
+            $listItems = $auditPage['items'];
+            $pagination = $auditPage['pagination'];
+            $rhActivity = array_map(
+                static fn ($log) => [
+                    'at' => $log->getCriadoEm()->format('c'),
+                    'user' => $log->getUser()?->getNome() ?? $log->getUser()?->getEmail(),
+                    'empresa' => $log->getEmpresa()->getNome(),
+                    'modulo' => $log->getModulo(),
+                    'acao' => $log->getAcao(),
+                    'entidade' => $log->getEntidade(),
+                    'entidade_id' => $log->getEntidadeId(),
+                ],
+                $this->rhAuditRepo->findRecentGlobal(15),
+            );
+        } elseif ($tab === 'reports') {
+            $auditSummary = $this->platformAudit->summaryLast24h();
+            $since = new \DateTimeImmutable('-24 hours');
+            $auditSummary['rh_events_24h'] = $this->rhAuditRepo->countSince($since);
+            $auditSummary['log_incidents_24h'] = $logAnalysis['counts'];
+            $auditSummary['platform_audit_total'] = (int) $this->platformAuditRepo->count([]);
+        } elseif (isset(self::LOG_FILE_MAP[$tab])) {
             $logView = $this->logReader->paginate(
                 $logDir . '/' . self::LOG_FILE_MAP[$tab],
                 $page,
@@ -97,6 +142,8 @@ final class PlatformOpsService
             'pagination' => $pagination,
             'log_meta' => $logMeta,
             'level_filter' => $levelFilter,
+            'audit_summary' => $auditSummary,
+            'rh_activity' => $rhActivity,
         ];
     }
 

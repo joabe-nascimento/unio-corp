@@ -35,6 +35,8 @@ class PlatformOpsController extends AbstractController
     /** @var list<string> */
     public const ALL_TABS = [
         'overview',
+        'activity',
+        'reports',
         'errors',
         'warnings',
         'routes',
@@ -67,11 +69,37 @@ class PlatformOpsController extends AbstractController
             $levelFilter = '';
         }
 
-        $view = $ops->buildView($tab, $page, $perPage, $levelFilter);
+        $auditCategory = trim((string) $request->query->get('cat', ''));
+        $auditAction = trim((string) $request->query->get('acao', ''));
+        $auditOutcome = trim((string) $request->query->get('resultado', ''));
+        $auditSearch = trim((string) $request->query->get('q', ''));
+
+        $view = $ops->buildView(
+            $tab,
+            $page,
+            $perPage,
+            $levelFilter,
+            $auditCategory,
+            $auditAction,
+            $auditOutcome,
+            $auditSearch,
+        );
 
         $queryBase = ['tab' => $tab];
         if ($levelFilter !== '') {
             $queryBase['level'] = $levelFilter;
+        }
+        if ($auditCategory !== '') {
+            $queryBase['cat'] = $auditCategory;
+        }
+        if ($auditAction !== '') {
+            $queryBase['acao'] = $auditAction;
+        }
+        if ($auditOutcome !== '') {
+            $queryBase['resultado'] = $auditOutcome;
+        }
+        if ($auditSearch !== '') {
+            $queryBase['q'] = $auditSearch;
         }
 
         return $this->render(self::T . 'operacoes.html.twig', [
@@ -81,7 +109,15 @@ class PlatformOpsController extends AbstractController
             'list_items' => $view['list_items'],
             'pagination' => $view['pagination'],
             'log_meta' => $view['log_meta'],
+            'audit_summary' => $view['audit_summary'],
+            'rh_activity' => $view['rh_activity'],
             'level_filter' => $levelFilter,
+            'audit_filters' => [
+                'cat' => $auditCategory,
+                'acao' => $auditAction,
+                'resultado' => $auditOutcome,
+                'q' => $auditSearch,
+            ],
             'active_tab' => $tab,
             'incident_tabs' => self::INCIDENT_TABS,
             'log_tabs' => self::LOG_TABS,

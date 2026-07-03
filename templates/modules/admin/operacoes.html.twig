@@ -18,9 +18,9 @@
 {% block hub_content %}
 <div class="ops-page-header mb-3">
     <p class="text-muted mb-0 small">
+        <i class="fas fa-lock mr-1" aria-hidden="true"></i> Acesso exclusivo da conta <strong>Dono da plataforma</strong> (PLATFORM_OWNER).
         Últimas {{ log_analysis.scanned_lines|number_format(0, ',', '.') }} linhas analisadas em prod.log
         · {{ snapshot.generated_at|slice(0, 19)|replace({'T': ' '}) }}
-        · ruído filtrado: {{ counts.noise|number_format(0, ',', '.') }}
     </p>
 </div>
 
@@ -137,6 +137,172 @@
         </section>
     </div>
 </div>
+
+{% for report_key, report in snapshot.reports %}
+<section class="unio-card mb-3">
+    <div class="d-flex justify-content-between align-items-center px-3 pt-3">
+        {% include 'components/section_header.html.twig' with {
+            title: report_key == 'deploy' ? 'Relatório de deploy' : 'Relatório CI (falha)',
+            subtitle: report.exists ? report.status|upper : 'Arquivo ausente'
+        } %}
+    </div>
+    <pre class="ops-log-pre mx-3 mb-3 p-3 bg-light small border rounded">{% if report.content is empty %}(vazio){% else %}{{ report.content }}{% endif %}</pre>
+</section>
+{% endfor %}
+
+{% elseif active_tab == 'activity' %}
+<section class="unio-card mb-3">
+    <form method="get" action="{{ path('app_admin_operacoes') }}" class="px-3 pt-3 pb-2 d-flex flex-wrap align-items-end gap-3">
+        <input type="hidden" name="tab" value="activity">
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Categoria',
+            name: 'cat',
+            value: audit_filters.cat,
+            min_width: '120px',
+            options: [
+                { value: '', label: 'Todas' },
+                { value: 'admin', label: 'Admin' },
+                { value: 'auth', label: 'Auth' },
+                { value: 'config', label: 'Config' },
+                { value: 'deploy', label: 'Deploy' },
+                { value: 'http', label: 'HTTP' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Ação',
+            name: 'acao',
+            value: audit_filters.acao,
+            min_width: '120px',
+            options: [
+                { value: '', label: 'Todas' },
+                { value: 'create', label: 'Criar' },
+                { value: 'update', label: 'Editar' },
+                { value: 'activate', label: 'Ativar' },
+                { value: 'deactivate', label: 'Desativar' },
+                { value: 'login', label: 'Login' },
+                { value: 'login_failed', label: 'Login falhou' },
+                { value: 'deploy', label: 'Deploy' },
+                { value: 'save', label: 'Salvar config' },
+                { value: 'error', label: 'Erro HTTP' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Resultado',
+            name: 'resultado',
+            value: audit_filters.resultado,
+            min_width: '110px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'success', label: 'Sucesso' },
+                { value: 'failure', label: 'Falha' },
+                { value: 'warning', label: 'Aviso' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Busca',
+            type: 'text',
+            name: 'q',
+            value: audit_filters.q,
+            placeholder: 'e-mail, mensagem…',
+            min_width: '160px'
+        } %}
+        <button type="submit" class="btn-unio btn-sm"><i class="fas fa-filter mr-1"></i> Filtrar</button>
+    </form>
+</section>
+
+<section class="unio-card mb-3">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Trilha de auditoria',
+        subtitle: 'Quem criou, editou, ativou, desativou, logou ou falhou — ' ~ pagination.total ~ ' evento(s)'
+    } %}
+    <div class="border-top">
+        {% include 'components/ops_activity_table.html.twig' with { rows: list_items } %}
+    </div>
+    {% include 'components/table_pagination.html.twig' with {
+        pagination: pagination,
+        route: 'app_admin_operacoes',
+        query: query_base,
+        per_page_options: [25, 50, 100],
+        per_page_label: 'Por página'
+    } %}
+</section>
+
+{% if rh_activity is not empty %}
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with { title: 'RH — últimas ações (todas empresas)', subtitle: 'Módulo recursos humanos' } %}
+    <div class="table-responsive border-top">
+        <table class="table table-sm table-unio mb-0">
+            <thead>
+                <tr>
+                    <th>Quando</th><th>Quem</th><th>Empresa</th><th>Módulo</th><th>Ação</th><th>Entidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rh_activity %}
+                <tr>
+                    <td><small class="text-muted">{{ row.at|slice(0, 19)|replace({'T': ' '}) }}</small></td>
+                    <td><small>{{ row.user|default('—') }}</small></td>
+                    <td><small>{{ row.empresa }}</small></td>
+                    <td><code class="small">{{ row.modulo }}</code></td>
+                    <td><code class="small">{{ row.acao }}</code></td>
+                    <td><small>{{ row.entidade|default('—') }}{% if row.entidade_id %} #{{ row.entidade_id }}{% endif %}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+
+{% elseif active_tab == 'reports' %}
+{% set summary = audit_summary %}
+{% include 'components/kpi_row.html.twig' with {
+    items: [
+        { value: summary.outcomes.success|default(0), label: 'Sucessos', sub: 'Últimas 24h', icon: 'fa-check-circle' },
+        { value: summary.outcomes.failure|default(0), label: 'Falhas', sub: 'Últimas 24h', icon: 'fa-times-circle' },
+        { value: summary.outcomes.warning|default(0), label: 'Avisos', sub: 'Últimas 24h', icon: 'fa-exclamation-triangle' },
+        { value: summary.rh_events_24h|default(0), label: 'Eventos RH', sub: 'Últimas 24h', icon: 'fa-users' },
+    ]
+} %}
+
+<div class="row mb-3">
+    <div class="col-lg-6 mb-3 mb-lg-0">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with { title: 'Incidentes no log (24h)', subtitle: 'Parse de prod.log' } %}
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between"><span>Erros</span><strong>{{ summary.log_incidents_24h.errors|default(0) }}</strong></li>
+                <li class="list-group-item d-flex justify-content-between"><span>Avisos</span><strong>{{ summary.log_incidents_24h.warnings|default(0) }}</strong></li>
+                <li class="list-group-item d-flex justify-content-between"><span>Rotas / exceções</span><strong>{{ summary.log_incidents_24h.routes|default(0) }}</strong></li>
+                <li class="list-group-item d-flex justify-content-between"><span>Integrações</span><strong>{{ summary.log_incidents_24h.integrations|default(0) }}</strong></li>
+                <li class="list-group-item d-flex justify-content-between"><span>Acesso negado</span><strong>{{ summary.log_incidents_24h.access|default(0) }}</strong></li>
+            </ul>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with { title: 'Auditoria por categoria (24h)', subtitle: summary.platform_audit_total|default(0) ~ ' eventos totais' } %}
+            <ul class="list-group list-group-flush">
+                {% for cat, n in summary.categories|default({}) %}
+                <li class="list-group-item d-flex justify-content-between"><span>{{ cat }}</span><strong>{{ n }}</strong></li>
+                {% else %}
+                <li class="list-group-item text-muted">Nenhum evento nas últimas 24h.</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</div>
+
+{% if summary.recent is defined and summary.recent is not empty %}
+<section class="unio-card mb-3">
+    {% include 'components/section_header.html.twig' with { title: 'Últimos eventos registrados', subtitle: 'Auditoria da plataforma' } %}
+    <div class="border-top">
+        {% include 'components/ops_activity_table.html.twig' with { rows: summary.recent } %}
+    </div>
+    <div class="px-3 pb-3">
+        <a href="{{ path('app_admin_operacoes', { tab: 'activity' }) }}" class="btn-unio btn-sm btn-unio-ghost">Ver trilha completa</a>
+    </div>
+</section>
+{% endif %}
 
 {% for report_key, report in snapshot.reports %}
 <section class="unio-card mb-3">

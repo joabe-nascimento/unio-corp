@@ -120,3 +120,5 @@ EOF
 
 trap - ERR
 ci_report_success "Deploy server OK — $DEPLOY_PATH (public_html symlinked)"
+
+$PHP_BIN bin/console app:platform-audit:record-deploy --no-interaction 2>/dev/null || true

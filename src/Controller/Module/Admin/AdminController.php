@@ -3,6 +3,7 @@
 namespace App\Controller\Module\Admin;
 
 use App\Entity\Empresa;
+use App\Entity\PlatformAuditLog;
 use App\Entity\User;
 use App\Entity\UserProductGrant;
 use App\Repository\EmpresaRepository;
@@ -11,6 +12,7 @@ use App\Repository\UserRepository;
 use App\Service\OnboardingProgressService;
 use App\Service\PermissionService;
 use App\Service\PlatformConfigService;
+use App\Service\Platform\PlatformAuditService;
 use App\Service\SvgAssetBundlingService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -50,6 +52,7 @@ class AdminController extends AbstractController
         private UserPasswordHasherInterface $passwordHasher,
         private PlatformConfigService $platformConfig,
         private SvgAssetBundlingService $svgAssetBundling,
+        private PlatformAuditService $platformAudit,
     ) {}
 
     // ────────────────────────── INDEX ──────────────────────────────────
@@ -159,6 +162,18 @@ class AdminController extends AbstractController
             $perfil = 'MEMBRO';
         }
         if ($this->userRepo->findOneBy(['email' => $email])) {
+            $this->platformAudit->record(
+                PlatformAuditLog::CATEGORY_ADMIN,
+                PlatformAuditLog::ACTION_CREATE,
+                PlatformAuditLog::OUTCOME_FAILURE,
+                'Falha ao criar usuário: e-mail já existe',
+                $this->getUser() instanceof User ? $this->getUser() : null,
+                null,
+                'user',
+                null,
+                $email,
+                $request,
+            );
             $this->addFlash('error', 'Já existe um usuário com esse e-mail.');
             return $this->redirectToRoute('app_admin_usuarios', ['open_novo' => 1]);
         }
@@ -184,6 +199,20 @@ class AdminController extends AbstractController
         $user->setPassword($this->passwordHasher->hashPassword($user, $senha));
         $this->em->persist($user);
         $this->em->flush();
+
+        $this->platformAudit->record(
+            PlatformAuditLog::CATEGORY_ADMIN,
+            PlatformAuditLog::ACTION_CREATE,
+            PlatformAuditLog::OUTCOME_SUCCESS,
+            sprintf('Usuário criado: %s (%s)', $nome, $email),
+            $this->getUser() instanceof User ? $this->getUser() : null,
+            null,
+            'user',
+            $user->getId(),
+            $nome,
+            $request,
+            ['perfil' => $perfil, 'empresa_id' => $empresa?->getId()],
+        );
 
         $onboarding->markStepComplete('invite_user');
 
@@ -257,6 +286,20 @@ class AdminController extends AbstractController
 
         $this->em->flush();
 
+        $this->platformAudit->record(
+            PlatformAuditLog::CATEGORY_ADMIN,
+            PlatformAuditLog::ACTION_UPDATE,
+            PlatformAuditLog::OUTCOME_SUCCESS,
+            sprintf('Usuário editado: %s', $user->getEmail()),
+            $me,
+            null,
+            'user',
+            $user->getId(),
+            $user->getNome(),
+            $request,
+            ['perfil' => $user->getPerfil(), 'ativo' => $user->isAtivo()],
+        );
+
         $this->addFlash('success', 'Usuário atualizado com sucesso.');
         return $this->redirectToRoute('app_admin_usuarios');
     }
@@ -290,6 +333,19 @@ class AdminController extends AbstractController
         }
 
         $this->em->flush();
+
+        $this->platformAudit->record(
+            PlatformAuditLog::CATEGORY_ADMIN,
+            $user->isAtivo() ? PlatformAuditLog::ACTION_ACTIVATE : PlatformAuditLog::ACTION_DEACTIVATE,
+            PlatformAuditLog::OUTCOME_SUCCESS,
+            sprintf('Usuário %s: %s', $user->isAtivo() ? 'ativado' : 'desativado', $user->getEmail()),
+            $me,
+            null,
+            'user',
+            $user->getId(),
+            $user->getNome(),
+            $request,
+        );
 
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse(['ok' => true, 'ativo' => $user->isAtivo()]);
@@ -360,6 +416,21 @@ class AdminController extends AbstractController
         $this->em->persist($empresa);
         $this->em->flush();
 
+        $actor = $this->getUser();
+        $this->platformAudit->record(
+            PlatformAuditLog::CATEGORY_ADMIN,
+            PlatformAuditLog::ACTION_CREATE,
+            PlatformAuditLog::OUTCOME_SUCCESS,
+            sprintf('Empresa criada: %s', $nome),
+            $actor instanceof User ? $actor : null,
+            null,
+            'empresa',
+            $empresa->getId(),
+            $nome,
+            $request,
+            ['cnpj' => $cnpj],
+        );
+
         $this->addFlash('success', "Empresa \"{$nome}\" criada com sucesso.");
         return $this->redirectToRoute('app_admin_empresas');
     }
@@ -407,6 +478,21 @@ class AdminController extends AbstractController
 
         $this->em->flush();
 
+        $actor = $this->getUser();
+        $this->platformAudit->record(
+            PlatformAuditLog::CATEGORY_ADMIN,
+            PlatformAuditLog::ACTION_UPDATE,
+            PlatformAuditLog::OUTCOME_SUCCESS,
+            sprintf('Empresa editada: %s', $empresa->getNome()),
+            $actor instanceof User ? $actor : null,
+            null,
+            'empresa',
+            $empresa->getId(),
+            $empresa->getNome(),
+            $request,
+            ['ativo' => $empresa->isAtivo()],
+        );
+
         $this->addFlash('success', 'Empresa atualizada com sucesso.');
         return $this->redirectToRoute('app_admin_empresas');
     }
@@ -431,6 +517,20 @@ class AdminController extends AbstractController
         }
 
         $this->em->flush();
+
+        $actor = $this->getUser();
+        $this->platformAudit->record(
+            PlatformAuditLog::CATEGORY_ADMIN,
+            $empresa->isAtivo() ? PlatformAuditLog::ACTION_ACTIVATE : PlatformAuditLog::ACTION_DEACTIVATE,
+            PlatformAuditLog::OUTCOME_SUCCESS,
+            sprintf('Empresa %s: %s', $empresa->isAtivo() ? 'ativada' : 'desativada', $empresa->getNome()),
+            $actor instanceof User ? $actor : null,
+            null,
+            'empresa',
+            $empresa->getId(),
+            $empresa->getNome(),
+            $request,
+        );
 
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse(['ok' => true, 'ativo' => $empresa->isAtivo()]);
@@ -593,6 +693,21 @@ class AdminController extends AbstractController
             $newConfig['sessao_timeout'] = max(15, min(1440, (int) $request->request->get('sessao_timeout', 120)));
 
             $this->platformConfig->save($newConfig);
+
+            $actor = $this->getUser();
+            $this->platformAudit->record(
+                PlatformAuditLog::CATEGORY_CONFIG,
+                PlatformAuditLog::ACTION_SAVE,
+                $hadAssetErrors ? PlatformAuditLog::OUTCOME_WARNING : PlatformAuditLog::OUTCOME_SUCCESS,
+                'Configurações da plataforma salvas',
+                $actor instanceof User ? $actor : null,
+                null,
+                'config',
+                null,
+                'platform_config',
+                $request,
+                ['manutencao' => $request->request->has('manutencao')],
+            );
 
             if ($hadAssetErrors) {
                 $this->addFlash('warning', 'Algumas configurações foram salvas, mas houve problemas com um ou mais arquivos de imagem.');
