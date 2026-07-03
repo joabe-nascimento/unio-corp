@@ -1,0 +1,138 @@
+{#
+  shell_help_hub — hub de ajuda no header (fluxos e tours sob demanda)
+#}
+<div class="shell-help-wrap" data-shell-help>
+    <button type="button"
+            class="shell-help-btn"
+            id="shellHelpBtn"
+            aria-expanded="false"
+            aria-controls="shellHelpPanel"
+            aria-haspopup="dialog"
+            title="Ajuda — guias e fluxos da plataforma"
+            data-tour="help">
+        <i class="far fa-circle-question" aria-hidden="true"></i>
+        <span class="sr-only">Ajuda</span>
+    </button>
+
+    <div id="shellHelpPanel"
+         class="shell-help-panel"
+         role="dialog"
+         aria-label="Central de ajuda"
+         hidden>
+        <div class="shell-help-panel__head">
+            <div>
+                <span class="shell-help-panel__title">Ajuda</span>
+                <span class="shell-help-panel__sub">Guias interativos da plataforma</span>
+            </div>
+            <button type="button" class="shell-help-panel__close" data-shell-help-close aria-label="Fechar ajuda">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="shell-help-panel__body" data-shell-help-flows>
+            {% set flows = onboarding_help_flows|default([]) %}
+            {% if flows|length > 0 %}
+                {% set featured = [] %}
+                {% set guides = [] %}
+                {% set actions = [] %}
+                {% for flow in flows %}
+                    {% if flow.featured|default(false) %}
+                        {% set featured = featured|merge([flow]) %}
+                    {% elseif flow.action|default('') != '' %}
+                        {% set actions = actions|merge([flow]) %}
+                    {% else %}
+                        {% set guides = guides|merge([flow]) %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if featured|length > 0 %}
+                <section class="shell-help-section" aria-label="Destaque">
+                    <h3 class="shell-help-section__label">Recomendado</h3>
+                    <ul class="shell-help-flow-list">
+                        {% for flow in featured %}
+                        <li>
+                            <button type="button"
+                                    class="shell-help-flow shell-help-flow--featured{% if flow.done|default(false) %} is-done{% endif %}"
+                                    data-shell-help-flow="{{ flow.id }}"
+                                    {% if flow.action|default('') %}data-shell-help-action="{{ flow.action }}"{% endif %}
+                                    {% if flow.navigate|default('') %}data-shell-help-navigate="{{ path(flow.navigate) }}"{% endif %}>
+                                <span class="shell-help-flow__icon" aria-hidden="true">
+                                    <i class="fas {{ flow.icon|default('fa-route') }}"></i>
+                                </span>
+                                <span class="shell-help-flow__body">
+                                    <span class="shell-help-flow__label">{{ flow.label }}</span>
+                                    <span class="shell-help-flow__desc">{{ flow.description }}</span>
+                                </span>
+                                {% if flow.done|default(false) %}
+                                <span class="shell-help-flow__badge">Feito</span>
+                                {% else %}
+                                <i class="fas fa-play shell-help-flow__go" aria-hidden="true"></i>
+                                {% endif %}
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
+
+                {% if guides|length > 0 %}
+                <section class="shell-help-section" aria-label="Guias por tema">
+                    <h3 class="shell-help-section__label">Por tema</h3>
+                    <ul class="shell-help-flow-list">
+                        {% for flow in guides %}
+                        <li>
+                            <button type="button"
+                                    class="shell-help-flow"
+                                    data-shell-help-flow="{{ flow.id }}">
+                                <span class="shell-help-flow__icon" aria-hidden="true">
+                                    <i class="fas {{ flow.icon|default('fa-circle-info') }}"></i>
+                                </span>
+                                <span class="shell-help-flow__body">
+                                    <span class="shell-help-flow__label">{{ flow.label }}</span>
+                                    <span class="shell-help-flow__desc">{{ flow.description }}</span>
+                                </span>
+                                <i class="fas fa-play shell-help-flow__go" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
+
+                {% if actions|length > 0 %}
+                <section class="shell-help-section" aria-label="Ações rápidas">
+                    <h3 class="shell-help-section__label">Ações rápidas</h3>
+                    <ul class="shell-help-flow-list shell-help-flow-list--compact">
+                        {% for flow in actions %}
+                        <li>
+                            <button type="button"
+                                    class="shell-help-flow shell-help-flow--action"
+                                    data-shell-help-flow="{{ flow.id }}"
+                                    {% if flow.action|default('') %}data-shell-help-action="{{ flow.action }}"{% endif %}
+                                    {% if flow.navigate|default('') %}data-shell-help-navigate="{{ path(flow.navigate) }}"{% endif %}>
+                                <span class="shell-help-flow__icon" aria-hidden="true">
+                                    <i class="fas {{ flow.icon|default('fa-bolt') }}"></i>
+                                </span>
+                                <span class="shell-help-flow__body">
+                                    <span class="shell-help-flow__label">{{ flow.label }}</span>
+                                    <span class="shell-help-flow__desc">{{ flow.description }}</span>
+                                </span>
+                                <i class="fas fa-arrow-right shell-help-flow__go" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
+            {% else %}
+                <p class="shell-help-empty">Nenhum guia disponível para seu perfil no momento.</p>
+            {% endif %}
+        </div>
+
+        <footer class="shell-help-panel__foot">
+            <p class="shell-help-panel__hint">
+                Os guias não iniciam automaticamente — escolha um fluxo acima quando quiser.
+            </p>
+        </footer>
+    </div>
+</div>

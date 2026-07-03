@@ -1,0 +1,126 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Alertas clínicos · Pós-Operatório{% endblock %}
+{% block permissions_scope %}hub_pos_operatorio{% endblock %}
+
+{% set hub_page_title = 'Fila de alertas clínicos' %}
+{% set hub_page_subtitle = 'Prioridade P1–P4 · SLA de resposta' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-heart-pulse mr-1"></i> Sala Crítica P1
+</a>
+<a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1"></i> Visão geral
+</a>
+{% endblock %}
+
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: stats.p1, label: 'P1 abertos', icon: 'fa-fire' },
+        { value: stats.p2, label: 'P2 abertos', icon: 'fa-triangle-exclamation' },
+        { value: stats.abertos, label: 'Aguardando', icon: 'fa-inbox' },
+        { value: stats.em_atendimento, label: 'Em atendimento', icon: 'fa-user-nurse' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block hub_content %}
+<div data-pos-op-live
+     data-pos-op-mercure-url="{{ path('app_pos_operatorio_api_mercure') }}"
+     data-pos-op-poll-url="{{ path('app_pos_operatorio_api_alertas_poll') }}"
+     data-pos-op-stats="{{ stats|json_encode|e('html_attr') }}"
+     hidden aria-hidden="true"></div>
+<section class="unio-card mb-3">
+    <form method="get" class="d-flex flex-wrap gap-2 align-items-end p-3 border-bottom">
+        <div>
+            <label class="small text-muted mb-1" for="f-pri">Prioridade</label>
+            <select id="f-pri" name="prioridade" class="form-control form-control-sm">
+                <option value="">Todas</option>
+                {% for p in ['P1','P2','P3','P4'] %}
+                <option value="{{ p }}"{{ filters.prioridade == p ? ' selected' : '' }}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="small text-muted mb-1" for="f-st">Status</label>
+            <select id="f-st" name="status" class="form-control form-control-sm">
+                <option value="ativos"{{ filters.status == 'ativos' or not filters.status ? ' selected' : '' }}>Ativos</option>
+                <option value="aberto"{{ filters.status == 'aberto' ? ' selected' : '' }}>Aberto</option>
+                <option value="em_atendimento"{{ filters.status == 'em_atendimento' ? ' selected' : '' }}>Em atendimento</option>
+                <option value="resolvido"{{ filters.status == 'resolvido' ? ' selected' : '' }}>Resolvido</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-unio btn-sm">Filtrar</button>
+    </form>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Pri</th>
+                    <th>Paciente</th>
+                    <th>Motivo</th>
+                    <th>Status</th>
+                    <th>Responsável</th>
+                    <th>SLA</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tickets %}
+                <tr class="admin-table-row">
+                    <td>
+                        {% include 'components/status_badge.html.twig' with {
+                            label: t.prioridade,
+                            variant: t.prioridade == 'P1' ? 'danger' : (t.prioridade == 'P2' ? 'warning' : 'info')
+                        } %}
+                    </td>
+                    <td>
+                        <strong>{{ t.paciente_nome }}</strong><br>
+                        <code class="admin-table-mono">{{ t.paciente_codigo }}</code>
+                        {% if t.dia_pos is not null %}<span class="badge-perfil default ml-1">D+{{ t.dia_pos }}</span>{% endif %}
+                        <div class="mt-1">
+                            <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: t.paciente_id }) }}" class="btn-unio-ghost btn-xs">Ficha</a>
+                        </div>
+                    </td>
+                    <td>{{ t.motivo }}</td>
+                    <td>{{ t.status_label }}</td>
+                    <td>{{ t.responsavel }}</td>
+                    <td>
+                        {% if t.sla_pct is not null %}
+                        <span class="small{{ t.sla_breach_imminent ? ' text-danger font-weight-bold' : '' }}">{{ t.sla_remaining_label }}</span>
+                        <div class="progress progress-xs mt-1" style="height:4px">
+                            <div class="progress-bar bg-{{ t.sla_pct > 80 ? 'danger' : 'warning' }}" style="width:{{ t.sla_pct }}%"></div>
+                        </div>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="text-nowrap">
+                        {% if t.status != 'resolvido' %}
+                        <form method="post" action="{{ path('app_pos_operatorio_alerta_assumir', {id: t.id}) }}" class="d-inline">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_alerta_' ~ t.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-xs">Assumir</button>
+                        </form>
+                        <form method="post" action="{{ path('app_pos_operatorio_alerta_resolver', {id: t.id}) }}" class="d-inline">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_alerta_' ~ t.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-xs text-success">Resolver</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">Nenhum alerta na fila.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/pos-operatorio-live.js') }}?v=1"></script>
+{% endblock %}

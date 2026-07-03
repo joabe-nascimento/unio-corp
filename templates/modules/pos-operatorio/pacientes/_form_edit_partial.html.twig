@@ -1,0 +1,18 @@
+<form method="post"
+      action="{{ path('app_pos_operatorio_paciente_editar', { id: paciente.id }) }}"
+      class="unio-form unio-offcanvas-form"
+      id="posOpPacienteEditForm">
+    <input type="hidden" name="_token" value="{{ csrf_token('pos_op_paciente') }}">
+    <input type="hidden" name="redirect_to" value="list">
+
+    {% include 'modules/pos-operatorio/pacientes/_form_fields.html.twig' with {
+        field_prefix: 'edit-'
+    } %}
+
+    <div class="unio-form-actions unio-offcanvas-form-actions">
+        <button type="submit" class="btn-unio">
+            <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar
+        </button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    </div>
+</form>

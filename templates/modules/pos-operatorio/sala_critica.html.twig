@@ -1,0 +1,82 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Sala Crítica · Pós-Operatório{% endblock %}
+{% block permissions_scope %}hub_pos_operatorio{% endblock %}
+
+{% set hub_page_title = 'Sala Crítica' %}
+{% set hub_page_subtitle = 'Alertas P1 · coordenação clínica' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
+{% block hub_toolbar_actions %}
+{% include 'components/status_badge.html.twig' with {
+    label: p1_count > 0 ? (p1_count ~ ' P1 ATIVO' ~ (p1_count != 1 ? 'S' : '')) : 'ESTÁVEL',
+    variant: p1_count > 0 ? 'danger' : 'success'
+} %}
+<a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm ml-2">
+    <i class="fas fa-list mr-1"></i> Fila completa
+</a>
+{% endblock %}
+
+{% block hub_content %}
+<div data-pos-op-live
+     data-pos-op-mercure-url="{{ path('app_pos_operatorio_api_mercure') }}"
+     data-pos-op-poll-url="{{ path('app_pos_operatorio_api_alertas_poll') }}"
+     data-pos-op-stats="{{ stats|json_encode|e('html_attr') }}"
+     hidden aria-hidden="true"></div>
+<div class="pos-op-war-room">
+    {% include 'components/page_banner.html.twig' with {
+        icon: 'fa-heart-pulse',
+        title: command_brief.headline,
+        subtitle: command_brief.summary
+    } %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <section class="unio-card mb-3">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Incidentes P1',
+                    subtitle: p1_count ~ ' alerta(s) prioritário(s)'
+                } %}
+                {% if p1_incidents %}
+                {% for inc in p1_incidents %}
+                <div class="p-3 border-bottom pos-op-p1-card">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <strong>{{ inc.paciente_nome }}</strong>
+                            <code class="ml-2">{{ inc.paciente_codigo }}</code>
+                            <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: inc.paciente_id }) }}" class="btn-unio-ghost btn-xs ml-2">Ficha</a>
+                            <p class="mb-1 mt-1">{{ inc.motivo }}</p>
+                            <span class="small text-muted">{{ inc.timeline_hint }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="badge badge-danger">{{ inc.prioridade }}</span>
+                            <div class="small mt-1{{ inc.sla_breach_imminent ? ' text-danger font-weight-bold' : '' }}">SLA {{ inc.sla_remaining_label }}</div>
+                        </div>
+                    </div>
+                    <form method="post" action="{{ path('app_pos_operatorio_alerta_assumir', {id: inc.id}) }}" class="mt-2">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_alerta_' ~ inc.id) }}">
+                        <button type="submit" class="btn-unio btn-sm">Assumir agora</button>
+                    </form>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="p-4 text-muted mb-0">Nenhum P1 ativo — operação estável.</p>
+                {% endif %}
+            </section>
+        </div>
+        <div class="col-lg-4">
+            <section class="unio-card p-3">
+                <h3 class="h6">Índice de severidade</h3>
+                <p class="display-4 mb-0">{{ severity_score }}<span class="h6 text-muted">/100</span></p>
+                <p class="small text-muted mb-0">Nível: {{ severity_level }}</p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/pos-operatorio-live.js') }}?v=1"></script>
+{% endblock %}

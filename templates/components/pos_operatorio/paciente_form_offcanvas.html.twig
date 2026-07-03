@@ -1,0 +1,26 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'pos-op-paciente-form',
+    title: 'Novo paciente',
+    subtitle: 'Cadastro pós-cirúrgico',
+    icon: 'fa-user-injured',
+    size: 'lg',
+    open: open|default(false)
+} %}
+    {% block offcanvas_body %}
+        <form method="post" action="{{ path('app_pos_operatorio_paciente_novo') }}" class="unio-form unio-offcanvas-form" id="posOpPacienteCreateForm">
+            <input type="hidden" name="_token" value="{{ csrf_token('pos_op_paciente') }}">
+            <input type="hidden" name="redirect_to" value="list">
+
+            {% include 'modules/pos-operatorio/pacientes/_form_fields.html.twig' with {
+                field_prefix: 'new-'
+            } %}
+
+            <div class="unio-form-actions unio-offcanvas-form-actions">
+                <button type="submit" class="btn-unio">
+                    <i class="fas fa-check mr-1" aria-hidden="true"></i> Cadastrar paciente
+                </button>
+                <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}

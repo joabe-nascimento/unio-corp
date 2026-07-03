@@ -1,0 +1,53 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Protocolos · Pós-Operatório{% endblock %}
+{% block permissions_scope %}hub_pos_operatorio{% endblock %}
+
+{% set hub_page_title = 'Protocolos' %}
+{% set hub_page_subtitle = 'Modelos de acompanhamento por procedimento' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_protocolo_novo') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1"></i> Novo protocolo
+</a>
+<a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1"></i> Visão geral
+</a>
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Duração</th>
+                    <th>Checklist</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pr in protocolos %}
+                <tr>
+                    <td><strong>{{ pr.nome }}</strong></td>
+                    <td>{{ pr.tipoProcedimento|default('—') }}</td>
+                    <td>{{ pr.duracaoDias }} dias</td>
+                    <td>{{ pr.checklist|length }} itens</td>
+                    <td>{{ pr.ativo ? 'Ativo' : 'Inativo' }}</td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pos_operatorio_protocolo_editar', { id: pr.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-muted p-4">Nenhum protocolo cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

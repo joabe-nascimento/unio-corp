@@ -1,0 +1,200 @@
+<div class="pos-op-ficha">
+    <div class="row pos-op-ficha-grid pos-op-ficha-grid--offcanvas">
+        <div class="col-xl-8 pos-op-ficha-main">
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Dados clínicos',
+                    subtitle: 'Identificação e equipe responsável'
+                } %}
+                <dl class="pos-op-detail-grid">
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Código</dt>
+                        <dd><code class="admin-table-mono">{{ paciente.codigo }}</code></dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Data da cirurgia</dt>
+                        <dd>{{ paciente.dataCirurgia ? paciente.dataCirurgia|date('d/m/Y') : '—' }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Procedimento</dt>
+                        <dd>{{ paciente.procedimento|default('—') }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Protocolo</dt>
+                        <dd>{{ paciente.protocolo ? paciente.protocolo.nome : '—' }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Médico responsável</dt>
+                        <dd>{{ paciente.medicoResponsavel ? paciente.medicoResponsavel.nome : '—' }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Telefone</dt>
+                        <dd>{{ paciente.telefoneContato|default('—') }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Portal do paciente</dt>
+                        <dd>
+                            {% if portal_user %}
+                                {{ portal_user.nome }} <span class="text-muted">({{ portal_user.email }})</span>
+                            {% else %}
+                                <span class="text-muted">Não vinculado</span>
+                                <button type="button"
+                                        class="btn btn-link btn-sm p-0 ml-1 align-baseline"
+                                        data-unio-offcanvas-open="pos-op-paciente-edit"
+                                        data-pos-op-paciente-edit="{{ paciente.id }}"
+                                        data-pos-op-paciente-nome="{{ paciente.nome|e('html_attr') }}"
+                                        data-pos-op-paciente-codigo="{{ paciente.codigo|e('html_attr') }}">
+                                    Vincular
+                                </button>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Consentimento LGPD</dt>
+                        <dd>{{ consentimento_em|default('Pendente no portal') }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            {% if checklist_progress|length > 0 %}
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Progresso do protocolo',
+                    subtitle: 'Checklist por dia pós-operatório'
+                } %}
+                <ul class="pos-op-protocol-progress">
+                    {% for step in checklist_progress %}
+                    <li class="pos-op-protocol-progress__item{% if step.done %} is-done{% endif %}">
+                        <span class="pos-op-protocol-progress__day">D+{{ step.dia }}</span>
+                        <span class="pos-op-protocol-progress__text">{{ step.item }}</span>
+                        {% if step.done %}<i class="fas fa-check pos-op-protocol-progress__check" aria-hidden="true"></i>{% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Questionários recentes',
+                    subtitle: questionarios|length ~ ' resposta(s) registrada(s)'
+                } %}
+                {% if questionarios|length > 0 %}
+                <div class="table-responsive">
+                    <table class="admin-table admin-table--compact">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Dor</th>
+                                <th>Febre</th>
+                                <th>Score</th>
+                                <th>Enviado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for q in questionarios %}
+                            <tr>
+                                <td>{{ q.data }}</td>
+                                <td>{{ q.dor is not null ? q.dor ~ '/10' : '—' }}</td>
+                                <td>{{ q.febre is not null ? q.febre ~ ' °C' : '—' }}</td>
+                                <td>
+                                    {% include 'components/status_badge.html.twig' with {
+                                        label: q.score,
+                                        variant: q.score >= 70 ? 'danger' : (q.score >= 40 ? 'warning' : 'success')
+                                    } %}
+                                </td>
+                                <td class="admin-table-date">{{ q.respondido_em }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{{ path('app_pos_operatorio_questionarios') }}" class="btn-unio-ghost btn-sm mt-3">Ver todos os questionários</a>
+                {% else %}
+                <p class="text-muted small px-3 pb-3 mb-0">Nenhum questionário respondido ainda.</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <div class="col-xl-4 pos-op-ficha-side">
+            {% if alertas|length > 0 %}
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Alertas abertos',
+                    subtitle: alertas|length ~ ' requer(em) acompanhamento'
+                } %}
+                <div class="pos-op-alerts-feed px-3 pb-3">
+                    {% for alerta in alertas %}
+                    <div class="pos-op-alert-row pos-op-alert-row--{{ alerta.prioridade == 'P1' ? 'critical' : (alerta.prioridade == 'P2' ? 'warn' : 'info') }}">
+                        <span class="pos-op-alert-icon"><i class="fas fa-triangle-exclamation"></i></span>
+                        <span class="pos-op-alert-body">
+                            <span class="pos-op-alert-head">
+                                {% include 'components/status_badge.html.twig' with {
+                                    label: alerta.prioridade,
+                                    variant: alerta.prioridade == 'P1' ? 'danger' : (alerta.prioridade == 'P2' ? 'warning' : 'info')
+                                } %}
+                                <small class="text-muted">{{ alerta.criado_em }}</small>
+                            </span>
+                            <strong class="pos-op-alert-title">{{ alerta.motivo }}</strong>
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="px-3 pb-3">
+                    <a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">Ir para fila de alertas</a>
+                </div>
+            </section>
+            {% endif %}
+
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Linha do tempo',
+                    subtitle: 'Eventos clínicos e operacionais'
+                } %}
+                {% if timeline_groups|default([])|length > 0 %}
+                <div class="pos-op-timeline-v2 px-3 pb-3">
+                    {% for group in timeline_groups %}
+                    <section class="pos-op-timeline-v2__group" aria-label="{{ group.date_label }}">
+                        <header class="pos-op-timeline-v2__date">
+                            <span class="pos-op-timeline-v2__date-dot" aria-hidden="true"></span>
+                            <span class="pos-op-timeline-v2__date-label">{{ group.date_label }}</span>
+                        </header>
+                        <ol class="pos-op-timeline-v2__events">
+                            {% for ev in group.events %}
+                            <li class="pos-op-timeline-v2__event pos-op-timeline-v2__event--{{ ev.tone }}">
+                                <div class="pos-op-timeline-v2__rail" aria-hidden="true">
+                                    <span class="pos-op-timeline-v2__node"></span>
+                                </div>
+                                <article class="pos-op-timeline-v2__card">
+                                    <div class="pos-op-timeline-v2__card-head">
+                                        <span class="pos-op-timeline-v2__icon" aria-hidden="true">
+                                            <i class="fas {{ ev.icon }}"></i>
+                                        </span>
+                                        <div class="pos-op-timeline-v2__meta">
+                                            <strong>{{ ev.label }}</strong>
+                                            <time datetime="{{ ev.datetime }}" class="pos-op-timeline-v2__time">{{ ev.time }}</time>
+                                        </div>
+                                    </div>
+                                    {% if ev.detail %}
+                                    <p class="pos-op-timeline-v2__detail">{{ ev.detail }}</p>
+                                    {% endif %}
+                                    {% if ev.author %}
+                                    <footer class="pos-op-timeline-v2__author">
+                                        <i class="fas fa-user-circle" aria-hidden="true"></i>
+                                        {{ ev.author }}
+                                    </footer>
+                                    {% endif %}
+                                </article>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </section>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small px-3 pb-3 mb-0">Sem eventos registrados.</p>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+</div>

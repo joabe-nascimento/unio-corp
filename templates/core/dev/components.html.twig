@@ -1,0 +1,349 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Guia de componentes{% endblock %}
+{% block page_show_title %}{% endblock %}
+{% block page_title %}{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% block content %}
+<div class="dev-components-page">
+    {# ── Hero ── #}
+    <header class="dev-components-hero unio-card">
+        <div class="dev-components-hero__top">
+            <nav class="dev-components-breadcrumb" aria-label="Navegação">
+                <a href="{{ path('app_dashboard') }}">Início</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">Componentes</span>
+            </nav>
+        </div>
+        <div class="dev-components-hero__body">
+            <p class="dev-components-eyebrow">Design system Unio</p>
+            <h1 class="dev-components-title">Guia visual de componentes</h1>
+            <p class="dev-components-lead">
+                Referência interna para manter consistência entre módulos, hubs e telas do shell.
+                Componentes com elevação, degradê da marca Unio e micro-interações alinhadas ao inset shell.
+            </p>
+            <ul class="dev-components-meta" aria-label="Arquivos de referência">
+                <li><i class="fas fa-palette" aria-hidden="true"></i> <code>unio-theme.css</code> — tokens e cores</li>
+                <li><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> <code>unio-shell-polish.css</code> — polish do shell</li>
+                <li><i class="fas fa-universal-access" aria-hidden="true"></i> Skip link, foco visível e ARIA</li>
+            </ul>
+            <div class="dev-components-hero__actions">
+                <button type="button" class="btn-unio" data-shell-help-open>
+                    <i class="fas fa-circle-question" aria-hidden="true"></i> Abrir ajuda
+                </button>
+                <button type="button" class="btn-unio-ghost" data-shell-tour-restart>
+                    <i class="fas fa-route" aria-hidden="true"></i> Reiniciar tour do shell
+                </button>
+            </div>
+        </div>
+    </header>
+
+    {# ── Índice ── #}
+    <nav class="dev-components-toc unio-card" aria-label="Seções do guia">
+        <span class="dev-components-toc__label">Ir para</span>
+        <ul class="dev-components-toc__list">
+            <li><a href="#devCompBadges">Badges</a></li>
+            <li><a href="#devCompButtons">Botões</a></li>
+            <li><a href="#devCompKpis">KPIs e cards</a></li>
+            <li><a href="#devCompEmpty">Empty states</a></li>
+            <li><a href="#devCompForms">Formulários</a></li>
+            <li><a href="#devCompShell">Shell</a></li>
+        </ul>
+    </nav>
+
+    {# ── Badges ── #}
+    <section class="dev-components-section unio-card" id="devCompBadges" aria-labelledby="devCompBadgesTitle">
+        {% include 'components/section_header.html.twig' with {
+            title: 'Badges e status',
+            subtitle: 'Perfis de acesso e estados operacionais'
+        } %}
+        <div class="dev-components-panel">
+            <p class="dev-components-panel__label">Perfis</p>
+            <div class="dev-components-grid dev-components-grid--inline">
+                {% include 'components/perfil_tag.html.twig' with {
+                    label: 'Gestor',
+                    class: 'gestor',
+                    description: 'Acesso a hubs de gestão e RH.'
+                } %}
+                {% include 'components/perfil_tag.html.twig' with {
+                    label: 'Supervisor',
+                    class: 'supervisor',
+                    description: 'Supervisão de equipes e operações.'
+                } %}
+            </div>
+            <p class="dev-components-panel__label">Status</p>
+            <div class="dev-components-grid dev-components-grid--inline">
+                {% include 'components/status_badge.html.twig' with { label: 'Ativo', variant: 'success' } %}
+                {% include 'components/status_badge.html.twig' with { label: 'Em análise', variant: 'warning' } %}
+                {% include 'components/status_badge.html.twig' with { label: 'Arquivado', variant: 'secondary' } %}
+                {% include 'components/status_badge.html.twig' with { label: 'Crítico', variant: 'danger' } %}
+            </div>
+        </div>
+    </section>
+
+    {# ── Botões ── #}
+    <section class="dev-components-section unio-card" id="devCompButtons" aria-labelledby="devCompButtonsTitle">
+        {% include 'components/section_header.html.twig' with {
+            title: 'Botões',
+            subtitle: 'Hierarquia de ações primárias, secundárias e destrutivas'
+        } %}
+        <div class="dev-components-panel dev-components-btn-showcase">
+            <div class="dev-components-btn-group">
+                <p class="dev-components-panel__label">Primários</p>
+                <div class="dev-components-btn-row">
+                    <div class="dev-components-btn-sample">
+                        <button type="button" class="btn-unio">
+                            <i class="fas fa-check" aria-hidden="true"></i> Salvar alterações
+                        </button>
+                        <code class="dev-components-btn-caption">.btn-unio</code>
+                    </div>
+                    <div class="dev-components-btn-sample">
+                        <button type="button" class="btn-unio-primary">Confirmar</button>
+                        <code class="dev-components-btn-caption">.btn-unio-primary</code>
+                    </div>
+                    <div class="dev-components-btn-sample">
+                        <button type="button" class="btn-unio-primary" disabled>Desabilitado</button>
+                        <code class="dev-components-btn-caption">:disabled</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dev-components-btn-group">
+                <p class="dev-components-panel__label">Secundários e outline</p>
+                <div class="dev-components-btn-row">
+                    <div class="dev-components-btn-sample">
+                        <button type="button" class="btn-unio-ghost">Cancelar</button>
+                        <code class="dev-components-btn-caption">.btn-unio-ghost</code>
+                    </div>
+                    <div class="dev-components-btn-sample">
+                        <button type="button" class="btn-unio-ghost">
+                            <i class="fas fa-filter" aria-hidden="true"></i> Filtrar
+                        </button>
+                        <code class="dev-components-btn-caption">com ícone</code>
+                    </div>
+                    <div class="dev-components-btn-sample">
+                        <button type="button" class="btn-unio-ghost btn-success-ghost">
+                            <i class="fas fa-check" aria-hidden="true"></i> Aprovar
+                        </button>
+                        <code class="dev-components-btn-caption">.btn-success-ghost</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dev-components-btn-group">
+                <p class="dev-components-panel__label">Destrutivos e alerta</p>
+                <div class="dev-components-btn-row">
+                    <div class="dev-components-btn-sample">
+                        <button type="button" class="btn-unio-ghost btn-danger-ghost">
+                            <i class="fas fa-trash" aria-hidden="true"></i> Excluir
+                        </button>
+                        <code class="dev-components-btn-caption">.btn-danger-ghost</code>
+                    </div>
+                    <div class="dev-components-btn-sample">
+                        <button type="button" class="btn-unio-ghost btn-danger-ghost">Remover acesso</button>
+                        <code class="dev-components-btn-caption">ação destrutiva</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dev-components-btn-group">
+                <p class="dev-components-panel__label">Barra de ações (formulários)</p>
+                <div class="dev-components-demo-box dev-components-demo-box--toolbar">
+                    <div class="dev-components-toolbar-demo">
+                        <button type="button" class="btn-unio-ghost">Cancelar</button>
+                        <button type="button" class="btn-unio">Salvar</button>
+                    </div>
+                    <p class="dev-components-toolbar-hint">Padrão: ghost à esquerda, primário à direita.</p>
+                </div>
+            </div>
+
+            <div class="dev-components-btn-group">
+                <p class="dev-components-panel__label">Grupo compacto (listas e toolbars)</p>
+                <div class="dev-components-demo-box dev-components-demo-box--toolbar">
+                    <div class="dev-components-toolbar-demo dev-components-toolbar-demo--split">
+                        <button type="button" class="btn-unio-ghost">
+                            <i class="fas fa-download" aria-hidden="true"></i> Exportar
+                        </button>
+                        <button type="button" class="btn-unio-ghost">
+                            <i class="fas fa-plus" aria-hidden="true"></i> Novo
+                        </button>
+                        <button type="button" class="btn-unio">Publicar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── KPIs ── #}
+    <section class="dev-components-section unio-card" id="devCompKpis" aria-labelledby="devCompKpisTitle">
+        {% include 'components/section_header.html.twig' with {
+            title: 'KPIs e cards',
+            subtitle: 'Indicadores numéricos e atalhos de navegação'
+        } %}
+        <div class="dev-components-panel">
+            {% include 'components/kpi_row.html.twig' with { items: [
+                { value: '128', label: 'Colaboradores', sub: 'Ativos', icon: 'fa-users', trend: 'up' },
+                { value: '12', label: 'Vagas abertas', sub: 'Recrutamento', icon: 'fa-briefcase' },
+                { value: '94%', label: 'SLA TI', sub: 'Últimos 30 dias', icon: 'fa-headset', trend: 'up' },
+                { value: '3', label: 'Alertas', sub: 'Pendentes', icon: 'fa-bell' },
+            ]} %}
+            <div class="row dev-components-cards-row">
+                <div class="col-md-6">
+                    {% include 'components/action_card.html.twig' with {
+                        title: 'Dashboard',
+                        subtitle: 'Visão geral da sua área de trabalho',
+                        route: 'app_dashboard',
+                        icon: 'fa-house',
+                        tone: 'accent'
+                    } %}
+                </div>
+                <div class="col-md-6">
+                    {% include 'components/action_card.html.twig' with {
+                        title: 'Unio Cortex',
+                        subtitle: 'Inteligência e visão consolidada',
+                        route: 'app_cortex',
+                        icon: 'fa-brain',
+                        tone: 'neutral'
+                    } %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── Empty states ── #}
+    <section class="dev-components-section unio-card" id="devCompEmpty" aria-labelledby="devCompEmptyTitle">
+        {% include 'components/section_header.html.twig' with {
+            title: 'Empty states',
+            subtitle: 'Listas vazias, stubs e telas sem dados'
+        } %}
+        <div class="dev-components-panel">
+            <div class="row">
+                <div class="col-lg-6 mb-3 mb-lg-0">
+                    <div class="dev-components-demo-box">
+                        {% include 'components/empty_state.html.twig' with {
+                            icon: 'fa-inbox',
+                            title: 'Nenhum registro',
+                            text: 'Quando houver dados, eles aparecerão aqui.',
+                            compact: true
+                        } %}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="dev-components-demo-box">
+                        {% include 'components/empty_state.html.twig' with {
+                            icon: 'fa-layer-group',
+                            title: 'Hub em desenvolvimento',
+                            text: 'Este módulo ainda está sendo implementado.',
+                            btn_label: 'Ver roadmap',
+                            btn_href: path('app_dashboard'),
+                            compact: true
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── Formulários ── #}
+    <section class="dev-components-section unio-card" id="devCompForms" aria-labelledby="devCompFormsTitle">
+        {% include 'components/section_header.html.twig' with {
+            title: 'Formulários e progresso',
+            subtitle: 'Campos temáticos e feedback de andamento'
+        } %}
+        <div class="dev-components-panel">
+            <div class="row">
+                <div class="col-lg-6 mb-3 mb-lg-0">
+                    <div class="dev-components-demo-box">
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'demo_name',
+                            name: 'demo_name',
+                            label: 'Nome completo',
+                            type: 'text',
+                            placeholder: 'Ex.: Ana Silva',
+                            required: true
+                        } %}
+                        {% include 'components/unio_form_field.html.twig' with {
+                            id: 'demo_status',
+                            name: 'demo_status',
+                            label: 'Status',
+                            type: 'select',
+                            value: 'ativo',
+                            options: [
+                                { value: 'ativo', label: 'Ativo' },
+                                { value: 'inativo', label: 'Inativo' },
+                            ]
+                        } %}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="dev-components-demo-box">
+                        <p class="dev-components-panel__label">Barras de progresso</p>
+                        <p class="dev-components-progress-label">Checklist de onboarding</p>
+                        {% include 'components/progress_inline.html.twig' with { percent: 35, variant: 'accent' } %}
+                        <p class="dev-components-progress-label">Conclusão de meta</p>
+                        {% include 'components/progress_inline.html.twig' with { percent: 72, variant: 'success' } %}
+                        <p class="dev-components-progress-label">Alerta operacional</p>
+                        {% include 'components/progress_inline.html.twig' with { percent: 88, variant: 'warning' } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── Shell ── #}
+    <section class="dev-components-section unio-card" id="devCompShell" aria-labelledby="devCompShellTitle">
+        {% include 'components/section_header.html.twig' with {
+            title: 'Shell da plataforma',
+            subtitle: 'Elementos do header e sidebar presentes em todas as telas'
+        } %}
+        <div class="dev-components-panel">
+            <ul class="dev-components-shell-grid">
+                <li class="dev-components-shell-item">
+                    <span class="dev-components-shell-item__icon" aria-hidden="true"><i class="fas fa-magnifying-glass"></i></span>
+                    <div>
+                        <strong>Busca global</strong>
+                        <p>Ctrl/⌘+K — filtros por núcleo, app e membro</p>
+                    </div>
+                </li>
+                <li class="dev-components-shell-item">
+                    <span class="dev-components-shell-item__icon" aria-hidden="true"><i class="fas fa-circle-question"></i></span>
+                    <div>
+                        <strong>Ajuda</strong>
+                        <p>Guias interativos e tour sob demanda no header</p>
+                    </div>
+                </li>
+                <li class="dev-components-shell-item">
+                    <span class="dev-components-shell-item__icon" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+                    <div>
+                        <strong>Núcleos</strong>
+                        <p>Navegação por domínio com tons de cor por hub</p>
+                    </div>
+                </li>
+                <li class="dev-components-shell-item">
+                    <span class="dev-components-shell-item__icon" aria-hidden="true"><i class="fas fa-sparkles"></i></span>
+                    <div>
+                        <strong>Vitória</strong>
+                        <p>Assistente virtual no canto superior direito</p>
+                    </div>
+                </li>
+                <li class="dev-components-shell-item">
+                    <span class="dev-components-shell-item__icon" aria-hidden="true"><i class="fas fa-user-circle"></i></span>
+                    <div>
+                        <strong>Identidade</strong>
+                        <p>Conta, workspace e tema no topo da sidebar</p>
+                    </div>
+                </li>
+                <li class="dev-components-shell-item">
+                    <span class="dev-components-shell-item__icon" aria-hidden="true"><i class="fas fa-grip"></i></span>
+                    <div>
+                        <strong>Apps</strong>
+                        <p>Launcher de módulos da plataforma no header</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </section>
+</div>
+{% endblock %}

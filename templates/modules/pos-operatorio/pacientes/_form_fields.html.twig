@@ -1,0 +1,71 @@
+{# Campos compartilhados — formulário paciente (offcanvas / partial) #}
+{% set _pfx = field_prefix|default('') %}
+
+<div class="form-group">
+    <label for="{{ _pfx }}nome">Nome completo *</label>
+    <input id="{{ _pfx }}nome" name="nome" class="form-control" required value="{{ paciente ? paciente.nome : '' }}">
+</div>
+
+<div class="form-group">
+    <label for="{{ _pfx }}procedimento">Procedimento</label>
+    <input id="{{ _pfx }}procedimento" name="procedimento" class="form-control" value="{{ paciente ? paciente.procedimento : '' }}">
+</div>
+
+<div class="form-group">
+    <label for="{{ _pfx }}data_cirurgia">Data da cirurgia</label>
+    <input id="{{ _pfx }}data_cirurgia" name="data_cirurgia" type="date" class="form-control"
+           value="{{ paciente and paciente.dataCirurgia ? paciente.dataCirurgia|date('Y-m-d') : '' }}">
+</div>
+
+<div class="form-group">
+    <label for="{{ _pfx }}telefone">Telefone de contato</label>
+    <input id="{{ _pfx }}telefone" name="telefone" class="form-control" value="{{ paciente ? paciente.telefoneContato : '' }}">
+</div>
+
+<div class="form-group">
+    <label for="{{ _pfx }}protocolo_id">Protocolo</label>
+    <select id="{{ _pfx }}protocolo_id" name="protocolo_id" class="form-control">
+        <option value="">— Selecione —</option>
+        {% for pr in protocolos %}
+        <option value="{{ pr.id }}"{{ paciente and paciente.protocolo and paciente.protocolo.id == pr.id ? ' selected' : '' }}>
+            {{ pr.nome }}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="{{ _pfx }}medico_id">Médico responsável</label>
+    <select id="{{ _pfx }}medico_id" name="medico_id" class="form-control">
+        <option value="">— Selecione —</option>
+        {% for m in medicos %}
+        <option value="{{ m.id }}"{{ paciente and paciente.medicoResponsavel and paciente.medicoResponsavel.id == m.id ? ' selected' : '' }}>
+            {{ m.nome }}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="{{ _pfx }}portal_user_id">Usuário do portal (login do paciente)</label>
+    <select id="{{ _pfx }}portal_user_id" name="portal_user_id" class="form-control">
+        <option value="">— Nenhum —</option>
+        {% for u in portal_users %}
+        <option value="{{ u.id }}"{{ paciente and paciente.portalUser and paciente.portalUser.id == u.id ? ' selected' : '' }}>
+            {{ u.nome }} ({{ u.email }})
+        </option>
+        {% endfor %}
+    </select>
+    <small class="text-muted">Este usuário acessa o questionário em /pos-operatorio/portal</small>
+</div>
+
+{% if paciente %}
+<div class="form-group">
+    <label for="{{ _pfx }}status">Status</label>
+    <select id="{{ _pfx }}status" name="status" class="form-control">
+        {% for st in ['ativo', 'pendente', 'encerrado'] %}
+        <option value="{{ st }}"{{ paciente.status == st ? ' selected' : '' }}>{{ st|capitalize }}</option>
+        {% endfor %}
+    </select>
+</div>
+{% endif %}

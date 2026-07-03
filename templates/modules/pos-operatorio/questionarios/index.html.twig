@@ -1,0 +1,78 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Questionários · Pós-Operatório{% endblock %}
+{% block permissions_scope %}hub_pos_operatorio{% endblock %}
+
+{% set hub_page_title = 'Questionários' %}
+{% set hub_page_subtitle = 'Respostas diárias dos pacientes' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_portal') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-mobile-screen mr-1"></i> Portal do paciente
+</a>
+<a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1"></i> Visão geral
+</a>
+{% endblock %}
+
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: stats.hoje, label: 'Respondidos hoje', icon: 'fa-file-medical' },
+        { value: stats.pendentes, label: 'Pendentes hoje', icon: 'fa-clock' },
+        { value: stats.total, label: 'Últimas respostas', icon: 'fa-list' },
+    ], mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Paciente</th>
+                    <th>Fase</th>
+                    <th>Dor</th>
+                    <th>Febre</th>
+                    <th>Score</th>
+                    <th>Enviado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in items %}
+                <tr>
+                    <td>{{ row.data }}</td>
+                    <td>
+                        <strong>{{ row.paciente_nome }}</strong><br>
+                        <code class="admin-table-mono">{{ row.paciente_codigo }}</code>
+                    </td>
+                    <td>{% if row.dia_pos is not null %}D+{{ row.dia_pos }}{% else %}—{% endif %}</td>
+                    <td>{{ row.dor }}</td>
+                    <td>{{ row.febre }}</td>
+                    <td>
+                        {% include 'components/status_badge.html.twig' with {
+                            label: row.score,
+                            variant: row.score >= 70 ? 'danger' : (row.score >= 40 ? 'warning' : 'success')
+                        } %}
+                        {% if row.alerta_gerado %}
+                        <span class="badge-perfil danger ml-1">Alerta</span>
+                        {% endif %}
+                    </td>
+                    <td class="admin-table-date">{{ row.respondido_em }}</td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: row.paciente_id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-muted p-4">Nenhuma resposta registrada ainda.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

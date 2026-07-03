@@ -1,0 +1,35 @@
+{#
+  shell_tour — overlay de tour contextual do shell
+#}
+{% if app.user and onboarding_tour_json|default('{}') != '{}' %}
+<script type="application/json" id="shellTourConfig">{{ onboarding_tour_json|raw }}</script>
+<div id="shellTourMount"
+     data-user-id="{{ app.user.id }}"
+     data-route="{{ app.request.attributes.get('_route') }}"
+     data-tour-complete-url="{{ path('app_onboarding_tour_complete') }}"
+     data-csrf-token="{{ csrf_token('onboarding_tour') }}"></div>
+<div id="shellTour" class="shell-tour" hidden>
+    <div class="shell-tour__backdrop" data-shell-tour-backdrop></div>
+    <div class="shell-tour__spotlight" data-shell-tour-spotlight hidden></div>
+    <div class="shell-tour__card" data-shell-tour-card role="dialog" aria-modal="true" aria-labelledby="shellTourTitle">
+        <span class="shell-tour__arrow" data-shell-tour-arrow aria-hidden="true"></span>
+        <div class="shell-tour__card-inner">
+            <div class="shell-tour__card-head">
+                <span class="shell-tour__step" data-shell-tour-step>1 / 1</span>
+                <button type="button" class="shell-tour__close" data-shell-tour-close aria-label="Fechar tour">
+                    <i class="fas fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+            <h2 class="shell-tour__title" id="shellTourTitle" data-shell-tour-title></h2>
+            <p class="shell-tour__body" data-shell-tour-body></p>
+            <div class="shell-tour__actions">
+                <button type="button" class="shell-tour__skip" data-shell-tour-skip>Pular tour</button>
+                <div class="shell-tour__nav">
+                    <button type="button" class="btn-unio-ghost btn-unio--sm" data-shell-tour-prev>Anterior</button>
+                    <button type="button" class="btn-unio btn-unio--sm" data-shell-tour-next>Próximo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
