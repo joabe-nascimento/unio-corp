@@ -57,11 +57,31 @@ if ! grep -q "$CSS_MARKER" "$DEPLOY_PATH/public/css/unio-app.css"; then
   exit 1
 fi
 
-# Falha se public_html (document root em alguns setups) ficou com CSS antigo.
-if [[ -f "$PUBLIC_HTML/css/unio-app.css" ]] && ! grep -q "$CSS_MARKER" "$PUBLIC_HTML/css/unio-app.css"; then
-  echo "ERRO: $PUBLIC_HTML/css/unio-app.css desatualizado após sync — verifique document root no cPanel."
-  ls -la "$DEPLOY_PATH/public/css/unio-app.css" "$PUBLIC_HTML/css/unio-app.css" 2>/dev/null || true
-  exit 1
+# Falha se public_html (document root) ficou com CSS antigo ou tamanho divergente.
+if [[ -f "$PUBLIC_HTML/css/unio-app.css" ]]; then
+  if ! grep -q "$CSS_MARKER" "$PUBLIC_HTML/css/unio-app.css"; then
+    echo "ERRO: $PUBLIC_HTML/css/unio-app.css desatualizado após sync — verifique document root no cPanel."
+    ls -la "$DEPLOY_PATH/public/css/unio-app.css" "$PUBLIC_HTML/css/unio-app.css" 2>/dev/null || true
+    exit 1
+  fi
+  src_bytes=$(wc -c < "$DEPLOY_PATH/public/css/unio-app.css" | tr -d ' ')
+  dest_bytes=$(wc -c < "$PUBLIC_HTML/css/unio-app.css" | tr -d ' ')
+  if [[ "$src_bytes" != "$dest_bytes" ]]; then
+    echo "ERRO: tamanho CSS diverge após sync (unio=$src_bytes public_html=$dest_bytes)"
+    ls -la "$DEPLOY_PATH/public/css/unio-app.css" "$PUBLIC_HTML/css/unio-app.css" 2>/dev/null || true
+    exit 1
+  fi
+  echo "CSS OK: unio-app.css $dest_bytes bytes em unio e public_html"
 fi
 
-echo "Deploy server OK — $DEPLOY_PATH (CSS app: $(wc -c < "$DEPLOY_PATH/public/css/unio-app.css" | tr -d ' ') bytes)"
+if [[ -f "$PUBLIC_HTML/css/unio-app.min.css" && -f "$DEPLOY_PATH/public/css/unio-app.min.css" ]]; then
+  src_min=$(wc -c < "$DEPLOY_PATH/public/css/unio-app.min.css" | tr -d ' ')
+  dest_min=$(wc -c < "$PUBLIC_HTML/css/unio-app.min.css" | tr -d ' ')
+  if [[ "$src_min" != "$dest_min" ]]; then
+    echo "ERRO: tamanho unio-app.min.css diverge (unio=$src_min public_html=$dest_min)"
+    exit 1
+  fi
+  echo "CSS OK: unio-app.min.css $dest_min bytes em unio e public_html"
+fi
+
+echo "Deploy server OK — $DEPLOY_PATH"
