@@ -6,11 +6,26 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class VitoriaChatApiTest extends WebTestCase
 {
-    public function testAuthenticatedChatProxyReturnsVitoriaReply(): void
+    private static function requireVitoriaPythonOnline(): void
     {
-        if (!getenv('VITORIA_AI_URL') && !($_ENV['VITORIA_AI_URL'] ?? '')) {
+        $url = getenv('VITORIA_AI_URL') ?: ($_ENV['VITORIA_AI_URL'] ?? '');
+        if ($url === '') {
             self::markTestSkipped('VITORIA_AI_URL não configurado.');
         }
+
+        $parts = parse_url($url);
+        $host = $parts['host'] ?? '127.0.0.1';
+        $port = (int) ($parts['port'] ?? 8100);
+        $fp = @fsockopen($host, $port, $errno, $errstr, 2);
+        if ($fp === false) {
+            self::markTestSkipped(sprintf('Vitória Python offline em %s:%d (%s)', $host, $port, $errstr ?: 'sem conexão'));
+        }
+        fclose($fp);
+    }
+
+    public function testAuthenticatedChatProxyReturnsVitoriaReply(): void
+    {
+        self::requireVitoriaPythonOnline();
 
         $client = static::createClient();
         $client->request('GET', '/login');
@@ -45,6 +60,7 @@ final class VitoriaChatApiTest extends WebTestCase
 
     public function testVitoriaStatusReportsOnlineWhenPythonRunning(): void
     {
+        self::requireVitoriaPythonOnline();
         $client = static::createClient();
         $client->request('GET', '/login');
         $client->submitForm('Entrar na plataforma', [
