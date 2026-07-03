@@ -1,0 +1,195 @@
+# Deploy reutilizavel — HostGator via SSH.
+# Secrets SSH no repositorio (Settings -> Secrets). Variaveis de path no GitHub Environment.
+
+name: Deploy (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      github_environment:
+        required: true
+        type: string
+      deploy_path_default:
+        required: true
+        type: string
+      deploy_public_html_default:
+        required: true
+        type: string
+      archive_remote_name:
+        required: false
+        type: string
+        default: deploy.tar.gz
+      skip_unio_platform_steps:
+        required: false
+        type: boolean
+        default: false
+      report_artifact_prefix:
+        required: false
+        type: string
+        default: deploy-report
+      failure_summary_title:
+        required: false
+        type: string
+        default: Falha no deploy
+    secrets:
+      DEPLOY_SSH_HOST:
+        required: true
+      DEPLOY_SSH_USER:
+        required: true
+      DEPLOY_SSH_KEY:
+        required: true
+      DEPLOY_SSH_PORT:
+        required: true
+      MAILBOX_JOABE_PASSWORD:
+        required: false
+      MAILBOX_UNIO_PASSWORD:
+        required: false
+      PLATFORM_OWNER_PASSWORD:
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.github_environment }}
+
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_SSH_USER }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML }}
+      ARCHIVE_REMOTE: ${{ inputs.archive_remote_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: ctype, iconv, mbstring, pdo_mysql, zip
+          coverage: none
+
+      - name: Install Composer dependencies (prod)
+        run: composer install --no-dev --no-progress --prefer-dist --optimize-autoloader --no-scripts
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Sync public vendor assets
+        run: |
+          npm ci
+          npm run vendor:sync
+          php bin/minify-css.php
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null || { echo "Chave SSH invalida — verifique DEPLOY_SSH_KEY no repositorio"; exit 1; }
+          ssh-keyscan -p "${DEPLOY_PORT:-2222}" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Create and upload deploy archive
+        run: |
+          ARCHIVE="${RUNNER_TEMP}/deploy.tar.gz"
+          tar --exclude='.git' \
+              --exclude='.github' \
+              --exclude='node_modules' \
+              --exclude='.env' \
+              --exclude='.env.*' \
+              --exclude='var/cache' \
+              --exclude='var/log' \
+              --exclude='public/uploads' \
+              --exclude='tests' \
+              --exclude='docs' \
+              --exclude='services' \
+              --exclude='.cursor' \
+              --exclude='deploy.tar.gz' \
+              --exclude='phpunit.xml.dist' \
+              --exclude='.phpunit.cache' \
+              -czf "$ARCHIVE" .
+
+          scp -i ~/.ssh/deploy_key \
+              -P "${DEPLOY_PORT:-2222}" \
+              -o StrictHostKeyChecking=accept-new \
+              -o BatchMode=yes \
+              "$ARCHIVE" \
+              "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/${ARCHIVE_REMOTE}"
+
+      - name: Extract and post-deploy on server
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          SKIP_UNIO: ${{ inputs.skip_unio_platform_steps }}
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          script_stop: true
+          script: |
+            DEPLOY_PATH="${{ vars.DEPLOY_PATH }}"
+            DEPLOY_PATH="${DEPLOY_PATH:-${{ inputs.deploy_path_default }}}"
+            PUBLIC_HTML="${{ vars.DEPLOY_PUBLIC_HTML }}"
+            PUBLIC_HTML="${PUBLIC_HTML:-${{ inputs.deploy_public_html_default }}}"
+
+            mkdir -p "$DEPLOY_PATH"
+            tar -xzf "/tmp/${{ inputs.archive_remote_name }}" -C "$DEPLOY_PATH"
+            rm -f "/tmp/${{ inputs.archive_remote_name }}"
+
+            export DEPLOY_PATH PUBLIC_HTML
+            export PHP_BIN="${PHP_BIN:-php}"
+            export GITHUB_SHA="${{ github.sha }}"
+            export GITHUB_REF_NAME="${{ github.ref_name }}"
+            if [[ "${{ inputs.skip_unio_platform_steps }}" == "true" ]]; then
+              export SKIP_UNIO_PLATFORM_STEPS=1
+            else
+              export MAILBOX_JOABE_PASSWORD="${{ secrets.MAILBOX_JOABE_PASSWORD }}"
+              export MAILBOX_UNIO_PASSWORD="${{ secrets.MAILBOX_UNIO_PASSWORD }}"
+              export PLATFORM_OWNER_PASSWORD="${{ secrets.PLATFORM_OWNER_PASSWORD }}"
+            fi
+            bash "${DEPLOY_PATH}/scripts/deploy-server.sh" || {
+              echo "========== DEPLOY REPORT =========="
+              cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || echo "(sem relatorio)"
+              exit 1
+            }
+            echo "========== DEPLOY REPORT =========="
+            cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || true
+
+      - name: Baixar relatorio de deploy (sucesso ou falha)
+        if: always() && (success() || failure())
+        env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || inputs.deploy_path_default }}
+        run: |
+          mkdir -p deploy-reports
+          scp -i ~/.ssh/deploy_key \
+              -P "${DEPLOY_PORT:-2222}" \
+              -o StrictHostKeyChecking=accept-new \
+              -o BatchMode=yes \
+              "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/var/log/deploy-report.txt" \
+              deploy-reports/deploy-report.txt 2>/dev/null || echo "Relatorio remoto indisponivel" > deploy-reports/deploy-report.txt
+
+      - name: Upload relatorio de deploy
+        if: always() && (success() || failure())
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.report_artifact_prefix }}-${{ github.run_id }}
+          path: deploy-reports/deploy-report.txt
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Resumo de falha do deploy
+        if: failure()
+        run: |
+          if [[ -f deploy-reports/deploy-report.txt ]]; then
+            {
+              echo "## ${{ inputs.failure_summary_title }}"
+              echo '```text'
+              cat deploy-reports/deploy-report.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

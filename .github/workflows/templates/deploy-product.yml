@@ -1,0 +1,30 @@
+name: Deploy Product __SLUG_TITLE__
+
+on:
+  push:
+    branches:
+      - __BRANCH__
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-product-__SLUG__
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate-reusable.yml
+    with:
+      git_branch: __BRANCH__
+
+  deploy:
+    needs: validate
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      github_environment: __GITHUB_ENV__
+      deploy_path_default: __DEPLOY_PATH__
+      deploy_public_html_default: __PUBLIC_HTML__
+      archive_remote_name: deploy-__SLUG__.tar.gz
+      skip_unio_platform_steps: true
+      report_artifact_prefix: deploy-report-__SLUG__
+      failure_summary_title: Falha no deploy __SLUG_TITLE__
+    secrets: inherit

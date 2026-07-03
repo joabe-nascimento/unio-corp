@@ -122,7 +122,7 @@ push production
 
 Deploy **não inicia** se validate falhar.
 
-### Secrets (environment `production`)
+### Secrets SSH (repositório — compartilhados)
 
 | Secret | Uso |
 |--------|-----|
@@ -130,15 +130,29 @@ Deploy **não inicia** se validate falhar.
 | `DEPLOY_SSH_USER` | Usuário SSH |
 | `DEPLOY_SSH_KEY` | Chave privada OpenSSH |
 | `DEPLOY_SSH_PORT` | Porta (ex.: 2222) |
+
+Usados por **Deploy Production**, **Deploy Product RH** e futuros homologs via `deploy-reusable.yml` (`secrets: inherit`).
+
+### Secrets (environment `production` — só Unio)
+
+| Secret | Uso |
+|--------|-----|
 | `MAILBOX_JOABE_PASSWORD` | Caixa joabe@ (opcional) |
 | `PLATFORM_OWNER_PASSWORD` | Reset senha owner (opcional) |
 
-### Variables
+### Variables por environment
 
-| Variable | Exemplo |
-|----------|---------|
-| `DEPLOY_PATH` | `/home2/joabef36/unio` |
-| `DEPLOY_PUBLIC_HTML` | `/home2/joabef36/public_html` |
+| Environment | Variables |
+|-------------|-----------|
+| `production` | `DEPLOY_PATH`, `DEPLOY_PUBLIC_HTML` |
+| `product-rh` | `DEPLOY_PATH`, `DEPLOY_PUBLIC_HTML`, `DEFAULT_URI` |
+
+### Homolog de produto (`product/rh`)
+
+- Workflow: `deploy-product-rh.yml` → `deploy-reusable.yml`
+- CI no push: só validate dentro do deploy (sem run duplicado em `ci.yml`)
+- Novo produto: `bash scripts/scaffold-product-homolog.sh <slug> [--apply-server] [--apply-github]`
+- Branches de homolog listadas em `config/deploy-branches.txt` (ignoradas por `sync-branches.sh`)
 
 ---
 
@@ -171,6 +185,7 @@ Desenvolver
 ## O que ainda não existe no Actions
 
 - Deploy automático para `new_staging` / `new_staging2`
+- Deploy automático para outros `product/*` além de `product/rh` (use `scaffold-product-homolog.sh`)
 - Notificação Slack/email em falha
 
 Ver também: [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md) · [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md)

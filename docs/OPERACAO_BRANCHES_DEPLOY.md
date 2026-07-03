@@ -83,7 +83,7 @@ Push direto em `feature/*` ou `product/*` **não dispara CI** — use PR para va
 
 ### 3. Sincronizar branches espelho (todas iguais)
 
-Depois de um deploy importante, alinhar `main`, `product/*` e `feature/*` com `production`:
+Depois de um deploy importante, alinhar `main`, `product/*` (espelho) e `feature/*` com `production`:
 
 ```bash
 git fetch origin
@@ -94,8 +94,11 @@ bash scripts/sync-branches.sh production
 |----------|-------------------------|
 | Branch só atrás de `production` | Fast-forward (seguro) |
 | Branch divergiu (commits exclusivos) | Reset forçado para `production` |
+| Branch em `config/deploy-branches.txt` | **Ignorada** (homolog com deploy próprio) |
 
-**Por que não dispara dezenas de CI:** push em `product/*` e `feature/*` não está no trigger do `ci.yml`. Só `production`, `main` e staging disparam CI no push.
+**Branches de homolog/deploy** (ex.: `product/rh`) **nunca** entram no sync — commits exclusivos do produto ficam preservados.
+
+**Por que não dispara dezenas de CI:** push em `product/*` e `feature/*` não está no trigger do `ci.yml`. `product/rh` valida no workflow **Deploy Product RH** (sem CI duplicado).
 
 ---
 

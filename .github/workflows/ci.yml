@@ -1,7 +1,7 @@
 name: CI
 
-# CI só em push para branches “oficiais”. product/** e feature/** validam via PR
-# (evita dezenas de runs idênticos ao sincronizar branches espelho).
+# CI em push: branches oficiais (sem product/rh — validate roda no workflow Deploy Product RH).
+# product/** e feature/** validam via PR.
 on:
   push:
     branches:
@@ -9,7 +9,6 @@ on:
       - production
       - new_staging
       - new_staging2
-      - product/rh
   pull_request:
     branches:
       - main
