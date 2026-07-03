@@ -1427,7 +1427,7 @@
         .content--with-toolbar .container-fluid--page-body {
             padding: 0;
             max-width: 100%;
-            background: var(--surface);
+            background: transparent;
         }
         .content--with-toolbar .container-fluid--page-body:has(.empty-state-panel) {
             flex: 1 1 auto;
@@ -25936,41 +25936,18 @@ body.layout-inset-shell .content-wrapper {
     min-height: 0;
     margin-left: 0 !important;
     margin-top: 0 !important;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden;
     background: var(--inset-panel-bg) !important;
     display: flex;
     flex-direction: column;
 }
 
-body.layout-inset-shell .content-wrapper:has(.empty-state-panel),
-body.layout-inset-shell .content-wrapper:has(.chat-page) {
-    overflow: hidden;
-}
-
 body.layout-inset-shell .content-wrapper > .app-page-scroll {
     flex: 1 1 auto;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Hubs/listas em scroll — área não estica; rodapé segue o conteúdo (não “fixo”) */
-body.layout-inset-shell .content-wrapper > .app-page-scroll:has(.page-body-scroll) {
-    flex: 0 1 auto;
-    min-height: auto;
-    overflow: visible;
-}
-
-body.layout-inset-shell .content-wrapper > .main-footer {
-    flex-shrink: 0;
-    margin-top: 0;
-}
-
-/* Páginas hero/empty-state — preenchem o painel; rodapé no fim do painel */
-body.layout-inset-shell .content-wrapper:has(.empty-state-panel) > .main-footer,
-body.layout-inset-shell .content-wrapper:has(.page-body-fill) > .main-footer {
-    margin-top: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: block;
 }
 
 body.layout-inset-shell .app-page-chrome {
@@ -25980,52 +25957,45 @@ body.layout-inset-shell .app-page-chrome {
 
 body.layout-inset-shell .app-page-scroll {
     background: var(--inset-panel-bg);
+    border-radius: 0;
+}
+
+/* Rodapé dentro do scroll — fluxo natural, sem pinar no viewport */
+body.layout-inset-shell .app-page-scroll > .main-footer {
+    margin-top: 0;
+    flex-shrink: 0;
+    width: 100%;
     border-radius: 0 0 var(--inset-radius-br) 0;
 }
 
-/* Scroll interno — só fill/empty-state esticam; hub scroll usa fluxo natural */
+/* Scroll interno — fill/empty-state preenchem; hub scroll usa fluxo natural */
 body.layout-inset-shell .app-page-scroll:has(.page-body-fill),
 body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) {
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
-}
-
-body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) {
-    display: block;
-    flex: 0 1 auto;
-    min-height: auto;
 }
 
 body.layout-inset-shell .app-page-scroll:has(.page-body-fill) > .content,
-body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) > .content,
-body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) > .content {
+body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) > .content {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
-}
-
-body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) > .content {
-    flex: 0 1 auto;
-    min-height: auto;
-    display: block;
 }
 
 body.layout-inset-shell .app-page-scroll:has(.page-body-fill) .container-fluid--page-body,
-body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) .container-fluid--page-body,
-body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) .container-fluid--page-body {
+body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) .container-fluid--page-body {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
 }
 
+body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) > .content,
 body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) .container-fluid--page-body {
-    flex: 0 1 auto;
-    min-height: auto;
+    flex: none;
     display: block;
+    min-height: auto;
 }
 
 body.layout-inset-shell .page-body-fill,
@@ -26179,6 +26149,7 @@ body.layout-inset-shell.layout-footer-fixed .wrapper .main-footer {
     bottom: auto !important;
     flex-shrink: 0;
     margin-left: 0 !important;
+    margin-top: 0;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -26198,11 +26169,21 @@ body.layout-inset-shell.layout-footer-fixed .wrapper .main-footer {
     background: var(--inset-panel-bg) !important;
 }
 
-/* Hub / toolbar — mesmo fundo do painel inset (sem faixa --bg pela metade) */
+/* Inset shell — fundo único do painel; cards trazem sua própria superfície (componentes) */
 body.layout-inset-shell .page-lead-zone,
 body.layout-inset-shell .list-toolbar--page,
 body.layout-inset-shell .page-lead-kpis,
-body.layout-inset-shell .content--with-toolbar .container-fluid--page-body {
+body.layout-inset-shell .content--with-toolbar .container-fluid--page-body,
+body.layout-inset-shell .page-body-inner {
+    background: transparent !important;
+}
+
+[data-theme="light"] body.layout-inset-shell .page-lead-zone,
+[data-theme="light"] body.layout-inset-shell .page-lead-kpis,
+[data-theme="light"] body.layout-inset-shell .list-toolbar--page,
+[data-theme="light"] body.layout-inset-shell .content-wrapper,
+[data-theme="light"] body.layout-inset-shell .content,
+[data-theme="light"] body.layout-inset-shell .app-page-scroll {
     background: var(--inset-panel-bg) !important;
 }
 
