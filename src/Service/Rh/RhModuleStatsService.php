@@ -76,7 +76,7 @@ class RhModuleStatsService
         foreach (RhModuleCatalog::all() as $mod) {
             $id = $mod['id'];
             $stat = $counts[$id] ?? ['count' => 0, 'label' => '—'];
-            $count = (int) ($stat['count'] ?? 0);
+            $count = (int) $stat['count'];
             $pulse = (bool) ($mod['activity_pulse'] ?? false);
             $modules[] = array_merge($mod, [
                 'count' => $count,
