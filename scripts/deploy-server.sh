@@ -110,6 +110,16 @@ CI_REPORT_STEP="Sincronizar identidade de e-mail"
 ci_report_step "$CI_REPORT_STEP"
 $PHP_BIN bin/console app:platform:sync-email-identity --no-interaction 2>/dev/null || true
 
+if [[ -n "${PLATFORM_OWNER_PASSWORD:-}" ]]; then
+  CI_REPORT_STEP="Atualizar senha PLATFORM_OWNER"
+  ci_report_step "$CI_REPORT_STEP"
+  $PHP_BIN bin/console app:ensure-platform-owner \
+    --allow-prod \
+    --email=joabe@uniowork.com.br \
+    --password="$PLATFORM_OWNER_PASSWORD" \
+    --no-interaction 2>/dev/null || true
+fi
+
 CI_REPORT_STEP="Caixas de e-mail (cPanel)"
 ci_report_step "$CI_REPORT_STEP"
 bash "$DEPLOY_PATH/scripts/setup-platform-mailboxes.sh" 2>/dev/null || true
