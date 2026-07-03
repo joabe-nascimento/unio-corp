@@ -137,3 +137,9 @@ Criadas no repositório — não é preciso recriar:
 - `product/publicidade`, `product/admin`
 
 `hotfix/*` e `release/*` são criadas **sob demanda** (uma branch por correção ou por versão).
+
+## Cliente dedicado (deploy isolado)
+
+Para contratos com instância própria (domínio + banco + branch `client/*`), use a matriz completa em [OPERACAO_CLIENTE_MATRIZ.md](OPERACAO_CLIENTE_MATRIZ.md).
+
+Exemplo ilustrativo: `client/uniao-medica` com RH + Pós-operatório — ver tabela de módulos, URLs e checklist de configuração no documento acima.

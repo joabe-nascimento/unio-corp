@@ -6,6 +6,7 @@ Documentação consolidada após estabilização do deploy HostGator, CI/CD e va
 |-----------|----------|
 | [OPERACAO_HISTORICO_CORRECOES.md](OPERACAO_HISTORICO_CORRECOES.md) | Cronologia completa: erros → correções → sucesso |
 | [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md) | Como cada branch funciona **a partir de hoje** |
+| [OPERACAO_CLIENTE_MATRIZ.md](OPERACAO_CLIENTE_MATRIZ.md) | Matriz cliente × produto × branch × URL (contratos e deploy dedicado) |
 | [OPERACAO_GITHUB_ACTIONS.md](OPERACAO_GITHUB_ACTIONS.md) | Workflows CI, validate e Deploy Production |
 | [OPERACAO_VALIDACAO_LOCAL.md](OPERACAO_VALIDACAO_LOCAL.md) | Script, Docker Compose, hooks git, comandos |
 | [OPERACAO_EMAIL_PLATAFORMA.md](OPERACAO_EMAIL_PLATAFORMA.md) | E-mails HostGator/Titan, login, assinaturas, secrets e deploy |
