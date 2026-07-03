@@ -106,6 +106,14 @@ if [[ -f "$PUBLIC_HTML/css/unio-app.min.css" && -f "$DEPLOY_PATH/public/css/unio
   echo "CSS OK: unio-app.min.css $dest_min bytes em unio e public_html"
 fi
 
+CI_REPORT_STEP="Sincronizar identidade de e-mail"
+ci_report_step "$CI_REPORT_STEP"
+$PHP_BIN bin/console app:platform:sync-email-identity --no-interaction 2>/dev/null || true
+
+CI_REPORT_STEP="Caixas de e-mail (cPanel)"
+ci_report_step "$CI_REPORT_STEP"
+bash "$DEPLOY_PATH/scripts/setup-platform-mailboxes.sh" 2>/dev/null || true
+
 CI_REPORT_STEP="Registrar revisão de deploy"
 ci_report_step "$CI_REPORT_STEP"
 mkdir -p var/deploy

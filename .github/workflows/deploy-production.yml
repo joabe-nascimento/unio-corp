@@ -110,6 +110,8 @@ jobs:
             export PHP_BIN="${PHP_BIN:-php}"
             export GITHUB_SHA="${{ github.sha }}"
             export GITHUB_REF_NAME="${{ github.ref_name }}"
+            export MAILBOX_JOABE_PASSWORD="${{ secrets.MAILBOX_JOABE_PASSWORD }}"
+            export MAILBOX_UNIO_PASSWORD="${{ secrets.MAILBOX_UNIO_PASSWORD }}"
             bash "${DEPLOY_PATH}/scripts/deploy-server.sh" || {
               echo "========== DEPLOY REPORT =========="
               cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || echo "(sem relatório)"

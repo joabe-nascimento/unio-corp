@@ -35,7 +35,7 @@ class EnsurePlatformOwnerCommand extends Command
     {
         $this->configureProdSeedGuard();
         $this
-            ->addOption('email', null, InputOption::VALUE_REQUIRED, 'E-mail da conta pessoal', 'joabenascimento1@outlook.com')
+            ->addOption('email', null, InputOption::VALUE_REQUIRED, 'E-mail da conta pessoal', 'joabe@uniowork.com.br')
             ->addOption('nome', null, InputOption::VALUE_REQUIRED, 'Nome exibido', 'Joabe Fonseca do Nascimento')
             ->addOption('password', 'p', InputOption::VALUE_REQUIRED, 'Senha (obrigatória ao criar usuário novo)');
     }
