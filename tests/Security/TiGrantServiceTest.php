@@ -72,9 +72,19 @@ class TiGrantServiceTest extends TestCase
     public function testTenantBypassesAssert(): void
     {
         $tenant = $this->createMock(User::class);
-        $tenant->method('isTenant')->willReturn(true);
+        $tenant->method('hasPlatformAccess')->willReturn(true);
 
         $this->service->assert($tenant, false);
+
+        self::assertTrue(true);
+    }
+
+    public function testPlatformOwnerBypassesAssert(): void
+    {
+        $owner = $this->createMock(User::class);
+        $owner->method('hasPlatformAccess')->willReturn(true);
+
+        $this->service->assert($owner, false);
 
         self::assertTrue(true);
     }
@@ -83,7 +93,7 @@ class TiGrantServiceTest extends TestCase
     {
         $user = $this->createMock(User::class);
         $user->method('getId')->willReturn($id);
-        $user->method('isTenant')->willReturn(false);
+        $user->method('hasPlatformAccess')->willReturn(false);
 
         return $user;
     }

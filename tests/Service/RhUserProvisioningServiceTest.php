@@ -90,7 +90,24 @@ class RhUserProvisioningServiceTest extends TestCase
         $state = $this->service->resolvePlatformAccountState($process);
 
         self::assertSame('blocked', $state['state']);
-        self::assertStringContainsString('tenant', strtolower((string) $state['reason']));
+        self::assertStringContainsString('plataforma', strtolower((string) $state['reason']));
+    }
+
+    public function testResolvePlatformAccountStateBlockedForPlatformOwner(): void
+    {
+        $process = $this->makeProcess('owner@example.com');
+        $process->setEmpresa(new Empresa());
+        $user = (new User())
+            ->setEmail('owner@example.com')
+            ->setPerfil('PLATFORM_OWNER')
+            ->setRoles([User::ROLE_PLATFORM_OWNER]);
+
+        $this->userRepo->method('findOneBy')->willReturn($user);
+
+        $state = $this->service->resolvePlatformAccountState($process);
+
+        self::assertSame('blocked', $state['state']);
+        self::assertStringContainsString('plataforma', strtolower((string) $state['reason']));
     }
 
     public function testLinkExistingUserSetsEmpresaAndMarksChecklist(): void
