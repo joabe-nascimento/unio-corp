@@ -122,47 +122,61 @@ jobs:
               "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/${ARCHIVE_REMOTE}"
 
       - name: Extract and post-deploy on server
-        uses: appleboy/ssh-action@v1.2.0
         env:
-          INPUT_DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
-          INPUT_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML }}
           MAILBOX_JOABE_PASSWORD: ${{ secrets.MAILBOX_JOABE_PASSWORD }}
           MAILBOX_UNIO_PASSWORD: ${{ secrets.MAILBOX_UNIO_PASSWORD }}
           PLATFORM_OWNER_PASSWORD: ${{ secrets.PLATFORM_OWNER_PASSWORD }}
-        with:
-          host: ${{ secrets.DEPLOY_SSH_HOST }}
-          username: ${{ secrets.DEPLOY_SSH_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: ${{ secrets.DEPLOY_SSH_PORT }}
-          envs: INPUT_DEPLOY_PATH,INPUT_PUBLIC_HTML,MAILBOX_JOABE_PASSWORD,MAILBOX_UNIO_PASSWORD,PLATFORM_OWNER_PASSWORD
-          script_stop: true
-          script: |
-            set -eo pipefail
-            DEPLOY_PATH="${INPUT_DEPLOY_PATH:-${{ inputs.deploy_path_default }}}"
-            PUBLIC_HTML="${INPUT_PUBLIC_HTML:-${{ inputs.deploy_public_html_default }}}"
+        run: |
+          DEPLOY_PATH="${DEPLOY_PATH:-${{ inputs.deploy_path_default }}}"
+          PUBLIC_HTML="${DEPLOY_PUBLIC_HTML:-${{ inputs.deploy_public_html_default }}}"
+          ARCHIVE="${ARCHIVE_REMOTE}"
 
-            mkdir -p "$DEPLOY_PATH"
-            tar -xzf "/tmp/${{ inputs.archive_remote_name }}" -C "$DEPLOY_PATH"
-            rm -f "/tmp/${{ inputs.archive_remote_name }}"
-
-            export DEPLOY_PATH PUBLIC_HTML
-            export PHP_BIN="${PHP_BIN:-php}"
-            export GITHUB_SHA="${INPUT_GITHUB_SHA:-${{ github.sha }}}"
-            export GITHUB_REF_NAME="${INPUT_GITHUB_REF_NAME:-${{ github.ref_name }}}"
+          ENV_FILE="${RUNNER_TEMP}/deploy-remote.env"
+          {
+            printf 'DEPLOY_PATH=%s\n' "$DEPLOY_PATH"
+            printf 'PUBLIC_HTML=%s\n' "$PUBLIC_HTML"
+            printf 'GITHUB_SHA=%s\n' '${{ github.sha }}'
+            printf 'GITHUB_REF_NAME=%s\n' '${{ github.ref_name }}'
             if [[ "${{ inputs.skip_unio_platform_steps }}" == "true" ]]; then
-              export SKIP_UNIO_PLATFORM_STEPS=1
+              printf 'SKIP_UNIO_PLATFORM_STEPS=1\n'
             else
-              export MAILBOX_JOABE_PASSWORD="${MAILBOX_JOABE_PASSWORD:-}"
-              export MAILBOX_UNIO_PASSWORD="${MAILBOX_UNIO_PASSWORD:-}"
-              export PLATFORM_OWNER_PASSWORD="${PLATFORM_OWNER_PASSWORD:-}"
+              printf 'MAILBOX_JOABE_PASSWORD=%s\n' "${MAILBOX_JOABE_PASSWORD:-}"
+              printf 'MAILBOX_UNIO_PASSWORD=%s\n' "${MAILBOX_UNIO_PASSWORD:-}"
+              printf 'PLATFORM_OWNER_PASSWORD=%s\n' "${PLATFORM_OWNER_PASSWORD:-}"
             fi
-            bash "${DEPLOY_PATH}/scripts/deploy-server.sh" || {
-              echo "========== DEPLOY REPORT =========="
-              cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || echo "(sem relatorio)"
-              exit 1
-            }
+          } > "$ENV_FILE"
+
+          scp -i ~/.ssh/deploy_key \
+              -P "${DEPLOY_PORT:-2222}" \
+              -o StrictHostKeyChecking=accept-new \
+              -o BatchMode=yes \
+              "$ENV_FILE" \
+              "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/deploy-remote.env"
+
+          ssh -i ~/.ssh/deploy_key \
+              -p "${DEPLOY_PORT:-2222}" \
+              -o StrictHostKeyChecking=accept-new \
+              -o BatchMode=yes \
+              "${DEPLOY_USER}@${DEPLOY_HOST}" \
+              "ARCHIVE=${ARCHIVE} bash -s" << 'EOS'
+          set -eo pipefail
+          set -a
+          # shellcheck source=/dev/null
+          source /tmp/deploy-remote.env
+          set +a
+          rm -f /tmp/deploy-remote.env
+          mkdir -p "$DEPLOY_PATH"
+          tar -xzf "/tmp/${ARCHIVE}" -C "$DEPLOY_PATH"
+          rm -f "/tmp/${ARCHIVE}"
+          export PHP_BIN="${PHP_BIN:-php}"
+          bash "${DEPLOY_PATH}/scripts/deploy-server.sh" || {
             echo "========== DEPLOY REPORT =========="
-            cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || true
+            cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || echo "(sem relatorio)"
+            exit 1
+          }
+          echo "========== DEPLOY REPORT =========="
+          cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || true
+          EOS
 
       - name: Baixar relatorio de deploy (sucesso ou falha)
         if: always() && (success() || failure())
