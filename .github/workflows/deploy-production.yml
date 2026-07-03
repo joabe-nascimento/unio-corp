@@ -60,6 +60,7 @@ jobs:
 
       - name: Create and upload deploy archive
         run: |
+          ARCHIVE="${RUNNER_TEMP}/deploy.tar.gz"
           tar --exclude='.git' \
               --exclude='.github' \
               --exclude='node_modules' \
@@ -75,13 +76,13 @@ jobs:
               --exclude='deploy.tar.gz' \
               --exclude='phpunit.xml.dist' \
               --exclude='.phpunit.cache' \
-              -czf deploy.tar.gz .
+              -czf "$ARCHIVE" .
 
           scp -i ~/.ssh/deploy_key \
               -P "${DEPLOY_PORT:-2222}" \
               -o StrictHostKeyChecking=accept-new \
               -o BatchMode=yes \
-              deploy.tar.gz \
+              "$ARCHIVE" \
               "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/deploy.tar.gz"
 
       - name: Extract and post-deploy on server
