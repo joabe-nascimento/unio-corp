@@ -124,33 +124,43 @@ jobs:
       - name: Extract and post-deploy on server
         uses: appleboy/ssh-action@v1.2.0
         env:
-          SKIP_UNIO: ${{ inputs.skip_unio_platform_steps }}
+          INPUT_DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+          INPUT_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML }}
+          INPUT_DEPLOY_PATH_DEFAULT: ${{ inputs.deploy_path_default }}
+          INPUT_PUBLIC_HTML_DEFAULT: ${{ inputs.deploy_public_html_default }}
+          INPUT_ARCHIVE: ${{ inputs.archive_remote_name }}
+          INPUT_SKIP_UNIO: ${{ inputs.skip_unio_platform_steps }}
+          INPUT_GITHUB_SHA: ${{ github.sha }}
+          INPUT_GITHUB_REF_NAME: ${{ github.ref_name }}
+          MAILBOX_JOABE_PASSWORD: ${{ secrets.MAILBOX_JOABE_PASSWORD }}
+          MAILBOX_UNIO_PASSWORD: ${{ secrets.MAILBOX_UNIO_PASSWORD }}
+          PLATFORM_OWNER_PASSWORD: ${{ secrets.PLATFORM_OWNER_PASSWORD }}
         with:
           host: ${{ secrets.DEPLOY_SSH_HOST }}
           username: ${{ secrets.DEPLOY_SSH_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_SSH_PORT }}
+          envs: INPUT_DEPLOY_PATH,INPUT_PUBLIC_HTML,INPUT_DEPLOY_PATH_DEFAULT,INPUT_PUBLIC_HTML_DEFAULT,INPUT_ARCHIVE,INPUT_SKIP_UNIO,INPUT_GITHUB_SHA,INPUT_GITHUB_REF_NAME,MAILBOX_JOABE_PASSWORD,MAILBOX_UNIO_PASSWORD,PLATFORM_OWNER_PASSWORD
           script_stop: true
           script: |
-            DEPLOY_PATH="${{ vars.DEPLOY_PATH }}"
-            DEPLOY_PATH="${DEPLOY_PATH:-${{ inputs.deploy_path_default }}}"
-            PUBLIC_HTML="${{ vars.DEPLOY_PUBLIC_HTML }}"
-            PUBLIC_HTML="${PUBLIC_HTML:-${{ inputs.deploy_public_html_default }}}"
+            set -euo pipefail
+            DEPLOY_PATH="${INPUT_DEPLOY_PATH:-$INPUT_DEPLOY_PATH_DEFAULT}"
+            PUBLIC_HTML="${INPUT_PUBLIC_HTML:-$INPUT_PUBLIC_HTML_DEFAULT}"
 
             mkdir -p "$DEPLOY_PATH"
-            tar -xzf "/tmp/${{ inputs.archive_remote_name }}" -C "$DEPLOY_PATH"
-            rm -f "/tmp/${{ inputs.archive_remote_name }}"
+            tar -xzf "/tmp/${INPUT_ARCHIVE}" -C "$DEPLOY_PATH"
+            rm -f "/tmp/${INPUT_ARCHIVE}"
 
             export DEPLOY_PATH PUBLIC_HTML
             export PHP_BIN="${PHP_BIN:-php}"
-            export GITHUB_SHA="${{ github.sha }}"
-            export GITHUB_REF_NAME="${{ github.ref_name }}"
-            if [[ "${{ inputs.skip_unio_platform_steps }}" == "true" ]]; then
+            export GITHUB_SHA="$INPUT_GITHUB_SHA"
+            export GITHUB_REF_NAME="$INPUT_GITHUB_REF_NAME"
+            if [[ "$INPUT_SKIP_UNIO" == "true" ]]; then
               export SKIP_UNIO_PLATFORM_STEPS=1
             else
-              export MAILBOX_JOABE_PASSWORD="${{ secrets.MAILBOX_JOABE_PASSWORD }}"
-              export MAILBOX_UNIO_PASSWORD="${{ secrets.MAILBOX_UNIO_PASSWORD }}"
-              export PLATFORM_OWNER_PASSWORD="${{ secrets.PLATFORM_OWNER_PASSWORD }}"
+              export MAILBOX_JOABE_PASSWORD
+              export MAILBOX_UNIO_PASSWORD
+              export PLATFORM_OWNER_PASSWORD
             fi
             bash "${DEPLOY_PATH}/scripts/deploy-server.sh" || {
               echo "========== DEPLOY REPORT =========="
