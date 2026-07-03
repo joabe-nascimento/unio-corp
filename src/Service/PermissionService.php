@@ -992,6 +992,8 @@ class PermissionService
         'product_pessoas' => [
             'gestor' => ['membros' => 'GESTOR', 'equipes' => 'GESTOR', 'cargos' => 'GESTOR_EQUIPE', 'avaliacao' => 'GESTOR_EQUIPE'],
             'gestor-eq' => ['membros' => 'GESTOR_EQUIPE', 'equipes' => 'SUPERVISOR'],
+            'supervisor' => ['membros' => 'SUPERVISOR_EQUIPE', 'equipes' => 'SUPERVISOR', 'cargos' => 'SUPERVISOR_EQUIPE', 'avaliacao' => 'SUPERVISOR'],
+            'sup-eq' => ['membros' => 'MEMBRO', 'equipes' => 'SUPERVISOR_EQUIPE'],
             'membro' => ['membros' => 'MEMBRO'],
         ],
         'product_engenharia' => [

@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Command\Concern\ProdSeedGuardTrait;
 use App\Entity\User;
 use App\Entity\UserProductGrant;
+use App\Repository\UserProductGrantRepository;
 use App\Repository\UserRepository;
 use App\Service\PermissionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,6 +27,7 @@ class SeedProductGrantsCommand extends Command
     public function __construct(
         private EntityManagerInterface $em,
         private UserRepository $userRepo,
+        private UserProductGrantRepository $grantRepo,
         private string $appEnv = 'dev',
     ) {
         parent::__construct();
@@ -48,6 +50,14 @@ class SeedProductGrantsCommand extends Command
         $force = (bool) $input->getOption('force');
         $created = 0;
         $skipped = 0;
+
+        if ($force) {
+            foreach ($this->collectSeedUsers() as $user) {
+                $this->grantRepo->deleteAllForUser($user);
+                $user->getProductGrants()->clear();
+            }
+            $this->em->flush();
+        }
 
         foreach (PermissionService::DEFAULT_GRANTS as $scope => $members) {
             foreach ($members as $memberId => $products) {
@@ -88,6 +98,22 @@ class SeedProductGrantsCommand extends Command
         $io->success("Grants: {$created} gravado(s), {$skipped} ignorado(s). Use --force para sobrescrever.");
 
         return Command::SUCCESS;
+    }
+
+    /** @return list<User> */
+    private function collectSeedUsers(): array
+    {
+        $users = [];
+        foreach (PermissionService::DEFAULT_GRANTS as $members) {
+            foreach (array_keys($members) as $memberId) {
+                $user = $this->findUserByMemberId($memberId);
+                if ($user) {
+                    $users[$user->getId()] = $user;
+                }
+            }
+        }
+
+        return array_values($users);
     }
 
     private function findUserByMemberId(string $memberId): ?User
