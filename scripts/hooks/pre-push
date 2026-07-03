@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Git hook — roda antes de git push.
+# Instalar: bash scripts/install-git-hooks.sh  (ou .\scripts\install-git-hooks.ps1)
+# Pular: SKIP_VALIDATE=1 git push  |  git push --no-verify
+
+set -euo pipefail
+
+if [[ "${SKIP_VALIDATE:-0}" == "1" ]]; then
+  echo "pre-push: SKIP_VALIDATE=1 — validação ignorada."
+  exit 0
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+echo "pre-push: validando antes do push..."
+
+run_bash() {
+  local bash_bin="$1"
+  exec "$bash_bin" "${ROOT}/scripts/validate-before-push.sh"
+}
+
+for candidate in \
+  "${PROGRAMFILES:-/c/Program Files}/Git/bin/bash.exe" \
+  "${PROGRAMFILES:-/c/Program Files}/Git/usr/bin/bash.exe" \
+  "$(command -v bash 2>/dev/null || true)"
+do
+  if [[ -n "$candidate" && -x "$candidate" ]]; then
+    run_bash "$candidate"
+  fi
+done
+
+if command -v powershell.exe >/dev/null 2>&1; then
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${ROOT}/scripts/validate-before-push.ps1"
+  exit $?
+fi
+
+echo "pre-push: bash/powershell não encontrado — instale Git for Windows." >&2
+exit 1

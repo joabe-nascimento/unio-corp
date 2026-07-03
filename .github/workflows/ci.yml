@@ -51,6 +51,12 @@ jobs:
           extensions: ctype, iconv, pdo_mysql
           coverage: none
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
       - name: Get Composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
@@ -65,24 +71,7 @@ jobs:
       - name: Install dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-      - name: Prepare database
-        run: |
-          # Banco vazio no CI: migrations incrementais não criam user/empresa (schema legado).
-          # schema:create gera todas as tabelas a partir das entidades Doctrine.
-          php bin/console doctrine:database:drop --force --if-exists --no-interaction
-          php bin/console doctrine:database:create --no-interaction
-          php bin/console doctrine:schema:create --no-interaction
-          php bin/console app:seed-users --no-interaction
-          php bin/console app:seed-product-grants --force --no-interaction
-
-      - name: Validate system rules
-        run: composer validate:system
-
-      - name: PHPStan
-        if: github.ref != 'refs/heads/production'
-        run: composer phpstan
-
-      - name: Run PHPUnit
-        run: composer test
+      - name: Validate (lint, seeds, PHPStan, PHPUnit, assets)
+        run: composer validate:ci
         env:
-          APP_ENV: test
+          GIT_BRANCH: ${{ github.ref_name }}
