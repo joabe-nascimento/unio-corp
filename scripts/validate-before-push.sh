@@ -112,6 +112,9 @@ if [[ "$QUICK" != "1" && "$SKIP_TESTS" != "1" ]]; then
 fi
 
 if [[ "$QUICK" != "1" && "$SKIP_ASSETS" != "1" && -f package.json ]]; then
+  run_step "CSS minificado (prod usa unio-app.min.css)"
+  "$PHP_BIN" bin/minify-css.php
+
   run_step "Assets — npm ci + vendor:sync"
   if command -v npm >/dev/null 2>&1; then
     npm ci --no-audit --no-fund
