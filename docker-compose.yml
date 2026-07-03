@@ -1,3 +1,16 @@
+# Serviços locais e validação de qualidade (espelha o CI).
+#
+# Vitória AI (dev):
+#   docker compose up vitoria-ai
+#
+# Validação completa antes de push/deploy (MariaDB + lints + seeds + PHPStan + PHPUnit):
+#   docker compose --profile validate run --rm validate
+#   make validate-docker
+#   npm run validate:docker
+#
+# Hook git (valida a cada push):
+#   composer hooks:install
+
 services:
   vitoria-ai:
     build:
@@ -12,3 +25,35 @@ services:
       VITORIA_ENV: development
       # OPENAI_API_KEY: sk-...
     restart: unless-stopped
+
+  mariadb:
+    profiles: [validate]
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: unio
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  validate:
+    profiles: [validate]
+    build:
+      context: .
+      dockerfile: docker/validate/Dockerfile
+    volumes:
+      - .:/app
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      APP_ENV: dev
+      APP_SECRET: validate-local-secret
+      DATABASE_URL: mysql://root:root@mariadb:3306/unio?serverVersion=mariadb-10.11.11&charset=utf8mb4
+      VALIDATE_FRESH_DB: "1"
+      GIT_BRANCH: ${GIT_BRANCH:-local}

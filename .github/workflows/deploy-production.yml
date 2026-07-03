@@ -11,51 +11,9 @@ concurrency:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
-
-    services:
-      mariadb:
-        image: mariadb:10.11
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: unio
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="healthcheck.sh --connect --innodb_initialized"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
-    env:
-      APP_ENV: dev
-      APP_SECRET: ci-secret-not-for-production
-      DATABASE_URL: mysql://root:root@127.0.0.1:3306/unio?serverVersion=mariadb-10.11.11&charset=utf8mb4
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: ctype, iconv, pdo_mysql
-          coverage: none
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-
-      - name: Install Composer dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      - name: Validate before deploy
-        run: composer validate:ci
-        env:
-          GIT_BRANCH: production
+    uses: ./.github/workflows/validate-reusable.yml
+    with:
+      git_branch: production
 
   deploy:
     needs: validate
