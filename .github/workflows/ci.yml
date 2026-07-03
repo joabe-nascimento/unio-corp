@@ -1,5 +1,7 @@
 name: CI
 
+# CI só em push para branches “oficiais”. product/** e feature/** validam via PR
+# (evita dezenas de runs idênticos ao sincronizar branches espelho).
 on:
   push:
     branches:
@@ -7,8 +9,6 @@ on:
       - production
       - new_staging
       - new_staging2
-      - 'feature/**'
-      - 'product/**'
   pull_request:
     branches:
       - main
@@ -16,6 +16,12 @@ on:
       - new_staging
       - new_staging2
       - 'product/**'
+      - 'feature/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
