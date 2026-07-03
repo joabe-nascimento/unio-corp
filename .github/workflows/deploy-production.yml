@@ -39,55 +39,54 @@ jobs:
           npm ci
           npm run vendor:sync
 
-      - name: Setup SSH key
+      - name: Create deploy archive
         run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          DEPLOY_PORT="${{ secrets.DEPLOY_SSH_PORT }}"
-          DEPLOY_PORT="${DEPLOY_PORT:-22}"
-          ssh-keyscan -p "$DEPLOY_PORT" "${{ secrets.DEPLOY_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          tar --exclude='.git' \
+              --exclude='.github' \
+              --exclude='node_modules' \
+              --exclude='.env' \
+              --exclude='.env.*' \
+              --exclude='var/cache' \
+              --exclude='var/log' \
+              --exclude='public/uploads' \
+              --exclude='tests' \
+              --exclude='docs' \
+              --exclude='services' \
+              --exclude='.cursor' \
+              --exclude='*.zip' \
+              --exclude='*.tar.gz' \
+              --exclude='phpunit.xml.dist' \
+              --exclude='.phpunit.cache' \
+              -czf /tmp/deploy.tar.gz .
 
-      - name: Rsync to HostGator
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_SSH_USER }}
-          DEPLOY_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
-          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
-        run: |
-          DEPLOY_PORT="${DEPLOY_PORT:-22}"
-          DEPLOY_PATH="${DEPLOY_PATH:-/home2/joabef36/unio}"
-          RSYNC_SSH="ssh -i ~/.ssh/deploy_key -p ${DEPLOY_PORT} -o StrictHostKeyChecking=accept-new -o LogLevel=ERROR -o BatchMode=yes"
-          rsync -avz --no-motd \
-            -e "$RSYNC_SSH" \
-            --exclude '.git/' \
-            --exclude '.github/' \
-            --exclude 'node_modules/' \
-            --exclude '.env' \
-            --exclude '.env.*' \
-            --exclude 'var/cache/' \
-            --exclude 'var/log/' \
-            --exclude 'public/uploads/' \
-            --exclude 'tests/' \
-            --exclude 'docs/' \
-            --exclude 'services/' \
-            --exclude '.cursor/' \
-            --exclude '*.zip' \
-            --exclude 'phpunit.xml.dist' \
-            --exclude '.phpunit.cache/' \
-            ./ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+      - name: Upload archive to server via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          source: /tmp/deploy.tar.gz
+          target: /tmp/
+          strip_components: 0
 
-      - name: Post-deploy (migrations, cache, public_html)
+      - name: Extract and post-deploy on server
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_SSH_HOST }}
           username: ${{ secrets.DEPLOY_SSH_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: 22
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
           script: |
-            export DEPLOY_PATH="${{ vars.DEPLOY_PATH }}"
-            export PUBLIC_HTML="${{ vars.DEPLOY_PUBLIC_HTML }}"
-            export DEPLOY_PATH="${DEPLOY_PATH:-/home2/joabef36/unio}"
-            export PUBLIC_HTML="${PUBLIC_HTML:-/home2/joabef36/public_html}"
+            DEPLOY_PATH="${{ vars.DEPLOY_PATH }}"
+            DEPLOY_PATH="${DEPLOY_PATH:-/home2/joabef36/unio}"
+            PUBLIC_HTML="${{ vars.DEPLOY_PUBLIC_HTML }}"
+            PUBLIC_HTML="${PUBLIC_HTML:-/home2/joabef36/public_html}"
+
+            mkdir -p "$DEPLOY_PATH"
+            tar -xzf /tmp/deploy.tar.gz -C "$DEPLOY_PATH"
+            rm -f /tmp/deploy.tar.gz
+
+            export DEPLOY_PATH PUBLIC_HTML
             export PHP_BIN="${PHP_BIN:-php}"
             bash "${DEPLOY_PATH}/scripts/deploy-server.sh"
