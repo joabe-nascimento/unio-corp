@@ -42,20 +42,29 @@ product/engenharia  ──┘
 
 ## Fluxo normal (feature → produção)
 
+**Operação atual (jul/2026):** trabalho pode ir direto para `production` (deploy automático) ou via PR. Branches `product/*` e `feature/*` são **espelhos** — sincronize com:
+
+```bash
+bash scripts/sync-branches.sh production
 ```
-feature/<nome>  →  product/<módulo>  →  main  →  new_staging  →  new_staging2  →  production
+
+Push em `product/*` / `feature/*` **não dispara CI**; validação via PR ou push em `production`. Detalhes: [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md).
+
+```
+feature/<nome>  →  (PR opcional)  →  production  →  deploy
+                         │
+              product/<módulo>  (espelho, sync script)
 ```
 
 ```bash
-# Exemplo: nova tela em RH
-git checkout product/rh
-git pull origin product/rh
+# Exemplo: nova tela em RH (via PR)
 git checkout -b feature/rh-folha-relatorio
 # ... commits ...
-git checkout product/rh
-git merge feature/rh-folha-relatorio
-git push origin product/rh
-# Abrir PR: product/rh → main
+git push origin feature/rh-folha-relatorio
+# Abrir PR: feature/rh-folha-relatorio → production
+
+# Depois do deploy, alinhar espelhos:
+bash scripts/sync-branches.sh production
 ```
 
 ## Hotfix (urgente em produção)

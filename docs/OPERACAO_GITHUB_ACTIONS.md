@@ -14,28 +14,28 @@ Referência dos workflows em `.github/workflows/` (jul/2026).
                                │
            ┌───────────────────┼───────────────────┐
            ▼                   ▼                   ▼
-      ci.yml            deploy-production.yml    (futuro)
-   push feature/*         push production
-   push product/*         validate → deploy
-   PR → main/production
+      ci.yml            deploy-production.yml   workflow_dispatch
+   push: oficiais         push production         (manual)
+   PR: todas
 ```
+
+**Objetivo:** um push em `production` gera **2 runs** (CI + Deploy), não dezenas de runs idênticos ao sincronizar `product/*` e `feature/*`.
 
 ---
 
 ## 1. `validate-reusable.yml` — fonte da verdade
 
-**Tipo:** reusable (`workflow_call`)  
-**Não dispara sozinho** — é chamado por outros workflows.
+**Tipo:** reusable (`workflow_call`) — não dispara sozinho.
 
 ### O que executa
 
 | Step | Comando / ação |
 |------|----------------|
-| MariaDB 10.11 | Service container (banco limpo) |
+| MariaDB 10.11 | Service container |
 | Composer install | `composer install` |
-| Validação completa | `composer validate:ci` |
+| Validação | `composer validate:ci` |
 
-### Dentro de `validate:ci` (`scripts/validate-before-push.sh`)
+### Dentro de `validate:ci`
 
 | # | Check |
 |---|--------|
@@ -43,92 +43,95 @@ Referência dos workflows em `.github/workflows/` (jul/2026).
 | 2 | `lint:container` |
 | 3 | `lint:yaml config` |
 | 4 | `lint:twig templates` |
-| 5 | Banco: drop/create/schema + `app:seed-users` + `app:seed-product-grants --force` |
-| 6 | `app:validate-system` (permissões, rotas, seeds) |
-| 7 | PHPStan (exceto se `GIT_BRANCH=production`) |
-| 8 | PHPUnit (`APP_ENV=test`) |
+| 5 | Banco: schema + seeds |
+| 6 | `app:validate-system` |
+| 7 | PHPStan (exceto branch `production`) |
+| 8 | PHPUnit |
 | 9 | `php bin/minify-css.php` |
 | 10 | `npm ci` + `npm run vendor:sync` |
-
-### Input
-
-| Parâmetro | Uso |
-|-----------|-----|
-| `git_branch` | Define regras (ex.: pular PHPStan em `production`) |
 
 ---
 
 ## 2. `ci.yml` — integração contínua
 
-**Trigger:**
+### Triggers (atualizado jul/2026)
 
 ```yaml
 on:
   push:
-    branches: [main, production, new_staging, new_staging2, feature/**, product/**]
+    branches:
+      - main
+      - production
+      - new_staging
+      - new_staging2
   pull_request:
-    branches: [main, production, new_staging, new_staging2, product/**]
+    branches:
+      - main
+      - production
+      - new_staging
+      - new_staging2
+      - 'product/**'
+      - 'feature/**'
+  workflow_dispatch:
 ```
 
-**Job:**
+### Concurrency
 
 ```yaml
-jobs:
-  validate:
-    uses: ./.github/workflows/validate-reusable.yml
-    with:
-      git_branch: ${{ github.ref_name }}
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 ```
 
-| Branch pushada | O que roda |
-|----------------|------------|
-| `feature/*` | Validate completo (com PHPStan) |
-| `product/*` | Validate completo |
-| `production` | Validate (PHPStan **pulado** no script) |
-| `main`, `new_staging*` | Validate completo |
-| PR para `main` / `production` | Validate completo |
+Cancela run anterior na mesma branch se houver push novo.
 
-**Resultado esperado:** job `validate` verde antes de merge.
+### Quando o CI roda
+
+| Evento | Branches | Runs |
+|--------|----------|------|
+| **push** | `production`, `main`, `new_staging`, `new_staging2` | 1× validate |
+| **push** | `product/*`, `feature/*` | **Não roda** |
+| **pull_request** | → oficiais ou product/feature | 1× validate |
+| **workflow_dispatch** | manual | 1× validate |
+
+### Por que `product/*` não dispara CI no push
+
+Branches espelho são sincronizadas em massa com `scripts/sync-branches.sh`. Disparar CI em cada push gerava ~30 runs idênticos e poluía a tela de Actions. Validação dessas branches: **via PR** ou push em `production`.
 
 ---
 
 ## 3. `deploy-production.yml` — HostGator
 
 **Trigger:** `push` apenas em `production`  
-**Concurrency:** `deploy-production` (cancela deploy anterior se novo push)
+**Concurrency:** `deploy-production` (cancela deploy anterior)
 
-### Job 1: `validate`
+### Fluxo
 
-```yaml
-validate:
-  uses: ./.github/workflows/validate-reusable.yml
-  with:
-    git_branch: production
+```
+push production
+      │
+      ▼
+┌─────────────┐     ┌─────────────┐
+│  validate   │ OK  │   deploy    │
+│  ~2–3 min   │────►│  ~2–3 min   │
+└─────────────┘     └──────┬──────┘
+                           ▼
+                 deploy-server.sh
+                 migrate + cache + rsync
 ```
 
 Deploy **não inicia** se validate falhar.
 
-### Job 2: `deploy` (`needs: validate`)
-
-| Step | Ação |
-|------|------|
-| Checkout | Código da branch |
-| Composer | `install --no-dev --no-scripts` |
-| Node | `npm ci` + `vendor:sync` |
-| **Minify CSS** | `php bin/minify-css.php` |
-| SSH | Configura chave (`DEPLOY_SSH_KEY`) |
-| Tar + SCP | Arquivo em `$RUNNER_TEMP`, upload para `/tmp/deploy.tar.gz` |
-| SSH extract | `tar -xzf` em `DEPLOY_PATH` |
-| Post-deploy | `bash scripts/deploy-server.sh` |
-
-### Secrets (GitHub → Environment `production`)
+### Secrets (environment `production`)
 
 | Secret | Uso |
 |--------|-----|
 | `DEPLOY_SSH_HOST` | Host HostGator |
 | `DEPLOY_SSH_USER` | Usuário SSH |
-| `DEPLOY_SSH_KEY` | Chave privada (OpenSSH, com newline) |
+| `DEPLOY_SSH_KEY` | Chave privada OpenSSH |
 | `DEPLOY_SSH_PORT` | Porta (ex.: 2222) |
+| `MAILBOX_JOABE_PASSWORD` | Caixa joabe@ (opcional) |
+| `PLATFORM_OWNER_PASSWORD` | Reset senha owner (opcional) |
 
 ### Variables
 
@@ -137,51 +140,37 @@ Deploy **não inicia** se validate falhar.
 | `DEPLOY_PATH` | `/home2/joabef36/unio` |
 | `DEPLOY_PUBLIC_HTML` | `/home2/joabef36/public_html` |
 
-### Exclusões do tar
-
-`.git`, `.github`, `node_modules`, `.env*`, `var/cache`, `var/log`, `public/uploads`, `tests`, `docs`, etc.
-
 ---
 
-## Diagrama do deploy bem-sucedido (último)
+## Diagrama — fluxo completo recomendado
 
 ```
-push production (7abf2c2)
-        │
-        ▼
-┌───────────────┐     ┌───────────────┐
-│   validate    │ OK  │    deploy     │
-│  ~2m30s       │────►│   ~3m30s      │
-│  MariaDB+CI   │     │ tar→scp→ssh   │
-└───────────────┘     └───────┬───────┘
-                              ▼
-                    deploy-server.sh
-                    migrate + cache + rsync
+Desenvolver
+    │
+    ├─► push production ──► CI ──► Deploy ──► uniowork.com.br
+    │
+    ├─► PR feature/* → production ──► CI no PR ──► merge ──► CI + Deploy
+    │
+    └─► sync-branches.sh ──► espelhos alinhados (sem CI extra)
 ```
 
-Runs de referência:
+---
 
-- Validate + Deploy: buscar em Actions filtro branch `production`, commit `7abf2c2`
+## Falhas comuns
+
+| Sintoma | Ação |
+|---------|------|
+| PHPUnit 500 Twig block | Block deve estar definido em `base.html.twig` (`{% block page_scroll_mode %}flow{% endblock %}`) |
+| PHPStan | `composer phpstan:baseline` ou corrigir |
+| Deploy SSH | Verificar `DEPLOY_SSH_KEY`, newline, porta |
+| Site com CSS antigo | Hard refresh; bump `?v=` em `base.html.twig` |
+| Muitos runs na Actions | Verificar se push foi em `product/*` antes da otimização; hoje só oficiais disparam CI |
 
 ---
 
-## Falhas comuns no Actions
-
-| Sintoma | Onde olhar | Ação |
-|---------|------------|------|
-| Validate falha PHPStan | Log step "Validate" | `composer phpstan:baseline` ou corrigir código |
-| Validate falha PHPUnit | Log PHPUnit | Rodar `php bin/phpunit` local |
-| Validate falha `app:validate-system` | Permissões/seeds | `app:seed-product-grants --force` local |
-| Deploy falha SSH | "Setup SSH key" | Verificar secret, newline, porta |
-| Deploy OK mas site antigo | Browser cache | Ctrl+Shift+R; verificar `?v=` no CSS |
-| Layout quebrado em prod | CSS min desatualizado | Garantir `minify-css.php` no deploy (já incluso) |
-
----
-
-## O que **não** existe ainda no Actions
+## O que ainda não existe no Actions
 
 - Deploy automático para `new_staging` / `new_staging2`
-- Deploy em `main`
-- Notificação Slack/email em falha (pode adicionar depois)
+- Notificação Slack/email em falha
 
-Para staging, hoje: deploy manual ou estender workflow copiando o padrão de `deploy-production.yml`.
+Ver também: [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md) · [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md)

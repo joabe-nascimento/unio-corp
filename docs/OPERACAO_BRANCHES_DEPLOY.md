@@ -1,66 +1,129 @@
 # Branches e deploy — como funciona a partir de hoje
 
-Guia operacional atualizado após estabilização do pipeline (jul/2026).  
-Para o modelo completo de longo prazo, veja também [BRANCHES.md](BRANCHES.md).
+Guia operacional atualizado (jul/2026) após otimização do CI e espelhamento de branches.  
+Modelo de longo prazo: [BRANCHES.md](BRANCHES.md) · Workflows: [OPERACAO_GITHUB_ACTIONS.md](OPERACAO_GITHUB_ACTIONS.md)
 
 ---
 
 ## Mapa rápido
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  DESENVOLVIMENTO                                                │
-│  feature/*  ou  product/*  →  trabalho diário                   │
-│       │                                                         │
-│       ▼  merge quando pronto + CI verde                         │
-│  production  ──push──►  GitHub Actions                          │
-│       │              validate → deploy → HostGator              │
-│       ▼                                                         │
-│  Site em produção (unio / public_html)                          │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│  DESENVOLVIMENTO                                                       │
+│                                                                        │
+│  Opção A — direto (mais usado hoje)                                   │
+│    production  ──push──►  CI + Deploy Production  ──►  HostGator      │
+│                                                                        │
+│  Opção B — com revisão                                                │
+│    feature/* ou product/*  ──PR──►  production  ──►  CI + Deploy    │
+│                                                                        │
+│  Espelhar branches (sem disparar CI extra)                            │
+│    bash scripts/sync-branches.sh production                           │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Branch por branch
+## Papéis das branches
 
-### `production` — **única que faz deploy**
+| Branch | Deploy | CI no push | Uso |
+|--------|--------|------------|-----|
+| **`production`** | Sim (automático) | Sim | Código no ar — `uniowork.com.br` |
+| **`main`** | Não | Sim | Tronco / referência estável |
+| **`new_staging` / `new_staging2`** | Não* | Sim | Homologação / QA |
+| **`product/*`** | Não | **Não** | Espelho por módulo (organização) |
+| **`feature/*`** | Não | **Não** | Espelho por feature (organização) |
 
-| | |
-|---|---|
-| **Deploy** | Sim — automático a cada `git push origin production` |
-| **CI** | Sim — workflow `CI` + `Deploy Production` |
-| **Uso** | Código que está (ou vai estar) no ar na HostGator |
-| **HEAD atual** | `7abf2c2` |
+\* Deploy automático só existe para `production` hoje.
+
+**HEAD atual de referência:** `production` @ `3f2a3b1`
+
+---
+
+## Fluxo do dia a dia
+
+### 1. Publicar em produção (caminho direto)
 
 ```bash
 git checkout production
 git pull origin production
-git merge feature/sua-branch   # ou product/rh, etc.
-git push origin production     # dispara validate + deploy
+# ... editar, validar localmente ...
+composer validate:pre-push    # ou: make validate-docker
+git add .
+git commit -m "feat: descrição"
+git push origin production
 ```
 
-**Não** faça push direto sem validação local quando possível (`make validate-docker` ou `composer validate:ci`).
+**O que acontece no GitHub Actions (2 runs):**
+
+1. **CI** — `validate-reusable` (lint, seeds, PHPUnit, assets)
+2. **Deploy Production** — só se CI passar → HostGator
+
+Acompanhar: https://github.com/joabe-nascimento/unio-corp/actions
 
 ---
 
-### `feature/*` — desenvolvimento de funcionalidade
+### 2. Trabalhar com revisão (PR)
 
-| | |
-|---|---|
-| **Deploy** | Não |
-| **CI** | Sim — a cada push (workflow `CI` via `validate-reusable.yml`) |
-| **Exemplo ativo** | `feature/core-responsive-layout` (layout, kanban, validação) |
-| **Fluxo** | Commits → push → CI verde → merge em `production` (ou `product/*` → `main` conforme [BRANCHES.md](BRANCHES.md)) |
+```bash
+git checkout -b feature/minha-mudanca
+# ... commits ...
+git push origin feature/minha-mudanca
+```
 
-Branches `feature/*` típicas no repo:
+Abrir PR: `feature/minha-mudanca` → `production` (ou `main` / staging)
 
-- `feature/core-*` — login, perfil, projetos, chat, permissões, layout
-- `feature/admin-modulos` — admin
+- **CI roda no PR** (validate completo)
+- Após merge → push em `production` → CI + Deploy
+
+Push direto em `feature/*` ou `product/*` **não dispara CI** — use PR para validar.
 
 ---
 
-### `product/*` — módulos de longa duração
+### 3. Sincronizar branches espelho (todas iguais)
+
+Depois de um deploy importante, alinhar `main`, `product/*` e `feature/*` com `production`:
+
+```bash
+git fetch origin
+bash scripts/sync-branches.sh production
+```
+
+| Situação | Comportamento do script |
+|----------|-------------------------|
+| Branch só atrás de `production` | Fast-forward (seguro) |
+| Branch divergiu (commits exclusivos) | Reset forçado para `production` |
+
+**Por que não dispara dezenas de CI:** push em `product/*` e `feature/*` não está no trigger do `ci.yml`. Só `production`, `main` e staging disparam CI no push.
+
+---
+
+### 4. Hotfix urgente
+
+```bash
+git checkout production
+git pull origin production
+git checkout -b hotfix/descricao-curta
+# correção mínima
+composer validate:pre-push
+git push -u origin hotfix/descricao-curta
+```
+
+Merge `hotfix/*` → `production` → push → deploy automático.
+
+Depois: `bash scripts/sync-branches.sh production` para alinhar espelhos.
+
+---
+
+## Branch por branch (detalhe)
+
+### `production`
+
+- **Única branch com deploy automático**
+- Cada `git push origin production` → validate + deploy
+- Preferir validação local antes do push quando possível
+
+### `product/*` — módulos
 
 | Branch | Escopo |
 |--------|--------|
@@ -73,79 +136,15 @@ Branches `feature/*` típicas no repo:
 | `product/admin` | Admin tenant |
 | … | Ver [BRANCHES.md](BRANCHES.md) |
 
-| | |
-|---|---|
-| **Deploy** | Não (até merge em `production`) |
-| **CI** | Sim — push dispara `CI` |
-| **Fluxo oficial** | `feature/*` → `product/*` → `main` → staging → `production` |
+Espelhos: mantidos iguais a `production` via `sync-branches.sh`. Trabalho real pode ser feito em `production` ou em branch temporária + PR.
 
-**Atalho usado nesta sessão:** merge direto `feature/core-responsive-layout` → `production` para entregar layout e pipeline rapidamente. Para releases formais, preferir o fluxo completo via `main` / staging.
+### `feature/*` — funcionalidades
 
----
+Mesma lógica dos `product/*`: espelho organizacional, CI via PR, não via push.
 
-### `main` — integração
+### `main` / staging
 
-| | |
-|---|---|
-| **Deploy** | Não |
-| **CI** | Sim |
-| **Uso** | Tronco de integração antes de staging |
-| **Estado** | Pode estar atrás de `production` / `feature/*` — alinhar quando fizer release |
-
----
-
-### `new_staging` / `new_staging2` — homologação
-
-| | |
-|---|---|
-| **Deploy** | Não configurado no workflow atual (só `production`) |
-| **CI** | Sim — push dispara `CI` |
-| **Uso** | QA e demos antes de produção (fluxo documentado em BRANCHES.md) |
-
----
-
-### `hotfix/*` e `release/*` — sob demanda
-
-Criadas a partir de `production` (hotfix) ou `main` (release). Ver [BRANCHES.md](BRANCHES.md).
-
----
-
-## Fluxo recomendado **a partir de hoje**
-
-### Dia a dia (feature)
-
-```bash
-git checkout -b feature/minha-mudanca
-# ... editar ...
-composer validate:pre-push    # ou make validate-docker
-git add . && git commit -m "feat: ..."
-git push origin feature/minha-mudanca
-# Aguardar CI verde no GitHub
-```
-
-### Subir para HostGator
-
-```bash
-git checkout production
-git pull origin production
-git merge feature/minha-mudanca
-git push origin production
-# → validate (2–3 min) → deploy (1–2 min)
-```
-
-Acompanhar: https://github.com/joabe-nascimento/unio-corp/actions
-
-### Hotfix urgente em produção
-
-```bash
-git checkout production
-git pull
-git checkout -b hotfix/descricao
-# correção mínima
-git push -u origin hotfix/descricao
-# merge hotfix → production → push
-# depois merge back em main / staging
-```
+Integração e homologação. CI no push; deploy manual ou futuro workflow dedicado.
 
 ---
 
@@ -157,20 +156,26 @@ Script `scripts/deploy-server.sh`:
 2. `doctrine:migrations:migrate`
 3. `cache:clear --env=prod --no-warmup`
 4. `cache:warmup --env=prod`
-5. `rsync` de `public/css`, `js`, `images`, `vendor`, `pos-operatorio` → `public_html`
+5. `rsync` de assets → `public_html`
+6. Identidade de e-mail / caixas (se secrets configurados)
 
-**Cache:** sim, é apagado e recriado a cada deploy.
-
-**Dados:** banco, uploads e logs **não** são apagados.
+**Cache:** recriado a cada deploy. **Banco, uploads e logs:** preservados.
 
 ---
 
-## Produção vs desenvolvimento local
+## Produção vs local
 
 | | Local (`APP_DEBUG=1`) | Produção (`APP_DEBUG=0`) |
 |---|---|---|
-| CSS | `unio-app.css` | **`unio-app.min.css`** |
-| Seeds | `app:seed-users`, `app:seed-product-grants` OK | Bloqueados sem `--allow-prod` |
-| Cron seeds | Não usar | **Remover** do cPanel |
+| CSS | `unio-app.css` | `unio-app.min.css` |
+| Bump cache | opcional | `?v=` em `base.html.twig` após CSS |
 
-**Importante:** após alterar `unio-app.css`, sempre rodar `php bin/minify-css.php` antes do deploy (já automatizado no workflow).
+Após alterar `unio-app.css`: `php bin/minify-css.php` (automatizado no deploy).
+
+---
+
+## Regra de ouro
+
+> Nada sobe para a HostGator sem passar por **`production`** + pipeline **Validate** + **Deploy Production**.
+
+> Sincronizar espelhos com **`scripts/sync-branches.sh`** — não com push manual em 29 branches.
