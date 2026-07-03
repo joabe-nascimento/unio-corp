@@ -30,7 +30,6 @@ final class WelcomeAnalyticsService
         private GovernanceAnalyticsService $governance,
         private GrowthAnalyticsService $growth,
         private ChartPanelFactory $chartPanelFactory,
-        private NavigationService $navigation,
         private UserRepository $userRepo,
         private EmpresaRepository $empresaRepo,
         private FuncionarioRepository $funcionarioRepo,

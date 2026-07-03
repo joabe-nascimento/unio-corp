@@ -171,9 +171,9 @@ final class PlatformOpsService
     }
 
     /**
-     * @return array{exists: bool, modified: ?string}|null
+     * @return array{exists: bool, modified: ?string}
      */
-    private function fileMeta(string $path): ?array
+    private function fileMeta(string $path): array
     {
         if (!is_file($path)) {
             return ['exists' => false, 'modified' => null];

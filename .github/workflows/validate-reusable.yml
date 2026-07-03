@@ -69,3 +69,22 @@ jobs:
         run: composer validate:ci
         env:
           GIT_BRANCH: ${{ inputs.git_branch || github.ref_name }}
+
+      - name: Publicar relatório de falha (validate)
+        if: failure()
+        run: |
+          if [[ -f var/log/ci-failure-report.txt ]]; then
+            echo "--- Relatório ---"
+            cat var/log/ci-failure-report.txt
+          else
+            echo "Sem relatório em var/log/ci-failure-report.txt"
+          fi
+
+      - name: Upload relatório de falha (validate)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validate-failure-report-${{ github.run_id }}
+          path: var/log/ci-failure-report.txt
+          if-no-files-found: ignore
+          retention-days: 14
