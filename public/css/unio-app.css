@@ -25947,7 +25947,59 @@ body.layout-inset-shell .content-wrapper > .app-page-scroll {
     min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    display: block;
+}
+
+/* Fluxo natural — hubs/listas curtas: rodapé logo após o conteúdo */
+body.layout-inset-shell .content-wrapper > .app-page-scroll--flow {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+body.layout-inset-shell .app-page-scroll--flow > .content,
+body.layout-inset-shell .app-page-scroll--flow > .content.content--with-toolbar {
+    flex: 0 0 auto !important;
+    display: block !important;
+    min-height: auto !important;
+}
+
+body.layout-inset-shell .app-page-scroll--flow > .main-footer {
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+}
+
+body.layout-inset-shell .app-page-scroll--flow .container-fluid--page-body,
+body.layout-inset-shell .app-page-scroll--flow .page-body-inner {
+    flex: none !important;
+    display: block !important;
+    min-height: auto !important;
+}
+
+/* Preenche painel — listas longas, empty state, stubs */
+body.layout-inset-shell .content-wrapper > .app-page-scroll--fill,
+body.layout-inset-shell .app-page-scroll--flow:has(.empty-state-panel),
+body.layout-inset-shell .app-page-scroll--flow:has(.page-body-fill) {
+    display: flex;
+    flex-direction: column;
+}
+
+body.layout-inset-shell .app-page-scroll--fill > .content,
+body.layout-inset-shell .app-page-scroll--flow:has(.empty-state-panel) > .content,
+body.layout-inset-shell .app-page-scroll--flow:has(.page-body-fill) > .content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body.layout-inset-shell .app-page-scroll--fill .container-fluid--page-body,
+body.layout-inset-shell .app-page-scroll--flow:has(.empty-state-panel) .container-fluid--page-body,
+body.layout-inset-shell .app-page-scroll--flow:has(.page-body-fill) .container-fluid--page-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 body.layout-inset-shell .app-page-chrome {
@@ -25960,42 +26012,31 @@ body.layout-inset-shell .app-page-scroll {
     border-radius: 0;
 }
 
-/* Rodapé dentro do scroll — fluxo natural, sem pinar no viewport */
+/* Rodapé inset — padrão único em todas as telas */
 body.layout-inset-shell .app-page-scroll > .main-footer {
-    margin-top: 0;
     flex-shrink: 0;
     width: 100%;
+    margin-top: 0;
     border-radius: 0 0 var(--inset-radius-br) 0;
 }
 
-/* Scroll interno — fill/empty-state preenchem; hub scroll usa fluxo natural */
-body.layout-inset-shell .app-page-scroll:has(.page-body-fill),
-body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) {
-    display: flex;
-    flex-direction: column;
+body.layout-inset-shell .app-page-scroll--flow > .main-footer {
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
 }
 
-body.layout-inset-shell .app-page-scroll:has(.page-body-fill) > .content,
-body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) > .content {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
+@media (min-width: 1200px) {
+    body.layout-inset-shell .app-page-scroll--flow > .main-footer {
+        padding-top: 24px !important;
+        padding-bottom: 24px !important;
+    }
 }
 
-body.layout-inset-shell .app-page-scroll:has(.page-body-fill) .container-fluid--page-body,
-body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) .container-fluid--page-body {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) > .content,
-body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) .container-fluid--page-body {
-    flex: none;
-    display: block;
-    min-height: auto;
+body.layout-inset-shell .app-page-scroll--flow:has(.page-body-scroll) > .content,
+body.layout-inset-shell .app-page-scroll--flow:has(.page-body-scroll) .container-fluid--page-body {
+    flex: none !important;
+    display: block !important;
+    min-height: auto !important;
 }
 
 body.layout-inset-shell .page-body-fill,

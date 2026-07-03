@@ -15,7 +15,7 @@
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=304">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=305">
     {% set _shell_polish_css = app.debug ? 'css/unio-shell-polish.css' : 'css/unio-shell-polish.min.css' %}
     <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=27">
 
@@ -142,7 +142,7 @@
             {% block content_lead %}{% endblock %}
         </div>
 
-        <div class="app-page-scroll">
+        <div class="app-page-scroll app-page-scroll--{{ block('page_scroll_mode')|default('flow')|trim }}">
         <section class="content{% if block('page_toolbar_layout')|trim %} content--with-toolbar{% elseif not show_page_header %} content--no-header{% endif %}">
             <div class="container-fluid container-fluid--page-body">
                 {% block content %}{% endblock %}
