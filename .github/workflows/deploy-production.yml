@@ -57,8 +57,8 @@ jobs:
         run: |
           DEPLOY_PORT="${DEPLOY_PORT:-22}"
           DEPLOY_PATH="${DEPLOY_PATH:-/home2/joabef36/unio}"
-          RSYNC_SSH="ssh -i ~/.ssh/deploy_key -p ${DEPLOY_PORT} -o StrictHostKeyChecking=accept-new"
-          rsync -avz \
+          RSYNC_SSH="ssh -i ~/.ssh/deploy_key -p ${DEPLOY_PORT} -o StrictHostKeyChecking=accept-new -o LogLevel=ERROR -o BatchMode=yes"
+          rsync -avz --no-motd \
             -e "$RSYNC_SSH" \
             --exclude '.git/' \
             --exclude '.github/' \
