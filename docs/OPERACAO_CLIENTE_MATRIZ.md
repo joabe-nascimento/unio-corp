@@ -134,57 +134,70 @@ git checkout -b feature/minha-tarefa
 bash scripts/sync-branches.sh production   # alinha product/*
 ```
 
+## Domínio: precisa registrar outro?
+
+**Não necessariamente.** Na mesma HostGator você pode usar **subdomínio** do `uniowork.com.br`:
+
+| Opção | Exemplo | Quando usar |
+|-------|---------|-------------|
+| **Subdomínio** (mesma conta) | `cliente.uniowork.com.br` | Homologação, piloto, cliente sem domínio próprio |
+| **Domínio addon** | `cliente.com.br` | Marca do cliente, produção “oficial” dele |
+| **Mesmo site, outro tenant** | `uniowork.com.br` + empresa no Admin | **Não** é deploy separado — só permissões/dados |
+
+### Subdomínio com deploy isolado (recomendado para começar)
+
+No cPanel → **Subdomínios**:
+
+```
+cliente.uniowork.com.br  →  pasta própria (NÃO a mesma do uniowork.com.br)
+```
+
+Exemplo de estrutura na **mesma** conta HostGator:
+
+```
+/home/USER/unio/              ← production (uniowork.com.br)
+/home/USER/public_html/       ← document root Unio
+
+/home/USER/cliente-app/       ← branch client/cliente
+/home/USER/cliente-public/    ← document root de cliente.uniowork.com.br
+```
+
+Cada instância: **pasta + banco MySQL + `.env.local` + branch Git + workflow** próprios. O subdomínio só aponta para a pasta certa.
+
+SSL: AutoSSL cobre `*.uniowork.com.br` / subdomínios criados no cPanel.
+
 ---
 
-## Exemplo B — União Médica (cliente dedicado — proposta)
+## Exemplo B — Cliente dedicado (genérico)
 
-Cenário ilustrativo: clínica/hospital com **RH interno + pós-operatório**, sem admin global da plataforma Unio.
+Substitua `<slug>` e `<subdomínio>` pelos nomes reais do contrato.
 
-| Item | Valor proposto |
-|------|----------------|
-| **Cliente** | União Médica |
-| **Branch Git** | `client/uniao-medica` |
-| **Domínio** | `https://uniao-medica.com.br` (ou subdomínio temporário) |
-| **GitHub Environment** | `client-uniao-medica` (a criar) |
-| **Deploy** | Push em `client/uniao-medica` → **só esse servidor** |
-| **Promoção para Unio** | Merge seletivo → `production` quando feature for genérica |
+| Item | Valor |
+|------|--------|
+| **Branch Git** | `client/<slug>` |
+| **Domínio** | `https://<subdomínio>.uniowork.com.br` ou domínio próprio |
+| **GitHub Environment** | `client-<slug>` (a criar) |
+| **Deploy** | Push em `client/<slug>` → **só a pasta/banco desse cliente** |
 
-### Módulos do contrato (sugestão)
-
-| Incluído | Produto | Branch trabalho | URL principal | Grants / perfis |
-|:--------:|---------|-----------------|---------------|-----------------|
-| ✅ | Core (login, layout) | `product/core` | `/login` | Todos |
-| ✅ | Pós-operatório | `product/hub-pos-operatorio` | `/pos-operatorio` | Equipe clínica, enfermagem |
-| ✅ | Pós-op portal paciente | ↑ | `/pos-operatorio/portal` | Paciente / link externo |
-| ✅ | RH — funcionários | `product/rh` | `/rh/funcionarios` | RH, gestão |
-| ✅ | RH — admissões | `product/rh` | `/rh/admissoes` | RH |
-| ◐ | RH — folha / eSocial | `product/rh` | `/rh/folha` | Só se contratado |
-| ✅ | Pessoas — equipes | `product/pessoas` | `/pessoas/equipes` | Gestão |
-| ❌ | Engenharia | `product/engenharia` | `/engenharia` | Fora do contrato |
-| ❌ | Admin plataforma Unio | `product/admin` | `/admin` | **Não** — usar perfil GESTOR tenant |
-| ❌ | TI, Talentos, stubs | — | — | Fora do contrato |
-
-**URL de entrada sugerida:** `https://uniao-medica.com.br/pos-operatorio` ou subdomínio `https://pos.uniao-medica.com.br` (redirecionamento futuro).
-
-### Fluxo de trabalho só União Médica
+### Fluxo Git
 
 ```bash
-git checkout client/uniao-medica
-git pull origin client/uniao-medica
-git checkout -b feature/uniao-medica-alertas-pos-op
-# edita: templates/modules/pos-operatorio/, src/.../PosOperatorio/
-git push origin feature/uniao-medica-alertas-pos-op
-# PR → client/uniao-medica  →  deploy só do cliente
+git checkout client/<slug>
+git checkout -b feature/<slug>-minha-tarefa
+git push origin feature/<slug>-minha-tarefa
+# PR → client/<slug>  →  deploy só desse ambiente
 
-# Trazer correção da Unio principal:
-git checkout client/uniao-medica
-git merge production          # traz fixes genéricos; resolver conflitos
+# Trazer correções da Unio:
+git checkout client/<slug>
+git merge production
 
 # Subir melhoria genérica para todos:
 git checkout production
-git cherry-pick <commit>      # ou merge client/uniao-medica (revisar customizações)
+git cherry-pick <commit>
 git push origin production
 ```
+
+Preencha módulos e URLs na [tabela template](#modelo-de-contrato-template) acima.
 
 ---
 
@@ -206,7 +219,7 @@ git push origin production
 | # | Item |
 |---|------|
 | 1 | Domínio ou subdomínio apontando para a conta |
-| 2 | Pasta app: ex. `/home/USER/uniao-medica` |
+| 2 | Pasta app: ex. `/home/USER/cliente-app` |
 | 3 | `public_html` ou symlink para `public/` |
 | 4 | Banco MySQL dedicado |
 | 5 | `.env.local`: `DATABASE_URL`, `APP_SECRET`, `DEFAULT_URI=https://dominio` |
@@ -250,6 +263,6 @@ git push origin production
 | Instância | Branch deploy | Isolamento |
 |----------|---------------|------------|
 | Unio (`uniowork.com.br`) | `production` | Tenant por empresa no mesmo banco |
-| Cliente (ex. União Médica) | `client/uniao-medica` | Domínio + pasta + banco + grants |
+| Cliente dedicado | `client/<slug>` | Subdomínio ou domínio + pasta + banco + grants |
 
 A **matriz de contrato** define *o que* o cliente vê (URLs + permissões). A **branch `client/*`** define *onde* você desenvolve e publica sem afetar a Unio até fazer merge.

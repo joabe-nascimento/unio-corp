@@ -140,6 +140,4 @@ Criadas no repositório — não é preciso recriar:
 
 ## Cliente dedicado (deploy isolado)
 
-Para contratos com instância própria (domínio + banco + branch `client/*`), use a matriz completa em [OPERACAO_CLIENTE_MATRIZ.md](OPERACAO_CLIENTE_MATRIZ.md).
-
-Exemplo ilustrativo: `client/uniao-medica` com RH + Pós-operatório — ver tabela de módulos, URLs e checklist de configuração no documento acima.
+Para contratos com instância própria (subdomínio ou domínio + banco + branch `client/*`), use [OPERACAO_CLIENTE_MATRIZ.md](OPERACAO_CLIENTE_MATRIZ.md).
