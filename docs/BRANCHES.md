@@ -1,5 +1,7 @@
 # Organização de branches — Unio
 
+> **Operação atual (CI/CD, deploy HostGator, validação):** [OPERACAO_INDICE.md](OPERACAO_INDICE.md) e [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md).
+
 ## Ambientes (deploy)
 
 | Branch | Uso |

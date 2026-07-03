@@ -1,5 +1,7 @@
 # Deploy agora — checklist HostGator (joabef36)
 
+**Documentação operacional completa (jul/2026):** [OPERACAO_INDICE.md](./OPERACAO_INDICE.md) — histórico de correções, branches, Actions e validação local.
+
 **Deploy automático (recomendado após setup):** [DEPLOY_GITHUB_ACTIONS.md](./DEPLOY_GITHUB_ACTIONS.md) — `git push origin production` atualiza o site.
 
 Status atual:
