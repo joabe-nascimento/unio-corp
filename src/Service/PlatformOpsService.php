@@ -26,7 +26,7 @@ final class PlatformOpsService
             'generated_at' => (new \DateTimeImmutable())->format('c'),
             'environment' => $this->appEnv,
             'php_version' => PHP_VERSION,
-            'symfony_version' => KernelInterface::VERSION,
+            'symfony_version' => $this->resolveSymfonyVersion($projectDir),
             'project_dir' => $projectDir,
             'disk' => $this->diskUsage($projectDir),
             'deploy' => $this->readDeployHints($projectDir),
@@ -146,6 +146,28 @@ final class PlatformOpsService
         }
 
         return $hints;
+    }
+
+    private function resolveSymfonyVersion(string $projectDir): string
+    {
+        $lockFile = $projectDir . '/composer.lock';
+        if (!is_readable($lockFile)) {
+            return 'indisponível';
+        }
+
+        try {
+            $data = json_decode((string) file_get_contents($lockFile), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return 'indisponível';
+        }
+
+        foreach ($data['packages'] ?? [] as $package) {
+            if (($package['name'] ?? '') === 'symfony/framework-bundle') {
+                return ltrim((string) ($package['version'] ?? ''), 'v') ?: 'indisponível';
+            }
+        }
+
+        return 'indisponível';
     }
 
     /**
