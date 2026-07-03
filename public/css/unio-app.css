@@ -25936,10 +25936,16 @@ body.layout-inset-shell .content-wrapper {
     min-height: 0;
     margin-left: 0 !important;
     margin-top: 0 !important;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     background: var(--inset-panel-bg) !important;
     display: flex;
     flex-direction: column;
+}
+
+body.layout-inset-shell .content-wrapper:has(.empty-state-panel),
+body.layout-inset-shell .content-wrapper:has(.chat-page) {
+    overflow: hidden;
 }
 
 body.layout-inset-shell .content-wrapper > .app-page-scroll {
@@ -25949,9 +25955,22 @@ body.layout-inset-shell .content-wrapper > .app-page-scroll {
     flex-direction: column;
 }
 
+/* Hubs/listas em scroll — área não estica; rodapé segue o conteúdo (não “fixo”) */
+body.layout-inset-shell .content-wrapper > .app-page-scroll:has(.page-body-scroll) {
+    flex: 0 1 auto;
+    min-height: auto;
+    overflow: visible;
+}
+
 body.layout-inset-shell .content-wrapper > .main-footer {
-    margin-top: auto;
     flex-shrink: 0;
+    margin-top: 0;
+}
+
+/* Páginas hero/empty-state — preenchem o painel; rodapé no fim do painel */
+body.layout-inset-shell .content-wrapper:has(.empty-state-panel) > .main-footer,
+body.layout-inset-shell .content-wrapper:has(.page-body-fill) > .main-footer {
+    margin-top: auto;
 }
 
 body.layout-inset-shell .app-page-chrome {
@@ -25964,14 +25983,19 @@ body.layout-inset-shell .app-page-scroll {
     border-radius: 0 0 var(--inset-radius-br) 0;
 }
 
-/* Scroll interno — conteúdo preenche área acima do rodapé */
+/* Scroll interno — só fill/empty-state esticam; hub scroll usa fluxo natural */
 body.layout-inset-shell .app-page-scroll:has(.page-body-fill),
-body.layout-inset-shell .app-page-scroll:has(.empty-state-panel),
-body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) {
+body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
+}
+
+body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) {
+    display: block;
+    flex: 0 1 auto;
+    min-height: auto;
 }
 
 body.layout-inset-shell .app-page-scroll:has(.page-body-fill) > .content,
@@ -25983,6 +26007,12 @@ body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) > .content {
     flex-direction: column;
 }
 
+body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) > .content {
+    flex: 0 1 auto;
+    min-height: auto;
+    display: block;
+}
+
 body.layout-inset-shell .app-page-scroll:has(.page-body-fill) .container-fluid--page-body,
 body.layout-inset-shell .app-page-scroll:has(.empty-state-panel) .container-fluid--page-body,
 body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) .container-fluid--page-body {
@@ -25990,6 +26020,12 @@ body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) .container-fluid
     display: flex;
     flex-direction: column;
     min-height: 0;
+}
+
+body.layout-inset-shell .app-page-scroll:has(.page-body-scroll) .container-fluid--page-body {
+    flex: 0 1 auto;
+    min-height: auto;
+    display: block;
 }
 
 body.layout-inset-shell .page-body-fill,
@@ -26162,10 +26198,12 @@ body.layout-inset-shell.layout-footer-fixed .wrapper .main-footer {
     background: var(--inset-panel-bg) !important;
 }
 
-/* Hub / toolbar — mesmo fundo do painel inset (claro e escuro) */
+/* Hub / toolbar — mesmo fundo do painel inset (sem faixa --bg pela metade) */
+body.layout-inset-shell .page-lead-zone,
 body.layout-inset-shell .list-toolbar--page,
-body.layout-inset-shell .page-lead-kpis {
-    background: transparent;
+body.layout-inset-shell .page-lead-kpis,
+body.layout-inset-shell .content--with-toolbar .container-fluid--page-body {
+    background: var(--inset-panel-bg) !important;
 }
 
 /* Chat / empty state — superfície alinhada ao painel branco */
