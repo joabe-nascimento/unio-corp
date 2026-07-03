@@ -7,16 +7,15 @@
 #   DEFAULT_URI=https://rh.uniowork.com.br \
 #   bash scripts/setup-product-env-server.sh
 #
-# Opcional (cria .env.local se nÃ£o existir):
+# Opcional (cria .env.local se nao existir):
 #   APP_SECRET=... DATABASE_URL=... bash scripts/setup-product-env-server.sh
 
 set -euo pipefail
 
-DEPLOY_PATH="${DEPLOY_PATH:?DEPLOY_PATH obrigatÃ³rio}"
-PUBLIC_HTML="${PUBLIC_HTML:?PUBLIC_HTML obrigatÃ³rio}"
-DEFAULT_URI="${DEFAULT_URI:?DEFAULT_URI obrigatÃ³rio (ex.: https://rh.uniowork.com.br)}"
+DEPLOY_PATH="${DEPLOY_PATH:?DEPLOY_PATH obrigatorio}"
+PUBLIC_HTML="${PUBLIC_HTML:?PUBLIC_HTML obrigatorio}"
+DEFAULT_URI="${DEFAULT_URI:?DEFAULT_URI obrigatorio (ex.: https://rh.uniowork.com.br)}"
 APP_DIR_NAME="$(basename "$DEPLOY_PATH")"
-HOME_DIR="$(dirname "$DEPLOY_PATH")"
 
 echo "== Setup produto: $DEFAULT_URI"
 echo "   app:  $DEPLOY_PATH"
@@ -42,7 +41,35 @@ return static function (array \$context) {
 PHP
   echo "Criado: $INDEX_PHP"
 else
-  echo "Mantido: $INDEX_PHP (jÃ¡ existia)"
+  echo "Mantido: $INDEX_PHP (ja existia)"
+fi
+
+HTACCESS="$PUBLIC_HTML/.htaccess"
+if [[ ! -f "$HTACCESS" ]]; then
+  cat > "$HTACCESS" <<'HTA'
+DirectoryIndex index.php
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    DirectoryIndex index.php
+</IfModule>
+HTA
+  echo "Criado: $HTACCESS"
+else
+  echo "Mantido: $HTACCESS (ja existia)"
 fi
 
 ENV_FILE="$DEPLOY_PATH/.env.local"
@@ -57,14 +84,14 @@ DATABASE_URL=
 MAILER_DSN=null://null
 MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
 ENV
-  echo "Criado: $ENV_BASE (valores sensíveis ficam em .env.local)"
+  echo "Criado: $ENV_BASE (valores sensiveis ficam em .env.local)"
 else
-  echo "Mantido: $ENV_BASE (já existia)"
+  echo "Mantido: $ENV_BASE (ja existia)"
 fi
 
 if [[ ! -f "$ENV_FILE" ]]; then
   if [[ -z "${APP_SECRET:-}" || -z "${DATABASE_URL:-}" ]]; then
-    echo "AVISO: .env.local nÃ£o criado â€” defina APP_SECRET e DATABASE_URL e rode de novo."
+    echo "AVISO: .env.local nao criado — defina APP_SECRET e DATABASE_URL e rode de novo."
   else
     cat > "$ENV_FILE" <<ENV
 APP_ENV=prod
@@ -94,12 +121,12 @@ ENV
     echo "Criado: $ENV_FILE"
   fi
 else
-  echo "Mantido: $ENV_FILE (jÃ¡ existia)"
+  echo "Mantido: $ENV_FILE (ja existia)"
 fi
 
 echo ""
-echo "PrÃ³ximos passos:"
-echo "  1. cPanel: subdomÃ­nio apontando para $PUBLIC_HTML (se ainda nÃ£o existir)"
+echo "Proximos passos:"
+echo "  1. cPanel: subdominio apontando para $PUBLIC_HTML (se ainda nao existir)"
 echo "  2. Conferir .env.local em $ENV_FILE"
-echo "  3. Deploy da branch product/rh (GitHub Actions â†’ Deploy Product RH)"
-echo "  4. ApÃ³s primeiro deploy: php bin/console app:ensure-platform-owner --allow-prod (se necessÃ¡rio)"
+echo "  3. Deploy da branch product/rh (GitHub Actions -> Deploy Product RH)"
+echo "  4. Apos primeiro deploy: seeds rodam automaticamente (gestor@unio.dev / unio123)"
