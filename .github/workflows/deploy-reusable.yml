@@ -158,9 +158,9 @@ jobs:
             if [[ "$INPUT_SKIP_UNIO" == "true" ]]; then
               export SKIP_UNIO_PLATFORM_STEPS=1
             else
-              export MAILBOX_JOABE_PASSWORD
-              export MAILBOX_UNIO_PASSWORD
-              export PLATFORM_OWNER_PASSWORD
+              export MAILBOX_JOABE_PASSWORD="${MAILBOX_JOABE_PASSWORD:-}"
+              export MAILBOX_UNIO_PASSWORD="${MAILBOX_UNIO_PASSWORD:-}"
+              export PLATFORM_OWNER_PASSWORD="${PLATFORM_OWNER_PASSWORD:-}"
             fi
             bash "${DEPLOY_PATH}/scripts/deploy-server.sh" || {
               echo "========== DEPLOY REPORT =========="
