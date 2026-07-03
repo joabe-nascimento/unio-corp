@@ -29,12 +29,13 @@ Modelo de longo prazo: [BRANCHES.md](BRANCHES.md) · Workflows: [OPERACAO_GITHUB
 | Branch | Deploy | CI no push | Uso |
 |--------|--------|------------|-----|
 | **`production`** | Sim (automático) | Sim | Código no ar — `uniowork.com.br` |
+| **`product/rh`** | Sim → `rh.uniowork.com.br` | Sim | Homolog isolada do módulo RH |
 | **`main`** | Não | Sim | Tronco / referência estável |
 | **`new_staging` / `new_staging2`** | Não* | Sim | Homologação / QA |
-| **`product/*`** | Não | **Não** | Espelho por módulo (organização) |
+| **`product/*`** (exceto `rh`) | Não | **Não** | Espelho por módulo (organização) |
 | **`feature/*`** | Não | **Não** | Espelho por feature (organização) |
 
-\* Deploy automático só existe para `production` hoje.
+\* Deploy automático: `production` (Unio) e `product/rh` (piloto homolog RH).
 
 **HEAD atual de referência:** `production` @ `3f2a3b1`
 
