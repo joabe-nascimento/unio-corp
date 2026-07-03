@@ -28,8 +28,9 @@ $PHP_BIN bin/console doctrine:migrations:migrate --no-interaction
 $PHP_BIN bin/console cache:clear --env=prod --no-warmup
 $PHP_BIN bin/console cache:warmup --env=prod
 
-# HostGator shared: rsync pode não existir ou falhar silenciosamente — cp -a é confiável.
-sync_public_dir() {
+# public_html é o document root; unio/public tem os estáticos do deploy.
+# Symlink evita cópia manual: ao atualizar unio/public, o site serve os mesmos arquivos.
+link_public_dir() {
   local rel="$1"
   local src="$DEPLOY_PATH/public/$rel"
   local dest="$PUBLIC_HTML/$rel"
@@ -38,17 +39,20 @@ sync_public_dir() {
     return 0
   fi
 
-  mkdir -p "$dest"
-  cp -a "$src/." "$dest/"
-  echo "sync OK: public/$rel → $dest ($(find "$src" -type f | wc -l | tr -d ' ') arquivos)"
+  if [[ -e "$dest" || -L "$dest" ]]; then
+    rm -rf "$dest"
+  fi
+
+  ln -sfn "$src" "$dest"
+  echo "link OK: $dest → $src"
 }
 
 for dir in css js images vendor; do
-  sync_public_dir "$dir"
+  link_public_dir "$dir"
 done
 
 if [[ -d public/pos-operatorio ]]; then
-  sync_public_dir pos-operatorio
+  link_public_dir pos-operatorio
 fi
 
 # Falha o deploy se o pacote extraído não contém o CSS esperado (evita "deploy verde, site velho").
