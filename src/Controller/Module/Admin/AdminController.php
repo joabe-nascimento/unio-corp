@@ -103,6 +103,7 @@ class AdminController extends AbstractController
             'ativos'  => $this->userRepo->count(['ativo' => true]),
             'inativos'=> $this->userRepo->count(['ativo' => false]),
             'tenants' => count($this->userRepo->findBy(['perfil' => 'TENANT'])),
+            'platform_owners' => count($this->userRepo->findBy(['perfil' => 'PLATFORM_OWNER'])),
         ];
 
         return $this->render(self::T . 'usuarios.html.twig', [
@@ -204,6 +205,13 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('app_admin_usuarios');
         }
 
+        /** @var User $me */
+        $me = $this->getUser();
+        if ($user->isPlatformOwner() && !$me->isPlatformOwner()) {
+            $this->addFlash('error', 'A conta do dono da plataforma não pode ser alterada por outro administrador.');
+            return $this->redirectToRoute('app_admin_usuarios');
+        }
+
         $nome   = trim((string) $request->request->get('nome', ''));
         $perfil = (string) $request->request->get('perfil', $user->getPerfil());
 
@@ -269,6 +277,9 @@ class AdminController extends AbstractController
         $me = $this->getUser();
         if ($user->getId() === $me->getId()) {
             return new JsonResponse(['ok' => false, 'error' => 'self'], 400);
+        }
+        if ($user->isPlatformOwner()) {
+            return new JsonResponse(['ok' => false, 'error' => 'protected'], 403);
         }
 
         $acao = (string) $request->request->get('acao', '');
@@ -748,6 +759,7 @@ class AdminController extends AbstractController
     private function rolePorPerfil(string $perfil): string
     {
         return match ($perfil) {
+            'PLATFORM_OWNER'    => User::ROLE_PLATFORM_OWNER,
             'TENANT'            => User::ROLE_TENANT,
             'GESTOR'            => User::ROLE_GESTOR,
             'GESTOR_EQUIPE'     => User::ROLE_GESTOR_EQUIPE,

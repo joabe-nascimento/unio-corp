@@ -33,7 +33,7 @@ final class DashboardStatsService
      */
     public function getKpis(User $user, ?Empresa $empresa, string $layout, int $empresasCount): array
     {
-        $isTenant = $this->navigation->isTenant($user);
+        $hasGlobalScope = $user->hasPlatformAccess();
         $kpis = [];
 
         if ($empresa !== null) {
@@ -74,7 +74,7 @@ final class DashboardStatsService
             }
         }
 
-        if ($isTenant) {
+        if ($hasGlobalScope) {
             $kpis[] = $this->kpi(
                 (int) $this->userRepo->count([]),
                 'Usuários',
@@ -111,7 +111,7 @@ final class DashboardStatsService
             $kpis = \array_slice($kpis, 0, 6);
         }
 
-        if ($layout === 'tenant') {
+        if ($layout === 'tenant' || $layout === 'platform_owner') {
             $kpis = \array_slice($kpis, 0, 8);
         }
 
@@ -121,6 +121,12 @@ final class DashboardStatsService
     public function getLayoutHeadline(string $layout, ?Empresa $empresa): array
     {
         return match ($layout) {
+            'platform_owner' => [
+                'icon' => 'fa-crown',
+                'title' => 'Conta pessoal da plataforma',
+                'subtitle' => 'Visão global · operações, usuários e saúde do ambiente'
+                    . ($empresa ? ' · ' . $empresa->getNome() : ''),
+            ],
             'tenant' => [
                 'icon' => 'fa-shield-halved',
                 'title' => 'Gestão da plataforma',

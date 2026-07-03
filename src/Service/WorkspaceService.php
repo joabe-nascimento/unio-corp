@@ -68,7 +68,7 @@ class WorkspaceService
     /** @return list<Empresa> */
     private function fetchAvailableEmpresas(User $user): array
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return $this->empresaRepo->findBy(['ativo' => true], ['nome' => 'ASC']);
         }
         if ($user->getEmpresa()) {
@@ -120,7 +120,7 @@ class WorkspaceService
 
     private function canAccess(User $user, Empresa $empresa): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 

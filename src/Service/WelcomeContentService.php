@@ -101,7 +101,8 @@ final class WelcomeContentService
     {
         $items = [];
         foreach (self::INSIGHTS as $insight) {
-            if (!\in_array($layout, $insight['layouts'], true)) {
+            if (!\in_array($layout, $insight['layouts'], true)
+                && !($layout === 'platform_owner' && \in_array('tenant', $insight['layouts'], true))) {
                 continue;
             }
             $items[] = $insight;

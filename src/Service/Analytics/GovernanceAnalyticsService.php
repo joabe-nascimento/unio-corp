@@ -26,16 +26,16 @@ final class GovernanceAnalyticsService
      */
     public function buildSections(User $user, ?Empresa $empresa): array
     {
-        $isTenant = $this->navigation->isTenant($user);
+        $hasGlobalScope = $user->hasPlatformAccess();
 
         $governance = array_values(array_filter([
             !($empresa !== null && ($this->navigation->showModuloRh($user) || $this->navigation->showModuloPessoas($user)))
-                ? $this->buildAccessSankey($user, $empresa, $isTenant)
+                ? $this->buildAccessSankey($user, $empresa, $hasGlobalScope)
                 : null,
             $empresa !== null ? $this->buildProfileRing($empresa) : null,
             $empresa !== null ? $this->buildUserActivityGauge($empresa) : null,
-            ($isTenant && $empresa === null) ? $this->buildTenantSankey() : null,
-            ($isTenant && $empresa === null) ? $this->buildTenantEmpresaTreemap() : null,
+            ($hasGlobalScope && $empresa === null) ? $this->buildTenantSankey() : null,
+            ($hasGlobalScope && $empresa === null) ? $this->buildTenantEmpresaTreemap() : null,
         ]));
 
         if ($governance === []) {

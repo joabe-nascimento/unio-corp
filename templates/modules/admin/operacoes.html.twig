@@ -1,0 +1,68 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Operações da plataforma{% endblock %}
+{% block permissions_scope %}hub_admin{% endblock %}
+{% set hub_page_title = 'Operações da plataforma' %}
+
+{% block hub_content %}
+<div class="row mb-3">
+    <div class="col-md-4">
+        <div class="card card-outline card-primary h-100">
+            <div class="card-header"><h3 class="card-title mb-0">Ambiente</h3></div>
+            <div class="card-body">
+                <dl class="mb-0">
+                    <dt>APP_ENV</dt><dd><code>{{ snapshot.environment }}</code></dd>
+                    <dt>PHP</dt><dd>{{ snapshot.php_version }}</dd>
+                    <dt>Symfony</dt><dd>{{ snapshot.symfony_version }}</dd>
+                    <dt>Gerado em</dt><dd>{{ snapshot.generated_at }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-outline card-secondary h-100">
+            <div class="card-header"><h3 class="card-title mb-0">Deploy</h3></div>
+            <div class="card-body">
+                <dl class="mb-0">
+                    <dt>Git HEAD</dt>
+                    <dd>{% if snapshot.deploy.git_head %}<code>{{ snapshot.deploy.git_head|slice(0, 12) }}</code>{% else %}<span class="text-muted">indisponível</span>{% endif %}</dd>
+                    <dt>bin/console</dt>
+                    <dd>{{ snapshot.deploy.console_mtime.modified|default('—') }}</dd>
+                    <dt>public/index.php</dt>
+                    <dd>{{ snapshot.deploy.public_index_mtime.modified|default('—') }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-outline card-info h-100">
+            <div class="card-header"><h3 class="card-title mb-0">Disco (estimado)</h3></div>
+            <div class="card-body">
+                <dl class="mb-0">
+                    <dt>Projeto</dt><dd>{{ (snapshot.disk.project_bytes / 1024 / 1024)|number_format(1, ',', '.') }} MB</dd>
+                    <dt>var/log</dt>
+                    <dd>{% if snapshot.disk.var_log_bytes is not null %}{{ (snapshot.disk.var_log_bytes / 1024 / 1024)|number_format(1, ',', '.') }} MB{% else %}—{% endif %}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for key, log in snapshot.logs %}
+<div class="card card-outline card-dark mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">Log {{ key }}</h3>
+        <small class="text-muted">
+            {% if log.exists %}
+                {{ log.size|number_format(0, ',', '.') }} bytes · {{ log.modified }}
+            {% else %}
+                arquivo não encontrado
+            {% endif %}
+        </small>
+    </div>
+    <div class="card-body p-0">
+        <pre class="mb-0 p-3 bg-dark text-light small" style="max-height: 420px; overflow: auto;">{% if log.lines is empty %}(vazio){% else %}{% for line in log.lines %}{{ line }}
+{% endfor %}{% endif %}</pre>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

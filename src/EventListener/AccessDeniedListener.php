@@ -47,7 +47,7 @@ class AccessDeniedListener
 
         $request = $event->getRequest();
 
-        if ($this->config->isMaintenanceMode() && !$this->isTenant()) {
+        if ($this->config->isMaintenanceMode() && !$this->hasPlatformAccess()) {
             $event->setResponse(new RedirectResponse(
                 $this->router->generate('app_manutencao'),
                 Response::HTTP_TEMPORARY_REDIRECT
@@ -186,11 +186,11 @@ class AccessDeniedListener
             || str_contains($lower, 'area de trabalho');
     }
 
-    private function isTenant(): bool
+    private function hasPlatformAccess(): bool
     {
         $user = $this->security->getUser();
 
-        return $user instanceof User && $user->isTenant();
+        return $user instanceof User && $user->hasPlatformAccess();
     }
 
     private function addFlash(Request $request, string $type, string $message): void

@@ -39,7 +39,7 @@ class DashboardController extends AbstractController
             'chart_sections'  => $analytics->getChartSections($user, $empresa),
             'empresa'         => $empresa,
             'empresas'        => $empresas,
-            'account_pending' => empty($empresas) && !$user->isTenant(),
+            'account_pending' => empty($empresas) && !$user->hasPlatformAccess(),
             'greeting'        => $welcome->getGreeting(),
             'date_label'      => $dt['date_label'],
             'time_label'      => $dt['time_label'],

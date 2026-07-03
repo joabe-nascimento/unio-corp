@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Entity\User;
 use App\Service\PlatformConfigService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -12,7 +13,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Bloqueia acesso de usuários não-tenant quando o modo de manutenção está ativo.
+ * Bloqueia acesso de usuários comuns quando o modo de manutenção está ativo.
+ * Tenant e dono da plataforma (PLATFORM_OWNER) continuam com acesso.
  * Redireciona para /manutencao ou retorna 503 para requisições não-HTML.
  */
 /** Executa após o firewall (prioridade 8) para o usuário já estar autenticado. */
@@ -77,9 +79,9 @@ class MaintenanceListener
             return;
         }
 
-        // Tenants continuam com acesso total
+        // Tenant e dono da plataforma continuam com acesso total
         $user = $this->security->getUser();
-        if ($user !== null && method_exists($user, 'isTenant') && $user->isTenant()) {
+        if ($user instanceof User && $user->hasPlatformAccess()) {
             return;
         }
 

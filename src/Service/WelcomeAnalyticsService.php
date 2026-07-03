@@ -78,7 +78,7 @@ final class WelcomeAnalyticsService
      */
     public function buildExecutiveSummary(User $user, ?Empresa $empresa): array
     {
-        $isTenant = $this->navigation->isTenant($user);
+        $hasGlobalScope = $user->hasPlatformAccess();
         $kpis = [];
 
         if ($empresa !== null) {
@@ -106,7 +106,7 @@ final class WelcomeAnalyticsService
                 $tasksTotal > 0 ? $this->executiveKpi('delivery', 'Entrega', $deliveryRate, 'fa-gauge-high', $tasksDone . ' de ' . $tasksTotal . ' tarefas', '%') : null,
                 $rhOpen > 0 ? $this->executiveKpi('rh-open', 'RH em aberto', $rhOpen, 'fa-user-clock', 'Admissões e desligamentos') : null,
             ]));
-        } elseif ($isTenant) {
+        } elseif ($hasGlobalScope) {
             $empresas = $this->countEmpresasAtivas();
             $users = (int) $this->userRepo->count([]);
             $kpis = [

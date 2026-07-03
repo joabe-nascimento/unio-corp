@@ -65,7 +65,7 @@ class PermissionService
     /** Painel/aba Permissões — perfil global ou grant ≥ Gestor de Equipe no escopo. */
     public function canManagePermissions(User $user, ?string $scope = null): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -94,7 +94,7 @@ class PermissionService
     public function canEditorSaveGrants(User $editor, array $grantsMap): bool
     {
         if ($this->canManagePermissions($editor)) {
-            if ($editor->isTenant() || \in_array($editor->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE'], true)) {
+            if ($editor->hasPlatformAccess() || \in_array($editor->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE'], true)) {
                 return true;
             }
         } else {
@@ -1230,8 +1230,8 @@ class PermissionService
             throw new \InvalidArgumentException('Membro não encontrado nesta empresa.');
         }
 
-        if ($target->getPerfil() === 'TENANT') {
-            throw new \InvalidArgumentException('Permissões de tenant não são editáveis.');
+        if (\in_array($target->getPerfil(), ['TENANT', 'PLATFORM_OWNER'], true)) {
+            throw new \InvalidArgumentException('Permissões de contas globais da plataforma não são editáveis.');
         }
 
         $grantsMap = $this->syncOperacoesHubGrants($grantsMap);
@@ -1420,7 +1420,7 @@ class PermissionService
         $users = $this->userRepo->findBy(['empresa' => $empresa, 'ativo' => true], ['nome' => 'ASC']);
         $members = [];
         foreach ($users as $user) {
-            if ($user->getPerfil() === 'TENANT') {
+            if ($user->hasPlatformAccess()) {
                 continue;
             }
             $members[] = $this->memberFromUser($user, $empresa);

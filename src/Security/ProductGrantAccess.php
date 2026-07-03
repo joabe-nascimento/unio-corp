@@ -173,7 +173,7 @@ final class ProductGrantAccess
 
     public function usesGranularGrants(User $user): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return false;
         }
 
@@ -184,7 +184,7 @@ final class ProductGrantAccess
     /** Matriz salva explicitamente (inclui "sem acesso" total). */
     public function usesConfiguredMatrix(User $user): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return false;
         }
 
@@ -193,7 +193,7 @@ final class ProductGrantAccess
 
     public function canView(User $user, string $scope, string $product): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -206,7 +206,7 @@ final class ProductGrantAccess
     /** UI/nav: grant granular ou role global quando ainda não há matriz no banco. */
     public function canViewProductForUi(User $user, string $scope, string $product): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -222,7 +222,7 @@ final class ProductGrantAccess
      */
     public function effectiveProfileLevel(User $user, string $scope, string $product): int
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return 99;
         }
 
@@ -241,7 +241,7 @@ final class ProductGrantAccess
     /** Criar/editar no produto — exige perfil mínimo (ex.: GESTOR_EQUIPE para novo membro). */
     public function grantAtLeast(User $user, string $scope, string $product, string $minProfileId): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -255,7 +255,7 @@ final class ProductGrantAccess
 
     public function canManageRoute(User $user, string $routeName): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -313,7 +313,7 @@ final class ProductGrantAccess
 
     public function canAccessRoute(User $user, string $routeName): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -387,7 +387,7 @@ final class ProductGrantAccess
 
     public function roleAllowsRoute(User $user, string $routeName): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -408,7 +408,7 @@ final class ProductGrantAccess
 
     public function isRouteAllowed(User $user, string $routeName): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -459,7 +459,7 @@ final class ProductGrantAccess
             'global_label' => $globalLabel,
         ];
 
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return $result;
         }
 
@@ -499,7 +499,7 @@ final class ProductGrantAccess
 
     private function tiRouteAllowed(User $user, string $action): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -513,7 +513,7 @@ final class ProductGrantAccess
 
     private function tiCanCreateChamado(User $user): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 

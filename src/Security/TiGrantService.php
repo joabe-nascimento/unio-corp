@@ -25,7 +25,7 @@ final class TiGrantService
 
     public function canCreateChamado(User $user): bool
     {
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -187,7 +187,7 @@ final class TiGrantService
 
     public function assert(User $user, bool $allowed, string $message = 'Sem permissão para esta ação.'): void
     {
-        if (!$allowed && !$user->isTenant()) {
+        if (!$allowed && !$user->hasPlatformAccess()) {
             throw new \Symfony\Component\Security\Core\Exception\AccessDeniedException($message);
         }
     }

@@ -39,7 +39,7 @@ final class ProductGrantVoter extends Voter
             return false;
         }
 
-        if ($user->isTenant()) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 

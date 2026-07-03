@@ -22,7 +22,7 @@ class SecurityController extends AbstractController
             }
 
             $user = $this->getUser();
-            if ($config->isMaintenanceMode() && $user instanceof User && !$user->isTenant()) {
+            if ($config->isMaintenanceMode() && $user instanceof User && !$user->hasPlatformAccess()) {
                 return $this->redirectToRoute('app_logout');
             }
 

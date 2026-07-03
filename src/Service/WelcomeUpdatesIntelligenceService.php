@@ -404,7 +404,7 @@ final class WelcomeUpdatesIntelligenceService
 
         $kpis = $this->dashboardStats->getKpis($user, $empresa, $layout, $empresasCount);
 
-        if ($kpis !== [] && $empresa === null && $this->navigation->isTenant($user)) {
+        if ($kpis !== [] && $empresa === null && $user->hasPlatformAccess()) {
 
             $updates[] = $this->update(
 

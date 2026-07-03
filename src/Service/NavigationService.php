@@ -11,6 +11,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Menu e layout por perfil principal + grants granulares quando existem no banco.
+ * PLATFORM_OWNER = conta pessoal do dono (acima do tenant).
  * TENANT = operador da plataforma, acesso total (hubs + plataforma).
  */
 class NavigationService
@@ -34,6 +35,10 @@ class NavigationService
 
     public function getLayout(User $user): string
     {
+        if ($user->isPlatformOwner()) {
+            return 'platform_owner';
+        }
+
         if ($this->isTenant($user)) {
             return 'tenant';
         }
@@ -47,7 +52,7 @@ class NavigationService
 
     public function showModuloRh(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -63,7 +68,7 @@ class NavigationService
 
     public function showModuloPessoas(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -79,7 +84,7 @@ class NavigationService
 
     public function showHubOperacoes(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -90,7 +95,7 @@ class NavigationService
 
     public function showHubTalentos(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -101,7 +106,7 @@ class NavigationService
 
     public function showHubMaturidade(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -117,7 +122,7 @@ class NavigationService
 
     public function showHubRecrutamento(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -246,7 +251,7 @@ class NavigationService
 
     private function showFutureHub(User $user, string $scope): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -259,7 +264,7 @@ class NavigationService
 
     public function showModuloEngenharia(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -275,7 +280,7 @@ class NavigationService
 
     public function showModuloPublicidade(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -304,11 +309,11 @@ class NavigationService
             || $this->showAnyPlannedHub($user);
     }
 
-    /** Seção Plataforma (usuários, empresas, configurações) — somente TENANT */
+    /** Seção Plataforma (usuários, empresas, configurações) — tenant ou dono pessoal. */
     /** Quadro de desenvolvimento da plataforma (estilo Motion) — produto interno Unio. */
     public function showProjetosMetas(User $user): bool
     {
-        if ($this->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             return true;
         }
 
@@ -334,12 +339,18 @@ class NavigationService
 
     public function showPlataforma(User $user): bool
     {
-        return $this->isTenant($user);
+        return $user->hasPlatformAccess();
     }
 
     public function showTenantEmpresas(User $user): bool
     {
-        return $this->isTenant($user);
+        return $user->hasPlatformAccess();
+    }
+
+    /** Logs, deploy e saúde do ambiente — somente PLATFORM_OWNER. */
+    public function showPlatformOperacoes(User $user): bool
+    {
+        return $user->isPlatformOwner();
     }
 
     public function isHubOperacoesActive(?string $route): bool
@@ -639,6 +650,7 @@ class NavigationService
             'nav_show_plataforma' => $showPlataforma,
             'nav_show_admin' => $showPlataforma,
             'nav_show_tenant_empresas' => $this->showTenantEmpresas($user),
+            'nav_show_platform_operacoes' => $this->showPlatformOperacoes($user),
             'nav_hub_operacoes_active' => $this->isHubOperacoesActive($route),
             'nav_hub_talentos_active' => $this->isHubTalentosActive($route),
             'nav_hub_maturidade_active' => $this->isHubMaturidadeActive($route),

@@ -215,7 +215,9 @@ final class WelcomeNewsFeedService
     private function isVisible(User $user, string $layout, array $article): bool
     {
         $layouts = $article['layouts'] ?? null;
-        if (\is_array($layouts) && $layouts !== [] && !\in_array($layout, $layouts, true)) {
+        if (\is_array($layouts) && $layouts !== []
+            && !\in_array($layout, $layouts, true)
+            && !($layout === 'platform_owner' && \in_array('tenant', $layouts, true))) {
             return false;
         }
 

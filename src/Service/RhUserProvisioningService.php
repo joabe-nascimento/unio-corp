@@ -244,8 +244,8 @@ class RhUserProvisioningService
         User $user,
         ?Funcionario $funcionario,
     ): void {
-        if ($user->isTenant()) {
-            throw new RhProcessException('Contas de tenant não podem ser vinculadas por admissão.');
+        if ($user->hasPlatformAccess()) {
+            throw new RhProcessException('Contas globais da plataforma não podem ser vinculadas por admissão.');
         }
 
         $userEmpresa = $user->getEmpresa();

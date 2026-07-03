@@ -14,6 +14,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    public const ROLE_PLATFORM_OWNER    = 'ROLE_PLATFORM_OWNER';
     public const ROLE_TENANT            = 'ROLE_TENANT';
     public const ROLE_GESTOR            = 'ROLE_GESTOR';
     public const ROLE_GESTOR_EQUIPE     = 'ROLE_GESTOR_EQUIPE';
@@ -29,6 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         'GESTOR_EQUIPE'     => 4,
         'GESTOR'            => 5,
         'TENANT'            => 7,
+        'PLATFORM_OWNER'    => 9,
     ];
 
     #[ORM\Id]
@@ -181,7 +183,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     // ── Helpers de perfil ──────────────────────────────────────────────
 
-    public function isTenant(): bool           { return $this->perfil === 'TENANT' || \in_array(self::ROLE_TENANT, $this->getRoles(), true); }
+    public function isPlatformOwner(): bool    { return $this->perfil === 'PLATFORM_OWNER'; }
+    public function isTenant(): bool           { return $this->perfil === 'TENANT'; }
+
+    /** Tenant operacional ou dono pessoal da plataforma (acesso global). */
+    public function hasPlatformAccess(): bool
+    {
+        return $this->isPlatformOwner() || $this->isTenant();
+    }
     public function isGestor(): bool           { return in_array(self::ROLE_GESTOR, $this->getRoles()); }
     public function isGestorEquipe(): bool     { return in_array(self::ROLE_GESTOR_EQUIPE, $this->getRoles()); }
     public function isSupervisor(): bool       { return in_array(self::ROLE_SUPERVISOR, $this->getRoles()); }
@@ -196,6 +205,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPerfilLabel(): string
     {
         return match ($this->perfil) {
+            'PLATFORM_OWNER'    => 'Dono da plataforma',
             'TENANT'            => 'Tenant',
             'ADMIN'             => 'Gestor',
             'GESTOR'            => 'Gestor',
@@ -211,6 +221,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPerfilClass(): string
     {
         return match ($this->perfil) {
+            'PLATFORM_OWNER'    => 'platform-owner',
             'TENANT'            => 'tenant',
             'ADMIN'             => 'gestor',
             'GESTOR'            => 'gestor',
@@ -226,6 +237,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRolePrincipal(): string
     {
         return match ($this->perfil) {
+            'PLATFORM_OWNER'    => self::ROLE_PLATFORM_OWNER,
             'TENANT'            => self::ROLE_TENANT,
             'ADMIN'             => self::ROLE_GESTOR,
             'GESTOR'            => self::ROLE_GESTOR,

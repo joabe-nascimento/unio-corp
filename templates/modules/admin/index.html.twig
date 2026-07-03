@@ -23,6 +23,16 @@
             icon: 'fa-user-shield'
         } %}
     </div>
+    {% if is_granted('ROLE_PLATFORM_OWNER') %}
+    <div class="col-md-4 mb-2 d-flex">
+        {% include 'components/action_card.html.twig' with {
+            title: 'Operações',
+            subtitle: 'Logs, deploy e saúde do ambiente',
+            route: 'app_admin_operacoes',
+            icon: 'fa-server'
+        } %}
+    </div>
+    {% endif %}
     {% if is_granted('ROLE_TENANT') %}
     <div class="col-md-4 mb-2 d-flex">
         {% include 'components/action_card.html.twig' with {

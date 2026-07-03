@@ -22,7 +22,7 @@ class MaintenanceController extends AbstractController
         }
 
         $user = $this->getUser();
-        if ($user instanceof User && $user->isTenant()) {
+        if ($user instanceof User && $user->hasPlatformAccess()) {
             return $this->redirectToRoute('app_dashboard');
         }
 

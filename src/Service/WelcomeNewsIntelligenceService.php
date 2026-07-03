@@ -214,7 +214,7 @@ final class WelcomeNewsIntelligenceService
             }
         }
 
-        if ($this->navigation->isTenant($user)) {
+        if ($user->hasPlatformAccess()) {
             $empresasAtivas = (int) $this->empresaRepo->count(['ativo' => true]);
             if ($empresasAtivas > 1) {
                 $items[] = $this->insight(
@@ -248,7 +248,7 @@ final class WelcomeNewsIntelligenceService
      */
     private function buildTenantInsights(User $user, string $layout): array
     {
-        if (!$this->navigation->isTenant($user)) {
+        if (!$user->hasPlatformAccess()) {
             return [];
         }
 
@@ -324,7 +324,8 @@ final class WelcomeNewsIntelligenceService
         return array_values(array_filter($items, static function (array $item) use ($layout): bool {
             $layouts = $item['layouts'] ?? [];
 
-            return $layouts === [] || \in_array($layout, $layouts, true);
+            return $layouts === [] || \in_array($layout, $layouts, true)
+                || ($layout === 'platform_owner' && \in_array('tenant', $layouts, true));
         }));
     }
 }

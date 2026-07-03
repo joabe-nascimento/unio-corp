@@ -33,10 +33,10 @@ final class GrowthAnalyticsService
      */
     public function buildSections(User $user, ?Empresa $empresa): array
     {
-        $isTenant = $this->navigation->isTenant($user);
+        $hasGlobalScope = $user->hasPlatformAccess();
 
         $growthCharts = array_values(array_filter([
-            $this->buildEvolutionChart($user, $empresa, $isTenant),
+            $this->buildEvolutionChart($user, $empresa, $hasGlobalScope),
             $empresa !== null ? $this->buildTaskVelocityChart($empresa) : null,
             $empresa !== null ? $this->buildRhActivityChart($empresa) : null,
         ]));
