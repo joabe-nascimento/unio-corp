@@ -11,7 +11,8 @@
     page_list_section_toolbar
     page_list_content
 
-  O wrapper .page-body-fill ancora o footer no inset shell (listas vazias / pouco conteúdo).
+  O wrapper .page-body-scroll evita sobreposição do rodapé em listas com KPIs, toolbar e empty state.
+  Use page_list_body_mode: 'fill' só para páginas realmente curtas (sem toolbar de seção).
 #}
 {% extends 'base.html.twig' %}
 {% block page_toolbar_layout %}yes{% endblock %}
@@ -32,7 +33,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-body-inner page-body-fill">
+{% set _list_body_mode = page_list_body_mode|default('scroll') %}
+<div class="page-body-inner{% if _list_body_mode == 'fill' %} page-body-fill{% else %} page-body-scroll{% endif %}">
     {% block page_list_section_toolbar %}{% endblock %}
     {% block page_list_content %}{% endblock %}
 </div>
