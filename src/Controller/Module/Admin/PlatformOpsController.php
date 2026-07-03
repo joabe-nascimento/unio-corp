@@ -69,6 +69,11 @@ class PlatformOpsController extends AbstractController
 
         $view = $ops->buildView($tab, $page, $perPage, $levelFilter);
 
+        $queryBase = ['tab' => $tab];
+        if ($levelFilter !== '') {
+            $queryBase['level'] = $levelFilter;
+        }
+
         return $this->render(self::T . 'operacoes.html.twig', [
             'view' => $view,
             'snapshot' => $view['snapshot'],
@@ -80,10 +85,7 @@ class PlatformOpsController extends AbstractController
             'active_tab' => $tab,
             'incident_tabs' => self::INCIDENT_TABS,
             'log_tabs' => self::LOG_TABS,
-            'query_base' => array_filter([
-                'tab' => $tab,
-                'level' => $levelFilter !== '' ? $levelFilter : null,
-            ], static fn ($v) => $v !== null && $v !== ''),
+            'query_base' => $queryBase,
         ]);
     }
 }
