@@ -27,6 +27,17 @@ trap on_err ERR
 
 cd "$DEPLOY_PATH"
 
+if [[ ! -f .env ]]; then
+  CI_REPORT_STEP="Criar .env base (stub)"
+  ci_report_step "$CI_REPORT_STEP"
+  cat > .env <<'ENV'
+APP_ENV=prod
+APP_SECRET=
+APP_SHARE_DIR=var/share
+ENV
+  echo "Criado .env stub — secrets em .env.local"
+fi
+
 CI_REPORT_STEP="Preparar diretórios"
 ci_report_step "$CI_REPORT_STEP"
 mkdir -p var/cache var/log var/sessions \
@@ -41,9 +52,27 @@ CI_REPORT_STEP="Limpar cache prod corrompido"
 ci_report_step "$CI_REPORT_STEP"
 rm -rf var/cache/prod/* 2>/dev/null || true
 
-CI_REPORT_STEP="Doctrine migrations"
+CI_REPORT_STEP="Doctrine schema / migrations"
 ci_report_step "$CI_REPORT_STEP"
-$PHP_BIN bin/console doctrine:migrations:migrate --no-interaction
+
+db_has_core_schema() {
+  $PHP_BIN bin/console dbal:run-sql "SELECT 1 FROM \`user\` LIMIT 1" --quiet >/dev/null 2>&1
+}
+
+if db_has_core_schema; then
+  $PHP_BIN bin/console doctrine:migrations:migrate --no-interaction
+else
+  echo "Banco sem schema base — doctrine:schema:create + marcar migrations"
+  $PHP_BIN bin/console doctrine:schema:create --no-interaction
+  $PHP_BIN bin/console doctrine:migrations:sync-metadata-storage --no-interaction 2>/dev/null || true
+  $PHP_BIN bin/console doctrine:migrations:version --add --all --no-interaction
+
+  if [[ "${SKIP_UNIO_PLATFORM_STEPS:-0}" == "1" ]]; then
+    echo "Seeds iniciais (ambiente produto/homolog)"
+    $PHP_BIN bin/console app:seed-users --allow-prod --no-interaction 2>/dev/null || true
+    $PHP_BIN bin/console app:seed-product-grants --force --allow-prod --no-interaction 2>/dev/null || true
+  fi
+fi
 
 CI_REPORT_STEP="Cache Symfony (prod)"
 ci_report_step "$CI_REPORT_STEP"

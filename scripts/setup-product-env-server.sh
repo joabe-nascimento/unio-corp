@@ -46,6 +46,22 @@ else
 fi
 
 ENV_FILE="$DEPLOY_PATH/.env.local"
+ENV_BASE="$DEPLOY_PATH/.env"
+if [[ ! -f "$ENV_BASE" ]]; then
+  cat > "$ENV_BASE" <<ENV
+APP_ENV=prod
+APP_SECRET=
+APP_SHARE_DIR=var/share
+DEFAULT_URI=${DEFAULT_URI}
+DATABASE_URL=
+MAILER_DSN=null://null
+MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
+ENV
+  echo "Criado: $ENV_BASE (valores sensíveis ficam em .env.local)"
+else
+  echo "Mantido: $ENV_BASE (já existia)"
+fi
+
 if [[ ! -f "$ENV_FILE" ]]; then
   if [[ -z "${APP_SECRET:-}" || -z "${DATABASE_URL:-}" ]]; then
     echo "AVISO: .env.local nÃ£o criado â€” defina APP_SECRET e DATABASE_URL e rode de novo."
