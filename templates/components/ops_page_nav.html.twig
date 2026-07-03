@@ -1,0 +1,59 @@
+{#
+  ops_page_nav — navegação da página Operações (incidentes + arquivos de log)
+#}
+{% set tab_labels = {
+    'overview': 'Visão geral',
+    'errors': 'Erros',
+    'warnings': 'Avisos',
+    'routes': 'Rotas & exceções',
+    'access': 'Acesso negado',
+    'integrations': 'Integrações',
+    'deprecations': 'Depreciações',
+    'deploy': 'Deploy',
+    'log_prod': 'prod.log',
+    'log_errors': 'platform-errors.log',
+    'log_dev': 'dev.log',
+} %}
+{% set counts = log_analysis.counts %}
+
+<div class="ops-page-nav mb-3">
+    <div class="ops-page-nav-group">
+        <span class="ops-page-nav-label">Monitoramento</span>
+        <div class="hub-overview-tabs ops-page-nav-tabs" role="tablist" aria-label="Monitoramento">
+            {% for tab in ['overview', 'deploy'] %}
+            <a href="{{ path('app_admin_operacoes', { tab: tab }) }}"
+               class="hub-overview-tab{% if tab == active_tab %} hub-overview-tab--active{% endif %}">
+                {{ tab_labels[tab] }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="ops-page-nav-group">
+        <span class="ops-page-nav-label">Incidentes</span>
+        <div class="hub-overview-tabs ops-page-nav-tabs" role="tablist" aria-label="Incidentes">
+            {% for tab in incident_tabs %}
+            <a href="{{ path('app_admin_operacoes', { tab: tab }) }}"
+               class="hub-overview-tab{% if tab == active_tab %} hub-overview-tab--active{% endif %}">
+                {{ tab_labels[tab] }}
+                {% set n = counts[tab]|default(0) %}
+                {% if n > 0 %}
+                <span class="badge badge-{{ tab in ['errors', 'routes', 'access'] ? 'danger' : 'warning' }} ml-1">{{ n }}</span>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="ops-page-nav-group">
+        <span class="ops-page-nav-label">Arquivos de log</span>
+        <div class="hub-overview-tabs ops-page-nav-tabs" role="tablist" aria-label="Arquivos de log">
+            {% for tab in log_tabs %}
+            <a href="{{ path('app_admin_operacoes', { tab: tab }) }}"
+               class="hub-overview-tab{% if tab == active_tab %} hub-overview-tab--active{% endif %}">
+                <i class="fas fa-file-lines mr-1" aria-hidden="true"></i>{{ tab_labels[tab] }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>

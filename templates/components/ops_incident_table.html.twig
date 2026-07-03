@@ -1,0 +1,44 @@
+{#
+  ops_incident_table — tabela de incidentes parseados do log
+  Props: incidents (list), empty_message (string)
+#}
+<div class="table-responsive">
+    <table class="table table-sm table-unio mb-0 ops-incident-table">
+        <thead>
+            <tr>
+                <th style="width: 11rem;">Quando</th>
+                <th style="width: 5rem;">Nível</th>
+                <th style="width: 8rem;">Canal</th>
+                <th style="width: 10rem;">Rota</th>
+                <th>Mensagem</th>
+                <th style="width: 9rem;">Usuário</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if incidents is empty %}
+            <tr>
+                <td colspan="6" class="text-muted text-center py-4">{{ empty_message|default('Nenhum incidente nesta categoria no trecho analisado.') }}</td>
+            </tr>
+            {% else %}
+            {% for row in incidents %}
+            <tr>
+                <td><small class="text-muted">{{ row.at|slice(0, 19) }}</small></td>
+                <td>
+                    {% set lvl = row.level|lower %}
+                    <span class="badge badge-{{ lvl in ['critical', 'error', 'alert', 'emergency'] ? 'danger' : (lvl == 'warning' ? 'warning' : 'secondary') }}">{{ row.level }}</span>
+                </td>
+                <td><code class="small">{{ row.channel }}</code></td>
+                <td>{% if row.route %}<code class="small">{{ row.route|slice(0, 28) }}</code>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                <td>
+                    <div class="ops-incident-msg">{{ row.message }}</div>
+                    {% if row.uri %}
+                    <small class="text-muted d-block text-truncate" style="max-width: 28rem;" title="{{ row.uri }}">{{ row.uri }}</small>
+                    {% endif %}
+                </td>
+                <td><small>{% if row.user %}{{ row.user }}{% else %}<span class="text-muted">—</span>{% endif %}</small></td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>

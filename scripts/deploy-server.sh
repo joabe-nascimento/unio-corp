@@ -106,5 +106,17 @@ if [[ -f "$PUBLIC_HTML/css/unio-app.min.css" && -f "$DEPLOY_PATH/public/css/unio
   echo "CSS OK: unio-app.min.css $dest_min bytes em unio e public_html"
 fi
 
+CI_REPORT_STEP="Registrar revisão de deploy"
+ci_report_step "$CI_REPORT_STEP"
+mkdir -p var/deploy
+cat > var/deploy/revision.json <<EOF
+{
+  "commit": "${GITHUB_SHA:-unknown}",
+  "branch": "${GITHUB_REF_NAME:-unknown}",
+  "deployed_at": "$(date -Iseconds 2>/dev/null || date)",
+  "deploy_path": "$DEPLOY_PATH"
+}
+EOF
+
 trap - ERR
 ci_report_success "Deploy server OK — $DEPLOY_PATH (public_html symlinked)"

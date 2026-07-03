@@ -1,69 +1,259 @@
 {% extends 'layout/hub.html.twig' %}
 {% block title %}Operações da plataforma{% endblock %}
-{% block permissions_scope %}hub_admin{% endblock %}
+{% set hub_show_tabs = false %}
 {% set hub_page_title = 'Operações da plataforma' %}
 {% set hub_page_body_mode = 'scroll' %}
 
+{% set counts = log_analysis.counts %}
+{% set incidents = log_analysis.incidents %}
+{% set is_log_tab = active_tab in log_tabs %}
+{% set is_incident_tab = active_tab in incident_tabs %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_admin_operacoes', query_base|merge({ page: 1 })) }}" class="btn-unio btn-sm btn-unio-ghost">
+    <i class="fas fa-sync-alt mr-1"></i> Atualizar
+</a>
+{% endblock %}
+
 {% block hub_content %}
+<div class="ops-page-header mb-3">
+    <p class="text-muted mb-0 small">
+        Últimas {{ log_analysis.scanned_lines|number_format(0, ',', '.') }} linhas analisadas em prod.log
+        · {{ snapshot.generated_at|slice(0, 19)|replace({'T': ' '}) }}
+        · ruído filtrado: {{ counts.noise|number_format(0, ',', '.') }}
+    </p>
+</div>
+
+{% if active_tab == 'overview' %}
+{% include 'components/kpi_row.html.twig' with {
+    items: [
+        { value: counts.errors, label: 'Erros', sub: 'CRITICAL / ERROR', route: 'app_admin_operacoes', route_params: { tab: 'errors' } },
+        { value: counts.warnings, label: 'Avisos', sub: 'WARNING', route: 'app_admin_operacoes', route_params: { tab: 'warnings' } },
+        { value: counts.routes, label: 'Rotas', sub: 'Exceções HTTP', route: 'app_admin_operacoes', route_params: { tab: 'routes' } },
+        { value: counts.integrations, label: 'Integrações', sub: 'Mercure, mail…', route: 'app_admin_operacoes', route_params: { tab: 'integrations' } },
+    ]
+} %}
+{% endif %}
+
+{% include 'components/ops_page_nav.html.twig' %}
+
+{% if active_tab == 'overview' %}
 <div class="row mb-3">
-    <div class="col-md-4">
-        <div class="card card-outline card-primary h-100">
-            <div class="card-header"><h3 class="card-title mb-0">Ambiente</h3></div>
-            <div class="card-body">
-                <dl class="mb-0">
-                    <dt>APP_ENV</dt><dd><code>{{ snapshot.environment }}</code></dd>
-                    <dt>PHP</dt><dd>{{ snapshot.php_version }}</dd>
-                    <dt>Symfony</dt><dd>{{ snapshot.symfony_version }}</dd>
-                    <dt>Gerado em</dt><dd>{{ snapshot.generated_at }}</dd>
+    <div class="col-lg-6 mb-3 mb-lg-0">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with { title: 'Ambiente', subtitle: 'Runtime da plataforma' } %}
+            <div class="card-body pt-0">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">APP_ENV</dt><dd class="col-sm-8"><code>{{ snapshot.environment }}</code></dd>
+                    <dt class="col-sm-4">PHP</dt><dd class="col-sm-8">{{ snapshot.php_version }}</dd>
+                    <dt class="col-sm-4">Symfony</dt><dd class="col-sm-8">{{ snapshot.symfony_version }}</dd>
+                    <dt class="col-sm-4">Usuários</dt><dd class="col-sm-8">{{ snapshot.platform.users_active }} ativos / {{ snapshot.platform.users_total }} total</dd>
+                    <dt class="col-sm-4">Empresas</dt><dd class="col-sm-8">{{ snapshot.platform.empresas_total }}</dd>
                 </dl>
             </div>
-        </div>
+        </section>
     </div>
-    <div class="col-md-4">
-        <div class="card card-outline card-secondary h-100">
-            <div class="card-header"><h3 class="card-title mb-0">Deploy</h3></div>
-            <div class="card-body">
-                <dl class="mb-0">
-                    <dt>Git HEAD</dt>
-                    <dd>{% if snapshot.deploy.git_head %}<code>{{ snapshot.deploy.git_head|slice(0, 12) }}</code>{% else %}<span class="text-muted">indisponível</span>{% endif %}</dd>
-                    <dt>bin/console</dt>
-                    <dd>{{ snapshot.deploy.console_mtime.modified|default('—') }}</dd>
-                    <dt>public/index.php</dt>
-                    <dd>{{ snapshot.deploy.public_index_mtime.modified|default('—') }}</dd>
+    <div class="col-lg-6">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with { title: 'Deploy & disco', subtitle: 'Última implantação' } %}
+            <div class="card-body pt-0">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Commit</dt>
+                    <dd class="col-sm-8">
+                        {% if snapshot.deploy.git_head %}
+                            <code title="{{ snapshot.deploy.git_head }}">{{ snapshot.deploy.git_head|slice(0, 12) }}</code>
+                        {% else %}
+                            <span class="text-muted">indisponível</span>
+                        {% endif %}
+                    </dd>
+                    {% if snapshot.deploy.revision.deployed_at is defined %}
+                    <dt class="col-sm-4">Deploy em</dt><dd class="col-sm-8">{{ snapshot.deploy.revision.deployed_at|slice(0, 19)|replace({'T': ' '}) }}</dd>
+                    {% endif %}
+                    <dt class="col-sm-4">Projeto</dt><dd class="col-sm-8">{{ (snapshot.disk.project_bytes / 1024 / 1024)|number_format(1, ',', '.') }} MB</dd>
+                    <dt class="col-sm-4">var/log</dt>
+                    <dd class="col-sm-8">{% if snapshot.disk.var_log_bytes is not null %}{{ (snapshot.disk.var_log_bytes / 1024 / 1024)|number_format(1, ',', '.') }} MB{% else %}—{% endif %}</dd>
                 </dl>
             </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card card-outline card-info h-100">
-            <div class="card-header"><h3 class="card-title mb-0">Disco (estimado)</h3></div>
-            <div class="card-body">
-                <dl class="mb-0">
-                    <dt>Projeto</dt><dd>{{ (snapshot.disk.project_bytes / 1024 / 1024)|number_format(1, ',', '.') }} MB</dd>
-                    <dt>var/log</dt>
-                    <dd>{% if snapshot.disk.var_log_bytes is not null %}{{ (snapshot.disk.var_log_bytes / 1024 / 1024)|number_format(1, ',', '.') }} MB{% else %}—{% endif %}</dd>
-                </dl>
-            </div>
-        </div>
+        </section>
     </div>
 </div>
 
-{% for key, log in snapshot.logs %}
-<div class="card card-outline card-dark mb-3">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title mb-0">Log {{ key }}</h3>
-        <small class="text-muted">
-            {% if log.exists %}
-                {{ log.size|number_format(0, ',', '.') }} bytes · {{ log.modified }}
-            {% else %}
-                arquivo não encontrado
-            {% endif %}
-        </small>
+<section class="unio-card mb-3">
+    {% include 'components/section_header.html.twig' with { title: 'Saúde da plataforma', subtitle: 'Checks automáticos' } %}
+    <ul class="list-group list-group-flush">
+        {% for check in snapshot.health %}
+        <li class="list-group-item d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <strong>{{ check.label }}</strong>
+                <div class="text-muted small">{{ check.detail }}</div>
+                {% if check.hint %}<div class="small text-info mt-1">{{ check.hint }}</div>{% endif %}
+            </div>
+            <span class="badge badge-{{ check.status == 'ok' ? 'success' : (check.status == 'warn' ? 'warning' : 'danger') }} text-uppercase">{{ check.status }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{% if counts.errors > 0 or counts.integrations > 0 %}
+<section class="unio-card mb-3">
+    <div class="d-flex justify-content-between align-items-center px-3 pt-3">
+        {% include 'components/section_header.html.twig' with { title: 'Últimos problemas', subtitle: 'Erros e integrações recentes' } %}
+        <a href="{{ path('app_admin_operacoes', { tab: 'errors' }) }}" class="btn-unio btn-xs btn-unio-ghost">Ver erros</a>
     </div>
-    <div class="card-body p-0">
-        <pre class="mb-0 p-3 bg-dark text-light small" style="max-height: 420px; overflow: auto;">{% if log.lines is empty %}(vazio){% else %}{% for line in log.lines %}{{ line }}
-{% endfor %}{% endif %}</pre>
+    <div class="border-top">
+        {% set recent = incidents.errors|merge(incidents.integrations)|slice(0, 10) %}
+        {% include 'components/ops_incident_table.html.twig' with { incidents: recent } %}
+    </div>
+</section>
+{% endif %}
+
+{% elseif active_tab == 'deploy' %}
+<div class="row mb-3">
+    <div class="col-md-6 mb-3 mb-md-0">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with { title: 'Revisão implantada', subtitle: 'var/deploy/revision.json' } %}
+            <div class="card-body pt-0">
+                {% if snapshot.deploy.revision %}
+                <dl class="mb-0">
+                    <dt>Commit</dt><dd><code>{{ snapshot.deploy.revision.commit|default('—') }}</code></dd>
+                    <dt>Branch</dt><dd>{{ snapshot.deploy.revision.branch|default('—') }}</dd>
+                    <dt>Quando</dt><dd>{{ snapshot.deploy.revision.deployed_at|default('—') }}</dd>
+                </dl>
+                {% else %}
+                <p class="text-muted mb-0">Será criado no próximo deploy via GitHub Actions.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+    <div class="col-md-6">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with { title: 'Arquivos', subtitle: 'Timestamps locais' } %}
+            <div class="card-body pt-0">
+                <dl class="mb-0">
+                    <dt>bin/console</dt><dd>{{ snapshot.deploy.console_mtime.modified|default('—') }}</dd>
+                    <dt>public/index.php</dt><dd>{{ snapshot.deploy.public_index_mtime.modified|default('—') }}</dd>
+                </dl>
+            </div>
+        </section>
     </div>
 </div>
+
+{% for report_key, report in snapshot.reports %}
+<section class="unio-card mb-3">
+    <div class="d-flex justify-content-between align-items-center px-3 pt-3">
+        {% include 'components/section_header.html.twig' with {
+            title: report_key == 'deploy' ? 'Relatório de deploy' : 'Relatório CI (falha)',
+            subtitle: report.exists ? report.status|upper : 'Arquivo ausente'
+        } %}
+    </div>
+    <pre class="ops-log-pre mx-3 mb-3 p-3 bg-light small border rounded">{% if report.content is empty %}(vazio){% else %}{{ report.content }}{% endif %}</pre>
+</section>
 {% endfor %}
+
+{% elseif active_tab == 'integrations' %}
+<section class="unio-card mb-3">
+    {% include 'components/section_header.html.twig' with { title: 'Mercure', subtitle: 'Tempo real (chat, notificações)' } %}
+    <div class="card-body pt-0">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">MERCURE_URL</dt><dd class="col-sm-9"><code>{{ snapshot.integrations.mercure_url ?: '(vazio)' }}</code></dd>
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">
+                {% if snapshot.integrations.mercure_configured %}
+                <span class="badge badge-success">OK</span>
+                {% else %}
+                <span class="badge badge-warning">Não configurado</span>
+                {% endif %}
+            </dd>
+        </dl>
+    </div>
+</section>
+
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with { title: 'Falhas no log', subtitle: counts.integrations ~ ' ocorrência(s)' } %}
+    <div class="border-top">
+        {% include 'components/ops_incident_table.html.twig' with { incidents: list_items } %}
+    </div>
+    {% include 'components/table_pagination.html.twig' with {
+        pagination: pagination,
+        route: 'app_admin_operacoes',
+        query: query_base,
+        per_page_options: [25, 50, 100],
+        per_page_label: 'Por página'
+    } %}
+</section>
+
+{% elseif is_log_tab %}
+<section class="unio-card mb-3">
+    <form method="get" action="{{ path('app_admin_operacoes') }}" class="ops-log-filters px-3 pt-3 pb-2 d-flex flex-wrap align-items-end gap-3">
+        <input type="hidden" name="tab" value="{{ active_tab }}">
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Nível',
+            name: 'level',
+            value: level_filter,
+            min_width: '120px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'DEBUG', label: 'DEBUG' },
+                { value: 'INFO', label: 'INFO' },
+                { value: 'WARNING', label: 'WARNING' },
+                { value: 'ERROR', label: 'ERROR' },
+                { value: 'CRITICAL', label: 'CRITICAL' },
+            ]
+        } %}
+        <button type="submit" class="btn-unio btn-sm"><i class="fas fa-filter mr-1"></i> Filtrar</button>
+        {% if level_filter %}
+        <a href="{{ path('app_admin_operacoes', { tab: active_tab }) }}" class="btn-unio btn-sm btn-unio-ghost">Limpar</a>
+        {% endif %}
+    </form>
+</section>
+
+<section class="unio-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 pt-3">
+        {% include 'components/section_header.html.twig' with {
+            title: log_meta.filename|default('Log'),
+            subtitle: log_meta.exists
+                ? (log_meta.size|number_format(0, ',', '.') ~ ' bytes · janela ' ~ log_meta.window_lines|number_format(0, ',', '.') ~ ' linhas')
+                : 'Arquivo não encontrado'
+        } %}
+        <small class="text-muted">Mais recentes primeiro · até 5.000 linhas</small>
+    </div>
+    <div class="border-top">
+        {% include 'components/ops_log_table.html.twig' with { entries: list_items } %}
+    </div>
+    {% include 'components/table_pagination.html.twig' with {
+        pagination: pagination,
+        route: 'app_admin_operacoes',
+        query: query_base,
+        per_page_options: [25, 50, 100],
+        per_page_label: 'Linhas por página'
+    } %}
+</section>
+
+{% elseif is_incident_tab %}
+<section class="unio-card">
+    {% set tab_titles = {
+        'errors': 'Erros críticos',
+        'warnings': 'Avisos',
+        'routes': 'Rotas e exceções HTTP',
+        'access': 'Acesso negado',
+        'deprecations': 'Depreciações',
+    } %}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 pt-3">
+        {% include 'components/section_header.html.twig' with {
+            title: tab_titles[active_tab]|default(active_tab),
+            subtitle: pagination.total ~ ' ocorrência(s) no trecho analisado'
+        } %}
+    </div>
+    <div class="border-top">
+        {% include 'components/ops_incident_table.html.twig' with { incidents: list_items } %}
+    </div>
+    {% include 'components/table_pagination.html.twig' with {
+        pagination: pagination,
+        route: 'app_admin_operacoes',
+        query: query_base,
+        per_page_options: [25, 50, 100],
+        per_page_label: 'Por página'
+    } %}
+</section>
+{% endif %}
 {% endblock %}

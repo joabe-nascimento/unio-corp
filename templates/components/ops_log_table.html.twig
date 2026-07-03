@@ -1,0 +1,44 @@
+{#
+  ops_log_table — linhas parseadas de um arquivo de log (paginado)
+#}
+<div class="table-responsive">
+    <table class="table table-sm table-unio mb-0 ops-log-table">
+        <thead>
+            <tr>
+                <th style="width: 11rem;">Quando</th>
+                <th style="width: 5.5rem;">Nível</th>
+                <th style="width: 8rem;">Canal</th>
+                <th style="width: 11rem;">Rota</th>
+                <th>Mensagem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if entries is empty %}
+            <tr>
+                <td colspan="5" class="text-muted text-center py-4">{{ empty_message|default('Nenhuma linha nesta página.') }}</td>
+            </tr>
+            {% else %}
+            {% for row in entries %}
+            {% set lvl = row.level|lower %}
+            <tr class="ops-log-row ops-log-row--{{ lvl in ['critical', 'error', 'alert', 'emergency'] ? 'danger' : (lvl == 'warning' ? 'warning' : 'default') }}">
+                <td><small class="text-muted">{{ row.at|slice(0, 19) }}</small></td>
+                <td>
+                    <span class="badge badge-{{ lvl in ['critical', 'error', 'alert', 'emergency'] ? 'danger' : (lvl == 'warning' ? 'warning' : (lvl == 'info' ? 'info' : 'secondary')) }}">{{ row.level }}</span>
+                </td>
+                <td><code class="small">{{ row.channel }}</code></td>
+                <td>{% if row.route %}<code class="small">{{ row.route|slice(0, 24) }}</code>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                <td>
+                    <div class="ops-log-msg">{{ row.message }}</div>
+                    {% if row.uri %}
+                    <small class="text-muted d-block text-truncate" style="max-width: 32rem;" title="{{ row.uri }}">{{ row.uri }}</small>
+                    {% endif %}
+                    {% if row.user %}
+                    <small class="text-muted d-block">{{ row.user }}</small>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>

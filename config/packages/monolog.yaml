@@ -44,6 +44,12 @@ when@prod:
                 path: php://stderr
                 level: debug
                 formatter: monolog.formatter.json
+            platform_errors:
+                type: rotating_file
+                path: "%kernel.logs_dir%/platform-errors.log"
+                level: warning
+                max_files: 5
+                channels: ["!event"]
             console:
                 type: console
                 process_psr_3_messages: false
