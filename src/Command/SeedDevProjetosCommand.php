@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Command\Concern\ProdSeedGuardTrait;
 use App\Entity\DevMeta;
 use App\Entity\DevProjeto;
 use App\Entity\DevTarefa;
@@ -18,22 +19,31 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'app:seed-dev-projetos', description: 'Demo: projetos de desenvolvimento Unio')]
 class SeedDevProjetosCommand extends Command
 {
+    use ProdSeedGuardTrait;
+
     public function __construct(
         private EmpresaRepository $empresaRepo,
         private DevProjetoService $service,
         private EntityManagerInterface $em,
+        private string $appEnv = 'dev',
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
+        $this->configureProdSeedGuard();
         $this->addOption('fresh', null, InputOption::VALUE_NONE, 'Recria dados demo');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        if (($code = $this->refuseInProductionUnlessAllowed($input, $io)) !== null) {
+            return $code;
+        }
+
         $empresa = $this->empresaRepo->findOneBy(['nome' => SeedUsersCommand::DEMO_EMPRESA_NOME])
             ?? $this->empresaRepo->findOneBy([], ['id' => 'ASC']);
 

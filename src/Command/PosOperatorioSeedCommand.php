@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Command\Concern\ProdSeedGuardTrait;
 use App\Entity\Empresa;
 use App\Entity\PosOperatorioEvento;
 use App\Entity\PosOperatorioPaciente;
@@ -25,18 +26,22 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class PosOperatorioSeedCommand extends Command
 {
+    use ProdSeedGuardTrait;
+
     public function __construct(
         private EntityManagerInterface $em,
         private EmpresaRepository $empresaRepo,
         private UserRepository $userRepo,
         private PosOperatorioQuestionarioService $questionarioService,
         private PosOperatorioEventRecorder $events,
+        private string $appEnv = 'dev',
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
+        $this->configureProdSeedGuard();
         $this->addOption('empresa-id', null, InputOption::VALUE_REQUIRED, 'ID da empresa (workspace)');
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Recriar se já existir seed PO-DEMO');
     }
@@ -44,6 +49,11 @@ final class PosOperatorioSeedCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        if (($code = $this->refuseInProductionUnlessAllowed($input, $io)) !== null) {
+            return $code;
+        }
+
         $empresaId = $input->getOption('empresa-id');
         $empresa = $empresaId
             ? $this->empresaRepo->find((int) $empresaId)

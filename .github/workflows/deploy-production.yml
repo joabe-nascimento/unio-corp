@@ -51,11 +51,7 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          # #region agent log
-          echo "Key lines: $(wc -l < ~/.ssh/deploy_key)"
-          echo "Key header: $(head -1 ~/.ssh/deploy_key)"
-          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null && echo "Key validation: OK" || { echo "Key validation: FAILED — recoloque DEPLOY_SSH_KEY no GitHub (BEGIN/END completos, sem espaços extras)"; exit 1; }
-          # #endregion
+          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null || { echo "Chave SSH inválida — verifique DEPLOY_SSH_KEY no GitHub"; exit 1; }
           ssh-keyscan -p "${DEPLOY_PORT:-2222}" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Create and upload deploy archive

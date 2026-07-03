@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Command\Concern\ProdSeedGuardTrait;
 use App\Entity\Empresa;
 use App\Entity\Funcionario;
 use App\Entity\RhOffboardingProcess;
@@ -25,6 +26,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class SeedRhProcessesCommand extends Command
 {
+    use ProdSeedGuardTrait;
+
     public function __construct(
         private EmpresaRepository $empresaRepo,
         private RhOnboardingProcessRepository $onboardingRepo,
@@ -32,18 +35,25 @@ class SeedRhProcessesCommand extends Command
         private RhOnboardingService $onboarding,
         private RhOffboardingService $offboarding,
         private EntityManagerInterface $em,
+        private string $appEnv = 'dev',
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
+        $this->configureProdSeedGuard();
         $this->addOption('fresh', null, InputOption::VALUE_NONE, 'Remove processos RH existentes da empresa antes de criar');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        if (($code = $this->refuseInProductionUnlessAllowed($input, $io)) !== null) {
+            return $code;
+        }
+
         $empresa = $this->empresaRepo->findOneBy(['nome' => SeedUsersCommand::DEMO_EMPRESA_NOME])
             ?? $this->empresaRepo->findOneBy([], ['id' => 'ASC']);
 

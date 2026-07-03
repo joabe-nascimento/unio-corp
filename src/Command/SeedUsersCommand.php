@@ -2,13 +2,13 @@
 
 namespace App\Command;
 
+use App\Command\Concern\ProdSeedGuardTrait;
 use App\Entity\Empresa;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -16,6 +16,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[AsCommand(name: 'app:seed-users', description: 'Cria/atualiza empresas e usuários de teste (idempotente — nunca apaga dados)')]
 class SeedUsersCommand extends Command
 {
+    use ProdSeedGuardTrait;
+
     public const DEMO_EMPRESA_NOME = 'Unio Demo';
     public const SEED_PASSWORD = 'unio123';
 
@@ -29,21 +31,15 @@ class SeedUsersCommand extends Command
 
     protected function configure(): void
     {
-        $this->addOption(
-            'allow-prod',
-            null,
-            InputOption::VALUE_NONE,
-            'Permite execução em produção (use com cautela)'
-        );
+        $this->configureProdSeedGuard();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        if ($this->appEnv === 'prod' && !$input->getOption('allow-prod')) {
-            $io->error('Recusado em produção. Use --allow-prod se realmente necessário.');
-            return Command::FAILURE;
+        if (($code = $this->refuseInProductionUnlessAllowed($input, $io)) !== null) {
+            return $code;
         }
 
         $empresaRepo = $this->em->getRepository(Empresa::class);
@@ -76,9 +72,12 @@ class SeedUsersCommand extends Command
 
         foreach ($seedUsers as $data) {
             $user = $userRepo->findOneBy(['email' => $data['email']]) ?? new User();
+            $isNew = $user->getId() === null;
             $user->setNome($data['nome'])->setEmail($data['email'])->setPerfil($data['perfil']);
             $user->setRoles([$user->getRolePrincipal()]);
-            $user->setPassword($this->hasher->hashPassword($user, self::SEED_PASSWORD));
+            if ($isNew) {
+                $user->setPassword($this->hasher->hashPassword($user, self::SEED_PASSWORD));
+            }
             $user->setAtivo(true);
             if ($data['empresa']) {
                 $user->setEmpresa($data['empresa']);

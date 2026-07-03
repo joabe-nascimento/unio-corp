@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Command\Concern\ProdSeedGuardTrait;
 use App\Entity\User;
 use App\Entity\UserProductGrant;
 use App\Repository\UserRepository;
@@ -20,21 +21,30 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class SeedProductGrantsCommand extends Command
 {
+    use ProdSeedGuardTrait;
+
     public function __construct(
         private EntityManagerInterface $em,
         private UserRepository $userRepo,
+        private string $appEnv = 'dev',
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
+        $this->configureProdSeedGuard();
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Recria grants existentes dos usuários seed');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        if (($code = $this->refuseInProductionUnlessAllowed($input, $io)) !== null) {
+            return $code;
+        }
+
         $force = (bool) $input->getOption('force');
         $created = 0;
         $skipped = 0;

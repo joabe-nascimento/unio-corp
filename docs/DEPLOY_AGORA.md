@@ -65,7 +65,7 @@ Gerenciador de arquivos → **+ Arquivo** → `.env.local` → colar:
 
 ```dotenv
 APP_ENV=prod
-APP_DEBUG=1
+APP_DEBUG=0
 APP_SECRET=14cda3ddff18cfc102c2d7f3702a4b6c3fb9b4ab0ff2c6b4665e2bda4bdef38f
 
 DEFAULT_URI=https://uniowork.com.br
@@ -111,6 +111,8 @@ chmod -R ug+rwx public/uploads/
 ```
 
 Login seed (altere depois): `gestor@unio.dev` / `unio123`
+
+**Cron em produção:** não agende `app:seed-users`, `app:seed-product-grants` nem outros comandos `app:seed-*` — eles são bloqueados em prod e só servem para dev/staging. Mantenha no cron apenas filas e lembretes (ex.: `app:pos-operatorio:send-reminders`, `app:rh:email-process-queue`).
 
 Se der erro 500:
 
@@ -172,7 +174,7 @@ Arquivo: **`/home2/joabef36/unio/.env.local`**
 
 ```dotenv
 APP_ENV=prod
-APP_DEBUG=1
+APP_DEBUG=0
 ```
 
 **Importante:** volte `APP_DEBUG=0` quando terminar — expõe detalhes internos do sistema.
