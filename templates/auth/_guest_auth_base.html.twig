@@ -1,0 +1,34 @@
+{% set _tema = platform_config.tema|default('dark') %}
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ _tema }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block guest_title %}Unio{% endblock %} | {{ platform_config.plataforma_nome|default('Unio') }}</title>
+    <script>try{var _t=localStorage.getItem('unio-theme')||'{{ _tema }}';document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    {% include 'auth/_guest_auth_styles.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=2">
+    {% block guest_head %}{% endblock %}
+</head>
+<body class="guest-auth-page">
+{% include 'components/guest_theme_toggle.html.twig' %}
+
+<div class="guest-auth-page__inner">
+    <div class="guest-auth-card">
+        {% block guest_logo %}
+            {% include 'components/guest_auth_logo.html.twig' %}
+        {% endblock %}
+        {% block guest_content %}{% endblock %}
+    </div>
+</div>
+
+{% block guest_foot %}
+    {% include 'components/cookie_consent_banner.html.twig' %}
+    <script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
+{% endblock %}
+</body>
+</html>
