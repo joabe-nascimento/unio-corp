@@ -31,6 +31,9 @@ class MaintenanceListener
         'app_register',
         'app_forgot_password',
         'app_reset_password',
+        'app_legal_termos',
+        'app_legal_privacidade',
+        'app_legal_lgpd',
         '_wdt',
         '_profiler',
         '_profiler_home',
@@ -70,7 +73,7 @@ class MaintenanceListener
                 return;
             }
         }
-        foreach (['/manutencao', '/login', '/logout', '/encerrar-sessao', '/register', '/forgot-password', '/reset-password'] as $prefix) {
+        foreach (['/manutencao', '/login', '/logout', '/encerrar-sessao', '/register', '/forgot-password', '/reset-password', '/termos', '/privacidade', '/lgpd'] as $prefix) {
             if (str_starts_with($path, $prefix)) {
                 return;
             }
