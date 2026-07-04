@@ -57,7 +57,16 @@
                 <button type="button" class="chat-tab" data-chat-tab="group" role="tab" aria-selected="false">Grupos</button>
             </div>
 
-            <div class="chat-conv-list" id="chatConvList" role="list"></div>
+            <div class="chat-conv-list" id="chatConvList" role="list">
+                <div class="chat-conv-list-placeholder" id="chatConvListPlaceholder" hidden>
+                    {% include 'components/empty_state.html.twig' with {
+                        compact: true,
+                        icon: 'fa-inbox',
+                        title: 'Nenhuma conversa',
+                        text: 'Inicie uma conversa ou crie um grupo.'
+                    } %}
+                </div>
+            </div>
         </div>
 
         <div class="chat-sidebar-panel" id="chatSidebarPanel" hidden>
@@ -133,16 +142,23 @@
     <main class="chat-main" id="chatMain">
         {% if not chat_has_workspace|default(false) %}
         <div class="chat-empty chat-empty--blocked">
-            <div class="chat-empty-icon" aria-hidden="true"><i class="fas fa-building"></i></div>
-            <h3 class="chat-empty-title">Selecione uma área de trabalho</h3>
-            <p class="chat-empty-text">O Chat Bate Papo usa a empresa ativa do seu workspace.</p>
-            <a href="{{ path('app_workspace_select') }}" class="btn-unio btn-sm mt-2">Escolher workspace</a>
+            {% include 'components/empty_state.html.twig' with {
+                compact: true,
+                icon: 'fa-building',
+                title: 'Selecione uma área de trabalho',
+                text: 'O Chat Bate Papo usa a empresa ativa do seu workspace.',
+                btn_label: 'Escolher workspace',
+                btn_href: path('app_workspace_select')
+            } %}
         </div>
         {% else %}
         <div class="chat-empty" id="chatEmpty">
-            <div class="chat-empty-icon" aria-hidden="true"><i class="fas fa-comments"></i></div>
-            <h3 class="chat-empty-title">Selecione uma conversa</h3>
-            <p class="chat-empty-text">Escolha um contato ou grupo na lista ao lado.</p>
+            {% include 'components/empty_state.html.twig' with {
+                compact: true,
+                icon: 'fa-comments',
+                title: 'Selecione uma conversa',
+                text: 'Escolha um contato ou grupo na lista ao lado.'
+            } %}
         </div>
 
         <div class="chat-room" id="chatRoom" hidden>

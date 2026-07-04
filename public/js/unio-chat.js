@@ -192,12 +192,28 @@
         });
     }
 
+    function renderListEmpty(title, text, icon) {
+        icon = icon || 'fa-inbox';
+        return '<div class="empty-state empty-state--compact chat-conv-empty-state">' +
+            '<div class="empty-icon"><i class="fas ' + icon + '" aria-hidden="true"></i></div>' +
+            '<h6>' + escapeHtml(title) + '</h6>' +
+            (text ? '<p>' + escapeHtml(text) + '</p>' : '') +
+            '</div>';
+    }
+
     function renderConvList() {
         if (!convList) return;
         var items = filteredConversations();
+        var placeholder = document.getElementById('chatConvListPlaceholder');
+        if (placeholder) placeholder.hidden = true;
         convList.innerHTML = '';
         if (!items.length) {
-            convList.innerHTML = '<p class="chat-conv-empty">Nenhuma conversa encontrada.</p>';
+            var isFiltered = (chatSearch && chatSearch.value.trim()) || activeTab !== 'all';
+            convList.innerHTML = renderListEmpty(
+                isFiltered ? 'Nenhuma conversa encontrada' : 'Nenhuma conversa',
+                isFiltered ? 'Tente outro termo ou filtro.' : 'Inicie uma conversa ou crie um grupo.',
+                isFiltered ? 'fa-search' : 'fa-inbox'
+            );
             return;
         }
         items.forEach(function (c) {
