@@ -595,7 +595,6 @@ class NavigationService
             'app_ti_novidade_novo_submit',
             'app_ti_novidade_editar_submit',
             'app_ti_novidade_excluir',
-            'app_ti_war_room',
         ], true);
     }
 

@@ -222,8 +222,6 @@ final class ProductGrantRouteMap
         'app_ti_problema_excluir' => ['scope' => 'hub_ti', 'product' => 'problemas'],
         'app_ti_meus_chamados' => ['scope' => 'hub_ti', 'product' => 'meus_chamados'],
         'app_ti_analytics_export' => ['scope' => 'hub_ti', 'product' => 'analytics'],
-        'app_ti_war_room' => ['scope' => 'hub_ti', 'product' => 'chamados'],
-        'app_ti_war_room_poll' => ['scope' => 'hub_ti', 'product' => 'chamados'],
         'app_expansao' => ['scope' => 'hub_expansao', 'product' => '_hub'],
         'app_qualidade' => ['scope' => 'hub_qualidade', 'product' => '_hub'],
         'app_facilities' => ['scope' => 'hub_facilities', 'product' => '_hub'],
