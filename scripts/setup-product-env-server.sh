@@ -124,6 +124,17 @@ else
   echo "Mantido: $ENV_FILE (ja existia)"
 fi
 
+VHOST="${DEFAULT_URI#https://}"
+VHOST="${VHOST#http://}"
+VHOST="${VHOST%%/*}"
+if command -v uapi >/dev/null 2>&1 && [[ -n "$VHOST" ]]; then
+  echo "Configurando PHP 8.2 para $VHOST (cPanel)..."
+  uapi --output=json LangPHP php_set_vhost_versions version=ea-php82 vhost="${VHOST}" 2>/dev/null \
+    || uapi --output=json LangPHP php_set_vhost_versions version=ea-php81 vhost="${VHOST}" 2>/dev/null \
+    || echo "AVISO: nao foi possivel definir versao PHP via uapi"
+  uapi --output=json SSL start_autossl_check 2>/dev/null || true
+fi
+
 echo ""
 echo "Proximos passos:"
 echo "  1. cPanel: subdominio apontando para $PUBLIC_HTML (se ainda nao existir)"
