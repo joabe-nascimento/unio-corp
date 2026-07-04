@@ -1,9 +1,9 @@
 {% extends 'layout/hub.html.twig' %}
 {% block title %}Núcleo TI{% endblock %}
 {% block permissions_scope %}{% if ti_section == 'overview' %}hub_ti{% endif %}{% endblock %}
-{% set hub_page_title = ti_section == 'overview' ? 'Núcleo TI' : ti_active_module.label|default('Núcleo TI') %}
-{% set hub_page_subtitle = ti_section != 'overview' ? ti_active_module.subtitle|default('') : 'NOC Center · Service desk & infraestrutura' %}
-{% set hub_search_hidden = true %}
+{% set hub_page_title = hub_page_title|default(ti_section == 'overview' ? 'Núcleo TI' : ti_active_module.label|default('Núcleo TI')) %}
+{% set hub_page_subtitle = hub_page_subtitle|default(ti_section != 'overview' ? ti_active_module.subtitle|default('') : 'NOC Center · Service desk & infraestrutura') %}
+{% set hub_search_hidden = hub_search_hidden|default(true) %}
 
 {% block hub_toolbar_actions %}
 <div class="ti-toolbar-meta ti-toolbar-meta--badges">
