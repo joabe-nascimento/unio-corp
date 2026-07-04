@@ -1,20 +1,33 @@
 {#
-  LGPD / transparência: links legais e identificação da operadora (Admin → LGPD & Transparência).
+  Links legais — variantes por contexto (LGPD):
+  - full:    links + CNPJ (home marketing, rodapés institucionais)
+  - links:   Termos · Privacidade · LGPD, sem CNPJ (páginas legais — bloco operador já identifica)
+  - minimal: Privacidade · Termos (rodapé do app logado)
+  - auth:    só Privacidade (painel login — cadastro já tem checkbox com Termos)
 #}
+{% set _variant = variant|default('full') %}
 {% set _cnpj = platform_config.operadora_cnpj|default('')|trim %}
 {% set _fantasia = platform_config.operadora_nome_fantasia|default('')|trim %}
 {% set _razao = platform_config.operadora_razao_social|default('')|trim %}
 
-<div class="platform-legal{{ extra_class|default('') }}">
-    <a href="{{ path('app_legal_termos') }}" class="platform-legal__item">Termos de Uso</a>
-    <span class="platform-legal__sep" aria-hidden="true">·</span>
-    <a href="{{ path('app_legal_privacidade') }}" class="platform-legal__item">Política de Privacidade</a>
-    <span class="platform-legal__sep" aria-hidden="true">·</span>
-    <a href="{{ path('app_legal_lgpd') }}" class="platform-legal__item">Canal LGPD</a>
-    {% if _cnpj %}
-    <span class="platform-legal__sep" aria-hidden="true">·</span>
-    <span class="platform-legal__cnpj" title="CNPJ da operadora da plataforma">
-        {% if _fantasia %}{{ _fantasia }} · {% endif %}CNPJ {{ _cnpj }}{% if _razao and not _fantasia %} · {{ _razao }}{% endif %}
-    </span>
+<div class="platform-legal platform-legal--{{ _variant }}{{ extra_class|default('') }}">
+    {% if _variant == 'auth' %}
+        <a href="{{ path('app_legal_privacidade') }}" class="platform-legal__item">Política de Privacidade</a>
+    {% elseif _variant == 'minimal' %}
+        <a href="{{ path('app_legal_privacidade') }}" class="platform-legal__item">Privacidade</a>
+        <span class="platform-legal__sep" aria-hidden="true">·</span>
+        <a href="{{ path('app_legal_termos') }}" class="platform-legal__item">Termos</a>
+    {% else %}
+        <a href="{{ path('app_legal_termos') }}" class="platform-legal__item">Termos de Uso</a>
+        <span class="platform-legal__sep" aria-hidden="true">·</span>
+        <a href="{{ path('app_legal_privacidade') }}" class="platform-legal__item">Política de Privacidade</a>
+        <span class="platform-legal__sep" aria-hidden="true">·</span>
+        <a href="{{ path('app_legal_lgpd') }}" class="platform-legal__item">Canal LGPD</a>
+        {% if _variant == 'full' and _cnpj %}
+        <span class="platform-legal__sep" aria-hidden="true">·</span>
+        <span class="platform-legal__cnpj" title="CNPJ da operadora da plataforma">
+            {% if _fantasia %}{{ _fantasia }} · {% endif %}CNPJ {{ _cnpj }}{% if _razao and not _fantasia %} · {{ _razao }}{% endif %}
+        </span>
+        {% endif %}
     {% endif %}
 </div>
