@@ -55,7 +55,7 @@ final class PlatformAuditService
         } catch (\Throwable) {
             // Auditoria não deve derrubar login, deploy ou fluxos críticos.
             if ($this->em->isOpen()) {
-                $this->em->clear(PlatformAuditLog::class);
+                $this->em->detach($entry);
             }
         }
 
