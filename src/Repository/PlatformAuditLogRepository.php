@@ -110,4 +110,30 @@ class PlatformAuditLogRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function countAuthEventsSince(\DateTimeImmutable $since, string $acao): int
+    {
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.categoria = :cat')
+            ->andWhere('a.acao = :acao')
+            ->andWhere('a.criadoEm >= :since')
+            ->setParameter('cat', PlatformAuditLog::CATEGORY_AUTH)
+            ->setParameter('acao', $acao)
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /** @return list<PlatformAuditLog> */
+    public function findRecentAuth(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.categoria = :cat')
+            ->setParameter('cat', PlatformAuditLog::CATEGORY_AUTH)
+            ->orderBy('a.criadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

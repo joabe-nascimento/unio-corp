@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\Admin;
 
+use App\Service\Platform\PlatformCommandCenterService;
 use App\Service\PlatformOpsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,6 +35,7 @@ class PlatformOpsController extends AbstractController
 
     /** @var list<string> */
     public const ALL_TABS = [
+        'centro',
         'overview',
         'activity',
         'reports',
@@ -50,11 +52,11 @@ class PlatformOpsController extends AbstractController
     ];
 
     #[Route('', name: 'app_admin_operacoes')]
-    public function index(Request $request, PlatformOpsService $ops): Response
+    public function index(Request $request, PlatformOpsService $ops, PlatformCommandCenterService $commandCenter): Response
     {
-        $tab = (string) $request->query->get('tab', 'overview');
+        $tab = (string) $request->query->get('tab', 'centro');
         if (!in_array($tab, self::ALL_TABS, true)) {
-            $tab = 'overview';
+            $tab = 'centro';
         }
 
         $perPage = $request->query->getInt('per_page', 25);
@@ -104,6 +106,8 @@ class PlatformOpsController extends AbstractController
 
         return $this->render(self::T . 'operacoes.html.twig', [
             'view' => $view,
+            'command_center' => $tab === 'centro' ? $commandCenter->build() : null,
+            'failed_logins_24h' => $commandCenter->failedLoginsLast24h(),
             'snapshot' => $view['snapshot'],
             'log_analysis' => $view['log_analysis'],
             'list_items' => $view['list_items'],

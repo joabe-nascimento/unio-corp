@@ -1,34 +1,42 @@
+{% set _tema = platform_config.tema|default('dark') %}
+{% set _email = platform_config.suporte_email|default('')|trim %}
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" data-theme="{{ _tema }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Manutenção | {{ platform_config.plataforma_nome|default('Unio') }}</title>
+    <title>Manutenção · {{ platform_config.plataforma_nome|default('Unio') }}</title>
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Sora:wght@700;800&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     {% include 'components/unio_theme_vars.html.twig' %}
-    <link rel="stylesheet" href="{{ asset('css/unio-app.css') }}?v=174">
-    <style>
-        body { background: var(--layout-bg,#161C24); display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; padding:24px; }
-        .manut-box { text-align:center; max-width:440px; }
-        .manut-icon { font-size:56px; color:#ffb400; margin-bottom:24px; animation: pulse 2s ease-in-out infinite; }
-        @keyframes pulse { 0%,100% { opacity:.8; transform:scale(1); } 50% { opacity:1; transform:scale(1.08); } }
-        .manut-msg { font-family:'Sora',sans-serif; font-size:22px; font-weight:700; color:var(--text-1,#E8EDF5); line-height:1.5; margin:0 0 28px; }
-        .manut-back { display:inline-block; padding:10px 24px; background:var(--accent,#4F7FFF); color:#fff; border-radius:8px; font-weight:600; font-size:14px; text-decoration:none; }
-        .manut-back:hover { opacity:.88; color:#fff; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/maintenance-page.css') }}?v=1">
 </head>
-<body>
-<div class="manut-box">
-    <div class="manut-icon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></div>
-    <p class="manut-msg">{{ msg }}</p>
-    {% include 'components/platform_support.html.twig' with { extra_class: ' platform-support--manut' } %}
-    {# Usuário logado: /login redireciona ao dashboard e volta para /manutencao — sair primeiro #}
-    <a href="{{ app.user ? path('app_logout') : path('app_login') }}" class="manut-back mt-3 d-inline-block">
-        <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i> Voltar ao login
-    </a>
-</div>
+<body class="maintenance-page">
+<main class="maintenance-page__inner">
+    <div class="maintenance-page__logo">
+        {% include 'components/platform_logo.html.twig' with { variant: 'full', class: 'maintenance-page__logo-img' } only %}
+    </div>
+
+    <p class="maintenance-page__status">
+        <span class="maintenance-page__status-dot" aria-hidden="true"></span>
+        Manutenção
+    </p>
+
+    <p class="maintenance-page__message">{{ msg }}</p>
+
+    {% if _email %}
+    <p class="maintenance-page__contact">
+        Dúvidas: <a href="mailto:{{ _email }}">{{ _email }}</a>
+    </p>
+    {% endif %}
+
+    <p class="maintenance-page__action">
+        <a href="{{ app.user ? path('app_logout') : path('app_login') }}">
+            {{ app.user ? 'Sair e ir ao login' : 'Ir ao login' }}
+        </a>
+    </p>
+</main>
 </body>
 </html>

@@ -67,7 +67,7 @@ class PlatformConfigService
         'encarregado_dados_email'  => '',
         'legal_ultima_atualizacao' => '',
         'manutencao'          => false,
-        'msg_manutencao'      => 'Estamos realizando melhorias. Voltamos em breve!',
+        'msg_manutencao'      => 'Estamos em manutenção. Retornamos em breve.',
         'senha_min'           => 8,
         'sessao_timeout'      => 120,
         'senha_maiuscula'     => false,

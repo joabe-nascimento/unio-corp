@@ -1,0 +1,220 @@
+{# Centro de comando — exclusivo PLATFORM_OWNER #}
+{% set cc = command_center %}
+{% set gov = cc.governance %}
+{% set sec = cc.security %}
+{% set failed_kpi = {
+    value: sec.failed_logins_24h,
+    label: 'Logins falhos',
+    sub: 'Últimas 24h',
+    icon: 'fa-user-lock',
+    route: sec.failed_logins_24h > 0 ? 'app_admin_operacoes' : null,
+    route_params: sec.failed_logins_24h > 0 ? { tab: 'activity', acao: 'login_failed' } : {}
+} %}
+
+{% include 'components/kpi_row.html.twig' with {
+    items: [
+        { value: cc.environments|length, label: 'Ambientes', sub: 'Prod + homologs', icon: 'fa-globe' },
+        failed_kpi,
+        { value: cc.backups|length, label: 'Backups DB', sub: 'var/backups/db', icon: 'fa-database' },
+        { value: gov.empresas_ativas ~ '/' ~ gov.empresas_total, label: 'Empresas', sub: 'Ativas / total', icon: 'fa-building', route: 'app_admin_empresas' },
+    ]
+} %}
+
+<div class="row mb-3">
+    {# 1. Ambientes #}
+    <div class="col-xl-7 mb-3 mb-xl-0">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Ambientes',
+                subtitle: 'Produção e homologs · ping HTTP'
+            } %}
+            <div class="table-responsive border-top">
+                <table class="table table-sm table-unio mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ambiente</th>
+                            <th>Branch</th>
+                            <th>URL</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for env in cc.environments %}
+                        <tr>
+                            <td>
+                                <strong>{{ env.label }}</strong>
+                                {% if env.current %}<span class="badge badge-primary ml-1">atual</span>{% endif %}
+                            </td>
+                            <td><code class="small">{{ env.branch }}</code></td>
+                            <td><a href="{{ env.url }}" target="_blank" rel="noopener noreferrer" class="small">{{ env.url|replace({'https://': ''}) }}</a></td>
+                            <td>
+                                {% if env.http_ok %}
+                                <span class="badge badge-success">{{ env.http_status }} · {{ env.http_ms }}ms</span>
+                                {% elseif env.http_status %}
+                                <span class="badge badge-warning">{{ env.http_status }}</span>
+                                {% else %}
+                                <span class="badge badge-secondary" title="{{ env.http_error|default('') }}">offline</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                <a href="{{ env.url }}" target="_blank" rel="noopener noreferrer" class="btn-unio btn-xs btn-unio-ghost">
+                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    {# 2. Governança rápida #}
+    <div class="col-xl-5">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Governança',
+                subtitle: gov.plataforma_nome ~ ' · flags críticas'
+            } %}
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>Modo manutenção</span>
+                    {% if gov.manutencao %}
+                    <span class="badge badge-warning">ATIVO</span>
+                    {% else %}
+                    <span class="badge badge-success">Desligado</span>
+                    {% endif %}
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>Cadastro público</span>
+                    <span class="badge badge-{{ gov.registro_publico ? 'success' : 'secondary' }}">{{ gov.registro_publico ? 'Aberto' : 'Fechado' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                    <span>Encarregado LGPD</span>
+                    <small class="text-muted text-truncate">{{ gov.encarregado_email ?: '—' }}</small>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>CNPJ operadora</span>
+                    <small><code>{{ gov.operadora_cnpj ?: '—' }}</code></small>
+                </li>
+            </ul>
+            <div class="px-3 py-3 border-top">
+                <a href="{{ path('app_admin_configuracoes') }}" class="btn-unio btn-sm btn-unio-ghost">
+                    <i class="fas fa-sliders mr-1"></i> Abrir configurações
+                </a>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="row mb-3">
+    {# 3. Backups DB #}
+    <div class="col-lg-6 mb-3 mb-lg-0">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Backups do banco',
+                subtitle: 'Gerados antes de migrations (deploy)'
+            } %}
+            {% if cc.backups is empty %}
+            <p class="text-muted px-3 pb-3 mb-0 small">Nenhum backup em <code>var/backups/db/</code> ainda. O próximo deploy com migration criará um.</p>
+            {% else %}
+            <div class="table-responsive border-top">
+                <table class="table table-sm table-unio mb-0">
+                    <thead><tr><th>Arquivo</th><th>Tamanho</th><th>Data</th></tr></thead>
+                    <tbody>
+                        {% for bk in cc.backups %}
+                        <tr>
+                            <td><code class="small">{{ bk.name }}</code></td>
+                            <td><small>{{ (bk.size_bytes / 1024 / 1024)|number_format(2, ',', '.') }} MB</small></td>
+                            <td><small class="text-muted">{{ bk.modified_at|slice(0, 16)|replace({'T': ' '}) }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    {# 4. Deploy / CI #}
+    <div class="col-lg-6">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Último deploy',
+                subtitle: 'var/log/deploy-report.txt'
+            } %}
+            <div class="card-body pt-0">
+                {% if cc.deploy_report.exists %}
+                <p class="mb-2">
+                    Status:
+                    {% if cc.deploy_report.status == 'success' %}
+                    <span class="badge badge-success">Sucesso</span>
+                    {% elseif cc.deploy_report.status == 'failure' %}
+                    <span class="badge badge-danger">Falha</span>
+                    {% else %}
+                    <span class="badge badge-secondary">Desconhecido</span>
+                    {% endif %}
+                </p>
+                <pre class="ops-log-pre p-2 bg-light small border rounded mb-3">{{ cc.deploy_report.excerpt }}</pre>
+                {% else %}
+                <p class="text-muted small mb-3">Relatório ainda não disponível neste ambiente.</p>
+                {% endif %}
+                <a href="{{ path('app_admin_operacoes', { tab: 'deploy' }) }}" class="btn-unio btn-sm btn-unio-ghost mr-2">
+                    Detalhes do deploy
+                </a>
+                {% for shortcut in cc.shortcuts|slice(0, 2) %}
+                <a href="{{ shortcut.url }}" target="_blank" rel="noopener noreferrer" class="btn-unio btn-sm btn-unio-ghost">
+                    <i class="fab {{ shortcut.icon }} mr-1" aria-hidden="true"></i>{{ shortcut.label }}
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="row mb-3">
+    {# 5. Segurança / auth #}
+    <div class="col-xl-7 mb-3 mb-xl-0">
+        <section class="unio-card h-100">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 pt-3">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Autenticação',
+                    subtitle: sec.successful_logins_24h ~ ' logins OK · ' ~ sec.failed_logins_24h ~ ' falhas (24h)'
+                } %}
+                <a href="{{ path('app_admin_operacoes', { tab: 'activity', acao: 'login_failed' }) }}" class="btn-unio btn-xs btn-unio-ghost">Ver falhas</a>
+            </div>
+            <div class="border-top">
+                {% include 'components/ops_activity_table.html.twig' with { rows: sec.recent_auth } %}
+            </div>
+        </section>
+    </div>
+
+    {# Atalhos owner #}
+    <div class="col-xl-5">
+        <section class="unio-card h-100">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Atalhos do dono',
+                subtitle: 'Acesso rápido'
+            } %}
+            <div class="list-group list-group-flush">
+                {% for shortcut in cc.shortcuts %}
+                <a href="{{ shortcut.url is defined ? shortcut.url : path(shortcut.route) }}"
+                   class="list-group-item list-group-item-action d-flex align-items-center gap-3"
+                   {% if shortcut.url is defined %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <span class="ops-shortcut-icon text-muted"><i class="{{ shortcut.url is defined ? 'fab' : 'fas' }} {{ shortcut.icon }}" aria-hidden="true"></i></span>
+                    <span>
+                        <strong class="d-block">{{ shortcut.label }}</strong>
+                        <small class="text-muted">{{ shortcut.description }}</small>
+                    </span>
+                    {% if shortcut.url is defined %}<i class="fas fa-external-link-alt ml-auto text-muted small"></i>{% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<p class="text-muted small mb-0">
+    Centro de comando atualizado em {{ cc.generated_at|slice(0, 19)|replace({'T': ' '}) }} · exclusivo PLATFORM_OWNER
+</p>

@@ -2,6 +2,7 @@
   ops_page_nav — navegação da página Operações (incidentes + arquivos de log)
 #}
 {% set tab_labels = {
+    'centro': 'Centro de comando',
     'overview': 'Visão geral',
     'activity': 'Atividade',
     'reports': 'Relatórios',
@@ -22,10 +23,14 @@
     <div class="ops-page-nav-group">
         <span class="ops-page-nav-label">Monitoramento</span>
         <div class="hub-overview-tabs ops-page-nav-tabs" role="tablist" aria-label="Monitoramento">
-            {% for tab in ['overview', 'activity', 'reports', 'deploy'] %}
+            {% for tab in ['centro', 'overview', 'activity', 'reports', 'deploy'] %}
             <a href="{{ path('app_admin_operacoes', { tab: tab }) }}"
                class="hub-overview-tab{% if tab == active_tab %} hub-overview-tab--active{% endif %}">
+                {% if tab == 'centro' %}<i class="fas fa-crown mr-1" aria-hidden="true"></i>{% endif %}
                 {{ tab_labels[tab] }}
+                {% if tab == 'centro' and failed_logins_24h|default(0) > 0 %}
+                <span class="badge badge-danger ml-1">{{ failed_logins_24h }}</span>
+                {% endif %}
             </a>
             {% endfor %}
         </div>

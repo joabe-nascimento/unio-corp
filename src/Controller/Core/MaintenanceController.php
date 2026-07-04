@@ -28,7 +28,7 @@ class MaintenanceController extends AbstractController
 
         $msg = trim((string) $config->get('msg_manutencao'));
         if ($msg === '') {
-            $msg = 'Estamos realizando melhorias. Voltamos em breve!';
+            $msg = 'Estamos em manutenção. Retornamos em breve.';
         }
 
         $response = $this->render('core/manutencao.html.twig', [
