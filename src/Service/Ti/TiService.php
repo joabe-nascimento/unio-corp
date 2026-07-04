@@ -279,7 +279,7 @@ final class TiService
         ];
     }
 
-    /** Public accessor for War Room and other consumers */
+    /** Public accessor for NOC systems and other consumers */
     public function getNocSystems(Empresa $empresa): array
     {
         return $this->buildNocSystems($empresa);
