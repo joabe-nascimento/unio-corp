@@ -1,72 +1,40 @@
-{% extends 'modules/ti/_base.html.twig' %}
+{% extends 'base.html.twig' %}
 {% block title %}War Room — Núcleo TI{% endblock %}
-{% block permissions_scope %}hub_ti{% endblock %}
-{% set hub_page_title = 'War Room' %}
-{% set hub_page_subtitle = 'Incident Command Center · P1' %}
-{% set hub_search_hidden = true %}
-{% set hub_page_body_mode = 'scroll' %}
+{% block page_show_title %}{% endblock %}
+{% block page_scroll_mode %}flow{% endblock %}
+{% block body_attrs %} data-page="ti-war-room"{% endblock %}
 
-{% block hub_toolbar_actions %}
-<div class="d-flex flex-wrap align-items-center gap-2 ti-war-room-toolbar">
-    <div class="wr-severity-gauge" title="Índice de severidade operacional">
-        <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true">
-            <circle cx="26" cy="26" r="22" fill="none" stroke="#1a2840" stroke-width="4"/>
-            <circle id="wrSeverityCircle" cx="26" cy="26" r="22" fill="none"
-                stroke="{{ severity_level == 'critical' ? '#ff3b3b' : (severity_level == 'elevated' ? '#f59e0b' : '#10b981') }}"
-                stroke-width="4" stroke-linecap="round"/>
-        </svg>
-        <div class="wr-severity-gauge-val" id="wrSeverityVal">{{ severity_score }}</div>
+{% block content %}
+<div class="ti-war-room-page">
+    <div class="ti-war-room wr-root"
+         data-wr-poll-url="{{ path('app_ti_war_room_poll') }}"
+         data-wr-severity="{{ severity_score }}"
+         data-severity="{{ severity_level }}">
+        <div class="wr-scanline" aria-hidden="true"></div>
+
+        {% include 'components/ti/war_room_header.html.twig' %}
+
+        <div class="wr-main">
+            <div class="wr-command-head">
+                {% include 'components/page_banner.html.twig' with {
+                    icon: 'fa-skull-crossbones',
+                    title: 'Sala de crise P1',
+                    subtitle: 'Coordenação de incidentes em tempo real — chamados críticos, NOC, blast radius, briefing ' ~ ai_assistant_name ~ ', runbooks e comunicação com stakeholders.'
+                } %}
+
+                {% include 'components/ti/war_room_brief.html.twig' %}
+            </div>
+
+            {% include 'components/ti/war_room_board.html.twig' %}
+        </div>
     </div>
-    <span class="wr-live-dot" title="Monitoramento ao vivo"></span>
-    {% include 'components/status_badge.html.twig' with {
-        label: p1_count > 0 ? (p1_count ~ ' P1 ATIVO' ~ (p1_count != 1 ? 'S' : '')) : 'SISTEMA ESTÁVEL',
-        variant: p1_count > 0 ? 'danger' : 'success',
-        extra_class: 'ti-badge-priority ti-badge-priority--p1',
-        attrs: { id: 'wrP1Badge' }
-    } %}
-    <span class="wr-clock" id="wrClock">--:--:--</span>
-    {% include 'components/status_badge.html.twig' with { label: 'Live · 15s', variant: 'info' } %}
-    <a href="{{ path('app_ti_chamados') }}" class="btn-unio-ghost btn-sm">
-        <i class="fas fa-list mr-1" aria-hidden="true"></i> Fila de chamados
-    </a>
-</div>
-{% endblock %}
-
-{% block hub_kpis %}
-<div class="page-lead-kpis page-lead-kpis--war-room">
-{% include 'components/kpi_row.html.twig' with { items: [
-    { value: metrics.open_total, label: 'Abertos', icon: 'fa-inbox' },
-    { value: metrics.p2_active, label: 'P2', icon: 'fa-exclamation' },
-    { value: metrics.systems_up ~ '/' ~ metrics.systems_total, label: 'Sistemas OK', icon: 'fa-server' },
-    { value: metrics.sla_compliance ~ '%', label: 'SLA 7d', icon: 'fa-shield-check' },
-], mb: 'mb-0', extra_class: 'stats-row--4' } %}
-</div>
-{% endblock %}
-
-{% block ti_section_content %}
-<div class="ti-war-room wr-root"
-     data-wr-poll-url="{{ path('app_ti_war_room_poll') }}"
-     data-wr-severity="{{ severity_score }}"
-     data-severity="{{ severity_level }}">
-    <div class="wr-scanline" aria-hidden="true"></div>
-
-    <div class="wr-command-head">
-        {% include 'components/page_banner.html.twig' with {
-            icon: 'fa-skull-crossbones',
-            title: 'Sala de crise P1',
-            subtitle: 'Coordenação de incidentes em tempo real — chamados críticos, NOC, blast radius, briefing ' ~ ai_assistant_name ~ ', runbooks e comunicação com stakeholders.'
-        } %}
-
-        {% include 'components/ti/war_room_brief.html.twig' %}
-    </div>
-
-    {% include 'components/ti/war_room_board.html.twig' %}
 </div>
 {% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/ti-war-room.css') }}?v=4">
+<link rel="stylesheet" href="{{ asset('css/ti-hub.css') }}?v=68">
+<link rel="stylesheet" href="{{ asset('css/ti-war-room.css') }}?v=5">
 {% endblock %}
 
 {% block javascripts %}
