@@ -9,6 +9,9 @@ concurrency:
   group: deploy-production
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   validate:
     uses: ./.github/workflows/validate-reusable.yml
@@ -26,3 +29,30 @@ jobs:
       report_artifact_prefix: deploy-report
       failure_summary_title: Falha no deploy
     secrets: inherit
+
+  smoke_test:
+    needs: deploy
+    uses: ./.github/workflows/smoke-test-reusable.yml
+    with:
+      urls: |
+        https://uniowork.com.br/login
+        https://uniowork.com.br/termos
+        https://uniowork.com.br/privacidade
+
+  release:
+    needs: smoke_test
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Criar GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: deploy-${{ github.run_number }}
+          name: Deploy production #${{ github.run_number }}
+          generate_release_notes: true
+          target_commitish: ${{ github.sha }}

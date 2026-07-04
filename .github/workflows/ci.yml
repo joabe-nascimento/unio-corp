@@ -2,6 +2,7 @@ name: CI
 
 # CI em push: branches oficiais (sem product/rh — validate roda no workflow Deploy Product RH).
 # product/** e feature/** validam via PR.
+# Cron diário (06:00 UTC = 03:00 BRT) — detecta quebras sem push recente.
 on:
   push:
     branches:
@@ -17,6 +18,12 @@ on:
       - new_staging2
       - 'product/**'
       - 'feature/**'
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/**/*.md'
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 concurrency:

@@ -217,6 +217,20 @@ Actions → **Deploy Production** → run com falha → **Re-run all jobs**
 
 ---
 
+## Pipeline avançado (jul/2026)
+
+| Recurso | O que faz |
+|---------|-----------|
+| **Smoke test** | Após deploy, `curl` em `/login`, `/termos`, `/privacidade` — workflow falha se ≠ 200 |
+| **GitHub Release** | Cada deploy prod OK cria tag `deploy-N` com release notes |
+| **CI noturno** | Cron 03:00 BRT — testes sem push |
+| **paths-ignore** | PR só com `docs/` ou `*.md` não dispara CI |
+| **Backup DB** | `mysqldump` em `var/backups/db/` antes de cada migration (últimos 7) |
+
+Backups no servidor: `~/unio/var/backups/db/pre-migrate-*.sql.gz`
+
+---
+
 ## Segurança
 
 - Nunca commite `.env.local` ou chaves SSH no Git

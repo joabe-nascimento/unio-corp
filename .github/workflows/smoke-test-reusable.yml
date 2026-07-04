@@ -1,0 +1,36 @@
+# Smoke test HTTP pós-deploy — URLs públicas devem responder 200.
+
+name: Smoke test (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      urls:
+        required: true
+        type: string
+        description: 'URLs (uma por linha) que devem retornar HTTP 200'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke test HTTP
+        run: |
+          set -euo pipefail
+          failed=0
+          while IFS= read -r url || [[ -n "$url" ]]; do
+            url="${url//$'\r'/}"
+            url="${url#"${url%%[![:space:]]*}"}"
+            url="${url%"${url##*[![:space:]]}"}"
+            [[ -z "$url" ]] && continue
+            code=$(curl -fsS -o /dev/null -w '%{http_code}' --connect-timeout 15 --max-time 30 "$url" || echo '000')
+            if [[ "$code" != '200' ]]; then
+              echo "FAIL $url → HTTP $code"
+              failed=1
+            else
+              echo "OK   $url → HTTP $code"
+            fi
+          done <<< "${{ inputs.urls }}"
+          if [[ "$failed" -ne 0 ]]; then
+            exit 1
+          fi

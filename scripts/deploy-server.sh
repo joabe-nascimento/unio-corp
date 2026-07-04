@@ -14,6 +14,8 @@ CSS_MARKER="${CSS_MARKER:-core-projetos-toolbar}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # shellcheck source=scripts/lib/ci-report.sh
 source "$ROOT/scripts/lib/ci-report.sh"
+# shellcheck source=scripts/lib/backup-database.sh
+source "$ROOT/scripts/lib/backup-database.sh"
 
 CI_REPORT_KIND=deploy
 CI_REPORT_FILE="${DEPLOY_PATH}/var/log/deploy-report.txt"
@@ -40,7 +42,7 @@ fi
 
 CI_REPORT_STEP="Preparar diretórios"
 ci_report_step "$CI_REPORT_STEP"
-mkdir -p var/cache var/log var/sessions \
+mkdir -p var/cache var/log var/sessions var/backups/db \
   public/uploads/users \
   public/uploads/chat/voice \
   public/uploads/chat/files \
@@ -60,6 +62,10 @@ db_has_core_schema() {
 }
 
 if db_has_core_schema; then
+  CI_REPORT_STEP="Backup DB (pré-migration)"
+  ci_report_step "$CI_REPORT_STEP"
+  backup_database_before_migrate "$DEPLOY_PATH" "$PHP_BIN" 7 || true
+
   $PHP_BIN bin/console doctrine:migrations:migrate --no-interaction
 else
   echo "Banco sem schema base — doctrine:schema:create + marcar migrations"

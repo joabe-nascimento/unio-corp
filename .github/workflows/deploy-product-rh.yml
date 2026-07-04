@@ -28,3 +28,10 @@ jobs:
       report_artifact_prefix: deploy-report-rh
       failure_summary_title: Falha no deploy RH
     secrets: inherit
+
+  smoke_test:
+    needs: deploy
+    uses: ./.github/workflows/smoke-test-reusable.yml
+    with:
+      urls: |
+        https://rh.uniowork.com.br/login
