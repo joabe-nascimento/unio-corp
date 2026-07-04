@@ -9,6 +9,7 @@
     {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}">
     {% include 'components/unio_theme_vars.html.twig' %}
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -594,6 +595,7 @@
 
         <div class="auth-left-footer">
             {% include 'components/platform_support.html.twig' with { extra_class: ' platform-support--auth' } %}
+            {% include 'components/platform_legal.html.twig' with { extra_class: ' platform-legal--auth' } %}
         </div>
     </div>
 
@@ -729,6 +731,19 @@
                     <span class="invalid-feedback" style="margin-top:-8px;margin-bottom:10px;">{{ registrationForm.plainPassword.vars.errors[0].message }}</span>
                 {% endif %}
 
+                <div class="register-legal-check">
+                    {{ form_widget(registrationForm.aceitoTermos) }}
+                    <label for="{{ registrationForm.aceitoTermos.vars.id }}">
+                        Li e aceito os
+                        <a href="{{ path('app_legal_termos') }}" target="_blank" rel="noopener noreferrer">Termos de Uso</a>
+                        e a
+                        <a href="{{ path('app_legal_privacidade') }}" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.
+                    </label>
+                </div>
+                {% if registrationForm.aceitoTermos.vars.errors|length %}
+                    <span class="invalid-feedback" style="display:block;margin-top:-8px;margin-bottom:12px">{{ registrationForm.aceitoTermos.vars.errors[0].message }}</span>
+                {% endif %}
+
                 <button type="submit" class="btn-primary">Criar minha conta</button>
 
             {{ form_end(registrationForm) }}
@@ -742,5 +757,7 @@
     </div>{# /auth-right-inner #}
     </div>{# /auth-right #}
 </div>{# /auth-wrapper #}
+{% include 'components/cookie_consent_banner.html.twig' %}
+<script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
 </body>
 </html>

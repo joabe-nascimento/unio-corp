@@ -564,6 +564,8 @@ class AdminController extends AbstractController
                 'plataforma_nome', 'plataforma_tagline', 'logo_url', 'logo_mark_url', 'logo_full_url', 'favicon_url',
                 'cor_primaria', 'tema',
                 'suporte_email', 'suporte_telefone', 'website', 'rodape_texto',
+                'operadora_razao_social', 'operadora_nome_fantasia', 'operadora_cnpj', 'operadora_endereco',
+                'encarregado_dados_nome', 'encarregado_dados_email', 'legal_ultima_atualizacao',
                 'msg_manutencao',
             ];
             $newConfig = [];

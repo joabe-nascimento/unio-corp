@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block legal_title %}Documento legal{% endblock %} | {{ platform_config.plataforma_nome|default('Unio') }}</title>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
+    <link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}">
+</head>
+<body class="legal-page">
+<div class="legal-page__wrap">
+    <header class="legal-page__top">
+        <a href="{{ path('app_home') }}" class="legal-page__back">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar ao início
+        </a>
+        <div class="legal-page__brand">Uni<em>o</em></div>
+        <h1>{% block legal_heading %}{% endblock %}</h1>
+        <p class="legal-page__updated">Última atualização: {{ platform_config.legal_ultima_atualizacao|default("now"|date("d/m/Y")) }}</p>
+    </header>
+
+    {% include 'legal/_operator_block.html.twig' %}
+
+    <main>
+        {% block legal_content %}{% endblock %}
+    </main>
+
+    <footer class="legal-page__foot">
+        {% include 'components/platform_support.html.twig' %}
+        {% include 'components/platform_legal.html.twig' %}
+    </footer>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% set _razao = platform_config.operadora_razao_social|default('')|trim %}
+{% set _fantasia = platform_config.operadora_nome_fantasia|default('')|trim %}
+{% set _cnpj = platform_config.operadora_cnpj|default('')|trim %}
+{% set _endereco = platform_config.operadora_endereco|default('')|trim %}
+{% set _dpo_nome = platform_config.encarregado_dados_nome|default('')|trim %}
+{% set _dpo_email = platform_config.encarregado_dados_email|default(platform_config.suporte_email|default(''))|trim %}
+{% set _site = platform_config.website|default('')|trim %}
+
+{% if _razao or _cnpj or _dpo_email %}
+<aside class="legal-page__operator" aria-label="Identificação do controlador de dados">
+    <p><strong>Controlador / Operadora da plataforma</strong></p>
+    <ul style="list-style:none;padding:0;margin:8px 0 0">
+        {% if _fantasia %}<li><strong>Nome fantasia:</strong> {{ _fantasia }}</li>{% endif %}
+        {% if _razao %}<li><strong>Razão social:</strong> {{ _razao }}</li>{% endif %}
+        {% if _cnpj %}<li><strong>CNPJ:</strong> {{ _cnpj }}</li>{% endif %}
+        {% if _endereco %}<li><strong>Endereço:</strong> {{ _endereco }}</li>{% endif %}
+        {% if _site %}
+            {% set _href = _site starts with 'http' ? _site : 'https://' ~ _site %}
+            <li><strong>Website:</strong> <a href="{{ _href }}" target="_blank" rel="noopener noreferrer">{{ _site|replace({'https://': '', 'http://': ''})|trim('/') }}</a></li>
+        {% endif %}
+        {% if _dpo_email %}
+            <li><strong>Contato LGPD{% if _dpo_nome %} ({{ _dpo_nome }}){% endif %}:</strong>
+                <a href="mailto:{{ _dpo_email }}">{{ _dpo_email }}</a>
+            </li>
+        {% endif %}
+    </ul>
+</aside>
+{% endif %}

@@ -53,6 +53,8 @@ class RegisterController extends AbstractController
             $user->setPerfil('MEMBRO');
             $user->setRoles([$user->getRolePrincipal()]);
             $user->setAtivo(true);
+            $user->setTermosAceitosEm(new \DateTimeImmutable());
+            $user->setTermosVersao($platformConfig->getLegalDocumentsVersion());
 
             $em->persist($user);
 

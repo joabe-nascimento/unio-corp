@@ -1,7 +1,7 @@
 # Branches e deploy — como funciona a partir de hoje
 
 Guia operacional atualizado (jul/2026) após otimização do CI e espelhamento de branches.  
-Modelo de longo prazo: [BRANCHES.md](BRANCHES.md) · Workflows: [OPERACAO_GITHUB_ACTIONS.md](OPERACAO_GITHUB_ACTIONS.md)
+Homolog por produto (piloto RH): [OPERACAO_HOMOLOG_PRODUTO.md](OPERACAO_HOMOLOG_PRODUTO.md) · Branches: [BRANCHES.md](BRANCHES.md) · Workflows: [OPERACAO_GITHUB_ACTIONS.md](OPERACAO_GITHUB_ACTIONS.md)
 
 ---
 

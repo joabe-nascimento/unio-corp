@@ -1,0 +1,51 @@
+{% extends 'legal/layout.html.twig' %}
+
+{% block legal_title %}Canal LGPD{% endblock %}
+{% block legal_heading %}Canal LGPD — exercer seus direitos{% endblock %}
+
+{% block legal_content %}
+<p>
+    Use este formulário para solicitar, conforme a Lei nº 13.709/2018 (LGPD), confirmação de tratamento,
+    acesso, correção, eliminação, portabilidade, revogação de consentimento ou informações sobre compartilhamento
+    de dados pessoais tratados pela plataforma {{ platform_config.plataforma_nome|default('Unio') }}.
+</p>
+
+{% for msg in app.flashes('lgpd_success') %}
+<div class="legal-alert legal-alert--success" role="status">{{ msg }}</div>
+{% endfor %}
+{% for msg in app.flashes('lgpd_error') %}
+<div class="legal-alert legal-alert--error" role="alert">{{ msg }}</div>
+{% endfor %}
+
+<div class="legal-form-card">
+    {{ form_start(form, { attr: { class: 'legal-form', novalidate: 'novalidate' } }) }}
+        <div class="legal-form-field">
+            {{ form_label(form.nome) }}
+            {{ form_widget(form.nome, { attr: { class: 'legal-form-control' } }) }}
+            {{ form_errors(form.nome) }}
+        </div>
+        <div class="legal-form-field">
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email, { attr: { class: 'legal-form-control' } }) }}
+            {{ form_errors(form.email) }}
+        </div>
+        <div class="legal-form-field">
+            {{ form_label(form.tipo) }}
+            {{ form_widget(form.tipo, { attr: { class: 'legal-form-control' } }) }}
+            {{ form_errors(form.tipo) }}
+        </div>
+        <div class="legal-form-field">
+            {{ form_label(form.mensagem) }}
+            {{ form_widget(form.mensagem, { attr: { class: 'legal-form-control' } }) }}
+            {{ form_errors(form.mensagem) }}
+        </div>
+        <button type="submit" class="legal-form-submit">Enviar solicitação</button>
+    {{ form_end(form) }}
+</div>
+
+<p style="margin-top:24px;font-size:13px">
+    Você também pode consultar a
+    <a href="{{ path('app_legal_privacidade') }}">Política de Privacidade</a>
+    ou enviar e-mail diretamente ao contato LGPD indicado nela.
+</p>
+{% endblock %}

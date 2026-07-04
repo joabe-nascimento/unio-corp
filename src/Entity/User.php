@@ -66,6 +66,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private array $onboardingCompletedSteps = [];
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $termosAceitosEm = null;
+
+    #[ORM\Column(length: 32, nullable: true)]
+    private ?string $termosVersao = null;
+
     #[ORM\ManyToOne(targetEntity: Empresa::class, inversedBy: 'usuarios')]
     private ?Empresa $empresa = null;
 
@@ -119,6 +125,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAtivo(bool $ativo): static { $this->ativo = $ativo; return $this; }
 
     public function getCriadoEm(): \DateTimeImmutable { return $this->criadoEm; }
+
+    public function getTermosAceitosEm(): ?\DateTimeImmutable { return $this->termosAceitosEm; }
+
+    public function setTermosAceitosEm(?\DateTimeImmutable $termosAceitosEm): static
+    {
+        $this->termosAceitosEm = $termosAceitosEm;
+
+        return $this;
+    }
+
+    public function getTermosVersao(): ?string { return $this->termosVersao; }
+
+    public function setTermosVersao(?string $termosVersao): static
+    {
+        $this->termosVersao = $termosVersao !== null && $termosVersao !== '' ? $termosVersao : null;
+
+        return $this;
+    }
 
     /** @return list<string> */
     public function getOnboardingCompletedSteps(): array

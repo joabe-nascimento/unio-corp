@@ -6,6 +6,7 @@ use App\Entity\Empresa;
 use App\Entity\TiNotificacao;
 use App\Entity\User;
 use App\Repository\TiNotificacaoRepository;
+use App\Service\TransactionalEmailComposer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -18,6 +19,7 @@ final class TiNotificationService
     public function __construct(
         private EntityManagerInterface $em,
         private TiNotificacaoRepository $repository,
+        private TransactionalEmailComposer $emailComposer,
         private ?MailerInterface $mailer = null,
     ) {}
 
@@ -55,6 +57,8 @@ final class TiNotificationService
             );
         }
 
+        $footerHtml = $this->emailComposer->renderHtmlFooter();
+
         $body = <<<HTML
 <!DOCTYPE html>
 <html>
@@ -69,9 +73,7 @@ final class TiNotificationService
       <p>{$mensagem}</p>
       {$linkHtml}
     </div>
-    <div style="background:#F8FAFC;padding:12px 24px;font-size:12px;color:#94A3B8;">
-      Esta é uma notificação automática do UNio. Não responda este e-mail.
-    </div>
+    {$footerHtml}
   </div>
 </body>
 </html>

@@ -22,6 +22,9 @@
         <a href="#cfg-contato"     class="cfg-sidebar-item" data-cfg-nav="contato">
             <i class="fas fa-headset" aria-hidden="true"></i> Contato &amp; Suporte
         </a>
+        <a href="#cfg-lgpd"        class="cfg-sidebar-item" data-cfg-nav="lgpd">
+            <i class="fas fa-user-shield" aria-hidden="true"></i> LGPD &amp; Transparência
+        </a>
         <a href="#cfg-seguranca"   class="cfg-sidebar-item" data-cfg-nav="seguranca">
             <i class="fas fa-shield-halved" aria-hidden="true"></i> Segurança
         </a>
@@ -207,6 +210,83 @@
                     value: config.rodape_texto|default(''),
                     placeholder: 'Ex.: © 2026 Unio — Todos os direitos reservados.'
                 } %}
+            </div>
+        </section>
+
+        {# ── 2b. LGPD & Transparência ── #}
+        <section class="cfg-section" id="cfg-lgpd" data-cfg-section="lgpd">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fas fa-user-shield" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">LGPD &amp; Transparência</h2>
+                    <p class="cfg-section-sub">Identificação da operadora, CNPJ e contato do encarregado — exibidos em Termos, Privacidade e rodapés.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="cfg-row-2">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'cfg_operadora_nome_fantasia',
+                        name: 'operadora_nome_fantasia',
+                        label: 'Nome fantasia',
+                        value: config.operadora_nome_fantasia|default(''),
+                        placeholder: 'Unio'
+                    } %}
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'cfg_operadora_cnpj',
+                        name: 'operadora_cnpj',
+                        label: 'CNPJ da operadora',
+                        value: config.operadora_cnpj|default(''),
+                        placeholder: '00.000.000/0001-00'
+                    } %}
+                </div>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'cfg_operadora_razao_social',
+                    name: 'operadora_razao_social',
+                    label: 'Razão social',
+                    value: config.operadora_razao_social|default(''),
+                    placeholder: 'Razão social completa'
+                } %}
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'cfg_operadora_endereco',
+                    name: 'operadora_endereco',
+                    label: 'Endereço (cidade/UF ou completo)',
+                    value: config.operadora_endereco|default(''),
+                    placeholder: 'Feira de Santana — BA'
+                } %}
+                <div class="cfg-row-2">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'cfg_encarregado_dados_nome',
+                        name: 'encarregado_dados_nome',
+                        label: 'Encarregado de dados (nome)',
+                        value: config.encarregado_dados_nome|default(''),
+                        placeholder: 'Joabe Fonseca do Nascimento'
+                    } %}
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'cfg_encarregado_dados_email',
+                        name: 'encarregado_dados_email',
+                        label: 'E-mail LGPD / privacidade',
+                        type: 'email',
+                        value: config.encarregado_dados_email|default(''),
+                        placeholder: 'privacidade@empresa.com (opcional — usa suporte se vazio)'
+                    } %}
+                </div>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'cfg_legal_ultima_atualizacao',
+                    name: 'legal_ultima_atualizacao',
+                    label: 'Data exibida nos documentos legais',
+                    value: config.legal_ultima_atualizacao|default(''),
+                    placeholder: '04/07/2026 (vazio = data atual; usada no aceite do cadastro)'
+                } %}
+                <p class="cfg-system-hint">
+                    A versão acima é gravada em <code>termos_versao</code> quando o usuário aceita os Termos no cadastro.
+                    Páginas:
+                    <a href="{{ path('app_legal_termos') }}" target="_blank" rel="noopener noreferrer">Termos</a>
+                    ·
+                    <a href="{{ path('app_legal_privacidade') }}" target="_blank" rel="noopener noreferrer">Privacidade</a>
+                    ·
+                    <a href="{{ path('app_legal_lgpd') }}" target="_blank" rel="noopener noreferrer">Canal LGPD</a>
+                </p>
             </div>
         </section>
 

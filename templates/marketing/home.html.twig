@@ -1221,6 +1221,9 @@
                 </ul>
                 <h4 class="mkt-footer-col-title" style="margin-top:24px">Conformidade</h4>
                 <ul class="mkt-footer-links">
+                    <li><a href="{{ path('app_legal_privacidade') }}">Política de Privacidade</a></li>
+                    <li><a href="{{ path('app_legal_termos') }}">Termos de Uso</a></li>
+                    <li><a href="{{ path('app_legal_lgpd') }}">Canal LGPD</a></li>
                     <li><span class="mkt-footer-badge"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD conforme</span></li>
                     <li><span class="mkt-footer-badge"><i class="fas fa-lock" aria-hidden="true"></i> Dados isolados por workspace</span></li>
                     <li><span class="mkt-footer-badge"><i class="fas fa-eye" aria-hidden="true"></i> Trilha de auditoria completa</span></li>
@@ -1234,6 +1237,12 @@
                 © {{ "now"|date("Y") }} <strong>{{ _pnome }}</strong>.
                 Todos os direitos reservados.
             </p>
+            {% set _cnpj_mkt = platform_config.operadora_cnpj|default('')|trim %}
+            {% if _cnpj_mkt %}
+            <p class="mkt-footer-copy" style="margin-top:6px;font-size:12px;opacity:.75">
+                {% if platform_config.operadora_nome_fantasia|default('')|trim %}{{ platform_config.operadora_nome_fantasia|trim }} · {% endif %}CNPJ {{ _cnpj_mkt }}
+            </p>
+            {% endif %}
             <div class="mkt-footer-bottom-actions">
                 <span class="mkt-footer-built">Feito com <i class="fas fa-heart" aria-hidden="true"></i> para gestão de pessoas</span>
                 <button type="button" class="mkt-theme-btn mkt-footer-theme-btn" id="footerThemeToggle" title="Alternar tema" aria-label="Alternar tema">
@@ -1326,5 +1335,8 @@
 })();
 </script>
 
+{% include 'components/cookie_consent_banner.html.twig' %}
+<link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=1">
+<script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
 </body>
 </html>

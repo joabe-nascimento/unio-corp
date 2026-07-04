@@ -59,6 +59,13 @@ class PlatformConfigService
         'suporte_telefone'    => '',
         'website'             => '',
         'rodape_texto'        => '',
+        'operadora_razao_social'   => '',
+        'operadora_nome_fantasia'  => '',
+        'operadora_cnpj'           => '',
+        'operadora_endereco'       => '',
+        'encarregado_dados_nome'   => '',
+        'encarregado_dados_email'  => '',
+        'legal_ultima_atualizacao' => '',
         'manutencao'          => false,
         'msg_manutencao'      => 'Estamos realizando melhorias. Voltamos em breve!',
         'senha_min'           => 8,
@@ -183,6 +190,28 @@ class PlatformConfigService
         return trim((string) $this->get('suporte_email')) !== ''
             || trim((string) $this->get('suporte_telefone')) !== ''
             || trim((string) $this->get('website')) !== '';
+    }
+
+    public function hasLegalOperator(): bool
+    {
+        return trim((string) $this->get('operadora_cnpj')) !== ''
+            || trim((string) $this->get('operadora_razao_social')) !== '';
+    }
+
+    /** E-mail para solicitações LGPD (encarregado ou suporte). */
+    public function getEncarregadoDadosEmail(): string
+    {
+        $dpo = trim((string) $this->get('encarregado_dados_email'));
+
+        return $dpo !== '' ? $dpo : trim((string) $this->get('suporte_email'));
+    }
+
+    /** Versão dos documentos legais (aceite no cadastro). */
+    public function getLegalDocumentsVersion(): string
+    {
+        $configured = trim((string) $this->get('legal_ultima_atualizacao'));
+
+        return $configured !== '' ? $configured : (new \DateTimeImmutable())->format('Y-m-d');
     }
 
     public function getAccentRgbCsv(): string

@@ -12,9 +12,11 @@
         <p>Olá, {{ payload.candidato_nome|default('') }}!</p>
         {% endblock %}
     </div>
-    <div style="background:#F8FAFC;padding:12px 24px;font-size:12px;color:#94A3B8;">
-        Mensagem automática do processo seletivo. Não responda este e-mail.
-    </div>
+    {% include 'emails/_legal_footer.html.twig' with {
+        termos_url: absolute_url(path('app_legal_termos')),
+        privacidade_url: absolute_url(path('app_legal_privacidade')),
+        lgpd_url: absolute_url(path('app_legal_lgpd')),
+    } %}
 </div>
 </body>
 </html>

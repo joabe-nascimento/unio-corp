@@ -22,6 +22,7 @@ class PasswordResetService
         private EntityManagerInterface $em,
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator,
+        private TransactionalEmailComposer $emailComposer,
         private string $mailerFrom,
         private string $mailerDsn,
         private bool $kernelDebug,
@@ -124,11 +125,13 @@ class PasswordResetService
 
     private function buildEmailBody(User $user, string $resetUrl): string
     {
-        return sprintf(
-            "Olá, %s\n\nRecebemos uma solicitação para redefinir sua senha na Unio.\n\nAcesse o link abaixo (válido por %d hora):\n%s\n\nSe você não solicitou, ignore este e-mail.\n",
+        $body = sprintf(
+            "Olá, %s\n\nRecebemos uma solicitação para redefinir sua senha na Unio.\n\nAcesse o link abaixo (válido por %d hora):\n%s\n\nSe você não solicitou, ignore este e-mail.",
             $user->getNome(),
             self::TOKEN_TTL_HOURS,
             $resetUrl
         );
+
+        return $this->emailComposer->appendPlainFooter($body);
     }
 }

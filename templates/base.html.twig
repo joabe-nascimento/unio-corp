@@ -162,6 +162,7 @@
                 <span class="main-footer__brand">{{ _pnome }}</span><span class="main-footer__dot" aria-hidden="true">·</span><span class="main-footer__copy">&copy; {{ "now"|date("Y") }}</span><span class="main-footer__dot" aria-hidden="true">·</span><span class="main-footer__tagline">{{ platform_config.rodape_texto|default(platform_config.plataforma_tagline|default('Plataforma de Gestão de Pessoas')) }}</span>
             </p>
             {% include 'components/platform_support.html.twig' with { extra_class: ' platform-support--footer' } %}
+            {% include 'components/platform_legal.html.twig' with { extra_class: ' platform-legal--footer' } %}
         </footer>
         </div>
     </div>
@@ -182,6 +183,9 @@
 {% if app.user %}
 {% include 'components/shell_tour.html.twig' %}
 {% endif %}
+
+{% include 'components/cookie_consent_banner.html.twig' %}
+<script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
 
 {% include 'components/vendor_scripts_core.html.twig' %}
 <script>
@@ -761,5 +765,8 @@ window.addEventListener('load', function () {
     updateSendState();
 })();
 </script>
+{% include 'components/cookie_consent_banner.html.twig' %}
+<link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=1">
+<script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
 </body>
 </html>
