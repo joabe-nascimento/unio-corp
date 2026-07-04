@@ -49,8 +49,15 @@ final class PlatformAuditService
             $entry->setRota($request->attributes->get('_route'));
         }
 
-        $this->em->persist($entry);
-        $this->em->flush();
+        try {
+            $this->em->persist($entry);
+            $this->em->flush();
+        } catch (\Throwable) {
+            // Auditoria não deve derrubar login, deploy ou fluxos críticos.
+            if ($this->em->isOpen()) {
+                $this->em->clear(PlatformAuditLog::class);
+            }
+        }
 
         return $entry;
     }

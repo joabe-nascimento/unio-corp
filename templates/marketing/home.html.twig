@@ -17,134 +17,117 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=16">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
 </head>
-<body class="marketing-home">
+<body class="marketing-home mkt-v2">
 
-<header class="mkt-header">
-    <div class="mkt-header-inner">
-        <a href="{{ path('app_home') }}" class="mkt-brand" title="{{ _pnome }}">
+<header class="mkt-header mkt-header--v2">
+    <div class="mkt-header-inner mkt-header-inner--v2">
+        <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ _pnome }}">
             {% include 'components/platform_logo.html.twig' with {
                 variant: 'full',
-                class: 'mkt-logo' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
+                class: 'mkt-logo mkt-logo--v2' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
             } only %}
         </a>
-        <nav class="mkt-nav" aria-label="Navegação principal">
+        <nav class="mkt-nav mkt-nav--v2" aria-label="Navegação principal">
             <a href="#recursos">Recursos</a>
-            <a href="#empresarial">Empresarial</a>
             <a href="#nucleos">Núcleos</a>
             <a href="#modulos">Módulos</a>
             <a href="#vitoria">Vitória</a>
             <a href="#comparacao">Comparar</a>
             <a href="#faq">FAQ</a>
-            <a href="#comecar">Começar</a>
         </nav>
-        <div class="mkt-header-actions">
-            <button type="button" class="mkt-theme-btn" id="guestThemeToggle" title="Alternar tema" aria-label="Alternar tema">
+        <div class="mkt-header-actions mkt-header-actions--v2">
+            <button type="button" class="mkt-theme-btn mkt-theme-btn--v2" id="guestThemeToggle" title="Alternar tema" aria-label="Alternar tema">
                 <i class="fas fa-sun" id="guestThemeIcon" aria-hidden="true"></i>
             </button>
-            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--ghost">Entrar</a>
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--ghost-v2">Entrar</a>
             {% if platform_config.registro_publico ?? true %}
-            <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--primary">Criar conta</a>
+            <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--glow">Começar grátis</a>
             {% else %}
-            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--primary">Acessar plataforma</a>
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
             {% endif %}
         </div>
     </div>
 </header>
 
 <main>
-    {# ── Hero ── #}
-    <section class="mkt-hero" aria-labelledby="mkt-hero-title">
-        <div class="mkt-hero-bg" aria-hidden="true">
-            <img class="mkt-hero-deco mkt-hero-deco--mesh" src="{{ asset('images/auth/mesh-network.svg') }}" alt="">
-            <img class="mkt-hero-deco mkt-hero-deco--orbit" src="{{ asset('images/auth/deco-orbit.svg') }}" alt="">
-            <img class="mkt-hero-deco mkt-hero-deco--chip" src="{{ asset('images/auth/deco-chip.svg') }}" alt="">
-            <img class="mkt-hero-deco mkt-hero-deco--nodes" src="{{ asset('images/auth/deco-nodes-cluster.svg') }}" alt="">
+    {# ── Hero v2 ── #}
+    <section class="mkt-hero mkt-hero--v2" aria-labelledby="mkt-hero-title">
+        <div class="mkt-hero-v2-bg" aria-hidden="true">
+            <div class="mkt-hero-v2-grid"></div>
+            <div class="mkt-hero-v2-orb mkt-hero-v2-orb--cyan"></div>
+            <div class="mkt-hero-v2-orb mkt-hero-v2-orb--indigo"></div>
         </div>
-        <div class="mkt-hero-inner">
-            <div class="mkt-hero-copy">
-                <p class="mkt-hero-eyebrow">
-                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
-                    Plataforma de gestão multi-empresa · 30+ núcleos
+        <div class="mkt-hero-inner mkt-hero-inner--v2">
+            <div class="mkt-hero-copy mkt-hero-copy--v2">
+                <p class="mkt-hero-eyebrow mkt-hero-eyebrow--v2">
+                    <span class="mkt-hero-eyebrow-dot"></span>
+                    Plataforma multi-empresa · 30+ núcleos
                 </p>
-                <h1 class="mkt-hero-title" id="mkt-hero-title">
-                    RH, TI e operações conectados em um só lugar
+                <h1 class="mkt-hero-title mkt-hero-title--v2" id="mkt-hero-title">
+                    Gestão de pessoas e operações,
+                    <span class="mkt-gradient-text">unificadas</span>
                 </h1>
-                <p class="mkt-hero-lead">
-                    {{ _pnome }} unifica RH, Hub TI, Recrutamento, Bate-papo e Integrações em um único ambiente
-                    multi-empresa — com permissões granulares, white-label e a copiloto inteligente Vitória.
+                <p class="mkt-hero-lead mkt-hero-lead--v2">
+                    {{ _pnome }} conecta RH, Hub TI, Recrutamento e Integrações em workspaces isolados —
+                    com permissões granulares, white-label e a copiloto Vitória.
                 </p>
-                <div class="mkt-hero-cta">
-                    <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--white">
-                        <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                <div class="mkt-hero-cta mkt-hero-cta--v2">
+                    <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">
                         Entrar na plataforma
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
                     </a>
                     {% if platform_config.registro_publico ?? true %}
-                    <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--outline-light">
-                        Criar conta gratuita
-                    </a>
+                    <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--surface mkt-btn--lg">Criar conta</a>
                     {% endif %}
                 </div>
-                <div class="mkt-hero-stats">
-                    <div class="mkt-hero-stat">
-                        <strong>30+</strong>
-                        <span>Núcleos disponíveis</span>
-                    </div>
-                    <div class="mkt-hero-stat">
-                        <strong>85+</strong>
-                        <span>Permissões granulares</span>
-                    </div>
-                    <div class="mkt-hero-stat">
-                        <strong>Multi-empresa</strong>
-                        <span>Workspaces isolados</span>
-                    </div>
-                    <div class="mkt-hero-stat">
-                        <strong>Vitória IA</strong>
-                        <span>Copiloto contextual</span>
-                    </div>
+                <div class="mkt-hero-chips">
+                    <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-building" aria-hidden="true"></i> Multi-empresa</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Vitória IA</span>
                 </div>
             </div>
-            <div class="mkt-hero-visual" aria-hidden="true">
-                <div class="mkt-hero-card">
-                    <div class="mkt-hero-card-head">
-                        <span class="mkt-hero-card-dot"></span>
-                        <span class="mkt-hero-card-label">Painel {{ _pnome }} — visão geral</span>
+            <div class="mkt-hero-visual mkt-hero-visual--v2" aria-hidden="true">
+                <div class="mkt-preview">
+                    <div class="mkt-preview-chrome">
+                        <span class="mkt-preview-dot mkt-preview-dot--r"></span>
+                        <span class="mkt-preview-dot mkt-preview-dot--y"></span>
+                        <span class="mkt-preview-dot mkt-preview-dot--g"></span>
+                        <span class="mkt-preview-url">uniowork.com.br — dashboard</span>
                     </div>
-                    <div class="mkt-hero-card-rows">
-                        <div class="mkt-hero-card-row">
-                            <span class="mkt-hero-card-icon"><i class="fas fa-id-card"></i></span>
-                            <span class="mkt-hero-card-text">
-                                <strong>RH operacional completo</strong>
-                                <span>Admissão, férias, folha e offboarding</span>
-                            </span>
+                    <div class="mkt-preview-layout">
+                        <div class="mkt-preview-sidebar">
+                            <span class="mkt-preview-nav-item mkt-preview-nav-item--active"><i class="fas fa-grip"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-id-card"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-headset"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-briefcase"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-plug"></i></span>
                         </div>
-                        <div class="mkt-hero-card-row">
-                            <span class="mkt-hero-card-icon"><i class="fas fa-headset"></i></span>
-                            <span class="mkt-hero-card-text">
-                                <strong>Hub TI — Service desk</strong>
-                                <span>Chamados, SLA, P1 e infraestrutura</span>
-                            </span>
-                        </div>
-                        <div class="mkt-hero-card-row">
-                            <span class="mkt-hero-card-icon"><i class="fas fa-briefcase"></i></span>
-                            <span class="mkt-hero-card-text">
-                                <strong>Recrutamento</strong>
-                                <span>Vagas, banco de talentos e pipeline</span>
-                            </span>
-                        </div>
-                        <div class="mkt-hero-card-row">
-                            <span class="mkt-hero-card-icon"><i class="fas fa-building"></i></span>
-                            <span class="mkt-hero-card-text">
-                                <strong>Multi-empresa nativo</strong>
-                                <span>Troca de workspace em um clique</span>
-                            </span>
-                        </div>
-                        <div class="mkt-hero-card-row">
-                            <span class="mkt-hero-card-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
-                            <span class="mkt-hero-card-text">
-                                <strong>Vitória — assistente IA</strong>
-                                <span>Copiloto contextual integrado</span>
-                            </span>
+                        <div class="mkt-preview-main">
+                            <div class="mkt-preview-kpis">
+                                <div class="mkt-preview-kpi"><strong>248</strong><span>Colaboradores</span></div>
+                                <div class="mkt-preview-kpi"><strong>12</strong><span>Chamados abertos</span></div>
+                                <div class="mkt-preview-kpi mkt-preview-kpi--accent"><strong>98%</strong><span>SLA TI</span></div>
+                            </div>
+                            <div class="mkt-preview-modules">
+                                <div class="mkt-preview-module">
+                                    <i class="fas fa-id-card" aria-hidden="true"></i>
+                                    <div><strong>RH operacional</strong><span>Admissão, férias, folha</span></div>
+                                </div>
+                                <div class="mkt-preview-module">
+                                    <i class="fas fa-headset" aria-hidden="true"></i>
+                                    <div><strong>Hub TI</strong><span>Chamados, SLA, P1</span></div>
+                                </div>
+                                <div class="mkt-preview-module">
+                                    <i class="fas fa-briefcase" aria-hidden="true"></i>
+                                    <div><strong>Recrutamento</strong><span>Vagas e pipeline</span></div>
+                                </div>
+                                <div class="mkt-preview-module mkt-preview-module--highlight">
+                                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                                    <div><strong>Vitória</strong><span>Copiloto contextual</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1335,7 +1318,7 @@
 </script>
 
 {% include 'components/cookie_consent_banner.html.twig' %}
-<link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=3">
 <script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
 </body>
 </html>
