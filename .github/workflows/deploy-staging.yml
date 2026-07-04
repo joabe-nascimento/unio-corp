@@ -1,0 +1,40 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches:
+      - new_staging
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate-reusable.yml
+    with:
+      git_branch: new_staging
+
+  deploy:
+    needs: validate
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      github_environment: staging
+      deploy_path_default: /home2/joabef36/unio-staging
+      deploy_public_html_default: /home2/joabef36/staging.uniowork.com.br
+      archive_remote_name: deploy-staging.tar.gz
+      skip_unio_platform_steps: false
+      report_artifact_prefix: deploy-report-staging
+      failure_summary_title: Falha no deploy Staging
+    secrets: inherit
+
+  smoke_test:
+    needs: deploy
+    uses: ./.github/workflows/smoke-test-reusable.yml
+    with:
+      urls: |
+        https://staging.uniowork.com.br/
+        https://staging.uniowork.com.br/login
+        https://staging.uniowork.com.br/termos
+        https://staging.uniowork.com.br/privacidade

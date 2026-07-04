@@ -31,11 +31,12 @@ Homolog por produto (piloto RH): [OPERACAO_HOMOLOG_PRODUTO.md](OPERACAO_HOMOLOG_
 | **`production`** | Sim (automático) | Sim | Código no ar — `uniowork.com.br` |
 | **`product/rh`** | Sim → `rh.uniowork.com.br` | Sim | Homolog isolada do módulo RH |
 | **`main`** | Não | Sim | Tronco / referência estável |
-| **`new_staging` / `new_staging2`** | Não* | Sim | Homologação / QA |
+| **`new_staging`** | Sim → `staging.uniowork.com.br` | Sim | Homologação principal (Unio completa) |
+| **`new_staging2`** | Não* | Sim | Segundo staging (QA paralelo — deploy futuro) |
 | **`product/*`** (exceto `rh`) | Não | **Não** | Espelho por módulo (organização) |
 | **`feature/*`** | Não | **Não** | Espelho por feature (organização) |
 
-\* Deploy automático: `production` (Unio) e `product/rh` (piloto homolog RH).
+\* Deploy automático: `production`, `product/rh` (homolog RH), `new_staging` (homolog Unio).
 
 **HEAD atual de referência:** `production` @ `3f2a3b1`
 
