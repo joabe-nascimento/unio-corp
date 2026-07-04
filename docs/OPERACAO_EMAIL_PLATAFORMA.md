@@ -83,9 +83,9 @@ A Unio usa **três papéis distintos** de e-mail. Não misture senhas nem propó
 
 ## 3. Credenciais atuais
 
-> ⚠️ **Segurança:** este documento descreve senhas definidas em jul/2026.  
-> **Não commite** `.env.local`, `var/secrets/` nem senhas em código.  
-> Após uso, prefira guardar no gerenciador de senhas e **rotacionar** periodicamente.
+> ⚠️ **Segurança:** este documento **não contém senhas reais** — apenas referências a secrets e variáveis de ambiente.  
+> **Não commite** `.env.local`, `var/secrets/` nem credenciais em código ou docs.  
+> Valores sensíveis: gerenciador de senhas, GitHub Secrets ou `~/unio/.env.local` no servidor.
 
 ### Plataforma Unio (login web)
 
@@ -294,14 +294,14 @@ Credenciais salvas em: `var/secrets/mailbox-credentials.json`
   "updated_at": "2026-07-03T...",
   "joabe": {
     "email": "joabe@uniowork.com.br",
-    "password": "..."
+    "password": "<redacted>"
   },
   "unio": {
     "email": "unio@uniowork.com.br",
-    "password": "..."
+    "password": "<redacted>"
   },
   "smtp": {
-    "host": "mail.uniowork.com.br",
+    "host": "smtp.titan.email",
     "port": 587,
     "encryption": "tls"
   }

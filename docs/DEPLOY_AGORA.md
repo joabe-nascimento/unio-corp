@@ -68,13 +68,13 @@ Gerenciador de arquivos → **+ Arquivo** → `.env.local` → colar:
 ```dotenv
 APP_ENV=prod
 APP_DEBUG=0
-APP_SECRET=14cda3ddff18cfc102c2d7f3702a4b6c3fb9b4ab0ff2c6b4665e2bda4bdef38f
+APP_SECRET=altere-gerar-string-aleatoria-64-chars
 
 DEFAULT_URI=https://uniowork.com.br
 
-DATABASE_URL="mysql://joabef36_unio:j61%3E7tH2D%2AaJ%40@localhost:3306/joabef36_unio?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
+DATABASE_URL="mysql://USUARIO:SENHA@localhost:3306/NOME_DO_BANCO?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
 
-MAILER_DSN=smtp://noreply%40uniowork.com.br:SENHA_SMTP@mail.uniowork.com.br:587
+MAILER_DSN=smtp://noreply%40uniowork.com.br:SENHA_SMTP@smtp.titan.email:587
 MAILER_FROM_ADDRESS=noreply@uniowork.com.br
 
 MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0

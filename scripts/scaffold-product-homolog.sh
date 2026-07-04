@@ -137,8 +137,7 @@ REMOTE
      APP_SECRET='${APP_SECRET}' DATABASE_URL='${DATABASE_URL}' \
      bash /tmp/setup-product-env-server.sh && rm -f /tmp/setup-product-env-server.sh"
 
-  echo "[+] Servidor preparado. Guarde DATABASE_URL (nao commitar):"
-  echo "    ${DATABASE_URL}"
+  echo "[+] Servidor preparado. Credenciais gravadas em ${DEPLOY_PATH}/.env.local (nao commitar)."
 fi
 
 # 5. GitHub environment (optional)

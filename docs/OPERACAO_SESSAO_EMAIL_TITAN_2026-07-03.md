@@ -92,7 +92,7 @@ MAILER_DSN="smtp://noreply%40uniowork.com.br:SENHA_URL_ENCODED@smtp.titan.email:
 | Regra | Detalhe |
 |-------|---------|
 | Host SMTP | `smtp.titan.email:587` (não usar `mail.uniowork.com.br` para contas Titan) |
-| Senha com `#` | Codificar como `%23` **uma vez** dentro das aspas (`Unio2026%23`, não `%%23`) |
+| Senha com `#` | Codificar como `%23` **uma vez** dentro das aspas (ex.: `MinhaSenha%23`, não `%%23`) |
 | `%40` | `@` do e-mail na URL do DSN |
 
 Backup criado no servidor antes de edições: `.env.local.bak-mailer-*`
