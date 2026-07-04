@@ -163,6 +163,19 @@ else
   echo "SKIP: steps Unio (e-mail / PLATFORM_OWNER / mailboxes) — ambiente produto"
 fi
 
+DEFAULT_URI="$(grep -E '^DEFAULT_URI=' .env.local 2>/dev/null | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+VHOST="${DEFAULT_URI#https://}"
+VHOST="${VHOST#http://}"
+VHOST="${VHOST%%/*}"
+if command -v uapi >/dev/null 2>&1 && [[ -n "$VHOST" ]]; then
+  CI_REPORT_STEP="PHP vhost (cPanel)"
+  ci_report_step "$CI_REPORT_STEP"
+  uapi --output=json LangPHP php_set_vhost_versions version=ea-php82 vhost="${VHOST}" 2>/dev/null \
+    || uapi --output=json LangPHP php_set_vhost_versions version=ea-php81 vhost="${VHOST}" 2>/dev/null \
+    || true
+  uapi --output=json SSL start_autossl_check 2>/dev/null || true
+fi
+
 CI_REPORT_STEP="Registrar revisão de deploy"
 ci_report_step "$CI_REPORT_STEP"
 mkdir -p var/deploy
