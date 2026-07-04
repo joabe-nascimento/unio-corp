@@ -17,11 +17,47 @@
 .ti-hub--war_room .ti-war-room * { box-sizing: border-box; }
 
 .ti-hub--war_room .ti-war-room.wr-root {
-    display: flex; flex-direction: column; position: relative;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-height: 0;
     background:
         radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,59,59,.08), transparent),
         radial-gradient(ellipse 60% 40% at 100% 100%, rgba(56,189,248,.05), transparent),
         var(--wr-bg);
+}
+
+.ti-hub--war_room .ti-war-room .wr-command-head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 0 16px;
+    flex-shrink: 0;
+}
+
+.ti-hub--war_room .ti-war-room .wr-command-head .page-banner {
+    margin-bottom: 0;
+    background: linear-gradient(135deg, rgba(56,189,248,.12), rgba(167,139,250,.08));
+    border-color: rgba(56,189,248,.22);
+    color: var(--wr-text);
+}
+
+.ti-hub--war_room .ti-war-room .wr-command-head .page-banner-title {
+    color: var(--wr-text);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ti-hub--war_room .ti-war-room .wr-command-head .page-banner-sub {
+    color: var(--wr-muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.ti-hub--war_room .ti-war-room .wr-command-head .page-banner-icon {
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.1);
+    color: var(--wr-info);
 }
 .wr-root[data-severity="critical"] { animation: wr-pulse-border 3s ease-in-out infinite; }
 .wr-root[data-severity="elevated"] { --wr-glow: rgba(245,158,11,.25); }
@@ -265,7 +301,7 @@
 .ti-hub--war_room .ti-war-room {
     color: var(--wr-text);
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
 }
 .ti-hub--war_room .ti-war-room .unio-card {
     background: var(--wr-panel);
@@ -284,18 +320,42 @@
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
     align-items: start;
+    flex: none;
+    min-height: auto;
+    grid-template-rows: none;
 }
 .ti-hub--war_room .ti-war-room .wr-col {
     border-right: none;
     padding: 0;
     overflow: visible;
-    min-height: 0;
+    min-height: auto;
 }
 .ti-hub--war_room .ti-war-room .wr-brief.wr-brief-bar {
     display: flex;
     gap: 16px;
     align-items: flex-start;
-    background: linear-gradient(90deg, rgba(167,139,250,.08), transparent 60%);
+    background: linear-gradient(90deg, rgba(167,139,250,.12), rgba(13,21,36,.4) 70%);
+    border-color: var(--wr-border);
+    margin-bottom: 0;
+}
+.ti-hub--war_room .page-lead-kpis--war-room {
+    padding-bottom: 8px;
+}
+.ti-hub--war_room .page-lead-kpis--war-room .stats-row > [class*="col"] {
+    margin-bottom: 0;
+}
+body.layout-inset-shell .ti-hub--war_room .page-body-inner--hub-tabs.page-body-scroll {
+    flex: none;
+    display: block;
+    min-height: auto;
+    overflow: visible;
+}
+body.layout-inset-shell .ti-hub--war_room .page-body-inner--hub-tabs.page-body-scroll > .hub-tab-panel--active,
+body.layout-inset-shell .ti-hub--war_room .page-body-inner--hub-tabs.page-body-scroll > .hub-tab-panel:not([hidden]) {
+    flex: none;
+    display: block;
+    min-height: auto;
+    overflow: visible;
 }
 .ti-hub--war_room .ti-war-room-toolbar .wr-clock {
     font-family: 'Courier New', monospace;

@@ -4,6 +4,7 @@
 {% set hub_page_title = 'War Room' %}
 {% set hub_page_subtitle = 'Incident Command Center · P1' %}
 {% set hub_search_hidden = true %}
+{% set hub_page_body_mode = 'scroll' %}
 
 {% block hub_toolbar_actions %}
 <div class="d-flex flex-wrap align-items-center gap-2 ti-war-room-toolbar">
@@ -32,13 +33,14 @@
 {% endblock %}
 
 {% block hub_kpis %}
+<div class="page-lead-kpis page-lead-kpis--war-room">
 {% include 'components/kpi_row.html.twig' with { items: [
     { value: metrics.open_total, label: 'Abertos', icon: 'fa-inbox' },
     { value: metrics.p2_active, label: 'P2', icon: 'fa-exclamation' },
     { value: metrics.systems_up ~ '/' ~ metrics.systems_total, label: 'Sistemas OK', icon: 'fa-server' },
     { value: metrics.sla_compliance ~ '%', label: 'SLA 7d', icon: 'fa-shield-check' },
-    { value: metrics.mttr_hours ~ 'h', label: 'MTTR', icon: 'fa-clock' },
-], mb: 'mb-0' } %}
+], mb: 'mb-0', extra_class: 'stats-row--4' } %}
+</div>
 {% endblock %}
 
 {% block ti_section_content %}
@@ -48,11 +50,15 @@
      data-severity="{{ severity_level }}">
     <div class="wr-scanline" aria-hidden="true"></div>
 
-    {% include 'components/page_banner.html.twig' with {
-        icon: 'fa-skull-crossbones',
-        title: 'Sala de crise P1',
-        subtitle: 'Coordenação de incidentes em tempo real — chamados críticos, NOC, blast radius, briefing ' ~ ai_assistant_name ~ ', runbooks e comunicação com stakeholders.'
-    } %}
+    <div class="wr-command-head">
+        {% include 'components/page_banner.html.twig' with {
+            icon: 'fa-skull-crossbones',
+            title: 'Sala de crise P1',
+            subtitle: 'Coordenação de incidentes em tempo real — chamados críticos, NOC, blast radius, briefing ' ~ ai_assistant_name ~ ', runbooks e comunicação com stakeholders.'
+        } %}
+
+        {% include 'components/ti/war_room_brief.html.twig' %}
+    </div>
 
     {% include 'components/ti/war_room_board.html.twig' %}
 </div>
@@ -60,7 +66,7 @@
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/ti-war-room.css') }}?v=3">
+<link rel="stylesheet" href="{{ asset('css/ti-war-room.css') }}?v=4">
 {% endblock %}
 
 {% block javascripts %}
