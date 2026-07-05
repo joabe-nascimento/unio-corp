@@ -1,5 +1,5 @@
 # Deploy reutilizavel — HostGator via SSH.
-# Secrets SSH no repositorio (Settings -> Secrets). Variaveis de path no GitHub Environment.
+# Secrets: DEPLOY_SSH_KEY, DEPLOY_SSH_USER, DEPLOY_SSH_PORT (host canonico em config/deploy-hostgator.defaults.env).
 
 name: Deploy (reusable)
 
@@ -33,7 +33,7 @@ on:
         default: Falha no deploy
     secrets:
       DEPLOY_SSH_HOST:
-        required: true
+        required: false
       DEPLOY_SSH_USER:
         required: true
       DEPLOY_SSH_KEY:
@@ -54,12 +54,6 @@ jobs:
     environment: ${{ inputs.github_environment }}
 
     env:
-      DEPLOY_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
-      DEPLOY_CANONICAL_HOST: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
-      DEPLOY_USER: ${{ secrets.DEPLOY_SSH_USER }}
-      DEPLOY_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
-      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
-      DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML }}
       ARCHIVE_REMOTE: ${{ inputs.archive_remote_name }}
       DEPLOY_SSH_ALIAS: hg-deploy
 
@@ -67,12 +61,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
-        run: |
-          chmod +x scripts/ci-ssh-setup.sh scripts/ci-retry.sh scripts/ci-remote-extract.sh
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
-          bash scripts/ci-ssh-setup.sh
+      - name: Setup SSH HostGator
+        uses: ./.github/actions/hostgator-ssh
+        with:
+          ssh_key: ${{ secrets.DEPLOY_SSH_KEY }}
+          ssh_host: ${{ secrets.DEPLOY_SSH_HOST }}
+          ssh_user: ${{ secrets.DEPLOY_SSH_USER }}
+          ssh_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -121,18 +117,18 @@ jobs:
       - name: Extract and post-deploy on server
         timeout-minutes: 12
         env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || inputs.deploy_path_default }}
+          DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML || inputs.deploy_public_html_default }}
           MAILBOX_JOABE_PASSWORD: ${{ secrets.MAILBOX_JOABE_PASSWORD }}
           MAILBOX_UNIO_PASSWORD: ${{ secrets.MAILBOX_UNIO_PASSWORD }}
           PLATFORM_OWNER_PASSWORD: ${{ secrets.PLATFORM_OWNER_PASSWORD }}
         run: |
-          DEPLOY_PATH="${DEPLOY_PATH:-${{ inputs.deploy_path_default }}}"
-          PUBLIC_HTML="${DEPLOY_PUBLIC_HTML:-${{ inputs.deploy_public_html_default }}}"
           ARCHIVE="${ARCHIVE_REMOTE}"
 
           ENV_FILE="${RUNNER_TEMP}/deploy-remote.env"
           {
             printf 'DEPLOY_PATH=%s\n' "$DEPLOY_PATH"
-            printf 'PUBLIC_HTML=%s\n' "$PUBLIC_HTML"
+            printf 'PUBLIC_HTML=%s\n' "$DEPLOY_PUBLIC_HTML"
             printf 'GITHUB_SHA=%s\n' '${{ github.sha }}'
             printf 'GITHUB_REF_NAME=%s\n' '${{ github.ref_name }}'
             if [[ "${{ inputs.skip_unio_platform_steps }}" == "true" ]]; then

@@ -1,0 +1,42 @@
+name: HostGator SSH
+description: Configura chave SSH, IPv4 e alias hg-deploy para deploy/setup no HostGator.
+
+inputs:
+  ssh_key:
+    description: Chave privada OpenSSH (DEPLOY_SSH_KEY)
+    required: true
+  ssh_host:
+    description: Host do secret (legado; nao usar se for dominio publico)
+    required: false
+    default: ''
+  ssh_user:
+    description: Usuario SSH
+    required: true
+  ssh_port:
+    description: Porta SSH
+    required: true
+    default: '2222'
+  canonical_host:
+    description: Hostname canonico do servidor (sobrescreve defaults do repo)
+    required: false
+    default: ''
+  preflight:
+    description: Testar conexao SSH antes de continuar (1/0)
+    required: false
+    default: '1'
+
+runs:
+  using: composite
+  steps:
+    - name: Configurar SSH HostGator
+      shell: bash
+      run: |
+        chmod +x scripts/ci-ssh-setup.sh scripts/ci-retry.sh scripts/ci-remote-extract.sh
+        mkdir -p ~/.ssh
+        printf '%s\n' "${{ inputs.ssh_key }}" | tr -d '\r' > ~/.ssh/deploy_key
+        export DEPLOY_HOST="${{ inputs.ssh_host }}"
+        export DEPLOY_CANONICAL_HOST="${{ inputs.canonical_host }}"
+        export DEPLOY_USER="${{ inputs.ssh_user }}"
+        export DEPLOY_PORT="${{ inputs.ssh_port }}"
+        export DEPLOY_SSH_PREFLIGHT="${{ inputs.preflight }}"
+        bash scripts/ci-ssh-setup.sh

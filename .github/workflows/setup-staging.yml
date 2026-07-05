@@ -1,7 +1,6 @@
 name: Setup Staging (server)
 
 # Setup inicial ou reparo de pastas/index.php/.env.local no servidor de homologacao.
-# Pre-requisito: subdominio staging.uniowork.com.br apontando para ~/staging.uniowork.com.br
 on:
   workflow_dispatch:
     inputs:
@@ -14,53 +13,45 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: staging
+
+    env:
+      DEPLOY_SSH_ALIAS: hg-deploy
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "${{ secrets.DEPLOY_SSH_PORT || '2222' }}" "${{ secrets.DEPLOY_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
-
-      - name: Upload setup script
-        run: |
-          scp -i ~/.ssh/deploy_key \
-              -P "${{ secrets.DEPLOY_SSH_PORT || '2222' }}" \
-              -o StrictHostKeyChecking=accept-new \
-              -o BatchMode=yes \
-              scripts/setup-product-env-server.sh \
-              "${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }}:/tmp/setup-staging-env-server.sh"
-
-      - name: Run server setup
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Setup SSH HostGator
+        uses: ./.github/actions/hostgator-ssh
         with:
-          host: ${{ secrets.DEPLOY_SSH_HOST }}
-          username: ${{ secrets.DEPLOY_SSH_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: ${{ secrets.DEPLOY_SSH_PORT }}
-          script_stop: true
-          script: |
-            DEPLOY_PATH="${{ vars.DEPLOY_PATH }}"
-            DEPLOY_PATH="${DEPLOY_PATH:-/home2/joabef36/unio-staging}"
-            PUBLIC_HTML="${{ vars.DEPLOY_PUBLIC_HTML }}"
-            PUBLIC_HTML="${PUBLIC_HTML:-/home2/joabef36/staging.uniowork.com.br}"
-            DEFAULT_URI="${{ vars.DEFAULT_URI }}"
-            DEFAULT_URI="${DEFAULT_URI:-https://staging.uniowork.com.br}"
+          ssh_key: ${{ secrets.DEPLOY_SSH_KEY }}
+          ssh_host: ${{ secrets.DEPLOY_SSH_HOST }}
+          ssh_user: ${{ secrets.DEPLOY_SSH_USER }}
+          ssh_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
 
-            export DEPLOY_PATH PUBLIC_HTML DEFAULT_URI
+      - name: Upload and run server setup
+        env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home2/joabef36/unio-staging' }}
+          DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML || '/home2/joabef36/staging.uniowork.com.br' }}
+          DEFAULT_URI: ${{ vars.DEFAULT_URI || 'https://staging.uniowork.com.br' }}
+        run: |
+          bash scripts/ci-retry.sh scp scripts/setup-product-env-server.sh \
+            "${DEPLOY_SSH_ALIAS}:/tmp/setup-staging-env-server.sh"
+
+          REMOTE_ENV="${RUNNER_TEMP}/setup-remote.env"
+          {
+            printf 'DEPLOY_PATH=%s\n' "$DEPLOY_PATH"
+            printf 'PUBLIC_HTML=%s\n' "$DEPLOY_PUBLIC_HTML"
+            printf 'DEFAULT_URI=%s\n' "$DEFAULT_URI"
             if [[ "${{ inputs.create_env }}" == "true" ]]; then
-              export APP_SECRET="${{ secrets.APP_SECRET_STAGING }}"
-              export DATABASE_URL="${{ secrets.DATABASE_URL_STAGING }}"
+              printf 'APP_SECRET=%s\n' "${{ secrets.APP_SECRET_STAGING }}"
+              printf 'DATABASE_URL=%s\n' "${{ secrets.DATABASE_URL_STAGING }}"
             fi
+          } > "$REMOTE_ENV"
 
-            bash /tmp/setup-staging-env-server.sh
-            rm -f /tmp/setup-staging-env-server.sh
-
-            echo "=== Verificacao ==="
-            ls -la "$DEPLOY_PATH/.env.local" 2>/dev/null || echo "(sem .env.local ainda)"
-            ls -la "$PUBLIC_HTML/index.php" 2>/dev/null || echo "(sem index.php)"
+          bash scripts/ci-retry.sh scp "$REMOTE_ENV" "${DEPLOY_SSH_ALIAS}:/tmp/setup-remote.env"
+          bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
+            'set -a; source /tmp/setup-remote.env; set +a; bash /tmp/setup-staging-env-server.sh; rm -f /tmp/setup-remote.env /tmp/setup-staging-env-server.sh; echo "=== Verificacao ==="; ls -la "$DEPLOY_PATH/.env.local" 2>/dev/null || echo "(sem .env.local ainda)"; ls -la "$PUBLIC_HTML/index.php" 2>/dev/null || echo "(sem index.php)"'

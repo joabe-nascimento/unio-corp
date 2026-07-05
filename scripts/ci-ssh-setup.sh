@@ -2,10 +2,19 @@
 # Configura SSH para deploy HostGator a partir do GitHub Actions.
 set -euo pipefail
 
-original_host="${DEPLOY_HOST:?DEPLOY_HOST required}"
-host="${DEPLOY_CANONICAL_HOST:-$original_host}"
-user="${DEPLOY_USER:?DEPLOY_USER required}"
-port="${DEPLOY_PORT:-2222}"
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+defaults_file="${script_dir}/../config/deploy-hostgator.defaults.env"
+if [[ -f "$defaults_file" ]]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$defaults_file"
+  set +a
+fi
+
+original_host="${DEPLOY_HOST:-}"
+canonical_host="${DEPLOY_CANONICAL_HOST:-${DEPLOY_SSH_CANONICAL_HOST:-br1136.hostgator.com.br}}"
+user="${DEPLOY_USER:-${DEPLOY_SSH_DEFAULT_USER:-joabef36}}"
+port="${DEPLOY_PORT:-${DEPLOY_SSH_DEFAULT_PORT:-2222}}"
 key_file="${DEPLOY_KEY_FILE:-$HOME/.ssh/deploy_key}"
 alias_name="${DEPLOY_SSH_ALIAS:-hg-deploy}"
 preflight="${DEPLOY_SSH_PREFLIGHT:-1}"
@@ -15,6 +24,13 @@ is_cloudflare_ip() {
     104.*|172.6[0-9].*|172.67.*|2606:*) return 0 ;;
     *) return 1 ;;
   esac
+}
+
+is_public_site_host() {
+  case "$1" in
+    uniowork.com.br|www.uniowork.com.br) return 0 ;;
+  esac
+  [[ "$1" == *".uniowork.com.br" ]]
 }
 
 resolve_ipv4() {
@@ -42,31 +58,28 @@ ssh-keygen -y -f "$key_file" > /dev/null || {
   exit 1
 }
 
+host="$canonical_host"
+if [[ -n "$original_host" ]]; then
+  original_ip="$(resolve_ipv4 "$original_host")"
+  if is_public_site_host "$original_host" || { [[ -n "$original_ip" ]] && is_cloudflare_ip "$original_ip"; }; then
+    echo "AVISO: DEPLOY_SSH_HOST (${original_host}) e dominio publico/CDN — SSH usa ${host}."
+  elif [[ "$original_host" != "$host" ]]; then
+    echo "INFO: DEPLOY_SSH_HOST=${original_host}; conexao SSH via canonico ${host}."
+  fi
+fi
+
 connect_host="$(resolve_ipv4 "$host")"
 if [[ -z "$connect_host" ]]; then
   connect_host="$host"
 fi
 
 if is_cloudflare_ip "$connect_host"; then
-  fallback="${DEPLOY_CANONICAL_HOST:-br1136.hostgator.com.br}"
-  if [[ "$host" != "$fallback" ]]; then
-    echo "AVISO: DEPLOY_SSH_HOST (${original_host} -> ${connect_host}) aponta para CDN/Cloudflare."
-    echo "Usando host SSH canonico: ${fallback}"
-    host="$fallback"
-    connect_host="$(resolve_ipv4 "$host")"
-    if [[ -z "$connect_host" ]]; then
-      connect_host="$host"
-    fi
-  fi
-fi
-
-echo "SSH target: ${original_host} -> ${host} @ ${connect_host}:${port} (IPv4)"
-
-if is_cloudflare_ip "$connect_host"; then
-  echo "ERRO: host SSH ainda resolve para CDN/Cloudflare (${connect_host})." >&2
-  echo "Atualize DEPLOY_SSH_HOST ou defina a variable DEPLOY_SSH_CANONICAL_HOST (ex.: br1136.hostgator.com.br)." >&2
+  echo "ERRO: host SSH canonico (${host} -> ${connect_host}) resolve para CDN/Cloudflare." >&2
+  echo "Atualize config/deploy-hostgator.defaults.env ou a variable DEPLOY_SSH_CANONICAL_HOST." >&2
   exit 1
 fi
+
+echo "SSH target: ${host} @ ${connect_host}:${port} (IPv4)"
 
 touch "$HOME/.ssh/known_hosts"
 chmod 600 "$HOME/.ssh/known_hosts"
@@ -93,5 +106,5 @@ chmod 600 "$HOME/.ssh/config"
 
 if [[ "$preflight" == "1" ]]; then
   echo "Testando conectividade SSH..."
-  bash "$(dirname "$0")/ci-retry.sh" ssh "${alias_name}" "echo deploy-ssh-ok"
+  bash "${script_dir}/ci-retry.sh" ssh "${alias_name}" "echo deploy-ssh-ok"
 fi
