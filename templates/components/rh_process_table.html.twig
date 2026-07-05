@@ -4,7 +4,8 @@
   Props:
     type        (string)  onboarding | offboarding
     processos   (array)
-    empty_icon, empty_title, empty_text, empty_btn_label, empty_btn_href
+    empty_icon, empty_title, empty_text
+    (empty_btn_* omitidos quando section_toolbar já expõe a mesma ação)
 #}
 {% set _is_onboarding = type|default('onboarding') == 'onboarding' %}
 {% set _progress_variant = _is_onboarding ? 'accent' : 'warning' %}
@@ -15,10 +16,7 @@
         {% include 'components/empty_state.html.twig' with {
             icon: empty_icon|default(_is_onboarding ? 'fa-user-plus' : 'fa-user-minus'),
             title: empty_title|default('Nenhum processo'),
-            text: empty_text|default(''),
-            btn_label: empty_btn_label|default(''),
-            btn_href: empty_btn_href|default('#'),
-            btn_opens: empty_btn_opens|default('')
+            text: empty_text|default('')
         } %}
     {% else %}
         <div class="table-responsive">

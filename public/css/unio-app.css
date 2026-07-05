@@ -1985,7 +1985,7 @@
             }
         }
 
-        @media (max-width: 767.98px) {
+        @media (max-width: 991.98px) {
             .section-toolbar-end {
                 flex-basis: 100%;
                 width: 100%;
@@ -1994,7 +1994,7 @@
             }
         }
 
-        /* Toolbar dual — inline sempre visível + FAB/offcanvas extra no mobile */
+        /* Toolbar dual — inline sempre visível + FAB/offcanvas extra no mobile (≤991px) */
         .toolbar-controls-dual {
             display: contents;
         }
@@ -2017,7 +2017,7 @@
             display: none;
         }
 
-        @media (max-width: 767.98px) {
+        @media (max-width: 991.98px) {
             .toolbar-controls-dual:not(.toolbar-controls-dual--empty) {
                 display: flex;
                 flex-direction: column;
@@ -2028,19 +2028,33 @@
             }
             .toolbar-controls-dual .toolbar-inline-controls {
                 display: flex;
-                flex-wrap: wrap;
-                align-items: flex-end;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: stretch;
                 justify-content: flex-start;
                 width: 100%;
                 gap: 10px;
             }
             .toolbar-controls-dual .toolbar-inline-controls .filter-group {
-                flex: 1 1 auto;
-                min-width: calc(50% - 6px);
+                flex: 1 1 100%;
+                width: 100%;
+                min-width: 0;
+                max-width: none;
             }
-            .toolbar-controls-dual .toolbar-inline-controls .filter-group--search {
-                flex: 0 0 auto;
-                min-width: 36px;
+            .toolbar-controls-dual .toolbar-inline-controls .filter-group--search,
+            .toolbar-controls-dual .toolbar-inline-controls .ti-ticket-table-search {
+                flex: 1 1 100%;
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+            }
+            .toolbar-controls-dual .toolbar-inline-controls .filter-select-wrap {
+                display: block;
+                width: 100%;
+                max-width: none;
+            }
+            .toolbar-controls-dual .toolbar-inline-controls .filter-select-wrap .filter-select {
+                width: 100%;
             }
             .toolbar-mobile-fab {
                 display: inline-flex;
@@ -2061,6 +2075,9 @@
                 cursor: pointer;
                 box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 42%, transparent);
                 transition: transform 0.15s ease, box-shadow 0.15s ease;
+            }
+            body.layout-inset-shell:has(.shell-mobile-nav) .toolbar-mobile-fab:not([hidden]) {
+                bottom: calc(16px + var(--shell-mobile-nav-offset, 68px));
             }
             .toolbar-mobile-fab:hover {
                 transform: translateY(-2px);
@@ -5832,6 +5849,16 @@
             color: var(--text-3);
             max-width: 720px;
         }
+        .dashboard-hero-subtitle-line {
+            display: block;
+        }
+        .dashboard-hero-subtitle-line + .dashboard-hero-subtitle-line {
+            margin-top: 3px;
+        }
+        .dashboard-hero-subtitle-line--lead {
+            font-weight: 600;
+            color: var(--text-2);
+        }
         @media (max-width: 575.98px) {
             .dashboard-hero-top {
                 flex-direction: column;
@@ -8857,23 +8884,16 @@
         }
         .unio-chart-section-head {
             display: flex;
-            align-items: center;
-            gap: 14px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px 16px;
             margin-bottom: 18px;
             padding-bottom: 14px;
             border-bottom: 1px solid var(--border);
         }
         .unio-chart-section-icon {
-            width: 42px; height: 42px;
-            border-radius: 10px;
-            background: var(--accent-dim);
-            border: 1px solid var(--accent-line);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            font-size: 17px;
-            flex-shrink: 0;
+            display: none !important;
         }
         .unio-chart-section-title {
             font-size: 15px;
@@ -9147,8 +9167,12 @@
                 padding-right: 0 !important;
             }
 
-            .content.content--no-header:not(:has(.inset-page-shell)) {
+            .content.content--no-header:not(:has(.inset-page-shell)):not(:has(.page-body-inner)) {
                 padding: 16px !important;
+            }
+
+            body.layout-inset-shell .content.content--no-header:has(.page-body-inner) {
+                padding: 12px 0 8px !important;
             }
 
             .content:not(.content--no-header):not(.content--with-toolbar) {
@@ -26709,7 +26733,7 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
 
 @media (max-width: 991.98px) {
     body.layout-inset-shell:has(.shell-mobile-nav) {
-        --shell-mobile-nav-height: 56px;
+        --shell-mobile-nav-height: 68px;
         --shell-mobile-nav-offset: calc(var(--shell-mobile-nav-height) + env(safe-area-inset-bottom, 0px));
     }
 
@@ -26843,11 +26867,6 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         padding-right: 0;
     }
 
-    body.layout-inset-shell .dashboard-page-toolbar {
-        padding-left: 0;
-        padding-right: 0;
-    }
-
     /*
      * Coluna única no mobile — toolbar, KPIs, abas e cards com a mesma largura.
      * Evita desalinhamento entre app-page-chrome (20px) e corpo (+16px do container).
@@ -26919,16 +26938,137 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
      * Aplica em listagens, hubs, dashboard, welcome e demais telas logadas.
      */
     body.layout-inset-shell .content.content--no-header:has(.inset-page-shell) {
-        padding-top: 8px !important;
-        padding-bottom: 4px !important;
+        padding-top: 12px !important;
+        padding-bottom: 8px !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
 
     body.layout-inset-shell .inset-page-shell .inset-page-content,
-    body.layout-inset-shell .dashboard-page-shell .inset-page-content {
+    body.layout-inset-shell .dashboard-page-shell .inset-page-content,
+    body.layout-inset-shell .welcome-page-shell .inset-page-content {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* Títulos do dashboard inset — recuo e respiro vertical (não zerar no bloco .app-inset-panel abaixo) */
+    body.layout-inset-shell .inset-page-content > .dashboard-page-toolbar {
+        padding: 12px var(--page-mobile-gutter) 0;
+        margin-bottom: 14px;
+    }
+
+    body.layout-inset-shell .inset-page-content > .dashboard-kpis-section .dashboard-section-head {
+        padding: 16px var(--page-mobile-gutter) 0;
+        margin-bottom: 14px;
+    }
+
+    body.layout-inset-shell .inset-page-content > .unio-charts-panel > .unio-charts-panel-header,
+    body.layout-inset-shell .inset-page-content .welcome-section-header {
         padding-left: var(--page-mobile-gutter);
         padding-right: var(--page-mobile-gutter);
+    }
+
+    body.layout-inset-shell .inset-page-content .dashboard-section-title {
+        margin-bottom: 4px;
+    }
+
+    /* Cards inset — largura total do painel (composable unio-shell-surface) */
+    body.layout-inset-shell .app-inset-panel .unio-shell-surface,
+    body.layout-inset-shell .inset-page-content > .dashboard-hero,
+    body.layout-inset-shell .inset-page-content > .onboarding-checklist,
+    body.layout-inset-shell .app-inset-panel .unio-chart-section,
+    body.layout-inset-shell .app-inset-panel .welcome-section.unio-card,
+    body.layout-inset-shell .inset-page-content .dashboard-kpi-card,
+    body.layout-inset-shell .app-inset-panel .dashboard-kpi-card {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 0 !important;
+        border-left-width: 0;
+        border-right-width: 0;
+    }
+
+    body.layout-inset-shell .app-inset-panel .unio-chart-section,
+    body.layout-inset-shell .app-inset-panel .welcome-section.unio-card,
+    body.layout-inset-shell .app-inset-panel .unio-shell-surface:not(.dashboard-hero):not(.dashboard-kpi-card):not(.unio-chart-card) {
+        padding: 16px var(--page-mobile-gutter) !important;
+    }
+
+    body.layout-inset-shell .inset-page-content .unio-chart-section {
+        padding: 16px var(--page-mobile-gutter) !important;
+    }
+
+    body.layout-inset-shell .page-body-inner .unio-chart-section {
+        padding: 16px var(--page-mobile-gutter) !important;
+    }
+
+    body.layout-inset-shell .inset-page-content .dashboard-kpis-grid {
+        gap: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    body.layout-inset-shell .inset-page-content .dashboard-kpi-card + .dashboard-kpi-card {
+        border-top-width: 0;
+    }
+
+    body.layout-inset-shell .inset-page-content > .dashboard-kpis-section {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    body.layout-inset-shell .inset-page-content > .dashboard-kpis-section .dashboard-kpis-grid {
+        margin-top: 0;
+    }
+
+    body.layout-inset-shell .inset-page-content > .unio-charts-panel {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    body.layout-inset-shell .inset-page-content > .dashboard-hero {
+        border-top-width: 0;
+        margin-bottom: 1rem !important;
+        padding: 0 !important;
+    }
+
+    body.layout-inset-shell .dashboard-hero-inner--compact {
+        padding: 16px var(--page-mobile-gutter) 18px;
+    }
+
+    body.layout-inset-shell .dashboard-hero-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 14px;
+    }
+
+    body.layout-inset-shell .dashboard-hero-datetime-compact {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+
+    body.layout-inset-shell .dashboard-hero--compact .dashboard-hero-greeting {
+        font-size: 22px;
+        text-wrap: balance;
+        margin-bottom: 10px;
+    }
+
+    body.layout-inset-shell .dashboard-hero-subtitle {
+        max-width: none;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    body.layout-inset-shell .dashboard-hero-subtitle-line + .dashboard-hero-subtitle-line {
+        margin-top: 4px;
+    }
+
+    body.layout-inset-shell .inset-page-content > .onboarding-checklist {
+        border-top-width: 0;
     }
 
     body.layout-inset-shell .page-body-inner {
@@ -26936,7 +27076,7 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         padding-bottom: 16px;
     }
 
-    body.layout-inset-shell .app-inset-panel .unio-card:not(.list-toolbar):not(.empty-state-panel),
+    body.layout-inset-shell .app-inset-panel .unio-card:not(.list-toolbar):not(.empty-state-panel):not(.dashboard-hero):not(.unio-chart-section),
     body.layout-inset-shell .app-inset-panel .page-stub-card,
     body.layout-inset-shell .app-inset-panel .onboarding-checklist,
     body.layout-inset-shell .app-inset-panel .welcome-present-highlights {
@@ -26968,8 +27108,6 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         padding-right: 0 !important;
     }
 
-    body.layout-inset-shell .app-inset-panel .dashboard-section-head,
-    body.layout-inset-shell .app-inset-panel .dashboard-page-toolbar,
     body.layout-inset-shell .app-inset-panel .unio-charts-panel-header,
     body.layout-inset-shell .app-inset-panel .section-toolbar {
         padding-left: 0;
@@ -27031,55 +27169,113 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         margin-left: auto;
     }
 
-    /* Gráficos — cabeçalho empilhado, textos alinhados à coluna */
+    /* Gráficos / seções — cabeçalho empilhado (composable shell_section_head) */
     body.layout-inset-shell .unio-charts-panel-header {
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
     }
 
-    body.layout-inset-shell .unio-chart-section-head {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        grid-template-areas:
-            "icon text"
-            "count count";
+    body.layout-inset-shell .unio-shell-section-head,
+    body.layout-inset-shell .unio-chart-section-head,
+    body.layout-inset-shell .welcome-section-header {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr);
         align-items: start;
-        column-gap: 12px;
-        row-gap: 8px;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
     }
 
-    body.layout-inset-shell .unio-chart-section-icon {
-        grid-area: icon;
-    }
-
+    body.layout-inset-shell .unio-shell-section-head-text,
     body.layout-inset-shell .unio-chart-section-head-text {
-        grid-area: text;
+        width: 100%;
         min-width: 0;
+        max-width: 100%;
+        flex: none;
+        display: block;
     }
 
-    body.layout-inset-shell .unio-chart-section-count {
-        grid-area: count;
-        justify-self: start;
-        white-space: normal;
+    body.layout-inset-shell .unio-shell-section-badge,
+    body.layout-inset-shell .unio-chart-section-badge {
+        margin-bottom: 10px;
     }
 
+    body.layout-inset-shell .unio-shell-section-title,
     body.layout-inset-shell .unio-chart-section-title,
-    body.layout-inset-shell .unio-chart-section-sub,
+    body.layout-inset-shell .welcome-section-title {
+        margin-bottom: 8px;
+    }
+
+    body.layout-inset-shell .dashboard-section-head {
+        margin-bottom: 14px;
+    }
+
+    body.layout-inset-shell .dashboard-section-title {
+        margin-bottom: 6px;
+    }
+
+    body.layout-inset-shell .dashboard-section-sub {
+        text-wrap: wrap;
+        max-width: none;
+        line-height: 1.45;
+    }
+
+    body.layout-inset-shell .unio-shell-section-count,
+    body.layout-inset-shell .unio-chart-section-count,
+    body.layout-inset-shell .welcome-section-count {
+        align-self: flex-start;
+        white-space: normal;
+        margin-top: 2px;
+    }
+
+    /* Textos — quebra natural em toda a plataforma */
+    body.layout-inset-shell .unio-shell-section-title,
+    body.layout-inset-shell .unio-chart-section-title,
     body.layout-inset-shell .unio-chart-card-title,
-    body.layout-inset-shell .unio-chart-card-desc {
-        text-wrap: balance;
+    body.layout-inset-shell .welcome-section-title,
+    body.layout-inset-shell .module-card .section-subtitle,
+    body.layout-inset-shell .section-subtitle {
+        text-wrap: wrap;
+        word-break: normal;
+        overflow-wrap: break-word;
+        hyphens: none;
+        max-width: none;
+    }
+
+    body.layout-inset-shell .unio-shell-section-sub,
+    body.layout-inset-shell .unio-chart-section-sub,
+    body.layout-inset-shell .unio-chart-card-desc,
+    body.layout-inset-shell .welcome-section-sub {
+        text-wrap: wrap;
+        word-break: normal;
+        overflow-wrap: break-word;
+        hyphens: none;
+        max-width: 100%;
+        width: 100%;
+        display: block;
+        box-sizing: border-box;
+        line-height: 1.45;
     }
 
     body.layout-inset-shell .unio-chart-card-head {
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    body.layout-inset-shell .unio-chart-card-head-main {
+        width: 100%;
+        flex: none;
+        min-width: 0;
     }
 
     body.layout-inset-shell .unio-chart-kpi {
         align-self: flex-start;
         text-align: left;
+        width: auto;
+        max-width: 100%;
     }
 
     body.layout-inset-shell .unio-chart-canvas-wrap--hero {
@@ -27087,28 +27283,133 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         height: min(260px, 55vw);
     }
 
+    body.layout-inset-shell .unio-chart-canvas-wrap--pro {
+        min-height: 280px;
+    }
+
+    body.layout-inset-shell .unio-chart-card--pro .unio-chart-canvas-wrap--pro {
+        min-height: 300px;
+        height: auto;
+    }
+
+    body.layout-inset-shell .unio-chart-card-head-main .unio-chart-card-desc {
+        line-height: 1.45;
+    }
+
     body.layout-inset-shell .unio-charts-executive {
         grid-template-columns: 1fr;
     }
 
-    body.layout-inset-shell .dashboard-hero-top {
+    /* module_card — atalhos em cima, botão primário sempre embaixo (hubs operação, pessoas, etc.) */
+    body.layout-inset-shell .module-card,
+    body.layout-inset-shell .unio-shell-module-card {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
     }
 
-    body.layout-inset-shell .dashboard-hero-datetime-compact {
-        width: 100%;
-        margin-left: 0;
+    body.layout-inset-shell .module-card-actions {
+        flex-direction: column;
+        align-items: stretch;
         justify-content: flex-start;
+        gap: 14px;
+        margin-top: auto;
+        padding-top: 12px;
     }
 
-    body.layout-inset-shell .dashboard-hero--compact .dashboard-hero-greeting {
-        font-size: 22px;
-        text-wrap: balance;
+    body.layout-inset-shell .module-card-dock {
+        flex: none;
+        width: 100%;
     }
 
-    body.layout-inset-shell .dashboard-hero-subtitle {
-        text-wrap: balance;
+    body.layout-inset-shell .module-card-actions__primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: stretch;
+        gap: 8px;
+        width: 100%;
+        line-height: 1.25;
+        padding-top: 9px;
+        padding-bottom: 9px;
+        text-align: center;
+    }
+
+    body.layout-inset-shell .module-card-actions__primary i,
+    body.layout-inset-shell .module-card-actions__primary .fas {
+        margin: 0 !important;
+        line-height: 1;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    /* Botões com ícone — alinhamento vertical consistente no mobile */
+    body.layout-inset-shell .btn-unio {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        line-height: 1.25;
+        vertical-align: middle;
+    }
+
+    body.layout-inset-shell .btn-unio i[class*="fa-"] {
+        line-height: 1;
+        flex-shrink: 0;
+    }
+
+    body.layout-inset-shell .btn-unio .mr-1,
+    body.layout-inset-shell .btn-unio .ml-1,
+    body.layout-inset-shell .btn-unio .mr-2,
+    body.layout-inset-shell .btn-unio .ml-2 {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* Páginas base direto — coluna única via page_body_shell */
+    body.layout-inset-shell .page-body-shell .cortex-page,
+    body.layout-inset-shell .page-body-shell .welcome-news-page,
+    body.layout-inset-shell .page-body-shell .dev-components-page {
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    body.layout-inset-shell .page-body-shell .cortex-hero {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    body.layout-inset-shell .page-body-shell .cortex-hero-sub {
+        max-width: none;
+    }
+
+    body.layout-inset-shell .page-body-shell .cortex-pulse-card {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    body.layout-inset-shell .page-body-shell .cortex-stage {
+        grid-template-columns: 1fr;
+    }
+
+    body.layout-inset-shell .page-body-shell .cortex-panel.unio-card {
+        border-radius: 0 !important;
+        border-left-width: 0;
+        border-right-width: 0;
+        padding: 16px var(--page-mobile-gutter) !important;
+    }
+
+    body.layout-inset-shell .page-body-shell .welcome-news-read {
+        border-radius: 0 !important;
+        border-left-width: 0;
+        border-right-width: 0;
+    }
+
+    body.layout-inset-shell .app-inset-panel .unio-shell-charts-panel {
+        padding-left: 0;
+        padding-right: 0;
     }
 }

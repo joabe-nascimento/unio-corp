@@ -1,5 +1,5 @@
 /**
- * Toolbar mobile — FAB + offcanvas para filtros/busca em toda a plataforma.
+ * Toolbar mobile — FAB + offcanvas para filtros/busca em toda a plataforma (≤991px).
  * Controles inline permanecem visíveis; FAB abre painel complementar no mobile.
  */
 (function () {

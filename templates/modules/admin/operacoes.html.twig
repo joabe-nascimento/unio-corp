@@ -154,8 +154,13 @@
 {% endfor %}
 
 {% elseif active_tab == 'activity' %}
-<section class="unio-card mb-3">
-    <form method="get" action="{{ path('app_admin_operacoes') }}" class="px-3 pt-3 pb-2 d-flex flex-wrap align-items-end gap-3">
+<form method="get" action="{{ path('app_admin_operacoes') }}" class="ops-audit-filters-form mb-3">
+{% embed 'components/section_toolbar.html.twig' with {
+    offcanvas_id: 'ops-audit-filters',
+    fab_label: 'Filtros de auditoria',
+    search_in_section: false
+} %}
+    {% block section_toolbar_filters %}
         <input type="hidden" name="tab" value="activity">
         {% include 'components/filter_group.html.twig' with {
             label: 'Categoria',
@@ -209,9 +214,14 @@
             placeholder: 'e-mail, mensagem…',
             min_width: '160px'
         } %}
-        <button type="submit" class="btn-unio btn-sm"><i class="fas fa-filter mr-1"></i> Filtrar</button>
-    </form>
-</section>
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_admin_operacoes', { tab: 'activity' }),
+            has_filters: audit_filters.cat or audit_filters.acao or audit_filters.resultado or audit_filters.q,
+            submit_icon: 'fa-filter'
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
 
 <section class="unio-card mb-3">
     {% include 'components/section_header.html.twig' with {
@@ -352,8 +362,13 @@
 </section>
 
 {% elseif is_log_tab %}
-<section class="unio-card mb-3">
-    <form method="get" action="{{ path('app_admin_operacoes') }}" class="ops-log-filters px-3 pt-3 pb-2 d-flex flex-wrap align-items-end gap-3">
+<form method="get" action="{{ path('app_admin_operacoes') }}" class="ops-log-filters-form mb-3">
+{% embed 'components/section_toolbar.html.twig' with {
+    offcanvas_id: 'ops-log-filters-' ~ active_tab,
+    fab_label: 'Filtros de log',
+    search_in_section: false
+} %}
+    {% block section_toolbar_filters %}
         <input type="hidden" name="tab" value="{{ active_tab }}">
         {% include 'components/filter_group.html.twig' with {
             label: 'Nível',
@@ -369,12 +384,14 @@
                 { value: 'CRITICAL', label: 'CRITICAL' },
             ]
         } %}
-        <button type="submit" class="btn-unio btn-sm"><i class="fas fa-filter mr-1"></i> Filtrar</button>
-        {% if level_filter %}
-        <a href="{{ path('app_admin_operacoes', { tab: active_tab }) }}" class="btn-unio btn-sm btn-unio-ghost">Limpar</a>
-        {% endif %}
-    </form>
-</section>
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_admin_operacoes', { tab: active_tab }),
+            has_filters: level_filter,
+            submit_icon: 'fa-filter'
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
 
 <section class="unio-card">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 pt-3">

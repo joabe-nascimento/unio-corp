@@ -9,7 +9,7 @@
 {% endif %}
 {% set _context_parts = _context_parts|merge([access_badge.label]) %}
 
-<section class="dashboard-hero dashboard-hero--compact unio-card mb-4">
+<section class="dashboard-hero dashboard-hero--compact unio-card unio-shell-hero unio-shell-surface mb-4">
     <div class="dashboard-hero-bg" aria-hidden="true"></div>
     <div class="dashboard-hero-inner dashboard-hero-inner--compact">
         <header class="dashboard-hero-top">
@@ -28,15 +28,20 @@
 
         <div class="dashboard-hero-main">
             <h1 class="dashboard-hero-greeting">{{ greeting }}, {{ app.user.nome|split(' ')|first }}!</h1>
-            <p class="dashboard-hero-subtitle">
+            <div class="dashboard-hero-subtitle">
                 {% if headline.title is defined and headline.subtitle is defined %}
-                    {{ headline.title }} — {{ headline.subtitle }}
+                    <span class="dashboard-hero-subtitle-line dashboard-hero-subtitle-line--lead">{{ headline.title }}</span>
+                    {% for part in headline.subtitle|split(' · ') %}
+                        {% if part|trim %}
+                        <span class="dashboard-hero-subtitle-line">{{ part|trim }}</span>
+                        {% endif %}
+                    {% endfor %}
                 {% elseif headline.title is defined %}
-                    {{ headline.title }}
+                    <span class="dashboard-hero-subtitle-line">{{ headline.title }}</span>
                 {% else %}
-                    Visão geral da sua área de trabalho.
+                    <span class="dashboard-hero-subtitle-line">Visão geral da sua área de trabalho.</span>
                 {% endif %}
-            </p>
+            </div>
         </div>
     </div>
 </section>

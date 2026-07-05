@@ -19,6 +19,39 @@
         return v || fallback;
     }
 
+    function isMobileViewport() {
+        return global.matchMedia('(max-width: 991.98px)').matches;
+    }
+
+    function isNarrowChart(host) {
+        if (!host) return isMobileViewport();
+        var wrap = host.closest('.unio-chart-canvas-wrap') || host.parentElement;
+        var w = wrap ? wrap.clientWidth : 0;
+        return (w > 0 && w < 420) || isMobileViewport();
+    }
+
+    function echartLegend(narrow, text2, opts) {
+        opts = opts || {};
+        if (narrow || opts.forceBottom) {
+            return {
+                type: 'plain',
+                bottom: opts.bottom != null ? opts.bottom : 0,
+                left: 'center',
+                width: opts.width || '94%',
+                orient: 'horizontal',
+                textStyle: { color: text2, fontSize: narrow ? 10 : 11 },
+                itemWidth: 10,
+                itemHeight: 10,
+                itemGap: narrow ? 8 : 12
+            };
+        }
+        return { top: 4, textStyle: { color: text2, fontSize: 11 } };
+    }
+
+    function echartGridBottom(grid, extra) {
+        return Object.assign({}, grid, { bottom: (grid.bottom || 28) + (extra || 0) });
+    }
+
     function hexToRgba(hex, alpha) {
         var h = (hex || '').replace('#', '');
         if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
@@ -125,7 +158,7 @@
         };
     }
 
-    function buildEchartOption(def) {
+    function buildEchartOption(def, ctx) {
         var text1 = cssVar('--text-1', '#E8EDF5');
         var text2 = cssVar('--text-2', '#8A96A3');
         var text3 = cssVar('--text-3', '#8A96A3');
@@ -134,6 +167,7 @@
         var surface = cssVar('--surface-2', '#1a2030');
         var type = def.type || 'sankey';
         var colors = palette((def.datasets || def.series || def.data || []).length || 6);
+        var narrow = ctx && ctx.narrow;
         var option = echartBaseOption();
 
         if (type === 'sankey') {
@@ -171,9 +205,13 @@
                 itemStyle: { borderColor: accent, borderWidth: 1.5, shadowBlur: 8, shadowColor: hexToRgba(accent, 0.28) }
             }];
         } else if (type === 'area-line') {
-            option.grid = { top: 36, left: 44, right: 20, bottom: 32 };
+            var areaDs = def.datasets || [];
+            var areaBottomLegend = narrow || areaDs.length >= 3;
+            option.grid = areaBottomLegend
+                ? echartGridBottom({ top: narrow ? 8 : 36, left: 44, right: 16, bottom: 28 }, narrow ? 30 : 24)
+                : { top: 36, left: 44, right: 20, bottom: 32 };
             option.tooltip = { trigger: 'axis', backgroundColor: surface, borderColor: border, textStyle: { color: text1, fontSize: 12 } };
-            option.legend = { top: 4, textStyle: { color: text2, fontSize: 11 } };
+            option.legend = echartLegend(narrow, text2, { forceBottom: areaDs.length >= 3 });
             option.xAxis = { type: 'category', boundaryGap: false, data: def.labels || [], axisLine: { lineStyle: { color: border } }, axisLabel: { color: text3, fontSize: 11 } };
             option.yAxis = { type: 'value', splitLine: { lineStyle: { color: border, type: 'dashed' } }, axisLabel: { color: text3, fontSize: 11 } };
             option.series = (def.datasets || []).map(function (ds, idx) {
@@ -187,9 +225,14 @@
             });
         } else if (type === 'stacked-bar') {
             var horizontal = !!def.horizontal;
-            option.grid = horizontal ? { top: 16, left: 100, right: 24, bottom: 28 } : { top: 36, left: 44, right: 16, bottom: 28 };
+            var stackDs = def.datasets || [];
+            var stackBottomLegend = narrow || stackDs.length >= 3;
+            var stackGrid = horizontal
+                ? { top: 12, left: narrow ? 84 : 100, right: 12, bottom: 28 }
+                : { top: stackBottomLegend ? 8 : 36, left: 40, right: 12, bottom: 28 };
+            option.grid = stackBottomLegend ? echartGridBottom(stackGrid, narrow ? 32 : 28) : stackGrid;
             option.tooltip = { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: surface, borderColor: border };
-            option.legend = { top: 4, textStyle: { color: text2, fontSize: 11 } };
+            option.legend = echartLegend(narrow, text2, { forceBottom: stackDs.length >= 3 });
             if (horizontal) {
                 option.xAxis = { type: 'value', splitLine: { lineStyle: { color: border, type: 'dashed' } }, axisLabel: { color: text3 } };
                 option.yAxis = { type: 'category', data: def.labels || [], axisLabel: { color: text3, fontSize: 11 }, axisLine: { lineStyle: { color: border } } };
@@ -295,7 +338,7 @@
     function buildEchart(host, def) {
         if (typeof global.echarts === 'undefined' || !host) return null;
         var chart = global.echarts.init(host, null, { renderer: 'canvas' });
-        chart.setOption(buildEchartOption(def));
+        chart.setOption(buildEchartOption(def, { narrow: isNarrowChart(host) }));
         return chart;
     }
 
@@ -415,7 +458,7 @@
                     if (typeof global.echarts === 'undefined') return;
                     var host = document.getElementById(id);
                     if (!host) return;
-                    var option = buildEchartOption(chartDef);
+                    var option = buildEchartOption(chartDef, { narrow: isNarrowChart(host) });
                     var existing = echartsRegistry[panelId][chartDef.id];
                     if (existing && softUpdate) { existing.setOption(option, true); return; }
                     if (existing) existing.dispose();
@@ -506,12 +549,23 @@
     global.addEventListener('resize', resizeAllCharts);
     global.addEventListener('unio-charts-resize', resizeAllCharts);
 
+    var resizeLayoutTimer = null;
+
     function resizeAllCharts() {
         Object.keys(registry).forEach(function (pid) {
             Object.keys(registry[pid]).forEach(function (id) { if (registry[pid][id]) registry[pid][id].resize(); });
         });
         Object.keys(echartsRegistry).forEach(function (pid) {
-            Object.keys(echartsRegistry[pid]).forEach(function (id) { if (echartsRegistry[pid][id]) echartsRegistry[pid][id].resize(); });
+            Object.keys(echartsRegistry[pid]).forEach(function (id) {
+                var chart = echartsRegistry[pid][id];
+                if (chart) chart.resize();
+            });
         });
+        if (resizeLayoutTimer) clearTimeout(resizeLayoutTimer);
+        resizeLayoutTimer = setTimeout(function () {
+            document.querySelectorAll('[data-unio-charts-panel]').forEach(function (panelEl) {
+                initChartsFromSections(panelEl, parseSections(panelEl), { softUpdate: true });
+            });
+        }, 180);
     }
 })(window);

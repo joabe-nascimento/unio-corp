@@ -1,0 +1,14 @@
+{#
+  page_body_shell — coluna única mobile para páginas que estendem base.html.twig diretamente
+
+  Blocks:
+    page_body
+
+  Props:
+    mode         (string)  scroll | fill — default scroll
+    extra_class  (string)  classes extras no wrapper
+#}
+{% set _mode = mode|default('scroll') %}
+<div class="page-body-inner page-body-shell{% if _mode == 'fill' %} page-body-fill{% else %} page-body-scroll{% endif %}{% if extra_class is defined and extra_class %} {{ extra_class }}{% endif %}">
+    {% block page_body %}{% endblock %}
+</div>

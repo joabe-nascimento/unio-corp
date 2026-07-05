@@ -1,40 +1,40 @@
-{% set _panel = panel_id|default('default') %}
-{% set _chart = chart %}
-{% set _echarts_types = ['sankey', 'heatmap', 'bubble', 'scatter', 'radar', 'area-line', 'stacked-bar', 'funnel', 'treemap', 'gauge', 'ring', 'bar-pro'] %}
-{% set _is_echarts = _chart.type|default('bar') in _echarts_types or _chart.engine|default('') == 'echarts' %}
-{% set _size = _chart.size|default('default') %}
-{% set _wide_types = ['line', 'area-line', 'sankey', 'heatmap', 'stacked-bar'] %}
-{% set _wide = wide|default(_chart.size|default('') == 'hero' or _chart.type|default('bar') in _wide_types) %}
-
-<article class="unio-chart-card unio-chart-card--animate unio-chart-card--{{ _size }}{% if _wide %} unio-chart-card--wide{% endif %}{% if _is_echarts %} unio-chart-card--pro{% endif %}"
-         data-unio-chart-card="{{ _chart.id }}"
-         data-unio-chart-type="{{ _chart.type|default('bar') }}">
-    <div class="unio-chart-card-head">
-        <div class="unio-chart-card-head-main">
-            <h4 class="unio-chart-card-title">{{ _chart.title }}</h4>
-            {% if _chart.description is defined and _chart.description %}
-            <p class="unio-chart-card-desc">{{ _chart.description }}</p>
-            {% endif %}
-        </div>
-        {% if _chart.kpi is defined and _chart.kpi %}
-        <div class="unio-chart-kpi" data-unio-chart-kpi="{{ _chart.id }}">
-            <span class="unio-chart-kpi-value" data-unio-chart-kpi-value>{{ _chart.kpi.value }}</span>
-            <span class="unio-chart-kpi-label" data-unio-chart-kpi-label>{{ _chart.kpi.label }}</span>
-        </div>
-        {% endif %}
-    </div>
-    <div class="unio-chart-canvas-wrap{% if _is_echarts %} unio-chart-canvas-wrap--pro{% endif %}{% if _size == 'compact' %} unio-chart-canvas-wrap--compact{% endif %}{% if _size == 'hero' %} unio-chart-canvas-wrap--hero{% endif %}">
-        {% if _is_echarts %}
-        <div id="unio-chart-{{ _panel }}-{{ _chart.id }}"
-             class="unio-echart-host"
-             data-unio-echart-host="{{ _chart.id }}"
-             role="img"
-             aria-label="Gráfico: {{ _chart.title }}"></div>
-        {% else %}
-        <canvas id="unio-chart-{{ _panel }}-{{ _chart.id }}"
-                data-unio-chart-canvas="{{ _chart.id }}"
-                role="img"
-                aria-label="Gráfico: {{ _chart.title }}"></canvas>
-        {% endif %}
-    </div>
-</article>
+{% set _panel = panel_id|default('default') %}
+{% set _chart = chart %}
+{% set _echarts_types = ['sankey', 'heatmap', 'bubble', 'scatter', 'radar', 'area-line', 'stacked-bar', 'funnel', 'treemap', 'gauge', 'ring', 'bar-pro'] %}
+{% set _is_echarts = _chart.type|default('bar') in _echarts_types or _chart.engine|default('') == 'echarts' %}
+{% set _size = _chart.size|default('default') %}
+{% set _wide_types = ['line', 'area-line', 'sankey', 'heatmap', 'stacked-bar'] %}
+{% set _wide = wide|default(_chart.size|default('') == 'hero' or _chart.type|default('bar') in _wide_types) %}
+
+<article class="unio-chart-card unio-shell-chart-card unio-chart-card--animate unio-chart-card--{{ _size }}{% if _wide %} unio-chart-card--wide{% endif %}{% if _is_echarts %} unio-chart-card--pro{% endif %}"
+         data-unio-chart-card="{{ _chart.id }}"
+         data-unio-chart-type="{{ _chart.type|default('bar') }}">
+    <div class="unio-chart-card-head">
+        <div class="unio-chart-card-head-main">
+            <h4 class="unio-chart-card-title">{{ _chart.title }}</h4>
+            {% if _chart.description is defined and _chart.description %}
+            <p class="unio-chart-card-desc">{{ _chart.description }}</p>
+            {% endif %}
+        </div>
+        {% if _chart.kpi is defined and _chart.kpi %}
+        <div class="unio-chart-kpi" data-unio-chart-kpi="{{ _chart.id }}">
+            <span class="unio-chart-kpi-value" data-unio-chart-kpi-value>{{ _chart.kpi.value }}</span>
+            <span class="unio-chart-kpi-label" data-unio-chart-kpi-label>{{ _chart.kpi.label }}</span>
+        </div>
+        {% endif %}
+    </div>
+    <div class="unio-chart-canvas-wrap{% if _is_echarts %} unio-chart-canvas-wrap--pro{% endif %}{% if _size == 'compact' %} unio-chart-canvas-wrap--compact{% endif %}{% if _size == 'hero' %} unio-chart-canvas-wrap--hero{% endif %}">
+        {% if _is_echarts %}
+        <div id="unio-chart-{{ _panel }}-{{ _chart.id }}"
+             class="unio-echart-host"
+             data-unio-echart-host="{{ _chart.id }}"
+             role="img"
+             aria-label="Gráfico: {{ _chart.title }}"></div>
+        {% else %}
+        <canvas id="unio-chart-{{ _panel }}-{{ _chart.id }}"
+                data-unio-chart-canvas="{{ _chart.id }}"
+                role="img"
+                aria-label="Gráfico: {{ _chart.title }}"></canvas>
+        {% endif %}
+    </div>
+</article>

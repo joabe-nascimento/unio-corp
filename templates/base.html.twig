@@ -15,7 +15,7 @@
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=322">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=332">
     {% set _shell_polish_css = app.debug ? 'css/unio-shell-polish.css' : 'css/unio-shell-polish.min.css' %}
     <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=28">
 
@@ -222,14 +222,18 @@ window.addEventListener('load', function () {
         resizeTimer = setTimeout(applyMobileSidebar, 150);
     });
 
+    function closeMobileSidebar() {
+        $body.removeClass('sidebar-open');
+    }
+
+    function toggleMobileSidebar() {
+        $body.toggleClass('sidebar-open');
+    }
+
     jQuery(document).on('click', function (e) {
         if (!isMobile() || !$body.hasClass('sidebar-open')) return;
-        if (jQuery(e.target).closest('.main-sidebar, [data-widget="pushmenu"]').length) return;
-        if ($pushMenu.length && typeof $pushMenu.PushMenu === 'function') {
-            $pushMenu.PushMenu('collapse');
-        } else {
-            $body.removeClass('sidebar-open');
-        }
+        if (jQuery(e.target).closest('.main-sidebar, [data-widget="pushmenu"], .shell-mobile-nav').length) return;
+        closeMobileSidebar();
     });
 
     jQuery('[data-widget="treeview"]').on('expanded.lte.treeview', function () {
@@ -240,12 +244,9 @@ window.addEventListener('load', function () {
 
     jQuery(document).on('click', '[data-shell-mobile-action="open-sidebar"]', function (e) {
         e.preventDefault();
+        e.stopPropagation();
         if (!isMobile()) return;
-        if ($pushMenu.length && typeof $pushMenu.PushMenu === 'function') {
-            $pushMenu.PushMenu('toggle');
-        } else {
-            $body.toggleClass('sidebar-open');
-        }
+        toggleMobileSidebar();
     });
 });
 </script>
@@ -321,7 +322,7 @@ window.addEventListener('load', function () {
 </script>
 <script src="{{ asset('js/unio-file-upload.js') }}?v=2"></script>
 <script src="{{ asset('js/unio-offcanvas.js') }}?v=2"></script>
-<script src="{{ asset('js/unio-toolbar-mobile.js') }}?v=6"></script>
+<script src="{{ asset('js/unio-toolbar-mobile.js') }}?v=7"></script>
 <script src="{{ asset('js/unio-filter-select.js') }}?v=3"></script>
 <script src="{{ asset('js/unio-table-pager.js') }}?v=1"></script>
 <script src="{{ asset('js/unio-color-picker.js') }}?v=2"></script>

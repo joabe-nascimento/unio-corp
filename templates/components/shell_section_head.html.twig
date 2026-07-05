@@ -1,0 +1,34 @@
+{#
+  shell_section_head — cabeçalho de seção padronizado (gráficos, welcome, hubs)
+
+  Props:
+    title        (string)
+    subtitle     (string, opt)
+    badge        (string, opt)
+    count        (string, opt)
+    title_tag    (string)  h2 | h3 — default h3
+    head_class   (string)  classes legadas extras (ex. unio-chart-section-head)
+    badge_class  (string)
+    title_class  (string)
+    sub_class    (string)
+    count_class  (string)
+#}
+{% set _tag = title_tag|default('h3') %}
+<header class="unio-shell-section-head {{ head_class|default('') }}">
+    <div class="unio-shell-section-head-text">
+        {% if badge|default('') %}
+        <span class="unio-shell-section-badge {{ badge_class|default('') }}">{{ badge }}</span>
+        {% endif %}
+        {% if _tag == 'h2' %}
+        <h2 class="unio-shell-section-title {{ title_class|default('') }}">{{ title }}</h2>
+        {% else %}
+        <h3 class="unio-shell-section-title {{ title_class|default('') }}">{{ title }}</h3>
+        {% endif %}
+        {% if subtitle|default('') %}
+        <p class="unio-shell-section-sub {{ sub_class|default('') }}">{{ subtitle }}</p>
+        {% endif %}
+    </div>
+    {% if count|default('') %}
+    <span class="unio-shell-section-count {{ count_class|default('') }}">{{ count }}</span>
+    {% endif %}
+</header>

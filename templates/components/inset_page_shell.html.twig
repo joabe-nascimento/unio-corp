@@ -1,0 +1,20 @@
+{#
+  inset_page_shell — página full-bleed com fundo geométrico (dashboard, welcome, etc.)
+
+  Blocks:
+    inset_content
+
+  Props:
+    shell_class   (string)  ex. dashboard-page-shell
+    content_class (string)  ex. dashboard-page
+    content_id    (string)
+    geo_id        (string)  id do SVG de fundo
+#}
+<div class="inset-page-shell {{ shell_class|default('') }}">
+    <div class="inset-page-bg {{ bg_class|default('') }}" aria-hidden="true">
+        {% include 'components/inset_geometric_background.html.twig' with { geo_id: geo_id|default('default') } only %}
+    </div>
+    <div class="inset-page-content {{ content_class|default('') }}"{% if content_id is defined and content_id %} id="{{ content_id }}"{% endif %}{% if content_attrs is defined %}{% for _attr, _val in content_attrs %} {{ _attr }}="{{ _val }}"{% endfor %}{% endif %}>
+        {% block inset_content %}{% endblock %}
+    </div>
+</div>

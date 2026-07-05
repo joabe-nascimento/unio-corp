@@ -1,76 +1,145 @@
 {% extends 'base.html.twig' %}
 
+
+
 {% block title %}Dashboard{% endblock %}
+
 {% block page_show_title %}{% endblock %}
+
+
 
 {% block content %}
 
-<div class="inset-page-shell dashboard-page-shell">
-    <div class="inset-page-bg" aria-hidden="true">
-        {% include 'components/inset_geometric_background.html.twig' with { geo_id: 'dashboard' } only %}
-    </div>
+{% embed 'components/inset_page_shell.html.twig' with {
 
-<div class="inset-page-content dashboard-page" id="dashboardPage">
+    shell_class: 'dashboard-page-shell',
+
+    content_class: 'dashboard-page',
+
+    content_id: 'dashboardPage',
+
+    geo_id: 'dashboard'
+
+} %}
+
+{% block inset_content %}
+
+
 
 {% if account_pending|default(false) %}
+
     {% include 'components/account_pending_banner.html.twig' %}
+
 {% endif %}
 
+
+
 <div class="dashboard-page-toolbar">
+
     <p class="dashboard-page-toolbar-label">Central do dashboard</p>
+
 </div>
+
+
 
 {% include 'components/dashboard_welcome.html.twig' %}
 
+
+
 {% include 'components/welcome/onboarding_checklist.html.twig' with {
+
     onboarding: onboarding|default({ visible: false })
+
 } only %}
 
+
+
 {% if kpis|length > 0 %}
+
 <section class="dashboard-kpis-section mb-4" aria-label="Indicadores">
+
     <header class="dashboard-section-head">
         <div>
             <h2 class="dashboard-section-title">Panorama em números</h2>
             <p class="dashboard-section-sub">Indicadores da sua área de trabalho agora</p>
         </div>
     </header>
+
     <div class="dashboard-kpis-grid">
+
         {% for kpi in kpis %}
+
             {% if kpi.route is defined and kpi.route %}
-            <a href="{{ path(kpi.route) }}" class="dashboard-kpi-card dashboard-kpi-card--link">
+
+            <a href="{{ path(kpi.route) }}" class="dashboard-kpi-card dashboard-kpi-card--link unio-shell-surface">
+
                 <div class="dashboard-kpi-icon" aria-hidden="true"><i class="fas {{ kpi.icon }}"></i></div>
+
                 <div class="dashboard-kpi-body">
+
                     <span class="dashboard-kpi-value">{{ kpi.value }}</span>
+
                     <span class="dashboard-kpi-label">{{ kpi.label }}</span>
+
                 </div>
+
                 <i class="fas fa-chevron-right dashboard-kpi-arrow" aria-hidden="true"></i>
+
             </a>
+
             {% else %}
-            <div class="dashboard-kpi-card">
+
+            <div class="dashboard-kpi-card unio-shell-surface">
+
                 <div class="dashboard-kpi-icon" aria-hidden="true"><i class="fas {{ kpi.icon }}"></i></div>
+
                 <div class="dashboard-kpi-body">
+
                     <span class="dashboard-kpi-value">{{ kpi.value }}</span>
+
                     <span class="dashboard-kpi-label">{{ kpi.label }}</span>
+
                 </div>
+
             </div>
+
             {% endif %}
+
         {% endfor %}
+
     </div>
+
 </section>
+
 {% endif %}
 
+
+
 {% include 'components/charts/panel.html.twig' with {
+
     sections: chart_sections|default([]),
+
     class: 'dashboard-analytics'
+
 } %}
 
-</div>
-</div>{# .inset-page-shell #}
+
 
 {% endblock %}
+
+{% endembed %}
+
+{% endblock %}
+
+
 
 {% block javascripts %}
-{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 2 } only %}
+
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 6 } only %}
+
 <script src="{{ asset('js/dashboard-home.js') }}?v=1"></script>
+
 <script src="{{ asset('js/onboarding-checklist.js') }}?v=2"></script>
+
 {% endblock %}
+

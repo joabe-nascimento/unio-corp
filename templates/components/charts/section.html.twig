@@ -9,21 +9,19 @@
 {% set _panel = panel_id|default('default') %}
 {% set _tier = _section.tier|default('operational') %}
 
-<section class="unio-chart-section unio-card unio-chart-section--{{ _tier }}"
+<section class="unio-chart-section unio-card unio-shell-surface unio-chart-section--{{ _tier }}"
          data-unio-chart-section="{{ _section.id }}">
-    <header class="unio-chart-section-head">
-        <div class="unio-chart-section-icon" aria-hidden="true">
-            <i class="fas {{ _section.icon }}"></i>
-        </div>
-        <div class="unio-chart-section-head-text">
-            {% if _section.badge|default('') %}
-            <span class="unio-chart-section-badge">{{ _section.badge }}</span>
-            {% endif %}
-            <h3 class="unio-chart-section-title">{{ _section.title }}</h3>
-            <p class="unio-chart-section-sub">{{ _section.subtitle }}</p>
-        </div>
-        <span class="unio-chart-section-count">{{ _section.charts|length }} visuais</span>
-    </header>
+    {% include 'components/shell_section_head.html.twig' with {
+        head_class: 'unio-chart-section-head',
+        badge_class: 'unio-chart-section-badge',
+        title_class: 'unio-chart-section-title',
+        sub_class: 'unio-chart-section-sub',
+        count_class: 'unio-chart-section-count',
+        badge: _section.badge|default(''),
+        title: _section.title,
+        subtitle: _section.subtitle,
+        count: _section.charts|length ~ ' visuais'
+    } only %}
     <div class="unio-charts-grid unio-charts-grid--enterprise">
         {% for chart in _section.charts %}
             {% include 'components/charts/card.html.twig' with {

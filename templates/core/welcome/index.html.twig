@@ -5,17 +5,18 @@
 {% block page_show_title %}{% endblock %}
 
 {% block content %}
-
-<div class="inset-page-shell welcome-page-shell">
-    <div class="inset-page-bg welcome-page-bg" aria-hidden="true">
-        {% include 'components/inset_geometric_background.html.twig' with { geo_id: 'welcome' } only %}
-    </div>
-
-<div class="inset-page-content welcome-page welcome-page--present"
-     id="welcomePage"
-     data-user-id="{{ app.user.id }}"
-     data-layout="comfortable">
-
+{% embed 'components/inset_page_shell.html.twig' with {
+    shell_class: 'welcome-page-shell',
+    content_class: 'welcome-page welcome-page--present',
+    content_id: 'welcomePage',
+    geo_id: 'welcome',
+    bg_class: 'welcome-page-bg',
+    content_attrs: {
+        'data-user-id': app.user.id,
+        'data-layout': 'comfortable'
+    }
+} %}
+{% block inset_content %}
     <div class="welcome-page-inner">
 
     <div class="welcome-page-toolbar">
@@ -41,14 +42,17 @@
     } only %}
 
     <div class="welcome-page-sections">
-        <section class="welcome-section unio-card" id="welcome-hubs" data-welcome-section="hubs">
-            <header class="welcome-section-header">
-                <div>
-                    <h2 class="welcome-section-title">Por onde começar</h2>
-                    <p class="welcome-section-sub">Núcleos disponíveis — fixe favoritos com a estrela</p>
-                </div>
-                <span class="welcome-section-count">{{ hubs|length }} núcleos</span>
-            </header>
+        <section class="welcome-section unio-card unio-shell-surface" id="welcome-hubs" data-welcome-section="hubs">
+            {% include 'components/shell_section_head.html.twig' with {
+                head_class: 'welcome-section-header',
+                title_class: 'welcome-section-title',
+                sub_class: 'welcome-section-sub',
+                count_class: 'welcome-section-count',
+                title_tag: 'h2',
+                title: 'Por onde começar',
+                subtitle: 'Núcleos disponíveis — fixe favoritos com a estrela',
+                count: hubs|length ~ ' núcleos'
+            } only %}
 
             {% if hubs|length > 0 %}
             {% include 'components/hub_dock.html.twig' with {
@@ -94,14 +98,17 @@
     } only %}
 
     {% if novidades|length > 0 %}
-    <section class="welcome-section welcome-section--spotlight unio-card" data-welcome-section="novidades">
-        <header class="welcome-section-header">
-            <div>
-                <h2 class="welcome-section-title">Em destaque para você</h2>
-                <p class="welcome-section-sub">Novidades liberadas no seu perfil nesta área de trabalho</p>
-            </div>
-            <span class="welcome-section-count">{{ novidades|length }} novos</span>
-        </header>
+    <section class="welcome-section welcome-section--spotlight unio-card unio-shell-surface" data-welcome-section="novidades">
+        {% include 'components/shell_section_head.html.twig' with {
+            head_class: 'welcome-section-header',
+            title_class: 'welcome-section-title',
+            sub_class: 'welcome-section-sub',
+            count_class: 'welcome-section-count',
+            title_tag: 'h2',
+            title: 'Em destaque para você',
+            subtitle: 'Novidades liberadas no seu perfil nesta área de trabalho',
+            count: novidades|length ~ ' novos'
+        } only %}
         <div class="welcome-novidades-track">
             {% for n in novidades %}
             <article class="welcome-novidade-card" data-novidade-id="{{ n.id }}">
@@ -129,9 +136,8 @@
     </section>
     {% endif %}
     </div>{# .welcome-page-inner #}
-</div>{# .welcome-page #}
-</div>{# .welcome-page-shell #}
-
+{% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block page_overlays %}
@@ -160,7 +166,7 @@
 
 {% block javascripts %}
 {% if chart_sections|length > 0 %}
-<script>document.body.dataset.unioChartsJs = {{ (asset('js/unio-charts.js') ~ '?v=5')|json_encode|raw }};</script>
+<script>document.body.dataset.unioChartsJs = {{ (asset('js/unio-charts.js') ~ '?v=6')|json_encode|raw }};</script>
 <script src="{{ asset('js/welcome-charts-lazy.js') }}?v=1" defer></script>
 {% endif %}
 <script src="{{ asset('js/welcome-home.js') }}?v=6"></script>

@@ -289,21 +289,24 @@
 
         var filterRoot = root.querySelector('[data-ti-ticket-filters]');
 
-        function getFilterScope() {
+        function getInlineFilterControls() {
             if (!filterRoot) return null;
-            return filterRoot.querySelector('.toolbar-inline-controls') || filterRoot;
+            return filterRoot.querySelector('.toolbar-inline-controls');
         }
 
         function getFilterElements() {
-            var scope = getFilterScope();
-            if (!scope) {
+            var inline = getInlineFilterControls();
+            if (!inline) {
                 return { status: null, priority: null, category: null, search: null };
             }
             return {
-                status: scope.querySelector('[data-ti-filter="status"]'),
-                priority: scope.querySelector('[data-ti-filter="priority"]'),
-                category: scope.querySelector('[data-ti-filter="category"]'),
-                search: scope.querySelector('[data-ti-filter-search]'),
+                status: document.getElementById('ti-table-filter-status')
+                    || inline.querySelector('[data-ti-filter="status"]:not([data-toolbar-mobile-clone])'),
+                priority: document.getElementById('ti-table-filter-priority')
+                    || inline.querySelector('[data-ti-filter="priority"]:not([data-toolbar-mobile-clone])'),
+                category: document.getElementById('ti-table-filter-category')
+                    || inline.querySelector('[data-ti-filter="category"]:not([data-toolbar-mobile-clone])'),
+                search: inline.querySelector('[data-ti-filter-search]:not([data-toolbar-mobile-clone])'),
             };
         }
 
@@ -350,11 +353,64 @@
 
         function matchesFilters(el) {
             var f = getFilters();
-            if (f.status && el.getAttribute('data-ti-status') !== f.status) return false;
-            if (f.priority && el.getAttribute('data-ti-priority') !== f.priority) return false;
-            if (f.category && el.getAttribute('data-ti-category') !== f.category) return false;
+            if (f.status && (el.getAttribute('data-ti-status') || '') !== f.status) return false;
+            if (f.priority && (el.getAttribute('data-ti-priority') || '') !== f.priority) return false;
+            if (f.category && (el.getAttribute('data-ti-category') || '') !== f.category) return false;
             if (f.q && (el.getAttribute('data-ti-search') || '').indexOf(f.q) === -1) return false;
             return true;
+        }
+
+        function countVisibleRows() {
+            var visible = 0;
+            getTableRows().forEach(function (row) {
+                if (!row.classList.contains('is-filter-hidden')) visible++;
+            });
+            return visible;
+        }
+
+        function updateFilteredSummary() {
+            var table = getTableWrap();
+            if (!table) return;
+
+            var total = parseInt(table.getAttribute('data-ti-ticket-count') || '0', 10);
+            var visible = countVisibleRows();
+            var filtered = anyFilterActive();
+            var subtitle = root.querySelector('.section-header--in-card .section-subtitle');
+            var suffix = ' · P1→P4, depois data de abertura';
+
+            if (subtitle) {
+                if (filtered && visible !== total) {
+                    subtitle.textContent = visible + ' de ' + total + ' registros' + suffix;
+                } else {
+                    subtitle.textContent = total + ' registros' + suffix;
+                }
+            }
+
+            var emptyRow = table.querySelector('[data-ti-ticket-filter-empty]');
+            if (emptyRow) {
+                emptyRow.hidden = !(filtered && visible === 0 && total > 0);
+            }
+        }
+
+        function clearFilters() {
+            var els = getFilterElements();
+            if (els.status) els.status.value = '';
+            if (els.priority) els.priority.value = '';
+            if (els.category) els.category.value = '';
+            if (els.search) els.search.value = '';
+            applyFilters();
+        }
+
+        function bindFilterControls() {
+            var els = getFilterElements();
+            [els.status, els.priority, els.category, els.search].forEach(function (el) {
+                if (!el || el.dataset.tiFilterBound === '1') return;
+                el.dataset.tiFilterBound = '1';
+                el.addEventListener('change', applyFilters);
+                if (el.hasAttribute('data-ti-filter-search')) {
+                    el.addEventListener('input', applyFilters);
+                }
+            });
         }
 
         function anyFilterActive() {
@@ -387,6 +443,7 @@
                 el.removeAttribute('hidden');
             });
             updateKanbanColEmpty();
+            updateFilteredSummary();
         }
 
         function applyFilters() {
@@ -404,16 +461,8 @@
                 setFilteredState(card, !matchesFilters(card));
             });
             updateKanbanColEmpty();
+            updateFilteredSummary();
             syncFilterSizerUi();
-        }
-
-        function onFilterInputEvent(e) {
-            var el = e.target;
-            if (!el || !filterRoot || !filterRoot.contains(el)) return;
-            if (el.hasAttribute('data-toolbar-mobile-clone')) return;
-            if (!el.closest('.toolbar-inline-controls')) return;
-            if (!el.matches('[data-ti-filter], [data-ti-filter-search]')) return;
-            applyFilters();
         }
 
         function applyViewPanels(view) {
@@ -434,7 +483,7 @@
 
         function setView(view) {
             applyViewPanels(view);
-            showAllRows();
+            applyFilters();
         }
 
         function getSavedView() {
@@ -456,21 +505,26 @@
         }
 
         if (filterRoot) {
-            filterRoot.addEventListener('change', onFilterInputEvent);
-            filterRoot.addEventListener('input', onFilterInputEvent);
+            bindFilterControls();
             document.addEventListener('unio-toolbar-mobile-synced', function (e) {
                 if (!e.detail || !filterRoot.contains(e.detail.host)) return;
                 applyFilters();
             });
+            filterRoot.addEventListener('click', function (e) {
+                if (e.target.closest('[data-ti-clear-filters]')) {
+                    e.preventDefault();
+                    clearFilters();
+                }
+            });
         }
 
         applyViewPanels(getSavedView());
-        showAllRows();
+        applyFilters();
 
         window.addEventListener('pageshow', function (event) {
             if (!event.persisted) return;
             applyViewPanels(getSavedView());
-            showAllRows();
+            applyFilters();
         });
     }
 
