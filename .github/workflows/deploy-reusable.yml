@@ -60,10 +60,17 @@ jobs:
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
       DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML }}
       ARCHIVE_REMOTE: ${{ inputs.archive_remote_name }}
+      DEPLOY_SSH_ALIAS: hg-deploy
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
+          bash scripts/ci-ssh-setup.sh
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -87,14 +94,6 @@ jobs:
           npm run vendor:sync
           php bin/minify-css.php
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null || { echo "Chave SSH invalida — verifique DEPLOY_SSH_KEY no repositorio"; exit 1; }
-          ssh-keyscan -p "${DEPLOY_PORT:-2222}" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
-
       - name: Create and upload deploy archive
         run: |
           ARCHIVE="${RUNNER_TEMP}/deploy.tar.gz"
@@ -115,14 +114,7 @@ jobs:
               --exclude='.phpunit.cache' \
               -czf "$ARCHIVE" .
 
-          bash scripts/ci-retry.sh scp -i ~/.ssh/deploy_key \
-              -P "${DEPLOY_PORT:-2222}" \
-              -o StrictHostKeyChecking=accept-new \
-              -o BatchMode=yes \
-              -o ConnectTimeout=20 \
-              -o ServerAliveInterval=15 \
-              "$ARCHIVE" \
-              "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/${ARCHIVE_REMOTE}"
+          bash scripts/ci-retry.sh scp "$ARCHIVE" "${DEPLOY_SSH_ALIAS}:/tmp/${ARCHIVE_REMOTE}"
 
       - name: Extract and post-deploy on server
         timeout-minutes: 12
@@ -150,31 +142,9 @@ jobs:
             fi
           } > "$ENV_FILE"
 
-          bash scripts/ci-retry.sh scp -i ~/.ssh/deploy_key \
-              -P "${DEPLOY_PORT:-2222}" \
-              -o StrictHostKeyChecking=accept-new \
-              -o BatchMode=yes \
-              -o ConnectTimeout=20 \
-              -o ServerAliveInterval=15 \
-              "$ENV_FILE" \
-              "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/deploy-remote.env"
-
-          bash scripts/ci-retry.sh scp -i ~/.ssh/deploy_key \
-              -P "${DEPLOY_PORT:-2222}" \
-              -o StrictHostKeyChecking=accept-new \
-              -o BatchMode=yes \
-              -o ConnectTimeout=20 \
-              scripts/ci-remote-extract.sh \
-              "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/ci-remote-extract.sh"
-
-          bash scripts/ci-retry.sh ssh -i ~/.ssh/deploy_key \
-              -p "${DEPLOY_PORT:-2222}" \
-              -o StrictHostKeyChecking=accept-new \
-              -o BatchMode=yes \
-              -o ConnectTimeout=20 \
-              -o ServerAliveInterval=15 \
-              "${DEPLOY_USER}@${DEPLOY_HOST}" \
-              "ARCHIVE=${ARCHIVE} bash /tmp/ci-remote-extract.sh"
+          bash scripts/ci-retry.sh scp "$ENV_FILE" "${DEPLOY_SSH_ALIAS}:/tmp/deploy-remote.env"
+          bash scripts/ci-retry.sh scp scripts/ci-remote-extract.sh "${DEPLOY_SSH_ALIAS}:/tmp/ci-remote-extract.sh"
+          bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" "ARCHIVE=${ARCHIVE} bash /tmp/ci-remote-extract.sh"
 
       - name: Baixar relatorio de deploy (sucesso ou falha)
         if: always() && (success() || failure())
@@ -183,12 +153,7 @@ jobs:
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH || inputs.deploy_path_default }}
         run: |
           mkdir -p deploy-reports
-          scp -i ~/.ssh/deploy_key \
-              -P "${DEPLOY_PORT:-2222}" \
-              -o StrictHostKeyChecking=accept-new \
-              -o BatchMode=yes \
-              -o ConnectTimeout=20 \
-              "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/var/log/deploy-report.txt" \
+          scp "${DEPLOY_SSH_ALIAS}:${DEPLOY_PATH}/var/log/deploy-report.txt" \
               deploy-reports/deploy-report.txt 2>/dev/null \
             || echo "Relatorio remoto indisponivel" > deploy-reports/deploy-report.txt
 
