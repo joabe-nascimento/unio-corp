@@ -2,12 +2,31 @@
 # Configura SSH para deploy HostGator a partir do GitHub Actions.
 set -euo pipefail
 
-host="${DEPLOY_HOST:?DEPLOY_HOST required}"
+original_host="${DEPLOY_HOST:?DEPLOY_HOST required}"
+host="${DEPLOY_CANONICAL_HOST:-$original_host}"
 user="${DEPLOY_USER:?DEPLOY_USER required}"
 port="${DEPLOY_PORT:-2222}"
 key_file="${DEPLOY_KEY_FILE:-$HOME/.ssh/deploy_key}"
 alias_name="${DEPLOY_SSH_ALIAS:-hg-deploy}"
 preflight="${DEPLOY_SSH_PREFLIGHT:-1}"
+
+is_cloudflare_ip() {
+  case "$1" in
+    104.*|172.6[0-9].*|172.67.*|2606:*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+resolve_ipv4() {
+  local name="$1"
+  local ipv4=""
+  if command -v getent >/dev/null 2>&1; then
+    ipv4="$(getent ahostsv4 "$name" | awk '/STREAM/ {print $1; exit}')"
+  elif command -v dig >/dev/null 2>&1; then
+    ipv4="$(dig +short A "$name" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)"
+  fi
+  printf '%s' "$ipv4"
+}
 
 mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
@@ -23,28 +42,31 @@ ssh-keygen -y -f "$key_file" > /dev/null || {
   exit 1
 }
 
-connect_host="$host"
-if command -v getent >/dev/null 2>&1; then
-  ipv4="$(getent ahostsv4 "$host" | awk '/STREAM/ {print $1; exit}')"
-  if [[ -n "${ipv4:-}" ]]; then
-    connect_host="$ipv4"
-  fi
-elif command -v dig >/dev/null 2>&1; then
-  ipv4="$(dig +short A "$host" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)"
-  if [[ -n "${ipv4:-}" ]]; then
-    connect_host="$ipv4"
+connect_host="$(resolve_ipv4 "$host")"
+if [[ -z "$connect_host" ]]; then
+  connect_host="$host"
+fi
+
+if is_cloudflare_ip "$connect_host"; then
+  fallback="${DEPLOY_CANONICAL_HOST:-br1136.hostgator.com.br}"
+  if [[ "$host" != "$fallback" ]]; then
+    echo "AVISO: DEPLOY_SSH_HOST (${original_host} -> ${connect_host}) aponta para CDN/Cloudflare."
+    echo "Usando host SSH canonico: ${fallback}"
+    host="$fallback"
+    connect_host="$(resolve_ipv4 "$host")"
+    if [[ -z "$connect_host" ]]; then
+      connect_host="$host"
+    fi
   fi
 fi
 
-echo "SSH target: ${host} -> ${connect_host}:${port} (IPv4)"
+echo "SSH target: ${original_host} -> ${host} @ ${connect_host}:${port} (IPv4)"
 
-case "$connect_host" in
-  104.*|172.6[0-9].*|172.67.*|2606:*)
-    echo "ERRO: DEPLOY_SSH_HOST resolve para CDN/Cloudflare (${connect_host})." >&2
-    echo "Use o hostname gatorXXXX.hostgator.com.br ou o IP do servidor no cPanel — nao o dominio do site." >&2
-    exit 1
-    ;;
-esac
+if is_cloudflare_ip "$connect_host"; then
+  echo "ERRO: host SSH ainda resolve para CDN/Cloudflare (${connect_host})." >&2
+  echo "Atualize DEPLOY_SSH_HOST ou defina a variable DEPLOY_SSH_CANONICAL_HOST (ex.: br1136.hostgator.com.br)." >&2
+  exit 1
+fi
 
 touch "$HOME/.ssh/known_hosts"
 chmod 600 "$HOME/.ssh/known_hosts"
