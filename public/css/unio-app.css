@@ -25990,13 +25990,6 @@ body.layout-inset-shell .sidebar-top {
     flex-shrink: 0;
 }
 
-body.layout-inset-shell.sidebar-mini.sidebar-collapse .main-sidebar {
-    width: 4.6rem !important;
-    min-width: 4.6rem !important;
-    max-width: 4.6rem !important;
-    flex: 0 0 4.6rem !important;
-}
-
 /* Inset usa flex — anula offsets legados do AdminLTE (250px / 4.6rem) */
 body.layout-inset-shell.sidebar-mini.layout-fixed .content-wrapper,
 body.layout-inset-shell.sidebar-mini.layout-fixed .main-header,
@@ -26023,6 +26016,13 @@ body.layout-inset-shell .main-sidebar::before {
 }
 
 @media (min-width: 992px) {
+    body.layout-inset-shell.sidebar-mini.sidebar-collapse .main-sidebar {
+        width: 4.6rem !important;
+        min-width: 4.6rem !important;
+        max-width: 4.6rem !important;
+        flex: 0 0 4.6rem !important;
+    }
+
     body.layout-inset-shell.sidebar-mini.sidebar-collapse .main-sidebar:hover {
         width: var(--sidebar-width, 280px) !important;
         min-width: var(--sidebar-width, 280px) !important;
@@ -26472,7 +26472,12 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         box-shadow: none !important;
     }
 
-    body.layout-inset-shell.sidebar-open .main-sidebar {
+    body.layout-inset-shell.sidebar-open .main-sidebar,
+    body.layout-inset-shell.sidebar-mini.sidebar-collapse.sidebar-open .main-sidebar {
+        width: var(--sidebar-width-hover, var(--sidebar-width, 280px)) !important;
+        min-width: var(--sidebar-width-hover, var(--sidebar-width, 280px)) !important;
+        max-width: none !important;
+        flex: none !important;
         transform: translateX(0) !important;
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35) !important;
     }
