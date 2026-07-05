@@ -69,6 +69,7 @@ jobs:
 
       - name: Setup SSH key
         run: |
+          chmod +x scripts/ci-ssh-setup.sh scripts/ci-retry.sh scripts/ci-remote-extract.sh
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
           bash scripts/ci-ssh-setup.sh

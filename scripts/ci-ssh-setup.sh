@@ -93,5 +93,5 @@ chmod 600 "$HOME/.ssh/config"
 
 if [[ "$preflight" == "1" ]]; then
   echo "Testando conectividade SSH..."
-  "$(dirname "$0")/ci-retry.sh" ssh "${alias_name}" "echo deploy-ssh-ok"
+  bash "$(dirname "$0")/ci-retry.sh" ssh "${alias_name}" "echo deploy-ssh-ok"
 fi
