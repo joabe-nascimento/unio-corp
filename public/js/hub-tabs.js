@@ -68,6 +68,9 @@
         if (leadZone) {
             leadZone.setAttribute('data-active-hub-tab', name);
         }
+        if (root) {
+            root.setAttribute('data-active-hub-tab', name);
+        }
 
         root.querySelectorAll('[data-hub-panel]').forEach(function (panel) {
             var active = panel.getAttribute('data-hub-panel') === name;
