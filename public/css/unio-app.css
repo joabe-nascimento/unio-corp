@@ -26838,31 +26838,12 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         max-height: calc(100dvh - 8px);
     }
 
-    body.layout-inset-shell:has(.shell-mobile-nav) .content.content--no-header:has(.inset-page-shell) {
-        padding: 8px 0 4px !important;
-    }
-
     body.layout-inset-shell:has(.shell-mobile-nav) .content.content--no-header:has(.inset-page-shell) > .container-fluid--page-body {
         padding-left: 0;
         padding-right: 0;
     }
 
-    body.layout-inset-shell:has(.shell-mobile-nav) .inset-page-shell .inset-page-content,
-    body.layout-inset-shell:has(.shell-mobile-nav) .dashboard-page-shell .inset-page-content {
-        padding-left: var(--page-mobile-gutter, 12px);
-        padding-right: var(--page-mobile-gutter, 12px);
-    }
-
-    body.layout-inset-shell:has(.shell-mobile-nav) .dashboard-kpis-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    body.layout-inset-shell:has(.shell-mobile-nav) .dashboard-kpi-card {
-        width: 100%;
-    }
-
-    body.layout-inset-shell:has(.shell-mobile-nav) .dashboard-page-toolbar {
+    body.layout-inset-shell .dashboard-page-toolbar {
         padding-left: 0;
         padding-right: 0;
     }
@@ -26933,7 +26914,10 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         justify-content: center;
     }
 
-    /* Inset (dashboard, welcome, hubs) — mesma coluna e padding interno dos cards */
+    /*
+     * Plataforma inteira (mobile) — uma coluna, um gutter, cards alinhados.
+     * Aplica em listagens, hubs, dashboard, welcome e demais telas logadas.
+     */
     body.layout-inset-shell .content.content--no-header:has(.inset-page-shell) {
         padding-top: 8px !important;
         padding-bottom: 4px !important;
@@ -26941,28 +26925,76 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         padding-right: 0 !important;
     }
 
-    body.layout-inset-shell .inset-page-content .unio-card,
-    body.layout-inset-shell .inset-page-content .onboarding-checklist,
-    body.layout-inset-shell .inset-page-content .unio-chart-section,
-    body.layout-inset-shell .inset-page-content .dashboard-hero,
-    body.layout-inset-shell .inset-page-content .welcome-present-highlights {
+    body.layout-inset-shell .inset-page-shell .inset-page-content,
+    body.layout-inset-shell .dashboard-page-shell .inset-page-content {
+        padding-left: var(--page-mobile-gutter);
+        padding-right: var(--page-mobile-gutter);
+    }
+
+    body.layout-inset-shell .page-body-inner {
+        padding-top: 12px;
+        padding-bottom: 16px;
+    }
+
+    body.layout-inset-shell .app-inset-panel .unio-card:not(.list-toolbar):not(.empty-state-panel),
+    body.layout-inset-shell .app-inset-panel .page-stub-card,
+    body.layout-inset-shell .app-inset-panel .onboarding-checklist,
+    body.layout-inset-shell .app-inset-panel .welcome-present-highlights {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
         padding: 16px !important;
     }
 
-    body.layout-inset-shell .inset-page-content .dashboard-kpi-card {
+    body.layout-inset-shell .app-inset-panel .dashboard-kpi-card,
+    body.layout-inset-shell .app-inset-panel .stat-card {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
     }
 
-    body.layout-inset-shell .inset-page-content .dashboard-section-head,
-    body.layout-inset-shell .inset-page-content .dashboard-page-toolbar,
-    body.layout-inset-shell .inset-page-content .unio-charts-panel-header {
+    body.layout-inset-shell .app-inset-panel .page-body-inner .row,
+    body.layout-inset-shell .app-inset-panel .inset-page-content .row,
+    body.layout-inset-shell .app-inset-panel .hub-tab-panel > .row,
+    body.layout-inset-shell .app-inset-panel .module-grid {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    body.layout-inset-shell .app-inset-panel .page-body-inner .row > [class*="col"],
+    body.layout-inset-shell .app-inset-panel .inset-page-content .row > [class*="col"],
+    body.layout-inset-shell .app-inset-panel .hub-tab-panel > .row > [class*="col"] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    body.layout-inset-shell .app-inset-panel .dashboard-section-head,
+    body.layout-inset-shell .app-inset-panel .dashboard-page-toolbar,
+    body.layout-inset-shell .app-inset-panel .unio-charts-panel-header,
+    body.layout-inset-shell .app-inset-panel .section-toolbar {
         padding-left: 0;
         padding-right: 0;
+    }
+
+    body.layout-inset-shell .section-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    body.layout-inset-shell .section-toolbar-end {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+
+    body.layout-inset-shell .section-toolbar-start {
+        width: 100%;
+    }
+
+    body.layout-inset-shell .dashboard-kpis-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     /* Primeiros passos — título em bloco, ações abaixo */
