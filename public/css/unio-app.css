@@ -7097,6 +7097,17 @@
             gap: 12px;
             margin-bottom: 14px;
         }
+        .onboarding-checklist__intro {
+            flex: 1;
+            min-width: 0;
+        }
+        .onboarding-checklist__actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
         .onboarding-checklist__eyebrow {
             font-size: 11px;
             font-weight: 700;
@@ -9136,7 +9147,7 @@
                 padding-right: 0 !important;
             }
 
-            .content.content--no-header {
+            .content.content--no-header:not(:has(.inset-page-shell)) {
                 padding: 16px !important;
             }
 
@@ -9287,7 +9298,7 @@
                 padding-right: 14px;
             }
 
-            .content.content--no-header {
+            .content.content--no-header:not(:has(.inset-page-shell)) {
                 padding: 14px !important;
             }
 
@@ -26920,5 +26931,152 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         flex: 1 1 0;
         text-align: center;
         justify-content: center;
+    }
+
+    /* Inset (dashboard, welcome, hubs) — mesma coluna e padding interno dos cards */
+    body.layout-inset-shell .content.content--no-header:has(.inset-page-shell) {
+        padding-top: 8px !important;
+        padding-bottom: 4px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    body.layout-inset-shell .inset-page-content .unio-card,
+    body.layout-inset-shell .inset-page-content .onboarding-checklist,
+    body.layout-inset-shell .inset-page-content .unio-chart-section,
+    body.layout-inset-shell .inset-page-content .dashboard-hero,
+    body.layout-inset-shell .inset-page-content .welcome-present-highlights {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 16px !important;
+    }
+
+    body.layout-inset-shell .inset-page-content .dashboard-kpi-card {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    body.layout-inset-shell .inset-page-content .dashboard-section-head,
+    body.layout-inset-shell .inset-page-content .dashboard-page-toolbar,
+    body.layout-inset-shell .inset-page-content .unio-charts-panel-header {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Primeiros passos — título em bloco, ações abaixo */
+    body.layout-inset-shell .onboarding-checklist__head {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    body.layout-inset-shell .onboarding-checklist__title {
+        font-size: 17px;
+        line-height: 1.35;
+        text-wrap: balance;
+    }
+
+    body.layout-inset-shell .onboarding-checklist__actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    body.layout-inset-shell .onboarding-checklist__step {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    body.layout-inset-shell .onboarding-checklist__body {
+        flex: 1 1 calc(100% - 34px);
+        min-width: 0;
+    }
+
+    body.layout-inset-shell .onboarding-checklist__cta,
+    body.layout-inset-shell .onboarding-checklist__done-badge {
+        margin-left: auto;
+    }
+
+    /* Gráficos — cabeçalho empilhado, textos alinhados à coluna */
+    body.layout-inset-shell .unio-charts-panel-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    body.layout-inset-shell .unio-chart-section-head {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+            "icon text"
+            "count count";
+        align-items: start;
+        column-gap: 12px;
+        row-gap: 8px;
+    }
+
+    body.layout-inset-shell .unio-chart-section-icon {
+        grid-area: icon;
+    }
+
+    body.layout-inset-shell .unio-chart-section-head-text {
+        grid-area: text;
+        min-width: 0;
+    }
+
+    body.layout-inset-shell .unio-chart-section-count {
+        grid-area: count;
+        justify-self: start;
+        white-space: normal;
+    }
+
+    body.layout-inset-shell .unio-chart-section-title,
+    body.layout-inset-shell .unio-chart-section-sub,
+    body.layout-inset-shell .unio-chart-card-title,
+    body.layout-inset-shell .unio-chart-card-desc {
+        text-wrap: balance;
+    }
+
+    body.layout-inset-shell .unio-chart-card-head {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    body.layout-inset-shell .unio-chart-kpi {
+        align-self: flex-start;
+        text-align: left;
+    }
+
+    body.layout-inset-shell .unio-chart-canvas-wrap--hero {
+        min-height: 260px;
+        height: min(260px, 55vw);
+    }
+
+    body.layout-inset-shell .unio-charts-executive {
+        grid-template-columns: 1fr;
+    }
+
+    body.layout-inset-shell .dashboard-hero-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    body.layout-inset-shell .dashboard-hero-datetime-compact {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+
+    body.layout-inset-shell .dashboard-hero--compact .dashboard-hero-greeting {
+        font-size: 22px;
+        text-wrap: balance;
+    }
+
+    body.layout-inset-shell .dashboard-hero-subtitle {
+        text-wrap: balance;
     }
 }
