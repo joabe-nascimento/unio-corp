@@ -45,7 +45,7 @@
         {% set _selected_label = label|default('Filtrar') %}
         {% for opt in options|default([]) %}
             {% if opt is iterable and opt.label is defined %}
-                {% set _opt_val = opt.value|default(opt.label) %}
+                {% set _opt_val = opt.value ?? opt.label %}
                 {% set _is_selected = (value is defined and value is not null and value|length > 0 and value == _opt_val)
                     or (loop.first and (value is not defined or value is null or value|length == 0)) %}
                 {% if _is_selected %}{% set _selected_label = opt.label %}{% endif %}
@@ -66,7 +66,7 @@
                     {% for attr, val in _select_attrs %}{{ attr }}="{{ val }}" {% endfor %}>
                 {% for opt in options|default([]) %}
                     {% if opt is iterable and opt.label is defined %}
-                        {% set _opt_val = opt.value|default(opt.label) %}
+                        {% set _opt_val = opt.value ?? opt.label %}
                         {% set _is_selected = (value is defined and value is not null and value|length > 0 and value == _opt_val)
                             or (loop.first and (value is not defined or value is null or value|length == 0)) %}
                         <option value="{{ _opt_val }}"{% if _is_selected %} selected{% endif %}>
