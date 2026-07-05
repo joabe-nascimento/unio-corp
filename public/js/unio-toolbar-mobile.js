@@ -259,7 +259,17 @@
     }
 
     function isMobileShell() {
-        return window.innerWidth < 992 && !!document.querySelector('.shell-mobile-nav');
+        if (window.UnioMobileShellSync && typeof window.UnioMobileShellSync.isMobileShell === 'function') {
+            return window.UnioMobileShellSync.isMobileShell();
+        }
+        if (!window.matchMedia('(max-width: 1199.98px)').matches) {
+            return false;
+        }
+        var nav = document.querySelector('.shell-mobile-nav');
+        if (!nav) {
+            return false;
+        }
+        return window.getComputedStyle(nav).display !== 'none';
     }
 
     function resolveFab(host) {
@@ -271,11 +281,20 @@
     }
 
     function portalFabs() {
-        if (!isMobileShell()) return;
+        if (!isMobileShell()) {
+            document.querySelectorAll('.toolbar-mobile-fab[data-toolbar-offcanvas-host]').forEach(function (fab) {
+                var hostId = fab.getAttribute('data-toolbar-offcanvas-host');
+                var host = document.querySelector('[data-toolbar-controls-dual][data-toolbar-offcanvas-id="' + hostId + '"]');
+                if (host && fab.parentElement !== host) {
+                    host.appendChild(fab);
+                }
+            });
+            return;
+        }
         document.querySelectorAll('[data-toolbar-controls-dual]').forEach(function (host) {
             var fab = host.querySelector('.toolbar-mobile-fab');
             var id = host.getAttribute('data-toolbar-offcanvas-id');
-            if (!fab || !id) return;
+            if (!fab || !id || fab.hidden) return;
             fab.setAttribute('data-toolbar-offcanvas-host', id);
             if (fab.parentElement !== document.body) {
                 document.body.appendChild(fab);
@@ -416,6 +435,9 @@
         discoverFilterRows().forEach(autoWrapRow);
         portalFabs();
         hideEmptyDuals();
+        if (window.UnioMobileShellSync && typeof window.UnioMobileShellSync.sync === 'function') {
+            window.UnioMobileShellSync.sync();
+        }
     }
 
     document.addEventListener('click', function (e) {
@@ -446,5 +468,8 @@
     window.addEventListener('resize', function () {
         portalFabs();
         hideEmptyDuals();
+        if (window.UnioMobileShellSync && typeof window.UnioMobileShellSync.sync === 'function') {
+            window.UnioMobileShellSync.sync();
+        }
     });
 })();

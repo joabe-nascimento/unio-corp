@@ -13,11 +13,61 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
     {% include 'components/vendor_styles.html.twig' %}
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
+    <script>(function(){var m=window.matchMedia('(max-width:1199.98px)');function s(){document.documentElement.classList.toggle('shell-drawer',m.matches);}s();if(m.addEventListener){m.addEventListener('change',s);}else{m.addListener(s);}})();</script>
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=334">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=344">
     {% set _shell_polish_css = app.debug ? 'css/unio-shell-polish.css' : 'css/unio-shell-polish.min.css' %}
     <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=28">
+
+    <style id="unio-shell-drawer-critical">
+    html.shell-drawer body.layout-inset-shell .wrapper { flex-direction: column !important; }
+    html.shell-drawer body.layout-inset-shell .app-inset-main { width: 100% !important; max-width: 100% !important; flex: 1 1 auto !important; }
+    html.shell-drawer body.layout-inset-shell .main-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        float: none !important;
+        flex: none !important;
+    }
+    html.shell-drawer body.layout-inset-shell:not(.sidebar-open) .main-sidebar,
+    html.shell-drawer body.layout-inset-shell.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar {
+        display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        flex: 0 0 0 !important;
+        transform: translateX(-100%) !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        overflow: hidden !important;
+    }
+    @media (max-width: 1199.98px) {
+        body.layout-inset-shell .wrapper { flex-direction: column !important; }
+        body.layout-inset-shell .app-inset-main { width: 100% !important; max-width: 100% !important; flex: 1 1 auto !important; }
+        body.layout-inset-shell .main-sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            float: none !important;
+            flex: none !important;
+        }
+        body.layout-inset-shell:not(.sidebar-open) .main-sidebar,
+        body.layout-inset-shell.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar {
+            display: none !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            flex: 0 0 0 !important;
+            transform: translateX(-100%) !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            overflow: hidden !important;
+        }
+    }
+    </style>
 
     {% block stylesheets %}{% endblock %}
     {% if app.user %}
@@ -25,7 +75,46 @@
     {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
-<body class="hold-transition sidebar-mini layout-fixed layout-inset-shell"{% block body_attrs %}{% endblock %}>
+<body class="hold-transition sidebar-mini sidebar-collapse layout-fixed layout-inset-shell"{% block body_attrs %}{% endblock %}>
+<script>
+(function () {
+    'use strict';
+    var DRAWER_MQ = window.matchMedia('(max-width: 1199.98px)');
+    var NAV_FLAG = 'unio-shell-close-sidebar';
+
+    function isDrawerViewport() {
+        return DRAWER_MQ.matches;
+    }
+
+    function resetMobileSidebar() {
+        if (!isDrawerViewport() || !document.body) return;
+        document.body.classList.add('sidebar-collapse');
+        document.body.classList.remove('sidebar-open', 'sidebar-closed', 'sidebar-is-opening');
+        var overlay = document.getElementById('sidebar-overlay');
+        if (overlay) overlay.remove();
+    }
+
+    if (sessionStorage.getItem(NAV_FLAG) === '1') {
+        sessionStorage.removeItem(NAV_FLAG);
+    }
+    resetMobileSidebar();
+    document.addEventListener('DOMContentLoaded', resetMobileSidebar);
+    window.addEventListener('pageshow', resetMobileSidebar);
+    window.addEventListener('pagehide', resetMobileSidebar);
+    window.addEventListener('load', resetMobileSidebar);
+
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-shell-mobile-action="open-sidebar"], [data-unio-shell-toggle="sidebar"]')) return;
+        if (!isDrawerViewport()) return;
+        var link = e.target.closest('a[href]');
+        if (!link) return;
+        var href = link.getAttribute('href') || '';
+        if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
+        sessionStorage.setItem(NAV_FLAG, '1');
+        document.body.classList.remove('sidebar-open', 'sidebar-closed', 'sidebar-is-opening');
+    }, true);
+})();
+</script>
 <a href="#main-content-focus" class="skip-link">Pular para o conteúdo</a>
 <div class="wrapper">
 
@@ -73,7 +162,7 @@
 
     {# ── Top Navbar (Vitória, apps) — dentro do painel branco ── #}
     <nav class="main-header navbar navbar-expand navbar-dark">
-        <a class="nav-link nav-toggle-btn" data-widget="pushmenu" href="#" role="button" aria-label="Alternar menu lateral">
+        <a class="nav-link nav-toggle-btn" data-unio-shell-toggle="sidebar" href="#" role="button" aria-label="Alternar menu lateral">
             <span class="nav-toggle-icon" aria-hidden="true">
                 <span class="nav-toggle-bars">
                     <span class="nav-toggle-line"></span>
@@ -186,27 +275,31 @@
 
 {% include 'components/vendor_scripts_core.html.twig' %}
 <script>
-window.addEventListener('load', function () {
+function runShellSidebarControls() {
     if (typeof jQuery === 'undefined') return;
-    var $body = jQuery('body');
-    var $pushMenu = jQuery('[data-widget="pushmenu"]');
-    var MOBILE_BP = 992;
+    if (window.__UNIO_SHELL_SIDEBAR_INIT__) return;
+    window.__UNIO_SHELL_SIDEBAR_INIT__ = true;
 
-    function isMobile() {
-        return window.innerWidth < MOBILE_BP;
+    var $body = jQuery('body');
+    var $toggle = jQuery('[data-unio-shell-toggle="sidebar"]');
+    var DRAWER_MQ = window.matchMedia('(max-width: 1199.98px)');
+
+    function isDrawer() {
+        return DRAWER_MQ.matches;
     }
 
     var desktopSidebarCollapsed = null;
 
-    function applyMobileSidebar() {
-        if (isMobile()) {
+    function applyShellSidebar() {
+        jQuery('#sidebar-overlay').remove();
+        if (isDrawer()) {
             if (desktopSidebarCollapsed === null) {
                 desktopSidebarCollapsed = $body.hasClass('sidebar-collapse');
             }
             $body.addClass('sidebar-collapse');
-            $body.removeClass('sidebar-open');
+            $body.removeClass('sidebar-open sidebar-closed sidebar-is-opening');
         } else {
-            $body.removeClass('sidebar-open');
+            $body.removeClass('sidebar-open sidebar-closed sidebar-is-opening');
             if (desktopSidebarCollapsed !== null) {
                 $body.toggleClass('sidebar-collapse', desktopSidebarCollapsed);
                 desktopSidebarCollapsed = null;
@@ -214,41 +307,77 @@ window.addEventListener('load', function () {
         }
     }
 
-    applyMobileSidebar();
+    function closeDrawer() {
+        $body.removeClass('sidebar-open sidebar-closed sidebar-is-opening');
+    }
+
+    function toggleDrawer() {
+        $body.toggleClass('sidebar-open');
+        $body.removeClass('sidebar-closed sidebar-is-opening');
+    }
+
+    function toggleDesktopSidebar() {
+        $body.toggleClass('sidebar-collapse');
+    }
+
+    function shouldCloseOnNav(href) {
+        if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return false;
+        try {
+            var url = new URL(href, window.location.href);
+            return url.origin === window.location.origin;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    applyShellSidebar();
 
     var resizeTimer;
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(applyMobileSidebar, 150);
+        resizeTimer = setTimeout(applyShellSidebar, 150);
     });
 
-    function closeMobileSidebar() {
-        $body.removeClass('sidebar-open');
-    }
-
-    function toggleMobileSidebar() {
-        $body.toggleClass('sidebar-open');
-    }
-
-    jQuery(document).on('click', function (e) {
-        if (!isMobile() || !$body.hasClass('sidebar-open')) return;
-        if (jQuery(e.target).closest('.main-sidebar, [data-widget="pushmenu"], .shell-mobile-nav').length) return;
-        closeMobileSidebar();
+    jQuery(document).on('click.unioShellDrawer', function (e) {
+        if (!isDrawer() || !$body.hasClass('sidebar-open')) return;
+        if (jQuery(e.target).closest('.main-sidebar, [data-unio-shell-toggle="sidebar"], .shell-mobile-nav').length) return;
+        closeDrawer();
     });
 
-    jQuery('[data-widget="treeview"]').on('expanded.lte.treeview', function () {
-        if ($body.hasClass('sidebar-mini') && $body.hasClass('sidebar-collapse') && !isMobile()) {
-            $pushMenu.PushMenu('expand');
+    jQuery(document).on('click.unioShellNav', 'a[href]', function () {
+        if (!isDrawer()) return;
+        if (shouldCloseOnNav(this.getAttribute('href') || '')) {
+            try { sessionStorage.setItem('unio-shell-close-sidebar', '1'); } catch (err) {}
+            closeDrawer();
         }
     });
 
-    jQuery(document).on('click', '[data-shell-mobile-action="open-sidebar"]', function (e) {
+    jQuery('[data-widget="treeview"]').on('expanded.lte.treeview', function () {
+        if ($body.hasClass('sidebar-mini') && $body.hasClass('sidebar-collapse') && !isDrawer()) {
+            $body.removeClass('sidebar-collapse');
+        }
+    });
+
+    jQuery(document).on('click.unioShellMenu', '[data-shell-mobile-action="open-sidebar"]', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        if (!isMobile()) return;
-        toggleMobileSidebar();
+        if (!isDrawer()) return;
+        toggleDrawer();
     });
-});
+
+    $toggle.off('click.unioShellToggle').on('click.unioShellToggle', function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (isDrawer()) {
+            toggleDrawer();
+        } else {
+            toggleDesktopSidebar();
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', runShellSidebarControls);
+window.addEventListener('load', runShellSidebarControls);
 </script>
 <script>
 (function () {
@@ -322,7 +451,8 @@ window.addEventListener('load', function () {
 </script>
 <script src="{{ asset('js/unio-file-upload.js') }}?v=2"></script>
 <script src="{{ asset('js/unio-offcanvas.js') }}?v=2"></script>
-<script src="{{ asset('js/unio-toolbar-mobile.js') }}?v=8"></script>
+<script src="{{ asset('js/unio-mobile-shell-sync.js') }}?v=8"></script>
+<script src="{{ asset('js/unio-toolbar-mobile.js') }}?v=10"></script>
 <script src="{{ asset('js/unio-filter-select.js') }}?v=3"></script>
 <script src="{{ asset('js/unio-table-pager.js') }}?v=1"></script>
 <script src="{{ asset('js/unio-color-picker.js') }}?v=2"></script>

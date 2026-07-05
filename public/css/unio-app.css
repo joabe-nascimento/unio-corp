@@ -4002,7 +4002,8 @@
             color: var(--text-2);
         }
 
-        [data-widget="pushmenu"] { color: var(--text-2) !important; }
+        [data-widget="pushmenu"],
+        [data-unio-shell-toggle="sidebar"] { color: var(--text-2) !important; }
         .navbar-nav .nav-link    { color: var(--text-2) !important; }
         .main-header .nav-toggle-btn.nav-link {
             background: transparent !important;
@@ -26024,7 +26025,7 @@ body.layout-inset-shell .main-sidebar::before {
     display: none !important;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
     body.layout-inset-shell.sidebar-mini.sidebar-collapse .main-sidebar {
         width: 4.6rem !important;
         min-width: 4.6rem !important;
@@ -26431,20 +26432,28 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
     background: var(--inset-panel-bg);
 }
 
-/* Sidebar colapsada — expansão flex, sem sombra de overlay (desktop) */
-@media (min-width: 992px) {
+/* Sidebar colapsada — expansão flex, sem sombra de overlay (desktop ≥1200px) */
+@media (min-width: 1200px) {
     body.layout-inset-shell.sidebar-mini.sidebar-collapse .main-sidebar:hover,
     body.layout-inset-shell.sidebar-mini.sidebar-open .main-sidebar {
         box-shadow: none !important;
     }
 }
 
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
     body.layout-inset-shell .wrapper {
-        display: block;
+        display: flex;
+        flex-direction: column;
         max-height: none;
         overflow: visible;
         padding: var(--inset-gap);
+    }
+
+    body.layout-inset-shell .app-inset-main {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
     }
 
     body.layout-inset-shell .wrapper:has(.chat-page),
@@ -26455,7 +26464,7 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
     }
 
     /*
-     * Drawer mobile — sobrescreve position:relative do layout-fixed (flex desktop).
+     * Drawer mobile/tablet — sobrescreve position:relative do layout-fixed (flex desktop).
      * Sem isso a sidebar fica no fluxo do documento e empurra o painel para baixo.
      */
     body.layout-inset-shell.layout-fixed .main-sidebar,
@@ -26479,6 +26488,16 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
     body.layout-inset-shell:not(.sidebar-open) .main-sidebar {
         transform: translateX(-100%) !important;
         box-shadow: none !important;
+        display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        flex: 0 0 0 !important;
+        overflow: hidden !important;
+    }
+
+    body.layout-inset-shell.sidebar-open .main-sidebar {
+        display: flex !important;
+        flex-direction: column !important;
     }
 
     body.layout-inset-shell.sidebar-open .main-sidebar,
@@ -26494,6 +26513,27 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
     body.layout-inset-shell.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover {
         transform: translateX(-100%) !important;
         box-shadow: none !important;
+        width: var(--sidebar-width-hover, var(--sidebar-width, 280px)) !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+
+    /* Anula mini-sidebar inline (4.6rem) do desktop dentro do drawer */
+    body.layout-inset-shell.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar {
+        width: var(--sidebar-width-hover, var(--sidebar-width, 280px)) !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        flex: none !important;
+    }
+
+    body.layout-inset-shell:not(.sidebar-open) .main-sidebar {
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    body.layout-inset-shell.sidebar-open .main-sidebar {
+        visibility: visible;
+        pointer-events: auto;
     }
 
     body.layout-inset-shell.sidebar-open::before {
@@ -26740,15 +26780,17 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
     font-variant-numeric: tabular-nums;
 }
 
-/* ═══ Mobile shell — barra inferior + respiro do conteúdo (≤991px) ═══ */
+/* ═══ Mobile shell — barra inferior + respiro do conteúdo (≤1199px, alinhado ao drawer) ═══ */
 .shell-mobile-nav {
     display: none;
 }
 
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
     body.layout-inset-shell:has(.shell-mobile-nav) {
         --shell-mobile-nav-height: 68px;
         --shell-mobile-nav-offset: calc(var(--shell-mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+        --shell-mobile-fab-extra: 0px;
+        --shell-mobile-content-pad: calc(var(--shell-mobile-nav-offset) + var(--shell-mobile-fab-extra) + 16px);
     }
 
     .shell-mobile-nav {
@@ -26862,6 +26904,13 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         flex: 1 1 auto;
         min-height: 0;
         padding-bottom: var(--shell-mobile-nav-offset);
+        box-sizing: border-box;
+    }
+
+    .shell-mobile-scroll-spacer {
+        width: 100%;
+        flex-shrink: 0;
+        pointer-events: none;
     }
 
     body.layout-inset-shell:has(.shell-mobile-nav) .app-page-scroll > .main-footer {
@@ -26892,11 +26941,36 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
     }
 
     body.layout-inset-shell:has(.shell-mobile-nav) .app-page-scroll {
-        scroll-padding-bottom: var(--shell-mobile-nav-offset);
+        scroll-padding-bottom: var(--shell-mobile-content-pad);
         -webkit-overflow-scrolling: touch;
     }
 
-    /* FAB de filtros — portal no body; posição fixa acima da barra inferior */
+    body.layout-inset-shell:has(.shell-mobile-nav) .app-page-scroll > .content {
+        padding-bottom: var(--shell-mobile-content-pad);
+    }
+
+    /* Hub/listagens com toolbar — anula padding: 0 !important do .content--with-toolbar */
+    body.layout-inset-shell:has(.shell-mobile-nav) .app-page-scroll > .content.content--with-toolbar {
+        padding-bottom: var(--shell-mobile-content-pad) !important;
+    }
+
+    body.layout-inset-shell:has(.shell-mobile-nav) .page-body-inner,
+    body.layout-inset-shell:has(.shell-mobile-nav) .rh-hub,
+    body.layout-inset-shell:has(.shell-mobile-nav) .welcome-page-inner {
+        padding-bottom: var(--shell-mobile-content-pad);
+    }
+
+    /* FAB de filtros — só visível no body (portal JS); oculto no chrome/toolbar */
+    body.layout-inset-shell:has(.shell-mobile-nav) .app-page-chrome .toolbar-mobile-fab,
+    body.layout-inset-shell:has(.shell-mobile-nav) .section-toolbar .toolbar-mobile-fab,
+    body.layout-inset-shell:has(.shell-mobile-nav) .toolbar-controls-dual .toolbar-mobile-fab {
+        display: none !important;
+    }
+
+    body.layout-inset-shell:has(.shell-mobile-nav) > .toolbar-mobile-fab:not([hidden]) {
+        display: inline-flex !important;
+    }
+
     body.layout-inset-shell:has(.shell-mobile-nav) .toolbar-mobile-fab:not([hidden]) {
         position: fixed;
         right: 16px;
@@ -27074,6 +27148,10 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         padding-right: 0 !important;
     }
 
+    body.layout-inset-shell:has(.shell-mobile-nav) .content.content--no-header:has(.inset-page-shell) {
+        padding-bottom: var(--shell-mobile-content-pad) !important;
+    }
+
     body.layout-inset-shell .inset-page-shell .inset-page-content,
     body.layout-inset-shell .dashboard-page-shell .inset-page-content,
     body.layout-inset-shell .welcome-page-shell .inset-page-content {
@@ -27206,9 +27284,8 @@ body.layout-inset-shell .container-fluid--page-body:has(.empty-state-panel) {
         padding-bottom: 16px;
     }
 
-    body.layout-inset-shell:has(.shell-mobile-nav) .page-body-inner,
-    body.layout-inset-shell:has(.shell-mobile-nav) .inset-page-content {
-        padding-bottom: 24px;
+    body.layout-inset-shell:has(.shell-mobile-nav) .page-body-inner {
+        padding-bottom: var(--shell-mobile-content-pad);
     }
 
     body.layout-inset-shell:has(.shell-mobile-nav) .inset-page-content > .onboarding-checklist {
