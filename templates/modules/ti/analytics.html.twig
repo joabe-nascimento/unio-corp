@@ -1,15 +1,26 @@
 {% extends 'modules/ti/_base.html.twig' %}
 {% block ti_section_content %}
+{% set _has_volume = analytics_volume|default([])|filter(row => row.opened|default(0) > 0 or row.resolved|default(0) > 0)|length > 0 %}
 <section class="unio-card mb-4">
     {% include 'components/section_header.html.twig' with {
         title: 'Volume de chamados',
         subtitle: 'Abertos vs resolvidos — últimos 6 meses',
-        btn_label: ti_can('export_analytics') ? 'Exportar CSV' : null,
-        btn_href: ti_can('export_analytics') ? path('app_ti_analytics_export') : null,
+        btn_label: _has_volume and ti_can('export_analytics') ? 'Exportar CSV' : null,
+        btn_href: _has_volume and ti_can('export_analytics') ? path('app_ti_analytics_export') : null,
         btn_icon: 'fa-download',
         btn_ghost: true
     } %}
+    {% if _has_volume %}
     <div class="ti-chart-host" id="tiVolumeChart" role="img" aria-label="Gráfico volume chamados"></div>
+    {% else %}
+    {% include 'components/chart_empty_slot.html.twig' with {
+        icon: 'fa-chart-column',
+        title: 'Sem chamados no período',
+        text: 'Abra ou importe chamados para visualizar volume aberto vs resolvido nos últimos 6 meses.',
+        btn_label: ti_can('create_chamado') ? 'Abrir chamado' : null,
+        btn_href: ti_can('create_chamado') ? path('app_ti_chamados') : null
+    } %}
+    {% endif %}
 </section>
 
 <section class="unio-card mb-4">

@@ -19,34 +19,37 @@
     toolbar_actions
     toolbar_filters
     toolbar_subnav
+
+  Voltar: usa page_back_route (global via PageBackResolver) com page_back_link componentizado.
 #}
 {% set _is_page = page_title is defined and page_title %}
 {% set _search_in_top = search_in_top|default(false) %}
 {% set _search_hidden = search_hidden is defined ? search_hidden : (_is_page and not _search_in_top) %}
 {% set _filters_in_top = filters_in_top|default(false) %}
-{% set _show_toolbar_end = _filters_in_top or not _search_hidden %}
+{% set _show_page_back = page_back_route|default(null) and not page_back_hide|default(false) %}
+{% set _show_actions = not _is_page or actions_in_top|default(false) %}
+{% set _toolbar_actions_html = block('toolbar_actions')|trim %}
+{% set _actions_on_right = _show_page_back and _toolbar_actions_html != '' %}
+{% set _back_first = _show_page_back or (actions_before_title|default(false) and _show_actions) %}
+{% set _show_toolbar_end = _filters_in_top or not _search_hidden or _actions_on_right %}
 <div class="list-toolbar{% if _is_page %} list-toolbar--page{% else %} unio-card mb-3{% endif %}">
     <div class="list-toolbar-main">
-        {% set _back_first = actions_before_title|default(false) and actions_in_top|default(false) %}
-        {% set _show_actions = not _is_page or actions_in_top|default(false) %}
         <div class="list-toolbar-left{% if _back_first %} list-toolbar-left--back-first{% else %} list-toolbar-left--stacked{% endif %}">
-            {% if _back_first and _show_actions %}
+            {% if _back_first %}
                 <div class="list-toolbar-actions list-toolbar-back">
-                    {{ block('toolbar_actions') }}
+                    {% if _show_page_back %}
+                        {% include 'components/page_back_link.html.twig' with {
+                            href: path(page_back_route, page_back_route_params|default({})),
+                            label: 'Voltar',
+                            icon_only: true
+                        } %}
+                    {% elseif _show_actions %}
+                        {{ block('toolbar_actions') }}
+                    {% endif %}
                 </div>
             {% endif %}
             <div class="list-toolbar-heading">
                 {% if _is_page %}
-                    {% if page_back_route|default(null) and not page_back_hide|default(false) %}
-                        {% include 'components/page_back_link.html.twig' with {
-                            href: path(page_back_route, page_back_route_params|default({})),
-                            label: 'Voltar',
-                            icon_only: true,
-                            small: true,
-                            inline: true,
-                            bare: true
-                        } %}
-                    {% endif %}
                     <div class="list-toolbar-heading-text">
                         <h1 class="list-toolbar-title">{{ page_title }}</h1>
                         {% if page_subtitle|default('') %}
@@ -55,7 +58,7 @@
                     </div>
                 {% endif %}
             </div>
-            {% if not _back_first and _show_actions %}
+            {% if not _back_first and _show_actions and not _actions_on_right %}
                 <div class="list-toolbar-actions">
                     {{ block('toolbar_actions') }}
                 </div>
@@ -63,6 +66,12 @@
         </div>
         {% if _show_toolbar_end %}
             <div class="list-toolbar-end">
+                {% if _actions_on_right %}
+                    <div class="list-toolbar-actions list-toolbar-actions--top-end">
+                        {{ block('toolbar_actions') }}
+                    </div>
+                {% endif %}
+                {% if _filters_in_top or not _search_hidden %}
                 {% set _route = app.request.attributes.get('_route')|default('page') %}
                 {% set _offcanvas_id = offcanvas_id|default('list-toolbar-filters-' ~ _route|replace({'.': '-'})) %}
                 {% embed 'components/toolbar_controls_dual.html.twig' with {
@@ -81,6 +90,7 @@
                         {% endif %}
                     {% endblock %}
                 {% endembed %}
+                {% endif %}
             </div>
         {% endif %}
     </div>

@@ -1,19 +1,34 @@
 {# Gráfico de headcount — Chart.js via Stimulus (POC Symfony UX Chartjs) #}
-{% if headcount_trend is defined and headcount_trend.values|default([])|length > 0 %}
+{% set _trend = headcount_trend|default(null) %}
+{% set _values = _trend.values|default([]) %}
+{% set _ativos = ativos|default(0) %}
+{% set _has_chart_data = _ativos > 0 and _values|length > 0 %}
 <div class="rh-hub-chart-card unio-card">
     <div class="rh-hub-chart-head">
         <div>
             <p class="rh-hub-chart-label">Tendência</p>
             <h3 class="rh-hub-chart-title">Headcount · 6 meses</h3>
         </div>
-        <span class="rh-hub-chart-badge">{{ ativos|default(0) }} ativos hoje</span>
+        <span class="rh-hub-chart-badge">{{ _ativos }} ativos hoje</span>
     </div>
+    {% if _has_chart_data %}
     <div class="rh-hub-chart-canvas-wrap">
         <canvas data-controller="unio-chart"
                 data-unio-chart-type-value="line"
                 data-unio-chart-label-value="Colaboradores ativos"
-                data-unio-chart-labels-value="{{ headcount_trend.labels|json_encode|e('html_attr') }}"
-                data-unio-chart-values-value="{{ headcount_trend.values|json_encode|e('html_attr') }}"></canvas>
+                data-unio-chart-labels-value="{{ _trend.labels|json_encode|e('html_attr') }}"
+                data-unio-chart-values-value="{{ _values|json_encode|e('html_attr') }}"></canvas>
     </div>
+    {% else %}
+    <div class="rh-hub-chart-empty">
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-users',
+            title: 'Sem colaboradores ativos',
+            text: 'Cadastre funcionários para acompanhar a evolução do headcount nos últimos 6 meses.',
+            btn_label: 'Ver funcionários',
+            btn_href: path('app_rh_funcionarios'),
+            compact: true
+        } %}
+    </div>
+    {% endif %}
 </div>
-{% endif %}

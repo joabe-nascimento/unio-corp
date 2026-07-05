@@ -75,6 +75,18 @@ final class PageBackResolver
         'app_ti_novidade_novo_submit' => 'app_ti_novidades',
         'app_ti_novidade_editar_submit' => 'app_ti_novidades',
         'app_ti_novidade_excluir' => 'app_ti_novidades',
+        'app_ti_kb' => 'app_ti',
+        'app_ti_kb_novo_submit' => 'app_ti_kb',
+        'app_ti_kb_editar_submit' => 'app_ti_kb',
+        'app_ti_kb_excluir' => 'app_ti_kb',
+        'app_ti_problemas' => 'app_ti',
+        'app_ti_problema_novo_submit' => 'app_ti_problemas',
+        'app_ti_problema_editar_submit' => 'app_ti_problemas',
+        'app_ti_problema_excluir' => 'app_ti_problemas',
+        'app_ti_catalogo_novo' => 'app_ti_catalogo',
+        'app_ti_catalogo_editar' => 'app_ti_catalogo',
+        'app_ti_catalogo_excluir' => 'app_ti_catalogo',
+        'app_ti_manutencao_aprovar' => 'app_ti_manutencoes',
         'app_expansao' => 'app_dashboard',
         'app_qualidade' => 'app_dashboard',
         'app_facilities' => 'app_dashboard',
@@ -137,14 +149,30 @@ final class PageBackResolver
         'app_terceiros' => 'app_dashboard',
         'app_publicidade' => 'app_dashboard',
         'app_admin' => 'app_dashboard',
+        'app_admin_configuracoes' => 'app_admin',
+        'app_admin_usuarios' => 'app_admin',
+        'app_admin_empresas' => 'app_admin',
+        'app_admin_operacoes' => 'app_admin',
         'app_welcome_news_show' => 'app_welcome',
+        'app_pessoas_equipe_detalhe' => 'app_pessoas_equipes',
+        'app_pessoas_membro_ficha' => 'app_pessoas_membros',
+        'app_pessoas_cargo_editar' => 'app_pessoas_cargos',
+        'app_pessoas_equipe_nova' => 'app_pessoas_equipes',
+        'app_pessoas_equipe_editar' => 'app_pessoas_equipe_detalhe',
+        'app_pessoas_membro_novo' => 'app_pessoas_membros',
+        'app_pessoas_membro_editar' => 'app_pessoas_membro_ficha',
+        'app_rh_admissao_show' => 'app_rh_admissoes',
+        'app_rh_demissao_show' => 'app_rh_demissoes',
+        'app_rh_funcionario_show' => 'app_rh_funcionarios',
         'app_cortex' => 'app_dashboard',
     ];
 
     /** segmento da rota de detalhe => rota da listagem */
     private const RH_LIST_PARENT = [
         'funcionario' => 'app_rh_funcionarios',
+        'admissao' => 'app_rh_admissoes',
         'admissoes' => 'app_rh_admissoes',
+        'demissao' => 'app_rh_demissoes',
         'demissoes' => 'app_rh_demissoes',
         'ferias' => 'app_rh_ferias',
         'folha' => 'app_rh_folha',
@@ -168,6 +196,10 @@ final class PageBackResolver
                 'route' => $parentRoute,
                 'params' => $this->inheritRouteParams($parentRoute, $routeParams),
             ];
+        }
+
+        if ($currentRoute === 'app_core_projetos_show') {
+            return ['route' => 'app_core_projetos', 'params' => ['view' => 'lista']];
         }
 
         if (str_starts_with($currentRoute, 'app_rh_portal')) {
@@ -199,6 +231,16 @@ final class PageBackResolver
 
         if (str_starts_with($currentRoute, 'app_engenharia_')) {
             return $this->resolvePrefixedHub('app_engenharia', $currentRoute, []);
+        }
+
+        foreach ([
+            'app_ti_' => 'app_ti',
+            'app_integracoes_' => 'app_integracoes',
+            'app_inovacao_' => 'app_inovacao',
+        ] as $prefix => $hubRoute) {
+            if (str_starts_with($currentRoute, $prefix)) {
+                return ['route' => $hubRoute, 'params' => []];
+            }
         }
 
         return null;
@@ -265,7 +307,9 @@ final class PageBackResolver
      */
     private function inheritRouteParams(string $parentRoute, array $routeParams): array
     {
-        if (!str_ends_with($parentRoute, '_show')) {
+        if (!str_ends_with($parentRoute, '_show')
+            && !str_ends_with($parentRoute, '_detalhe')
+            && !str_ends_with($parentRoute, '_ficha')) {
             return [];
         }
 

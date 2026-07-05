@@ -1,6 +1,7 @@
 {% extends 'modules/inovacao/_base.html.twig' %}
 
 {% block inov_section_content %}
+{% set _has_funnel = funnel|default([])|filter(stage => stage.count|default(0) > 0)|length > 0 %}
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="unio-card h-100">
@@ -8,7 +9,15 @@
                 title: 'Maturidade de inovação',
                 subtitle: 'Radar multidimensional da operação'
             } %}
+            {% if radar|default([])|length > 0 %}
             <div class="inov-chart-host" id="inovRadarChart" role="img" aria-label="Radar de maturidade de inovação"></div>
+            {% else %}
+            {% include 'components/chart_empty_slot.html.twig' with {
+                icon: 'fa-bullseye',
+                title: 'Radar indisponível',
+                text: 'Cadastre ideias e experimentos para calcular a maturidade multidimensional.'
+            } %}
+            {% endif %}
         </div>
     </div>
     <div class="col-md-6 mb-4">
@@ -17,7 +26,17 @@
                 title: 'Funil de conversão',
                 subtitle: 'Volume por estágio do pipeline'
             } %}
+            {% if _has_funnel %}
             <div class="inov-chart-host inov-chart-host--funnel" id="inovFunnelChart" role="img" aria-label="Funil de experimentos"></div>
+            {% else %}
+            {% include 'components/chart_empty_slot.html.twig' with {
+                icon: 'fa-filter',
+                title: 'Pipeline vazio',
+                text: 'Registre ideias no backlog para acompanhar a conversão por estágio.',
+                btn_label: 'Abrir backlog',
+                btn_href: path('app_inovacao_backlog')
+            } %}
+            {% endif %}
         </div>
     </div>
 </div>
@@ -27,6 +46,7 @@
         title: 'Dimensões detalhadas',
         subtitle: 'Indicadores que compõem o radar de maturidade'
     } %}
+    {% if radar|default([])|length > 0 %}
     <div class="inov-card-list">
     {% for dim in radar %}
     <div class="inov-card-list-item">
@@ -42,5 +62,12 @@
     </div>
     {% endfor %}
     </div>
+    {% else %}
+    {% include 'components/chart_empty_slot.html.twig' with {
+        icon: 'fa-sliders',
+        title: 'Sem dimensões calculadas',
+        text: 'A maturidade aparece aqui quando houver ideias e movimentações no pipeline.'
+    } %}
+    {% endif %}
 </section>
 {% endblock %}

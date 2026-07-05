@@ -1,11 +1,14 @@
 {#
-  recrutamento/hub_back_link — voltar ao núcleo ou tela pai
+  recrutamento/hub_back_link — legado; prefira page_back_route automático + page_back_link
 
   Props:
     href   (string, default app_recrutamento)
     label  (string, default 'Recrutamento')
     icon   (string, FA icon without fa- prefix, default 'arrow-left')
 #}
-<a href="{{ href|default(path('app_recrutamento')) }}" class="btn-unio-ghost btn-sm recrutamento-hub-back">
-    <i class="fas fa-{{ icon|default('arrow-left') }} mr-1" aria-hidden="true"></i> {{ label|default('Recrutamento') }}
-</a>
+{% include 'components/page_back_link.html.twig' with {
+    href: href|default(path('app_recrutamento')),
+    label: label|default('Recrutamento'),
+    icon: 'fa-' ~ icon|default('arrow-left'),
+    icon_only: true
+} %}

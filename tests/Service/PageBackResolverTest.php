@@ -77,4 +77,55 @@ class PageBackResolverTest extends TestCase
         $this->assertSame('app_pos_operatorio_pacientes', $back['route']);
         $this->assertSame([], $back['params']);
     }
+
+    public function testTiKbBackToTiHub(): void
+    {
+        $back = $this->resolver->resolve('app_ti_kb');
+        $this->assertNotNull($back);
+        $this->assertSame('app_ti', $back['route']);
+    }
+
+    public function testAdminConfiguracoesBackToAdmin(): void
+    {
+        $back = $this->resolver->resolve('app_admin_configuracoes');
+        $this->assertNotNull($back);
+        $this->assertSame('app_admin', $back['route']);
+    }
+
+    public function testPessoasEquipeDetalheBackToEquipesList(): void
+    {
+        $back = $this->resolver->resolve('app_pessoas_equipe_detalhe', ['id' => 5]);
+        $this->assertNotNull($back);
+        $this->assertSame('app_pessoas_equipes', $back['route']);
+    }
+
+    public function testCoreProjetosShowBackToLista(): void
+    {
+        $back = $this->resolver->resolve('app_core_projetos_show', ['id' => 1]);
+        $this->assertNotNull($back);
+        $this->assertSame('app_core_projetos', $back['route']);
+        $this->assertSame(['view' => 'lista'], $back['params']);
+    }
+
+    public function testPessoasCargoEditarBackToCargosList(): void
+    {
+        $back = $this->resolver->resolve('app_pessoas_cargo_editar', ['id' => 3]);
+        $this->assertNotNull($back);
+        $this->assertSame('app_pessoas_cargos', $back['route']);
+    }
+
+    public function testPessoasEquipeEditarBackToDetalhe(): void
+    {
+        $back = $this->resolver->resolve('app_pessoas_equipe_editar', ['id' => 5]);
+        $this->assertNotNull($back);
+        $this->assertSame('app_pessoas_equipe_detalhe', $back['route']);
+        $this->assertSame(['id' => 5], $back['params']);
+    }
+
+    public function testRhAdmissaoShowBackToList(): void
+    {
+        $back = $this->resolver->resolve('app_rh_admissao_show', ['id' => 1]);
+        $this->assertNotNull($back);
+        $this->assertSame('app_rh_admissoes', $back['route']);
+    }
 }

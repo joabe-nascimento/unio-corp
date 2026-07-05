@@ -9,12 +9,26 @@ export default class extends Controller {
     };
 
     connect() {
+        this._attempts = 0;
+        this._renderChart();
+    }
+
+    _renderChart() {
         const Chart = window.Chart;
-        if (!Chart) return;
+        if (!Chart) {
+            if (this._attempts < 40) {
+                this._attempts += 1;
+                this._retryTimer = window.setTimeout(() => this._renderChart(), 50);
+            }
+            return;
+        }
+
+        if (this.chart) return;
 
         const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4F7FFF';
         const grid = 'rgba(255,255,255,0.06)';
         const text = getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim() || '#8a96a3';
+        const maxValue = Math.max(...this.valuesValue.map((v) => Number(v) || 0));
 
         this.chart = new Chart(this.element, {
             type: this.typeValue,
@@ -50,7 +64,8 @@ export default class extends Controller {
                         ticks: { color: text, font: { size: 11 } },
                     },
                     y: {
-                        beginAtZero: false,
+                        beginAtZero: maxValue <= 1,
+                        suggestedMax: maxValue <= 1 ? 5 : undefined,
                         grid: { color: grid },
                         ticks: { color: text, font: { size: 11 }, precision: 0 },
                     },
@@ -60,6 +75,10 @@ export default class extends Controller {
     }
 
     disconnect() {
+        if (this._retryTimer) {
+            window.clearTimeout(this._retryTimer);
+            this._retryTimer = null;
+        }
         if (this.chart) {
             this.chart.destroy();
             this.chart = null;
