@@ -1,34 +1,49 @@
 {# Offcanvas CRUD — Base de Conhecimento #}
-<div class="unio-offcanvas" id="ti-kb-form" data-unio-offcanvas="ti-kb-form">
-    <div class="unio-offcanvas-backdrop" data-unio-offcanvas-close></div>
-    <div class="unio-offcanvas-panel">
-        <div class="unio-offcanvas-head">
-            <h2 class="unio-offcanvas-title section-title mb-0">Artigo KB</h2>
-            <button type="button" class="btn-unio-ghost btn-sm" data-unio-offcanvas-close aria-label="Fechar"><i class="fas fa-times"></i></button>
-        </div>
-        <form method="post" action="{{ path('app_ti_kb_novo_submit') }}" class="unio-offcanvas-body" id="tiKbForm" data-ti-infra-form="kb" data-ti-edit-url="{{ path('app_ti_kb_editar_submit', { id: 0 }) }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('ti_kb_form') }}">
-            <div class="mb-3">
-                <label class="perm-label">Título</label>
-                <input type="text" name="titulo" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="perm-label">Resumo</label>
-                <textarea name="resumo" class="form-control" rows="3" required></textarea>
-            </div>
-            <div class="mb-3">
-                <label class="perm-label">Conteúdo</label>
-                <textarea name="conteudo" class="form-control" rows="6"></textarea>
-            </div>
-            <div class="mb-3">
-                <label class="perm-label">Categoria</label>
-                <input type="text" name="categoria" class="form-control" value="geral">
-            </div>
-            <div class="mb-3">
-                <label class="perm-label">Tags (vírgula)</label>
-                <input type="text" name="tags" class="form-control" placeholder="vpn, senha, rede">
-            </div>
-            <button type="submit" class="btn-unio" data-ti-infra-submit-label="kb">Salvar artigo</button>
-        </form>
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'ti-kb-form',
+    title: 'Novo artigo KB',
+    subtitle: 'Base de conhecimento · triagem Vitória',
+    icon: 'fa-book',
+    size: 'lg',
+    open: app.request.query.getBoolean('open_novo') or (app.request.query.get('resource') == 'kb' and app.request.query.get('open_edit'))
+} %}
+    {% block offcanvas_drawer_attrs %}data-ti-infra-form="kb"{% endblock %}
+    {% block offcanvas_body %}
+    <form method="post"
+          action="{{ path('app_ti_kb_novo_submit') }}"
+          class="unio-form"
+          id="tiKbForm"
+          data-ti-infra-form-el="kb"
+          data-ti-edit-url="{{ path('app_ti_kb_editar_submit', { id: 0 }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('ti_kb_form') }}">
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_kb_titulo', name: 'titulo', label: 'Título',
+            placeholder: 'Ex.: VPN pós-patch Windows', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_kb_resumo', name: 'resumo', label: 'Resumo', type: 'textarea',
+            rows: 3, placeholder: 'Descrição curta para listagens…', required: true
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_kb_conteudo', name: 'conteudo', label: 'Conteúdo', type: 'textarea',
+            rows: 8, placeholder: 'Runbook completo (opcional)'
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_kb_categoria', name: 'categoria', label: 'Categoria',
+            value: 'geral', placeholder: 'geral, rede, acesso…'
+        } %}
+        {% include 'components/unio_form_field.html.twig' with {
+            id: 'ti_kb_tags', name: 'tags', label: 'Tags (vírgula)',
+            placeholder: 'vpn, senha, rede'
+        } %}
+    </form>
+    {% endblock %}
+    {% block offcanvas_footer %}
+    <div class="unio-offcanvas-footer">
+        <button type="submit" form="tiKbForm" class="btn-unio" data-ti-infra-submit="kb">
+            <i class="fas fa-check mr-1"></i> <span data-ti-infra-submit-label="kb">Salvar artigo</span>
+        </button>
+        <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
     </div>
-</div>
+    {% endblock %}
+{% endembed %}
