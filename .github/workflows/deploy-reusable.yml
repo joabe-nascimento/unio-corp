@@ -50,6 +50,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     environment: ${{ inputs.github_environment }}
 
     env:
@@ -118,12 +119,13 @@ jobs:
               -P "${DEPLOY_PORT:-2222}" \
               -o StrictHostKeyChecking=accept-new \
               -o BatchMode=yes \
-              -o ConnectTimeout=30 \
+              -o ConnectTimeout=20 \
               -o ServerAliveInterval=15 \
               "$ARCHIVE" \
               "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/${ARCHIVE_REMOTE}"
 
       - name: Extract and post-deploy on server
+        timeout-minutes: 12
         env:
           MAILBOX_JOABE_PASSWORD: ${{ secrets.MAILBOX_JOABE_PASSWORD }}
           MAILBOX_UNIO_PASSWORD: ${{ secrets.MAILBOX_UNIO_PASSWORD }}
@@ -152,52 +154,43 @@ jobs:
               -P "${DEPLOY_PORT:-2222}" \
               -o StrictHostKeyChecking=accept-new \
               -o BatchMode=yes \
-              -o ConnectTimeout=30 \
+              -o ConnectTimeout=20 \
               -o ServerAliveInterval=15 \
               "$ENV_FILE" \
               "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/deploy-remote.env"
 
-          ssh -i ~/.ssh/deploy_key \
-              -p "${DEPLOY_PORT:-2222}" \
-              -o StrictHostKeyChecking=accept-new \
-              -o BatchMode=yes \
-              -o ConnectTimeout=30 \
-              -o ServerAliveInterval=15 \
-              "${DEPLOY_USER}@${DEPLOY_HOST}" \
-              "ARCHIVE=${ARCHIVE} bash -s" << 'EOS'
-          set -eo pipefail
-          set -a
-          # shellcheck source=/dev/null
-          source /tmp/deploy-remote.env
-          set +a
-          rm -f /tmp/deploy-remote.env
-          mkdir -p "$DEPLOY_PATH"
-          tar -xzf "/tmp/${ARCHIVE}" -C "$DEPLOY_PATH"
-          rm -f "/tmp/${ARCHIVE}"
-          export PHP_BIN="${PHP_BIN:-php}"
-          bash "${DEPLOY_PATH}/scripts/deploy-server.sh" || {
-            echo "========== DEPLOY REPORT =========="
-            cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || echo "(sem relatorio)"
-            exit 1
-          }
-          echo "========== DEPLOY REPORT =========="
-          cat "${DEPLOY_PATH}/var/log/deploy-report.txt" 2>/dev/null || true
-          EOS
-
-      - name: Baixar relatorio de deploy (sucesso ou falha)
-        if: always() && (success() || failure())
-        env:
-          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || inputs.deploy_path_default }}
-        run: |
-          mkdir -p deploy-reports
           bash scripts/ci-retry.sh scp -i ~/.ssh/deploy_key \
               -P "${DEPLOY_PORT:-2222}" \
               -o StrictHostKeyChecking=accept-new \
               -o BatchMode=yes \
-              -o ConnectTimeout=30 \
+              -o ConnectTimeout=20 \
+              scripts/ci-remote-extract.sh \
+              "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/ci-remote-extract.sh"
+
+          bash scripts/ci-retry.sh ssh -i ~/.ssh/deploy_key \
+              -p "${DEPLOY_PORT:-2222}" \
+              -o StrictHostKeyChecking=accept-new \
+              -o BatchMode=yes \
+              -o ConnectTimeout=20 \
               -o ServerAliveInterval=15 \
+              "${DEPLOY_USER}@${DEPLOY_HOST}" \
+              "ARCHIVE=${ARCHIVE} bash /tmp/ci-remote-extract.sh"
+
+      - name: Baixar relatorio de deploy (sucesso ou falha)
+        if: always() && (success() || failure())
+        continue-on-error: true
+        env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || inputs.deploy_path_default }}
+        run: |
+          mkdir -p deploy-reports
+          scp -i ~/.ssh/deploy_key \
+              -P "${DEPLOY_PORT:-2222}" \
+              -o StrictHostKeyChecking=accept-new \
+              -o BatchMode=yes \
+              -o ConnectTimeout=20 \
               "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/var/log/deploy-report.txt" \
-              deploy-reports/deploy-report.txt 2>/dev/null || echo "Relatorio remoto indisponivel" > deploy-reports/deploy-report.txt
+              deploy-reports/deploy-report.txt 2>/dev/null \
+            || echo "Relatorio remoto indisponivel" > deploy-reports/deploy-report.txt
 
       - name: Upload relatorio de deploy
         if: always() && (success() || failure())

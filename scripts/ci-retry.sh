@@ -2,15 +2,16 @@
 # Retry wrapper for flaky CI network steps (SSH/SCP to HostGator).
 set -u
 
-attempts="${CI_RETRY_ATTEMPTS:-5}"
-delay="${CI_RETRY_DELAY:-20}"
+attempts="${CI_RETRY_ATTEMPTS:-3}"
+delay="${CI_RETRY_DELAY:-15}"
 n=1
 
 while true; do
-  if "$@"; then
+  "$@"
+  exit_code=$?
+  if [[ "$exit_code" -eq 0 ]]; then
     exit 0
   fi
-  exit_code=$?
   if (( n >= attempts )); then
     echo "ci-retry: falhou apos ${attempts} tentativas (exit ${exit_code}): $*" >&2
     exit "$exit_code"
