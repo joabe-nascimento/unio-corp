@@ -76,11 +76,10 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             $this->twig->addGlobal($name, $value);
         }
 
-        $this->twig->addGlobal(
-            'nav_notifications_unread',
-            $empresa !== null ? $this->notifications->countUnread($empresa, $user) : 0,
-        );
-        $this->twig->addGlobal('nav_chat_unread', $this->chat->getUnreadCount($user, $empresa ?? $user->getEmpresa()));
+        $notificationsUnread = $empresa !== null ? $this->notifications->countUnread($empresa, $user) : 0;
+        $this->twig->addGlobal('nav_notifications_unread', $notificationsUnread);
+        $chatUnread = $this->chat->getUnreadCount($user, $empresa ?? $user->getEmpresa());
+        $this->twig->addGlobal('nav_chat_unread', $chatUnread);
         $this->twig->addGlobal(
             'global_search_members_json',
             json_encode(
@@ -89,6 +88,15 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             ) ?: '[]',
         );
         $this->twig->addGlobal('platform_modules', $this->navigation->getPlatformModules($user));
+        $this->twig->addGlobal(
+            'mobile_shell_nav',
+            $this->navigation->getMobileShellNav(
+                $user,
+                \is_string($route) ? $route : null,
+                $chatUnread,
+                $notificationsUnread,
+            ),
+        );
         $tourConfig = $this->onboardingTour->build($user, $empresa, \count($empresas), \is_string($route) ? $route : null);
         $this->twig->addGlobal(
             'onboarding_tour_json',

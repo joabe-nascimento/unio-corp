@@ -5,13 +5,17 @@
     label (string, opt)  default: Voltar
     href  (string)
     icon  (string, opt)  default: fa-arrow-left
-    icon_only (bool, opt)  só a seta
+    icon_only (bool, opt)  só a seta (padrão das toolbars)
+    inline  (bool, opt)
+    pill    (bool, opt)  caixa com borda — evitar em toolbars de página
 #}
+{% set _icon_only = icon_only|default(false) %}
+{% set _pill = pill|default(false) %}
 <a href="{{ href }}"
-   class="page-back-link{% if icon_only|default(false) %} page-back-link--icon-only{% endif %}{% if small|default(false) %} page-back-link--sm{% endif %}{% if inline|default(false) %} page-back-link--inline{% endif %}{% if bare|default(false) %} page-back-link--bare{% endif %}"
+   class="page-back-link{% if _pill %} page-back-link--pill{% if _icon_only %} page-back-link--pill-icon{% endif %}{% elseif _icon_only %} page-back-link--arrow-only{% else %} page-back-link--labeled{% endif %}{% if inline|default(false) %} page-back-link--inline{% endif %}"
    aria-label="{{ label|default('Voltar') }}">
     <i class="fas {{ icon|default('fa-arrow-left') }}" aria-hidden="true"></i>
-    {% if not icon_only|default(false) %}
+    {% if not _icon_only %}
         <span>{{ label|default('Voltar') }}</span>
     {% endif %}
 </a>

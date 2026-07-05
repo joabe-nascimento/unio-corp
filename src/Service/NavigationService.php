@@ -746,4 +746,132 @@ class NavigationService
 
         return $modules;
     }
+
+    /**
+     * Até 5 atalhos fixos na barra inferior (somente mobile).
+     *
+     * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
+     */
+    public function getMobileShellNav(User $user, ?string $route, int $chatUnread = 0, int $notificationsUnread = 0): array
+    {
+        $items = [
+            $this->buildMobileShellLink('dashboard', 'fa-house', 'Início', 'app_dashboard', $route, static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_dashboard')),
+            $this->buildMobileShellLink('chat', 'fa-comments', 'Chat', 'app_chat', $route, static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_chat'), $chatUnread),
+        ];
+
+        $hub = $this->resolveMobileShellHub($user);
+        if ($hub !== null) {
+            $hubId = $hub['id'];
+            $items[] = $this->buildMobileShellLink(
+                $hubId,
+                $hub['icon'],
+                $this->mobileShellHubLabel($hub),
+                $hub['route'],
+                $route,
+                fn (?string $r): bool => $hubId === 'cortex'
+                    ? (bool) $r && str_starts_with($r, 'app_cortex')
+                    : $this->getActiveHubId($r) === $hubId,
+            );
+        }
+
+        $items[] = $this->buildMobileShellLink(
+            'notifications',
+            'fa-bell',
+            'Alertas',
+            'app_notifications',
+            $route,
+            static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_notifications'),
+            $notificationsUnread,
+        );
+
+        $items[] = [
+            'id' => 'menu',
+            'icon' => 'fa-bars',
+            'label' => 'Menu',
+            'type' => 'action',
+            'action' => 'open-sidebar',
+            'active' => false,
+        ];
+
+        return $items;
+    }
+
+    /**
+     * @param callable(?string): bool $isActive
+     *
+     * @return array{id: string, icon: string, label: string, type: string, route: string, active: bool, badge?: int}
+     */
+    private function buildMobileShellLink(
+        string $id,
+        string $icon,
+        string $label,
+        string $routeName,
+        ?string $currentRoute,
+        callable $isActive,
+        int $badge = 0,
+    ): array {
+        $item = [
+            'id' => $id,
+            'icon' => $icon,
+            'label' => $label,
+            'type' => 'link',
+            'route' => $routeName,
+            'active' => $isActive($currentRoute),
+        ];
+
+        if ($badge > 0) {
+            $item['badge'] = $badge;
+        }
+
+        return $item;
+    }
+
+    /**
+     * @return array{id: string, icon: string, title: string, route: string}|null
+     */
+    private function resolveMobileShellHub(User $user): ?array
+    {
+        $modules = $this->getPlatformModules($user);
+        if ($modules === []) {
+            return null;
+        }
+
+        foreach ($modules as $module) {
+            if (($module['id'] ?? '') === 'operacoes') {
+                return $module;
+            }
+        }
+
+        return $modules[0];
+    }
+
+    /**
+     * @param array{id?: string, title?: string} $hub
+     */
+    private function mobileShellHubLabel(array $hub): string
+    {
+        $id = $hub['id'] ?? '';
+        $short = match ($id) {
+            'cortex' => 'Cortex',
+            'operacoes' => 'Operações',
+            'talentos' => 'Talentos',
+            'maturidade' => 'Maturidade',
+            'recrutamento' => 'Recrutamento',
+            'admin' => 'Plataforma',
+            default => null,
+        };
+
+        if ($short !== null) {
+            return $short;
+        }
+
+        $title = trim((string) ($hub['title'] ?? ''));
+        if ($title === '') {
+            return 'Núcleo';
+        }
+
+        $title = preg_replace('/^Núcleo de\s+/iu', '', $title) ?? $title;
+
+        return mb_strlen($title) > 11 ? mb_substr($title, 0, 10).'…' : $title;
+    }
 }

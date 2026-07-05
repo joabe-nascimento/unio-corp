@@ -1,0 +1,29 @@
+{# Barra inferior — atalhos principais (somente mobile via CSS) #}
+{% if mobile_shell_nav|default([])|length > 0 %}
+<nav class="shell-mobile-nav" aria-label="Navegação principal">
+    <div class="shell-mobile-nav__inner">
+        {% for item in mobile_shell_nav %}
+            {% if item.type|default('link') == 'action' %}
+                <button type="button"
+                        class="shell-mobile-nav__item shell-mobile-nav__item--action"
+                        data-shell-mobile-action="{{ item.action|default('open-sidebar') }}"
+                        aria-label="{{ item.label }}">
+                    <span class="shell-mobile-nav__icon" aria-hidden="true"><i class="fas {{ item.icon }}"></i></span>
+                    <span class="shell-mobile-nav__label">{{ item.label }}</span>
+                </button>
+            {% else %}
+                <a href="{{ path(item.route) }}"
+                   class="shell-mobile-nav__item{{ item.active|default(false) ? ' is-active' : '' }}"
+                   {% if item.active|default(false) %}aria-current="page"{% endif %}
+                   title="{{ item.label }}">
+                    <span class="shell-mobile-nav__icon" aria-hidden="true"><i class="fas {{ item.icon }}"></i></span>
+                    <span class="shell-mobile-nav__label">{{ item.label }}</span>
+                    {% if item.badge|default(0) > 0 %}
+                        <span class="shell-mobile-nav__badge">{{ item.badge > 99 ? '99+' : item.badge }}</span>
+                    {% endif %}
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+</nav>
+{% endif %}

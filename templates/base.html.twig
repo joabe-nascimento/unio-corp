@@ -15,7 +15,7 @@
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=315">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=320">
     {% set _shell_polish_css = app.debug ? 'css/unio-shell-polish.css' : 'css/unio-shell-polish.min.css' %}
     <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=28">
 
@@ -173,6 +173,9 @@
     </div>{# .app-inset-main #}
 </div>
 
+{% if app.user %}
+{% include 'components/shell_mobile_nav.html.twig' %}
+{% endif %}
 {% include 'components/helix_assistant.html.twig' %}
 {% if app.user %}
 {% include 'components/shell_tour.html.twig' %}
@@ -232,6 +235,16 @@ window.addEventListener('load', function () {
     jQuery('[data-widget="treeview"]').on('expanded.lte.treeview', function () {
         if ($body.hasClass('sidebar-mini') && $body.hasClass('sidebar-collapse') && !isMobile()) {
             $pushMenu.PushMenu('expand');
+        }
+    });
+
+    jQuery(document).on('click', '[data-shell-mobile-action="open-sidebar"]', function (e) {
+        e.preventDefault();
+        if (!isMobile()) return;
+        if ($pushMenu.length && typeof $pushMenu.PushMenu === 'function') {
+            $pushMenu.PushMenu('toggle');
+        } else {
+            $body.toggleClass('sidebar-open');
         }
     });
 });
