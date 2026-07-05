@@ -56,9 +56,9 @@ O `scripts/deploy-server.sh` detecta banco sem schema e roda:
 
 1. `doctrine:schema:create`
 2. `doctrine:migrations:version --add --all`
-3. Seeds iniciais (só em ambiente produto): `app:seed-users`, `app:seed-product-grants`
+3. **Sem seeds demo** — igual staging/produção (`skip_unio_platform_steps: false`); contas reais via `PLATFORM_OWNER` / cadastro manual.
 
-Em ambientes produto, steps de e-mail Unio são **pulados** (`SKIP_UNIO_PLATFORM_STEPS=1`).
+Steps de plataforma (e-mail, `PLATFORM_OWNER`, mailboxes) **rodam** no deploy RH, como em staging.
 
 ---
 
