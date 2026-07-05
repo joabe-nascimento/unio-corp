@@ -81,7 +81,7 @@
     var chatMediaGalleryTitle = document.getElementById('chatMediaGalleryTitle');
     var chatMediaGalleryClose = document.getElementById('chatMediaGalleryClose');
     var chatMsgMenu = document.getElementById('chatMsgMenu');
-    var mobileMq = window.matchMedia('(max-width: 767.98px)');
+    var mobileMq = window.matchMedia('(max-width: 991.98px)');
 
     var conversations = [];
     var colleagues = [];

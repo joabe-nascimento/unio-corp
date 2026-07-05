@@ -258,10 +258,35 @@
         ).length > 0;
     }
 
+    function isMobileShell() {
+        return window.innerWidth < 992 && !!document.querySelector('.shell-mobile-nav');
+    }
+
+    function resolveFab(host) {
+        if (!host) return null;
+        var id = host.getAttribute('data-toolbar-offcanvas-id');
+        if (!id) return host.querySelector('.toolbar-mobile-fab');
+        return document.querySelector('.toolbar-mobile-fab[data-toolbar-offcanvas-host="' + id + '"]')
+            || host.querySelector('.toolbar-mobile-fab');
+    }
+
+    function portalFabs() {
+        if (!isMobileShell()) return;
+        document.querySelectorAll('[data-toolbar-controls-dual]').forEach(function (host) {
+            var fab = host.querySelector('.toolbar-mobile-fab');
+            var id = host.getAttribute('data-toolbar-offcanvas-id');
+            if (!fab || !id) return;
+            fab.setAttribute('data-toolbar-offcanvas-host', id);
+            if (fab.parentElement !== document.body) {
+                document.body.appendChild(fab);
+            }
+        });
+    }
+
     function hideEmptyDuals() {
         document.querySelectorAll('[data-toolbar-controls-dual]').forEach(function (host) {
             var inline = host.querySelector('.toolbar-inline-controls');
-            var fab = host.querySelector('.toolbar-mobile-fab');
+            var fab = resolveFab(host);
             if (!inline || !fab) return;
             var empty = !hasFilterControls(inline);
             fab.hidden = empty;
@@ -347,6 +372,7 @@
         fab.type = 'button';
         fab.className = 'toolbar-mobile-fab';
         fab.setAttribute('data-unio-offcanvas-open', id);
+        fab.setAttribute('data-toolbar-offcanvas-host', id);
         fab.setAttribute('aria-label', 'Filtros e busca');
         fab.setAttribute('title', 'Filtros e busca');
         fab.innerHTML = '<i class="fas fa-sliders" aria-hidden="true"></i>';
@@ -388,6 +414,7 @@
 
     function initAutoWrap() {
         discoverFilterRows().forEach(autoWrapRow);
+        portalFabs();
         hideEmptyDuals();
     }
 
@@ -396,6 +423,9 @@
         if (!openBtn) return;
 
         var host = openBtn.closest('[data-toolbar-controls-dual]');
+        if (!host && openBtn.getAttribute('data-toolbar-offcanvas-host')) {
+            host = document.querySelector('[data-toolbar-controls-dual][data-toolbar-offcanvas-id="' + openBtn.getAttribute('data-toolbar-offcanvas-host') + '"]');
+        }
         if (!host) return;
 
         var offcanvasId = host.getAttribute('data-toolbar-offcanvas-id');
@@ -412,4 +442,9 @@
     } else {
         initAutoWrap();
     }
+
+    window.addEventListener('resize', function () {
+        portalFabs();
+        hideEmptyDuals();
+    });
 })();
