@@ -5,8 +5,36 @@
     var POLL_MS = 2500;
     var SESSION_KEY = 'ti-chat-active';
     var NOTIF_SINCE_KEY = 'ti-notif-since';
+    var sessionPollTimer = null;
 
     window.TiChamadoChat = window.TiChamadoChat || {};
+
+    function stopSessionPolling() {
+        if (sessionPollTimer) {
+            window.clearInterval(sessionPollTimer);
+            sessionPollTimer = null;
+        }
+    }
+
+    /** Chamado sumiu / sem acesso à área de trabalho atual — encerra sessão fantasma. */
+    function abandonChatSession() {
+        stopSessionPolling();
+        writeSession(null);
+        syncGlobalLauncher();
+    }
+
+    function parsePollResponse(response) {
+        if (!response) {
+            return Promise.resolve(null);
+        }
+        if (response.status === 404 || response.status === 403 || response.status === 401) {
+            abandonChatSession();
+            return Promise.resolve(null);
+        }
+        return response.json().catch(function () {
+            return null;
+        });
+    }
 
     function readJson(id) {
         var el = document.getElementById(id);
@@ -209,22 +237,32 @@
             headers: { Accept: 'application/json' },
             credentials: 'same-origin',
         })
-            .then(function (r) { return r.json(); })
+            .then(parsePollResponse)
             .then(function (data) {
-                if (!data || !data.ok || !data.messages || !data.messages.length) {
-                    if (data && data.total != null) {
+                if (!data) {
+                    return;
+                }
+                if (!data.ok) {
+                    if (data.error) {
+                        abandonChatSession();
+                    }
+                    return;
+                }
+                if (!data.messages || !data.messages.length) {
+                    if (data.total != null) {
                         mergeSession({ messageCount: data.total });
                     }
                     return;
                 }
 
-                var prevCount = session.messageCount || 0;
+                var live = readSession() || session;
+                var prevCount = live.messageCount || 0;
                 var fresh = data.messages.filter(function (m) {
                     return m.seq == null || m.seq >= prevCount;
                 });
-                var lastSeq = session.lastIncomingSeq != null ? session.lastIncomingSeq : (prevCount - 1);
+                var lastSeq = live.lastIncomingSeq != null ? live.lastIncomingSeq : (prevCount - 1);
                 var incoming = fresh.filter(function (m) {
-                    return m.role !== session.viewerRole && m.seq != null && m.seq > lastSeq;
+                    return m.role !== live.viewerRole && m.seq != null && m.seq > lastSeq;
                 });
                 var newLastSeq = lastSeq;
                 incoming.forEach(function (m) {
@@ -232,7 +270,7 @@
                 });
                 mergeSession({
                     messageCount: data.total != null ? data.total : (prevCount + fresh.length),
-                    unread: (session.unread || 0) + incoming.length,
+                    unread: (live.unread || 0) + incoming.length,
                     lastIncomingSeq: newLastSeq,
                 });
 
@@ -244,15 +282,24 @@
     }
 
     function initSessionPolling() {
+        stopSessionPolling();
         var session = readSession();
         if (!session || !session.pollUrl) return;
 
         if (isOnTicketShowPage(session.ticketId)) return;
 
-        setInterval(function () {
-            pollSessionMessages(readSession());
-        }, POLL_MS);
-        pollSessionMessages(session);
+        function tick() {
+            var live = readSession();
+            if (!live || !live.pollUrl) {
+                stopSessionPolling();
+                syncGlobalLauncher();
+                return;
+            }
+            pollSessionMessages(live);
+        }
+
+        sessionPollTimer = window.setInterval(tick, POLL_MS);
+        tick();
     }
 
     function initManageMotivo() {
@@ -511,15 +558,35 @@
             if (!isChatVisible()) setBlink(true);
         }
 
+        function stopPanelPoll() {
+            if (pollTimer) {
+                window.clearInterval(pollTimer);
+                pollTimer = null;
+            }
+        }
+
         function poll() {
-            if (sending) return;
+            if (sending || !cfg.pollUrl) return;
             fetch(cfg.pollUrl + '?after=' + messageCount, {
                 headers: { Accept: 'application/json' },
                 credentials: 'same-origin',
             })
-                .then(function (r) { return r.json(); })
+                .then(function (r) {
+                    if (r.status === 404 || r.status === 403 || r.status === 401) {
+                        stopPanelPoll();
+                        abandonChatSession();
+                        return null;
+                    }
+                    return r.json().catch(function () { return null; });
+                })
                 .then(function (data) {
-                    if (!data || !data.ok) return;
+                    if (!data || !data.ok) {
+                        if (data && data.error) {
+                            stopPanelPoll();
+                            abandonChatSession();
+                        }
+                        return;
+                    }
                     if (data.total != null) syncMessageCount(data.total);
                     if (data.messages && data.messages.length) {
                         var fresh = appendMessages(data.messages);
