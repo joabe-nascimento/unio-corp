@@ -630,12 +630,19 @@
                 },
                 credentials: 'same-origin',
             })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    if (!data || !data.ok) {
-                        window.alert((data && data.error) || 'Não foi possível enviar a mensagem.');
+                .then(function (r) {
+                    return r.json().then(function (data) {
+                        return { ok: r.ok, data: data };
+                    }).catch(function () {
+                        return { ok: false, data: null };
+                    });
+                })
+                .then(function (result) {
+                    if (!result.ok || !result.data || !result.data.ok) {
+                        window.alert((result.data && result.data.error) || 'Não foi possível enviar a mensagem.');
                         return;
                     }
+                    var data = result.data;
                     var newMsgs = data.new_messages && data.new_messages.length
                         ? data.new_messages
                         : (data.messages ? data.messages.slice(-1) : []);
@@ -643,6 +650,12 @@
                     if (newMsgs.length) appendMessages(newMsgs);
                     if (textarea) textarea.value = '';
                     form.querySelectorAll('input[type="file"]').forEach(function (inp) { inp.value = ''; });
+                    if (window.TiChamadoAttachments && typeof window.TiChamadoAttachments.resetAll === 'function') {
+                        window.TiChamadoAttachments.resetAll();
+                    }
+                    document.querySelectorAll('[form="' + form.id + '"][type="file"]').forEach(function (inp) {
+                        inp.value = '';
+                    });
                     document.querySelectorAll('[data-ti-chat-emoji-panel]').forEach(function (p) { p.hidden = true; });
                     markRead();
                 })

@@ -780,9 +780,18 @@
     }
 
     function initChamadoAttachments() {
-        var root = document.querySelector('[data-ti-chamado-attachments]');
-        if (!root || root.dataset.tiAttachmentsInit) return;
-        root.dataset.tiAttachmentsInit = '1';
+        window.TiChamadoAttachments = window.TiChamadoAttachments || {};
+        window.TiChamadoAttachments.resetAll = function () {
+            document.querySelectorAll('[data-ti-chamado-attachments]').forEach(function (root) {
+                if (typeof root._tiAttachmentsReset === 'function') {
+                    root._tiAttachmentsReset();
+                }
+            });
+        };
+
+        document.querySelectorAll('[data-ti-chamado-attachments]').forEach(function (root) {
+            if (root.dataset.tiAttachmentsInit) return;
+            root.dataset.tiAttachmentsInit = '1';
 
         var input = root.querySelector('.ti-chamado-attachments-input');
         var drop = root.querySelector('.ti-chamado-attachments-drop');
@@ -790,6 +799,12 @@
         var max = parseInt(root.getAttribute('data-ti-attachments-max') || '5', 10);
         var files = [];
         var objectUrls = [];
+
+        root._tiAttachmentsReset = function () {
+            files = [];
+            if (input) input.value = '';
+            render();
+        };
 
         function formatSize(bytes) {
             if (!bytes || bytes < 1024) return bytes + ' B';
@@ -904,6 +919,7 @@
                 render();
             });
         }
+        });
     }
 
     function initInfraCrud() {

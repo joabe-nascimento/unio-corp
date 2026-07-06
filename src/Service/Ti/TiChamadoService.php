@@ -377,6 +377,8 @@ final class TiChamadoService
                 $out[] = $this->formatChatMessage($seq++, 'solicitante', $text, $ev, $ticket);
             } elseif (str_starts_with($text, 'Resposta da TI:')) {
                 $out[] = $this->formatChatMessage($seq++, 'ti', $text, $ev, $ticket);
+            } elseif (preg_match('/^(\d+) anexo\(s\) adicionado\(s\)$/', $text, $m)) {
+                $out[] = $this->formatLegacyAttachmentChatMessage($seq++, (int) $m[1], $ev, $ticket);
             }
         }
 
@@ -417,18 +419,7 @@ final class TiChamadoService
             if ($message === '' && $files === []) {
                 throw new \InvalidArgumentException('Escreva uma mensagem ou anexe arquivos.');
             }
-            if ($message !== '') {
-                $chamado->addTimelineEvent('Resposta da TI: ' . $message, $actorName);
-            }
-            if ($files !== []) {
-                $uploaded = $this->attachments->uploadForChamado($chamado, $files, $actor);
-                if ($uploaded !== []) {
-                    $chamado->addTimelineEvent(
-                        \count($uploaded) . ' anexo(s) adicionado(s)',
-                        $actorName,
-                    );
-                }
-            }
+            $this->postChatExchange($chamado, $actor, $actorName, true, $message, $files);
             $chamado->touch();
             $this->em->flush();
             $this->notifySolicitante(
@@ -450,19 +441,8 @@ final class TiChamadoService
             throw new \InvalidArgumentException('Escreva uma mensagem ou anexe arquivos.');
         }
 
-        if ($message !== '') {
-            $chamado->addTimelineEvent('Resposta do solicitante: ' . $message, $actorName);
-        }
-        if ($files !== []) {
-            $uploaded = $this->attachments->uploadForChamado($chamado, $files, $actor);
-            if ($uploaded !== []) {
-                $chamado->addTimelineEvent(
-                    \count($uploaded) . ' anexo(s) adicionado(s)',
-                    $actorName,
-                );
-            }
-        }
-        if ($chamado->getStatus() === TiChamado::STATUS_AGUARDANDO && $message !== '') {
+        $this->postChatExchange($chamado, $actor, $actorName, false, $message, $files);
+        if ($chamado->getStatus() === TiChamado::STATUS_AGUARDANDO && ($message !== '' || $files !== [])) {
             $chamado->setStatus(TiChamado::STATUS_EM_ANALISE);
             $chamado->addTimelineEvent('Status alterado para Em análise', 'Sistema');
         }
@@ -531,6 +511,68 @@ final class TiChamadoService
         $this->notifyOperatorsOnReply($chamado, $actor);
 
         return $this->mapTicket($chamado);
+    }
+
+    /** @return array<string, mixed> */
+    private function formatLegacyAttachmentChatMessage(int $seq, int $count, array $ev, array $ticket): array
+    {
+        $requester = (string) ($ticket['requester'] ?? '');
+        $actor = (string) ($ev['actor'] ?? '');
+        $role = ($requester !== '' && strcasecmp($actor, $requester) === 0) ? 'solicitante' : 'ti';
+
+        return [
+            'seq' => $seq,
+            'role' => $role,
+            'body' => '📎 ' . $count . ' anexo(s)',
+            'at' => (string) ($ev['at'] ?? ''),
+            'actor' => $actor,
+            'display_name' => $role === 'ti'
+                ? ($actor !== '' ? $actor : 'Equipe de TI')
+                : ($requester !== '' ? $requester : 'Solicitante'),
+        ];
+    }
+
+    /**
+     * @param list<UploadedFile> $files
+     */
+    private function postChatExchange(
+        TiChamado $chamado,
+        User $actor,
+        string $actorName,
+        bool $asOperator,
+        string $message,
+        array $files,
+    ): void {
+        $uploaded = $files !== [] ? $this->attachments->uploadForChamado($chamado, $files, $actor) : [];
+        $parts = [];
+        if ($message !== '') {
+            $parts[] = $message;
+        }
+        if ($uploaded !== []) {
+            $parts[] = $this->summarizeUploadedAttachments($uploaded);
+        }
+        if ($parts === []) {
+            return;
+        }
+
+        $prefix = $asOperator ? 'Resposta da TI: ' : 'Resposta do solicitante: ';
+        $chamado->addTimelineEvent($prefix . implode("\n", $parts), $actorName);
+    }
+
+    /** @param list<\App\Entity\TiChamadoAnexo> $uploaded */
+    private function summarizeUploadedAttachments(array $uploaded): string
+    {
+        $names = array_map(static fn ($a) => (string) $a->getNomeOriginal(), $uploaded);
+        if (\count($names) === 1) {
+            return '📎 ' . $names[0];
+        }
+
+        $preview = implode(', ', \array_slice($names, 0, 3));
+        if (\count($names) > 3) {
+            $preview .= '…';
+        }
+
+        return '📎 ' . \count($names) . ' anexos: ' . $preview;
     }
 
     /** @return array<string, mixed> */

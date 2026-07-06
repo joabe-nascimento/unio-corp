@@ -34,6 +34,15 @@
         </button>
     </div>
     {% include 'components/ti/chamado_message_emoji_picker.html.twig' %}
+    {% if show_attachments|default(false) and upload_id is defined %}
+    <div class="ti-chamado-compose-attachments">
+        {% include 'components/ti/chamado_attachments_upload.html.twig' with {
+            upload_id: upload_id,
+            compact: true,
+            form_id: form_dom_id
+        } %}
+    </div>
+    {% endif %}
     {% else %}
     <div class="ti-chamado-message-compose">
         <label class="unio-form-label" for="{{ message_field_id }}">{{ message_label }}</label>

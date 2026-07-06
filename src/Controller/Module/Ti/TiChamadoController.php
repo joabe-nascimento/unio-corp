@@ -525,6 +525,7 @@ final class TiChamadoController extends AbstractController
                 'messages' => $messages,
                 'total' => \count($messages),
                 'new_messages' => \array_values(\array_slice($messages, $beforeCount)),
+                'attachments' => $ticket['attachments'] ?? [],
             ];
             if ($this->wantsJson($request)) {
                 return new JsonResponse($payload);
