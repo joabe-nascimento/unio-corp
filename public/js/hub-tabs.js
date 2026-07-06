@@ -29,10 +29,32 @@
         return !!(root && root.querySelector('[data-hub-panel="' + name + '"]'));
     }
 
+    function getPageScrollEl() {
+        return document.querySelector('.app-page-scroll');
+    }
+
+    function resetHubContentScroll() {
+        var behavior = global.matchMedia('(max-width: 1199.98px)').matches ? 'auto' : 'smooth';
+        var scrollEl = getPageScrollEl();
+        if (scrollEl) {
+            scrollEl.scrollTo({ top: 0, behavior: behavior });
+        }
+        /* scrollIntoView no chrome fixo podia deslocar document/window no mobile */
+        if (global.scrollY > 0) {
+            global.scrollTo({ top: 0, behavior: behavior });
+        }
+        var panelsRoot = getPanelsRoot();
+        if (panelsRoot && panelsRoot.scrollTop > 0) {
+            panelsRoot.scrollTo({ top: 0, behavior: behavior });
+        }
+        return !!scrollEl;
+    }
+
     function focusTab(name) {
-        var lead = document.querySelector('.page-lead-zone--hub-tabs');
-        if (lead) {
-            lead.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        /* Título + abas ficam em .app-page-chrome (fixo). scrollIntoView no lead empurra
+         * o título sob a navbar no mobile ao trocar Visão geral ↔ Permissões. */
+        if (resetHubContentScroll()) {
+            return;
         }
 
         var root = getPanelsRoot();
