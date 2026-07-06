@@ -356,8 +356,6 @@ class OnboardingTourService
             ];
         }
 
-        return array_values(array_filter($steps, static function (array $step): bool {
-            return $step['target'] !== '';
-        }));
+        return $steps;
     }
 }
