@@ -4,6 +4,7 @@ Documentação consolidada após estabilização do deploy HostGator, CI/CD e va
 
 | Documento | Conteúdo |
 |-----------|----------|
+| [ARQUITETURA.md](ARQUITETURA.md) | **Arquitetura do sistema** — stack, camadas, módulos, tenancy, upgrades |
 | [OPERACAO_HISTORICO_CORRECOES.md](OPERACAO_HISTORICO_CORRECOES.md) | Cronologia completa: erros → correções → sucesso |
 | [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md) | Como cada branch funciona **a partir de hoje** |
 | [OPERACAO_CLIENTE_MATRIZ.md](OPERACAO_CLIENTE_MATRIZ.md) | Matriz cliente × produto × branch × URL (contratos e deploy dedicado) |

@@ -12248,11 +12248,41 @@
             align-items: center;
             gap: 8px;
             flex-shrink: 0;
+            min-width: 0;
             overflow: visible;
         }
+        .permissions-panel,
+        .permissions-panel-card,
+        .perm-member-list,
         .perm-member-row,
-        .perm-picker-wrap {
+        .perm-picker-wrap,
+        .perm-row-actions {
             overflow: visible;
+        }
+        .perm-tags-btn.badge-perfil {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.02em;
+            text-transform: none;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        .perm-tags-btn-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+        .perm-picker-option.badge-perfil {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            text-align: left;
+            white-space: normal;
+            letter-spacing: 0.02em;
+            text-transform: none;
+            line-height: 1.25;
         }
         .perm-row-picker-applied {
             border-color: rgba(80, 200, 120, 0.4) !important;
@@ -12915,9 +12945,12 @@
             position: absolute;
             top: calc(100% + 6px);
             right: 0;
-            z-index: 1050;
+            left: auto;
+            z-index: 1080;
             min-width: 180px;
-            max-height: 220px;
+            max-width: min(260px, calc(100vw - 24px));
+            max-height: min(240px, calc(100vh - 96px));
+            overflow-x: hidden;
             overflow-y: auto;
             padding: 6px;
             border-radius: 10px;
@@ -12927,14 +12960,17 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            box-sizing: border-box;
         }
-        .perm-picker-menu.is-drop-up {
+        .perm-picker-menu.is-drop-up:not(.is-fixed) {
             top: auto;
             bottom: calc(100% + 6px);
         }
-        .perm-row-picker .perm-picker-menu {
-            top: auto;
-            bottom: calc(100% + 6px);
+        .perm-picker-menu.is-fixed {
+            position: fixed !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin: 0;
         }
         .perm-picker-trigger.is-open .perm-picker-chevron,
         .perm-tags-btn.is-open .perm-picker-chevron {
@@ -12985,27 +13021,73 @@
                 text-align: center;
                 padding: 10px 12px;
             }
+            .permissions-panel-card {
+                padding: 14px 12px 20px;
+            }
             .perm-member-row {
-                grid-template-columns: auto 1fr;
+                grid-template-columns: auto minmax(0, 1fr);
                 grid-template-areas:
                     "avatar info"
-                    "badge actions";
+                    "badge badge"
+                    "actions actions";
+                gap: 8px 10px;
+                padding: 10px;
+                min-width: 0;
             }
             .perm-member-row .permissions-avatar { grid-area: avatar; }
-            .perm-member-row .permissions-member-info { grid-area: info; }
-            .perm-member-row .perm-scope-tag { grid-area: badge; }
+            .perm-member-row .permissions-member-info {
+                grid-area: info;
+                min-width: 0;
+            }
+            .perm-member-row .permissions-member-name,
+            .perm-member-row .permissions-member-email {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 100%;
+            }
+            .perm-member-row .perm-scope-tag {
+                grid-area: badge;
+                justify-self: start;
+                max-width: 100%;
+            }
             .perm-member-row .perm-row-actions {
                 grid-area: actions;
-                justify-self: end;
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: stretch;
+                justify-content: stretch;
                 width: 100%;
-                justify-content: flex-end;
+                max-width: 100%;
+                gap: 8px;
+                min-width: 0;
             }
-            .perm-tags-btn {
+            .perm-row-actions .perm-picker-wrap {
+                flex: 1 1 0;
+                min-width: 0;
+                max-width: 50%;
+            }
+            .perm-row-actions > .perm-tags-btn {
+                flex: 1 1 0;
+                min-width: 0;
+                max-width: 50%;
+            }
+            .perm-row-actions .perm-tags-btn {
                 width: 100%;
+                max-width: 100%;
                 justify-content: center;
+                padding: 8px 8px;
+                font-size: 11px;
+            }
+            .perm-row-actions .perm-tags-btn-label {
+                max-width: 5.5em;
+            }
+            .permissions-panel {
+                padding-bottom: 8px;
             }
             .perm-offcanvas-drawer {
                 width: 100vw;
+                max-width: 100vw;
             }
         }
 
