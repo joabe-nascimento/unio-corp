@@ -100,59 +100,93 @@ Branches espelho são sincronizadas em massa com `scripts/sync-branches.sh`. Dis
 
 ---
 
-## 3. `deploy-production.yml` — HostGator
+## 3. Deploy HostGator (`deploy-reusable.yml`)
 
-**Trigger:** `push` apenas em `production`  
-**Concurrency:** `deploy-production` (cancela deploy anterior)
+**Workflows que chamam o reusable:**
+
+| Workflow | Branch | Environment |
+|----------|--------|-------------|
+| `deploy-production.yml` | `production` | `production` |
+| `deploy-staging.yml` | `new_staging` | `staging` |
+| `deploy-product-rh.yml` | `product/rh` | `product-rh` |
+
+**Concurrency:** `deploy-*-${{ github.ref }}` com `cancel-in-progress: false` (não interrompe deploy em andamento).
 
 ### Fluxo
 
 ```
-push production
+push branch oficial
       │
       ▼
-┌─────────────┐     ┌─────────────┐
-│  validate   │ OK  │   deploy    │
-│  ~2–3 min   │────►│  ~2–3 min   │
-└─────────────┘     └──────┬──────┘
-                           ▼
-                 deploy-server.sh
-                 migrate + cache + rsync
+┌─────────────┐     ┌─────────────────────────────────────┐
+│  validate   │ OK  │  deploy (deploy-reusable.yml)         │
+│  ~2–3 min   │────►│  1. hostgator-ssh (preflight)       │
+└─────────────┘     │  2. composer + npm + minify         │
+                    │  3. tar → SCP (retry) → SSH extract │
+                    └──────────────┬──────────────────────┘
+                                   ▼
+                          deploy-server.sh
+                          migrate + cache + symlinks
+                                   ▼
+                          smoke_test (curl HTTP 200)
 ```
 
 Deploy **não inicia** se validate falhar.
+
+### Host SSH canônico
+
+> Domínios `*.uniowork.com.br` passam pelo Cloudflare — **não servem para SSH**.
+
+| Onde | Valor |
+|------|--------|
+| `config/deploy-hostgator.defaults.env` | `DEPLOY_SSH_CANONICAL_HOST=br1136.hostgator.com.br` |
+| Variable GitHub | `DEPLOY_SSH_CANONICAL_HOST` (staging, production, product-rh) |
+| Action | `.github/actions/hostgator-ssh` |
+| Alias SSH no job | `hg-deploy` |
+
+Teste local: `ssh -p 2222 joabef36@br1136.hostgator.com.br`
 
 ### Secrets SSH (repositório — compartilhados)
 
 | Secret | Uso |
 |--------|-----|
-| `DEPLOY_SSH_HOST` | Host HostGator |
-| `DEPLOY_SSH_USER` | Usuário SSH |
-| `DEPLOY_SSH_KEY` | Chave privada OpenSSH |
-| `DEPLOY_SSH_PORT` | Porta (ex.: 2222) |
+| `DEPLOY_SSH_KEY` | Chave privada OpenSSH (**obrigatório**) |
+| `DEPLOY_SSH_USER` | Usuário SSH (`joabef36`) |
+| `DEPLOY_SSH_PORT` | Porta (`2222`) |
+| `DEPLOY_SSH_HOST` | Legado; conexão usa host canônico do repo/variable |
 
-Usados por **Deploy Production**, **Deploy Product RH** e futuros homologs via `deploy-reusable.yml` (`secrets: inherit`).
+Usados por todos os deploys e setups via `secrets: inherit`.
 
-### Secrets (environment `production` — só Unio)
+### Scripts de suporte
+
+| Script | Função |
+|--------|--------|
+| `scripts/ci-ssh-setup.sh` | IPv4, anti-Cloudflare, `~/.ssh/config` |
+| `scripts/ci-retry.sh` | Retry SCP/SSH |
+| `scripts/ci-remote-extract.sh` | Extract remoto + `deploy-server.sh` |
+| `scripts/deploy-server.sh` | Migrations, cache, symlinks, validação CSS |
+
+### Secrets (environment — só Unio completa)
 
 | Secret | Uso |
 |--------|-----|
 | `MAILBOX_JOABE_PASSWORD` | Caixa joabe@ (opcional) |
+| `MAILBOX_UNIO_PASSWORD` | Caixa unio@ (opcional) |
 | `PLATFORM_OWNER_PASSWORD` | Reset senha owner (opcional) |
 
 ### Variables por environment
 
 | Environment | Variables |
 |-------------|-----------|
-| `production` | `DEPLOY_PATH`, `DEPLOY_PUBLIC_HTML` |
-| `product-rh` | `DEPLOY_PATH`, `DEPLOY_PUBLIC_HTML`, `DEFAULT_URI` |
+| `production` | `DEPLOY_PATH`, `DEPLOY_PUBLIC_HTML`, `DEPLOY_SSH_CANONICAL_HOST` |
+| `staging` | `DEPLOY_PATH`, `DEPLOY_PUBLIC_HTML`, `DEFAULT_URI`, `DEPLOY_SSH_CANONICAL_HOST` |
+| `product-rh` | `DEPLOY_PATH`, `DEPLOY_PUBLIC_HTML`, `DEFAULT_URI`, `DEPLOY_SSH_CANONICAL_HOST` |
 
 ### Homolog de produto (`product/rh`)
 
 - Workflow: `deploy-product-rh.yml` → `deploy-reusable.yml`
-- CI no push: só validate dentro do deploy (sem run duplicado em `ci.yml`)
+- Setup manual: `setup-product-rh.yml` (usa mesma action `hostgator-ssh`)
 - Novo produto: `bash scripts/scaffold-product-homolog.sh <slug> [--apply-server] [--apply-github]`
-- Branches de homolog listadas em `config/deploy-branches.txt` (ignoradas por `sync-branches.sh`)
 
 ---
 
@@ -176,16 +210,19 @@ Desenvolver
 |---------|------|
 | PHPUnit 500 Twig block | Block deve estar definido em `base.html.twig` (`{% block page_scroll_mode %}flow{% endblock %}`) |
 | PHPStan | `composer phpstan:baseline` ou corrigir |
-| Deploy SSH | Verificar `DEPLOY_SSH_KEY`, newline, porta |
+| `Network is unreachable` no deploy | Host SSH era domínio Cloudflare — conferir log `SSH target: … @ 50.6.x.x`; ver [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md) |
+| Deploy SSH / `Permission denied` | Verificar chave autorizada no cPanel; `DEPLOY_SSH_KEY` com newline |
 | Site com CSS antigo | Hard refresh; bump `?v=` em `base.html.twig` |
-| Muitos runs na Actions | Verificar se push foi em `product/*` antes da otimização; hoje só oficiais disparam CI |
+| Muitos runs na Actions | Push em `product/*` não dispara CI; só branches oficiais |
 
 ---
 
 ## O que ainda não existe no Actions
 
-- Deploy automático para `new_staging` / `new_staging2`
+- Deploy automático para `new_staging2` (se criada)
 - Deploy automático para outros `product/*` além de `product/rh` (use `scaffold-product-homolog.sh`)
 - Notificação Slack/email em falha
+
+**Staging (`new_staging`):** deploy automático ativo via `deploy-staging.yml` → ver [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md).
 
 Ver também: [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md) · [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md)

@@ -26,7 +26,7 @@ Cronologia do trabalho de estabilização: sessão 403, pipeline CI/CD, deploy H
 | `ParameterNotFoundException` | `debug-bundle` em `require` prod; lock desatualizado | `symfony/debug-bundle` em `require-dev`; `bundles.php` só dev/test |
 | `DebugBundle not found` em prod | Bundle ausente após `--no-dev` | `composer install --no-scripts` no workflow |
 | `require is not defined` | `sync-vendor-assets.mjs` CommonJS | Convertido para ESM (`import`) |
-| Secrets SSH vazios | Environment secrets não configurados | User configurou `DEPLOY_SSH_*` no GitHub |
+| Deploy SSH / rede | Ver [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md) — host canônico `br1136.hostgator.com.br`, nunca domínio Cloudflare |
 | `error in libcrypto` | Chave SSH sem newline / CRLF | `printf` + `tr -d '\r'` na chave |
 | `tar: file changed as we read it` | tar no workspace mutável | tar em `$RUNNER_TEMP` |
 | rsync protocol mismatch | rsync antigo no shared hosting | Substituído por **tar + scp + ssh-action** |

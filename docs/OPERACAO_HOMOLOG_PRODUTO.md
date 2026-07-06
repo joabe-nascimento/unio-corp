@@ -84,12 +84,15 @@ Steps de plataforma (e-mail, `PLATFORM_OWNER`, mailboxes) **rodam** no deploy RH
 
 Compartilhados por Production e todos os homologs:
 
-| Secret | Exemplo |
-|--------|---------|
-| `DEPLOY_SSH_HOST` | `uniowork.com.br` |
-| `DEPLOY_SSH_USER` | `joabef36` |
-| `DEPLOY_SSH_KEY` | chave `unio_deploy` |
-| `DEPLOY_SSH_PORT` | `2222` |
+| Secret | Exemplo | Notas |
+|--------|---------|--------|
+| `DEPLOY_SSH_KEY` | chave `unio_deploy` | Obrigatório |
+| `DEPLOY_SSH_USER` | `joabef36` | |
+| `DEPLOY_SSH_PORT` | `2222` | |
+| `DEPLOY_SSH_HOST` | legado | **Não usar domínio público.** Pipeline usa `br1136.hostgator.com.br` |
+
+Variable **`DEPLOY_SSH_CANONICAL_HOST`** = `br1136.hostgator.com.br` (repo + environments).  
+Detalhes: [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md) · `config/deploy-hostgator.defaults.env`
 
 Secrets **só da Unio** (environment `production`): `MAILBOX_*`, `PLATFORM_OWNER_PASSWORD`.
 
@@ -104,6 +107,8 @@ Secrets **só da Unio** (environment `production`): `MAILBOX_*`, `PLATFORM_OWNER
 | `.github/workflows/deploy-reusable.yml` | `workflow_call` | Deploy genérico HostGator (SSH, tar, `deploy-server.sh`) |
 | `.github/workflows/deploy-production.yml` | push `production` | Prod Unio → chama reusable |
 | `.github/workflows/deploy-product-rh.yml` | push `product/rh` | Homolog RH → chama reusable |
+| `.github/workflows/deploy-staging.yml` | push `new_staging` | Staging Unio → chama reusable |
+| `.github/workflows/setup-staging.yml` | manual | Reparar pastas/index staging |
 | `.github/workflows/setup-product-rh.yml` | manual | Reparar pastas/index/.env no servidor RH |
 | `.github/workflows/templates/deploy-product.yml` | — | Template para novos produtos |
 

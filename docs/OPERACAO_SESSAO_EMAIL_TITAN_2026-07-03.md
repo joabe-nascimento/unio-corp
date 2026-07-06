@@ -282,9 +282,11 @@ Usuário → /forgot-password
 ### SSH
 
 ```bash
-ssh -i ~/.ssh/unio_deploy -p 2222 joabef36@uniowork.com.br
+ssh -i ~/.ssh/unio_deploy -p 2222 joabef36@br1136.hostgator.com.br
 cd ~/unio
 ```
+
+> Não use `uniowork.com.br` como host SSH — passa pelo Cloudflare. Ver [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md).
 
 ### Mailer
 

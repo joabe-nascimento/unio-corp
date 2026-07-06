@@ -1,219 +1,250 @@
 # Deploy automático — GitHub Actions → HostGator (SSH)
 
-Push na branch **`production`** → GitHub builda o projeto e envia para o servidor via SSH.
+Push nas branches oficiais dispara build no GitHub e envio para o servidor via SSH.
 
 Repositório: `https://github.com/joabe-nascimento/unio-corp`
+
+---
+
+## Branches e ambientes
+
+| Branch | Workflow | URL | Pasta no servidor |
+|--------|----------|-----|-------------------|
+| `production` | Deploy Production | https://uniowork.com.br | `/home2/joabef36/unio` |
+| `new_staging` | Deploy Staging | https://staging.uniowork.com.br | `/home2/joabef36/unio-staging` |
+| `product/rh` | Deploy Product RH | https://rh.uniowork.com.br | `/home2/joabef36/unio-rh` |
+
+Cada push nessas branches: **validate** → **deploy** → **smoke test** (URLs HTTP 200).
 
 ---
 
 ## Visão do fluxo
 
 ```
-PC: git push origin production
+PC: git push origin new_staging | production | product/rh
         ↓
-GitHub Actions (.github/workflows/deploy-production.yml)
-  1. composer install --no-dev
-  2. npm ci + vendor:sync
-  3. rsync → /home2/joabef36/unio/
-  4. SSH: migrations + cache + sync public_html
+GitHub Actions
+  1. validate-reusable (PHPUnit, PHPStan, assets…)
+  2. deploy-reusable:
+       a. Setup SSH HostGator (preflight + IPv4)
+       b. composer install --no-dev
+       c. npm ci + vendor:sync + minify CSS
+       d. tar.gz → SCP → /tmp/
+       e. SSH: extract + scripts/deploy-server.sh
+  3. smoke test (curl /login, /termos…)
         ↓
-https://uniowork.com.br atualizado
+Site atualizado
 ```
 
-**Não sobrescreve no servidor:** `.env.local`, `var/log/`, `public/uploads/` (fotos e arquivos de usuários).
+**Não sobrescreve no servidor:** `.env.local`, `var/log/`, `public/uploads/`.
 
 ---
 
-## Parte 1 — HostGator (uma vez)
+## Host SSH — regra crítica
+
+> **Nunca use o domínio público (`uniowork.com.br`, `staging.uniowork.com.br`) como host SSH.**  
+> Esses domínios passam pelo **Cloudflare** (CDN). SSH na porta 2222 **não funciona** via CDN → erro `Network is unreachable`.
+
+### Host canônico (versionado no repo)
+
+Arquivo: `config/deploy-hostgator.defaults.env`
+
+```env
+DEPLOY_SSH_CANONICAL_HOST=br1136.hostgator.com.br
+DEPLOY_SSH_DEFAULT_USER=joabef36
+DEPLOY_SSH_DEFAULT_PORT=2222
+```
+
+O pipeline **sempre conecta** nesse hostname (ou override via variable GitHub). O secret `DEPLOY_SSH_HOST` é legado — se apontar para domínio público, é ignorado com aviso no log.
+
+### Componentes do pipeline SSH
+
+| Arquivo | Função |
+|---------|--------|
+| `.github/actions/hostgator-ssh/action.yml` | Action reutilizável — setup de chave + preflight |
+| `scripts/ci-ssh-setup.sh` | Resolve IPv4, bloqueia Cloudflare, cria alias `hg-deploy` |
+| `scripts/ci-retry.sh` | Retry com exit code correto (3 tentativas, 15s) |
+| `scripts/ci-remote-extract.sh` | Extract + `deploy-server.sh` no servidor |
+
+### Testar SSH do seu PC
+
+```powershell
+ssh -i "$env:USERPROFILE\.ssh\unio_deploy" -p 2222 joabef36@br1136.hostgator.com.br
+```
+
+Se entrar no shell, SSH está OK. Digite `exit` para sair.
+
+---
+
+## Parte 1 — HostGator (setup único)
 
 ### 1.1 Ativar SSH
 
-1. cPanel → busque **SSH Access** / **Acesso SSH**
-2. Se não aparecer, abra chamado na HostGator pedindo SSH (planos Business/Turbo costumam ter)
-3. Anote:
-   - **Host:** IP do servidor ou `uniowork.com.br`
-   - **Porta:** geralmente `22`
-   - **Usuário:** `joabef36`
+1. cPanel → **SSH Access** / **Acesso SSH**
+2. Se não aparecer, abra chamado na HostGator (planos Business/Turbo costumam ter)
+3. Anote no cPanel o **hostname do servidor** (ex.: `br1136.hostgator.com.br`) — **não** o domínio do site
 
-### 1.2 Garantir pastas no servidor
-
-No Gerenciador de arquivos:
+### 1.2 Pastas no servidor
 
 ```
-/home2/joabef36/unio/          ← app Symfony
-/home2/joabef36/public_html/   ← domínio (index.php + estáticos)
+/home2/joabef36/unio/                    ← produção (Symfony)
+/home2/joabef36/public_html/             ← document root produção
+/home2/joabef36/unio-staging/             ← staging
+/home2/joabef36/staging.uniowork.com.br/  ← document root staging
+/home2/joabef36/unio-rh/                 ← homolog RH
+/home2/joabef36/rh.uniowork.com.br/       ← document root RH
 ```
 
 ### 1.3 `.env.local` no servidor (obrigatório)
 
-Arquivo: `/home2/joabef36/unio/.env.local`
+Deve existir **antes** do primeiro deploy. O GitHub **nunca** envia `.env` / `.env.local`.
 
-Deve existir **antes** do primeiro deploy automático (criado na instalação manual).  
-O GitHub **nunca** envia esse arquivo.
+### 1.4 Symlinks de estáticos
 
-### 1.4 `public_html/index.php`
-
-Confirme que existe e aponta para o Symfony:
-
-```php
-<?php
-
-use App\Kernel;
-
-require_once __DIR__.'/../unio/vendor/autoload_runtime.php';
-
-return static function (array $context) {
-    return new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
-};
-```
+O `scripts/deploy-server.sh` recria symlinks `css`, `js`, `images`, `vendor` do document root para `public/` da app.
 
 ---
 
 ## Parte 2 — Chave SSH de deploy (uma vez)
 
-No **PowerShell do seu PC**:
-
-### 2.1 Gerar par de chaves (só para deploy)
+### 2.1 Gerar par de chaves
 
 ```powershell
 ssh-keygen -t ed25519 -C "github-deploy-unio" -f "$env:USERPROFILE\.ssh\unio_deploy" -N '""'
 ```
 
-Arquivos criados:
-
-- `C:\Users\SEU_USUARIO\.ssh\unio_deploy` → **privada** (vai para o GitHub)
-- `C:\Users\SEU_USUARIO\.ssh\unio_deploy.pub` → **pública** (vai para a HostGator)
-
-### 2.2 Instalar chave pública na HostGator
-
-1. Abra `unio_deploy.pub` no Bloco de notas
-2. cPanel → **SSH Access** → **Manage SSH Keys** → **Import Key**
-3. Cole o conteúdo da `.pub` → **Import**
-4. **Authorize** a chave
-
-### 2.3 Testar conexão
-
-```powershell
-ssh -i "$env:USERPROFILE\.ssh\unio_deploy" -p 22 joabef36@SEU_HOST
-```
-
-Substitua `SEU_HOST` pelo host/IP do cPanel.  
-Se entrar no shell, SSH está OK. Digite `exit` para sair.
+- `unio_deploy` → **privada** (secret `DEPLOY_SSH_KEY`)
+- `unio_deploy.pub` → **pública** (cPanel → SSH Keys → Import → Authorize)
 
 ---
 
-## Parte 3 — Secrets no GitHub (uma vez)
+## Parte 3 — Secrets e variables no GitHub
 
-1. Abra: `https://github.com/joabe-nascimento/unio-corp/settings/secrets/actions`
-2. **New repository secret** para cada item:
+Settings → **Secrets and variables** → **Actions**
 
-| Nome | Valor |
-|------|--------|
-| `DEPLOY_SSH_HOST` | Host ou IP do servidor (ex.: `gatorXXXX.hostgator.com.br`) |
-| `DEPLOY_SSH_USER` | `joabef36` |
-| `DEPLOY_SSH_KEY` | Conteúdo **inteiro** do arquivo `unio_deploy` (privada), incluindo `-----BEGIN...` |
-| `DEPLOY_SSH_PORT` | `22` (se a HostGator usar outra porta, coloque aqui) |
+### 3.1 Secrets (repositório — compartilhados)
 
-### 3.1 Variáveis do repositório (opcional)
+| Nome | Valor | Obrigatório |
+|------|--------|-------------|
+| `DEPLOY_SSH_KEY` | Conteúdo inteiro de `unio_deploy` (com `-----BEGIN…`) | Sim |
+| `DEPLOY_SSH_USER` | `joabef36` | Sim |
+| `DEPLOY_SSH_PORT` | `2222` | Sim |
+| `DEPLOY_SSH_HOST` | Legado; pode ser qualquer valor — **conexão usa host canônico** | Não crítico |
 
-Settings → **Secrets and variables** → **Actions** → aba **Variables**:
+### 3.2 Variables (repositório ou por environment)
 
-| Nome | Valor padrão |
-|------|----------------|
-| `DEPLOY_PATH` | `/home2/joabef36/unio` |
-| `DEPLOY_PUBLIC_HTML` | `/home2/joabef36/public_html` |
+| Nome | Valor | Onde |
+|------|--------|------|
+| `DEPLOY_SSH_CANONICAL_HOST` | `br1136.hostgator.com.br` | Repo + environments `staging`, `production`, `product-rh` |
+| `DEPLOY_PATH` | Caminho da app no servidor | Por environment |
+| `DEPLOY_PUBLIC_HTML` | Document root | Por environment |
+| `DEFAULT_URI` | URL pública do ambiente | Homologs |
 
-Se não criar, o workflow usa esses caminhos por padrão.
+**Defaults por environment:**
 
-### 3.2 Environment `production` (recomendado)
+| Environment | `DEPLOY_PATH` | `DEPLOY_PUBLIC_HTML` |
+|-------------|---------------|----------------------|
+| `production` | `/home2/joabef36/unio` | `/home2/joabef36/public_html` |
+| `staging` | `/home2/joabef36/unio-staging` | `/home2/joabef36/staging.uniowork.com.br` |
+| `product-rh` | `/home2/joabef36/unio-rh` | `/home2/joabef36/rh.uniowork.com.br` |
 
-Settings → **Environments** → **New environment** → nome: `production`
+Se mudar de servidor HostGator, altere **`config/deploy-hostgator.defaults.env`** ou a variable `DEPLOY_SSH_CANONICAL_HOST` — não é necessário reconfigurar secrets de host.
 
-Opcional: exigir aprovação manual antes de cada deploy.
+### 3.3 Secrets por environment (opcionais)
+
+| Environment | Secrets |
+|-------------|---------|
+| `production` | `MAILBOX_JOABE_PASSWORD`, `MAILBOX_UNIO_PASSWORD`, `PLATFORM_OWNER_PASSWORD` |
+| `staging` | `APP_SECRET_STAGING`, `DATABASE_URL_STAGING` (só setup inicial) |
+| `product-rh` | `APP_SECRET_RH`, `DATABASE_URL_RH` (só setup inicial) |
 
 ---
 
-## Parte 4 — Subir o workflow (uma vez)
+## Parte 4 — Workflows
 
-No PC, na branch que você usa para integrar (ex.: `main`), mergeie o workflow e envie para `production`:
+| Workflow | Arquivo | Trigger |
+|----------|---------|---------|
+| Deploy Production | `deploy-production.yml` | push `production` |
+| Deploy Staging | `deploy-staging.yml` | push `new_staging` |
+| Deploy Product RH | `deploy-product-rh.yml` | push `product/rh` |
+| Deploy (core) | `deploy-reusable.yml` | `workflow_call` |
+| Setup Staging | `setup-staging.yml` | manual |
+| Setup Product RH | `setup-product-rh.yml` | manual |
+| Validate | `validate-reusable.yml` | CI + pré-deploy |
 
-```powershell
-cd C:\projetos\huplex
-git add .github/workflows/deploy-production.yml scripts/deploy-server.sh docs/DEPLOY_GITHUB_ACTIONS.md
-git commit -m "ci: deploy automático production via SSH"
-git push origin main
-```
+### Concurrency
 
-Depois, na branch `production`:
+Deploys usam `cancel-in-progress: false` — um push novo **não cancela** deploy em andamento (evita servidor inconsistente).
 
-```powershell
-git checkout production
-git merge main
-git push origin production
-```
+### Ordem no deploy
 
-O primeiro push em `production` dispara o deploy.
+1. **Setup SSH HostGator** — preflight antes do build (~10s se rede OK)
+2. Build (composer + npm)
+3. Upload tar.gz com retry
+4. Extract + `deploy-server.sh` com retry
+5. Smoke test
 
-Acompanhe em: `https://github.com/joabe-nascimento/unio-corp/actions`
+Acompanhe: `https://github.com/joabe-nascimento/unio-corp/actions`
 
 ---
 
 ## Parte 5 — Rotina do dia a dia
 
-### Desenvolver e publicar
+### Staging (homolog principal)
 
 ```powershell
-cd C:\projetos\huplex
-
-# 1. Trabalhe na sua branch
-git checkout feature/minha-feature
+git checkout new_staging
 # ... alterações ...
 git add .
 git commit -m "feat: minha alteração"
-git push origin feature/minha-feature
+git push origin new_staging
+```
 
-# 2. Abra PR → main (CI roda testes)
+→ Deploy Staging (~2–4 min) → https://staging.uniowork.com.br
 
-# 3. Quando estiver pronto para produção
+### Produção
+
+```powershell
 git checkout production
-git merge main
+git merge new_staging   # ou main, conforme fluxo da equipe
 git push origin production
 ```
 
-O push em **`production`** sozinho dispara o deploy (~3–8 min).
+→ Deploy Production + GitHub Release automática
 
-### O que o GitHub faz automaticamente
+### Re-run manual
 
-1. `composer install --no-dev`
-2. `npm ci` + `npm run vendor:sync`
-3. Envia arquivos para `unio/` (exceto `.env.local`, uploads, cache)
-4. No servidor: `doctrine:migrations:migrate`, `cache:warmup`
-5. Copia `css/`, `js/`, `images/`, `vendor/` para `public_html/`
+Actions → workflow com falha → **Re-run all jobs**
 
 ---
 
 ## Parte 6 — Conferir se deu certo
 
-1. GitHub → **Actions** → workflow **Deploy Production** → verde
-2. Site: https://uniowork.com.br/login
-3. Se falhar, abra o job e leia o log do passo **Rsync** ou **Post-deploy**
+1. GitHub Actions → job verde (validate + deploy + smoke)
+2. Abrir URL do ambiente (`/login`)
+3. Se falhar: baixar artifact **deploy-report-…** ou ver step summary
+
+Relatório no servidor: `{DEPLOY_PATH}/var/log/deploy-report.txt`
 
 ---
 
 ## Problemas comuns
 
-| Erro | Solução |
-|------|---------|
-| `Permission denied (publickey)` | Chave pública não autorizada no cPanel SSH |
-| `DEPLOY_SSH_KEY` inválida | Cole a chave privada completa, com quebras de linha |
-| `composer` / `php` no servidor | Não precisa — o build roda no GitHub; só migrations usam PHP no servidor |
-| Site 500 após deploy | Confirme `.env.local` no servidor; rode cache warmup manual se necessário |
-| CSS quebrado | Verifique se `public_html/css` foi atualizado (passo Post-deploy) |
-| Migration falhou | Veja log do SSH; corrija DB e rode de novo com push vazio ou re-run workflow |
+| Erro | Causa | Solução |
+|------|--------|---------|
+| `Network is unreachable` | SSH tentou Cloudflare/domínio público | Usar `br1136.hostgator.com.br` (já automático desde jul/2026) |
+| `Permission denied (publickey)` | Chave não autorizada no cPanel | Import + Authorize em SSH Keys |
+| `DEPLOY_SSH_KEY` inválida | Chave truncada ou CRLF | Recolar com `printf`; workflow faz `tr -d '\r'` |
+| `ci-retry: falhou apos 3 tentativas` | Rede GitHub→HostGator instável | Re-run; verificar firewall HostGator |
+| Host SSH aponta para CDN | Secret `DEPLOY_SSH_HOST=uniowork.com.br` | Ignorado pelo pipeline; conferir log `SSH target: … @ 50.6.x.x` |
+| Site 500 após deploy | `.env.local` ausente ou migration | Ver deploy-report; SSH manual no servidor |
+| CSS antigo | Cache browser ou symlink | Hard refresh; bump `?v=` em assets |
 
-### Re-run manual no GitHub
+### Migrar host SSH (novo servidor)
 
-Actions → **Deploy Production** → run com falha → **Re-run all jobs**
+1. Atualizar `config/deploy-hostgator.defaults.env`
+2. Atualizar variable `DEPLOY_SSH_CANONICAL_HOST` nos 3 environments
+3. Commit + push → deploy testa preflight automaticamente
 
 ---
 
@@ -221,13 +252,15 @@ Actions → **Deploy Production** → run com falha → **Re-run all jobs**
 
 | Recurso | O que faz |
 |---------|-----------|
-| **Smoke test** | Após deploy, `curl` em `/login`, `/termos`, `/privacidade` — workflow falha se ≠ 200 |
-| **GitHub Release** | Cada deploy prod OK cria tag `deploy-N` com release notes |
-| **CI noturno** | Cron 03:00 BRT — testes sem push |
-| **paths-ignore** | PR só com `docs/` ou `*.md` não dispara CI |
-| **Backup DB** | `mysqldump` em `var/backups/db/` antes de cada migration (últimos 7) |
+| **Preflight SSH** | Falha cedo se servidor inacessível |
+| **IPv4 forçado** | Evita `Network is unreachable` por rota IPv6 |
+| **Retry SCP/SSH** | 3 tentativas com backoff |
+| **Smoke test** | curl em `/`, `/login`, `/termos`, `/privacidade` |
+| **GitHub Release** | Tag `deploy-N` após prod OK |
+| **Backup DB** | `mysqldump` antes de migration (últimos 7) |
+| **Artifact deploy-report** | Log do `deploy-server.sh` por 14 dias |
 
-Backups no servidor: `~/unio/var/backups/db/pre-migrate-*.sql.gz`
+Backups: `~/unio/var/backups/db/pre-migrate-*.sql.gz`
 
 ---
 
@@ -235,8 +268,8 @@ Backups no servidor: `~/unio/var/backups/db/pre-migrate-*.sql.gz`
 
 - Nunca commite `.env.local` ou chaves SSH no Git
 - Rotacione `DEPLOY_SSH_KEY` se a chave vazar
-- Use branch `production` só para código estável
-- Apague scripts temporários do deploy manual (`install-once.php`, `fix-once.php`) em `public_html`
+- Domínio público ≠ host SSH
+- Apague scripts temporários em `public_html` após emergências
 
 ---
 
@@ -244,6 +277,10 @@ Backups no servidor: `~/unio/var/backups/db/pre-migrate-*.sql.gz`
 
 | Quando | O que fazer |
 |--------|-------------|
-| Setup inicial | SSH + chave + secrets GitHub + `.env.local` no servidor |
-| Cada release | `git push origin production` |
-| Upload manual | **Não precisa mais** (exceto emergência) |
+| Setup inicial | SSH no cPanel + chave + secrets + `.env.local` + variables |
+| Staging | `git push origin new_staging` |
+| Produção | `git push origin production` |
+| Novo servidor | Editar `config/deploy-hostgator.defaults.env` |
+| Upload manual | Só emergência — ver [DEPLOY_AGORA.md](DEPLOY_AGORA.md) |
+
+Ver também: [OPERACAO_GITHUB_ACTIONS.md](OPERACAO_GITHUB_ACTIONS.md) · [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md)

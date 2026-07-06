@@ -209,7 +209,7 @@ Preencha módulos e URLs na [tabela template](#modelo-de-contrato-template) acim
 |---|------|
 | 1 | Criar branch `client/<slug>` a partir de `production` |
 | 2 | Environment `client-<slug>` no GitHub |
-| 3 | Secrets: `DEPLOY_SSH_HOST`, `DEPLOY_SSH_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_SSH_PORT` |
+| 3 | Secrets: `DEPLOY_SSH_KEY`, `DEPLOY_SSH_USER`, `DEPLOY_SSH_PORT` (+ variable `DEPLOY_SSH_CANONICAL_HOST`) |
 | 4 | Variables: `DEPLOY_PATH`, `DEPLOY_PUBLIC_HTML` |
 | 5 | Workflow deploy só para `client/<slug>` (futuro) |
 | 6 | CI: push em `client/**` (futuro) |
