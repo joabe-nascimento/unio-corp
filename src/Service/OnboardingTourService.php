@@ -189,6 +189,10 @@ class OnboardingTourService
                 'body' => 'Troque de empresa, ajuste preferências e acesse seu perfil por aqui.',
                 'placement' => 'right',
                 'radius' => 10,
+                'requires_sidebar' => true,
+                'mobile_targets' => ['[data-tour="identity"]', '[data-tour="mobile-menu"]'],
+                'mobile_placement' => 'bottom',
+                'mobile_body' => 'Abra o Menu (barra inferior) e use o topo da sidebar para trocar de empresa e acessar seu perfil.',
             ],
             [
                 'id' => 'search',
@@ -197,6 +201,9 @@ class OnboardingTourService
                 'body' => 'Encontre núcleos, apps e membros. Use Ctrl+K (ou ⌘K no Mac) em qualquer tela.',
                 'placement' => 'bottom',
                 'radius' => 14,
+                'mobile_targets' => ['[data-tour="help"]'],
+                'mobile_placement' => 'bottom',
+                'mobile_body' => 'Toque em Ajuda no topo para guias e atalhos. No desktop, a busca fica aqui no header (Ctrl+K ou ⌘K).',
             ],
         ];
 
@@ -207,6 +214,9 @@ class OnboardingTourService
                 'title' => 'Unio Cortex',
                 'body' => 'Inteligência e visão consolidada dos dados da sua operação.',
                 'placement' => 'right',
+                'requires_sidebar' => true,
+                'mobile_targets' => ['[data-tour="cortex-mobile"]', '[data-tour="cortex"]'],
+                'mobile_placement' => 'top',
             ];
         }
 
@@ -220,9 +230,17 @@ class OnboardingTourService
                 ],
                 'zone' => 'hub-picker',
                 'prepare' => 'show-hub-picker',
+                'requires_sidebar' => true,
                 'title' => 'Núcleos da plataforma',
                 'body' => 'Escolha um núcleo na lista — cada um agrupa módulos e apps por domínio.',
                 'placement' => 'right',
+                'mobile_targets' => [
+                    '[data-tour="hub-picker-core"]',
+                    '[data-hub-pick="operacoes"]',
+                    '[data-tour="hub-operacoes-mobile"]',
+                ],
+                'mobile_placement' => 'bottom',
+                'mobile_body' => 'Abra o Menu ou use o atalho Operações na barra inferior para entrar em um núcleo.',
             ];
         }
 
@@ -233,6 +251,7 @@ class OnboardingTourService
             'body' => 'Tire dúvidas e acelere tarefas com a assistente virtual da Unio.',
             'placement' => 'bottom',
             'highlight' => 'circle',
+            'mobile_placement' => 'bottom',
         ];
 
         $profileStep = match ($layout) {
@@ -246,9 +265,17 @@ class OnboardingTourService
                         '[data-tour="hub-platform"]',
                     ],
                     'prepare' => 'show-hub-picker',
+                    'requires_sidebar' => true,
                     'title' => 'Administração da plataforma',
                     'body' => 'No grupo Plataforma, abra o núcleo para gerenciar usuários, empresas e configurações.',
                     'placement' => 'right',
+                    'mobile_targets' => [
+                        '[data-tour="hub-admin"]',
+                        '[data-hub-pick="admin"]',
+                        '[data-tour="mobile-menu"]',
+                    ],
+                    'mobile_placement' => 'bottom',
+                    'mobile_body' => 'Abra o Menu e, em Plataforma, entre no núcleo Administração.',
                 ]
                 : null,
             'gestor' => [
@@ -257,6 +284,9 @@ class OnboardingTourService
                 'title' => 'Gestão do dia a dia',
                 'body' => 'Acompanhe notificações, hubs de RH e talentos para liderar equipes e processos.',
                 'placement' => 'right',
+                'requires_sidebar' => true,
+                'mobile_targets' => ['[data-tour="notifications-mobile"]', '[data-tour="notifications"]'],
+                'mobile_placement' => 'top',
             ],
             'supervisor' => $hasHubs
                 ? [
@@ -268,9 +298,16 @@ class OnboardingTourService
                         '[data-hub-pick="recrutamento"]',
                     ],
                     'prepare' => 'show-hub-picker',
+                    'requires_sidebar' => true,
                     'title' => 'Supervisão operacional',
                     'body' => 'Entre no Núcleo de Operações ou Recrutamento para acompanhar equipes e fluxos.',
                     'placement' => 'right',
+                    'mobile_targets' => [
+                        '[data-tour="hub-operacoes-mobile"]',
+                        '[data-tour="hub-operacoes"]',
+                        '[data-hub-pick="operacoes"]',
+                    ],
+                    'mobile_placement' => 'top',
                 ]
                 : [
                     'id' => 'profile_supervisor',
@@ -278,6 +315,8 @@ class OnboardingTourService
                     'title' => 'Supervisão operacional',
                     'body' => 'Use notificações e chat para acompanhar a operação do dia a dia.',
                     'placement' => 'right',
+                    'mobile_targets' => ['[data-tour="notifications-mobile"]', '[data-tour="notifications"]'],
+                    'mobile_placement' => 'top',
                 ],
             default => $this->grants->grantAtLeast($user, 'product_rh', 'portal', 'MEMBRO')
                 ? [
@@ -313,6 +352,7 @@ class OnboardingTourService
                     )
                     : 'Ótimo! Você concluiu todos os primeiros passos da plataforma.',
                 'placement' => 'top',
+                'mobile_placement' => 'bottom',
             ];
         }
 

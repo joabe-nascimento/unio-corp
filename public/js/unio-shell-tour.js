@@ -5,6 +5,69 @@
     'use strict';
 
     var activeTargets = [];
+    var MOBILE_MQ = '(max-width: 1199.98px)';
+
+    function isMobileShell() {
+        if (!window.matchMedia(MOBILE_MQ).matches) {
+            return false;
+        }
+        var nav = document.querySelector('.shell-mobile-nav');
+        if (!nav) {
+            return false;
+        }
+        return window.getComputedStyle(nav).display !== 'none';
+    }
+
+    function getTourViewportInsets() {
+        var insets = { top: 12, right: 12, bottom: 12, left: 12 };
+        if (!isMobileShell()) {
+            return insets;
+        }
+
+        var rootStyle = window.getComputedStyle(document.documentElement);
+        var offsetRaw = rootStyle.getPropertyValue('--shell-mobile-nav-offset').trim();
+        var offsetPx = 0;
+
+        if (offsetRaw) {
+            var probe = document.createElement('div');
+            probe.style.position = 'fixed';
+            probe.style.visibility = 'hidden';
+            probe.style.bottom = offsetRaw;
+            document.body.appendChild(probe);
+            offsetPx = window.innerHeight - probe.getBoundingClientRect().top;
+            probe.remove();
+        }
+
+        if (offsetPx < 48) {
+            var navInner = document.querySelector('.shell-mobile-nav__inner') || document.querySelector('.shell-mobile-nav');
+            offsetPx = navInner ? Math.ceil(navInner.getBoundingClientRect().height) : 68;
+        }
+
+        insets.bottom = offsetPx + 12;
+        return insets;
+    }
+
+    function openMobileSidebar() {
+        if (!isMobileShell() || document.body.classList.contains('sidebar-open')) {
+            return;
+        }
+
+        var toggle = document.querySelector('[data-unio-shell-toggle="sidebar"]');
+        if (toggle) {
+            toggle.click();
+        }
+    }
+
+    function stepNeedsSidebar(step) {
+        return !!(step.requires_sidebar || step.prepare === 'show-hub-picker' || step.prepare === 'open-sidebar');
+    }
+
+    function stepPrepareDelay(step) {
+        if (!stepNeedsSidebar(step)) {
+            return 0;
+        }
+        return isMobileShell() ? 320 : (step.prepare === 'show-hub-picker' ? 180 : 80);
+    }
 
     function parseConfig() {
         var el = document.getElementById('shellTourConfig');
@@ -161,6 +224,10 @@
     }
 
     function prepareStep(step) {
+        if (isMobileShell() && stepNeedsSidebar(step)) {
+            openMobileSidebar();
+        }
+
         if (step.prepare !== 'show-hub-picker') {
             return;
         }
@@ -177,6 +244,16 @@
         });
     }
 
+    function resolveStepSelectors(step) {
+        if (isMobileShell() && step.mobile_targets && step.mobile_targets.length) {
+            return step.mobile_targets;
+        }
+        if (step.targets && step.targets.length) {
+            return step.targets;
+        }
+        return [step.target];
+    }
+
     function findTarget(step) {
         if (step.zone === 'hub-picker') {
             var zoneHit = unionHubPickerRect();
@@ -185,7 +262,7 @@
             }
         }
 
-        var selectors = step.targets && step.targets.length ? step.targets : [step.target];
+        var selectors = resolveStepSelectors(step);
         for (var i = 0; i < selectors.length; i++) {
             var node = document.querySelector(selectors[i]);
             if (isVisible(node)) {
@@ -275,14 +352,27 @@
             });
         }
 
-        function placeCard(rect, placement) {
-            var gap = 16;
+        function placeCard(rect, step) {
+            var insets = getTourViewportInsets();
+            var gap = isMobileShell() ? 12 : 16;
             var arrowSize = 12;
             var cardW = card.offsetWidth || 360;
             var cardH = card.offsetHeight || 180;
+            var resolved = step.placement || 'right';
+
+            if (isMobileShell()) {
+                if (step.mobile_placement) {
+                    resolved = step.mobile_placement;
+                } else if (rect.bottom <= 72) {
+                    resolved = 'bottom';
+                } else if (rect.top >= window.innerHeight - insets.bottom - 24) {
+                    resolved = 'top';
+                }
+            }
+
             var top;
             var left;
-            var resolved = placement || 'right';
+            var useDock = false;
 
             if (resolved === 'bottom') {
                 top = rect.bottom + gap;
@@ -298,11 +388,25 @@
                 left = rect.right + gap;
             }
 
-            left = Math.max(12, Math.min(left, window.innerWidth - cardW - 12));
-            top = Math.max(12, Math.min(top, window.innerHeight - cardH - 12));
+            left = Math.max(insets.left, Math.min(left, window.innerWidth - cardW - insets.right));
+            top = Math.max(insets.top, Math.min(top, window.innerHeight - cardH - insets.bottom));
+
+            if (isMobileShell()) {
+                var overlapsTarget = top + cardH + gap > rect.top && top < rect.bottom + gap;
+                var lacksSpace = top <= insets.top + 2
+                    || top + cardH >= window.innerHeight - insets.bottom - 2
+                    || overlapsTarget;
+
+                if (lacksSpace) {
+                    useDock = true;
+                    top = window.innerHeight - insets.bottom - cardH - 8;
+                    left = Math.max(insets.left, (window.innerWidth - cardW) / 2);
+                }
+            }
 
             card.style.top = Math.round(top) + 'px';
             card.style.left = Math.round(left) + 'px';
+            card.classList.toggle('shell-tour__card--mobile-dock', useDock);
 
             var targetCx = rect.left + rect.width / 2;
             var targetCy = rect.top + rect.height / 2;
@@ -310,7 +414,9 @@
             var cardCy = top + cardH / 2;
             var arrowSide;
 
-            if (resolved === 'bottom' || (resolved !== 'top' && cardCy > rect.bottom)) {
+            if (useDock) {
+                arrowSide = 'top';
+            } else if (resolved === 'bottom' || (resolved !== 'top' && cardCy > rect.bottom)) {
                 arrowSide = 'top';
             } else if (resolved === 'top' || cardCy + cardH < rect.top) {
                 arrowSide = 'bottom';
@@ -332,10 +438,15 @@
                 return;
             }
 
+            arrowEl.hidden = useDock;
             arrowEl.style.top = '';
             arrowEl.style.left = '';
             arrowEl.style.right = '';
             arrowEl.style.bottom = '';
+
+            if (useDock) {
+                return;
+            }
 
             if (arrowSide === 'left' || arrowSide === 'right') {
                 var arrowTop = targetCy - top - arrowSize;
@@ -348,6 +459,32 @@
             }
         }
 
+        function paintStep(hit, step) {
+            var pad = step.zone === 'hub-picker' ? 6 : 10;
+            var rect = hit.rect;
+            var holeW = rect.width + pad * 2;
+            var holeH = rect.height + pad * 2;
+            var radius = resolveHighlightRadius(step, holeW, holeH);
+            applyBackdropHole(backdrop, spotlight, rect, pad, radius);
+            setActiveTarget(hit.node, hit.extraNodes);
+
+            titleEl.textContent = step.title;
+            bodyEl.textContent = (isMobileShell() && step.mobile_body) ? step.mobile_body : step.body;
+            stepEl.textContent = (index + 1) + ' / ' + currentSteps.length;
+
+            prevBtn.disabled = index === 0;
+            nextBtn.textContent = index === currentSteps.length - 1 ? 'Concluir' : 'Próximo';
+
+            card.hidden = false;
+            requestAnimationFrame(function () {
+                placeCard(rect, step);
+            });
+
+            if (typeof hit.node.scrollIntoView === 'function') {
+                hit.node.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+            }
+        }
+
         function renderStep() {
             var step = currentSteps[index];
             if (!step) {
@@ -357,38 +494,26 @@
 
             prepareStep(step);
 
-            var hit = findTarget(step);
-            if (!hit) {
-                if (index < currentSteps.length - 1) {
-                    index += 1;
-                    renderStep();
+            function continueStep() {
+                var hit = findTarget(step);
+                if (!hit) {
+                    if (index < currentSteps.length - 1) {
+                        index += 1;
+                        renderStep();
+                        return;
+                    }
+                    finish(true);
                     return;
                 }
-                finish(true);
-                return;
+
+                paintStep(hit, step);
             }
 
-            var pad = step.zone === 'hub-picker' ? 6 : 10;
-            var rect = hit.rect;
-            var holeW = rect.width + pad * 2;
-            var holeH = rect.height + pad * 2;
-            var radius = resolveHighlightRadius(step, holeW, holeH);
-            applyBackdropHole(backdrop, spotlight, rect, pad, radius);
-
-            titleEl.textContent = step.title;
-            bodyEl.textContent = step.body;
-            stepEl.textContent = (index + 1) + ' / ' + currentSteps.length;
-
-            prevBtn.disabled = index === 0;
-            nextBtn.textContent = index === currentSteps.length - 1 ? 'Concluir' : 'Próximo';
-
-            card.hidden = false;
-            requestAnimationFrame(function () {
-                placeCard(rect, step.placement || 'right');
-            });
-
-            if (typeof hit.node.scrollIntoView === 'function') {
-                hit.node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            var delay = stepPrepareDelay(step);
+            if (delay > 0) {
+                window.setTimeout(continueStep, delay);
+            } else {
+                continueStep();
             }
         }
 
@@ -436,7 +561,9 @@
                 window.unioShellHelp.close();
             }
 
-            window.setTimeout(renderStep, flow.prepare === 'show-hub-picker' ? 180 : 60);
+            window.setTimeout(renderStep, flow.prepare === 'show-hub-picker'
+                ? (isMobileShell() ? 360 : 180)
+                : (isMobileShell() ? 120 : 60));
         }
 
         function open(atIndex) {
@@ -453,6 +580,17 @@
             document.body.classList.remove('shell-tour-open');
             clearBackdropHole(backdrop, spotlight);
             clearActiveTarget();
+            card.classList.remove('shell-tour__card--mobile-dock');
+            if (arrowEl) {
+                arrowEl.hidden = false;
+            }
+
+            if (isMobileShell() && document.body.classList.contains('sidebar-open')) {
+                var toggle = document.querySelector('[data-unio-shell-toggle="sidebar"]');
+                if (toggle) {
+                    toggle.click();
+                }
+            }
 
             if (completed) {
                 var flow = getFlow(activeFlowId);

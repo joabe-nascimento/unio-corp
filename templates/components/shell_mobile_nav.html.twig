@@ -7,6 +7,7 @@
                 <button type="button"
                         class="shell-mobile-nav__item shell-mobile-nav__item--action"
                         data-shell-mobile-action="{{ item.action|default('open-sidebar') }}"
+                        data-tour="mobile-menu"
                         aria-label="{{ item.label }}">
                     <span class="shell-mobile-nav__icon" aria-hidden="true"><i class="fas {{ item.icon }}"></i></span>
                     <span class="shell-mobile-nav__label">{{ item.label }}</span>
@@ -15,6 +16,7 @@
                 <a href="{{ path(item.route) }}"
                    class="shell-mobile-nav__item{{ item.active|default(false) ? ' is-active' : '' }}"
                    {% if item.active|default(false) %}aria-current="page"{% endif %}
+                   {% if item.id == 'notifications' %}data-tour="notifications-mobile"{% elseif item.id == 'cortex' %}data-tour="cortex-mobile"{% elseif item.id == 'operacoes' %}data-tour="hub-operacoes-mobile"{% endif %}
                    title="{{ item.label }}">
                     <span class="shell-mobile-nav__icon" aria-hidden="true"><i class="fas {{ item.icon }}"></i></span>
                     <span class="shell-mobile-nav__label">{{ item.label }}</span>
