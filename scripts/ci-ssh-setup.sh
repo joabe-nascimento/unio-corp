@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Configura SSH para deploy HostGator a partir do GitHub Actions.
+# Configura SSH para deploy HostGator a partir do GitHub Actions ou GitLab CI.
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"

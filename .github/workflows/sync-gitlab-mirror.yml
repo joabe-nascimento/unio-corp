@@ -1,0 +1,39 @@
+# Espelha branches oficiais para GitLab apos push no GitHub.
+# Secret: GITLAB_PROJECT_TOKEN (project access token unio-git-push com write_repository)
+
+name: Sync GitLab mirror
+
+on:
+  push:
+    branches:
+      - production
+      - new_staging
+      - main
+      - product/rh
+
+concurrency:
+  group: sync-gitlab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push branch to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_PROJECT_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${GITLAB_TOKEN:-}" ]]; then
+            echo "GITLAB_PROJECT_TOKEN nao configurado — sync ignorado"
+            exit 0
+          fi
+          git remote remove gitlab 2>/dev/null || true
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.com/joabe-nascimento/unio-corp.git"
+          git push gitlab "HEAD:${BRANCH}" --force-with-lease
