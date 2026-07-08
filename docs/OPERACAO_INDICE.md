@@ -17,7 +17,6 @@ Documentação consolidada após estabilização do deploy HostGator, CI/CD e va
 | [BRANCHES.md](BRANCHES.md) | Modelo oficial de branches (feature → product → main → staging → production) |
 | [DEPLOY_AGORA.md](DEPLOY_AGORA.md) | Checklist rápido HostGator |
 | [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md) | Pipeline SSH HostGator, secrets, host canônico, troubleshooting |
-| [GITLAB_SETUP.md](GITLAB_SETUP.md) | Espelho GitHub→GitLab, CI/CD, variáveis e deploy |
 
 ## Estado atual (último deploy)
 
