@@ -24,13 +24,9 @@ class MaintenanceListener
     /** Rotas públicas que permanecem acessíveis durante a manutenção */
     private const ALLOWED_ROUTES = [
         'app_home',
-        'app_login',
         'app_logout',
         'app_sessao_encerrar',
         'app_manutencao',
-        'app_register',
-        'app_forgot_password',
-        'app_reset_password',
         'app_legal_termos',
         'app_legal_privacidade',
         'app_legal_lgpd',
@@ -73,7 +69,7 @@ class MaintenanceListener
                 return;
             }
         }
-        foreach (['/manutencao', '/login', '/logout', '/encerrar-sessao', '/register', '/forgot-password', '/reset-password', '/termos', '/privacidade', '/lgpd'] as $prefix) {
+        foreach (['/manutencao', '/logout', '/encerrar-sessao', '/termos', '/privacidade', '/lgpd'] as $prefix) {
             if (str_starts_with($path, $prefix)) {
                 return;
             }
