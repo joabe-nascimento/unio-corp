@@ -112,20 +112,12 @@ class ConfiguracoesControllerTest extends WebTestCase
         self::bootKernel();
         self::assertTrue(static::getContainer()->get(PlatformConfigService::class)->isMaintenanceMode());
 
-        // Desativa manutenção (tenant deve acessar mesmo com manutenção ativa)
-        $this->loginAsTenant();
-        $crawler = $this->client->request('GET', '/admin/configuracoes');
-        self::assertResponseIsSuccessful();
-        $token   = $crawler->filter('#cfgForm input[name="_token"]')->attr('value');
-        $this->client->request('POST', '/admin/configuracoes', [
-            '_token'         => $token,
-            'plataforma_nome'=> 'Unio',
-            'cor_primaria'   => '#4F7FFF',
-            'tema'           => 'dark',
-            'msg_manutencao' => 'Voltamos em breve',
-            'senha_min'      => '8',
-            'sessao_timeout' => '120',
-        ]);
+        // Com manutenção ativa, /login fica bloqueado para todos (redireciona para /manutencao)
+        $this->client->request('GET', '/login');
+        self::assertResponseRedirects('/manutencao');
+
+        // Desativar manutenção diretamente via serviço (simula scripts/server-maintenance.sh off)
+        static::getContainer()->get(PlatformConfigService::class)->save(['manutencao' => false]);
         static::ensureKernelShutdown();
         self::bootKernel();
         $config = static::getContainer()->get(PlatformConfigService::class);
