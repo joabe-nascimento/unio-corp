@@ -112,7 +112,8 @@ class ConfiguracoesControllerTest extends WebTestCase
         self::bootKernel();
         self::assertTrue(static::getContainer()->get(PlatformConfigService::class)->isMaintenanceMode());
 
-        // Com manutenção ativa, /login fica bloqueado para todos (redireciona para /manutencao)
+        // Com manutenção ativa, /login fica bloqueado para usuários sem sessão
+        $this->client->restart(); // limpa sessão do tenant para simular visitante anônimo
         $this->client->request('GET', '/login');
         self::assertResponseRedirects('/manutencao');
 
