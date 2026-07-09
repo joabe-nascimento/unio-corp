@@ -2,12 +2,12 @@
 
 namespace App\EventSubscriber;
 
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * Redireciona visitantes anônimos do portal para a tela de login do paciente.
@@ -20,14 +20,15 @@ final class PortalPatientAccessSubscriber implements EventSubscriberInterface
     ];
 
     public function __construct(
-        private TokenStorageInterface $tokenStorage,
+        private Security $security,
         private UrlGeneratorInterface $router,
     ) {
     }
 
     public static function getSubscribedEvents(): array
     {
-        return [KernelEvents::REQUEST => ['onKernelRequest', 9]];
+        // Depois do FirewallListener (8) para a sessão já estar resolvida.
+        return [KernelEvents::REQUEST => ['onKernelRequest', 7]];
     }
 
     public function onKernelRequest(RequestEvent $event): void
@@ -48,7 +49,7 @@ final class PortalPatientAccessSubscriber implements EventSubscriberInterface
                 continue;
             }
 
-            if ($this->tokenStorage->getToken()?->getUser()) {
+            if ($this->security->getUser() !== null) {
                 return;
             }
 

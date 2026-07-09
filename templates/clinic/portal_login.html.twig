@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
-    <link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=7">
+    <link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=8">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
 </head>
 <body class="pos-portal-login-page">
@@ -32,6 +32,13 @@
         {% if error %}
         <div class="pos-portal-login__alert pos-portal-login__alert--error" role="alert">
             {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+        {% endif %}
+
+        {% if staff_logged_in|default(false) %}
+        <div class="pos-portal-login__alert pos-portal-login__alert--info" role="status">
+            Você está logado como equipe clínica. Saia para entrar com a conta do paciente
+            ou abra em aba anônima.
         </div>
         {% endif %}
 
