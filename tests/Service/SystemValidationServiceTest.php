@@ -4,6 +4,7 @@ namespace App\Tests\Service;
 
 use App\Repository\UserRepository;
 use App\Security\ProductGrantAccess;
+use App\Service\Organismo\OrganismoFeature;
 use App\Service\SystemValidationService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -62,7 +63,7 @@ class SystemValidationServiceTest extends KernelTestCase
         self::assertTrue($permissions->canManagePermissions($user, 'product_pessoas'));
     }
 
-    public function testTenantSeesMultipleWorkspaces(): void
+    public function testTenantHasActiveClinic(): void
     {
         $user = $this->users->findOneBy(['email' => 'tenant@unio.dev']);
         if (!$user) {
@@ -70,6 +71,12 @@ class SystemValidationServiceTest extends KernelTestCase
         }
 
         $workspace = static::getContainer()->get(\App\Service\WorkspaceService::class);
-        self::assertGreaterThanOrEqual(2, \count($workspace->getAvailableEmpresas($user)));
+        $organismo = static::getContainer()->get(OrganismoFeature::class);
+
+        if ($organismo->isEnabled()) {
+            self::assertGreaterThanOrEqual(1, \count($workspace->getAvailableEmpresas($user)));
+        } else {
+            self::assertGreaterThanOrEqual(2, \count($workspace->getAvailableEmpresas($user)));
+        }
     }
 }

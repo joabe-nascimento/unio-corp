@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Security\ProductGrantAccess;
+use App\Service\Organismo\OrganismoFeature;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -54,6 +55,7 @@ final class SystemValidationService
         private PermissionService $permissions,
         private NavigationService $navigation,
         private WorkspaceService $workspace,
+        private OrganismoFeature $organismo,
         private RouterInterface $router,
         private TokenStorageInterface $tokenStorage,
     ) {}
@@ -70,13 +72,17 @@ final class SystemValidationService
             return SystemValidationResult::fail(['Banco de dados indisponível: ' . $e->getMessage()]);
         }
 
-        foreach (self::CORE_ROUTES as $route) {
+        $coreRoutes = $this->organismo->isEnabled()
+            ? array_merge(self::CORE_ROUTES, self::ORGANISMO_CORE_ROUTES)
+            : self::CORE_ROUTES;
+
+        foreach ($coreRoutes as $route) {
             if ($this->router->getRouteCollection()->get($route) === null) {
                 $failures[] = sprintf('Rota ausente: %s', $route);
             }
         }
         if ($failures === []) {
-            $reports[] = sprintf('Rotas core: %d registradas', \count(self::CORE_ROUTES));
+            $reports[] = sprintf('Rotas core: %d registradas', \count($coreRoutes));
         }
 
         $missingSeeds = [];
@@ -92,70 +98,86 @@ final class SystemValidationService
             $reports[] = 'Usuários seed: OK';
         }
 
-        foreach (self::ROUTE_EXPECTATIONS as $email => $routes) {
-            $user = $this->userRepo->findOneBy(['email' => $email]);
-            if (!$user) {
-                continue;
-            }
+        if (!$this->organismo->isEnabled()) {
+            foreach (self::ROUTE_EXPECTATIONS as $email => $routes) {
+                $user = $this->userRepo->findOneBy(['email' => $email]);
+                if (!$user) {
+                    continue;
+                }
 
-            $this->authenticateAs($user);
+                $this->authenticateAs($user);
 
-            foreach ($routes as $route => $expected) {
-                $actual = $this->grants->isRouteAllowed($user, $route);
-                if ($actual !== $expected) {
-                    $failures[] = sprintf(
-                        '%s — %s: esperado %s, obteve %s',
-                        $email,
-                        $route,
-                        $expected ? 'permitido' : 'bloqueado',
-                        $actual ? 'permitido' : 'bloqueado',
-                    );
+                foreach ($routes as $route => $expected) {
+                    $actual = $this->grants->isRouteAllowed($user, $route);
+                    if ($actual !== $expected) {
+                        $failures[] = sprintf(
+                            '%s — %s: esperado %s, obteve %s',
+                            $email,
+                            $route,
+                            $expected ? 'permitido' : 'bloqueado',
+                            $actual ? 'permitido' : 'bloqueado',
+                        );
+                    }
                 }
             }
-        }
 
-        $membro = $this->userRepo->findOneBy(['email' => 'membro@unio.dev']);
-        if ($membro) {
-            $this->authenticateAs($membro);
-            if ($this->permissions->canManagePermissions($membro)) {
-                $failures[] = 'membro@unio.dev não deve gerenciar permissões globais';
+            $membro = $this->userRepo->findOneBy(['email' => 'membro@unio.dev']);
+            if ($membro) {
+                $this->authenticateAs($membro);
+                if ($this->permissions->canManagePermissions($membro)) {
+                    $failures[] = 'membro@unio.dev não deve gerenciar permissões globais';
+                }
+                if ($this->grants->grantAtLeast($membro, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
+                    $failures[] = 'membro@unio.dev não deve criar membros';
+                }
+                if ($this->navigation->showProjetosMetas($membro)) {
+                    $failures[] = 'membro@unio.dev não deve ver Projetos e Metas';
+                }
             }
-            if ($this->grants->grantAtLeast($membro, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
-                $failures[] = 'membro@unio.dev não deve criar membros';
-            }
-            if ($this->navigation->showProjetosMetas($membro)) {
-                $failures[] = 'membro@unio.dev não deve ver Projetos e Metas';
-            }
-        }
 
-        $gestor = $this->userRepo->findOneBy(['email' => 'gestor@unio.dev']);
-        if ($gestor) {
-            $this->authenticateAs($gestor);
-            if (!$this->permissions->canManagePermissions($gestor, 'product_pessoas')) {
-                $failures[] = 'gestor@unio.dev deve gerenciar permissões em Pessoas';
+            $gestor = $this->userRepo->findOneBy(['email' => 'gestor@unio.dev']);
+            if ($gestor) {
+                $this->authenticateAs($gestor);
+                if (!$this->permissions->canManagePermissions($gestor, 'product_pessoas')) {
+                    $failures[] = 'gestor@unio.dev deve gerenciar permissões em Pessoas';
+                }
+                if (!$this->grants->grantAtLeast($gestor, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
+                    $failures[] = 'gestor@unio.dev deve poder criar membros';
+                }
             }
-            if (!$this->grants->grantAtLeast($gestor, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
-                $failures[] = 'gestor@unio.dev deve poder criar membros';
+
+            $tenant = $this->userRepo->findOneBy(['email' => 'tenant@unio.dev']);
+            if ($tenant) {
+                $empresas = $this->workspace->getAvailableEmpresas($tenant);
+                if (\count($empresas) < 2) {
+                    $failures[] = 'tenant@unio.dev deve ver múltiplas empresas no workspace';
+                } else {
+                    $reports[] = sprintf('Tenant workspace: %d empresas', \count($empresas));
+                }
             }
-        }
 
-        $tenant = $this->userRepo->findOneBy(['email' => 'tenant@unio.dev']);
-        if ($tenant) {
-            $empresas = $this->workspace->getAvailableEmpresas($tenant);
-            if (\count($empresas) < 2) {
-                $failures[] = 'tenant@unio.dev deve ver múltiplas empresas no workspace';
-            } else {
-                $reports[] = sprintf('Tenant workspace: %d empresas', \count($empresas));
+            $gestorEmpresas = $gestor ? $this->workspace->getAvailableEmpresas($gestor) : [];
+            if ($gestor && \count($gestorEmpresas) !== 1) {
+                $failures[] = 'gestor@unio.dev deve ter exatamente 1 empresa no workspace';
             }
-        }
 
-        $gestorEmpresas = $gestor ? $this->workspace->getAvailableEmpresas($gestor) : [];
-        if ($gestor && \count($gestorEmpresas) !== 1) {
-            $failures[] = 'gestor@unio.dev deve ter exatamente 1 empresa no workspace';
-        }
+            if ($gestor && !$this->navigation->showProjetosMetas($gestor)) {
+                $failures[] = 'gestor@unio.dev deve ver navegação Projetos e Metas';
+            }
+        } else {
+            foreach (['tenant@unio.dev', 'gestor@unio.dev'] as $email) {
+                $user = $this->userRepo->findOneBy(['email' => $email]);
+                if (!$user) {
+                    continue;
+                }
 
-        if ($gestor && !$this->navigation->showProjetosMetas($gestor)) {
-            $failures[] = 'gestor@unio.dev deve ver navegação Projetos e Metas';
+                $empresas = $this->workspace->getAvailableEmpresas($user);
+                if (\count($empresas) < 1) {
+                    $failures[] = sprintf('%s deve ter clínica ativa vinculada', $email);
+                }
+            }
+
+            $reports[] = 'Clínica ativa (organismo): OK';
         }
 
         if ($failures === []) {
@@ -180,6 +202,11 @@ final class SystemValidationService
         'app_pessoas_membro_novo',
         'app_workspace_select',
         'app_workspace_switch',
+    ];
+
+    /** @var list<string> */
+    private const ORGANISMO_CORE_ROUTES = [
+        'app_pulso',
     ];
 
     private function authenticateAs(User $user): void

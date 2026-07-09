@@ -40,32 +40,17 @@ final class OnboardingProgressServiceTest extends TestCase
 
 {
 
-    public function testBuildIncludesShellTourStepAfterWorkspace(): void
-
+    public function testBuildStartsWithShellTourStep(): void
     {
-
         $user = $this->userWithPerfil('GESTOR');
-
         $empresa = (new Empresa())->setNome('Unio Demo');
-
         $service = $this->createService()['service'];
 
-
-
         $result = $service->build($user, $empresa, 1);
-
         $ids = array_column($result['steps'], 'id');
 
-
-
-        self::assertContains('workspace', $ids);
-
         self::assertContains('shell_tour', $ids);
-
-        self::assertSame('workspace', $ids[0]);
-
-        self::assertSame('shell_tour', $ids[1]);
-
+        self::assertSame('shell_tour', $ids[0]);
     }
 
 
@@ -106,22 +91,13 @@ final class OnboardingProgressServiceTest extends TestCase
 
         $session->set(OnboardingProgressService::SESSION_COMPLETED, ['shell_tour', 'workspace']);
 
-
-
         $user = $this->userWithPerfil('GESTOR');
-
         $service = $this->createService($session)['service'];
-
-
 
         $service->build($user, null, 0);
 
-
-
         self::assertTrue($user->isOnboardingStepComplete('shell_tour'));
-
-        self::assertTrue($user->isOnboardingStepComplete('workspace'));
-
+        self::assertFalse($user->isOnboardingStepComplete('workspace'));
         self::assertFalse($session->has(OnboardingProgressService::SESSION_COMPLETED));
 
     }
