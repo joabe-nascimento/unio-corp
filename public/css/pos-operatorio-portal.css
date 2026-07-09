@@ -21,6 +21,34 @@ body[data-portal-layout="1"] .app-inset-panel {
     padding-bottom: 0 !important;
 }
 
+/* Portal: scroll natural da página (evita cortar cards no fim do viewport) */
+body[data-portal-layout="1"] {
+    overflow-x: hidden;
+    overflow-y: auto !important;
+}
+
+body[data-portal-layout="1"].layout-inset-shell,
+body[data-portal-layout="1"].layout-inset-shell .wrapper {
+    max-height: none !important;
+    height: auto !important;
+    min-height: 100dvh;
+    overflow: visible !important;
+}
+
+body[data-portal-layout="1"] .app-inset-main,
+body[data-portal-layout="1"] .app-inset-panel,
+body[data-portal-layout="1"] .content-wrapper,
+body[data-portal-layout="1"] .app-page-scroll {
+    overflow: visible !important;
+    max-height: none !important;
+    min-height: auto !important;
+    flex: none !important;
+}
+
+body[data-portal-layout="1"] .content-wrapper {
+    overflow-y: visible !important;
+}
+
 body[data-portal-layout="1"] .content {
     padding: 0;
 }
@@ -41,12 +69,12 @@ body[data-portal-layout="1"] .page-lead-zone--portal .list-toolbar--page {
 
 /* Corpo */
 .pos-portal-body {
-    padding-bottom: 0;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 }
 
 .pos-portal-footer {
     margin-top: 16px;
-    padding: 12px 0 4px;
+    padding: 12px 0 calc(16px + env(safe-area-inset-bottom, 0px));
     text-align: center;
     font-size: 11px;
     color: var(--text-3, #94a3b8);
@@ -65,6 +93,14 @@ body[data-portal-layout="1"] .page-lead-zone--portal .list-toolbar--page {
 
 .pos-portal-card--contact {
     background: var(--surface-2, #f8fafc);
+}
+
+.pos-portal-card--contact .section-header--in-card {
+    padding: 14px 16px 10px;
+}
+
+.pos-portal-card--contact .pos-portal-dl--compact {
+    padding: 0 16px 16px;
 }
 
 .pos-portal-card__icon {
