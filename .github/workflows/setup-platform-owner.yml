@@ -15,6 +15,10 @@ on:
         description: 'E-mail da conta owner'
         required: false
         default: joabe@uniowork.com.br
+      password:
+        description: 'Senha (deixe vazio para gerar automaticamente)'
+        required: false
+        default: ''
 
 jobs:
   setup-owner:
@@ -39,15 +43,19 @@ jobs:
           canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
 
       - name: Criar ou atualizar PLATFORM_OWNER
+        id: owner
         env:
           DEPLOY_PATH: ${{ inputs.environment == 'clinicaunio' && '/home2/joabef36/unio-clinicaunio' || '/home2/joabef36/unio' }}
           OWNER_EMAIL: ${{ inputs.email }}
-          OWNER_PASSWORD: ${{ secrets.PLATFORM_OWNER_PASSWORD }}
+          INPUT_PASSWORD: ${{ inputs.password }}
+          SECRET_PASSWORD: ${{ secrets.PLATFORM_OWNER_PASSWORD }}
         run: |
+          set -euo pipefail
+          OWNER_PASSWORD="${INPUT_PASSWORD:-${SECRET_PASSWORD:-}}"
           if [[ -z "${OWNER_PASSWORD}" ]]; then
-            echo "::error::Defina o secret PLATFORM_OWNER_PASSWORD no environment ${{ inputs.environment }}"
-            exit 1
+            OWNER_PASSWORD="$(openssl rand -base64 18 | tr -d '/+=' | head -c 14)"
           fi
+          echo "::add-mask::${OWNER_PASSWORD}"
           bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
             "cd '${DEPLOY_PATH}' && php bin/console app:ensure-platform-owner \
               --allow-prod \
@@ -56,3 +64,15 @@ jobs:
               --no-interaction && \
              php bin/console cache:clear --env=prod --no-warmup && \
              php bin/console cache:warmup --env=prod"
+          {
+            echo "email=${OWNER_EMAIL}"
+            echo "password=${OWNER_PASSWORD}"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "## Conta PLATFORM_OWNER"
+            echo "- **Ambiente:** ${{ inputs.environment }}"
+            echo "- **E-mail:** ${OWNER_EMAIL}"
+            echo "- **Senha:** \`${OWNER_PASSWORD}\`"
+            echo ""
+            echo "Troque a senha após o primeiro login."
+          } >> "$GITHUB_STEP_SUMMARY"
