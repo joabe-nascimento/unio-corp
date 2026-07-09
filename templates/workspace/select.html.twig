@@ -207,9 +207,9 @@
             </span>
 
             <div class="wc-info">
-                <div class="wc-name">{{ emp.nome }}</div>
+                <div class="wc-name">{{ organismo_enabled|default(false) ? 'Unio Clínica' : emp.nome }}</div>
                 <div class="wc-meta">
-                    {% if emp.setor %}<span>{{ emp.setor }}</span>{% endif %}
+                    {% if not organismo_enabled|default(false) and emp.setor %}<span>{{ emp.setor }}</span>{% endif %}
                 </div>
             </div>
 

@@ -37,7 +37,7 @@
                 {{ _title }}
             </h2>
             <p class="unio-charts-panel-sub">
-                {{ _subtitle }}{% if empresa is defined and empresa %} · {{ empresa.nome }}{% endif %}
+                {{ _subtitle }}{% if empresa is defined and empresa and not org_brand_label %} · {{ empresa.nome }}{% elseif org_brand_label %} · {{ org_brand_label }}{% endif %}
             </p>
         </div>
         {% if show_chartjs_badge|default(false) %}

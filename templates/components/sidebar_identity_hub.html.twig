@@ -20,7 +20,7 @@
         <span class="sidebar-identity__text">
             <span class="sidebar-identity__name">{{ _first_name }}</span>
             {% if empresa is defined and empresa %}
-            <span class="sidebar-identity__workspace">{{ organismo.enabled|default(false) ? 'Unio Clínica' : empresa.nome }}</span>
+            <span class="sidebar-identity__workspace">{{ org_brand_label|default(empresa.nome) }}</span>
             {% endif %}
         </span>
         <i class="fas fa-chevron-down sidebar-identity__chevron" aria-hidden="true"></i>
@@ -50,7 +50,7 @@
                         {% if empresa is defined and empresa %}
                         <div class="sidebar-identity-panel__user-org">
                             <i class="fas fa-dna" aria-hidden="true"></i>
-                            <span>{% if organismo.enabled|default(false) %}Unio Clínica{% else %}{{ empresa.nome }}{% if empresa.setor %} · {{ empresa.setor }}{% endif %}{% endif %}</span>
+                            <span>{{ org_brand_label|default(empresa.nome) }}{% if not org_brand_label and empresa.setor %} · {{ empresa.setor }}{% endif %}</span>
                         </div>
                         {% endif %}
                     </div>

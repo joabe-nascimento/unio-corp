@@ -112,6 +112,10 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         ]);
         $this->twig->addGlobal('org_clinic', $this->organismoFeature->isEnabled());
         $this->twig->addGlobal(
+            'org_brand_label',
+            $this->organismoFeature->isEnabled() ? 'Unio Clínica' : null,
+        );
+        $this->twig->addGlobal(
             'nav_organismo_practices',
             $this->organismoFeature->isEnabled()
                 ? $this->praticaRegistry->getGroupedForUser($user)
