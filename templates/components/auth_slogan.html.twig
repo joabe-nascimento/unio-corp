@@ -1,5 +1,9 @@
 {# Slogan institucional — painel esquerdo do login #}
-{% set _slogan = platform_config.plataforma_tagline|default('Pessoas. Processos. Resultados.') %}
+{% if organismo.enabled|default(false) %}
+    {% set _slogan = organismo.copy.brand_slogan|default('Cuidado que continua.') %}
+{% else %}
+    {% set _slogan = platform_config.plataforma_tagline|default('Pessoas. Processos. Resultados.') %}
+{% endif %}
 {% set _parts = [] %}
 {% for piece in _slogan|split('.') %}
     {% set piece = piece|trim %}
@@ -12,6 +16,8 @@
         {% for part in _parts %}
             <span class="auth-slogan__word">{{ part }}<span class="auth-slogan__dot" aria-hidden="true">.</span></span>
         {% endfor %}
+    {% elseif organismo.enabled|default(false) %}
+        <span class="auth-slogan__word">{{ organismo.copy.brand_slogan|default('Cuidado que continua') }}<span class="auth-slogan__dot" aria-hidden="true">.</span></span>
     {% else %}
         <span class="auth-slogan__word">Pessoas<span class="auth-slogan__dot" aria-hidden="true">.</span></span>
         <span class="auth-slogan__word">Processos<span class="auth-slogan__dot" aria-hidden="true">.</span></span>
