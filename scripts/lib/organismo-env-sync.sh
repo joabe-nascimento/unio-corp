@@ -42,7 +42,8 @@ organismo_env_sync_for_uri() {
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_HOME true
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_NAME 'Unio Studio'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_SLOGAN 'Sites, sistemas e projetos que evoluem.'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE 'Desenvolvimento de sites, apps e projetos digitais'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE 'Desenvolvimento de sites, apps'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE_ACCENT 'e projetos digitais.'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_DESC 'Unio Studio reúne gestão de projetos, entregas, playbooks de implementação e portal do cliente — um ambiente pensado para equipes que constroem sites, sistemas e projetos clínicos com clareza e ritmo.'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_LUMEN_SUBTITLE 'Assistente do studio'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL 'Projeto'
