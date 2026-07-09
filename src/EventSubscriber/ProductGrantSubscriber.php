@@ -66,6 +66,6 @@ final class ProductGrantSubscriber implements EventSubscriberInterface
     {
         $entry = ProductGrantRouteMap::MAP[$route] ?? null;
 
-        return \is_array($entry) && ($entry['scope'] ?? '') === 'hub_pos_operatorio';
+        return \is_array($entry) && $entry['scope'] === 'hub_pos_operatorio';
     }
 }

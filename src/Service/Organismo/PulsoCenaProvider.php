@@ -83,7 +83,7 @@ final class PulsoCenaProvider
             }
         }
 
-        return array_values($cenas);
+        return $cenas;
     }
 
     /**
@@ -93,7 +93,7 @@ final class PulsoCenaProvider
     {
         $nome = $process->getNome() ?: 'Novo membro';
         $criado = $process->getCriadoEm();
-        $dias = $criado !== null ? max(0, (int) $criado->diff(new \DateTimeImmutable())->days) : 0;
+        $dias = max(0, (int) $criado->diff(new \DateTimeImmutable())->days);
 
         return [
             'id' => 'admissao-' . $process->getId(),

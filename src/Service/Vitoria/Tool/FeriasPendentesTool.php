@@ -52,7 +52,7 @@ final class FeriasPendentesTool implements VitoriaToolInterface
             $func = $ferias->getFuncionario();
             $results[] = [
                 'id' => $ferias->getId(),
-                'membro' => $func?->getNome(),
+                'membro' => $func->getNome(),
                 'status' => $ferias->getStatus(),
                 'url' => $this->router->generate('app_rh_ferias'),
             ];
