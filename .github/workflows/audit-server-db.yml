@@ -1,0 +1,46 @@
+name: Audit server DB
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'GitHub environment (production | clinicaunio)'
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - clinicaunio
+      deploy_path:
+        description: 'Caminho da app no servidor'
+        required: false
+        default: ''
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.environment }}
+
+    env:
+      DEPLOY_SSH_ALIAS: hg-deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH HostGator
+        uses: ./.github/actions/hostgator-ssh
+        with:
+          ssh_key: ${{ secrets.DEPLOY_SSH_KEY }}
+          ssh_host: ${{ secrets.DEPLOY_SSH_HOST }}
+          ssh_user: ${{ secrets.DEPLOY_SSH_USER }}
+          ssh_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
+
+      - name: Auditoria do banco
+        env:
+          DEPLOY_PATH: ${{ inputs.deploy_path != '' && inputs.deploy_path || (inputs.environment == 'clinicaunio' && '/home2/joabef36/unio-clinicaunio' || '/home2/joabef36/unio') }}
+        run: |
+          bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
+            "cd '${DEPLOY_PATH}' && sed -i 's/\r$//' scripts/audit-database.sh 2>/dev/null || true && bash scripts/audit-database.sh"
