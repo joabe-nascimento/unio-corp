@@ -69,7 +69,7 @@
     }
     </style>
     {% if organismo.enabled|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=24">
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=25">
     {% endif %}
 
     {% block stylesheets %}{% endblock %}
@@ -134,8 +134,12 @@
                     } only %}
                 </a>
             {% else %}
-                {# Organismo: topo mostra apenas logo/marca #}
+                {# Organismo: topo mostra marca (ícone fechada / logotipo aberta) #}
                 <a href="{{ path(nav_home_route|default('app_dashboard')) }}" class="org-sidebar-brand" title="{{ _pnome }}">
+                    {% include 'components/platform_logo.html.twig' with {
+                        variant: 'mark',
+                        class: 'sidebar-logo sidebar-logo-mark'
+                    } only %}
                     {% include 'components/platform_logo.html.twig' with {
                         variant: 'full',
                         class: 'sidebar-logo sidebar-logo-full'
