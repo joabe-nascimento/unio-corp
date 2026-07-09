@@ -1,15 +1,20 @@
-{# Slogan institucional — versão por tema (painel esquerdo do login) #}
-<div class="auth-slogan" role="img" aria-label="Pessoas, processos e resultados">
-    <img class="auth-slogan__img auth-slogan__img--dark"
-         src="{{ asset('images/auth/slogan-branco.png') }}?v=2"
-         alt=""
-         width="640"
-         height="48"
-         decoding="async">
-    <img class="auth-slogan__img auth-slogan__img--light"
-         src="{{ asset('images/auth/slogan-preto.png') }}?v=2"
-         alt=""
-         width="640"
-         height="48"
-         decoding="async">
-</div>
+{# Slogan institucional — painel esquerdo do login #}
+{% set _slogan = platform_config.plataforma_tagline|default('Pessoas. Processos. Resultados.') %}
+{% set _parts = [] %}
+{% for piece in _slogan|split('.') %}
+    {% set piece = piece|trim %}
+    {% if piece != '' %}
+        {% set _parts = _parts|merge([piece]) %}
+    {% endif %}
+{% endfor %}
+<p class="auth-slogan" aria-label="{{ _slogan }}">
+    {% if _parts is not empty %}
+        {% for part in _parts %}
+            <span class="auth-slogan__word">{{ part }}<span class="auth-slogan__dot" aria-hidden="true">.</span></span>
+        {% endfor %}
+    {% else %}
+        <span class="auth-slogan__word">Pessoas<span class="auth-slogan__dot" aria-hidden="true">.</span></span>
+        <span class="auth-slogan__word">Processos<span class="auth-slogan__dot" aria-hidden="true">.</span></span>
+        <span class="auth-slogan__word">Resultados<span class="auth-slogan__dot" aria-hidden="true">.</span></span>
+    {% endif %}
+</p>

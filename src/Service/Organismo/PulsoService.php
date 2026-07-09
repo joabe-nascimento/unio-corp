@@ -3,7 +3,9 @@
 namespace App\Service\Organismo;
 
 use App\Entity\Empresa;
+use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
+use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\RhFeriasRepository;
 use App\Repository\RhOnboardingProcessRepository;
 use App\Service\DashboardStatsService;
@@ -14,10 +16,12 @@ use App\Service\DashboardStatsService;
 final class PulsoService
 {
     public function __construct(
+        private OrganismoFeature $organismo,
         private PulsoCenaProvider $cenaProvider,
         private DashboardStatsService $dashboardStats,
         private RhOnboardingProcessRepository $onboardingRepo,
         private RhFeriasRepository $feriasRepo,
+        private PosOperatorioPacienteRepository $pacienteRepo,
     ) {
     }
 
@@ -67,6 +71,10 @@ final class PulsoService
             return [];
         }
 
+        if ($this->organismo->isEnabled()) {
+            return $this->buildClinicSinais($empresa);
+        }
+
         $sinais = [];
 
         $admissoes = $this->onboardingRepo->countOpenByEmpresa($empresa);
@@ -84,6 +92,42 @@ final class PulsoService
                 'tipo' => 'ferias_pendentes',
                 'valor' => $ferias,
                 'rotulo' => 'Férias aguardando aprovação',
+            ];
+        }
+
+        if ($sinais === []) {
+            $sinais[] = [
+                'tipo' => 'pulso_estavel',
+                'valor' => '—',
+                'rotulo' => 'Pulso estável — nenhum sinal urgente',
+            ];
+        }
+
+        return $sinais;
+    }
+
+    /**
+     * @return list<array{tipo: string, valor: int|string, rotulo: string, url?: string}>
+     */
+    private function buildClinicSinais(Empresa $empresa): array
+    {
+        $sinais = [];
+
+        $alertas = $this->pacienteRepo->countByStatus($empresa, PosOperatorioPaciente::STATUS_ALERTA);
+        if ($alertas > 0) {
+            $sinais[] = [
+                'tipo' => 'alertas_clinicos',
+                'valor' => $alertas,
+                'rotulo' => 'Pacientes em alerta clínico',
+            ];
+        }
+
+        $ativos = $this->pacienteRepo->countAtivosByEmpresa($empresa);
+        if ($ativos > 0) {
+            $sinais[] = [
+                'tipo' => 'pacientes_ativos',
+                'valor' => $ativos,
+                'rotulo' => 'Pacientes em acompanhamento',
             ];
         }
 

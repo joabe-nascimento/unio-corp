@@ -175,10 +175,19 @@ body.unio-organismo.layout-inset-shell .brand-link {
 }
 
 body.unio-organismo .content--with-toolbar .container-fluid--page-body {
-    padding-left: 0;
-    padding-right: 0;
     padding-top: 0;
     padding-bottom: 0;
+}
+
+/* Pulso, clinic-home etc. — respiro lateral; hubs usam .page-body-inner--organismo */
+body.unio-organismo .container-fluid--page-body:not(:has(.page-body-inner--organismo)) {
+    padding-left: var(--clinic-page-x, clamp(24px, 3vw, 40px));
+    padding-right: var(--clinic-page-x, clamp(24px, 3vw, 40px));
+}
+
+body.unio-organismo .container-fluid--page-body:has(.page-body-inner--organismo) {
+    padding-left: 0;
+    padding-right: 0;
 }
 
 body.unio-organismo .unio-card,
@@ -276,16 +285,22 @@ html[data-theme="light"] .unio-organismo .sidebar-bottom,
 }
 
 .unio-organismo .nav-sidebar > .nav-item > .nav-link {
-    display: flex !important;
-    flex-direction: row !important;
+    display: grid !important;
+    grid-template-columns: 22px minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    column-gap: 12px !important;
+    row-gap: 0;
     align-items: center !important;
-    gap: 12px !important;
-    padding: 9px 14px !important;
+    justify-items: start;
+    padding: 10px 14px !important;
     margin: 2px 8px;
     min-height: 40px !important;
     border-radius: 10px !important;
     color: var(--org-sidebar-muted) !important;
     transition: background 0.16s ease, color 0.16s ease;
+    box-sizing: border-box;
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
 }
 
 .unio-organismo .nav-sidebar > .nav-item > .nav-link:hover {
@@ -302,43 +317,55 @@ html[data-theme="light"] .unio-organismo .sidebar-bottom,
     box-shadow: 0 2px 8px rgba(90, 127, 199, 0.28) !important;
 }
 
-/* Ícones clínicos na sidebar — coluna fixa, alinhados ao texto */
-.unio-organismo .nav-sidebar > .nav-item > .nav-link > .nav-icon,
-.unio-organismo .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot > .nav-icon {
+/* Coluna fixa de ícones — todos via .nav-icon-slot */
+.unio-organismo .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot {
+    grid-column: 1;
+    grid-row: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    overflow: visible;
+    justify-self: center;
+    align-self: center;
+}
+
+.unio-organismo .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot > .nav-icon,
+.unio-organismo .nav-sidebar > .nav-item > .nav-link > .nav-icon {
     display: flex !important;
     align-items: center;
     justify-content: center;
-    width: 20px !important;
-    min-width: 20px !important;
-    height: 20px;
+    width: 18px !important;
+    min-width: 18px !important;
+    height: 18px !important;
     margin: 0 !important;
+    padding: 0 !important;
     float: none !important;
     align-self: center !important;
-    font-size: 14px;
-    line-height: 1;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    text-align: center !important;
     color: inherit;
     flex-shrink: 0;
     opacity: 0.88;
 }
 
-.unio-organismo .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 20px;
-    width: 20px;
-    min-width: 20px;
-    height: 20px;
-    margin: 0;
-}
-
 .unio-organismo .nav-sidebar > .nav-item > .nav-link > p {
-    flex: 1 1 auto;
+    grid-column: 2;
+    grid-row: 1;
+    flex: none !important;
+    display: block !important;
+    align-self: center;
     min-width: 0;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.25;
+    line-height: 1.2;
     font-weight: 600;
     font-size: 13px;
     letter-spacing: 0;
@@ -359,7 +386,7 @@ html[data-theme="light"] .unio-organismo .sidebar-bottom,
 }
 
 .unio-organismo .nav-sidebar .sidebar-hub-heading {
-    padding: 10px 14px 4px 46px;
+    padding: 10px 14px 4px 48px;
     margin: 0 8px;
 }
 
@@ -1684,11 +1711,6 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
     max-width: none;
 }
 
-body.unio-organismo .container-fluid--page-body:has(.clinic-home) {
-    padding-left: var(--clinic-page-x, clamp(24px, 3vw, 40px));
-    padding-right: var(--clinic-page-x, clamp(24px, 3vw, 40px));
-}
-
 /* ── Hero editorial — texto fora de card ── */
 .unio-organismo .clinic-home-hero {
     position: relative;
@@ -2895,9 +2917,9 @@ body.unio-organismo .container-fluid--page-body:has(.clinic-home) {
    ══════════════════════════════════════════ */
 .unio-organismo .nav-icon-slot .nav-clinic-badge {
     position: absolute;
-    top: -3px;
-    right: -6px;
-    margin-left: 0;
+    top: -5px;
+    right: -7px;
+    margin: 0;
     min-width: 14px;
     height: 14px;
     padding: 0 3px;
@@ -2945,15 +2967,82 @@ body.unio-organismo .container-fluid--page-body:has(.clinic-home) {
     50%      { box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.12); }
 }
 
-.sidebar-mini.sidebar-collapse:not(.sidebar-open) .unio-organismo .nav-sidebar > .nav-item > .nav-link {
-    position: relative;
-    justify-content: center !important;
-    overflow: visible;
-}
+/* Desktop clínica: toggle recolhe para ícones (respeita sidebar-collapse) */
+@media (min-width: 1200px) {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
 
-.sidebar-mini.sidebar-collapse:not(.sidebar-open) .unio-organismo .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot .nav-clinic-badge {
-    top: -2px;
-    right: -4px;
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        margin: 2px auto !important;
+        padding: 0 !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link > p {
+        display: none !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot {
+        grid-column: auto;
+        margin: 0;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot .nav-clinic-badge {
+        top: -2px;
+        right: -4px;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-heading-item,
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-separator {
+        display: none !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-heading {
+        display: none !important;
+    }
+
+    /* Hover na rail: expande labels como AdminLTE padrão */
+    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item {
+        display: block !important;
+        width: 100%;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link {
+        display: grid !important;
+        grid-template-columns: 22px minmax(0, 1fr);
+        justify-items: start;
+        align-items: center !important;
+        width: calc(100% - 16px) !important;
+        min-width: 0 !important;
+        max-width: calc(100% - 16px) !important;
+        height: auto !important;
+        min-height: 40px !important;
+        margin: 2px 8px !important;
+        padding: 10px 14px !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link > p {
+        display: block !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-heading-item,
+    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-separator {
+        display: list-item !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-heading {
+        display: flex !important;
+    }
 }
 
 /* ══════════════════════════════════════════

@@ -3,9 +3,11 @@
 namespace App\Service\Organismo;
 
 use App\Entity\Empresa;
+use App\Entity\PosOperatorioPaciente;
 use App\Entity\RhFerias;
 use App\Entity\RhOnboardingProcess;
 use App\Entity\User;
+use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\RhFeriasRepository;
 use App\Repository\RhOnboardingProcessRepository;
 use App\Repository\TiChamadoRepository;
@@ -18,9 +20,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class PulsoCenaProvider
 {
     public function __construct(
+        private OrganismoFeature $organismo,
         private RhOnboardingProcessRepository $onboardingRepo,
         private RhFeriasRepository $feriasRepo,
         private TiChamadoRepository $chamadoRepo,
+        private PosOperatorioPacienteRepository $pacienteRepo,
         private NavigationService $navigation,
         private UrlGeneratorInterface $router,
     ) {
@@ -32,7 +36,13 @@ final class PulsoCenaProvider
     public function getCenas(User $user, ?Empresa $empresa): array
     {
         if ($empresa === null) {
-            return $this->mockCenas(null);
+            return $this->organismo->isEnabled()
+                ? $this->mockClinicCenas(null)
+                : $this->mockCenas(null);
+        }
+
+        if ($this->organismo->isEnabled()) {
+            return $this->getClinicCenas($empresa);
         }
 
         $cenas = [];
@@ -87,6 +97,52 @@ final class PulsoCenaProvider
     }
 
     /**
+     * @return list<array<string, mixed>>
+     */
+    private function getClinicCenas(Empresa $empresa): array
+    {
+        $cenas = [];
+
+        foreach ($this->pacienteRepo->findRecentByEmpresa($empresa, 4, 0) as $paciente) {
+            $cenas[] = $this->cenaFromPaciente($paciente);
+        }
+
+        if ($cenas === []) {
+            return $this->mockClinicCenas($empresa);
+        }
+
+        return $cenas;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function cenaFromPaciente(PosOperatorioPaciente $paciente): array
+    {
+        $referencia = $paciente->getDataCirurgia() ?? $paciente->getCriadoEm();
+        $dias = max(0, (int) $referencia->diff(new \DateTimeImmutable())->days);
+        $status = $paciente->getStatus();
+
+        $estado = match ($status) {
+            PosOperatorioPaciente::STATUS_PENDENTE => 'aguardando',
+            PosOperatorioPaciente::STATUS_ALERTA => 'ativa',
+            default => 'ativa',
+        };
+
+        return [
+            'id' => 'paciente-' . $paciente->getId(),
+            'titulo' => $paciente->getNome(),
+            'tipo' => 'paciente',
+            'praticas' => ['recuperacao'],
+            'estado' => $estado,
+            'dias_aberta' => $dias,
+            'condutor' => $paciente->getProcedimento(),
+            'url' => $this->router->generate('app_pos_operatorio_pacientes', ['open_ficha' => $paciente->getId()]),
+            'mock' => false,
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function cenaFromOnboarding(RhOnboardingProcess $process): array
@@ -105,6 +161,28 @@ final class PulsoCenaProvider
             'condutor' => null,
             'url' => $this->router->generate('app_rh_admissoes_show', ['id' => $process->getId()]),
             'mock' => false,
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mockClinicCenas(?Empresa $empresa): array
+    {
+        $suffix = $empresa !== null ? (string) $empresa->getId() : '0';
+
+        return [
+            [
+                'id' => 'mock-clinica-pacientes-' . $suffix,
+                'titulo' => 'Cadastrar paciente pós-operatório',
+                'tipo' => 'paciente',
+                'praticas' => ['recuperacao'],
+                'estado' => 'aguardando',
+                'dias_aberta' => 0,
+                'condutor' => null,
+                'url' => $this->router->generate('app_pos_operatorio_pacientes'),
+                'mock' => true,
+            ],
         ];
     }
 

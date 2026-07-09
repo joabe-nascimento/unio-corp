@@ -48,7 +48,7 @@ class PlatformConfigService
 
     private const DEFAULTS = [
         'plataforma_nome'     => 'Unio',
-        'plataforma_tagline'  => 'Plataforma de Gestão de Pessoas',
+        'plataforma_tagline'  => 'Pessoas. Processos. Resultados.',
         'logo_url'            => '',
         'logo_mark_url'       => '',
         'logo_full_url'       => '',

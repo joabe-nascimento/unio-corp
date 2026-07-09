@@ -31,6 +31,18 @@ class PosOperatorioPacienteRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function countByStatus(Empresa $empresa, string $status): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.status = :status')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /** @return list<PosOperatorioPaciente> */
     public function findRecentByEmpresa(Empresa $empresa, int $limit, int $offset): array
     {

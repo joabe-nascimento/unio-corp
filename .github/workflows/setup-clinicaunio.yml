@@ -31,6 +31,11 @@ jobs:
           ssh_port: ${{ secrets.DEPLOY_SSH_PORT }}
           canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
 
+      - name: Ensure cPanel subdomain
+        run: |
+          bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
+            'uapi --output=json SubDomain addsubdomain domain=clinicaunio rootdomain=uniowork.com.br dir=clinicaunio.uniowork.com.br 2>&1 || true'
+
       - name: Upload and run server setup
         env:
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home2/joabef36/unio-clinicaunio' }}
