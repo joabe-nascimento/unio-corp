@@ -1,7 +1,7 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}{{ paciente ? 'Editar' : 'Novo' }} paciente · Pós-Operatório{% endblock %}
-{% block permissions_scope %}hub_pos_operatorio{% endblock %}
+{% block title %}{{ paciente ? 'Editar' : 'Novo' }} paciente{% if not org_clinic %} · Pós-Operatório{% endif %}{% endblock %}
+{% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
 
 {% set hub_page_title = paciente ? 'Editar paciente' : 'Novo paciente' %}
 {% set hub_page_subtitle = paciente ? paciente.codigo : 'Cadastro pós-cirúrgico' %}
@@ -90,4 +90,4 @@
 </section>
 {% endblock %}
 
-{% block body_attrs %} data-active-hub="hub_pos_operatorio"{% endblock %}
+{% block body_attrs %}{% if not org_clinic|default(false) %} data-active-hub="pos_operatorio"{% endif %}{% endblock %}

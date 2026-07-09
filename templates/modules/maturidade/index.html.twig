@@ -1,80 +1,107 @@
 {% extends 'layout/hub.html.twig' %}
-{% block title %}Núcleo de Maturidade{% endblock %}
-{% block permissions_scope %}hub_maturidade{% endblock %}
-{% set hub_page_title = 'Núcleo de Maturidade' %}
-{% block hub_kpis %}
-{% if scope_has_products('hub_maturidade') %}
-<div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: '—', label: 'Nível Médio',      sub: 'Aguardando avaliação' },
-        { value: '0',  label: 'Avaliações',       sub: 'Realizadas' },
-        { value: '0',  label: 'Planos de Ação',   sub: 'Em andamento' },
-        { value: '0',  label: 'Maturidade Alta',  sub: 'Colaboradores' },
-    ], mb: 'mb-0' } %}
-</div>
-{% endif %}
-{% endblock %}
+{% block title %}Painel de Recuperação{% endblock %}
+{% block permissions_scope %}{% endblock %}
+{% set hub_page_title = 'Painel de Recuperação' %}
+{% set hub_page_eyebrow = 'Unio Clínica' %}
+{% set hub_page_subtitle = 'Situação atual dos pacientes, alertas e protocolos pós-cirúrgicos' %}
+{% set hub_show_tabs = true %}
+{% set hub_use_clinic_tabs = true %}
+{% set hub_clinic_tabs = [
+    { id: 'overview', label: 'Alertas', hint: 'Monitoramento em tempo real' },
+    { id: 'retornos', label: 'Próximos retornos', hint: 'Agenda de consultas' },
+    { id: 'questionarios', label: 'Questionários', hint: 'Respostas dos pacientes' },
+] %}
+
 {% block hub_content %}
-{% if scope_has_products('hub_maturidade') %}
-<div class="row hub-overview-grid">
-    {% if product_grant('hub_maturidade', 'avaliacao') or product_grant('hub_maturidade', 'radar') %}
-    <div class="col-md-7 mb-4 d-flex">
-        <div class="unio-card flex-fill">
-            {% include 'components/section_header.html.twig' with {
-                title: 'Radar de Maturidade',
-                subtitle: 'Visão geral por dimensão organizacional'
-            } %}
-            {% include 'components/empty_state.html.twig' with {
-                icon: 'fa-bullseye',
-                title: 'Radar não disponível',
-                text: 'Realize a primeira avaliação para gerar o radar.',
-                btn_label: product_grant('hub_maturidade', 'avaliacao') ? 'Iniciar Avaliação' : '',
-                btn_href: path('app_maturidade_avaliacao'),
-                compact: true
-            } %}
+<div class="clinic-hub-overview">
+    <div class="clinic-hub-block">
+        <div class="clinic-hub-metrics">
+            <article class="clinic-metric">
+                <span class="clinic-metric__label">Pacientes ativos</span>
+                <span class="clinic-metric__value">—</span>
+            </article>
+            <article class="clinic-metric">
+                <span class="clinic-metric__label">Alertas críticos</span>
+                <span class="clinic-metric__value">—</span>
+            </article>
+            <article class="clinic-metric">
+                <span class="clinic-metric__label">Protocolos ativos</span>
+                <span class="clinic-metric__value">—</span>
+            </article>
+            <article class="clinic-metric">
+                <span class="clinic-metric__label">Questionários pendentes</span>
+                <span class="clinic-metric__value">—</span>
+            </article>
         </div>
-    </div>
-    {% endif %}
-    {% if product_grant('hub_maturidade', 'avaliacao') %}
-    <div class="col-md-5 mb-4">
-        <div class="unio-card">
-            {% include 'components/section_header.html.twig' with {
-                title: 'Dimensões Avaliadas',
-                subtitle: 'Clique para detalhar cada área'
-            } %}
-            {% for dim in ['Liderança','Cultura Organizacional','Processos','Tecnologia','Pessoas','Estratégia'] %}
-            <div class="d-flex align-items-center justify-content-between py-2 perm-row">
-                <span class="perm-label">{{ dim }}</span>
-                <div class="d-flex align-items-center" style="gap:8px">
-                    <div style="width:80px;height:4px;background:var(--border);border-radius:2px">
-                        <div style="width:0%;height:100%;background:var(--accent);border-radius:2px"></div>
-                    </div>
-                    <span style="color:var(--text-3);font-size:11px;font-family:monospace">—</span>
+
+        <section class="clinic-hub-panel clinic-hub-panel--main clinic-hub-panel--full">
+            <header class="clinic-hub-panel__head">
+                <div class="clinic-hub-panel__head-text">
+                    <h2 class="clinic-hub-panel__title">Acompanhamento pós-cirúrgico</h2>
+                    <p class="clinic-hub-panel__sub">Visão consolidada dos pacientes em recuperação</p>
+                </div>
+            </header>
+            <div class="clinic-hub-panel__body clinic-hub-panel__body--placeholder">
+                <div class="clinic-placeholder">
+                    <span class="clinic-placeholder__icon"><i class="fas fa-person-walking-arrow-right"></i></span>
+                    <p class="clinic-placeholder__title">Nenhum paciente em acompanhamento</p>
+                    <p class="clinic-placeholder__sub">Cadastre o primeiro paciente para iniciar o monitoramento.</p>
+                    <button type="button" class="clinic-placeholder__btn">
+                        <i class="fas fa-user-plus" aria-hidden="true"></i> Novo paciente
+                    </button>
                 </div>
             </div>
-            {% endfor %}
+        </section>
+
+        <div class="clinic-hub-tab-panel">
+            <div class="clinic-hub-subtab-panel__empty">
+                <i class="fas fa-circle-check clinic-empty-check" aria-hidden="true"></i>
+                <div>
+                    <p class="clinic-hub-subtab-panel__title">Sem alertas ativos</p>
+                    <p class="clinic-hub-subtab-panel__sub">Nenhum paciente precisa de atenção imediata no momento.</p>
+                </div>
+            </div>
         </div>
     </div>
-    {% endif %}
-    {% if nav_show_modulo_publicidade|default(false) and scope_has_products('product_publicidade') %}
-    <div class="col-md-6 mb-4 d-flex">
-        {% include 'components/module_card.html.twig' with {
-            title: 'Marca e Comunicação',
-            subtitle: 'Campanhas, criativos, mídia e ROI',
-            links: [
-                { label: 'Campanhas',  route: 'app_publicidade_campanhas' },
-                { label: 'Métricas',   route: 'app_publicidade_metricas' },
-                { label: 'Abrir módulo', route: 'app_publicidade', primary: true },
-            ]
-        } %}
-    </div>
-    {% endif %}
 </div>
-{% else %}
-    {% include 'components/hub_scope_empty.html.twig' with {
-        icon: 'fa-bullseye',
-        title: 'Nenhuma área disponível em Maturidade',
-        text: 'Você ainda não tem permissão para acessar Avaliações, Radar ou Planos de Ação. Solicite ao gestor da equipe.'
-    } %}
-{% endif %}
+{% endblock %}
+
+{% block hub_extra_panels %}
+<div class="hub-tab-panel" data-hub-panel="retornos" role="tabpanel" hidden>
+    <div class="clinic-hub-overview">
+        <div class="clinic-hub-block">
+            <div class="clinic-hub-tab-panel">
+                <div class="clinic-hub-subtab-panel__empty">
+                    <i class="fas fa-calendar-day clinic-empty-check clinic-empty-check--muted" aria-hidden="true"></i>
+                    <div>
+                        <p class="clinic-hub-subtab-panel__title">Agenda de retornos</p>
+                        <p class="clinic-hub-subtab-panel__sub">Consulte pacientes em acompanhamento e questionários pendentes.</p>
+                    </div>
+                </div>
+                <a href="{{ path('app_pos_operatorio_pacientes') }}" class="clinic-ficha-action">
+                    <i class="fas fa-user-injured" aria-hidden="true"></i> Ver pacientes
+                </a>
+                <a href="{{ path('app_pos_operatorio_questionarios') }}" class="clinic-ficha-action">
+                    <i class="fas fa-clipboard-list" aria-hidden="true"></i> Questionários pendentes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="hub-tab-panel" data-hub-panel="questionarios" role="tabpanel" hidden>
+    <div class="clinic-hub-overview">
+        <div class="clinic-hub-block">
+            <div class="clinic-hub-tab-panel">
+                <div class="clinic-hub-subtab-panel__empty">
+                    <i class="fas fa-circle-check clinic-empty-check" aria-hidden="true"></i>
+                    <div>
+                        <p class="clinic-hub-subtab-panel__title">Todos respondidos</p>
+                        <p class="clinic-hub-subtab-panel__sub">Não há questionários pendentes de revisão clínica.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

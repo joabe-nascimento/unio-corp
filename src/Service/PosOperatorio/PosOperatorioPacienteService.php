@@ -18,6 +18,9 @@ use App\Entity\PosOperatorioQuestionarioResposta;
 
 use App\Entity\User;
 
+use App\PosOperatorio\PosOperatorioDisplay;
+use App\PosOperatorio\PosOperatorioTimelineFormatter;
+
 use App\Repository\PosOperatorioPacienteRepository;
 
 use App\Repository\PosOperatorioProtocoloRepository;
@@ -102,7 +105,7 @@ final class PosOperatorioPacienteService
 
         $this->em->persist($paciente);
 
-        $this->events->record($paciente, PosOperatorioEvento::TIPO_CADASTRO, 'Paciente cadastrado no núcleo', $autor);
+        $this->events->record($paciente, PosOperatorioEvento::TIPO_CADASTRO, 'Paciente cadastrado', $autor);
 
         $this->em->flush();
 
@@ -242,13 +245,43 @@ final class PosOperatorioPacienteService
 
         $diaPos = $paciente->getDiaPosOperatorio();
 
+        $checklistProgress = array_map(static fn (array $item) => [
+
+            'dia' => (int) ($item['dia'] ?? 0),
+
+            'item' => (string) ($item['item'] ?? ''),
+
+            'done' => $diaPos !== null && (int) ($item['dia'] ?? 0) <= $diaPos,
+
+        ], $checklist);
+
+        $proximoChecklist = null;
+
+        foreach ($checklistProgress as $step) {
+
+            if (!$step['done']) {
+
+                $proximoChecklist = $step;
+
+                break;
+
+            }
+
+        }
+
 
 
         return [
 
             'paciente' => $paciente,
 
+            'display_nome' => PosOperatorioDisplay::pacienteNome($paciente),
+
             'dia_pos' => $diaPos,
+
+            'protocolo_dias' => $protocolo?->getDuracaoDias(),
+
+            'proximo_checklist' => $proximoChecklist,
 
             'ultima_resposta' => $paciente->getUltimaResposta(),
 
@@ -270,17 +303,11 @@ final class PosOperatorioPacienteService
 
             ] : null,
 
-            'checklist_progress' => array_map(static fn (array $item) => [
-
-                'dia' => (int) ($item['dia'] ?? 0),
-
-                'item' => (string) ($item['item'] ?? ''),
-
-                'done' => $diaPos !== null && (int) ($item['dia'] ?? 0) <= $diaPos,
-
-            ], $checklist),
+            'checklist_progress' => $checklistProgress,
 
             'consentimento_em' => $paciente->getConsentimentoLgpdEm()?->format('d/m/Y H:i'),
+
+            'cadastrado_em' => $paciente->getCriadoEm()->format('d/m/Y H:i'),
 
         ];
 
@@ -338,7 +365,7 @@ final class PosOperatorioPacienteService
                 PosOperatorioEvento::TIPO_CHAT => 'Chat clínico',
                 default => 'Registro',
             },
-            'detail' => $ev->getDescricao(),
+            'detail' => $this->eventDetail($ev),
             'author' => $ev->getAutor()?->getNome(),
             'icon' => match ($tipo) {
                 PosOperatorioEvento::TIPO_CADASTRO => 'fa-user-plus',
@@ -359,6 +386,11 @@ final class PosOperatorioPacienteService
                 default => 'info',
             },
         ];
+    }
+
+    private function eventDetail(PosOperatorioEvento $ev): string
+    {
+        return PosOperatorioTimelineFormatter::format($ev)['detail'];
     }
 
     private function timelineDateLabel(\DateTimeImmutable $date): string

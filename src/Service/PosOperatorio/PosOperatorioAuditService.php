@@ -17,11 +17,11 @@ final class PosOperatorioAuditService
 
     public function logAccess(PosOperatorioPaciente $paciente, User $user, string $contexto, ?Request $request = null): void
     {
-        $ip = $request?->getClientIp() ?? '—';
+        $quem = $user->getNome() ?? $user->getEmail() ?? 'Equipe';
         $this->events->record(
             $paciente,
             PosOperatorioEvento::TIPO_ACESSO_FICHA,
-            sprintf('Acesso à ficha (%s) por %s · IP %s', $contexto, $user->getNome() ?? $user->getEmail(), $ip),
+            sprintf('Ficha visualizada por %s', $quem),
             $user,
         );
         $this->em->flush();

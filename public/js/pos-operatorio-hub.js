@@ -20,7 +20,30 @@
         }
     }
 
-    function loadPartial(host, url, loadingText) {
+    function applyFichaMeta(host) {
+        if (!host) {
+            return;
+        }
+        var meta = host.querySelector('#posOpFichaMeta');
+        if (!meta) {
+            return;
+        }
+        var codigo = meta.getAttribute('data-codigo') || '';
+        var nome = meta.getAttribute('data-nome') || '';
+        var procedimento = meta.getAttribute('data-procedimento') || '';
+        var diaPos = meta.getAttribute('data-dia-pos') || '';
+        var subtitleParts = [codigo, procedimento];
+        if (diaPos !== '') {
+            subtitleParts.push('D+' + diaPos);
+        }
+        setOffcanvasHeading(
+            'pos-op-paciente-ficha',
+            nome || codigo || 'Ficha do paciente',
+            subtitleParts.filter(Boolean).join(' · ')
+        );
+    }
+
+    function loadPartial(host, url, loadingText, onLoaded) {
         if (!host || !url) {
             return Promise.resolve();
         }
@@ -37,6 +60,9 @@
             })
             .then(function (html) {
                 host.innerHTML = html;
+                if (typeof onLoaded === 'function') {
+                    onLoaded(host);
+                }
             })
             .catch(function () {
                 host.innerHTML = '<p class="text-danger small mb-0">Não foi possível carregar. Tente novamente.</p>';
@@ -55,7 +81,7 @@
         if (label) {
             label.textContent = codigo ? codigo + ' · ' + nome : nome;
         }
-        setOffcanvasHeading('pos-op-paciente-edit', 'Editar paciente', codigo || nome);
+        setOffcanvasHeading('pos-op-paciente-edit', 'Editar paciente', codigo ? codigo + ' · ' + nome : nome);
         return loadPartial(host, replaceIdInUrl(urlTpl, id), 'Carregando formulário…');
     }
 
@@ -66,16 +92,19 @@
             return Promise.resolve();
         }
         var urlTpl = host.getAttribute('data-pos-op-ficha-partial-url') || '';
-        nome = nome || 'Ficha do paciente';
         codigo = codigo || '';
-        setOffcanvasHeading('pos-op-paciente-ficha', nome, codigo ? codigo + ' · Acompanhamento pós-operatório' : 'Acompanhamento pós-operatório');
+        setOffcanvasHeading(
+            'pos-op-paciente-ficha',
+            codigo ? codigo + ' · Ficha clínica' : 'Ficha do paciente',
+            nome || 'Carregando…'
+        );
         if (editFromFicha) {
             editFromFicha.hidden = false;
             editFromFicha.setAttribute('data-pos-op-paciente-edit', id);
-            editFromFicha.setAttribute('data-pos-op-paciente-nome', nome);
+            editFromFicha.setAttribute('data-pos-op-paciente-nome', nome || '');
             editFromFicha.setAttribute('data-pos-op-paciente-codigo', codigo);
         }
-        return loadPartial(host, replaceIdInUrl(urlTpl, id), 'Carregando ficha…');
+        return loadPartial(host, replaceIdInUrl(urlTpl, id), 'Carregando ficha…', applyFichaMeta);
     }
 
     function openOffcanvas(id) {
@@ -134,20 +163,11 @@
             if (!id) {
                 return;
             }
-            var rowBtn = findRowEditTrigger(id);
-            if (rowBtn) {
-                loadEditPartial(
-                    id,
-                    editFromFicha.getAttribute('data-pos-op-paciente-nome') || '',
-                    editFromFicha.getAttribute('data-pos-op-paciente-codigo') || ''
-                );
-            } else {
-                loadEditPartial(
-                    id,
-                    editFromFicha.getAttribute('data-pos-op-paciente-nome') || '',
-                    editFromFicha.getAttribute('data-pos-op-paciente-codigo') || ''
-                );
-            }
+            loadEditPartial(
+                id,
+                editFromFicha.getAttribute('data-pos-op-paciente-nome') || '',
+                editFromFicha.getAttribute('data-pos-op-paciente-codigo') || ''
+            );
             openOffcanvas('pos-op-paciente-edit');
         });
     }
@@ -205,7 +225,7 @@
                     rowFicha.getAttribute('data-pos-op-paciente-codigo') || ''
                 );
             } else {
-                loadFichaPartial(fichaId, 'Ficha do paciente', '');
+                loadFichaPartial(fichaId, '', '');
             }
             openOffcanvas('pos-op-paciente-ficha');
             opened = true;

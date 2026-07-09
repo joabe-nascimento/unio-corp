@@ -5,6 +5,7 @@ namespace App\EventSubscriber;
 use App\Entity\User;
 use App\Security\ProductGrantAccess;
 use App\Security\ProductGrantRouteMap;
+use App\Service\Organismo\OrganismoFeature;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -22,6 +23,7 @@ final class ProductGrantSubscriber implements EventSubscriberInterface
         private Security $security,
         private ProductGrantAccess $grants,
         private UrlGeneratorInterface $urlGenerator,
+        private OrganismoFeature $organismo,
     ) {
     }
 
@@ -48,11 +50,22 @@ final class ProductGrantSubscriber implements EventSubscriberInterface
             return;
         }
 
+        if ($this->organismo->isEnabled() && $this->isPosOperatorioRoute($route)) {
+            return;
+        }
+
         if ($this->grants->isRouteAllowed($user, $route)) {
             return;
         }
 
         $dashboardUrl = $this->urlGenerator->generate('app_dashboard');
         $event->setController(static fn (): RedirectResponse => new RedirectResponse($dashboardUrl));
+    }
+
+    private function isPosOperatorioRoute(string $route): bool
+    {
+        $entry = ProductGrantRouteMap::MAP[$route] ?? null;
+
+        return \is_array($entry) && ($entry['scope'] ?? '') === 'hub_pos_operatorio';
     }
 }

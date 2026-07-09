@@ -22,7 +22,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:pos-operatorio:seed',
-    description: 'Popula protocolos e pacientes demo do Núcleo Pós-Operatório (Fase 1)',
+    description: 'Popula protocolos e pacientes demo da Unio Clínica',
 )]
 final class PosOperatorioSeedCommand extends Command
 {
@@ -152,7 +152,7 @@ final class PosOperatorioSeedCommand extends Command
         ], $medico);
 
         $io->success(sprintf(
-            'Seed Pós-Operatório criado para «%s»: PO-DEMO-001 (estável) e PO-DEMO-002 (alerta esperado).',
+            'Seed Unio Clínica criado para «%s»: PO-DEMO-001 (estável) e PO-DEMO-002 (alerta esperado).',
             $empresa->getNome() ?? 'workspace',
         ));
 

@@ -11,6 +11,11 @@
     ]} %}
 #}
 {% set n = items|length %}
+{% if organismo.enabled|default(false) %}
+<div class="page-lead-kpis page-lead-kpis--organismo{% if extra_class is defined and extra_class %} {{ extra_class }}{% endif %}">
+    {% include 'components/org_kpi_strip.html.twig' with { items: items } %}
+</div>
+{% else %}
 {% set col_class = n == 1 ? 'col-12'
     : (n == 2 ? 'col-md-6'
     : (n == 3 ? 'col-md-4'
@@ -24,3 +29,4 @@
     </div>
     {% endfor %}
 </div>
+{% endif %}

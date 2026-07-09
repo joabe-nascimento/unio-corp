@@ -8,6 +8,8 @@ namespace App\Controller\Module\PosOperatorio;
 
 use App\Entity\User;
 
+use App\PosOperatorio\PosOperatorioDisplay;
+
 use App\Repository\UserRepository;
 
 use App\Service\PosOperatorio\PosOperatorioAuditService;
@@ -289,6 +291,14 @@ final class PosOperatorioPacienteController extends AbstractController
 
 
             return $this->redirectToList($paciente, true);
+
+        }
+
+        if (PosOperatorioDisplay::isInvalidPatientName($nome)) {
+
+            $this->addFlash('error', 'Informe o nome completo do paciente.');
+
+            return $this->redirectToList($paciente, $paciente !== null);
 
         }
 

@@ -126,5 +126,23 @@ services:
         arguments:
             $appEnv: '%kernel.environment%'
 
+    App\Service\Organismo\OrganismoFeature:
+        arguments:
+            $enabled: '%env(bool:default:unio.organismo.enabled_default:UNIO_ORGANISMO_ENABLED)%'
+            $pulsoAsHome: '%env(bool:default:unio.organismo.pulso_home_default:UNIO_ORGANISMO_PULSO_HOME)%'
+
+    App\Service\Vitoria\VitoriaToolRegistry:
+        arguments:
+            $tools: !tagged_iterator app.vitoria_tool
+
+    App\Service\Vitoria\Tool\BuscarMembroTool:
+        tags: ['app.vitoria_tool']
+
+    App\Service\Vitoria\Tool\FeriasPendentesTool:
+        tags: ['app.vitoria_tool']
+
+    App\Service\Vitoria\Tool\AbrirAdmissaoTool:
+        tags: ['app.vitoria_tool']
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

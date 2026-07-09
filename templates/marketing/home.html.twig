@@ -1,29 +1,83 @@
-{% set _tema = platform_config.tema|default('dark') %}
+{% set _tema = platform_config.tema|default('light') %}
 {% set _pnome = platform_config.plataforma_nome|default('Unio') %}
-{% set _tagline = platform_config.plataforma_tagline|default('Plataforma de Gestão de Pessoas') %}
 {% set _logo_custom = platform_asset_custom('full') %}
-{% import 'macros/helix.html.twig' as helix %}
 
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="{{ _tema }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ _pnome }} — {{ _tagline }}</title>
-    <meta name="description" content="{{ _pnome }}: plataforma multi-empresa com 30+ núcleos — RH operacional, Hub TI, Recrutamento, Bate-papo, Integrações e assistente inteligente Vitória.">
+    <title>{{ _pnome }} Clínica — Cuidado que continua.</title>
+    <meta name="description" content="{{ _pnome }} Clínica: plataforma de acompanhamento pós-operatório com gestão de pacientes, protocolos clínicos, sala crítica e alertas em tempo real.">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=16">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
+    <style>
+    /* ── Clínica overrides ── */
+    :root {
+        --mkt-accent: #4b72be;
+        --mkt-accent-glow: rgba(75, 114, 190, 0.35);
+        --mkt-accent-soft: #eaf0fb;
+    }
+    .marketing-home { font-family: 'Nunito', 'Inter', system-ui, sans-serif; }
+    .mkt-hero-eyebrow-dot { background: #4b72be !important; }
+    .mkt-gradient-text { color: #4b72be; -webkit-text-fill-color: #4b72be; }
+    .mkt-btn--glow { background: #4b72be !important; box-shadow: 0 4px 20px rgba(75,114,190,.45) !important; }
+    .mkt-hero-v2-orb--cyan { background: radial-gradient(circle at 40% 50%, rgba(75,114,190,.18) 0%, transparent 70%) !important; }
+    .mkt-hero-v2-orb--indigo { background: radial-gradient(circle at 60% 50%, rgba(100,149,237,.14) 0%, transparent 70%) !important; }
+
+    /* Preview sidebar — azul clínico */
+    .mkt-preview-nav-item--active { background: #4b72be !important; color: #fff !important; }
+    .mkt-preview-kpi--accent { color: #4b72be !important; }
+    .mkt-preview-module--highlight { border-color: #4b72be !important; background: #eaf0fb !important; }
+    .mkt-preview-module--highlight i { color: #4b72be !important; }
+
+    /* Feature icons */
+    .mkt-feature-icon { background: #eaf0fb !important; color: #4b72be !important; }
+    .mkt-hub-icon { background: #eaf0fb !important; color: #4b72be !important; }
+    .mkt-pillar-icon { background: #eaf0fb !important; color: #4b72be !important; }
+    .mkt-metric-icon { background: #eaf0fb !important; color: #4b72be !important; }
+    .mkt-metric-card--accent { border-top-color: #4b72be !important; }
+    .mkt-metric-card--accent .mkt-metric-val { color: #4b72be !important; }
+    .mkt-bar-fill { background: #4b72be !important; }
+    .mkt-outcome-val { color: #4b72be !important; }
+    .mkt-step-num { background: #4b72be !important; color: #fff !important; }
+    .mkt-who-item i { color: #4b72be !important; }
+    .mkt-compare-yes i { color: #4b72be !important; }
+    .mkt-compare-th--unio { background: #eaf0fb !important; }
+    .mkt-compare-brand { color: #4b72be !important; }
+    .mkt-compare-badge { background: #4b72be !important; }
+
+    /* Clinic slogan */
+    .clinic-hero-slogan {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #eaf0fb;
+        color: #3d61a8;
+        border-radius: 999px;
+        padding: 5px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        margin-bottom: 16px;
+    }
+    .clinic-hero-slogan i { font-size: 12px; }
+
+    /* Dashboard preview clinic */
+    .mkt-preview-kpi strong { font-size: 1.1rem; }
+    .mkt-preview-module i { color: #4b72be; }
+    </style>
 </head>
 <body class="marketing-home mkt-v2">
 
 <header class="mkt-header mkt-header--v2">
     <div class="mkt-header-inner mkt-header-inner--v2">
-        <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ _pnome }}">
+        <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ _pnome }} Clínica">
             {% include 'components/platform_logo.html.twig' with {
                 variant: 'full',
                 class: 'mkt-logo mkt-logo--v2' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
@@ -31,10 +85,8 @@
         </a>
         <nav class="mkt-nav mkt-nav--v2" aria-label="Navegação principal">
             <a href="#recursos">Recursos</a>
-            <a href="#nucleos">Núcleos</a>
-            <a href="#modulos">Módulos</a>
-            <a href="#vitoria">Vitória</a>
-            <a href="#comparacao">Comparar</a>
+            <a href="#funcionalidades">Funcionalidades</a>
+            <a href="#como-funciona">Como funciona</a>
             <a href="#faq">FAQ</a>
         </nav>
         <div class="mkt-header-actions mkt-header-actions--v2">
@@ -43,7 +95,7 @@
             </button>
             <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--ghost-v2">Entrar</a>
             {% if platform_config.registro_publico ?? true %}
-            <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--glow">Começar grátis</a>
+            <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
             {% else %}
             <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
             {% endif %}
@@ -52,7 +104,7 @@
 </header>
 
 <main>
-    {# ── Hero v2 ── #}
+    {# ── Hero ── #}
     <section class="mkt-hero mkt-hero--v2" aria-labelledby="mkt-hero-title">
         <div class="mkt-hero-v2-bg" aria-hidden="true">
             <div class="mkt-hero-v2-grid"></div>
@@ -61,21 +113,24 @@
         </div>
         <div class="mkt-hero-inner mkt-hero-inner--v2">
             <div class="mkt-hero-copy mkt-hero-copy--v2">
+                <span class="clinic-hero-slogan">
+                    <i class="fas fa-heart-pulse" aria-hidden="true"></i>
+                    Plataforma clínica pós-operatória
+                </span>
                 <p class="mkt-hero-eyebrow mkt-hero-eyebrow--v2">
                     <span class="mkt-hero-eyebrow-dot"></span>
-                    Plataforma multi-empresa · 30+ núcleos
+                    Cuidado que continua.
                 </p>
                 <h1 class="mkt-hero-title mkt-hero-title--v2" id="mkt-hero-title">
-                    Gestão de pessoas e operações,
-                    <span class="mkt-gradient-text">unificadas</span>
+                    Acompanhamento pós-cirúrgico,
+                    <span class="mkt-gradient-text">inteligente e contínuo</span>
                 </h1>
                 <p class="mkt-hero-lead mkt-hero-lead--v2">
-                    {{ _pnome }} conecta RH, Hub TI, Recrutamento e Integrações em workspaces isolados —
-                    com permissões granulares, white-label e a copiloto Vitória.
+                    {{ _pnome }} reúne gestão de pacientes, protocolos clínicos, alertas em tempo real e portal do paciente — em uma plataforma pensada para clínicas que levam o cuidado a sério.
                 </p>
                 <div class="mkt-hero-cta mkt-hero-cta--v2">
                     <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">
-                        Entrar na plataforma
+                        Acessar plataforma
                         <i class="fas fa-arrow-right" aria-hidden="true"></i>
                     </a>
                     {% if platform_config.registro_publico ?? true %}
@@ -84,8 +139,8 @@
                 </div>
                 <div class="mkt-hero-chips">
                     <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
-                    <span class="mkt-hero-chip"><i class="fas fa-building" aria-hidden="true"></i> Multi-empresa</span>
-                    <span class="mkt-hero-chip"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Vitória IA</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-bed-pulse" aria-hidden="true"></i> Pós-operatório</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-bell" aria-hidden="true"></i> Alertas em tempo real</span>
                 </div>
             </div>
             <div class="mkt-hero-visual mkt-hero-visual--v2" aria-hidden="true">
@@ -94,38 +149,38 @@
                         <span class="mkt-preview-dot mkt-preview-dot--r"></span>
                         <span class="mkt-preview-dot mkt-preview-dot--y"></span>
                         <span class="mkt-preview-dot mkt-preview-dot--g"></span>
-                        <span class="mkt-preview-url">uniowork.com.br — dashboard</span>
+                        <span class="mkt-preview-url">unio.com.br — clínica</span>
                     </div>
                     <div class="mkt-preview-layout">
                         <div class="mkt-preview-sidebar">
-                            <span class="mkt-preview-nav-item mkt-preview-nav-item--active"><i class="fas fa-grip"></i></span>
-                            <span class="mkt-preview-nav-item"><i class="fas fa-id-card"></i></span>
-                            <span class="mkt-preview-nav-item"><i class="fas fa-headset"></i></span>
-                            <span class="mkt-preview-nav-item"><i class="fas fa-briefcase"></i></span>
-                            <span class="mkt-preview-nav-item"><i class="fas fa-plug"></i></span>
+                            <span class="mkt-preview-nav-item mkt-preview-nav-item--active"><i class="fas fa-house-medical"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-user-injured"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-bed-pulse"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-file-medical"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-bell"></i></span>
                         </div>
                         <div class="mkt-preview-main">
                             <div class="mkt-preview-kpis">
-                                <div class="mkt-preview-kpi"><strong>248</strong><span>Colaboradores</span></div>
-                                <div class="mkt-preview-kpi"><strong>12</strong><span>Chamados abertos</span></div>
-                                <div class="mkt-preview-kpi mkt-preview-kpi--accent"><strong>98%</strong><span>SLA TI</span></div>
+                                <div class="mkt-preview-kpi"><strong>42</strong><span>Pacientes ativos</span></div>
+                                <div class="mkt-preview-kpi"><strong>3</strong><span>Alertas críticos</span></div>
+                                <div class="mkt-preview-kpi mkt-preview-kpi--accent"><strong>97%</strong><span>Protocolos OK</span></div>
                             </div>
                             <div class="mkt-preview-modules">
                                 <div class="mkt-preview-module">
-                                    <i class="fas fa-id-card" aria-hidden="true"></i>
-                                    <div><strong>RH operacional</strong><span>Admissão, férias, folha</span></div>
+                                    <i class="fas fa-user-injured" aria-hidden="true"></i>
+                                    <div><strong>Pacientes</strong><span>Recuperação e acompanhamento</span></div>
                                 </div>
                                 <div class="mkt-preview-module">
-                                    <i class="fas fa-headset" aria-hidden="true"></i>
-                                    <div><strong>Hub TI</strong><span>Chamados, SLA, P1</span></div>
+                                    <i class="fas fa-bed-pulse" aria-hidden="true"></i>
+                                    <div><strong>Sala Crítica</strong><span>Monitoramento contínuo</span></div>
                                 </div>
                                 <div class="mkt-preview-module">
-                                    <i class="fas fa-briefcase" aria-hidden="true"></i>
-                                    <div><strong>Recrutamento</strong><span>Vagas e pipeline</span></div>
+                                    <i class="fas fa-file-medical" aria-hidden="true"></i>
+                                    <div><strong>Protocolos</strong><span>Guias clínicos ativos</span></div>
                                 </div>
                                 <div class="mkt-preview-module mkt-preview-module--highlight">
                                     <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
-                                    <div><strong>Vitória</strong><span>Copiloto contextual</span></div>
+                                    <div><strong>Vitória</strong><span>Copiloto clínico</span></div>
                                 </div>
                             </div>
                         </div>
@@ -135,100 +190,99 @@
         </div>
     </section>
 
-    {# ── Faixa de confiança empresarial ── #}
-    <div class="mkt-pro-strip" aria-label="Diferenciais empresariais">
+    {# ── Faixa de confiança ── #}
+    <div class="mkt-pro-strip" aria-label="Diferenciais clínicos">
         <div class="mkt-pro-strip-inner">
             <div class="mkt-pro-badge">
                 <i class="fas fa-shield-halved" aria-hidden="true"></i>
-                <div><strong>LGPD conforme</strong><span>Auditoria e consentimento</span></div>
+                <div><strong>LGPD conforme</strong><span>Dados de saúde protegidos</span></div>
             </div>
             <div class="mkt-pro-badge">
-                <i class="fas fa-building" aria-hidden="true"></i>
-                <div><strong>Multi-empresa nativo</strong><span>Workspaces isolados</span></div>
+                <i class="fas fa-heart-pulse" aria-hidden="true"></i>
+                <div><strong>Pós-operatório</strong><span>Do procedimento à alta</span></div>
             </div>
             <div class="mkt-pro-badge">
-                <i class="fas fa-key" aria-hidden="true"></i>
-                <div><strong>85+ permissões</strong><span>Controle por perfil e núcleo</span></div>
+                <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                <div><strong>Alertas em tempo real</strong><span>Notificações críticas imediatas</span></div>
             </div>
             <div class="mkt-pro-badge">
-                <i class="fas fa-palette" aria-hidden="true"></i>
-                <div><strong>White-label</strong><span>Identidade por workspace</span></div>
+                <i class="fas fa-person-circle-check" aria-hidden="true"></i>
+                <div><strong>Portal do paciente</strong><span>Acesso e questionários online</span></div>
             </div>
             <div class="mkt-pro-badge">
-                <i class="fas fa-code" aria-hidden="true"></i>
-                <div><strong>API &amp; Webhooks</strong><span>Integração com ecossistema</span></div>
+                <i class="fas fa-mobile-screen" aria-hidden="true"></i>
+                <div><strong>Responsivo</strong><span>Desktop, tablet e celular</span></div>
             </div>
         </div>
     </div>
 
-    {# ── Plataforma em números ── #}
+    {# ── Métricas ── #}
     <div class="mkt-section-wrap mkt-section-wrap--alt">
     <section class="mkt-section mkt-section--metrics" id="metricas" aria-labelledby="mkt-metrics-title">
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Plataforma em números</p>
-                <h2 class="mkt-section-title" id="mkt-metrics-title">Escala real para operações reais</h2>
+                <h2 class="mkt-section-title" id="mkt-metrics-title">Uma clínica mais segura, mais conectada</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Indicadores que refletem a profundidade da {{ _pnome }} — de permissões granulares a cobertura funcional cross-hub.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Acompanhamento contínuo, protocolos estruturados e alertas inteligentes — tudo em um só lugar.</p>
         </div>
 
         <div class="mkt-metric-grid">
             <div class="mkt-metric-card">
-                <div class="mkt-metric-icon"><i class="fas fa-cubes" aria-hidden="true"></i></div>
-                <div class="mkt-metric-val"><span class="mkt-count" data-to="30">0</span><sup>+</sup></div>
-                <span class="mkt-metric-label">Núcleos disponíveis</span>
-                <span class="mkt-metric-sub">RH, TI, Recrutamento e mais</span>
+                <div class="mkt-metric-icon"><i class="fas fa-user-injured" aria-hidden="true"></i></div>
+                <div class="mkt-metric-val">∞</div>
+                <span class="mkt-metric-label">Pacientes gerenciados</span>
+                <span class="mkt-metric-sub">Fichas, histórico e evolução</span>
             </div>
             <div class="mkt-metric-card">
-                <div class="mkt-metric-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></div>
-                <div class="mkt-metric-val"><span class="mkt-count" data-to="85">0</span><sup>+</sup></div>
-                <span class="mkt-metric-label">Permissões configuráveis</span>
-                <span class="mkt-metric-sub">Controle granular por perfil</span>
+                <div class="mkt-metric-icon"><i class="fas fa-file-medical" aria-hidden="true"></i></div>
+                <div class="mkt-metric-val"><span class="mkt-count" data-to="100">0</span><sup>%</sup></div>
+                <span class="mkt-metric-label">Protocolos rastreáveis</span>
+                <span class="mkt-metric-sub">Do procedimento ao pós-alta</span>
             </div>
             <div class="mkt-metric-card">
-                <div class="mkt-metric-icon"><i class="fas fa-layer-group" aria-hidden="true"></i></div>
-                <div class="mkt-metric-val"><span class="mkt-count" data-to="7">0</span></div>
-                <span class="mkt-metric-label">Categorias de hub</span>
-                <span class="mkt-metric-sub">Pessoas, TI, Operações e mais</span>
+                <div class="mkt-metric-icon"><i class="fas fa-bell" aria-hidden="true"></i></div>
+                <div class="mkt-metric-val">24/7</div>
+                <span class="mkt-metric-label">Monitoramento de alertas</span>
+                <span class="mkt-metric-sub">Notificações críticas em tempo real</span>
             </div>
             <div class="mkt-metric-card mkt-metric-card--accent">
-                <div class="mkt-metric-icon"><i class="fas fa-building" aria-hidden="true"></i></div>
-                <div class="mkt-metric-val"><span class="mkt-count" data-to="100">0</span><sup>%</sup></div>
-                <span class="mkt-metric-label">Multi-empresa nativo</span>
-                <span class="mkt-metric-sub">Workspaces totalmente isolados</span>
+                <div class="mkt-metric-icon"><i class="fas fa-clipboard-list" aria-hidden="true"></i></div>
+                <div class="mkt-metric-val"><span class="mkt-count" data-to="0">0</span></div>
+                <span class="mkt-metric-label">Falhas sem rastreio</span>
+                <span class="mkt-metric-sub">Auditoria completa de ações</span>
             </div>
         </div>
 
         <div class="mkt-coverage-chart">
-            <h3 class="mkt-chart-title">Cobertura por área funcional</h3>
+            <h3 class="mkt-chart-title">Cobertura do ciclo clínico</h3>
             <div class="mkt-bars">
                 <div class="mkt-bar-row">
-                    <span class="mkt-bar-label">RH e Pessoas</span>
+                    <span class="mkt-bar-label">Gestão de pacientes</span>
+                    <div class="mkt-bar-track"><div class="mkt-bar-fill" style="--pct:98%"></div></div>
+                    <span class="mkt-bar-pct">98%</span>
+                </div>
+                <div class="mkt-bar-row">
+                    <span class="mkt-bar-label">Protocolos e questionários</span>
                     <div class="mkt-bar-track"><div class="mkt-bar-fill" style="--pct:95%"></div></div>
                     <span class="mkt-bar-pct">95%</span>
                 </div>
                 <div class="mkt-bar-row">
-                    <span class="mkt-bar-label">TI e Infraestrutura</span>
+                    <span class="mkt-bar-label">Alertas e monitoramento</span>
+                    <div class="mkt-bar-track"><div class="mkt-bar-fill" style="--pct:92%"></div></div>
+                    <span class="mkt-bar-pct">92%</span>
+                </div>
+                <div class="mkt-bar-row">
+                    <span class="mkt-bar-label">Portal do paciente</span>
                     <div class="mkt-bar-track"><div class="mkt-bar-fill" style="--pct:88%"></div></div>
                     <span class="mkt-bar-pct">88%</span>
                 </div>
                 <div class="mkt-bar-row">
-                    <span class="mkt-bar-label">Recrutamento</span>
+                    <span class="mkt-bar-label">Comunicação e lembretes</span>
                     <div class="mkt-bar-track"><div class="mkt-bar-fill" style="--pct:82%"></div></div>
                     <span class="mkt-bar-pct">82%</span>
                 </div>
-                <div class="mkt-bar-row">
-                    <span class="mkt-bar-label">Operações</span>
-                    <div class="mkt-bar-track"><div class="mkt-bar-fill" style="--pct:76%"></div></div>
-                    <span class="mkt-bar-pct">76%</span>
-                </div>
-                <div class="mkt-bar-row">
-                    <span class="mkt-bar-label">Integrações &amp; APIs</span>
-                    <div class="mkt-bar-track"><div class="mkt-bar-fill" style="--pct:70%"></div></div>
-                    <span class="mkt-bar-pct">70%</span>
-                </div>
             </div>
-            <p class="mkt-chart-note">* Cobertura estimada de processos típicos por área em relação a ferramentas especializadas individuais.</p>
         </div>
     </section>
     </div>
@@ -238,199 +292,132 @@
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Recursos</p>
-                <h2 class="mkt-section-title" id="mkt-features-title">Tudo que sua operação precisa — em um único lugar</h2>
+                <h2 class="mkt-section-title" id="mkt-features-title">Tudo que sua clínica precisa — em um único lugar</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Módulos pensados para RH, TI, recrutamento e operações — com governança, clareza e escala corporativa.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Módulos pensados para o ciclo clínico completo — do procedimento ao acompanhamento pós-alta.</p>
         </div>
         <div class="mkt-features">
             <article class="mkt-feature">
-                <div class="mkt-feature-icon"><i class="fas fa-id-card" aria-hidden="true"></i></div>
-                <h3>RH de ponta a ponta</h3>
-                <p>Funcionários, admissão, demissão, férias, folha e documentos — com trilha de auditoria e fluxos operacionais.</p>
+                <div class="mkt-feature-icon"><i class="fas fa-user-injured" aria-hidden="true"></i></div>
+                <h3>Gestão de pacientes</h3>
+                <p>Ficha completa, histórico de procedimentos, evoluções e documentos — com acesso rápido e busca inteligente.</p>
             </article>
             <article class="mkt-feature">
-                <div class="mkt-feature-icon"><i class="fas fa-headset" aria-hidden="true"></i></div>
-                <h3>Hub TI — Service desk</h3>
-                <p>Chamados, SLA, NOC, gestão de ativos, licenças, integrações observáveis e escalação de incidentes P1.</p>
+                <div class="mkt-feature-icon"><i class="fas fa-bed-pulse" aria-hidden="true"></i></div>
+                <h3>Sala Crítica</h3>
+                <p>Painel em tempo real com status dos pacientes mais críticos — alertas visuais e escalonamento imediato.</p>
             </article>
             <article class="mkt-feature">
-                <div class="mkt-feature-icon"><i class="fas fa-briefcase" aria-hidden="true"></i></div>
-                <h3>Recrutamento completo</h3>
-                <p>Vagas, banco de talentos, pipeline de seleção, página de carreiras pública e analytics de contratação.</p>
+                <div class="mkt-feature-icon"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></div>
+                <h3>Alertas inteligentes</h3>
+                <p>Notificações baseadas em regras clínicas — desvios de protocolo, respostas a questionários e sinais de risco.</p>
+            </article>
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-file-medical" aria-hidden="true"></i></div>
+                <h3>Protocolos clínicos</h3>
+                <p>Crie, gerencie e monitore protocolos de recuperação — com etapas, responsáveis e rastreabilidade completa.</p>
+            </article>
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-clipboard-list" aria-hidden="true"></i></div>
+                <h3>Questionários de acompanhamento</h3>
+                <p>Envie questionários automáticos por etapa de recuperação — respostas processadas e alertas gerados automaticamente.</p>
+            </article>
+            <article class="mkt-feature">
+                <div class="mkt-feature-icon"><i class="fas fa-person-circle-check" aria-hidden="true"></i></div>
+                <h3>Portal do paciente</h3>
+                <p>Acesso seguro para o paciente visualizar seu protocolo, responder questionários e acompanhar a evolução.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></div>
-                <h3>Permissões granulares</h3>
-                <p>Controle fino por perfil, núcleo e produto. Cada usuário acessa apenas o que foi liberado para seu papel.</p>
+                <h3>Permissões por perfil</h3>
+                <p>Médicos, enfermeiros, recepcionistas e administradores — cada perfil com acesso exato ao que precisa.</p>
             </article>
             <article class="mkt-feature">
-                <div class="mkt-feature-icon"><i class="fas fa-comments" aria-hidden="true"></i></div>
-                <h3>Bate-papo integrado</h3>
-                <p>Chat em tempo real entre membros, galeria de mídia e histórico por workspace — sem sair da plataforma.</p>
-            </article>
-            <article class="mkt-feature">
-                <div class="mkt-feature-icon"><i class="fas fa-palette" aria-hidden="true"></i></div>
-                <h3>White-label</h3>
-                <p>Logo, cores, slogan, tema claro ou escuro e identidade visual completa configuráveis pelo administrador.</p>
-            </article>
-            <article class="mkt-feature">
-                <div class="mkt-feature-icon"><i class="fas fa-plug" aria-hidden="true"></i></div>
-                <h3>Hub de integrações</h3>
-                <p>Conectores, webhooks e observabilidade causal — com Dead Letter Queue e SLO por fluxo de negócio.</p>
-            </article>
-            <article class="mkt-feature">
-                <div class="mkt-feature-icon"><i class="fas fa-bell" aria-hidden="true"></i></div>
-                <h3>Notificações e central</h3>
-                <p>Dashboard, notificações persistentes, busca global e navegação por núcleos em toda a plataforma.</p>
+                <div class="mkt-feature-icon"><i class="fas fa-chart-line" aria-hidden="true"></i></div>
+                <h3>Visão geral da clínica</h3>
+                <p>Dashboard com indicadores de recuperação, taxa de alertas resolvidos e evolução dos pacientes ativos.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-mobile-screen" aria-hidden="true"></i></div>
-                <h3>Responsivo e mobile</h3>
-                <p>Interface adaptada a desktop e mobile, com filtros, busca e FAB otimizados para telas pequenas.</p>
+                <h3>Mobile e responsivo</h3>
+                <p>Acesse de qualquer dispositivo — interface adaptada para uso clínico em tablet, celular e desktop.</p>
             </article>
         </div>
     </section>
 
-    {# ── Visão empresarial ── #}
+    {# ── Funcionalidades em detalhe ── #}
     <div class="mkt-section-wrap mkt-section-wrap--alt">
-    <section class="mkt-section" id="empresarial" aria-labelledby="mkt-enterprise-title">
+    <section class="mkt-section" id="funcionalidades" aria-labelledby="mkt-funcs-title">
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
-                <p class="mkt-section-eyebrow">Visão empresarial</p>
-                <h2 class="mkt-section-title" id="mkt-enterprise-title">Arquitetura pensada para grupos, holdings e operações complexas</h2>
+                <p class="mkt-section-eyebrow">Ciclo clínico completo</p>
+                <h2 class="mkt-section-title" id="mkt-funcs-title">Do centro cirúrgico ao retorno do paciente</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Governança, isolamento de dados e integração nativa — sem depender de dezenas de ferramentas desconectadas.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Cada módulo cobre uma etapa crítica do acompanhamento — integrados, sem lacunas no cuidado.</p>
         </div>
         <div class="mkt-pillars">
             <article class="mkt-pillar">
-                <div class="mkt-pillar-icon"><i class="fas fa-sitemap" aria-hidden="true"></i></div>
-                <h3>Governança centralizada</h3>
-                <p>Perfis, permissões e políticas definidos uma vez — aplicados em todos os núcleos e workspaces. Admins controlam quem vê o quê, por empresa e por módulo.</p>
+                <div class="mkt-pillar-icon"><i class="fas fa-user-injured" aria-hidden="true"></i></div>
+                <h3>Registro e evolução</h3>
+                <p>Cada paciente tem uma ficha viva — procedimento realizado, equipe responsável, histórico de alertas e questionários respondidos. Tudo rastreável.</p>
                 <ul class="mkt-pillar-list">
-                    <li>85+ permissões configuráveis</li>
-                    <li>Controle por núcleo e produto</li>
-                    <li>Trilha de auditoria completa</li>
+                    <li>Ficha completa com histórico</li>
+                    <li>Busca rápida por nome ou procedimento</li>
+                    <li>Exportação para prontuário</li>
                 </ul>
             </article>
             <article class="mkt-pillar">
-                <div class="mkt-pillar-icon"><i class="fas fa-layer-group" aria-hidden="true"></i></div>
-                <h3>Multi-empresa nativo</h3>
-                <p>Cada workspace opera de forma independente — dados, usuários, branding e configurações isolados. Ideal para grupos com múltiplas unidades ou marcas.</p>
+                <div class="mkt-pillar-icon"><i class="fas fa-file-medical" aria-hidden="true"></i></div>
+                <h3>Protocolos padronizados</h3>
+                <p>Defina protocolos por tipo de procedimento — com etapas, prazos e ações esperadas. O sistema monitora automaticamente o cumprimento.</p>
                 <ul class="mkt-pillar-list">
-                    <li>Troca de workspace em 1 clique</li>
-                    <li>White-label por empresa</li>
-                    <li>Identidade visual configurável</li>
+                    <li>Criação visual de protocolos</li>
+                    <li>Atribuição automática por procedimento</li>
+                    <li>Alertas por desvio de protocolo</li>
                 </ul>
             </article>
             <article class="mkt-pillar">
-                <div class="mkt-pillar-icon"><i class="fas fa-plug" aria-hidden="true"></i></div>
-                <h3>Integração sem silos</h3>
-                <p>RH, TI e Recrutamento compartilham a mesma base de pessoas, permissões e histórico. Conectores e webhooks eliminam integrações manuais entre sistemas.</p>
+                <div class="mkt-pillar-icon"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></div>
+                <h3>Alertas e triagem</h3>
+                <p>Quando um questionário indica risco ou um protocolo não é cumprido no prazo, a equipe é notificada imediatamente — com prioridade e contexto.</p>
                 <ul class="mkt-pillar-list">
-                    <li>Hub de integrações observável</li>
-                    <li>API REST &amp; webhooks</li>
-                    <li>Dead Letter Queue e SLO</li>
+                    <li>Regras de alerta configuráveis</li>
+                    <li>Fila de triagem priorizada</li>
+                    <li>Histórico de ações tomadas</li>
                 </ul>
             </article>
             <article class="mkt-pillar">
-                <div class="mkt-pillar-icon"><i class="fas fa-chart-line" aria-hidden="true"></i></div>
-                <h3>Inteligência operacional</h3>
-                <p>Dashboards, analytics cross-hub e a copiloto Vitória transformam dados dispersos em decisões rápidas — do chamado P1 ao pipeline de contratação.</p>
+                <div class="mkt-pillar-icon"><i class="fas fa-person-circle-check" aria-hidden="true"></i></div>
+                <h3>Portal e engajamento</h3>
+                <p>O paciente acessa um portal seguro para responder questionários, visualizar orientações e registrar sintomas — de onde estiver.</p>
                 <ul class="mkt-pillar-list">
-                    <li>Cortex Analytics integrado</li>
-                    <li>MTTR, SLA e CSAT em tempo real</li>
-                    <li>Vitória IA contextualizada</li>
+                    <li>Acesso por link seguro</li>
+                    <li>Questionários por etapa de recuperação</li>
+                    <li>Integração automática com alertas</li>
                 </ul>
             </article>
         </div>
     </section>
     </div>
 
-    {# ── Como funciona + Para quem é ── #}
-    <div class="mkt-section-wrap mkt-section-wrap--alt">
-        <section class="mkt-section" id="como-funciona" aria-labelledby="mkt-steps-title">
-            <div class="mkt-section-head mkt-section-head--split">
-                <div class="mkt-section-head-main">
-                    <p class="mkt-section-eyebrow">Como funciona</p>
-                    <h2 class="mkt-section-title" id="mkt-steps-title">Do acesso ao resultado em quatro passos</h2>
-                </div>
-                <p class="mkt-section-sub mkt-section-sub--left">Uma jornada clara para qualquer perfil — sem fricção, sem configuração complexa.</p>
-            </div>
-            <ol class="mkt-steps">
-                <li class="mkt-step">
-                    <span class="mkt-step-num">1</span>
-                    <div class="mkt-step-body">
-                        <h3>Crie ou receba acesso</h3>
-                        <p>Cadastre-se ou receba convite do admin. Em minutos você já tem acesso configurado.</p>
-                    </div>
-                </li>
-                <li class="mkt-step">
-                    <span class="mkt-step-num">2</span>
-                    <div class="mkt-step-body">
-                        <h3>Selecione o workspace</h3>
-                        <p>Escolha a empresa ou área de trabalho — dados, permissões e identidade totalmente isolados.</p>
-                    </div>
-                </li>
-                <li class="mkt-step">
-                    <span class="mkt-step-num">3</span>
-                    <div class="mkt-step-body">
-                        <h3>Acesse seus núcleos</h3>
-                        <p>RH, Hub TI, Recrutamento, Bate-papo — veja apenas o que foi liberado para o seu perfil.</p>
-                    </div>
-                </li>
-                <li class="mkt-step">
-                    <span class="mkt-step-num">4</span>
-                    <div class="mkt-step-body">
-                        <h3>Opere com a Vitória</h3>
-                        <p>Dashboards, fluxos e a copiloto Vitória ao lado — para decidir e agir com mais velocidade.</p>
-                    </div>
-                </li>
-            </ol>
-
-            <div class="mkt-who-strip">
-                <div class="mkt-who-item">
-                    <i class="fas fa-user-tie" aria-hidden="true"></i>
-                    <div><strong>Gestores</strong><span>Dashboard, metas e aprovações</span></div>
-                </div>
-                <div class="mkt-who-item">
-                    <i class="fas fa-id-badge" aria-hidden="true"></i>
-                    <div><strong>RH e People Ops</strong><span>Admissão, férias, folha e auditoria</span></div>
-                </div>
-                <div class="mkt-who-item">
-                    <i class="fas fa-headset" aria-hidden="true"></i>
-                    <div><strong>Equipes de TI</strong><span>Chamados, SLA, ativos e NOC</span></div>
-                </div>
-                <div class="mkt-who-item">
-                    <i class="fas fa-briefcase" aria-hidden="true"></i>
-                    <div><strong>Recrutadores</strong><span>Vagas, pipeline e banco de talentos</span></div>
-                </div>
-                <div class="mkt-who-item">
-                    <i class="fas fa-crown" aria-hidden="true"></i>
-                    <div><strong>Administradores</strong><span>Multi-empresa, white-label e controle</span></div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    {# ── Dashboard preview Hub TI ── #}
+    {# ── Dashboard preview ── #}
     <section class="mkt-section" id="dashboard-preview" aria-labelledby="mkt-dash-title">
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
-                <p class="mkt-section-eyebrow">Hub TI — visão operacional</p>
-                <h2 class="mkt-section-title" id="mkt-dash-title">Visibilidade em tempo real sobre toda a operação de TI</h2>
+                <p class="mkt-section-eyebrow">Visão da clínica em tempo real</p>
+                <h2 class="mkt-section-title" id="mkt-dash-title">Tudo que importa, visível de um só painel</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Indicadores, chamados, SLA e anomalias — tudo no mesmo painel, integrado ao restante da plataforma.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Pacientes ativos, alertas críticos, protocolos em andamento — sem precisar abrir vários sistemas.</p>
         </div>
         <div class="mkt-dashboard-preview">
-            {# Chrome do app #}
             <div class="mkt-dash-window">
                 <div class="mkt-dash-chrome">
                     <div class="mkt-dash-chrome-dots" aria-hidden="true">
                         <span></span><span></span><span></span>
                     </div>
                     <div class="mkt-dash-chrome-title">
-                        <i class="fas fa-headset" aria-hidden="true"></i>
-                        Hub TI — Painel Operacional
+                        <i class="fas fa-heart-pulse" aria-hidden="true"></i>
+                        Unio Clínica — Visão Geral
                     </div>
                     <div class="mkt-dash-live">
                         <span class="mkt-dash-live-dot" aria-hidden="true"></span>
@@ -440,103 +427,99 @@
 
                 <div class="mkt-dash-toolbar">
                     <div class="mkt-dash-toolbar-left">
-                        <span class="mkt-dash-pill"><i class="fas fa-building" aria-hidden="true"></i> Workspace Alpha</span>
-                        <span class="mkt-dash-pill mkt-dash-pill--muted"><i class="fas fa-calendar" aria-hidden="true"></i> Últimos 7 dias</span>
+                        <span class="mkt-dash-pill"><i class="fas fa-building" aria-hidden="true"></i> Clínica São Paulo</span>
+                        <span class="mkt-dash-pill mkt-dash-pill--muted"><i class="fas fa-calendar" aria-hidden="true"></i> Hoje</span>
                     </div>
                     <div class="mkt-dash-toolbar-right">
-                        <span class="mkt-dash-pill mkt-dash-pill--action"><i class="fas fa-fire" aria-hidden="true"></i> Incidentes P1</span>
+                        <span class="mkt-dash-pill mkt-dash-pill--action"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> 3 alertas críticos</span>
                         <span class="mkt-dash-pill mkt-dash-pill--muted"><i class="fas fa-rotate" aria-hidden="true"></i> Atualizado agora</span>
                     </div>
                 </div>
 
-                {# KPIs #}
                 <div class="mkt-dash-kpis">
-                    <div class="mkt-dash-kpi">
+                    <div class="mkt-dash-kpi mkt-dash-kpi--good">
                         <div class="mkt-dash-kpi-top">
-                            <span class="mkt-dash-kpi-icon"><i class="fas fa-ticket" aria-hidden="true"></i></span>
-                            <svg class="mkt-dash-spark" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,20 10,14 20,16 30,8 40,12 50,4 60,6"/></svg>
+                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--cyan"><i class="fas fa-user-injured" aria-hidden="true"></i></span>
+                            <svg class="mkt-dash-spark mkt-dash-spark--up" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,18 12,16 24,12 36,10 48,6 60,2"/></svg>
                         </div>
-                        <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="247">0</span></span>
-                        <span class="mkt-dash-kpi-label">Chamados abertos</span>
-                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--warn"><i class="fas fa-arrow-trend-up" aria-hidden="true"></i> +12% esta semana</span>
+                        <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="42">0</span></span>
+                        <span class="mkt-dash-kpi-label">Pacientes ativos</span>
+                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--ok"><i class="fas fa-check" aria-hidden="true"></i> 8 altas hoje</span>
                     </div>
                     <div class="mkt-dash-kpi mkt-dash-kpi--good">
                         <div class="mkt-dash-kpi-top">
-                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--cyan"><i class="fas fa-bullseye" aria-hidden="true"></i></span>
-                            <svg class="mkt-dash-spark mkt-dash-spark--up" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,18 12,16 24,12 36,10 48,6 60,2"/></svg>
+                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--cyan"><i class="fas fa-file-medical" aria-hidden="true"></i></span>
+                            <svg class="mkt-dash-spark mkt-dash-spark--up" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,20 10,14 20,16 30,8 40,12 50,4 60,6"/></svg>
                         </div>
-                        <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="94">0</span>.<small>2%</small></span>
-                        <span class="mkt-dash-kpi-label">SLA cumprido</span>
+                        <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="97">0</span><small>%</small></span>
+                        <span class="mkt-dash-kpi-label">Protocolos em dia</span>
                         <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--ok"><i class="fas fa-check" aria-hidden="true"></i> Meta: 90%</span>
                     </div>
                     <div class="mkt-dash-kpi mkt-dash-kpi--good">
                         <div class="mkt-dash-kpi-top">
-                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--cyan"><i class="fas fa-clock" aria-hidden="true"></i></span>
-                            <svg class="mkt-dash-spark mkt-dash-spark--up" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,6 10,8 20,12 30,14 40,16 50,18 60,20"/></svg>
+                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--cyan"><i class="fas fa-clipboard-list" aria-hidden="true"></i></span>
+                            <svg class="mkt-dash-spark" viewBox="0 0 60 24" aria-hidden="true"><polyline points="0,6 10,8 20,12 30,14 40,16 50,18 60,20"/></svg>
                         </div>
-                        <span class="mkt-dash-kpi-val">1h <small>23m</small></span>
-                        <span class="mkt-dash-kpi-label">MTTR médio</span>
-                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--ok"><i class="fas fa-arrow-down" aria-hidden="true"></i> −18% vs. mês passado</span>
+                        <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="89">0</span><small>%</small></span>
+                        <span class="mkt-dash-kpi-label">Questionários respondidos</span>
+                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--ok"><i class="fas fa-arrow-up" aria-hidden="true"></i> +6% vs. semana passada</span>
                     </div>
                     <div class="mkt-dash-kpi mkt-dash-kpi--crit">
                         <div class="mkt-dash-kpi-top">
-                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--red"><i class="fas fa-fire" aria-hidden="true"></i></span>
+                            <span class="mkt-dash-kpi-icon mkt-dash-kpi-icon--red"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
                             <span class="mkt-dash-kpi-pulse" aria-hidden="true"></span>
                         </div>
                         <span class="mkt-dash-kpi-val"><span class="mkt-count" data-to="3">0</span></span>
-                        <span class="mkt-dash-kpi-label">Incidentes P1 ativos</span>
-                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--crit"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Escalação ativa</span>
+                        <span class="mkt-dash-kpi-label">Alertas críticos</span>
+                        <span class="mkt-dash-kpi-delta mkt-dash-kpi-delta--crit"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Triagem necessária</span>
                     </div>
                 </div>
 
-                {# Corpo principal #}
                 <div class="mkt-dash-main">
                     <div class="mkt-dash-main-left">
-                        {# Gráfico de barras #}
                         <div class="mkt-dash-chart-card mkt-dash-chart-card--wide">
                             <div class="mkt-dash-chart-head">
-                                <span><i class="fas fa-chart-column" aria-hidden="true"></i> Volume de chamados — últimos 7 dias</span>
-                                <span class="mkt-dash-chart-badge">Pico: Qui · 91 tickets</span>
+                                <span><i class="fas fa-chart-column" aria-hidden="true"></i> Novos pacientes — últimos 7 dias</span>
+                                <span class="mkt-dash-chart-badge">Pico: Qui · 9 pacientes</span>
                             </div>
-                            <div class="mkt-dash-bar-chart" aria-label="Gráfico de barras: volume de chamados por dia da semana">
-                                <div class="mkt-dash-bar-col" data-val="42"><div class="mkt-dash-bar-fill" style="--h:55%"></div><span>Seg</span></div>
-                                <div class="mkt-dash-bar-col" data-val="55"><div class="mkt-dash-bar-fill" style="--h:72%"></div><span>Ter</span></div>
-                                <div class="mkt-dash-bar-col" data-val="37"><div class="mkt-dash-bar-fill" style="--h:48%"></div><span>Qua</span></div>
-                                <div class="mkt-dash-bar-col mkt-dash-bar-col--peak" data-val="91"><div class="mkt-dash-bar-fill" style="--h:91%"></div><span>Qui</span></div>
-                                <div class="mkt-dash-bar-col" data-val="49"><div class="mkt-dash-bar-fill" style="--h:65%"></div><span>Sex</span></div>
-                                <div class="mkt-dash-bar-col mkt-dash-bar-col--dim" data-val="17"><div class="mkt-dash-bar-fill" style="--h:22%"></div><span>Sáb</span></div>
-                                <div class="mkt-dash-bar-col mkt-dash-bar-col--dim" data-val="14"><div class="mkt-dash-bar-fill" style="--h:18%"></div><span>Dom</span></div>
+                            <div class="mkt-dash-bar-chart" aria-label="Gráfico de barras: novos pacientes por dia da semana">
+                                <div class="mkt-dash-bar-col" data-val="4"><div class="mkt-dash-bar-fill" style="--h:44%"></div><span>Seg</span></div>
+                                <div class="mkt-dash-bar-col" data-val="6"><div class="mkt-dash-bar-fill" style="--h:66%"></div><span>Ter</span></div>
+                                <div class="mkt-dash-bar-col" data-val="5"><div class="mkt-dash-bar-fill" style="--h:55%"></div><span>Qua</span></div>
+                                <div class="mkt-dash-bar-col mkt-dash-bar-col--peak" data-val="9"><div class="mkt-dash-bar-fill" style="--h:91%"></div><span>Qui</span></div>
+                                <div class="mkt-dash-bar-col" data-val="7"><div class="mkt-dash-bar-fill" style="--h:77%"></div><span>Sex</span></div>
+                                <div class="mkt-dash-bar-col mkt-dash-bar-col--dim" data-val="3"><div class="mkt-dash-bar-fill" style="--h:33%"></div><span>Sáb</span></div>
+                                <div class="mkt-dash-bar-col mkt-dash-bar-col--dim" data-val="2"><div class="mkt-dash-bar-fill" style="--h:22%"></div><span>Dom</span></div>
                             </div>
                         </div>
 
-                        {# Feed de chamados recentes #}
                         <div class="mkt-dash-chart-card">
                             <div class="mkt-dash-chart-head">
-                                <span><i class="fas fa-list" aria-hidden="true"></i> Chamados recentes</span>
+                                <span><i class="fas fa-list" aria-hidden="true"></i> Alertas recentes</span>
                                 <span class="mkt-dash-chart-link">Ver todos <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
                             </div>
                             <ul class="mkt-dash-tickets">
                                 <li class="mkt-dash-ticket mkt-dash-ticket--p1">
-                                    <span class="mkt-dash-ticket-pri">P1</span>
+                                    <span class="mkt-dash-ticket-pri">C1</span>
                                     <div class="mkt-dash-ticket-body">
-                                        <strong>Servidor de e-mail indisponível</strong>
-                                        <span>#TI-4821 · há 12 min · Carlos M.</span>
+                                        <strong>Paciente relata dor intensa — pós lap.</strong>
+                                        <span>#A-412 · há 8 min · Dra. Carla M.</span>
                                     </div>
-                                    <span class="mkt-dash-ticket-status mkt-dash-ticket-status--open">Aberto</span>
+                                    <span class="mkt-dash-ticket-status mkt-dash-ticket-status--open">Triagem</span>
                                 </li>
                                 <li class="mkt-dash-ticket mkt-dash-ticket--p2">
-                                    <span class="mkt-dash-ticket-pri">P2</span>
+                                    <span class="mkt-dash-ticket-pri">C2</span>
                                     <div class="mkt-dash-ticket-body">
-                                        <strong>VPN lenta para filial SP</strong>
-                                        <span>#TI-4819 · há 34 min · Ana L.</span>
+                                        <strong>Questionário D+3 não respondido</strong>
+                                        <span>#A-409 · há 2h · João S.</span>
                                     </div>
-                                    <span class="mkt-dash-ticket-status mkt-dash-ticket-status--prog">Em andamento</span>
+                                    <span class="mkt-dash-ticket-status mkt-dash-ticket-status--prog">Em contato</span>
                                 </li>
                                 <li class="mkt-dash-ticket">
-                                    <span class="mkt-dash-ticket-pri mkt-dash-ticket-pri--p3">P3</span>
+                                    <span class="mkt-dash-ticket-pri mkt-dash-ticket-pri--p3">C3</span>
                                     <div class="mkt-dash-ticket-body">
-                                        <strong>Reset de senha — novo colaborador</strong>
-                                        <span>#TI-4815 · há 1h · Fernanda R.</span>
+                                        <strong>Protocolo D+7 concluído com sucesso</strong>
+                                        <span>#A-401 · há 4h · Ana R.</span>
                                     </div>
                                     <span class="mkt-dash-ticket-status mkt-dash-ticket-status--done">Resolvido</span>
                                 </li>
@@ -545,430 +528,219 @@
                     </div>
 
                     <div class="mkt-dash-main-right">
-                        {# Donut #}
                         <div class="mkt-dash-chart-card">
                             <div class="mkt-dash-chart-head">
-                                <span><i class="fas fa-chart-pie" aria-hidden="true"></i> Status dos chamados</span>
+                                <span><i class="fas fa-chart-pie" aria-hidden="true"></i> Status dos pacientes</span>
                             </div>
                             <div class="mkt-dash-donut-wrap">
                                 <div class="mkt-dash-donut" aria-hidden="true"></div>
                                 <div class="mkt-dash-donut-center">
-                                    <strong>247</strong>
-                                    <span>total</span>
+                                    <strong>42</strong>
+                                    <span>ativos</span>
                                 </div>
                             </div>
                             <div class="mkt-dash-legend">
-                                <span><i class="mkt-legend-dot" style="background:var(--accent)"></i> Resolvidos <b>58%</b></span>
-                                <span><i class="mkt-legend-dot" style="background:#2DD4FF"></i> Em andamento <b>27%</b></span>
-                                <span><i class="mkt-legend-dot" style="background:var(--border-2)"></i> Abertos <b>15%</b></span>
+                                <span><i class="mkt-legend-dot" style="background:var(--accent)"></i> Em protocolo <b>71%</b></span>
+                                <span><i class="mkt-legend-dot" style="background:#2DD4FF"></i> Em monitoramento <b>22%</b></span>
+                                <span><i class="mkt-legend-dot" style="background:var(--border-2)"></i> Aguardando alta <b>7%</b></span>
                             </div>
                         </div>
 
-                        {# SLA #}
                         <div class="mkt-dash-chart-card">
                             <div class="mkt-dash-chart-head">
-                                <span><i class="fas fa-gauge-high" aria-hidden="true"></i> SLA por prioridade</span>
+                                <span><i class="fas fa-gauge-high" aria-hidden="true"></i> Protocolos por etapa</span>
                             </div>
                             <div class="mkt-sla-bars">
                                 <div class="mkt-sla-row">
-                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p1"></span>P1</span>
-                                    <div class="mkt-sla-track"><div class="mkt-sla-fill mkt-sla-fill--warn" style="--pct:88%"></div></div>
-                                    <span class="mkt-sla-val">88%</span>
+                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p1"></span>D+1</span>
+                                    <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:94%"></div></div>
+                                    <span class="mkt-sla-val">94%</span>
                                 </div>
                                 <div class="mkt-sla-row">
-                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p2"></span>P2</span>
-                                    <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:96%"></div></div>
-                                    <span class="mkt-sla-val">96%</span>
+                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p2"></span>D+3</span>
+                                    <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:89%"></div></div>
+                                    <span class="mkt-sla-val">89%</span>
                                 </div>
                                 <div class="mkt-sla-row">
-                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p3"></span>P3</span>
-                                    <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:99%"></div></div>
-                                    <span class="mkt-sla-val">99%</span>
+                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p3"></span>D+7</span>
+                                    <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:97%"></div></div>
+                                    <span class="mkt-sla-val">97%</span>
                                 </div>
                                 <div class="mkt-sla-row">
-                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p4"></span>P4</span>
+                                    <span class="mkt-sla-label"><span class="mkt-sla-dot mkt-sla-dot--p4"></span>D+30</span>
                                     <div class="mkt-sla-track"><div class="mkt-sla-fill" style="--pct:100%"></div></div>
                                     <span class="mkt-sla-val">100%</span>
                                 </div>
                             </div>
                         </div>
 
-                        {# Vitória insight #}
                         <div class="mkt-dash-vitoria">
                             <div class="mkt-dash-vitoria-head">
                                 <span class="mkt-dash-vitoria-avatar"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i></span>
                                 <div>
-                                    <strong>Vitória · Insight</strong>
-                                    <span>Há 2 min</span>
+                                    <strong>Vitória · Insight clínico</strong>
+                                    <span>Há 3 min</span>
                                 </div>
                             </div>
-                            <p>3 incidentes P1 abertos há mais de 30 min. Recomendo escalar a fila crítica e verificar o cluster de e-mail — padrão similar ao incidente #TI-4790 da semana passada.</p>
+                            <p>3 pacientes com questionário D+3 pendente há mais de 6h. Sugiro contato proativo — histórico indica maior risco de complicação neste perfil.</p>
                             <div class="mkt-dash-vitoria-actions">
-                                <span class="mkt-dash-vitoria-btn"><i class="fas fa-fire" aria-hidden="true"></i> Ver incidentes P1</span>
-                                <span class="mkt-dash-vitoria-btn mkt-dash-vitoria-btn--ghost">Ver histórico</span>
+                                <span class="mkt-dash-vitoria-btn"><i class="fas fa-user-injured" aria-hidden="true"></i> Ver pacientes</span>
+                                <span class="mkt-dash-vitoria-btn mkt-dash-vitoria-btn--ghost">Dispensar</span>
                             </div>
                         </div>
 
-                        {# CSAT + equipe online #}
                         <div class="mkt-dash-mini-row">
                             <div class="mkt-dash-csat">
-                                <div class="mkt-dash-csat-ring" aria-hidden="true"><span>4.8</span></div>
+                                <div class="mkt-dash-csat-ring" aria-hidden="true"><span>4.9</span></div>
                                 <div>
-                                    <strong>CSAT médio</strong>
-                                    <span>+0.3 vs. mês passado</span>
+                                    <strong>Satisfação</strong>
+                                    <span>Pacientes desta semana</span>
                                 </div>
                             </div>
                             <div class="mkt-dash-team">
                                 <div class="mkt-dash-team-avatars" aria-hidden="true">
-                                    <span>CM</span><span>AL</span><span>FR</span><span class="mkt-dash-team-more">+5</span>
+                                    <span>CM</span><span>AL</span><span>FR</span><span class="mkt-dash-team-more">+3</span>
                                 </div>
                                 <div>
-                                    <strong>8 online</strong>
-                                    <span>Equipe de plantão</span>
+                                    <strong>6 online</strong>
+                                    <span>Equipe clínica</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <p class="mkt-dash-footnote"><i class="fas fa-circle-info" aria-hidden="true"></i> Dados ilustrativos com base em operação típica — preview do Hub TI integrado à {{ _pnome }}.</p>
+                <p class="mkt-dash-footnote"><i class="fas fa-circle-info" aria-hidden="true"></i> Dados ilustrativos — preview da visão geral da clínica em {{ _pnome }}.</p>
             </div>
         </div>
     </section>
 
-    {# ── Núcleos ── #}
-    <section class="mkt-section mkt-section--alt" id="nucleos" aria-labelledby="mkt-nucleos-title">
-        <div class="mkt-section-head">
-            <p class="mkt-section-eyebrow">Núcleos</p>
-            <h2 class="mkt-section-title" id="mkt-nucleos-title">Uma plataforma, 30+ centros de excelência</h2>
-            <p class="mkt-section-sub">Ative apenas os núcleos que sua organização precisa — mesma autenticação, mesmas permissões, sem silos.</p>
-        </div>
-        <div class="mkt-hubs">
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-id-card" aria-hidden="true"></i></div>
-                <h3>RH</h3>
-                <p>Admissão, férias, folha, documentos e offboarding</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-headset" aria-hidden="true"></i></div>
-                <h3>Hub TI</h3>
-                <p>Service desk, SLA, NOC, ativos e licenças</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-briefcase" aria-hidden="true"></i></div>
-                <h3>Recrutamento</h3>
-                <p>Vagas, banco de talentos e pipeline de seleção</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
-                <h3>Pessoas</h3>
-                <p>Membros, organograma, cargos e desenvolvimento</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-star" aria-hidden="true"></i></div>
-                <h3>Talentos</h3>
-                <p>Atração, PDIs e trilhas de carreira</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-chart-pie" aria-hidden="true"></i></div>
-                <h3>Maturidade</h3>
-                <p>Radar, avaliações e evolução organizacional</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-plug" aria-hidden="true"></i></div>
-                <h3>Integrações</h3>
-                <p>Conectores, webhooks e observabilidade causal</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-comments" aria-hidden="true"></i></div>
-                <h3>Bate-papo</h3>
-                <p>Chat em tempo real, galeria e histórico integrado</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-lightbulb" aria-hidden="true"></i></div>
-                <h3>Inovação</h3>
-                <p>Ideias, sprints e pipeline de transformação</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-briefcase" aria-hidden="true"></i></div>
-                <h3>Operações</h3>
-                <p>Projetos, execução e rotina do dia a dia</p>
-            </article>
-            <article class="mkt-hub">
-                <div class="mkt-hub-icon"><i class="fas fa-brain" aria-hidden="true"></i></div>
-                <h3>Cortex</h3>
-                <p>Analytics, insights proativos e inteligência operacional</p>
-            </article>
-            <article class="mkt-hub mkt-hub--more">
-                <div class="mkt-hub-icon"><i class="fas fa-plus" aria-hidden="true"></i></div>
-                <h3>E muito mais</h3>
-                <p>Financeiro, Compliance, Clima, Academy, Publicidade e outros</p>
-            </article>
-        </div>
-    </section>
+    {# ── Como funciona ── #}
+    <div class="mkt-section-wrap mkt-section-wrap--alt">
+        <section class="mkt-section" id="como-funciona" aria-labelledby="mkt-steps-title">
+            <div class="mkt-section-head mkt-section-head--split">
+                <div class="mkt-section-head-main">
+                    <p class="mkt-section-eyebrow">Como funciona</p>
+                    <h2 class="mkt-section-title" id="mkt-steps-title">Do procedimento ao acompanhamento, em quatro passos</h2>
+                </div>
+                <p class="mkt-section-sub mkt-section-sub--left">Um fluxo claro — do registro do paciente até a alta monitorada.</p>
+            </div>
+            <ol class="mkt-steps">
+                <li class="mkt-step">
+                    <span class="mkt-step-num">1</span>
+                    <div class="mkt-step-body">
+                        <h3>Registre o paciente</h3>
+                        <p>Cadastre a ficha com dados do procedimento, equipe responsável e protocolo indicado. Rápido, estruturado e rastreável.</p>
+                    </div>
+                </li>
+                <li class="mkt-step">
+                    <span class="mkt-step-num">2</span>
+                    <div class="mkt-step-body">
+                        <h3>Ative o protocolo</h3>
+                        <p>O sistema associa automaticamente o protocolo correto e agenda questionários por etapa — D+1, D+3, D+7 e pós-alta.</p>
+                    </div>
+                </li>
+                <li class="mkt-step">
+                    <span class="mkt-step-num">3</span>
+                    <div class="mkt-step-body">
+                        <h3>Monitore e responda alertas</h3>
+                        <p>A equipe recebe notificações automáticas quando há desvios, respostas de risco ou protocolos não cumpridos no prazo.</p>
+                    </div>
+                </li>
+                <li class="mkt-step">
+                    <span class="mkt-step-num">4</span>
+                    <div class="mkt-step-body">
+                        <h3>Alta com rastreio completo</h3>
+                        <p>Toda a jornada do paciente fica documentada — prontuário exportável e histórico para decisões futuras.</p>
+                    </div>
+                </li>
+            </ol>
 
-    {# ── Módulos em destaque (abas CSS) ── #}
-    <section class="mkt-section" id="modulos" aria-labelledby="mkt-modulos-title">
-        <div class="mkt-section-head">
-            <p class="mkt-section-eyebrow">Módulos</p>
-            <h2 class="mkt-section-title" id="mkt-modulos-title">Explore os principais módulos da plataforma</h2>
-            <p class="mkt-section-sub">RH, TI e Recrutamento integrados — selecione para ver os detalhes.</p>
-        </div>
-        <div class="mkt-tabs-wrap">
-            <input type="radio" name="mkt-tab" id="tab-rh" class="mkt-tab-input" checked>
-            <input type="radio" name="mkt-tab" id="tab-ti" class="mkt-tab-input">
-            <input type="radio" name="mkt-tab" id="tab-rec" class="mkt-tab-input">
-            <div class="mkt-tabs-nav" role="tablist">
-                <label for="tab-rh" role="tab"><i class="fas fa-id-card" aria-hidden="true"></i> RH</label>
-                <label for="tab-ti" role="tab"><i class="fas fa-headset" aria-hidden="true"></i> Hub TI</label>
-                <label for="tab-rec" role="tab"><i class="fas fa-briefcase" aria-hidden="true"></i> Recrutamento</label>
-            </div>
-            <div class="mkt-tabs-content">
-                <div class="mkt-tab-panel" id="panel-rh">
-                    <div class="mkt-rh-banner-grid">
-                        <div class="mkt-rh-banner-copy">
-                            <p class="mkt-section-eyebrow">Módulo RH</p>
-                            <h3>RH operacional, do admissional ao desligamento</h3>
-                            <p>Centralize a gestão de pessoas com fluxos estruturados, documentos, folha simplificada e trilha de auditoria — tudo dentro do workspace.</p>
-                            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--primary"><i class="fas fa-arrow-right" aria-hidden="true"></i> Explorar módulo RH</a>
-                        </div>
-                        <ul class="mkt-rh-modules">
-                            <li><i class="fas fa-user-plus" aria-hidden="true"></i> Admissão e onboarding</li>
-                            <li><i class="fas fa-umbrella-beach" aria-hidden="true"></i> Férias e afastamentos</li>
-                            <li><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i> Folha e holerites</li>
-                            <li><i class="fas fa-folder-open" aria-hidden="true"></i> Documentos e contratos</li>
-                            <li><i class="fas fa-user-minus" aria-hidden="true"></i> Demissão e offboarding</li>
-                            <li><i class="fas fa-clipboard-check" aria-hidden="true"></i> Auditoria e workflows</li>
-                        </ul>
-                    </div>
+            <div class="mkt-who-strip">
+                <div class="mkt-who-item">
+                    <i class="fas fa-user-doctor" aria-hidden="true"></i>
+                    <div><strong>Médicos</strong><span>Protocolo, evolução e alertas</span></div>
                 </div>
-                <div class="mkt-tab-panel" id="panel-ti">
-                    <div class="mkt-rh-banner-grid">
-                        <div class="mkt-rh-banner-copy">
-                            <p class="mkt-section-eyebrow">Hub TI</p>
-                            <h3>Do service desk ao NOC — TI integrada à operação</h3>
-                            <p>Chamados, SLA, ativos, licenças e integrações em um único hub — com analytics operacional, chat em tempo real e Vitória para triagem inteligente.</p>
-                            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--primary"><i class="fas fa-arrow-right" aria-hidden="true"></i> Explorar Hub TI</a>
-                        </div>
-                        <ul class="mkt-rh-modules">
-                            <li><i class="fas fa-ticket" aria-hidden="true"></i> Service desk &amp; chamados</li>
-                            <li><i class="fas fa-gauge-high" aria-hidden="true"></i> SLA e prioridades P1/P2</li>
-                            <li><i class="fas fa-fire" aria-hidden="true"></i> Escalação rápida de incidentes P1</li>
-                            <li><i class="fas fa-server" aria-hidden="true"></i> Gestão de ativos e licenças</li>
-                            <li><i class="fas fa-plug" aria-hidden="true"></i> Integrações observáveis</li>
-                            <li><i class="fas fa-chart-line" aria-hidden="true"></i> Analytics operacional e MTTR</li>
-                        </ul>
-                    </div>
+                <div class="mkt-who-item">
+                    <i class="fas fa-user-nurse" aria-hidden="true"></i>
+                    <div><strong>Enfermagem</strong><span>Sala crítica e acompanhamento</span></div>
                 </div>
-                <div class="mkt-tab-panel" id="panel-rec">
-                    <div class="mkt-rh-banner-grid">
-                        <div class="mkt-rh-banner-copy">
-                            <p class="mkt-section-eyebrow">Recrutamento</p>
-                            <h3>Da vaga ao talento contratado</h3>
-                            <p>Publique vagas, gerencie candidatos em pipeline Kanban, consulte o banco de talentos e acompanhe métricas de contratação — integrado ao RH.</p>
-                            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--primary"><i class="fas fa-arrow-right" aria-hidden="true"></i> Explorar Recrutamento</a>
-                        </div>
-                        <ul class="mkt-rh-modules">
-                            <li><i class="fas fa-briefcase" aria-hidden="true"></i> Abertura e gestão de vagas</li>
-                            <li><i class="fas fa-users" aria-hidden="true"></i> Banco de talentos integrado</li>
-                            <li><i class="fas fa-filter" aria-hidden="true"></i> Pipeline Kanban de seleção</li>
-                            <li><i class="fas fa-globe" aria-hidden="true"></i> Página de carreiras pública</li>
-                            <li><i class="fas fa-chart-bar" aria-hidden="true"></i> Analytics de contratação</li>
-                            <li><i class="fas fa-shield-halved" aria-hidden="true"></i> Permissões por vaga e perfil</li>
-                        </ul>
-                    </div>
+                <div class="mkt-who-item">
+                    <i class="fas fa-person-circle-check" aria-hidden="true"></i>
+                    <div><strong>Pacientes</strong><span>Portal, questionários e orientações</span></div>
+                </div>
+                <div class="mkt-who-item">
+                    <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                    <div><strong>Secretaria</strong><span>Cadastro e agendamento</span></div>
+                </div>
+                <div class="mkt-who-item">
+                    <i class="fas fa-crown" aria-hidden="true"></i>
+                    <div><strong>Gestores</strong><span>Visão geral, permissões e relatórios</span></div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
     {# ── Vitória ── #}
     <section class="mkt-section" id="vitoria" aria-labelledby="mkt-helia-title">
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
-                <p class="mkt-section-eyebrow">Assistente inteligente</p>
-                <h2 class="mkt-section-title" id="mkt-helia-title">Conheça a Vitória — sua copiloto na {{ _pnome }}</h2>
+                <p class="mkt-section-eyebrow">Assistente clínico inteligente</p>
+                <h2 class="mkt-section-title" id="mkt-helia-title">Conheça a Vitória — sua copiloto na clínica</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Responde dúvidas, sugere próximos passos e contextualiza módulos, núcleos e indicadores — sempre dentro do workspace ativo.</p>
-        </div>
-        <div class="mkt-helia-banner">
-            <div class="mkt-helia-banner-bg" aria-hidden="true"></div>
-            <div class="mkt-helia-avatar">
-                {{ helix.avatar('lg') }}
-            </div>
-            <div class="mkt-helia-copy">
-                <h3>IA integrada à operação, não isolada</h3>
-                <p>
-                    A Vitória conhece o contexto da sua empresa: sabe quais módulos você acessa, quais permissões possui
-                    e quais indicadores importam para o seu perfil. Reduz curva de aprendizado e acelera decisões do dia a dia.
-                </p>
-                <div class="mkt-helia-chips">
-                    <span class="mkt-helia-chip"><i class="fas fa-bolt" aria-hidden="true"></i> Respostas instantâneas</span>
-                    <span class="mkt-helia-chip"><i class="fas fa-building" aria-hidden="true"></i> Contexto do workspace</span>
-                    <span class="mkt-helia-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> Respeita permissões</span>
-                    <span class="mkt-helia-chip"><i class="fas fa-route" aria-hidden="true"></i> Navegação guiada</span>
-                </div>
-            </div>
+            <p class="mkt-section-sub mkt-section-sub--left">Sugere ações, identifica riscos e contextualiza o estado dos pacientes — em tempo real, dentro do sistema.</p>
         </div>
         <div class="mkt-helia-capabilities">
             <article class="mkt-helia-cap">
-                <i class="fas fa-compass" aria-hidden="true"></i>
+                <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
                 <div>
-                    <strong>Orientação contextual</strong>
-                    <span>Explica módulos, fluxos e telas de acordo com o perfil e o workspace ativo.</span>
+                    <strong>Identificação de riscos</strong>
+                    <span>Analisa padrões de resposta e sinaliza pacientes com maior probabilidade de complicação.</span>
+                </div>
+            </article>
+            <article class="mkt-helia-cap">
+                <i class="fas fa-list-check" aria-hidden="true"></i>
+                <div>
+                    <strong>Próximas ações sugeridas</strong>
+                    <span>Indica questionários pendentes, protocolos atrasados e contatos prioritários do dia.</span>
                 </div>
             </article>
             <article class="mkt-helia-cap">
                 <i class="fas fa-chart-simple" aria-hidden="true"></i>
                 <div>
                     <strong>Leitura de indicadores</strong>
-                    <span>Interpreta KPIs de RH, TI e Recrutamento — SLA, MTTR, pipeline e headcount.</span>
-                </div>
-            </article>
-            <article class="mkt-helia-cap">
-                <i class="fas fa-list-check" aria-hidden="true"></i>
-                <div>
-                    <strong>Próximos passos sugeridos</strong>
-                    <span>Indica ações pendentes: aprovações, chamados críticos, candidatos em etapa.</span>
+                    <span>Interpreta KPIs da clínica — taxa de alertas, aderência a protocolos e satisfação dos pacientes.</span>
                 </div>
             </article>
             <article class="mkt-helia-cap">
                 <i class="fas fa-graduation-cap" aria-hidden="true"></i>
                 <div>
-                    <strong>Onboarding acelerado</strong>
-                    <span>Novos usuários aprendem a plataforma com assistência personalizada — sem manual.</span>
+                    <strong>Orientação à equipe</strong>
+                    <span>Novos membros da equipe aprendem o sistema com assistência guiada — sem treinamentos extensos.</span>
                 </div>
             </article>
         </div>
         <div class="mkt-helia-examples" aria-label="Exemplos de perguntas para a Vitória">
             <p class="mkt-helia-examples-label">Exemplos do que você pode perguntar:</p>
             <div class="mkt-helia-examples-grid">
-                <span>"Quais chamados P1 estão abertos agora?"</span>
-                <span>"Como solicitar férias no meu perfil?"</span>
-                <span>"Quantos candidatos estão na etapa final?"</span>
-                <span>"Qual o SLA cumprido esta semana?"</span>
+                <span>"Quais pacientes têm questionário pendente hoje?"</span>
+                <span>"Há alertas críticos em aberto agora?"</span>
+                <span>"Qual a taxa de aderência ao protocolo esta semana?"</span>
+                <span>"Como registrar um novo paciente?"</span>
             </div>
         </div>
     </section>
 
-    {# ── Depoimentos ── #}
-    <div class="mkt-section-wrap mkt-section-wrap--alt">
-    <section class="mkt-section" id="depoimentos" aria-labelledby="mkt-dep-title">
-        <div class="mkt-section-head">
-            <p class="mkt-section-eyebrow">Quem usa a {{ _pnome }}</p>
-            <h2 class="mkt-section-title" id="mkt-dep-title">O que dizem as equipes que usam</h2>
-            <p class="mkt-section-sub">Gestores, RH e TI que centralizaram suas operações na plataforma.</p>
-        </div>
-        <div class="mkt-testimonials">
-            <article class="mkt-testimonial">
-                <div class="mkt-testimonial-stars" aria-label="5 estrelas">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                </div>
-                <blockquote>"Antes tínhamos quatro sistemas separados para RH, TI, recrutamento e comunicação. Com a {{ _pnome }}, tudo virou uma operação única — e o time economiza horas por semana."</blockquote>
-                <div class="mkt-testimonial-author">
-                    <div class="mkt-testimonial-avatar"><i class="fas fa-user" aria-hidden="true"></i></div>
-                    <div>
-                        <strong>Ana Lima</strong>
-                        <span>Gerente de RH · Grupo Brasília</span>
-                    </div>
-                </div>
-            </article>
-            <article class="mkt-testimonial">
-                <div class="mkt-testimonial-stars" aria-label="5 estrelas">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                </div>
-                <blockquote>"O Hub TI resolveu algo que nenhum service desk standalone resolvia: integração real com RH e permissões por workspace. O SLA em tempo real e a triagem com Vitória são diferencial absurdo."</blockquote>
-                <div class="mkt-testimonial-author">
-                    <div class="mkt-testimonial-avatar"><i class="fas fa-user" aria-hidden="true"></i></div>
-                    <div>
-                        <strong>Carlos Moura</strong>
-                        <span>Head de TI · TechOps Brasil</span>
-                    </div>
-                </div>
-            </article>
-            <article class="mkt-testimonial">
-                <div class="mkt-testimonial-stars" aria-label="5 estrelas">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                </div>
-                <blockquote>"A Vitória mudou como meu time navega a plataforma. Não preciso mais ensinar cada módulo — ela contextaliza tudo para o perfil de cada pessoa. Onboarding reduziu pela metade."</blockquote>
-                <div class="mkt-testimonial-author">
-                    <div class="mkt-testimonial-avatar"><i class="fas fa-user" aria-hidden="true"></i></div>
-                    <div>
-                        <strong>Fernanda Reis</strong>
-                        <span>Diretora de Pessoas · MultiCorp</span>
-                    </div>
-                </div>
-            </article>
-        </div>
-    </section>
-    </div>
-
-    {# ── Resultados esperados ── #}
-    <section class="mkt-section" id="resultados" aria-labelledby="mkt-outcomes-title">
-        <div class="mkt-section-head mkt-section-head--split">
-            <div class="mkt-section-head-main">
-                <p class="mkt-section-eyebrow">Impacto operacional</p>
-                <h2 class="mkt-section-title" id="mkt-outcomes-title">O que muda quando tudo está conectado</h2>
-            </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Consolidar RH, TI e operações em uma plataforma reduz fricção, custo de integração e tempo perdido entre sistemas.</p>
-        </div>
-        <div class="mkt-outcomes">
-            <div class="mkt-outcome">
-                <span class="mkt-outcome-val">−60%</span>
-                <strong>Tempo em tarefas administrativas</strong>
-                <span>Fluxos unificados eliminam retrabalho entre RH, TI e gestores.</span>
-            </div>
-            <div class="mkt-outcome">
-                <span class="mkt-outcome-val">1</span>
-                <strong>Login para toda a operação</strong>
-                <span>Substitua múltiplos sistemas por autenticação e permissões centralizadas.</span>
-            </div>
-            <div class="mkt-outcome">
-                <span class="mkt-outcome-val">−50%</span>
-                <strong>Curva de onboarding</strong>
-                <span>Vitória IA guia novos usuários — menos treinamento manual por módulo.</span>
-            </div>
-            <div class="mkt-outcome">
-                <span class="mkt-outcome-val">Zero</span>
-                <strong>Custo de integração interna</strong>
-                <span>RH, TI e Recrutamento já compartilham dados, pessoas e histórico.</span>
-            </div>
-        </div>
-        <p class="mkt-chart-note" style="text-align:center;margin-top:16px">Estimativas baseadas em operações típicas de médio porte com 3+ sistemas legados consolidados.</p>
-    </section>
-
-    {# ── Integrações ── #}
-    <section class="mkt-section" id="integracoes-compat" aria-labelledby="mkt-int-title">
-        <div class="mkt-section-head mkt-section-head--split">
-            <div class="mkt-section-head-main">
-                <p class="mkt-section-eyebrow">Integrações</p>
-                <h2 class="mkt-section-title" id="mkt-int-title">Conecta com o ecossistema que você já usa</h2>
-            </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Conectores nativos, webhooks e API REST — com observabilidade causal, Dead Letter Queue e SLO por fluxo.</p>
-        </div>
-        <div class="mkt-integrations-grid">
-            <div class="mkt-int-badge"><i class="fab fa-google" aria-hidden="true"></i><span>Google Workspace</span><small>E-mail, calendário e SSO</small></div>
-            <div class="mkt-int-badge"><i class="fab fa-microsoft" aria-hidden="true"></i><span>Microsoft 365</span><small>Teams, Outlook e AD</small></div>
-            <div class="mkt-int-badge"><i class="fab fa-slack" aria-hidden="true"></i><span>Slack</span><small>Notificações e alertas</small></div>
-            <div class="mkt-int-badge"><i class="fab fa-whatsapp" aria-hidden="true"></i><span>WhatsApp</span><small>Comunicação operacional</small></div>
-            <div class="mkt-int-badge"><i class="fas fa-clock" aria-hidden="true"></i><span>Ponto eletrônico</span><small>Importação de marcações</small></div>
-            <div class="mkt-int-badge"><i class="fas fa-database" aria-hidden="true"></i><span>TOTVS / SAP</span><small>ERP e folha corporativa</small></div>
-            <div class="mkt-int-badge"><i class="fas fa-file-invoice" aria-hidden="true"></i><span>Folha de pagamento</span><small>Holerites e eventos</small></div>
-            <div class="mkt-int-badge mkt-int-badge--api"><i class="fas fa-code" aria-hidden="true"></i><span>API REST &amp; Webhooks</span><small>Qualquer sistema externo</small></div>
-        </div>
-        <p class="mkt-chart-note" style="text-align:center;margin-top:12px">Conectores em expansão contínua — webhooks permitem integrar qualquer sistema externo sem vendor lock-in.</p>
-    </section>
-
-    {# ── LGPD / Trust band ── #}
+    {# ── Trust band ── #}
     <div class="mkt-trust-band" aria-label="Segurança e conformidade">
         <div class="mkt-trust-inner">
             <div class="mkt-trust-item">
                 <i class="fas fa-shield-halved" aria-hidden="true"></i>
-                <span><strong>LGPD conforme</strong> dados tratados com finalidade e consentimento</span>
+                <span><strong>LGPD conforme</strong> dados de saúde tratados com segurança e finalidade</span>
             </div>
             <div class="mkt-trust-item">
                 <i class="fas fa-building-lock" aria-hidden="true"></i>
-                <span><strong>Workspaces isolados</strong> dados de cada empresa completamente separados</span>
+                <span><strong>Dados isolados</strong> cada clínica com ambiente totalmente separado</span>
             </div>
             <div class="mkt-trust-item">
                 <i class="fas fa-eye" aria-hidden="true"></i>
@@ -981,96 +753,90 @@
         </div>
     </div>
 
-    {# ── Comparação ── #}
-    <section class="mkt-section" id="comparacao" aria-labelledby="mkt-compare-title">
+    {# ── Depoimentos ── #}
+    <div class="mkt-section-wrap mkt-section-wrap--alt">
+    <section class="mkt-section" id="depoimentos" aria-labelledby="mkt-dep-title">
+        <div class="mkt-section-head">
+            <p class="mkt-section-eyebrow">Quem usa {{ _pnome }}</p>
+            <h2 class="mkt-section-title" id="mkt-dep-title">O que dizem os profissionais de saúde</h2>
+            <p class="mkt-section-sub">Médicos, enfermeiros e gestores que centralizaram o acompanhamento pós-operatório.</p>
+        </div>
+        <div class="mkt-testimonials">
+            <article class="mkt-testimonial">
+                <div class="mkt-testimonial-stars" aria-label="5 estrelas">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <blockquote>"Antes ligávamos para cada paciente manualmente. Com {{ _pnome }}, os questionários chegam automáticos e os alertas chegam antes da complicação. Nosso índice de reinternação caiu pela metade."</blockquote>
+                <div class="mkt-testimonial-author">
+                    <div class="mkt-testimonial-avatar"><i class="fas fa-user-doctor" aria-hidden="true"></i></div>
+                    <div>
+                        <strong>Dra. Carla Mendonça</strong>
+                        <span>Cirurgiã · Clínica BioVida</span>
+                    </div>
+                </div>
+            </article>
+            <article class="mkt-testimonial">
+                <div class="mkt-testimonial-stars" aria-label="5 estrelas">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <blockquote>"A Sala Crítica mudou tudo para a nossa equipe de enfermagem. Sabemos em tempo real quem precisa de atenção — sem precisar ligar, checar planilha ou esperar retorno do paciente."</blockquote>
+                <div class="mkt-testimonial-author">
+                    <div class="mkt-testimonial-avatar"><i class="fas fa-user-nurse" aria-hidden="true"></i></div>
+                    <div>
+                        <strong>Ana Lúcia Ferreira</strong>
+                        <span>Enfermeira-chefe · Instituto Saúde</span>
+                    </div>
+                </div>
+            </article>
+            <article class="mkt-testimonial">
+                <div class="mkt-testimonial-stars" aria-label="5 estrelas">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <blockquote>"O portal do paciente gerou um nível de engajamento que nunca tivemos. Os pacientes respondem os questionários, a equipe reage aos alertas. O cuidado realmente continua após a alta."</blockquote>
+                <div class="mkt-testimonial-author">
+                    <div class="mkt-testimonial-avatar"><i class="fas fa-user-tie" aria-hidden="true"></i></div>
+                    <div>
+                        <strong>Marcos Teixeira</strong>
+                        <span>Diretor médico · Clínica Renova</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+    </div>
+
+    {# ── Resultados ── #}
+    <section class="mkt-section" id="resultados" aria-labelledby="mkt-outcomes-title">
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
-                <p class="mkt-section-eyebrow">Por que {{ _pnome }}?</p>
-                <h2 class="mkt-section-title" id="mkt-compare-title">Uma plataforma vs. ferramentas dispersas</h2>
+                <p class="mkt-section-eyebrow">Impacto clínico</p>
+                <h2 class="mkt-section-title" id="mkt-outcomes-title">O que muda quando o cuidado é contínuo</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Compare o que muda quando RH, TI, Recrutamento e operações falam a mesma língua — com uma única autenticação e governança centralizada.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Acompanhamento estruturado reduz complicações, reinternações e sobrecarga da equipe.</p>
         </div>
-        <div class="mkt-compare-wrap">
-            <table class="mkt-compare-table" role="table">
-                <thead>
-                    <tr>
-                        <th scope="col"></th>
-                        <th scope="col" class="mkt-compare-th mkt-compare-th--unio">
-                            <span class="mkt-compare-brand">{{ _pnome }}</span>
-                            <span class="mkt-compare-badge">Recomendado</span>
-                        </th>
-                        <th scope="col" class="mkt-compare-th">Ferramentas separadas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Multi-empresa nativo</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-no"><i class="fas fa-circle-xmark" aria-label="Não"></i></td>
-                    </tr>
-                    <tr>
-                        <td>RH, TI e Recrutamento integrados</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-no"><i class="fas fa-circle-xmark" aria-label="Não"></i></td>
-                    </tr>
-                    <tr>
-                        <td>Permissões granulares por núcleo</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-partial"><i class="fas fa-circle-minus" aria-label="Parcial"></i> Por ferramenta</td>
-                    </tr>
-                    <tr>
-                        <td>Assistente IA contextualizada</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-no"><i class="fas fa-circle-xmark" aria-label="Não"></i></td>
-                    </tr>
-                    <tr>
-                        <td>Bate-papo integrado à operação</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-no"><i class="fas fa-circle-xmark" aria-label="Não"></i> Ferramenta extra</td>
-                    </tr>
-                    <tr>
-                        <td>White-label por empresa</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-no"><i class="fas fa-circle-xmark" aria-label="Não"></i></td>
-                    </tr>
-                    <tr>
-                        <td>Analytics unificado cross-hub</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-partial"><i class="fas fa-circle-minus" aria-label="Parcial"></i> Fragmentado</td>
-                    </tr>
-                    <tr>
-                        <td>Uma única autenticação</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-no"><i class="fas fa-circle-xmark" aria-label="Não"></i> Login por sistema</td>
-                    </tr>
-                    <tr>
-                        <td>Custo de integração entre sistemas</td>
-                        <td class="mkt-compare-yes"><span class="mkt-compare-text-good">Zero</span></td>
-                        <td class="mkt-compare-no"><span class="mkt-compare-text-bad">Alto</span></td>
-                    </tr>
-                    <tr>
-                        <td>Hub de integrações com observabilidade</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-no"><i class="fas fa-circle-xmark" aria-label="Não"></i> Custom por sistema</td>
-                    </tr>
-                    <tr>
-                        <td>Interface responsiva (desktop + mobile)</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-partial"><i class="fas fa-circle-minus" aria-label="Parcial"></i> Varia</td>
-                    </tr>
-                    <tr>
-                        <td>Conformidade LGPD com auditoria</td>
-                        <td class="mkt-compare-yes"><i class="fas fa-circle-check" aria-label="Sim"></i></td>
-                        <td class="mkt-compare-partial"><i class="fas fa-circle-minus" aria-label="Parcial"></i> Por ferramenta</td>
-                    </tr>
-                    <tr>
-                        <td>Tempo de implantação inicial</td>
-                        <td class="mkt-compare-yes"><span class="mkt-compare-text-good">Dias</span></td>
-                        <td class="mkt-compare-no"><span class="mkt-compare-text-bad">Meses</span></td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="mkt-outcomes">
+            <div class="mkt-outcome">
+                <span class="mkt-outcome-val">−50%</span>
+                <strong>Reinternações evitadas</strong>
+                <span>Alertas precoces identificam complicações antes que se agravem.</span>
+            </div>
+            <div class="mkt-outcome">
+                <span class="mkt-outcome-val">100%</span>
+                <strong>Rastreabilidade do ciclo</strong>
+                <span>Toda a jornada do paciente documentada — do procedimento à alta.</span>
+            </div>
+            <div class="mkt-outcome">
+                <span class="mkt-outcome-val">−70%</span>
+                <strong>Tempo em contatos manuais</strong>
+                <span>Questionários automáticos substituem ligações individuais da equipe.</span>
+            </div>
+            <div class="mkt-outcome">
+                <span class="mkt-outcome-val">4.9</span>
+                <strong>Satisfação média dos pacientes</strong>
+                <span>Portal e acompanhamento ativo geram confiança e engajamento.</span>
+            </div>
         </div>
+        <p class="mkt-chart-note" style="text-align:center;margin-top:16px">Estimativas baseadas em clínicas com acompanhamento pós-operatório estruturado versus abordagem manual.</p>
     </section>
 
     {# ── FAQ ── #}
@@ -1079,40 +845,36 @@
             <div class="mkt-section-head">
                 <p class="mkt-section-eyebrow">Perguntas frequentes</p>
                 <h2 class="mkt-section-title" id="mkt-faq-title">Tire suas dúvidas</h2>
-                <p class="mkt-section-sub">Respostas rápidas sobre a {{ _pnome }} antes de começar.</p>
+                <p class="mkt-section-sub">Respostas rápidas sobre {{ _pnome }} antes de começar.</p>
             </div>
             <div class="mkt-faq">
                 <details class="mkt-faq-item">
-                    <summary>O que é a {{ _pnome }} e o que ela resolve?</summary>
-                    <p>É uma plataforma multi-empresa com 30+ núcleos — RH, Hub TI, Recrutamento, Bate-papo, Integrações e analytics — unificados em um único ambiente com permissões granulares, white-label e a assistente Vitória integrada. Resolve o problema de sistemas isolados que não se comunicam.</p>
+                    <summary>O que é {{ _pnome }} e o que ela resolve?</summary>
+                    <p>É uma plataforma de acompanhamento pós-operatório com gestão de pacientes, protocolos clínicos, sala crítica, alertas em tempo real, questionários automáticos e portal do paciente. Resolve o problema do cuidado fragmentado após procedimentos cirúrgicos.</p>
                 </details>
                 <details class="mkt-faq-item">
-                    <summary>Como funciona o multi-empresa?</summary>
-                    <p>Após o login, você seleciona a empresa ou área de trabalho. Cada workspace tem dados, usuários, permissões e identidade visual totalmente isolados. Usuários com múltiplos acessos trocam de workspace em um clique.</p>
+                    <summary>Como funciona o acompanhamento automático?</summary>
+                    <p>Ao cadastrar um paciente com o procedimento realizado, o sistema associa o protocolo correspondente e agenda questionários para as etapas definidas (D+1, D+3, D+7, etc.). Os pacientes recebem o questionário via portal e as respostas são analisadas — alertas são gerados automaticamente quando há indicadores de risco.</p>
                 </details>
                 <details class="mkt-faq-item">
-                    <summary>O Hub TI substitui um service desk tradicional?</summary>
-                    <p>Sim — e vai além. Inclui chamados, SLA por prioridade, NOC, gestão de ativos e licenças, integrações observáveis, escalação de P1 e analytics operacional (MTTR, CSAT) — tudo integrado ao RH e às permissões do workspace.</p>
+                    <summary>O paciente precisa instalar algum aplicativo?</summary>
+                    <p>Não. O portal do paciente é acessado via navegador por link seguro — funciona em qualquer celular, tablet ou computador, sem instalação.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>A plataforma é compatível com a LGPD?</summary>
-                    <p>Sim. Cada workspace mantém dados isolados, com trilha de auditoria completa, sessão segura com CSRF, consentimento e controle de acesso granular por perfil — em conformidade com a LGPD.</p>
+                    <p>Sim. Dados de saúde são tratados com isolamento por clínica, trilha de auditoria completa, consentimento e controle de acesso granular por perfil — em conformidade com a LGPD.</p>
                 </details>
                 <details class="mkt-faq-item">
-                    <summary>Posso personalizar logo, cores e identidade?</summary>
-                    <p>Administradores configuram logo, slogan, cores, tema padrão (claro ou escuro) e textos de suporte diretamente nas configurações da plataforma — sem código, por workspace.</p>
+                    <summary>Posso configurar diferentes protocolos por tipo de procedimento?</summary>
+                    <p>Sim. Você cria protocolos personalizados por tipo de cirurgia ou procedimento — com etapas, prazos e questionários específicos. A associação automática é feita no cadastro do paciente.</p>
                 </details>
                 <details class="mkt-faq-item">
-                    <summary>Quantos usuários e empresas a plataforma suporta?</summary>
-                    <p>A arquitetura multi-empresa foi pensada para escalar: cada workspace opera de forma independente, com permissões granulares por perfil. Grupos com dezenas de unidades e centenas de usuários operam na mesma instância.</p>
+                    <summary>Quantos usuários e pacientes a plataforma suporta?</summary>
+                    <p>A arquitetura é escalável — adequada para clínicas de pequeno, médio e grande porte. Cada clínica opera em workspace isolado, com usuários ilimitados por perfil.</p>
                 </details>
                 <details class="mkt-faq-item">
-                    <summary>A Vitória IA substitui o suporte humano?</summary>
-                    <p>Não — ela complementa. A Vitória acelera navegação, responde dúvidas operacionais e sugere próximos passos dentro do contexto do workspace. Decisões críticas e escalonamentos continuam com gestores e equipes especializadas.</p>
-                </details>
-                <details class="mkt-faq-item">
-                    <summary>Existe API para integrações customizadas?</summary>
-                    <p>Sim. A {{ _pnome }} expõe API REST e webhooks com observabilidade causal, Dead Letter Queue e SLO por fluxo — permitindo conectar ERPs, folha, ponto eletrônico e qualquer sistema externo.</p>
+                    <summary>A Vitória IA substitui o julgamento clínico?</summary>
+                    <p>Não — ela apoia. A Vitória identifica padrões, sugere ações e contextualiza indicadores para que a equipe tome decisões mais rápidas e informadas. O julgamento clínico sempre permanece com o profissional de saúde.</p>
                 </details>
             </div>
         </section>
@@ -1123,13 +885,13 @@
         <div class="mkt-cta-banner">
             <div class="mkt-cta-banner-inner">
                 <div class="mkt-cta-copy">
-                    <h2 id="mkt-cta-title">Pronto para unificar RH, TI e operações?</h2>
-                    <p>Acesse a {{ _pnome }}, escolha sua área de trabalho e comece com tudo integrado — sem silos, sem integrações manuais.</p>
+                    <h2 id="mkt-cta-title">Cuidado que não para na sala de cirurgia.</h2>
+                    <p>Acesse {{ _pnome }}, registre seus pacientes e comece o acompanhamento estruturado — protocolos, alertas e portal do paciente em um só lugar.</p>
                     <ul class="mkt-cta-list">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> 30+ núcleos ativáveis por workspace</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> RH, Hub TI e Recrutamento nativos</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Vitória IA e permissões granulares</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> White-label e conformidade LGPD</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Gestão completa de pacientes pós-operatórios</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Protocolos, alertas e sala crítica integrados</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Portal do paciente e questionários automáticos</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Vitória IA e conformidade LGPD</li>
                     </ul>
                 </div>
                 <div class="mkt-cta-banner-actions">
@@ -1151,51 +913,42 @@
 
 <footer class="mkt-footer">
     <div class="mkt-footer-inner">
-
         <div class="mkt-footer-grid">
-
-            {# Coluna 1 — Marca #}
             <div class="mkt-footer-col mkt-footer-col--brand">
                 {% include 'components/platform_logo.html.twig' with {
                     variant: 'full',
                     class: 'mkt-footer-logo mkt-logo' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
                 } only %}
-                <p class="mkt-footer-tagline">{{ platform_config.rodape_texto|default(_tagline) }}</p>
-                <p class="mkt-footer-desc">Plataforma de gestão multi-empresa com 30+ núcleos — RH, TI, Recrutamento e muito mais.</p>
+                <p class="mkt-footer-tagline">{{ platform_config.rodape_texto|default('Cuidado que continua.') }}</p>
+                <p class="mkt-footer-desc">Plataforma clínica de acompanhamento pós-operatório — pacientes, protocolos, alertas e portal integrados.</p>
                 {% include 'components/platform_support.html.twig' with { extra_class: ' mkt-footer-support' } %}
             </div>
 
-            {# Coluna 2 — Plataforma #}
             <div class="mkt-footer-col">
                 <h4 class="mkt-footer-col-title">Plataforma</h4>
                 <ul class="mkt-footer-links">
                     <li><a href="#recursos">Recursos</a></li>
-                    <li><a href="#empresarial">Visão empresarial</a></li>
-                    <li><a href="#nucleos">Núcleos</a></li>
-                    <li><a href="#modulos">Módulos</a></li>
-                    <li><a href="#dashboard-preview">Hub TI</a></li>
+                    <li><a href="#funcionalidades">Funcionalidades</a></li>
+                    <li><a href="#dashboard-preview">Dashboard</a></li>
+                    <li><a href="#como-funciona">Como funciona</a></li>
                     <li><a href="#vitoria">Vitória IA</a></li>
-                    <li><a href="#resultados">Impacto operacional</a></li>
-                    <li><a href="#comparacao">Por que {{ _pnome }}?</a></li>
+                    <li><a href="#resultados">Impacto clínico</a></li>
                     <li><a href="#faq">FAQ</a></li>
                 </ul>
             </div>
 
-            {# Coluna 3 — Módulos #}
             <div class="mkt-footer-col">
                 <h4 class="mkt-footer-col-title">Módulos</h4>
                 <ul class="mkt-footer-links">
-                    <li><a href="{{ path('app_login') }}"><i class="fas fa-id-card" aria-hidden="true"></i> RH operacional</a></li>
-                    <li><a href="{{ path('app_login') }}"><i class="fas fa-headset" aria-hidden="true"></i> Hub TI</a></li>
-                    <li><a href="{{ path('app_login') }}"><i class="fas fa-briefcase" aria-hidden="true"></i> Recrutamento</a></li>
-                    <li><a href="{{ path('app_login') }}"><i class="fas fa-comments" aria-hidden="true"></i> Bate-papo</a></li>
-                    <li><a href="{{ path('app_login') }}"><i class="fas fa-plug" aria-hidden="true"></i> Integrações</a></li>
-                    <li><a href="{{ path('app_login') }}"><i class="fas fa-brain" aria-hidden="true"></i> Cortex Analytics</a></li>
-                    <li><a href="{{ path('app_login') }}"><i class="fas fa-plus" aria-hidden="true"></i> 30+ núcleos</a></li>
+                    <li><a href="{{ path('app_login') }}"><i class="fas fa-user-injured" aria-hidden="true"></i> Pacientes</a></li>
+                    <li><a href="{{ path('app_login') }}"><i class="fas fa-bed-pulse" aria-hidden="true"></i> Sala Crítica</a></li>
+                    <li><a href="{{ path('app_login') }}"><i class="fas fa-file-medical" aria-hidden="true"></i> Protocolos</a></li>
+                    <li><a href="{{ path('app_login') }}"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Questionários</a></li>
+                    <li><a href="{{ path('app_login') }}"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Alertas</a></li>
+                    <li><a href="{{ path('app_login') }}"><i class="fas fa-person-circle-check" aria-hidden="true"></i> Portal do Paciente</a></li>
                 </ul>
             </div>
 
-            {# Coluna 4 — Acesso e Legal #}
             <div class="mkt-footer-col">
                 <h4 class="mkt-footer-col-title">Acesso</h4>
                 <ul class="mkt-footer-links">
@@ -1208,11 +961,9 @@
                     <li><a href="{{ path('app_legal_termos') }}">Termos de Uso</a></li>
                     <li><a href="{{ path('app_legal_lgpd') }}">Canal LGPD</a></li>
                     <li><span class="mkt-footer-badge"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD conforme</span></li>
-                    <li><span class="mkt-footer-badge"><i class="fas fa-lock" aria-hidden="true"></i> Dados isolados por workspace</span></li>
-                    <li><span class="mkt-footer-badge"><i class="fas fa-eye" aria-hidden="true"></i> Trilha de auditoria completa</span></li>
+                    <li><span class="mkt-footer-badge"><i class="fas fa-lock" aria-hidden="true"></i> Dados de saúde protegidos</span></li>
                 </ul>
             </div>
-
         </div>
 
         <div class="mkt-footer-bottom">
@@ -1232,13 +983,11 @@
                 </button>
             </div>
         </div>
-
     </div>
 </footer>
 
 <script>
 (function () {
-    /* ── Animated counters ── */
     function animateCount(el) {
         var target = parseInt(el.dataset.to, 10);
         var duration = 1400;
@@ -1253,7 +1002,6 @@
         }
         requestAnimationFrame(step);
     }
-    var observed = false;
     var counters = document.querySelectorAll('.mkt-count');
     if (counters.length && 'IntersectionObserver' in window) {
         var io = new IntersectionObserver(function(entries) {
@@ -1266,14 +1014,10 @@
         counters.forEach(function(c) { c.textContent = c.dataset.to; });
     }
 
-    /* ── Bar chart entrance ── */
     if ('IntersectionObserver' in window) {
         var barIo = new IntersectionObserver(function(entries) {
             entries.forEach(function(e) {
-                if (e.isIntersecting) {
-                    e.target.classList.add('mkt-bars--visible');
-                    barIo.unobserve(e.target);
-                }
+                if (e.isIntersecting) { e.target.classList.add('mkt-bars--visible'); barIo.unobserve(e.target); }
             });
         }, { threshold: 0.2 });
         document.querySelectorAll('.mkt-bars, .mkt-dash-bar-chart, .mkt-sla-bars').forEach(function(el) { barIo.observe(el); });
@@ -1284,27 +1028,18 @@
     function applyTheme(t) {
         document.documentElement.setAttribute('data-theme', t);
         var icon = document.getElementById('guestThemeIcon');
-        if (icon) {
-            icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
+        if (icon) icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         var btn = document.getElementById('guestThemeToggle');
-        if (btn) {
-            btn.title = t === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro';
-            btn.setAttribute('aria-label', btn.title);
-        }
+        if (btn) { btn.title = t === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'; btn.setAttribute('aria-label', btn.title); }
     }
-
-    var saved = localStorage.getItem('unio-theme')
-        || localStorage.getItem('unio-theme')
-        || document.documentElement.getAttribute('data-theme')
-        || 'dark';
+    var saved = localStorage.getItem('unio-theme') || document.documentElement.getAttribute('data-theme') || 'light';
     applyTheme(saved);
 
-    function bindThemeToggle(id, iconId) {
+    function bindThemeToggle(id) {
         var btn = document.getElementById(id);
         if (!btn) return;
         btn.addEventListener('click', function () {
-            var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+            var cur = document.documentElement.getAttribute('data-theme') || 'light';
             var next = cur === 'dark' ? 'light' : 'dark';
             localStorage.setItem('unio-theme', next);
             applyTheme(next);

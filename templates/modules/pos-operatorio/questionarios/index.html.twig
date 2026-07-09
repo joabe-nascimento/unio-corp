@@ -1,9 +1,10 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Questionários · Pós-Operatório{% endblock %}
-{% block permissions_scope %}hub_pos_operatorio{% endblock %}
+{% block title %}Questionários{% if not org_clinic %} · Pós-Operatório{% endif %}{% endblock %}
+{% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
 
 {% set hub_page_title = 'Questionários' %}
+{% set hub_page_eyebrow = org_clinic ? 'Unio Clínica' : '' %}
 {% set hub_page_subtitle = 'Respostas diárias dos pacientes' %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
@@ -12,6 +13,11 @@
 <a href="{{ path('app_pos_operatorio_portal') }}" class="btn-unio-ghost btn-sm">
     <i class="fas fa-mobile-screen mr-1"></i> Portal do paciente
 </a>
+{% if not org_clinic %}
+<a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1"></i> Visão geral
+</a>
+{% endif %}
 {% endblock %}
 
 {% block hub_kpis %}

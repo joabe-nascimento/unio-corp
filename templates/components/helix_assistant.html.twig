@@ -1,7 +1,18 @@
-{# Vitória — assistente virtual (IA em implementação futura) #}
+{# Lumen — assistente Organismo (legado: Vitória) #}
 {% import 'macros/helix.html.twig' as helix %}
+{% set _org = organismo.enabled|default(false) %}
+{% set _copy = organismo.copy|default({}) %}
+{% set _assistant = _org ? _copy.lumen|default('Lumen') : 'Vitória' %}
+{% set _subtitle = _org ? _copy.lumen_subtitle|default('Consciência da colônia') : 'Assistente virtual' %}
 
-<div id="helixPanel" class="helix-panel" aria-hidden="true"{% if app.user %} data-user-first="{{ app.user.nome|split(' ')|first|e('html_attr') }}"{% endif %} data-vitoria-chat-url="{{ path('api_vitoria_chat') }}">
+<div id="helixPanel"
+     class="helix-panel{% if _org %} helix-panel--lumen{% endif %}"
+     aria-hidden="true"
+     {% if app.user %} data-user-first="{{ app.user.nome|split(' ')|first|e('html_attr') }}"{% endif %}
+     data-vitoria-chat-url="{{ path('api_vitoria_chat') }}"
+     data-vitoria-tools-url="{{ path('api_vitoria_tools') }}"
+     data-assistant-name="{{ _assistant|e('html_attr') }}"
+     data-organismo="{{ _org ? '1' : '0' }}">
     <div class="helix-backdrop" data-helix-close tabindex="-1" aria-hidden="true"></div>
 
     <aside class="helix-drawer" role="dialog" aria-modal="true" aria-labelledby="helixTitle">
@@ -9,12 +20,12 @@
             <div class="helix-header-brand">
                 {{ helix.avatar('md') }}
                 <div class="helix-header-text">
-                    <h2 id="helixTitle" class="helix-title">Vitória</h2>
-                    <p class="helix-subtitle">Assistente virtual</p>
+                    <h2 id="helixTitle" class="helix-title">{{ _assistant }}</h2>
+                    <p class="helix-subtitle">{{ _subtitle }}</p>
                 </div>
             </div>
             <div class="helix-header-actions">
-                <span class="helix-badge-soon">Em breve</span>
+                {% if not _org %}<span class="helix-badge-soon">Em breve</span>{% endif %}
                 <button type="button" class="helix-history-toggle" id="helixHistoryToggle" aria-label="Histórico de conversas" aria-expanded="false" aria-controls="helixHistoryList">
                     <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
                     <span class="helix-history-toggle-count" id="helixHistoryToggleCount" data-count="0"></span>
@@ -50,18 +61,25 @@
                     <div class="helix-msg helix-msg--assistant">
                         {{ helix.face('sm') }}
                         <div class="helix-msg-bubble">
-                            <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou a Vitória — sua assistente na Unio.</p>
-                            <p class="mb-0 helix-msg-muted">A IA chega em breve. Suas mensagens já ficam salvas no histórico.</p>
+                            <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou {{ _assistant }} — {{ _org ? 'a consciência da sua colônia.' : 'sua assistente na Unio.' }}</p>
+                            <p class="mb-0 helix-msg-muted">{{ _org ? 'Posso buscar membros, listar férias pendentes ou abrir uma admissão.' : 'A IA chega em breve. Suas mensagens já ficam salvas no histórico.' }}</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="helix-suggestions" id="helixSuggestions">
                     <div class="helix-chips">
+                        {% if _org %}
+                        <button type="button" class="helix-chip" data-helix-tool="buscar_membro" data-helix-tool-query="Ana">Buscar membro</button>
+                        <button type="button" class="helix-chip" data-helix-tool="ferias_pendentes">Férias pendentes</button>
+                        <button type="button" class="helix-chip" data-helix-tool="abrir_admissao">Nova admissão</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="O que está acontecendo na colônia agora?">Pulso da colônia</button>
+                        {% else %}
                         <button type="button" class="helix-chip" data-helix-prompt="Como cadastrar um novo membro?">Membros</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Como trocar de área de trabalho?">Área de trabalho</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Quais módulos tenho acesso?">Módulos</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Preciso de ajuda com permissões">Permissões</button>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -71,7 +89,7 @@
                             id="helixInput"
                             class="helix-input"
                             rows="1"
-                            placeholder="Mensagem…"
+                            placeholder="{{ _org ? 'Digite uma intenção…' : 'Mensagem…' }}"
                             maxlength="2000"
                             aria-label="Mensagem"
                         ></textarea>

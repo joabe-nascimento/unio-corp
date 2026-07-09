@@ -4,17 +4,21 @@ namespace App\Service\PosOperatorio;
 
 use App\Entity\Empresa;
 use App\Entity\PosOperatorioAlerta;
+use App\Entity\PosOperatorioEvento;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
+use App\PosOperatorio\PosOperatorioDisplay;
+use App\PosOperatorio\PosOperatorioTimelineFormatter;
 use App\Repository\PosOperatorioAlertaRepository;
+use App\Repository\PosOperatorioEventoRepository;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\PosOperatorioProtocoloRepository;
-use App\Service\Vitoria\VitoriaClient;
+use App\Rh\RhProcessDisplay;
 use App\Service\WorkspaceService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Hub Pós-Operatório — dashboard clínico (dados reais ou preview ilustrativo).
+ * Unio Clínica — dashboard pós-operatório (dados reais ou preview ilustrativo).
  */
 final class PosOperatorioService
 {
@@ -28,7 +32,7 @@ final class PosOperatorioService
         private PosOperatorioPacienteRepository $pacienteRepo,
         private PosOperatorioAlertaRepository $alertaRepo,
         private PosOperatorioProtocoloRepository $protocoloRepo,
-        private VitoriaClient $vitoria,
+        private PosOperatorioEventoRepository $eventoRepo,
     ) {}
 
     /** @return array<string, mixed> */
@@ -36,7 +40,7 @@ final class PosOperatorioService
     {
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
         if (!$empresa) {
-            throw new BadRequestHttpException('Selecione um workspace para acessar o Núcleo Pós-Operatório.');
+            throw new BadRequestHttpException('Selecione um workspace para acessar a Unio Clínica.');
         }
 
         $perPage = $this->normalizePerPage($perPage);
@@ -67,13 +71,6 @@ final class PosOperatorioService
 
         $pendentes = array_values(array_filter($recentPatients, static fn (array $r) => $r['status'] === 'pendente'));
 
-        $vitoriaInsight = $this->vitoria->hubInsight(
-            'hub_pos_operatorio',
-            ['adesao_pct' => $this->estimateAdesao($empresa, $totalPatients)],
-            array_map(static fn (array $a) => ['pri' => $a['pri'], 'titulo' => $a['titulo']], $activeAlerts),
-            array_map(static fn (array $p) => ['codigo' => $p['codigo'], 'nome' => $p['nome']], $pendentes),
-        ) ?? $this->vitoriaInsightFallback($alertCount, $pendentes);
-
         return [
             'empresa' => $empresa,
             'pos_section' => 'overview',
@@ -90,11 +87,9 @@ final class PosOperatorioService
             ],
             'patients_per_page_options' => self::PATIENTS_PER_PAGE_OPTIONS,
             'active_alerts' => $activeAlerts,
-            'timeline_events' => $this->buildTimelineFromPacientes($pacientes),
-            'team_online' => $this->teamOnline(),
+            'timeline_events' => $this->buildTimelineForEmpresa($empresa),
+            'team_online' => [],
             'protocol_phases' => $this->protocolPhasesFromPacientes($pacientes),
-            'vitoria_insight' => $vitoriaInsight,
-            'vitoria_online' => $this->vitoria->isAvailable(),
         ];
     }
 
@@ -124,10 +119,8 @@ final class PosOperatorioService
             'patients_per_page_options' => self::PATIENTS_PER_PAGE_OPTIONS,
             'active_alerts' => $this->activeAlerts(),
             'timeline_events' => $this->timelineEvents(),
-            'team_online' => $this->teamOnline(),
+            'team_online' => [],
             'protocol_phases' => $this->protocolPhases(),
-            'vitoria_insight' => $this->vitoriaInsight(),
-            'vitoria_online' => $this->vitoria->isAvailable(),
         ];
     }
 
@@ -141,10 +134,12 @@ final class PosOperatorioService
         $row = [
             'id' => $p->getId(),
             'codigo' => $p->getCodigo(),
-            'nome' => $this->shortName($p->getNome()),
+            'nome' => PosOperatorioDisplay::pacienteNome($p),
             'procedimento' => $p->getProcedimento() ?? '—',
             'dia' => $dia !== null ? 'D+' . $dia : '—',
-            'medico' => $medico ? $this->shortName($medico->getNome() ?? 'Médico') : '—',
+            'medico' => $medico
+                ? RhProcessDisplay::colaboradorNome($medico->getNome() ?? '', $medico->getEmail())
+                : '—',
             'ultima_resposta' => $ultima ? $this->relativeTime($ultima->getRespondidoEm()) : 'pendente',
             'status' => $p->getStatus(),
         ];
@@ -175,7 +170,11 @@ final class PosOperatorioService
 
         return [
             'titulo' => $a->getMotivo(),
-            'paciente' => sprintf('%s · %s', $this->shortName($paciente->getNome()), $paciente->getCodigo()),
+            'paciente' => sprintf(
+                '%s · %s',
+                PosOperatorioDisplay::pacienteNome($paciente),
+                $paciente->getCodigo(),
+            ),
             'paciente_id' => $paciente->getId(),
             'pri' => $a->getPrioridade(),
             'tempo' => $this->relativeTime($a->getCriadoEm()),
@@ -200,16 +199,6 @@ final class PosOperatorioService
         return min(100, max(0, (int) round(($elapsed / $total) * 100)));
     }
 
-    private function shortName(string $nome): string
-    {
-        $parts = preg_split('/\s+/', trim($nome)) ?: [];
-        if (\count($parts) <= 1) {
-            return $nome;
-        }
-
-        return $parts[0] . ' ' . mb_substr($parts[\count($parts) - 1], 0, 1) . '.';
-    }
-
     private function relativeTime(\DateTimeImmutable $dt): string
     {
         $diff = time() - $dt->getTimestamp();
@@ -226,44 +215,20 @@ final class PosOperatorioService
         return 'ontem';
     }
 
-    private function estimateAdesao(Empresa $empresa, int $totalAtivos): int
+    /** @return list<array{time: string, label: string, detail: string, icon: string}> */
+    private function buildTimelineForEmpresa(Empresa $empresa): array
     {
-        if ($totalAtivos === 0) {
-            return 0;
-        }
-        $pendentes = 0;
-        foreach ($this->pacienteRepo->findRecentByEmpresa($empresa, min(50, $totalAtivos), 0) as $p) {
-            $ultima = $p->getUltimaResposta();
-            if (!$ultima || $ultima->getDataReferencia()->format('Y-m-d') !== (new \DateTimeImmutable('today'))->format('Y-m-d')) {
-                ++$pendentes;
+        $events = $this->eventoRepo->findRecentByEmpresa($empresa, 8);
+        $formatted = [];
+
+        foreach ($events as $ev) {
+            if (!$ev instanceof PosOperatorioEvento) {
+                continue;
             }
+            $formatted[] = PosOperatorioTimelineFormatter::format($ev);
         }
 
-        return (int) round((($totalAtivos - $pendentes) / $totalAtivos) * 100);
-    }
-
-    /** @param list<PosOperatorioPaciente> $pacientes */
-    private function buildTimelineFromPacientes(array $pacientes): array
-    {
-        $events = [];
-        foreach ($pacientes as $p) {
-            foreach ($p->getEventos()->slice(0, 2) as $ev) {
-                $events[] = [
-                    'time' => $ev->getCriadoEm()->format('H:i'),
-                    'label' => ucfirst($ev->getTipo()),
-                    'detail' => $ev->getDescricao(),
-                    'icon' => 'fa-file-medical',
-                    'sort' => $ev->getCriadoEm()->getTimestamp(),
-                ];
-            }
-        }
-        usort($events, static fn (array $a, array $b) => $b['sort'] <=> $a['sort']);
-
-        return array_map(static function (array $e) {
-            unset($e['sort']);
-
-            return $e;
-        }, \array_slice($events, 0, 5));
+        return $formatted;
     }
 
     /** @param list<PosOperatorioPaciente> $pacientes */
@@ -328,7 +293,7 @@ final class PosOperatorioService
             [
                 'tag' => 'Operação',
                 'title' => $ativos . ' paciente(s) em acompanhamento',
-                'text' => 'Dados em tempo real do núcleo Pós-Operatório.',
+                'text' => 'Dados em tempo real da clínica.',
                 'icon' => 'fa-user-injured',
                 'tone' => 'blue',
             ],
@@ -354,33 +319,8 @@ final class PosOperatorioService
             ['icon' => 'fa-clipboard-list', 'title' => 'Protocolos', 'subtitle' => 'Checklists por procedimento', 'metric' => $protocolos . ' modelos', 'href' => 'app_pos_operatorio_protocolos'],
             ['icon' => 'fa-file-medical', 'title' => 'Questionários', 'subtitle' => 'Respostas diárias', 'metric' => 'Portal paciente', 'href' => 'app_pos_operatorio_questionarios'],
             ['icon' => 'fa-triangle-exclamation', 'title' => 'Alertas clínicos', 'subtitle' => 'Prioridade P1–P4', 'metric' => $alertas . ' abertos', 'href' => 'app_pos_operatorio_alertas'],
-            ['icon' => 'fa-chart-line', 'title' => 'Painel médico', 'subtitle' => 'KPIs e linha do tempo', 'metric' => 'Ao vivo', 'href' => 'app_pos_operatorio'],
-            ['icon' => 'fa-mobile-screen', 'title' => 'Portal do paciente', 'subtitle' => 'Acesso mobile', 'metric' => '/portal', 'href' => 'app_pos_operatorio_portal'],
-        ];
-    }
-
-    /**
-     * @param list<array<string, mixed>> $pendentes
-     *
-     * @return array{text: string, action: string, bullets: list<string>}
-     */
-    private function vitoriaInsightFallback(int $alertCount, array $pendentes): array
-    {
-        $bullets = [];
-        if ($alertCount > 0) {
-            $bullets[] = sprintf('%d alerta(s) aberto(s) na fila clínica', $alertCount);
-        }
-        if (\count($pendentes) > 0) {
-            $bullets[] = sprintf('%d paciente(s) sem questionário hoje', \count($pendentes));
-        }
-        if ($bullets === []) {
-            $bullets[] = 'Operação estável — manter monitoramento de rotina';
-        }
-
-        return [
-            'text' => 'Insight operacional gerado localmente (serviço Vitória offline).',
-            'action' => 'Ver plano sugerido',
-            'bullets' => $bullets,
+            ['icon' => 'fa-chart-line', 'title' => 'Painel de recuperação', 'subtitle' => 'KPIs e linha do tempo', 'metric' => 'Ao vivo', 'href' => 'app_maturidade'],
+            ['icon' => 'fa-mobile-screen', 'title' => 'Portal do paciente', 'subtitle' => 'Acesso mobile', 'metric' => 'Questionários', 'href' => 'app_pos_operatorio_portal'],
         ];
     }
 
@@ -461,15 +401,6 @@ final class PosOperatorioService
         ];
     }
 
-    /** @return list<array{initials: string, nome: string, role: string, status: string}> */
-    private function teamOnline(): array
-    {
-        return [
-            ['initials' => 'DL', 'nome' => 'Dra. Lima', 'role' => 'Cirurgia geral', 'status' => 'online'],
-            ['initials' => 'RA', 'nome' => 'Dr. Almeida', 'role' => 'Ortopedia', 'status' => 'online'],
-        ];
-    }
-
     /** @return list<array{label: string, count: int, tone: string}> */
     private function protocolPhases(): array
     {
@@ -477,20 +408,6 @@ final class PosOperatorioService
             ['label' => 'D+0 / D+1', 'count' => 6, 'tone' => 'accent'],
             ['label' => 'D+2 a D+7', 'count' => 11, 'tone' => 'default'],
             ['label' => 'D+8+', 'count' => 7, 'tone' => 'muted'],
-        ];
-    }
-
-    /** @return array{text: string, action: string, bullets: list<string>} */
-    private function vitoriaInsight(): array
-    {
-        return [
-            'text' => 'Identifiquei 2 pacientes em D+1 sem questionário e 1 alerta P1 próximo do SLA.',
-            'action' => 'Ver plano sugerido',
-            'bullets' => [
-                'Enviar lembrete para Juliana M. (PO-1035)',
-                'Priorizar Carlos M. (PO-1040) — dor 8/10',
-                '94% de adesão nas últimas 24h',
-            ],
         ];
     }
 
@@ -505,7 +422,7 @@ final class PosOperatorioService
     {
         return [
             ['tag' => 'Preview', 'title' => 'Modo demonstração', 'text' => 'Rode php bin/console app:pos-operatorio:seed para popular dados clínicos.', 'icon' => 'fa-flask', 'tone' => 'blue'],
-            ['tag' => 'Vitória', 'title' => 'IA multifuncional', 'text' => 'Serviço Python em services/vitoria-ai — chat, triagem e insights.', 'icon' => 'fa-robot', 'tone' => 'blue'],
+            ['tag' => 'Clínica', 'title' => 'Acompanhamento pós-cirúrgico', 'text' => 'Cadastre pacientes, protocolos e questionários diários.', 'icon' => 'fa-user-injured', 'tone' => 'blue'],
         ];
     }
 }

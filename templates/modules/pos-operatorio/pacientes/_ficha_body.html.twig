@@ -24,6 +24,14 @@
                         <dd>{{ paciente.protocolo ? paciente.protocolo.nome : '—' }}</dd>
                     </div>
                     <div class="pos-op-detail-grid__row">
+                        <dt>Status clínico</dt>
+                        <dd>{{ paciente.status|pos_op_status_label }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Cadastrado em</dt>
+                        <dd>{{ cadastrado_em|default('—') }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
                         <dt>Médico responsável</dt>
                         <dd>{{ paciente.medicoResponsavel ? paciente.medicoResponsavel.nome : '—' }}</dd>
                     </div>
@@ -42,7 +50,7 @@
                                         class="btn btn-link btn-sm p-0 ml-1 align-baseline"
                                         data-unio-offcanvas-open="pos-op-paciente-edit"
                                         data-pos-op-paciente-edit="{{ paciente.id }}"
-                                        data-pos-op-paciente-nome="{{ paciente.nome|e('html_attr') }}"
+                                        data-pos-op-paciente-nome="{{ paciente|pos_op_paciente_nome|e('html_attr') }}"
                                         data-pos-op-paciente-codigo="{{ paciente.codigo|e('html_attr') }}">
                                     Vincular
                                 </button>
@@ -149,7 +157,7 @@
             <section class="unio-card pos-op-ficha-card mb-4">
                 {% include 'components/section_header.html.twig' with {
                     title: 'Linha do tempo',
-                    subtitle: 'Eventos clínicos e operacionais'
+                    subtitle: 'Histórico clínico do paciente'
                 } %}
                 {% if timeline_groups|default([])|length > 0 %}
                 <div class="pos-op-timeline-v2 px-3 pb-3">
@@ -178,7 +186,7 @@
                                     {% if ev.detail %}
                                     <p class="pos-op-timeline-v2__detail">{{ ev.detail }}</p>
                                     {% endif %}
-                                    {% if ev.author %}
+                                    {% if ev.author and ev.type != 'acesso_ficha' %}
                                     <footer class="pos-op-timeline-v2__author">
                                         <i class="fas fa-user-circle" aria-hidden="true"></i>
                                         {{ ev.author }}

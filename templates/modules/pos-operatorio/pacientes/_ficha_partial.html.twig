@@ -1,10 +1,57 @@
-<div class="pos-op-ficha-offcanvas-intro mb-3">
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: dia_pos is not null ? 'D+' ~ dia_pos : '—', label: 'Dia pós-op', icon: 'fa-calendar-day' },
-        { value: alertas_abertos, label: 'Alertas abertos', icon: 'fa-triangle-exclamation' },
-        { value: paciente.status|capitalize, label: 'Status clínico', icon: 'fa-heart-pulse' },
-        { value: ultima_resposta ? ultima_resposta.scoreRisco : '—', label: 'Último score', icon: 'fa-chart-line' },
-    ], mb: 'mb-0', extra_class: 'pos-op-ficha-offcanvas-kpis' } %}
+{% set _nome = display_nome|default(paciente|pos_op_paciente_nome) %}
+{% set _status = paciente.status|pos_op_status_label %}
+
+<div id="posOpFichaMeta"
+     hidden
+     data-nome="{{ _nome|e('html_attr') }}"
+     data-codigo="{{ paciente.codigo|e('html_attr') }}"
+     data-procedimento="{{ paciente.procedimento|default('')|e('html_attr') }}"
+     data-dia-pos="{{ dia_pos is not null ? dia_pos : '' }}"
+     data-status="{{ _status|e('html_attr') }}"></div>
+
+<header class="clinic-ficha-offcanvas-hero">
+    <div class="clinic-ficha-offcanvas-hero__main">
+        <span class="clinic-code">{{ paciente.codigo }}</span>
+        <h3 class="clinic-ficha-offcanvas-hero__name">{{ _nome }}</h3>
+        <p class="clinic-ficha-offcanvas-hero__sub">
+            {{ paciente.procedimento|default('Procedimento não informado') }}
+            {% if dia_pos is not null %} · D+{{ dia_pos }}{% endif %}
+            {% if protocolo_dias %} · protocolo {{ protocolo_dias }} dias{% endif %}
+        </p>
+    </div>
+    <span class="clinic-status clinic-status--{% if paciente.status == 'alerta' %}danger{% elseif paciente.status == 'pendente' %}muted{% elseif paciente.status == 'encerrado' %}muted{% else %}success{% endif %}">
+        {{ _status }}
+    </span>
+</header>
+
+<div class="clinic-ficha-offcanvas-kpis">
+    <article class="clinic-metric">
+        <span class="clinic-metric__label">Dia pós-op</span>
+        <span class="clinic-metric__value">{{ dia_pos is not null ? 'D+' ~ dia_pos : '—' }}</span>
+    </article>
+    <article class="clinic-metric">
+        <span class="clinic-metric__label">Alertas abertos</span>
+        <span class="clinic-metric__value{% if alertas_abertos > 0 %} clinic-metric__value--danger{% endif %}">{{ alertas_abertos }}</span>
+    </article>
+    <article class="clinic-metric">
+        <span class="clinic-metric__label">Último score</span>
+        <span class="clinic-metric__value{% if ultima_resposta and ultima_resposta.scoreRisco >= 70 %} clinic-metric__value--danger{% elseif ultima_resposta and ultima_resposta.scoreRisco >= 40 %} clinic-metric__value--warning{% endif %}">
+            {{ ultima_resposta ? ultima_resposta.scoreRisco : '—' }}
+        </span>
+    </article>
+    <article class="clinic-metric">
+        <span class="clinic-metric__label">Próximo passo</span>
+        <span class="clinic-metric__value clinic-metric__value--compact" title="{{ proximo_checklist ? proximo_checklist.item : '' }}">
+            {% if proximo_checklist %}
+                D+{{ proximo_checklist.dia }}
+            {% else %}
+                Concluído
+            {% endif %}
+        </span>
+        {% if proximo_checklist %}
+        <span class="clinic-metric__hint">{{ proximo_checklist.item }}</span>
+        {% endif %}
+    </article>
 </div>
 
 {% include 'modules/pos-operatorio/pacientes/_ficha_body.html.twig' %}

@@ -673,6 +673,7 @@ class NavigationService
             'nav_modulo_pos_op_paciente_open' => $this->isModuloPosOpPacienteActive($route),
             'nav_active_hub' => $this->getActiveHubId($route),
             'nav_has_hubs' => $this->hasAnyHub($user),
+            'nav_pulso_active' => $route === 'app_pulso' || str_starts_with((string) $route, 'app_pulso_'),
         ];
     }
 

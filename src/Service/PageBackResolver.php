@@ -2,11 +2,18 @@
 
 namespace App\Service;
 
+use App\Service\Organismo\OrganismoRedirectService;
+
 /**
  * Resolve a rota "voltar" para telas filhas de um hub (RH, Pessoas, Engenharia, etc.).
  */
 final class PageBackResolver
 {
+    public function __construct(
+        private OrganismoRedirectService $organismoRedirects,
+    ) {
+    }
+
     /** @var array<string, string> hub index route => parent hub route */
     private const HUB_PARENT = [
         'app_hub_operacoes' => 'app_dashboard',
@@ -128,17 +135,25 @@ final class PageBackResolver
         'app_seguros' => 'app_dashboard',
         'app_saude_ocupacional' => 'app_dashboard',
         'app_pos_operatorio' => 'app_dashboard',
-        'app_pos_operatorio_alertas' => 'app_pos_operatorio',
-        'app_pos_operatorio_sala_critica' => 'app_pos_operatorio',
-        'app_pos_operatorio_portal' => 'app_pos_operatorio',
-        'app_pos_operatorio_pacientes' => 'app_pos_operatorio',
+        'app_pos_operatorio_alertas' => 'app_dashboard',
+        'app_pos_operatorio_sala_critica' => 'app_dashboard',
+        'app_pos_operatorio_portal' => 'app_dashboard',
+        'app_pos_operatorio_pacientes' => 'app_dashboard',
         'app_pos_operatorio_paciente_novo' => 'app_pos_operatorio_pacientes',
         'app_pos_operatorio_paciente_show' => 'app_pos_operatorio_pacientes',
         'app_pos_operatorio_paciente_editar' => 'app_pos_operatorio_pacientes',
-        'app_pos_operatorio_protocolos' => 'app_pos_operatorio',
+        'app_pos_operatorio_protocolos' => 'app_dashboard',
         'app_pos_operatorio_protocolo_novo' => 'app_pos_operatorio_protocolos',
         'app_pos_operatorio_protocolo_editar' => 'app_pos_operatorio_protocolos',
-        'app_pos_operatorio_questionarios' => 'app_pos_operatorio',
+        'app_pos_operatorio_questionarios' => 'app_dashboard',
+        'app_clinic_pacientes' => 'app_dashboard',
+        'app_clinic_sala_critica' => 'app_dashboard',
+        'app_clinic_alertas' => 'app_dashboard',
+        'app_clinic_protocolos' => 'app_dashboard',
+        'app_clinic_questionarios' => 'app_dashboard',
+        'app_clinic_portal' => 'app_dashboard',
+        'app_clinic_retornos' => 'app_dashboard',
+        'app_clinic_paciente_show' => 'app_clinic_pacientes',
         'app_licitacoes' => 'app_dashboard',
         'app_marketing' => 'app_dashboard',
         'app_lakehouse' => 'app_dashboard',
@@ -190,7 +205,7 @@ final class PageBackResolver
         }
 
         if (isset(self::HUB_PARENT[$currentRoute])) {
-            $parentRoute = self::HUB_PARENT[$currentRoute];
+            $parentRoute = $this->normalizeRoute(self::HUB_PARENT[$currentRoute]);
 
             return [
                 'route' => $parentRoute,
@@ -321,5 +336,14 @@ final class PageBackResolver
         }
 
         return $inherited;
+    }
+
+    private function normalizeRoute(string $route): string
+    {
+        if ($route === 'app_dashboard') {
+            return $this->organismoRedirects->homeRoute();
+        }
+
+        return $route;
     }
 }

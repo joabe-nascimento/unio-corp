@@ -1,0 +1,43 @@
+{% import 'macros/organismo_icon.html.twig' as orgicon %}
+
+{% set _cena_tones = {
+    'admissao': { tone: 'terra', icon: 'fa-user-plus' },
+    'sustentacao': { tone: 'sky', icon: 'fa-server' },
+    'ferias': { tone: 'amber', icon: 'fa-umbrella-beach' },
+    'documentos': { tone: 'plum', icon: 'fa-file-lines' }
+} %}
+{% set _tipo = cena.tipo|default('cena') %}
+{% set _meta = _cena_tones[_tipo]|default({ tone: 'neutral', icon: 'fa-circle-dot' }) %}
+
+<article class="pulso-cena-card pulso-cena-card--{{ cena.estado|default('ativa') }}{% if cena.mock|default(false) %} pulso-cena-card--mock{% endif %}">
+    <div class="pulso-cena-card__head">
+        <div class="pulso-cena-card__head-left">
+            {{ orgicon.nav(_meta.icon, _meta.tone, 'sm') }}
+            <span class="pulso-cena-card__tipo">{{ _tipo|replace({'_': ' '}) }}</span>
+        </div>
+        {% if cena.mock|default(false) %}
+        <span class="pulso-cena-card__badge">PoC</span>
+        {% endif %}
+    </div>
+    <h3 class="pulso-cena-card__title">{{ cena.titulo }}</h3>
+    <div class="pulso-cena-card__meta">
+        {% if cena.dias_aberta is defined and cena.dias_aberta > 0 %}
+        <span><i class="fas fa-clock" aria-hidden="true"></i> {{ cena.dias_aberta }}d</span>
+        {% endif %}
+        {% if cena.condutor|default(null) %}
+        <span><i class="fas fa-user" aria-hidden="true"></i> {{ cena.condutor }}</span>
+        {% endif %}
+    </div>
+    {% if cena.praticas|default([])|length > 0 %}
+    <div class="pulso-cena-card__praticas">
+        {% for p in cena.praticas %}
+        <span class="pulso-pratica-tag">{{ p|replace({'_': ' '}) }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if cena.url|default(null) %}
+    <a href="{{ cena.url }}" class="pulso-cena-card__action">
+        Abrir cena <i class="fas fa-arrow-right" aria-hidden="true"></i>
+    </a>
+    {% endif %}
+</article>

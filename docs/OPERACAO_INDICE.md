@@ -14,6 +14,7 @@ Documentação consolidada após estabilização do deploy HostGator, CI/CD e va
 | [OPERACAO_EMAIL_PLATAFORMA.md](OPERACAO_EMAIL_PLATAFORMA.md) | E-mails HostGator/Titan, login, assinaturas, secrets e deploy |
 | [OPERACAO_SESSAO_EMAIL_TITAN_2026-07-03.md](OPERACAO_SESSAO_EMAIL_TITAN_2026-07-03.md) | **Sessão 3 jul 2026** — Titan, DKIM, MAILER_DSN, forgot-password, cron Messenger |
 | [OPERACAO_INPI_CHECKLIST.md](OPERACAO_INPI_CHECKLIST.md) | Checklist registro INPI (RPC) — Unio, CNPJ titular, hash, e-CNPJ, GRU 730 |
+| [ROADMAP_TRANSICAO_ORGANISMO.md](ROADMAP_TRANSICAO_ORGANISMO.md) | Transição conceitual (Colônia/Cena/Pulso) + matriz tech + tasks T0 |
 | [BRANCHES.md](BRANCHES.md) | Modelo oficial de branches (feature → product → main → staging → production) |
 | [DEPLOY_AGORA.md](DEPLOY_AGORA.md) | Checklist rápido HostGator |
 | [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md) | Pipeline SSH HostGator, secrets, host canônico, troubleshooting |

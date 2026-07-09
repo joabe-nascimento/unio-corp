@@ -1,9 +1,9 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Núcleo Pós-Operatório{% endblock %}
+{% block title %}Unio Clínica{% endblock %}
 {% block permissions_scope %}hub_pos_operatorio{% endblock %}
 
-{% set hub_page_title = 'Núcleo Pós-Operatório' %}
+{% set hub_page_title = 'Unio Clínica' %}
 {% set hub_page_subtitle = 'Acompanhamento clínico pós-cirúrgico' %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = true %}
@@ -47,8 +47,7 @@
     {% include 'components/pos_operatorio/hub_hero.html.twig' with {
         empresa: empresa,
         pos_pulse: pos_pulse,
-        pos_ticker: pos_ticker,
-        vitoria_insight: vitoria_insight
+        pos_ticker: pos_ticker
     } %}
 
     <div class="row pos-op-overview-grid">
@@ -88,7 +87,7 @@
                                     {% elseif p.status == 'pendente' %}
                                     {% include 'components/status_badge.html.twig' with { label: 'Pendente', variant: 'warning' } %}
                                     {% else %}
-                                    {% include 'components/status_badge.html.twig' with { label: 'Ativo', variant: 'success' } %}
+                                    {% include 'components/status_badge.html.twig' with { label: p.status|pos_op_status_label, variant: 'success' } %}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -113,8 +112,8 @@
                 }]) %}
             {% endfor %}
             {% include 'components/module_grid.html.twig' with {
-                title: 'Módulos do núcleo',
-                subtitle: 'Pacientes, protocolos, alertas e portal do paciente',
+                title: 'Atalhos clínicos',
+                subtitle: 'Pacientes, protocolos, alertas e portal',
                 items: module_items,
                 cols: 2
             } %}
@@ -183,7 +182,7 @@
                 <section class="unio-card mb-4">
                     {% include 'components/section_header.html.twig' with {
                         title: 'Linha do tempo',
-                        subtitle: 'Eventos recentes do núcleo'
+                        subtitle: 'Eventos recentes da clínica'
                     } %}
                     <ul class="pos-op-timeline">
                         {% for ev in timeline_events %}
@@ -199,6 +198,7 @@
                     </ul>
                 </section>
 
+                {% if team_online|default([])|length > 0 %}
                 <section class="unio-card">
                     {% include 'components/section_header.html.twig' with {
                         title: 'Equipe online',
@@ -219,6 +219,7 @@
                         {% endfor %}
                     </ul>
                 </section>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -233,15 +234,4 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/rh-hub-dashboard.js') }}?v=8"></script>
-<script>
-(function () {
-    var btn = document.querySelector('[data-pos-op-helix-open]');
-    if (btn) {
-        btn.addEventListener('click', function () {
-            var helixBtn = document.getElementById('helixOpenBtn');
-            if (helixBtn) helixBtn.click();
-        });
-    }
-})();
-</script>
 {% endblock %}

@@ -68,6 +68,9 @@
         }
     }
     </style>
+    {% if organismo.enabled|default(false) %}
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=24">
+    {% endif %}
 
     {% block stylesheets %}{% endblock %}
     {% if app.user %}
@@ -75,7 +78,7 @@
     {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
-<body class="hold-transition sidebar-mini sidebar-collapse layout-fixed layout-inset-shell"{% block body_attrs %}{% endblock %}>
+<body class="hold-transition sidebar-mini sidebar-collapse layout-fixed layout-inset-shell{% if organismo.enabled|default(false) %} unio-organismo{% endif %}"{% block body_attrs %}{% endblock %}>
 <script>
 (function () {
     'use strict';
@@ -121,10 +124,18 @@
     {# ── Sidebar (fundo do shell, integrada ao inset) ── #}
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <div class="sidebar-top">
-            {% if app.user %}
+            {% if app.user and not organismo.enabled|default(false) %}
                 {% include 'components/sidebar_identity_hub.html.twig' %}
-            {% else %}
+            {% elseif not app.user %}
                 <a href="{{ path('app_dashboard') }}" class="brand-link elevation-0" title="{{ _pnome }}">
+                    {% include 'components/platform_logo.html.twig' with {
+                        variant: 'full',
+                        class: 'sidebar-logo sidebar-logo-full'
+                    } only %}
+                </a>
+            {% else %}
+                {# Organismo: topo mostra apenas logo/marca #}
+                <a href="{{ path(nav_home_route|default('app_dashboard')) }}" class="org-sidebar-brand" title="{{ _pnome }}">
                     {% include 'components/platform_logo.html.twig' with {
                         variant: 'full',
                         class: 'sidebar-logo sidebar-logo-full'
@@ -148,7 +159,7 @@
             </nav>
         </div>
 
-        {% if app.user %}
+        {% if app.user and not organismo.enabled|default(false) %}
         <div class="sidebar-bottom">
             {% include 'components/sidebar_ambient_sound.html.twig' with {
                 user_id: app.user.id
@@ -160,7 +171,10 @@
     <div class="app-inset-main">
     <div class="app-inset-panel">
 
-    {# ── Top Navbar (Vitória, apps) — dentro do painel branco ── #}
+    {# ── Top Navbar — Organismo ou legado ── #}
+    {% if organismo.enabled|default(false) %}
+        {% include 'layout/_toolbar_organismo.html.twig' %}
+    {% else %}
     <nav class="main-header navbar navbar-expand navbar-dark">
         <a class="nav-link nav-toggle-btn" data-unio-shell-toggle="sidebar" href="#" role="button" aria-label="Alternar menu lateral">
             <span class="nav-toggle-icon" aria-hidden="true">
@@ -198,6 +212,7 @@
             {% endif %}
         </ul>
     </nav>
+    {% endif %}
 
     {# ── Content ── #}
     <div class="content-wrapper" id="main-content">
@@ -220,7 +235,7 @@
                         </div>
                         <div class="col-12 col-sm-6 text-sm-right">
                             <ol class="breadcrumb breadcrumb--page mb-0 d-inline-block">
-                                <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Início</a></li>
+                                <li class="breadcrumb-item"><a href="{{ path(nav_home_route|default('app_dashboard')) }}">{{ organismo.enabled|default(false) ? organismo.copy.inicio|default('Pulso') : 'Início' }}</a></li>
                                 {% block breadcrumb %}{% endblock %}
                             </ol>
                         </div>
@@ -254,7 +269,7 @@
 
     {% include 'components/unio_toast_stack.html.twig' %}
 
-    {% if app.user %}
+    {% if app.user and not organismo.enabled|default(false) %}
     {% include 'components/ti/chamado_chat_global.html.twig' %}
     {% endif %}
 
@@ -265,8 +280,10 @@
 {% if app.user %}
 {% include 'components/shell_mobile_nav.html.twig' %}
 {% endif %}
+{% if not organismo.enabled|default(false) %}
 {% include 'components/helix_assistant.html.twig' %}
-{% if app.user %}
+{% endif %}
+{% if app.user and not organismo.enabled|default(false) %}
 {% include 'components/shell_tour.html.twig' %}
 {% endif %}
 
@@ -643,12 +660,17 @@ window.addEventListener('load', runShellSidebarControls);
     function renderWelcomeOnly() {
         if (!messagesEl) return;
         var first = panel.dataset.userFirst || '';
+        var assistant = panel.dataset.assistantName || 'Vitória';
+        var isOrganismo = panel.dataset.organismo === '1';
         var greeting = first ? 'Olá, ' + escapeHtml(first) + '.' : 'Olá.';
+        var sub = isOrganismo
+            ? 'Posso buscar membros, listar férias pendentes ou abrir uma admissão.'
+            : 'Posso ajudar com operação, alertas clínicos e fluxos dos núcleos.';
         messagesEl.innerHTML =
             '<div class="helix-msg helix-msg--assistant">' + FACE_SM +
             '<div class="helix-msg-bubble">' +
-            '<p>' + greeting + ' Sou a Vitória — sua assistente na Unio.</p>' +
-            '<p class="mb-0 helix-msg-muted">Posso ajudar com operação, alertas clínicos e fluxos dos núcleos.</p>' +
+            '<p>' + greeting + ' Sou ' + escapeHtml(assistant) + (isOrganismo ? ' — a consciência da sua colônia.' : ' — sua assistente na Unio.') + '</p>' +
+            '<p class="mb-0 helix-msg-muted">' + sub + '</p>' +
             '</div></div>';
         if (suggestions) suggestions.style.display = '';
     }
@@ -657,7 +679,7 @@ window.addEventListener('load', runShellSidebarControls);
         if (!messagesEl || !session) return;
         var html = '';
         session.messages.forEach(function (m) {
-            html += messageHtml(m.role, m.text);
+            html += messageHtml(m.role, m.text, m.actionsHtml || '');
         });
         if (!html) {
             renderWelcomeOnly();
@@ -668,13 +690,75 @@ window.addEventListener('load', runShellSidebarControls);
         scrollMessages();
     }
 
-    function messageHtml(role, text) {
+    function messageHtml(role, text, actionsHtml) {
         var isUser = role === 'user';
         var esc = escapeHtml(text);
         return '<div class="helix-msg helix-msg--' + (isUser ? 'user' : 'assistant') + '">' +
             (isUser ? '' : FACE_SM) +
-            '<div class="helix-msg-bubble"><p class="mb-0">' + esc.replace(/\n/g, '<br>') + '</p></div>' +
-            '</div>';
+            '<div class="helix-msg-bubble"><p class="mb-0">' + esc.replace(/\n/g, '<br>') + '</p>' +
+            (actionsHtml || '') +
+            '</div></div>';
+    }
+
+    function renderToolActions(results) {
+        if (!results || !results.length) return '';
+        var html = '<div class="helix-tool-actions mt-2">';
+        results.forEach(function (r) {
+            if (r.url) {
+                var label = r.nome || r.label || r.membro || 'Abrir';
+                html += '<a class="helix-tool-action-btn" href="' + escapeHtml(r.url) + '">' + escapeHtml(label) + '</a>';
+            } else if (r.action === 'open_url' && r.url) {
+                html += '<a class="helix-tool-action-btn helix-tool-action-btn--primary" href="' + escapeHtml(r.url) + '">' + escapeHtml(r.label || 'Executar') + '</a>';
+            }
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function runHelixTool(toolName, params) {
+        var base = panel.dataset.vitoriaToolsUrl || '';
+        if (!base) return;
+        var url = base.replace(/\/$/, '') + '/' + encodeURIComponent(toolName);
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
+            body: JSON.stringify(params || {})
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var sid = ensureSession();
+                var session = getSession(sid);
+                if (!session) return;
+                session.messages.push({
+                    role: 'assistant',
+                    text: data.summary || 'Ação concluída.',
+                    at: new Date().toISOString(),
+                    actionsHtml: renderToolActions(data.results)
+                });
+                session.updatedAt = new Date().toISOString();
+                upsertSession(session);
+                renderMessagesWithActions(session);
+                renderHistory();
+            })
+            .catch(function () {
+                sendMessage('Não consegui executar a ação agora.');
+            });
+    }
+
+    function renderMessagesWithActions(session) {
+        if (!messagesEl || !session) return;
+        var html = '';
+        session.messages.forEach(function (m) {
+            html += messageHtml(m.role, m.text, m.actionsHtml || '');
+        });
+        if (!html) {
+            renderWelcomeOnly();
+            return;
+        }
+        messagesEl.innerHTML = html;
+        if (suggestions) suggestions.style.display = session.messages.length ? 'none' : '';
+        scrollMessages();
     }
 
     function escapeHtml(str) {
@@ -884,6 +968,14 @@ window.addEventListener('load', runShellSidebarControls);
             loadSession(item.dataset.sessionId);
         });
     }
+
+    panel.querySelectorAll('[data-helix-tool]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            var params = {};
+            if (chip.dataset.helixToolQuery) params.query = chip.dataset.helixToolQuery;
+            runHelixTool(chip.dataset.helixTool, params);
+        });
+    });
 
     panel.querySelectorAll('[data-helix-prompt]').forEach(function (chip) {
         chip.addEventListener('click', function () {

@@ -9,6 +9,7 @@ use App\Service\WelcomeContentService;
 use App\Service\WelcomeNewsFeedService;
 use App\Service\WelcomePresentationService;
 use App\Service\WelcomeService;
+use App\Service\Organismo\OrganismoRedirectService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,12 +28,17 @@ class WelcomeController extends AbstractController
         OnboardingProgressService $onboardingProgress,
         WorkspaceService $workspace,
         NavigationService $navigation,
+        OrganismoRedirectService $redirects,
     ): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $dt = $welcome->getDateTimeInfo();
-
         $empresas = $workspace->getAvailableEmpresas($user);
+
+        if ($redirects->homeRoute() === 'app_pulso') {
+            return $this->redirectToRoute('app_pulso');
+        }
+
+        $dt = $welcome->getDateTimeInfo();
         $empresa = $workspace->getActiveEmpresa($user);
         $empresasCount = \count($empresas);
         $layout = $navigation->getLayout($user);

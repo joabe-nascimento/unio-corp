@@ -8,7 +8,24 @@
 {% set _can_manage_perm = perm_scope != '' and can_manage_permissions(perm_scope) %}
 {% set _show_perm_tab = _can_manage_perm or (hub_permissions_tab|default(false) and perm_scope != '') %}
 {% set _show_hub_tabs = hub_show_tabs|default(_can_manage_perm or _show_perm_tab) %}
-<div class="page-lead-zone{% if _show_hub_tabs %} page-lead-zone--hub-tabs{% endif %}">
+{% set _org = organismo.enabled|default(false) %}
+<div class="page-lead-zone{% if _show_hub_tabs %} page-lead-zone--hub-tabs{% endif %}{% if _org %} page-lead-zone--organismo{% endif %}">
+    {% if _org %}
+    {% set _hub_extra_tabs_html %}
+{{ block('hub_extra_tabs') }}
+    {% endset %}
+    {% include 'components/org_hub_lead.html.twig' with {
+        page_title: hub_page_title|default(''),
+        page_subtitle: hub_page_subtitle|default(''),
+        page_eyebrow: hub_page_eyebrow|default(''),
+        show_hub_tabs: _show_hub_tabs,
+        show_perm_tab: _show_perm_tab,
+        back_label: hub_back_label|default(organismo.copy.pulso|default('Pulso')),
+        hub_extra_tabs_html: _hub_extra_tabs_html,
+        hub_use_clinic_tabs: hub_use_clinic_tabs|default(false),
+        hub_clinic_tabs: hub_clinic_tabs|default([])
+    } %}
+    {% else %}
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: hub_page_title|default(''),
         page_subtitle: hub_page_subtitle|default(''),
@@ -27,7 +44,7 @@
                         <button type="button" class="hub-overview-tab hub-overview-tab--active" data-hub-tab="overview" role="tab" aria-selected="true">
                             Visão geral
                         </button>
-                        {% block hub_extra_tabs %}{% endblock %}
+                        {{ block('hub_extra_tabs') }}
                         {% if _show_perm_tab %}
                         <button type="button" class="hub-overview-tab" data-hub-tab="permissions" role="tab" aria-selected="false">
                             <i class="fas fa-shield-halved mr-1" aria-hidden="true"></i> Permissões
@@ -39,6 +56,8 @@
             {% endif %}
         {% endblock %}
     {% endembed %}
+    {% endif %}
+    {% block hub_kpis %}{% endblock %}
 </div>
 {% endblock %}
 {% block content %}
@@ -47,9 +66,9 @@
 {% set _show_perm_tab = _can_manage_perm or (hub_permissions_tab|default(false) and perm_scope != '') %}
 {% set _show_hub_tabs = hub_show_tabs|default(_can_manage_perm or _show_perm_tab) %}
 {% set _body_mode = hub_page_body_mode|default('scroll') %}
-<div class="page-body-inner page-body-shell{% if _body_mode == 'fill' %} page-body-fill{% else %} page-body-scroll{% endif %}{% if _show_hub_tabs %} page-body-inner--hub-tabs{% endif %}{% if perm_scope == 'hub_recrutamento' %} recrutamento-hub{% endif %}">
+{% set _org = organismo.enabled|default(false) %}
+<div class="page-body-inner page-body-shell{% if _body_mode == 'fill' %} page-body-fill{% else %} page-body-scroll{% endif %}{% if _show_hub_tabs %} page-body-inner--hub-tabs{% endif %}{% if _org %} page-body-inner--organismo{% endif %}{% if perm_scope == 'hub_recrutamento' %} recrutamento-hub{% endif %}">
     <div class="hub-tab-panel hub-tab-panel--active" data-hub-panel="overview" role="tabpanel">
-        {% block hub_kpis %}{% endblock %}
         {% block hub_section_toolbar %}{% endblock %}
         {% block hub_content %}{% endblock %}
     </div>
@@ -71,3 +90,5 @@
 </div>
 
 {% endblock %}
+
+{% block hub_extra_tabs %}{% endblock %}

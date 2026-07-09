@@ -1,0 +1,17 @@
+{# Faixa compacta de KPIs — Organismo #}
+{% set _tones = ['sky', 'sage', 'lavender', 'teal', 'amber', 'plum'] %}
+<div class="org-kpi-strip" role="list">
+    {% for item in items %}
+    {% set _tone = _tones[loop.index0 % _tones|length] %}
+    <div class="org-kpi-strip__item" role="listitem">
+        <span class="org-dot org-dot--{{ _tone }} org-dot--sm" aria-hidden="true"></span>
+        <div class="org-kpi-strip__body">
+            <span class="org-kpi-strip__value"{% if item.kpi_key|default('') %} data-recrutamento-pipeline-kpi="{{ item.kpi_key }}"{% endif %}>{{ item.value }}</span>
+            <span class="org-kpi-strip__label">{{ item.label }}</span>
+            {% if item.sub|default('') %}
+            <span class="org-kpi-strip__sub">{{ item.sub }}</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>

@@ -1,10 +1,17 @@
 /**
- * Sidebar — modo lista de hubs vs painel do hub selecionado.
+ * Sidebar — lista de hubs (legado) ou painel da prática (Organismo).
  */
 (function () {
     'use strict';
 
+    function isOrganismoMode() {
+        return document.body.classList.contains('unio-organismo');
+    }
+
     function setPickerVisible(sidebar, visible) {
+        if (isOrganismoMode()) {
+            visible = false;
+        }
         sidebar.querySelectorAll('.sidebar-hub-group').forEach(function (el) {
             el.classList.toggle('is-hidden', !visible);
         });
@@ -19,16 +26,22 @@
             return;
         }
 
-        sidebar.classList.toggle('sidebar--hub-picker', !inHub);
+        sidebar.classList.toggle('sidebar--hub-picker', !inHub && !isOrganismoMode());
         sidebar.classList.toggle('sidebar--hub-open', inHub);
 
-        setPickerVisible(sidebar, !inHub);
+        setPickerVisible(sidebar, !inHub && !isOrganismoMode());
 
-        sidebar.querySelectorAll('[data-sidebar-hub-panel]').forEach(function (panel) {
-            panel.classList.add('is-hidden');
-        });
+        if (!inHub) {
+            sidebar.querySelectorAll('[data-sidebar-hub-panel]').forEach(function (panel) {
+                panel.classList.add('is-hidden');
+            });
+        }
 
         sidebar.querySelectorAll('[data-sidebar-hub-back]').forEach(function (back) {
+            if (back.hasAttribute('data-organismo-pulso-back')) {
+                back.classList.toggle('is-hidden', !inHub);
+                return;
+            }
             back.classList.toggle('is-hidden', !inHub);
         });
     }
@@ -100,6 +113,9 @@
     function initHubBack(sidebar) {
         sidebar.querySelectorAll('[data-sidebar-hub-back]').forEach(function (btn) {
             btn.addEventListener('click', function (event) {
+                if (btn.hasAttribute('data-organismo-pulso-back')) {
+                    return;
+                }
                 event.preventDefault();
                 setHubMode(false);
             });
@@ -125,6 +141,10 @@
 
         window.unioSidebarHubs = {
             showPicker: function () {
+                if (isOrganismoMode()) {
+                    window.location.href = sidebar.querySelector('[href*="pulso"]')?.getAttribute('href') || '/pulso';
+                    return;
+                }
                 setHubMode(false);
             },
         };

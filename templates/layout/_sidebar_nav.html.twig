@@ -1,4 +1,7 @@
-{# Menu lateral — itens principais + zona Núcleo selecionado (lista / painel) #}
+{# Menu lateral #}
+{% if organismo.enabled|default(false) %}
+    {% include 'layout/_sidebar_nav_organismo.html.twig' %}
+{% else %}
 {% set route = app.request.attributes.get('_route') %}
 {% set hub_operacoes_open = nav_hub_operacoes_active|default(false) %}
 {% set modulo_rh_open = nav_modulo_rh_active|default(false) %}
@@ -92,4 +95,5 @@
     </ul>
 </li>
 {% endfor %}
+{% endif %}
 {% endif %}

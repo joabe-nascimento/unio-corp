@@ -8,6 +8,10 @@ use App\Service\ChatService;
 use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
 use App\Service\OnboardingTourService;
+use App\Service\Organismo\ClinicNavBadgeService;
+use App\Service\Organismo\OrganismoCopyService;
+use App\Service\Organismo\OrganismoFeature;
+use App\Service\Organismo\OrganismoPraticaRegistry;
 use App\Service\PageBackResolver;
 use App\Service\PlatformNotificationService;
 use App\Service\WorkspaceService;
@@ -42,6 +46,10 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private PageBackResolver $pageBackResolver,
         private TiGrantService $tiGrants,
         private OnboardingTourService $onboardingTour,
+        private OrganismoFeature $organismoFeature,
+        private OrganismoCopyService $organismoCopy,
+        private OrganismoPraticaRegistry $praticaRegistry,
+        private ClinicNavBadgeService $clinicNavBadges,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -96,6 +104,34 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
                 $chatUnread,
                 $notificationsUnread,
             ),
+        );
+        $this->twig->addGlobal('organismo', [
+            'enabled' => $this->organismoFeature->isEnabled(),
+            'pulso_home' => $this->organismoFeature->isPulsoHome(),
+            'copy' => $this->organismoCopy->getGlobals(),
+        ]);
+        $this->twig->addGlobal('org_clinic', $this->organismoFeature->isEnabled());
+        $this->twig->addGlobal(
+            'nav_organismo_practices',
+            $this->organismoFeature->isEnabled()
+                ? $this->praticaRegistry->getGroupedForUser($user)
+                : [],
+        );
+        $activePractice = $this->organismoFeature->isEnabled()
+            ? $this->praticaRegistry->resolveActiveForRoute($user, \is_string($route) ? $route : null)
+            : null;
+        $this->twig->addGlobal('nav_active_practice', $activePractice);
+        $this->twig->addGlobal(
+            'clinic_nav_badges',
+            $this->organismoFeature->isEnabled()
+                ? $this->clinicNavBadges->forEmpresa($empresa)
+                : [],
+        );
+        $this->twig->addGlobal(
+            'nav_home_route',
+            $this->organismoFeature->isEnabled()
+                ? ($this->organismoFeature->isPulsoHome() ? 'app_pulso' : 'app_dashboard')
+                : 'app_dashboard',
         );
         $tourConfig = $this->onboardingTour->build($user, $empresa, \count($empresas), \is_string($route) ? $route : null);
         $this->twig->addGlobal(

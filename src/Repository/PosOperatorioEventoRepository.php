@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Empresa;
 use App\Entity\PosOperatorioEvento;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -12,6 +13,19 @@ class PosOperatorioEventoRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, PosOperatorioEvento::class);
+    }
+
+    /** @return list<PosOperatorioEvento> */
+    public function findRecentByEmpresa(Empresa $empresa, int $limit = 10): array
+    {
+        return $this->createQueryBuilder('e')
+            ->innerJoin('e.paciente', 'p')
+            ->andWhere('p.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('e.criadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
     }
 
     public function hasLembreteOnDate(\App\Entity\PosOperatorioPaciente $paciente, \DateTimeImmutable $day): bool

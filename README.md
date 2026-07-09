@@ -31,6 +31,7 @@ Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Mat
 | Documento | Conteúdo |
 |-----------|----------|
 | [docs/ROADMAP_90_DIAS.md](docs/ROADMAP_90_DIAS.md) | Roadmap 30/60/90 dias + backlog por módulo |
+| [docs/ROADMAP_TRANSICAO_ORGANISMO.md](docs/ROADMAP_TRANSICAO_ORGANISMO.md) | Transição Hub/Núcleo → Colônia/Cena/Pulso + matriz tech + tasks T0 |
 | [docs/ESTRUTURA.md](docs/ESTRUTURA.md) | Pastas, convenções, módulos |
 | [docs/QUALIDADE_PERFORMANCE_E_HUBS.md](docs/QUALIDADE_PERFORMANCE_E_HUBS.md) | Empty states, hubs planejados, performance, Redis, PHPStan |
 | [docs/RH.md](docs/RH.md) | Módulo RH (implementado e roadmap) |

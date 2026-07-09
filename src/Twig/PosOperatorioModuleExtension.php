@@ -2,12 +2,23 @@
 
 namespace App\Twig;
 
+use App\Entity\PosOperatorioPaciente;
+use App\PosOperatorio\PosOperatorioDisplay;
 use App\PosOperatorio\PosOperatorioModuleCatalog;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class PosOperatorioModuleExtension extends AbstractExtension
 {
+    public function getFilters(): array
+    {
+        return [
+            new TwigFilter('pos_op_paciente_nome', [$this, 'pacienteNome']),
+            new TwigFilter('pos_op_status_label', [$this, 'statusLabel']),
+        ];
+    }
+
     public function getFunctions(): array
     {
         return [
@@ -47,5 +58,15 @@ class PosOperatorioModuleExtension extends AbstractExtension
     public function isRouteActive(?string $currentRoute, array $mod): bool
     {
         return PosOperatorioModuleCatalog::isRouteActive($currentRoute, $mod);
+    }
+
+    public function pacienteNome(PosOperatorioPaciente $paciente): string
+    {
+        return PosOperatorioDisplay::pacienteNome($paciente);
+    }
+
+    public function statusLabel(string $status): string
+    {
+        return PosOperatorioDisplay::statusLabel($status);
     }
 }

@@ -437,14 +437,14 @@ class PermissionService
             ],
         ],
         'hub_pos_operatorio' => [
-            'label' => 'Núcleo Pós-Operatório',
+            'label' => 'Unio Clínica',
             'subtitle' => 'Acompanhamento clínico pós-cirúrgico',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
                 ['id' => 'protocolos', 'label' => 'Protocolos'],
                 ['id' => 'questionarios', 'label' => 'Questionários'],
                 ['id' => 'alertas', 'label' => 'Alertas clínicos'],
-                ['id' => 'painel', 'label' => 'Painel médico'],
+                ['id' => 'painel', 'label' => 'Painel de recuperação'],
                 ['id' => 'portal_paciente', 'label' => 'Portal do paciente'],
             ],
         ],
@@ -824,14 +824,14 @@ class PermissionService
         ],
         [
             'id' => 'hub_pos_operatorio',
-            'label' => 'Núcleo Pós-Operatório',
+            'label' => 'Unio Clínica',
             'scope' => 'hub_pos_operatorio',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
                 ['id' => 'protocolos', 'label' => 'Protocolos'],
                 ['id' => 'questionarios', 'label' => 'Questionários'],
                 ['id' => 'alertas', 'label' => 'Alertas clínicos'],
-                ['id' => 'painel', 'label' => 'Painel médico'],
+                ['id' => 'painel', 'label' => 'Painel de recuperação'],
                 ['id' => 'portal_paciente', 'label' => 'Portal do paciente'],
             ],
         ],

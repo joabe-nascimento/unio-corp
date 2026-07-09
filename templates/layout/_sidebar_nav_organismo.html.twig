@@ -1,0 +1,98 @@
+{# Navegação Clínica — Unio · Cuidado que continua. #}
+{% set route = app.request.attributes.get('_route') %}
+{% set badges = clinic_nav_badges|default({}) %}
+
+{# ── Início ── #}
+<li class="nav-item">
+    <a href="{{ path('app_dashboard') }}" class="nav-link {{ route == 'app_dashboard' or route == 'app_pulso' ? 'active' : '' }}">
+        <i class="fas fa-house-medical nav-icon" aria-hidden="true"></i>
+        <p>Início</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_maturidade') }}" class="nav-link {{ route starts with 'app_maturidade' ? 'active' : '' }}">
+        <i class="fas fa-stethoscope nav-icon" aria-hidden="true"></i>
+        <p>Painel de Recuperação</p>
+    </a>
+</li>
+
+{# ── Seção: Pacientes ── #}
+<li class="sidebar-hub-separator" aria-hidden="true"></li>
+<li class="nav-item sidebar-hub-heading-item">
+    <div class="sidebar-hub-heading">
+        <span class="sidebar-hub-heading-label">Pacientes</span>
+    </div>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_pos_operatorio_pacientes') }}" class="nav-link {{ route starts with 'app_pos_operatorio_paciente' or route == 'app_pos_operatorio_pacientes' ? 'active' : '' }}">
+        <i class="fas fa-user-injured nav-icon" aria-hidden="true"></i>
+        <p>Pacientes</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="nav-link {{ route == 'app_pos_operatorio_sala_critica' ? 'active' : '' }}">
+        <i class="fas fa-bed-pulse nav-icon" aria-hidden="true"></i>
+        <p>Sala Crítica</p>
+        {% if badges.sala_critica|default(0) > 0 %}
+        <span class="nav-clinic-badge nav-clinic-badge--danger" aria-label="{{ badges.sala_critica }} P1">{{ badges.sala_critica }}</span>
+        {% endif %}
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_pos_operatorio_alertas') }}" class="nav-link {{ route starts with 'app_pos_operatorio_alerta' ? 'active' : '' }}">
+        <i class="fas fa-triangle-exclamation nav-icon" aria-hidden="true"></i>
+        <p>Alertas</p>
+        {% if badges.alertas|default(0) > 0 %}
+        <span class="nav-clinic-badge nav-clinic-badge--warning" aria-label="{{ badges.alertas }} alertas">{{ badges.alertas }}</span>
+        {% endif %}
+    </a>
+</li>
+
+{# ── Seção: Acompanhamento ── #}
+<li class="sidebar-hub-separator" aria-hidden="true"></li>
+<li class="nav-item sidebar-hub-heading-item">
+    <div class="sidebar-hub-heading">
+        <span class="sidebar-hub-heading-label">Acompanhamento</span>
+    </div>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_pos_operatorio_protocolos') }}" class="nav-link {{ route starts with 'app_pos_operatorio_protocolo' ? 'active' : '' }}">
+        <i class="fas fa-file-medical nav-icon" aria-hidden="true"></i>
+        <p>Protocolos</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_pos_operatorio_questionarios') }}" class="nav-link {{ route == 'app_pos_operatorio_questionarios' ? 'active' : '' }}">
+        <i class="fas fa-clipboard-list nav-icon" aria-hidden="true"></i>
+        <p>Questionários</p>
+        {% if badges.questionarios|default(0) > 0 %}
+        <span class="nav-clinic-badge" aria-label="{{ badges.questionarios }} pendentes">{{ badges.questionarios }}</span>
+        {% endif %}
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_pos_operatorio_portal') }}" class="nav-link {{ route starts with 'app_pos_operatorio_portal' ? 'active' : '' }}">
+        <i class="fas fa-person-circle-check nav-icon" aria-hidden="true"></i>
+        <p>Portal do Paciente</p>
+    </a>
+</li>
+
+{# ── Geral ── #}
+<li class="sidebar-hub-separator" aria-hidden="true"></li>
+
+{% if nav_show_plataforma|default(false) %}
+<li class="nav-item">
+    <a href="{{ path('app_admin') }}"
+       class="nav-link {{ route starts with 'app_admin' ? 'active' : '' }}">
+        <i class="fas fa-sliders nav-icon" aria-hidden="true"></i>
+        <p>Administração</p>
+    </a>
+</li>
+{% endif %}

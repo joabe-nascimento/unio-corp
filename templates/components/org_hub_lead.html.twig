@@ -1,0 +1,57 @@
+{# Cabeçalho de módulo/prática — Unio Clínica #}
+<header class="org-hub-lead">
+    <div class="org-hub-lead__inner">
+        <div class="org-hub-lead__left">
+            {% if page_eyebrow|default('') %}
+            <span class="org-hub-lead__eyebrow">
+                <i class="fas fa-house-medical" aria-hidden="true"></i>
+                {{ page_eyebrow }}
+            </span>
+            {% endif %}
+            <h1 class="org-hub-lead__title">{{ page_title }}</h1>
+            {% if page_subtitle|default('') %}
+            <p class="org-hub-lead__subtitle">{{ page_subtitle }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if show_hub_tabs|default(false) %}
+    <nav class="org-clinic-nav{% if hub_use_clinic_tabs|default(false) %} org-clinic-nav--rich{% endif %}"
+         data-hub-tabs
+         role="tablist"
+         aria-label="Navegação do módulo">
+        {% if hub_use_clinic_tabs|default(false) and hub_clinic_tabs|default([])|length > 0 %}
+            {% for tab in hub_clinic_tabs %}
+            <button type="button"
+                    class="org-clinic-nav__tab org-clinic-nav__tab--rich{{ loop.first ? ' hub-overview-tab--active' : '' }}"
+                    data-hub-tab="{{ tab.id }}"
+                    role="tab"
+                    aria-selected="{{ loop.first ? 'true' : 'false' }}">
+                <span class="org-clinic-nav__label">{{ tab.label }}</span>
+                {% if tab.hint|default('') %}
+                <span class="org-clinic-nav__hint">{{ tab.hint }}</span>
+                {% endif %}
+            </button>
+            {% endfor %}
+        {% else %}
+            <button type="button"
+                    class="org-clinic-nav__tab hub-overview-tab--active"
+                    data-hub-tab="overview"
+                    role="tab"
+                    aria-selected="true">
+                Visão geral
+            </button>
+            {{ hub_extra_tabs_html|default('')|raw }}
+            {% if show_perm_tab|default(false) %}
+            <button type="button"
+                    class="org-clinic-nav__tab"
+                    data-hub-tab="permissions"
+                    role="tab"
+                    aria-selected="false">
+                Permissões
+            </button>
+            {% endif %}
+        {% endif %}
+    </nav>
+    {% endif %}
+</header>

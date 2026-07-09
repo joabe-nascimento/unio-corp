@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/organismo_icon.html.twig' as orgicon %}
+
+{% block title %}Unio Clínica{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=8">
+{% endblock %}
+
+{% block page_toolbar_layout %}yes{% endblock %}
+{% block page_scroll_mode %}flow{% endblock %}
+
+{% block content %}
+{% set headline = snapshot.pulso.headline|default('') %}
+<div class="pulso-root" id="pulsoRoot" data-api-url="{{ pulso_api_url }}">
+
+    <header class="pulso-hero pulso-hero--clinica">
+        <div class="pulso-hero__identity">
+            {{ orgicon.nav('fa-house-medical', 'sky', 'lg') }}
+            <div class="pulso-hero__text">
+                <h1 class="pulso-hero__title">
+                    Unio Clínica
+                    {% if empresa %}<span class="pulso-hero__colony">{{ empresa.nome }}</span>{% endif %}
+                </h1>
+                <p class="pulso-hero__sub pulso-hero__slogan">Cuidado que continua.</p>
+            </div>
+        </div>
+        <div class="pulso-hero__actions">
+            <div class="pulso-vital pulso-vital--{{ snapshot.pulso.nivel|default('saudavel') }}" id="pulsoVitalBadge">
+                <span class="pulso-vital__wave" aria-hidden="true"></span>
+                <span class="pulso-vital__label">{{ snapshot.pulso.nivel|default('saudavel')|capitalize }}</span>
+            </div>
+            <button type="button" class="pulso-icon-btn" id="pulsoRefreshBtn" title="Atualizar" aria-label="Atualizar">
+                <i class="fas fa-rotate" aria-hidden="true"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="pulso-metrics" role="list">
+        <div class="pulso-metric pulso-metric--sky" role="listitem">
+            {{ orgicon.nav('fa-user-injured', 'sky', 'sm') }}
+            <div class="pulso-metric__body">
+                <span class="pulso-metric__value" data-pulso-stat="ativas">{{ snapshot.pulso.cenas_ativas|default(0) }}</span>
+                <span class="pulso-metric__label">Pacientes ativos</span>
+            </div>
+        </div>
+        <div class="pulso-metric pulso-metric--amber" role="listitem">
+            {{ orgicon.nav('fa-hourglass-half', 'amber', 'sm') }}
+            <div class="pulso-metric__body">
+                <span class="pulso-metric__value" data-pulso-stat="aguardando">{{ snapshot.pulso.cenas_aguardando|default(0) }}</span>
+                <span class="pulso-metric__label">Em acompanhamento</span>
+            </div>
+        </div>
+        <div class="pulso-metric pulso-metric--sage pulso-metric--wide" role="listitem">
+            {{ orgicon.nav('fa-triangle-exclamation', 'rose', 'sm') }}
+            <div class="pulso-metric__body">
+                <span class="pulso-metric__label">Alertas recentes</span>
+                <ul class="pulso-sinais-list" id="pulsoSinaisList">
+                    {% for sinal in snapshot.sinais|default([]) %}
+                    <li class="pulso-sinal-item">
+                        <span class="pulso-sinal-item__valor">{{ sinal.valor }}</span>
+                        <span class="pulso-sinal-item__rotulo">{{ sinal.rotulo }}</span>
+                    </li>
+                    {% else %}
+                    <li class="pulso-sinal-item pulso-sinal-item--empty">
+                        <span class="pulso-sinal-item__rotulo">Nenhum alerta no momento</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <section class="pulso-cenas-section" aria-labelledby="pulsoCenasHeading">
+        <h2 id="pulsoCenasHeading" class="pulso-section-title">
+            <i class="fas fa-bed-pulse" aria-hidden="true"></i>
+            Casos em andamento
+        </h2>
+        <div class="pulso-cenas-grid" id="pulsoCenasGrid">
+            {% for cena in snapshot.cenas|default([]) %}
+            {% include 'core/pulso/_cena_card.html.twig' with { cena: cena } %}
+            {% else %}
+            <div class="pulso-empty">
+                {{ orgicon.nav('fa-heart-pulse', 'sky', 'xl') }}
+                <p>Nenhum caso ativo — tudo tranquilo na clínica.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if snapshot.kpis|default([])|length > 0 %}
+    <section class="pulso-kpis-section" aria-labelledby="pulsoKpisHeading">
+        <h2 id="pulsoKpisHeading" class="pulso-section-title">
+            <i class="fas fa-chart-line" aria-hidden="true"></i>
+            Sinais vitais da clínica
+        </h2>
+        <div class="pulso-kpis-grid">
+            {% for kpi in snapshot.kpis %}
+            <div class="pulso-kpi-tile">
+                {{ orgicon.nav(kpi.icon, 'neutral', 'md') }}
+                <span class="pulso-kpi-tile__value">{{ kpi.value }}</span>
+                <span class="pulso-kpi-tile__label">{{ kpi.label }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/unio-pulso.js') }}?v=2" defer></script>
+{% endblock %}
