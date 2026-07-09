@@ -11,7 +11,6 @@ use App\Service\OnboardingTourService;
 use App\Service\Organismo\ClinicNavBadgeService;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\Organismo\OrganismoFeature;
-use App\Service\Organismo\OrganismoPraticaRegistry;
 use App\Service\PageBackResolver;
 use App\Service\PlatformNotificationService;
 use App\Service\WorkspaceService;
@@ -48,7 +47,6 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private OnboardingTourService $onboardingTour,
         private OrganismoFeature $organismoFeature,
         private OrganismoCopyService $organismoCopy,
-        private OrganismoPraticaRegistry $praticaRegistry,
         private ClinicNavBadgeService $clinicNavBadges,
     ) {}
 
@@ -84,6 +82,13 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             $this->twig->addGlobal($name, $value);
         }
 
+        if ($this->organismoFeature->isEnabled()) {
+            $this->twig->addGlobal('nav_show_plataforma', false);
+            $this->twig->addGlobal('nav_show_tenant_empresas', false);
+            $this->twig->addGlobal('nav_show_admin', false);
+            $this->twig->addGlobal('platform_modules', []);
+        }
+
         $notificationsUnread = $empresa !== null ? $this->notifications->countUnread($empresa, $user) : 0;
         $this->twig->addGlobal('nav_notifications_unread', $notificationsUnread);
         $chatUnread = $this->chat->getUnreadCount($user, $empresa ?? $user->getEmpresa());
@@ -115,16 +120,6 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             'org_brand_label',
             $this->organismoFeature->isEnabled() ? 'Unio Clínica' : null,
         );
-        $this->twig->addGlobal(
-            'nav_organismo_practices',
-            $this->organismoFeature->isEnabled()
-                ? $this->praticaRegistry->getGroupedForUser($user)
-                : [],
-        );
-        $activePractice = $this->organismoFeature->isEnabled()
-            ? $this->praticaRegistry->resolveActiveForRoute($user, \is_string($route) ? $route : null)
-            : null;
-        $this->twig->addGlobal('nav_active_practice', $activePractice);
         $this->twig->addGlobal(
             'clinic_nav_badges',
             $this->organismoFeature->isEnabled()

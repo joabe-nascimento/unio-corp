@@ -8,19 +8,24 @@ use App\Repository\EmpresaRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+/**
+ * Resolve a clínica ativa do usuário (sem seleção/troca de workspace).
+ */
 class WorkspaceService
 {
-    private const SESSION_KEY = 'workspace_empresa_id';
     private const MEMO_ATTR = '_unio_workspace_memo';
 
     public function __construct(
         private RequestStack $requestStack,
-        private EmpresaRepository $empresaRepo
+        private EmpresaRepository $empresaRepo,
     ) {}
 
+    /** @return list<Empresa> */
     public function getAvailableEmpresas(User $user): array
     {
-        return $this->getMemo($user)['empresas'];
+        $empresa = $this->getActiveEmpresa($user);
+
+        return $empresa !== null ? [$empresa] : [];
     }
 
     public function getActiveEmpresa(User $user): ?Empresa
@@ -28,16 +33,12 @@ class WorkspaceService
         return $this->getMemo($user)['empresa'];
     }
 
+    /** @deprecated Sem troca de workspace — no-op de compatibilidade. */
     public function switchTo(User $user, int $empresaId): bool
     {
-        $empresa = $this->empresaRepo->find($empresaId);
-        if (!$empresa || !$this->canAccess($user, $empresa)) {
-            return false;
-        }
-        $this->requestStack->getSession()->set(self::SESSION_KEY, $empresaId);
-        $this->clearMemo();
+        $empresa = $this->getActiveEmpresa($user);
 
-        return true;
+        return $empresa !== null && $empresa->getId() === $empresaId;
     }
 
     /** @return array{empresas: list<Empresa>, empresa: ?Empresa} */
@@ -48,7 +49,12 @@ class WorkspaceService
             return $request->attributes->get(self::MEMO_ATTR);
         }
 
-        $data = $this->loadWorkspace($user);
+        $empresa = $this->resolveEmpresa($user);
+        $data = [
+            'empresas' => $empresa !== null ? [$empresa] : [],
+            'empresa' => $empresa,
+        ];
+
         if ($request instanceof Request) {
             $request->attributes->set(self::MEMO_ATTR, $data);
         }
@@ -56,74 +62,12 @@ class WorkspaceService
         return $data;
     }
 
-    /** @return array{empresas: list<Empresa>, empresa: ?Empresa} */
-    private function loadWorkspace(User $user): array
+    private function resolveEmpresa(User $user): ?Empresa
     {
-        $empresas = $this->fetchAvailableEmpresas($user);
-        $empresa = $this->resolveActiveEmpresa($user, $empresas);
-
-        return ['empresas' => $empresas, 'empresa' => $empresa];
-    }
-
-    /** @return list<Empresa> */
-    private function fetchAvailableEmpresas(User $user): array
-    {
-        if ($user->hasPlatformAccess()) {
-            return $this->empresaRepo->findBy(['ativo' => true], ['nome' => 'ASC']);
-        }
-        if ($user->getEmpresa()) {
-            return [$user->getEmpresa()];
+        if ($user->getEmpresa() !== null) {
+            return $user->getEmpresa();
         }
 
-        return [];
-    }
-
-    /** @param list<Empresa> $available */
-    private function resolveActiveEmpresa(User $user, array $available): ?Empresa
-    {
-        $request = $this->requestStack->getCurrentRequest();
-        $session = null;
-
-        if ($request?->hasSession()) {
-            $session = $request->getSession();
-        } elseif ($request?->hasPreviousSession()) {
-            $session = $request->getSession();
-        }
-
-        if ($session !== null) {
-            $id = $session->get(self::SESSION_KEY);
-
-            if ($id) {
-                $empresa = $this->empresaRepo->find($id);
-                if ($empresa && $this->canAccess($user, $empresa)) {
-                    return $empresa;
-                }
-            }
-        }
-
-        if (!empty($available)) {
-            $empresa = $available[0];
-            if ($session !== null) {
-                $session->set(self::SESSION_KEY, $empresa->getId());
-            }
-
-            return $empresa;
-        }
-
-        return null;
-    }
-
-    private function clearMemo(): void
-    {
-        $this->requestStack->getCurrentRequest()?->attributes->remove(self::MEMO_ATTR);
-    }
-
-    private function canAccess(User $user, Empresa $empresa): bool
-    {
-        if ($user->hasPlatformAccess()) {
-            return true;
-        }
-
-        return $user->getEmpresa()?->getId() === $empresa->getId();
+        return $this->empresaRepo->findOneBy(['ativo' => true], ['id' => 'ASC']);
     }
 }

@@ -24,7 +24,7 @@ class NotificationsController extends AbstractController
         $user = $this->requireUser();
         $empresa = $workspace->getActiveEmpresa($user);
         if ($empresa === null) {
-            return $this->redirectToRoute('app_workspace_select');
+            return $this->redirectToRoute('app_pulso');
         }
 
         $filtro = $request->query->getString('filtro', 'todas');
@@ -50,7 +50,7 @@ class NotificationsController extends AbstractController
         $user = $this->requireUser();
         $empresa = $workspace->getActiveEmpresa($user);
         if ($empresa === null) {
-            return $this->redirectToRoute('app_workspace_select');
+            return $this->redirectToRoute('app_pulso');
         }
 
         $notification = $notifications->findOwned($empresa, $user, $id);
@@ -77,7 +77,7 @@ class NotificationsController extends AbstractController
         $user = $this->requireUser();
         $empresa = $workspace->getActiveEmpresa($user);
         if ($empresa === null) {
-            return $this->redirectToRoute('app_workspace_select');
+            return $this->redirectToRoute('app_pulso');
         }
 
         if (!$this->isCsrfTokenValid('notifications_mark_all', $request->request->getString('_token'))) {

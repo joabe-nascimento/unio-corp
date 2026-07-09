@@ -50,7 +50,7 @@ final class ProductGrantSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if ($this->organismo->isEnabled() && $this->isPosOperatorioRoute($route)) {
+        if ($this->organismo->isEnabled()) {
             return;
         }
 
@@ -60,12 +60,5 @@ final class ProductGrantSubscriber implements EventSubscriberInterface
 
         $dashboardUrl = $this->urlGenerator->generate('app_dashboard');
         $event->setController(static fn (): RedirectResponse => new RedirectResponse($dashboardUrl));
-    }
-
-    private function isPosOperatorioRoute(string $route): bool
-    {
-        $entry = ProductGrantRouteMap::MAP[$route] ?? null;
-
-        return \is_array($entry) && $entry['scope'] === 'hub_pos_operatorio';
     }
 }

@@ -36,7 +36,7 @@ class OnboardingProgressService
 
     /** @var list<string> */
 
-    public const STEP_IDS = ['workspace', 'shell_tour', 'funcionario', 'portal', 'invite_user', 'hub'];
+    public const STEP_IDS = ['shell_tour', 'funcionario', 'portal', 'invite_user', 'hub'];
 
 
 
@@ -205,38 +205,6 @@ class OnboardingProgressService
     {
 
         $steps = [];
-
-
-
-        $workspaceDone = $this->isStepComplete('workspace', $user);
-
-        $steps[] = [
-
-            'id' => 'workspace',
-
-            'label' => 'Confirmar área de trabalho',
-
-            'hint' => $workspaceDone
-
-                ? 'Área de trabalho confirmada por você.'
-
-                : ($empresa
-
-                    ? 'Clique em Ir e confirme a empresa ativa (ou troque se houver mais de uma).'
-
-                    : 'Selecione a empresa em que vai trabalhar.'),
-
-            'icon' => 'fa-building',
-
-            'route' => 'app_workspace_select',
-
-            'route_params' => $empresa && $empresasCount > 1 ? ['force' => 1] : [],
-
-            'done' => $workspaceDone,
-
-        ];
-
-
 
         $shellTourDone = $this->isStepComplete('shell_tour', $user);
 

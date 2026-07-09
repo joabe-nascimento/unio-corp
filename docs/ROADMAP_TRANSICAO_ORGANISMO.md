@@ -144,7 +144,7 @@ Encaixa em paralelo com **Fase 1–3** de [ROADMAP_90_DIAS.md](ROADMAP_90_DIAS.m
 | T0-01 | Feature flag `organismo_pulso` | `config/packages/unio_organismo.yaml` (novo), parâmetro `%unio.organismo.pulso_enabled%` | Flag liga/desliga rota `/pulso` sem deploy |
 | T0-02 | Serviço de copy UI (Colônia vs legado) | `src/Service/OrganismoCopyService.php` (novo) | Métodos `colonia()`, `orquestrador()`, `pulso()` retornam strings; Twig global via subscriber |
 | T0-03 | Twig global `organismo` | `src/EventSubscriber/OrganismoTwigSubscriber.php`, `config/services.yaml` | Templates usam `organismo.colonia` em vez de hardcode |
-| T0-04 | Copy Colônia no workspace | `templates/workspace/select.html.twig` — título “Selecionar colônia” | Texto atualizado; rota/código `Empresa` intacto |
+| T0-04 | ~~Copy Colônia no workspace~~ | Removido — login vai direto ao Pulso | Concluído |
 | T0-05 | Copy Colônia no banner | `templates/components/page_banner.html.twig`, `templates/macros/empresa.html.twig` | Subtitle opcional “Colônia” quando `use_empresa_logo` |
 | T0-06 | Link experimental Pulso no menu | `src/Service/NavigationService.php`, `templates/layout/_sidebar_nav.html.twig` | Item “Pulso” visível só se flag ativa + perfil gestor+ |
 
