@@ -94,7 +94,7 @@ final class PosOperatorioAlertController extends AbstractController
         $user = $this->getUser();
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
         if (!$empresa) {
-            throw $this->createAccessDeniedException('Selecione um workspace.');
+            throw $this->createAccessDeniedException('Área de trabalho indisponível.');
         }
 
         return $empresa;

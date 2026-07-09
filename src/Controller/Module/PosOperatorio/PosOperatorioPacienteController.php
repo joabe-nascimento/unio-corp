@@ -376,7 +376,7 @@ final class PosOperatorioPacienteController extends AbstractController
 
         if (!$empresa) {
 
-            throw $this->createAccessDeniedException('Selecione um workspace.');
+            throw $this->createAccessDeniedException('Área de trabalho indisponível.');
 
         }
 

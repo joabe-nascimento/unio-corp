@@ -78,7 +78,7 @@ final class PosOperatorioPortalController extends AbstractController
         $user = $this->getUser();
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
         if (!$empresa) {
-            $this->addFlash('error', 'Selecione um workspace.');
+            $this->addFlash('error', 'Área de trabalho indisponível.');
 
             return $this->redirectToRoute('app_pos_operatorio_portal');
         }

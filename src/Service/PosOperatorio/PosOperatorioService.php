@@ -40,7 +40,7 @@ final class PosOperatorioService
     {
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
         if (!$empresa) {
-            throw new BadRequestHttpException('Selecione um workspace para acessar a Unio Clínica.');
+            throw new BadRequestHttpException('Área de trabalho indisponível.');
         }
 
         $perPage = $this->normalizePerPage($perPage);
