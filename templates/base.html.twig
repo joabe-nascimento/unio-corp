@@ -122,6 +122,7 @@
 <div class="wrapper">
 
     {# ── Sidebar (fundo do shell, integrada ao inset) ── #}
+    {% block app_sidebar %}
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <div class="sidebar-top">
             {% if app.user and not organismo.enabled|default(false) %}
@@ -167,11 +168,13 @@
         </div>
         {% endif %}
     </aside>
+    {% endblock %}
 
     <div class="app-inset-main">
     <div class="app-inset-panel">
 
     {# ── Top Navbar — Organismo ou legado ── #}
+    {% block app_topbar %}
     {% if organismo.enabled|default(false) %}
         {% include 'layout/_toolbar_organismo.html.twig' %}
     {% else %}
@@ -213,6 +216,7 @@
         </ul>
     </nav>
     {% endif %}
+    {% endblock %}
 
     {# ── Content ── #}
     <div class="content-wrapper" id="main-content">
