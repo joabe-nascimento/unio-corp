@@ -29,6 +29,15 @@ trap on_err ERR
 
 cd "$DEPLOY_PATH"
 
+DEFAULT_URI="$(grep -E '^DEFAULT_URI=' .env.local 2>/dev/null | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+if [[ -f .env.local && -n "$DEFAULT_URI" ]]; then
+  CI_REPORT_STEP="Organismo env por ambiente"
+  ci_report_step "$CI_REPORT_STEP"
+  # shellcheck source=scripts/lib/organismo-env-sync.sh
+  source "$ROOT/scripts/lib/organismo-env-sync.sh"
+  organismo_env_sync_for_uri "$DEPLOY_PATH/.env.local" "$DEFAULT_URI"
+fi
+
 if [[ ! -f .env ]]; then
   CI_REPORT_STEP="Criar .env base (stub)"
   ci_report_step "$CI_REPORT_STEP"
@@ -164,6 +173,7 @@ else
 fi
 
 DEFAULT_URI="$(grep -E '^DEFAULT_URI=' .env.local 2>/dev/null | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+
 VHOST="${DEFAULT_URI#https://}"
 VHOST="${VHOST#http://}"
 VHOST="${VHOST%%/*}"
