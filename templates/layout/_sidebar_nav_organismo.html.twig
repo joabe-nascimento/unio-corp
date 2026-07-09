@@ -34,21 +34,25 @@
 
 <li class="nav-item">
     <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="nav-link {{ route == 'app_pos_operatorio_sala_critica' ? 'active' : '' }}">
-        <i class="fas fa-bed-pulse nav-icon" aria-hidden="true"></i>
+        <span class="nav-icon-slot">
+            <i class="fas fa-bed-pulse nav-icon" aria-hidden="true"></i>
+            {% if badges.sala_critica|default(0) > 0 %}
+            <span class="nav-clinic-badge nav-clinic-badge--danger" aria-label="{{ badges.sala_critica }} P1">{{ badges.sala_critica }}</span>
+            {% endif %}
+        </span>
         <p>Sala Crítica</p>
-        {% if badges.sala_critica|default(0) > 0 %}
-        <span class="nav-clinic-badge nav-clinic-badge--danger" aria-label="{{ badges.sala_critica }} P1">{{ badges.sala_critica }}</span>
-        {% endif %}
     </a>
 </li>
 
 <li class="nav-item">
     <a href="{{ path('app_pos_operatorio_alertas') }}" class="nav-link {{ route starts with 'app_pos_operatorio_alerta' ? 'active' : '' }}">
-        <i class="fas fa-triangle-exclamation nav-icon" aria-hidden="true"></i>
+        <span class="nav-icon-slot">
+            <i class="fas fa-triangle-exclamation nav-icon" aria-hidden="true"></i>
+            {% if badges.alertas|default(0) > 0 %}
+            <span class="nav-clinic-badge nav-clinic-badge--warning" aria-label="{{ badges.alertas }} alertas">{{ badges.alertas }}</span>
+            {% endif %}
+        </span>
         <p>Alertas</p>
-        {% if badges.alertas|default(0) > 0 %}
-        <span class="nav-clinic-badge nav-clinic-badge--warning" aria-label="{{ badges.alertas }} alertas">{{ badges.alertas }}</span>
-        {% endif %}
     </a>
 </li>
 
@@ -69,11 +73,13 @@
 
 <li class="nav-item">
     <a href="{{ path('app_pos_operatorio_questionarios') }}" class="nav-link {{ route == 'app_pos_operatorio_questionarios' ? 'active' : '' }}">
-        <i class="fas fa-clipboard-list nav-icon" aria-hidden="true"></i>
+        <span class="nav-icon-slot">
+            <i class="fas fa-clipboard-list nav-icon" aria-hidden="true"></i>
+            {% if badges.questionarios|default(0) > 0 %}
+            <span class="nav-clinic-badge" aria-label="{{ badges.questionarios }} pendentes">{{ badges.questionarios }}</span>
+            {% endif %}
+        </span>
         <p>Questionários</p>
-        {% if badges.questionarios|default(0) > 0 %}
-        <span class="nav-clinic-badge" aria-label="{{ badges.questionarios }} pendentes">{{ badges.questionarios }}</span>
-        {% endif %}
     </a>
 </li>
 

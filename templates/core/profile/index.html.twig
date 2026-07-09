@@ -2,7 +2,7 @@
 
 
 
-{% block title %}Meu Perfil{% endblock %}
+{% block title %}{{ organismo.enabled|default(false) ? 'Minha conta' : 'Meu Perfil' }}{% endblock %}
 
 {% block page_show_title %}{% endblock %}
 
@@ -16,7 +16,7 @@
 
     {% embed 'components/list_toolbar.html.twig' with {
 
-        page_title: 'Meu Perfil',
+        page_title: organismo.enabled|default(false) ? 'Minha conta' : 'Meu Perfil',
 
         search_disabled: true,
 
@@ -75,15 +75,12 @@
         <div class="ficha-hero-name">{{ app.user.nome }}</div>
 
         <div class="ficha-hero-role">
-
             {{ user_access_badge().label }}
-
-            {% if empresa %}
-
+            {% if organismo.enabled|default(false) %}
+                <span class="ficha-hero-dept">· Unio Clínica</span>
+            {% elseif empresa %}
                 <span class="ficha-hero-dept">· {{ empresa.nome }}</span>
-
             {% endif %}
-
         </div>
 
         <div class="ficha-hero-meta">
@@ -97,23 +94,16 @@
     </div>
 
     <div class="ficha-hero-actions">
-
+        {% if not organismo.enabled|default(false) %}
         {% set access_badge = user_access_badge() %}
-
         <span class="badge-perfil {{ access_badge.class }}"{% if access_badge.elevated %} title="Conta global: {{ access_badge.global_label }}"{% endif %}>{{ access_badge.label }}</span>
-
         {% if access_badge.elevated %}
-
             <span class="text-muted small d-block mt-1">Conta global: {{ access_badge.global_label }}</span>
-
         {% endif %}
-
+        {% endif %}
         <span class="member-status member-status--{{ app.user.ativo ? 'ativo' : 'inativo' }}">
-
             {{ app.user.ativo ? 'Conta ativa' : 'Conta inativa' }}
-
         </span>
-
     </div>
 
 </div>
@@ -127,8 +117,7 @@
         <div class="unio-card mb-3 unio-form-panel">
 
             <div class="section-title mb-1">Identidade</div>
-
-            <p class="section-subtitle mb-3">Nome e foto exibidos no menu e na plataforma</p>
+            <p class="section-subtitle mb-3">{{ organismo.enabled|default(false) ? 'Nome e foto usados no menu e no acompanhamento clínico' : 'Nome e foto exibidos no menu e na plataforma' }}</p>
 
 
 
@@ -220,6 +209,7 @@
 
 
 
+        {% if not organismo.enabled|default(false) %}
         <div class="unio-card mb-3">
 
             <div class="section-title mb-1">Dados da conta</div>
@@ -261,6 +251,7 @@
             </div>
 
         </div>
+        {% endif %}
 
 
 
@@ -454,6 +445,7 @@
 
 
 
+        {% if not organismo.enabled|default(false) %}
         <div class="unio-card">
 
             <div class="section-title mb-1">Ficha na empresa</div>
@@ -481,6 +473,7 @@
             {% endif %}
 
         </div>
+        {% endif %}
 
     </div>
 
