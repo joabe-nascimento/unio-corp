@@ -46,6 +46,21 @@ final class OrganismoCopyService
         return $this->brandSlogan;
     }
 
+    public function colonia(): string
+    {
+        return $this->unitLabel;
+    }
+
+    public function pulso(): string
+    {
+        return 'Pulso';
+    }
+
+    public function lumen(): string
+    {
+        return 'Lumen';
+    }
+
     /** @return array<string, string> */
     public function getGlobals(): array
     {
