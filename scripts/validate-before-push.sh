@@ -61,7 +61,7 @@ run_step "Symfony — container DI"
 "$PHP_BIN" bin/console lint:container --no-interaction
 
 run_step "Symfony — YAML (config)"
-"$PHP_BIN" bin/console lint:yaml config --no-interaction
+"$PHP_BIN" bin/console lint:yaml config --parse-tags --no-interaction
 
 run_step "Symfony — Twig (templates)"
 "$PHP_BIN" bin/console lint:twig templates --no-interaction

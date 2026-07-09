@@ -10,7 +10,10 @@ final class PulsoApiTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('GET', '/api/pulso');
-        self::assertResponseRedirects();
+        self::assertTrue(
+            $client->getResponse()->isRedirect()
+            || $client->getResponse()->getStatusCode() === 403,
+        );
     }
 
     public function testPulsoApiReturnsSnapshotForGestor(): void

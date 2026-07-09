@@ -40,7 +40,7 @@ Write-Host "Git Bash não encontrado — executando checks PHP mínimos..." -For
 php bin/console lint:container --no-interaction
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-php bin/console lint:yaml config --no-interaction
+php bin/console lint:yaml config --parse-tags --no-interaction
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 php bin/console lint:twig templates --no-interaction

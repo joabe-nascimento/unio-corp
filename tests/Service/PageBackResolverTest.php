@@ -2,6 +2,8 @@
 
 namespace App\Tests\Service;
 
+use App\Service\Organismo\OrganismoFeature;
+use App\Service\Organismo\OrganismoRedirectService;
 use App\Service\PageBackResolver;
 use PHPUnit\Framework\TestCase;
 
@@ -11,7 +13,8 @@ class PageBackResolverTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->resolver = new PageBackResolver();
+        $redirects = new OrganismoRedirectService(new OrganismoFeature(false, false));
+        $this->resolver = new PageBackResolver($redirects);
     }
 
     public function testFeriasListBackToRhHub(): void

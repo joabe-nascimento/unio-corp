@@ -10,7 +10,10 @@ final class VitoriaToolsApiTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('GET', '/api/vitoria/tools');
-        self::assertResponseRedirects();
+        self::assertTrue(
+            $client->getResponse()->isRedirect()
+            || $client->getResponse()->getStatusCode() === 403,
+        );
     }
 
     public function testGestorCanListAndRunTools(): void

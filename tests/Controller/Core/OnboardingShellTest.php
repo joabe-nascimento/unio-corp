@@ -3,6 +3,7 @@
 namespace App\Tests\Controller\Core;
 
 use App\Repository\UserRepository;
+use App\Service\Organismo\OrganismoFeature;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -122,6 +123,10 @@ final class OnboardingShellTest extends WebTestCase
 
         if (!static::getContainer()->get(UserRepository::class)->findOneBy(['email' => self::GESTOR_EMAIL])) {
             self::markTestSkipped('Execute app:seed-users antes dos testes.');
+        }
+
+        if (static::getContainer()->get(OrganismoFeature::class)->isEnabled()) {
+            self::markTestSkipped('Tour do shell legado não se aplica com Organismo habilitado.');
         }
     }
 }
