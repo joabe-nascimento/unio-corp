@@ -7,8 +7,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ _pnome }} Clínica — Cuidado que continua.</title>
-    <meta name="description" content="{{ _pnome }} Clínica: plataforma de acompanhamento pós-operatório com gestão de pacientes, protocolos clínicos, sala crítica e alertas em tempo real.">
+    <title>{{ organismo.copy.brand_name|default('Unio Studio') }} — {{ organismo.copy.marketing_tagline|default('Sites, sistemas e projetos que evoluem.') }}</title>
+    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio Studio') }}: desenvolvimento de sites, sistemas e projetos digitais — gestão de entregas, playbooks e portal do cliente.">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
@@ -77,7 +77,7 @@
 
 <header class="mkt-header mkt-header--v2">
     <div class="mkt-header-inner mkt-header-inner--v2">
-        <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ _pnome }} Clínica">
+        <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ organismo.copy.brand_name|default('Unio Studio') }}">
             {% include 'components/platform_logo.html.twig' with {
                 variant: 'full',
                 class: 'mkt-logo mkt-logo--v2' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
@@ -114,19 +114,18 @@
         <div class="mkt-hero-inner mkt-hero-inner--v2">
             <div class="mkt-hero-copy mkt-hero-copy--v2">
                 <span class="clinic-hero-slogan">
-                    <i class="fas fa-heart-pulse" aria-hidden="true"></i>
-                    Plataforma clínica pós-operatória
+                    <i class="fas fa-code" aria-hidden="true"></i>
+                    {{ organismo.copy.marketing_eyebrow|default('Studio digital & projetos clínicos') }}
                 </span>
                 <p class="mkt-hero-eyebrow mkt-hero-eyebrow--v2">
                     <span class="mkt-hero-eyebrow-dot"></span>
-                    Cuidado que continua.
+                    {{ organismo.copy.marketing_tagline|default('Sites, sistemas e projetos que evoluem.') }}
                 </p>
                 <h1 class="mkt-hero-title mkt-hero-title--v2" id="mkt-hero-title">
-                    Acompanhamento pós-cirúrgico,
-                    <span class="mkt-gradient-text">inteligente e contínuo</span>
+                    {{ organismo.copy.hero_title|default('Desenvolvimento de sites, apps e projetos digitais') }}
                 </h1>
                 <p class="mkt-hero-lead mkt-hero-lead--v2">
-                    {{ _pnome }} reúne gestão de pacientes, protocolos clínicos, alertas em tempo real e portal do paciente — em uma plataforma pensada para clínicas que levam o cuidado a sério.
+                    {{ organismo.copy.hero_desc|default('Unio Studio reúne gestão de projetos, entregas, playbooks e portal do cliente num único ambiente.') }}
                 </p>
                 <div class="mkt-hero-cta mkt-hero-cta--v2">
                     <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">
@@ -417,7 +416,7 @@
                     </div>
                     <div class="mkt-dash-chrome-title">
                         <i class="fas fa-heart-pulse" aria-hidden="true"></i>
-                        Unio Clínica — Visão Geral
+                        {{ org_brand_label|default('Unio Studio') }} — Visão Geral
                     </div>
                     <div class="mkt-dash-live">
                         <span class="mkt-dash-live-dot" aria-hidden="true"></span>
@@ -919,8 +918,8 @@
                     variant: 'full',
                     class: 'mkt-footer-logo mkt-logo' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
                 } only %}
-                <p class="mkt-footer-tagline">{{ platform_config.rodape_texto|default('Cuidado que continua.') }}</p>
-                <p class="mkt-footer-desc">Plataforma clínica de acompanhamento pós-operatório — pacientes, protocolos, alertas e portal integrados.</p>
+                <p class="mkt-footer-tagline">{{ platform_config.rodape_texto|default(organismo.copy.marketing_tagline|default('Sites, sistemas e projetos que evoluem.')) }}</p>
+                <p class="mkt-footer-desc">{{ organismo.copy.hero_desc|default('Studio digital — projetos, entregas e portal do cliente integrados.') }}</p>
                 {% include 'components/platform_support.html.twig' with { extra_class: ' mkt-footer-support' } %}
             </div>
 

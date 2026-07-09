@@ -9,7 +9,6 @@ use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
 use App\Service\OnboardingTourService;
 use App\Service\Organismo\ClinicNavBadgeService;
-use App\Service\Organismo\OrganismoCopyService;
 use App\Service\Organismo\OrganismoFeature;
 use App\Service\PageBackResolver;
 use App\Service\PlatformNotificationService;
@@ -46,7 +45,6 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private TiGrantService $tiGrants,
         private OnboardingTourService $onboardingTour,
         private OrganismoFeature $organismoFeature,
-        private OrganismoCopyService $organismoCopy,
         private ClinicNavBadgeService $clinicNavBadges,
     ) {}
 
@@ -87,6 +85,10 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             $this->twig->addGlobal('nav_show_tenant_empresas', false);
             $this->twig->addGlobal('nav_show_admin', false);
             $this->twig->addGlobal('platform_modules', []);
+            $this->twig->addGlobal(
+                'clinic_nav_badges',
+                $this->clinicNavBadges->forEmpresa($empresa),
+            );
         }
 
         $notificationsUnread = $empresa !== null ? $this->notifications->countUnread($empresa, $user) : 0;
@@ -109,22 +111,6 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
                 $chatUnread,
                 $notificationsUnread,
             ),
-        );
-        $this->twig->addGlobal('organismo', [
-            'enabled' => $this->organismoFeature->isEnabled(),
-            'pulso_home' => $this->organismoFeature->isPulsoHome(),
-            'copy' => $this->organismoCopy->getGlobals(),
-        ]);
-        $this->twig->addGlobal('org_clinic', $this->organismoFeature->isEnabled());
-        $this->twig->addGlobal(
-            'org_brand_label',
-            $this->organismoFeature->isEnabled() ? 'Unio Clínica' : null,
-        );
-        $this->twig->addGlobal(
-            'clinic_nav_badges',
-            $this->organismoFeature->isEnabled()
-                ? $this->clinicNavBadges->forEmpresa($empresa)
-                : [],
         );
         $this->twig->addGlobal(
             'nav_home_route',
