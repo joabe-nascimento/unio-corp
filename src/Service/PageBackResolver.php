@@ -137,7 +137,6 @@ final class PageBackResolver
         'app_pos_operatorio' => 'app_dashboard',
         'app_pos_operatorio_alertas' => 'app_dashboard',
         'app_pos_operatorio_sala_critica' => 'app_dashboard',
-        'app_pos_operatorio_portal' => 'app_dashboard',
         'app_pos_operatorio_pacientes' => 'app_dashboard',
         'app_pos_operatorio_paciente_novo' => 'app_pos_operatorio_pacientes',
         'app_pos_operatorio_paciente_show' => 'app_pos_operatorio_pacientes',

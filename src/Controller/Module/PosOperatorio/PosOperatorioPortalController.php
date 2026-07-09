@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\PosOperatorio\PosOperatorioAuditService;
@@ -38,13 +39,14 @@ final class PosOperatorioPortalController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
-        $paciente = null;
+        $paciente = $this->pacienteRepo->findOneBy(['portalUser' => $user]);
 
-        if ($empresa) {
-            $paciente = $this->pacienteRepo->findOneBy(['portalUser' => $user, 'empresa' => $empresa]);
-            if ($paciente) {
-                $this->audit->logAccess($paciente, $user, 'portal_paciente', $request);
-            }
+        if ($paciente !== null && ($empresa === null || $paciente->getEmpresa()->getId() !== $empresa->getId())) {
+            $empresa = $paciente->getEmpresa();
+        }
+
+        if ($paciente instanceof PosOperatorioPaciente) {
+            $this->audit->logAccess($paciente, $user, 'portal_paciente', $request);
         }
 
         $portalView = $this->portalService->buildView($paciente);
@@ -60,9 +62,6 @@ final class PosOperatorioPortalController extends AbstractController
             'has_consent' => $paciente ? $this->audit->hasConsent($paciente) : false,
             'consent_at' => $paciente?->getConsentimentoLgpdEm(),
             'questionario_resumo' => $questionarioResumo,
-            'pacientes_vinculaveis' => $empresa && !$paciente
-                ? $this->pacienteRepo->findRecentByEmpresa($empresa, 20, 0)
-                : [],
         ], $portalView));
     }
 
@@ -116,14 +115,7 @@ final class PosOperatorioPortalController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
-        if (!$empresa) {
-            $this->addFlash('error', 'Workspace não selecionado.');
-
-            return $this->redirectToRoute('app_pos_operatorio_portal');
-        }
-
-        $paciente = $this->pacienteRepo->findOneBy(['portalUser' => $user, 'empresa' => $empresa]);
+        $paciente = $this->resolvePortalPaciente($user);
         if ($paciente === null) {
             $this->addFlash('error', 'Nenhum acompanhamento vinculado.');
 
@@ -147,14 +139,7 @@ final class PosOperatorioPortalController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
-        if (!$empresa) {
-            $this->addFlash('error', 'Workspace não selecionado.');
-
-            return $this->redirectToRoute('app_pos_operatorio_portal');
-        }
-
-        $paciente = $this->pacienteRepo->findOneBy(['portalUser' => $user, 'empresa' => $empresa]);
+        $paciente = $this->resolvePortalPaciente($user);
         if ($paciente === null) {
             $this->addFlash('error', 'Nenhum acompanhamento vinculado ao seu usuário.');
 
@@ -200,5 +185,12 @@ final class PosOperatorioPortalController extends AbstractController
         }
 
         return $respostas;
+    }
+
+    private function resolvePortalPaciente(User $user): ?PosOperatorioPaciente
+    {
+        $paciente = $this->pacienteRepo->findOneBy(['portalUser' => $user]);
+
+        return $paciente instanceof PosOperatorioPaciente ? $paciente : null;
     }
 }

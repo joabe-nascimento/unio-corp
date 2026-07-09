@@ -50,12 +50,6 @@ final class ClinicController extends AbstractController
         return $this->redirectToRoute('app_pos_operatorio_questionarios');
     }
 
-    #[Route('/portal', name: 'app_clinic_portal')]
-    public function portal(): Response
-    {
-        return $this->redirectToRoute('app_pos_operatorio_portal');
-    }
-
     #[Route('/retornos', name: 'app_clinic_retornos')]
     public function retornos(): Response
     {

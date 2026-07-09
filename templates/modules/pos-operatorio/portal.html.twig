@@ -8,48 +8,18 @@
 {% block portal_content %}
     {% if not paciente %}
         <section class="unio-card p-4 mb-3 pos-portal-card--info">
-            <div class="pos-portal-card__icon" aria-hidden="true"><i class="fas fa-link"></i></div>
+            <div class="pos-portal-card__icon" aria-hidden="true"><i class="fas fa-user-lock"></i></div>
             {% include 'components/section_header.html.twig' with {
-                title: 'Vincule seu login ao acompanhamento',
-                subtitle: 'Associe seu usuário a um cadastro pós-operatório para usar o portal como paciente.'
+                title: 'Acompanhamento não encontrado',
+                subtitle: 'Este login não está vinculado a um paciente ativo.'
             } %}
             <p class="text-muted small mb-3">
-                Equipe clínica também pode vincular em <strong>Pacientes → Editar → Usuário do portal</strong>.
+                Se você é paciente, confirme com a clínica se seu acesso já foi liberado.
+                Se entrou com a conta da equipe, use o <a href="{{ path('app_portal_patient_login') }}">login do portal do paciente</a>
+                com as credenciais que a clínica enviou.
             </p>
-
-            {% if pacientes_vinculaveis|length > 0 %}
-            <ul class="pos-portal-link-list">
-                {% for p in pacientes_vinculaveis %}
-                <li class="pos-portal-link-list__item">
-                    <div class="pos-portal-link-list__body">
-                        <strong>{{ p.nome }}</strong>
-                        <span class="pos-portal-link-list__meta">
-                            <code>{{ p.codigo }}</code>
-                            {% if p.procedimento %} · {{ p.procedimento }}{% endif %}
-                            {% if p.portalUser %}
-                            <span class="pos-portal-tag pos-portal-tag--warn">Já vinculado</span>
-                            {% endif %}
-                        </span>
-                    </div>
-                    {% if not p.portalUser %}
-                    <form method="post" action="{{ path('app_pos_operatorio_portal_vincular') }}" class="pos-portal-link-list__form">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_portal_vincular') }}">
-                        <input type="hidden" name="paciente_id" value="{{ p.id }}">
-                        <button type="submit" class="btn-unio btn-sm">Vincular</button>
-                    </form>
-                    {% endif %}
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-muted mb-3">Nenhum paciente cadastrado neste workspace.</p>
-            <a href="{{ path('app_pos_operatorio_pacientes', { open_novo: 1 }) }}" class="btn-unio">Cadastrar paciente</a>
-            {% endif %}
+            <a href="{{ path('app_portal_patient_logout') }}" class="btn-unio btn-sm">Sair e tentar outro login</a>
         </section>
-
-        <p class="pos-portal-footnote">
-            <a href="{{ path('app_pos_operatorio_pacientes') }}">Ver lista completa de pacientes</a>
-        </p>
 
     {% elseif not has_consent %}
         <section class="unio-card p-4">
@@ -118,36 +88,38 @@
         {% endif %}
         {% include 'components/kpi_row.html.twig' with { items: kpi_items, mb: 'mb-3', extra_class: 'pos-portal-kpis' } %}
 
-        <div class="row g-3 pos-portal-grid">
+        <div class="row g-3 pos-portal-grid align-items-start">
             {% if checklist_hoje|length > 0 or medico_email or paciente.telefoneContato %}
             <div class="col-lg-4 pos-portal-grid__aside">
                 {% if checklist_hoje|length > 0 %}
-                <section class="unio-card p-0 h-100">
+                <section class="unio-card p-0 pos-portal-card--orientacoes">
                     {% include 'components/section_header.html.twig' with {
                         title: 'Orientações de hoje',
                         subtitle: 'Protocolo pós-operatório'
                     } %}
-                    <ul class="pos-portal-checklist px-3 pb-3">
-                        {% for item in checklist_hoje %}
-                        <li class="pos-portal-checklist__item">
-                            <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
-                            <span class="pos-portal-checklist__text">{{ item.item }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% if checklist_proximos|default([])|length > 0 %}
-                    <details class="pos-portal-details px-3 pb-3">
-                        <summary>Próximas etapas do protocolo</summary>
-                        <ul class="pos-portal-checklist pos-portal-checklist--muted">
-                            {% for item in checklist_proximos %}
+                    <div class="pos-portal-card-body">
+                        <ul class="pos-portal-checklist">
+                            {% for item in checklist_hoje %}
                             <li class="pos-portal-checklist__item">
                                 <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
                                 <span class="pos-portal-checklist__text">{{ item.item }}</span>
                             </li>
                             {% endfor %}
                         </ul>
-                    </details>
-                    {% endif %}
+                        {% if checklist_proximos|default([])|length > 0 %}
+                        <details class="pos-portal-details">
+                            <summary>Próximas etapas do protocolo</summary>
+                            <ul class="pos-portal-checklist pos-portal-checklist--muted">
+                                {% for item in checklist_proximos %}
+                                <li class="pos-portal-checklist__item">
+                                    <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
+                                    <span class="pos-portal-checklist__text">{{ item.item }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                        {% endif %}
+                    </div>
                 </section>
                 {% endif %}
 

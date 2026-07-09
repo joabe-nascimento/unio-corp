@@ -1,41 +1,34 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{% block portal_title %}Portal do Paciente{% endblock %} · Pós-Operatório{% endblock %}
+{% block title %}{% block portal_title %}Portal do Paciente{% endblock %} · Unio Clínica{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=5">
+<link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=7">
 <link rel="manifest" href="{{ asset('pos-operatorio/manifest.webmanifest') }}">
 {% endblock %}
 
 {% block body_attrs %} data-portal-layout="1"{% endblock %}
 {% block page_show_title %}{% endblock %}
-{% block page_toolbar_layout %}yes{% endblock %}
+{% block page_toolbar_layout %}{% endblock %}
 
-{% block content_lead %}
-<div class="page-lead-zone page-lead-zone--portal">
-    {% embed 'components/list_toolbar.html.twig' with {
-        page_title: portal_page_title|default('Portal do paciente'),
-        page_subtitle: portal_page_subtitle|default(org_brand_label|default(empresa ? empresa.nome : '')),
-        search_hidden: true,
-        page_back_hide: true,
-        actions_in_top: true,
-        actions_before_title: true
-    } %}
-        {% block toolbar_actions %}
-            {% block portal_toolbar_actions %}
-            {% include 'components/page_back_link.html.twig' with {
-                href: path('app_pos_operatorio'),
-                label: 'Painel clínico',
-                inline: true
-            } %}
-            {% endblock %}
-        {% endblock %}
-    {% endembed %}
-</div>
-{% endblock %}
+{% block content_lead %}{% endblock %}
 
 {% block content %}
+<header class="pos-portal-topbar">
+    <div class="pos-portal-topbar__brand">
+        <span class="pos-portal-topbar__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></span>
+        <div class="pos-portal-topbar__text">
+            <strong class="pos-portal-topbar__title">{% block portal_topbar_title %}{{ portal_page_title|default('Acompanhamento') }}{% endblock %}</strong>
+            <span class="pos-portal-topbar__sub">{{ portal_page_subtitle|default('Unio Clínica') }}</span>
+        </div>
+    </div>
+    <a href="{{ path('app_portal_patient_logout') }}" class="pos-portal-topbar__logout" title="Sair">
+        <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+        <span>Sair</span>
+    </a>
+</header>
+
 <div class="page-body-inner pos-portal-body">
     {% block portal_content %}{% endblock %}
 
