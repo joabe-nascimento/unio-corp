@@ -114,7 +114,7 @@ if [[ "$APPLY_SERVER" == "1" ]]; then
 
   echo "[*] Criando subdominio ${SUBDOMAIN}..."
   ssh "${SSH_OPTS[@]}" "${SSH_USER}@${SSH_HOST}" \
-    "uapi --output=json SubDomain addsubdomain domain=${SUBDOMAIN} rootdomain=${ROOT_DOMAIN} dir=${SUBDOMAIN}" \
+    "uapi --output=json SubDomain addsubdomain domain=${SLUG} rootdomain=${ROOT_DOMAIN} dir=${SUBDOMAIN}" \
     || echo "[i] Subdominio pode ja existir"
 
   DB_PASS="$(openssl rand -base64 24 | tr -d '/+=' | head -c 24)"

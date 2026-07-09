@@ -125,6 +125,12 @@ ENV
   fi
 else
   echo "Mantido: $ENV_FILE (ja existia)"
+  if [[ "${UNIO_ORGANISMO_ENABLED:-false}" == "true" ]]; then
+    grep -q '^UNIO_ORGANISMO_ENABLED=' "$ENV_FILE" 2>/dev/null \
+      || echo "UNIO_ORGANISMO_ENABLED=true" >> "$ENV_FILE"
+    grep -q '^UNIO_ORGANISMO_PULSO_HOME=' "$ENV_FILE" 2>/dev/null \
+      || echo "UNIO_ORGANISMO_PULSO_HOME=true" >> "$ENV_FILE"
+  fi
 fi
 
 VHOST="${DEFAULT_URI#https://}"

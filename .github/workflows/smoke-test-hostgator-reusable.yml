@@ -1,0 +1,66 @@
+# Smoke test via SSH — valida vhost no Apache da HostGator (Host header).
+# Use quando o subdominio ja existe no cPanel mas ainda nao resolve publicamente.
+
+name: Smoke test HostGator (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      default_uri:
+        required: true
+        type: string
+        description: 'URL base (ex.: https://clinicaunio.uniowork.com.br)'
+      paths:
+        required: false
+        type: string
+        default: "/\n/login"
+        description: 'Paths (um por linha) que devem retornar HTTP 200 via vhost local'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_SSH_ALIAS: hg-deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH HostGator
+        uses: ./.github/actions/hostgator-ssh
+        with:
+          ssh_key: ${{ secrets.DEPLOY_SSH_KEY }}
+          ssh_host: ${{ secrets.DEPLOY_SSH_HOST }}
+          ssh_user: ${{ secrets.DEPLOY_SSH_USER }}
+          ssh_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
+
+      - name: Smoke test vhost (SSH + Host header)
+        env:
+          DEFAULT_URI: ${{ inputs.default_uri }}
+          PATHS: ${{ inputs.paths }}
+        run: |
+          set -euo pipefail
+          host="${DEFAULT_URI#https://}"
+          host="${host#http://}"
+          host="${host%%/*}"
+          failed=0
+          while IFS= read -r path || [[ -n "$path" ]]; do
+            path="${path//$'\r'/}"
+            path="${path#"${path%%[![:space:]]*}"}"
+            path="${path%"${path##*[![:space:]]}"}"
+            [[ -z "$path" ]] && continue
+            [[ "$path" != /* ]] && path="/$path"
+            code=$(ssh "${DEPLOY_SSH_ALIAS}" \
+              "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${host}' --connect-timeout 10 --max-time 20 'http://127.0.0.1${path}'" \
+              || echo '000')
+            if [[ "$code" != '200' && "$code" != '302' ]]; then
+              echo "FAIL http://${host}${path} (vhost local) → HTTP $code"
+              failed=1
+            else
+              echo "OK   http://${host}${path} (vhost local) → HTTP $code"
+            fi
+          done <<< "$PATHS"
+          if [[ "$failed" -ne 0 ]]; then
+            exit 1
+          fi
