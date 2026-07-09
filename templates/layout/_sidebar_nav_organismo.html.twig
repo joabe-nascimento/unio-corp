@@ -1,13 +1,14 @@
-{# Navegação Organismo — labels via organismo.copy (Studio / Clínica por ambiente) #}
+{# Navegação Organismo — Studio (prod) vs Clínica (clinicaunio) #}
 {% set route = app.request.attributes.get('_route') %}
 {% set badges = clinic_nav_badges|default({}) %}
 {% set copy = organismo.copy|default({}) %}
+{% set _clinic = org_clinic|default(false) %}
 
 {# ── Início ── #}
 <li class="nav-item">
     <a href="{{ path('app_dashboard') }}" class="nav-link {{ route == 'app_dashboard' or route == 'app_pulso' ? 'active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas fa-house-medical nav-icon" aria-hidden="true"></i>
+            <i class="fas {{ _clinic ? 'fa-house-medical' : 'fa-house' }} nav-icon" aria-hidden="true"></i>
         </span>
         <p>Início</p>
     </a>
@@ -16,9 +17,9 @@
 <li class="nav-item">
     <a href="{{ path('app_maturidade') }}" class="nav-link {{ route starts with 'app_maturidade' ? 'active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas fa-stethoscope nav-icon" aria-hidden="true"></i>
+            <i class="fas {{ _clinic ? 'fa-stethoscope' : 'fa-chart-line' }} nav-icon" aria-hidden="true"></i>
         </span>
-        <p>{{ copy.nav_maturidade|default('Painel de entregas') }}</p>
+        <p>{{ copy.nav_maturidade|default(_clinic ? 'Painel de Recuperação' : 'Painel de entregas') }}</p>
     </a>
 </li>
 
@@ -26,28 +27,28 @@
 <li class="sidebar-hub-separator" aria-hidden="true"></li>
 <li class="nav-item sidebar-hub-heading-item">
     <div class="sidebar-hub-heading">
-        <span class="sidebar-hub-heading-label">{{ copy.nav_section_clients|default('Projetos') }}</span>
+        <span class="sidebar-hub-heading-label">{{ copy.nav_section_clients|default(_clinic ? 'Pacientes' : 'Projetos') }}</span>
     </div>
 </li>
 
 <li class="nav-item">
     <a href="{{ path('app_pos_operatorio_pacientes') }}" class="nav-link {{ route starts with 'app_pos_operatorio_paciente' or route == 'app_pos_operatorio_pacientes' ? 'active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas fa-user-injured nav-icon" aria-hidden="true"></i>
+            <i class="fas {{ _clinic ? 'fa-user-injured' : 'fa-folder-open' }} nav-icon" aria-hidden="true"></i>
         </span>
-        <p>{{ copy.nav_pacientes|default('Projetos') }}</p>
+        <p>{{ copy.nav_pacientes|default(_clinic ? 'Pacientes' : 'Clientes') }}</p>
     </a>
 </li>
 
 <li class="nav-item">
     <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="nav-link {{ route == 'app_pos_operatorio_sala_critica' ? 'active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas fa-bed-pulse nav-icon" aria-hidden="true"></i>
+            <i class="fas {{ _clinic ? 'fa-bed-pulse' : 'fa-flag' }} nav-icon" aria-hidden="true"></i>
             {% if badges.sala_critica|default(0) > 0 %}
             <span class="nav-clinic-badge nav-clinic-badge--danger" aria-label="{{ badges.sala_critica }} P1">{{ badges.sala_critica }}</span>
             {% endif %}
         </span>
-        <p>{{ copy.nav_sala_critica|default('Prioridade alta') }}</p>
+        <p>{{ copy.nav_sala_critica|default(_clinic ? 'Sala Crítica' : 'Prioridade alta') }}</p>
     </a>
 </li>
 
@@ -63,20 +64,20 @@
     </a>
 </li>
 
-{# ── Entregas ── #}
+{# ── Entregas / produção ── #}
 <li class="sidebar-hub-separator" aria-hidden="true"></li>
 <li class="nav-item sidebar-hub-heading-item">
     <div class="sidebar-hub-heading">
-        <span class="sidebar-hub-heading-label">{{ copy.nav_section_deliverables|default('Entregas') }}</span>
+        <span class="sidebar-hub-heading-label">{{ copy.nav_section_deliverables|default(_clinic ? 'Acompanhamento' : 'Produção') }}</span>
     </div>
 </li>
 
 <li class="nav-item">
     <a href="{{ path('app_pos_operatorio_protocolos') }}" class="nav-link {{ route starts with 'app_pos_operatorio_protocolo' ? 'active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas fa-file-medical nav-icon" aria-hidden="true"></i>
+            <i class="fas {{ _clinic ? 'fa-file-medical' : 'fa-book' }} nav-icon" aria-hidden="true"></i>
         </span>
-        <p>{{ copy.nav_protocolos|default('Playbooks') }}</p>
+        <p>{{ copy.nav_protocolos|default(_clinic ? 'Protocolos' : 'Playbooks') }}</p>
     </a>
 </li>
 
@@ -88,16 +89,16 @@
             <span class="nav-clinic-badge" aria-label="{{ badges.questionarios }} pendentes">{{ badges.questionarios }}</span>
             {% endif %}
         </span>
-        <p>{{ copy.nav_questionarios|default('Check-ins') }}</p>
+        <p>{{ copy.nav_questionarios|default(_clinic ? 'Questionários' : 'Check-ins') }}</p>
     </a>
 </li>
 
 <li class="nav-item">
     <a href="{{ path('app_portal_patient_login') }}" class="nav-link {{ route starts with 'app_portal_patient' or route starts with 'app_pos_operatorio_portal' ? 'active' : '' }}" target="_blank" rel="noopener">
         <span class="nav-icon-slot">
-            <i class="fas fa-person-circle-check nav-icon" aria-hidden="true"></i>
+            <i class="fas {{ _clinic ? 'fa-person-circle-check' : 'fa-globe' }} nav-icon" aria-hidden="true"></i>
         </span>
-        <p>{{ copy.nav_portal|default('Portal do cliente') }}</p>
+        <p>{{ copy.nav_portal|default(_clinic ? 'Portal do Paciente' : 'Portal do cliente') }}</p>
     </a>
 </li>
 

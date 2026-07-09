@@ -1,17 +1,20 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Protocolos{% if not org_clinic %} · Pós-Operatório{% endif %}{% endblock %}
+{% set _copy = organismo.copy|default({}) %}
+{% set _label_playbooks = _copy.nav_protocolos|default(org_clinic|default(false) ? 'Protocolos' : 'Playbooks') %}
+
+{% block title %}{{ _label_playbooks }}{% if not org_clinic %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
 {% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
 
-{% set hub_page_title = 'Protocolos' %}
+{% set hub_page_title = _label_playbooks %}
 {% set hub_page_eyebrow = org_clinic ? org_brand_label : '' %}
-{% set hub_page_subtitle = 'Modelos de acompanhamento por procedimento' %}
+{% set hub_page_subtitle = org_clinic|default(false) ? 'Modelos de acompanhamento por procedimento' : 'Templates e fluxos de implementação' %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
 
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_pos_operatorio_protocolo_novo') }}" class="btn-unio btn-sm">
-    <i class="fas fa-plus mr-1"></i> Novo protocolo
+    <i class="fas fa-plus mr-1"></i> {{ org_clinic|default(false) ? 'Novo protocolo' : 'Novo playbook' }}
 </a>
 {% if not org_clinic %}
 <a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">

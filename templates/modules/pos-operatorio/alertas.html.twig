@@ -1,9 +1,12 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Alertas clínicos{% if not org_clinic %} · Pós-Operatório{% endif %}{% endblock %}
+{% set _copy = organismo.copy|default({}) %}
+{% set _label_alertas = _copy.nav_alertas|default('Alertas') %}
+
+{% block title %}{{ org_clinic|default(false) ? 'Alertas clínicos' : _label_alertas }}{% if not org_clinic %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
 {% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
 
-{% set hub_page_title = 'Fila de alertas clínicos' %}
+{% set hub_page_title = org_clinic|default(false) ? 'Fila de alertas clínicos' : 'Fila de ' ~ _label_alertas|lower %}
 {% set hub_page_eyebrow = org_clinic ? org_brand_label : '' %}
 {% set hub_page_subtitle = 'Prioridade P1–P4 · SLA de resposta' %}
 {% set hub_search_hidden = true %}
@@ -11,7 +14,7 @@
 
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-heart-pulse mr-1"></i> Sala Crítica P1
+    <i class="fas fa-flag mr-1"></i> {{ _copy.nav_sala_critica|default(org_clinic|default(false) ? 'Sala Crítica P1' : 'Prioridade alta') }}
 </a>
 {% if not org_clinic %}
 <a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">

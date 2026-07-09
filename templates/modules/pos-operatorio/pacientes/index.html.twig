@@ -1,11 +1,14 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Pacientes{% if not org_clinic %} · Pós-Operatório{% endif %}{% endblock %}
+{% set _copy = organismo.copy|default({}) %}
+{% set _label_clients = _copy.nav_pacientes|default(org_clinic|default(false) ? 'Pacientes' : 'Clientes') %}
+
+{% block title %}{{ _label_clients }}{% if not org_clinic %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
 {% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
 
-{% set hub_page_title = 'Pacientes' %}
+{% set hub_page_title = _label_clients %}
 {% set hub_page_eyebrow = org_clinic ? org_brand_label : '' %}
-{% set hub_page_subtitle = 'Cadastro e acompanhamento pós-cirúrgico' %}
+{% set hub_page_subtitle = org_clinic|default(false) ? 'Cadastro e acompanhamento pós-cirúrgico' : 'Cadastro de clientes e projetos digitais' %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
 
@@ -23,7 +26,7 @@
 {% endblock %}
 {% block hub_section_toolbar %}
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: 'Novo paciente',
+    btn_label: org_clinic|default(false) ? 'Novo paciente' : 'Novo projeto',
     btn_opens: 'pos-op-paciente-form',
     btn_icon: 'fa-plus',
     btn_sm: true,

@@ -47,6 +47,15 @@ final class OrganismoCopyService
         return $this->brandSlogan;
     }
 
+    /** Perfil clínica (clinicaunio) vs studio (production). */
+    public function isClinicProfile(): bool
+    {
+        $unit = mb_strtolower($this->unitLabel);
+        $brand = mb_strtolower($this->brandName);
+
+        return str_contains($unit, 'clínica') || str_contains($brand, 'clínica');
+    }
+
     public function colonia(): string
     {
         return $this->unitLabel;

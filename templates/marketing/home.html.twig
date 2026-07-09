@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ organismo.copy.brand_name|default('Unio Clínica') }} — {{ organismo.copy.marketing_tagline|default('Cuidado que continua.') }}</title>
-    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio Clínica') }}: acompanhamento pós-cirúrgico inteligente — cadastro de pacientes, protocolos e alertas clínicos.">
+    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio') }} — {{ organismo.copy.marketing_tagline|default('Sites, sistemas e projetos que evoluem.') }}">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
@@ -115,7 +115,7 @@
             <div class="mkt-hero-copy mkt-hero-copy--v2">
                 <span class="clinic-hero-slogan">
                     <i class="fas fa-code" aria-hidden="true"></i>
-                    {{ organismo.copy.marketing_eyebrow|default('Studio digital & projetos clínicos') }}
+                    {{ organismo.copy.marketing_eyebrow|default(org_clinic|default(false) ? 'Plataforma clínica pós-operatória' : 'Studio digital') }}
                 </span>
                 <p class="mkt-hero-eyebrow mkt-hero-eyebrow--v2">
                     <span class="mkt-hero-eyebrow-dot"></span>
@@ -137,9 +137,15 @@
                     {% endif %}
                 </div>
                 <div class="mkt-hero-chips">
+                    {% if org_clinic|default(false) %}
                     <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
                     <span class="mkt-hero-chip"><i class="fas fa-bed-pulse" aria-hidden="true"></i> Pós-operatório</span>
                     <span class="mkt-hero-chip"><i class="fas fa-bell" aria-hidden="true"></i> Alertas em tempo real</span>
+                    {% else %}
+                    <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-code" aria-hidden="true"></i> Sites &amp; sistemas</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-bell" aria-hidden="true"></i> Alertas em tempo real</span>
+                    {% endif %}
                 </div>
             </div>
             <div class="mkt-hero-visual mkt-hero-visual--v2" aria-hidden="true">
@@ -148,23 +154,38 @@
                         <span class="mkt-preview-dot mkt-preview-dot--r"></span>
                         <span class="mkt-preview-dot mkt-preview-dot--y"></span>
                         <span class="mkt-preview-dot mkt-preview-dot--g"></span>
-                        <span class="mkt-preview-url">unio.com.br — clínica</span>
+                        <span class="mkt-preview-url">uniowork.com.br{% if org_clinic|default(false) %} — clínica{% else %} — studio{% endif %}</span>
                     </div>
                     <div class="mkt-preview-layout">
                         <div class="mkt-preview-sidebar">
+                            {% if org_clinic|default(false) %}
                             <span class="mkt-preview-nav-item mkt-preview-nav-item--active"><i class="fas fa-house-medical"></i></span>
                             <span class="mkt-preview-nav-item"><i class="fas fa-user-injured"></i></span>
                             <span class="mkt-preview-nav-item"><i class="fas fa-bed-pulse"></i></span>
                             <span class="mkt-preview-nav-item"><i class="fas fa-file-medical"></i></span>
                             <span class="mkt-preview-nav-item"><i class="fas fa-bell"></i></span>
+                            {% else %}
+                            <span class="mkt-preview-nav-item mkt-preview-nav-item--active"><i class="fas fa-house"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-folder-open"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-flag"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-book"></i></span>
+                            <span class="mkt-preview-nav-item"><i class="fas fa-bell"></i></span>
+                            {% endif %}
                         </div>
                         <div class="mkt-preview-main">
                             <div class="mkt-preview-kpis">
+                                {% if org_clinic|default(false) %}
                                 <div class="mkt-preview-kpi"><strong>42</strong><span>Pacientes ativos</span></div>
                                 <div class="mkt-preview-kpi"><strong>3</strong><span>Alertas críticos</span></div>
                                 <div class="mkt-preview-kpi mkt-preview-kpi--accent"><strong>97%</strong><span>Protocolos OK</span></div>
+                                {% else %}
+                                <div class="mkt-preview-kpi"><strong>12</strong><span>Projetos ativos</span></div>
+                                <div class="mkt-preview-kpi"><strong>3</strong><span>Prioridade alta</span></div>
+                                <div class="mkt-preview-kpi mkt-preview-kpi--accent"><strong>97%</strong><span>Entregas OK</span></div>
+                                {% endif %}
                             </div>
                             <div class="mkt-preview-modules">
+                                {% if org_clinic|default(false) %}
                                 <div class="mkt-preview-module">
                                     <i class="fas fa-user-injured" aria-hidden="true"></i>
                                     <div><strong>Pacientes</strong><span>Recuperação e acompanhamento</span></div>
@@ -181,6 +202,24 @@
                                     <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
                                     <div><strong>Vitória</strong><span>Copiloto clínico</span></div>
                                 </div>
+                                {% else %}
+                                <div class="mkt-preview-module">
+                                    <i class="fas fa-folder-open" aria-hidden="true"></i>
+                                    <div><strong>Clientes</strong><span>Projetos e entregas</span></div>
+                                </div>
+                                <div class="mkt-preview-module">
+                                    <i class="fas fa-flag" aria-hidden="true"></i>
+                                    <div><strong>Prioridade alta</strong><span>Itens que exigem ação</span></div>
+                                </div>
+                                <div class="mkt-preview-module">
+                                    <i class="fas fa-book" aria-hidden="true"></i>
+                                    <div><strong>Playbooks</strong><span>Fluxos de implementação</span></div>
+                                </div>
+                                <div class="mkt-preview-module mkt-preview-module--highlight">
+                                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                                    <div><strong>Lumen</strong><span>Assistente do studio</span></div>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

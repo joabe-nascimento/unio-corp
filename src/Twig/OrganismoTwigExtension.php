@@ -32,7 +32,7 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
                 'pulso_home' => $this->organismo->isPulsoHome(),
                 'copy' => $this->copy->getGlobals(),
             ],
-            'org_clinic' => true,
+            'org_clinic' => $this->copy->isClinicProfile(),
             'org_brand_label' => $this->copy->brandName(),
         ];
     }

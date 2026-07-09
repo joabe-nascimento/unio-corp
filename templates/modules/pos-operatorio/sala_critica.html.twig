@@ -1,11 +1,14 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Sala Crítica{% if not org_clinic %} · Pós-Operatório{% endif %}{% endblock %}
+{% set _copy = organismo.copy|default({}) %}
+{% set _label_sala = _copy.nav_sala_critica|default(org_clinic|default(false) ? 'Sala Crítica' : 'Prioridade alta') %}
+
+{% block title %}{{ _label_sala }}{% if not org_clinic %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
 {% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
 
-{% set hub_page_title = 'Sala Crítica' %}
+{% set hub_page_title = _label_sala %}
 {% set hub_page_eyebrow = org_clinic ? org_brand_label : '' %}
-{% set hub_page_subtitle = 'Alertas P1 · coordenação clínica' %}
+{% set hub_page_subtitle = org_clinic|default(false) ? 'Alertas P1 · coordenação clínica' : 'Alertas P1 · atenção imediata' %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
 
