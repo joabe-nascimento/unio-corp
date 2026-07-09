@@ -4,6 +4,7 @@ namespace App\Controller\Auth;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Service\Organismo\OrganismoRedirectService;
 use App\Service\PlatformConfigService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +15,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 class SecurityController extends AbstractController
 {
     #[Route('/login', name: 'app_login')]
-    public function login(Request $request, AuthenticationUtils $authenticationUtils, PlatformConfigService $config): Response
+    public function login(Request $request, AuthenticationUtils $authenticationUtils, PlatformConfigService $config, OrganismoRedirectService $redirects): Response
     {
         if ($this->getUser()) {
             if (!$this->isGranted('ROLE_USER')) {
@@ -26,7 +27,7 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
 
-            return $this->redirectToRoute('app_workspace_select');
+            return $this->redirectToRoute($redirects->afterLoginRoute());
         }
 
         if ($request->query->getBoolean('timeout')) {

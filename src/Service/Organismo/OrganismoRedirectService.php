@@ -14,9 +14,13 @@ final class OrganismoRedirectService
     ) {
     }
 
-    /** Rota após login (firewall → workspace). */
+    /** Rota após login (firewall). */
     public function afterLoginRoute(): string
     {
+        if ($this->organismo->isEnabled()) {
+            return $this->organismo->isPulsoHome() ? 'app_pulso' : 'app_welcome';
+        }
+
         return 'app_workspace_select';
     }
 

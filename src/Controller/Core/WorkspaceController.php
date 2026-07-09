@@ -24,7 +24,12 @@ class WorkspaceController extends AbstractController
         Request $request,
     ): Response {
         /** @var \App\Entity\User $user */
-        $user     = $this->getUser();
+        $user = $this->getUser();
+
+        if ($organismo->isEnabled()) {
+            return $this->bootstrapAndRedirect($user, $ws, $onboarding, $redirects);
+        }
+
         $empresas = $ws->getAvailableEmpresas($user);
 
         if (empty($empresas)) {
@@ -41,7 +46,7 @@ class WorkspaceController extends AbstractController
         return $this->render('workspace/select.html.twig', [
             'empresas' => $empresas,
             'current'  => $ws->getActiveEmpresa($user),
-            'organismo_enabled' => $organismo->isEnabled(),
+            'organismo_enabled' => false,
         ]);
     }
 
@@ -51,8 +56,13 @@ class WorkspaceController extends AbstractController
         WorkspaceService $ws,
         OnboardingProgressService $onboarding,
         OrganismoRedirectService $redirects,
+        OrganismoFeature $organismo,
         Request $request,
     ): Response {
+        if ($organismo->isEnabled()) {
+            return $this->redirectToRoute($redirects->homeRoute());
+        }
+
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $ws->switchTo($user, $id);
@@ -64,6 +74,24 @@ class WorkspaceController extends AbstractController
         }
 
         $empresas = $ws->getAvailableEmpresas($user);
+
+        return $this->redirectToRoute($redirects->afterWorkspaceRoute($user, \count($empresas)));
+    }
+
+    private function bootstrapAndRedirect(
+        \App\Entity\User $user,
+        WorkspaceService $ws,
+        OnboardingProgressService $onboarding,
+        OrganismoRedirectService $redirects,
+    ): Response {
+        $empresas = $ws->getAvailableEmpresas($user);
+        if ($empresas !== []) {
+            $active = $ws->getActiveEmpresa($user) ?? $empresas[0];
+            if ($active !== null) {
+                $ws->switchTo($user, $active->getId());
+            }
+            $onboarding->markStepComplete('workspace');
+        }
 
         return $this->redirectToRoute($redirects->afterWorkspaceRoute($user, \count($empresas)));
     }
