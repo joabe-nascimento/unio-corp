@@ -1,0 +1,58 @@
+name: Setup Clinica Unio (server)
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_env:
+        description: 'Criar .env.local se nao existir (precisa secrets APP_SECRET_CLINICAUNIO e DATABASE_URL_CLINICAUNIO)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: clinicaunio
+
+    env:
+      DEPLOY_SSH_ALIAS: hg-deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH HostGator
+        uses: ./.github/actions/hostgator-ssh
+        with:
+          ssh_key: ${{ secrets.DEPLOY_SSH_KEY }}
+          ssh_host: ${{ secrets.DEPLOY_SSH_HOST }}
+          ssh_user: ${{ secrets.DEPLOY_SSH_USER }}
+          ssh_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
+
+      - name: Upload and run server setup
+        env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home2/joabef36/unio-clinicaunio' }}
+          DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML || '/home2/joabef36/clinicaunio.uniowork.com.br' }}
+          DEFAULT_URI: ${{ vars.DEFAULT_URI || 'https://clinicaunio.uniowork.com.br' }}
+        run: |
+          bash scripts/ci-retry.sh scp scripts/setup-product-env-server.sh \
+            "${DEPLOY_SSH_ALIAS}:/tmp/setup-product-env-server.sh"
+
+          REMOTE_ENV="${RUNNER_TEMP}/setup-remote.env"
+          {
+            printf 'DEPLOY_PATH=%s\n' "$DEPLOY_PATH"
+            printf 'PUBLIC_HTML=%s\n' "$DEPLOY_PUBLIC_HTML"
+            printf 'DEFAULT_URI=%s\n' "$DEFAULT_URI"
+            printf 'UNIO_ORGANISMO_ENABLED=true\n'
+            printf 'UNIO_ORGANISMO_PULSO_HOME=true\n'
+            if [[ "${{ inputs.create_env }}" == "true" ]]; then
+              printf 'APP_SECRET=%s\n' "${{ secrets.APP_SECRET_CLINICAUNIO }}"
+              printf 'DATABASE_URL=%s\n' "${{ secrets.DATABASE_URL_CLINICAUNIO }}"
+            fi
+          } > "$REMOTE_ENV"
+
+          bash scripts/ci-retry.sh scp "$REMOTE_ENV" "${DEPLOY_SSH_ALIAS}:/tmp/setup-remote.env"
+          bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
+            'set -a; source /tmp/setup-remote.env; set +a; bash /tmp/setup-product-env-server.sh; rm -f /tmp/setup-remote.env /tmp/setup-product-env-server.sh; echo "=== Verificacao ==="; ls -la "$DEPLOY_PATH/.env.local" 2>/dev/null || echo "(sem .env.local ainda)"; ls -la "$PUBLIC_HTML/index.php" 2>/dev/null || echo "(sem index.php)"'
