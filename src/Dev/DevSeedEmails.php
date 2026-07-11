@@ -38,4 +38,9 @@ final class DevSeedEmails
             self::ANA_PAULA,
         ];
     }
+
+    public static function legacyEmailFor(string $email): ?string
+    {
+        return self::LEGACY[$email] ?? null;
+    }
 }

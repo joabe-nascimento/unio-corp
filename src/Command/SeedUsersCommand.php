@@ -60,21 +60,14 @@ class SeedUsersCommand extends Command
         $this->em->flush();
         $io->text('Empresas: 3 sincronizadas (IDs preservados).');
 
-        $seedUsers = [
-            ['nome' => 'Joabe Nascimento',   'email' => DevSeedEmails::JOABE,     'perfil' => 'TENANT',            'empresa' => null],
-            ['nome' => 'Renata Oliveira',    'email' => DevSeedEmails::RENATA,    'perfil' => 'GESTOR',            'empresa' => $empresas[0]],
-            ['nome' => 'Ricardo Costa',      'email' => DevSeedEmails::RICARDO,   'perfil' => 'GESTOR_EQUIPE',     'empresa' => $empresas[0]],
-            ['nome' => 'Ana Paula Ribeiro',  'email' => DevSeedEmails::ANA_PAULA, 'perfil' => 'SUPERVISOR',        'empresa' => $empresas[0]],
-            ['nome' => 'Felipe Martins',     'email' => DevSeedEmails::FELIPE,    'perfil' => 'SUPERVISOR_EQUIPE', 'empresa' => $empresas[0]],
-            ['nome' => 'Lucas Santos',       'email' => DevSeedEmails::LUCAS,     'perfil' => 'MEMBRO',            'empresa' => $empresas[0]],
-            ['nome' => 'Marcela Ferreira',   'email' => DevSeedEmails::MARCELA,   'perfil' => 'GESTOR',            'empresa' => $empresas[1]],
-            ['nome' => 'Patrícia Almeida',   'email' => DevSeedEmails::PATRICIA,  'perfil' => 'GESTOR',            'empresa' => $empresas[2]],
-        ];
-
-        foreach ($seedUsers as $data) {
-            $user = $userRepo->findOneBy(['email' => $data['email']]);
-            if (!$user instanceof User && isset(DevSeedEmails::LEGACY[$data['email']])) {
-                $user = $userRepo->findOneBy(['email' => DevSeedEmails::LEGACY[$data['email']]]);
+        foreach ($this->seedUsers($empresas) as $data) {
+            $email = $data['email'];
+            $user = $userRepo->findOneBy(['email' => $email]);
+            if (!$user instanceof User) {
+                $legacyEmail = DevSeedEmails::legacyEmailFor($email);
+                if ($legacyEmail !== null) {
+                    $user = $userRepo->findOneBy(['email' => $legacyEmail]);
+                }
             }
             $user ??= new User();
             $isNew = $user->getId() === null;
@@ -95,5 +88,24 @@ class SeedUsersCommand extends Command
         $io->success('Seed concluído. Senha: ' . self::SEED_PASSWORD);
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param list<Empresa> $empresas
+     *
+     * @return list<array{nome: string, email: string, perfil: string, empresa: Empresa|null}>
+     */
+    private function seedUsers(array $empresas): array
+    {
+        return [
+            ['nome' => 'Joabe Nascimento',   'email' => DevSeedEmails::JOABE,     'perfil' => 'TENANT',            'empresa' => null],
+            ['nome' => 'Renata Oliveira',    'email' => DevSeedEmails::RENATA,    'perfil' => 'GESTOR',            'empresa' => $empresas[0]],
+            ['nome' => 'Ricardo Costa',      'email' => DevSeedEmails::RICARDO,   'perfil' => 'GESTOR_EQUIPE',     'empresa' => $empresas[0]],
+            ['nome' => 'Ana Paula Ribeiro',  'email' => DevSeedEmails::ANA_PAULA, 'perfil' => 'SUPERVISOR',        'empresa' => $empresas[0]],
+            ['nome' => 'Felipe Martins',     'email' => DevSeedEmails::FELIPE,    'perfil' => 'SUPERVISOR_EQUIPE', 'empresa' => $empresas[0]],
+            ['nome' => 'Lucas Santos',       'email' => DevSeedEmails::LUCAS,     'perfil' => 'MEMBRO',            'empresa' => $empresas[0]],
+            ['nome' => 'Marcela Ferreira',   'email' => DevSeedEmails::MARCELA,   'perfil' => 'GESTOR',            'empresa' => $empresas[1]],
+            ['nome' => 'Patrícia Almeida',   'email' => DevSeedEmails::PATRICIA,  'perfil' => 'GESTOR',            'empresa' => $empresas[2]],
+        ];
     }
 }
