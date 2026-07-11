@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Setup/verificacao clinicaunio na HostGator (rodar via SSH no servidor).
+# Setup/verificacao uniosaude na HostGator (rodar via SSH no servidor).
 #
 #   ssh -p 2222 joabef36@br1136.hostgator.com.br
-#   bash /tmp/setup-clinicaunio-hostgator.sh
+#   bash /tmp/setup-uniosaude-hostgator.sh
 #
 set -euo pipefail
 
 ROOT_DOMAIN="uniowork.com.br"
-SUB="clinicaunio"
+SUB="uniosaude"
 FQDN="${SUB}.${ROOT_DOMAIN}"
-DEPLOY_PATH="${DEPLOY_PATH:-/home2/joabef36/unio-clinicaunio}"
-PUBLIC_HTML="${PUBLIC_HTML:-/home2/joabef36/clinicaunio.uniowork.com.br}"
+DEPLOY_PATH="${DEPLOY_PATH:-/home2/joabef36/unio-uniosaude}"
+PUBLIC_HTML="${PUBLIC_HTML:-/home2/joabef36/uniosaude.uniowork.com.br}"
 SERVER_IP="${SERVER_IP:-50.6.138.130}"
 
-echo "== Clinica Unio — setup HostGator"
+echo "== Unio Saúde — setup HostGator"
 echo "   URL:  https://${FQDN}"
 echo "   app:  ${DEPLOY_PATH}"
 echo "   web:  ${PUBLIC_HTML}"

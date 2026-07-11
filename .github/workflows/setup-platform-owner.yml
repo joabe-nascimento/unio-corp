@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Ambiente (production | clinicaunio)'
+        description: 'Ambiente (production | uniosaude)'
         required: true
         default: production
         type: choice
         options:
           - production
-          - clinicaunio
+          - uniosaude
       email:
         description: 'E-mail da conta owner'
         required: false
@@ -45,7 +45,7 @@ jobs:
       - name: Criar ou atualizar PLATFORM_OWNER
         id: owner
         env:
-          DEPLOY_PATH: ${{ inputs.environment == 'clinicaunio' && '/home2/joabef36/unio-clinicaunio' || '/home2/joabef36/unio' }}
+          DEPLOY_PATH: ${{ inputs.environment == 'uniosaude' && '/home2/joabef36/unio-uniosaude' || '/home2/joabef36/unio' }}
           OWNER_EMAIL: ${{ inputs.email }}
           INPUT_PASSWORD: ${{ inputs.password }}
           SECRET_PASSWORD: ${{ secrets.PLATFORM_OWNER_PASSWORD }}

@@ -1,10 +1,10 @@
-name: Setup Clinica Unio (server)
+name: Setup Unio Saúde (server)
 
 on:
   workflow_dispatch:
     inputs:
       create_env:
-        description: 'Criar .env.local se nao existir (precisa secrets APP_SECRET_CLINICAUNIO e DATABASE_URL_CLINICAUNIO)'
+        description: 'Criar .env.local se nao existir (precisa secrets APP_SECRET_UNIOSAUDE e DATABASE_URL_UNIOSAUDE)'
         required: false
         default: false
         type: boolean
@@ -13,7 +13,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment: clinicaunio
+    environment: uniosaude
 
     env:
       DEPLOY_SSH_ALIAS: hg-deploy
@@ -34,13 +34,13 @@ jobs:
       - name: Ensure cPanel subdomain
         run: |
           bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
-            'uapi --output=json SubDomain addsubdomain domain=clinicaunio rootdomain=uniowork.com.br dir=clinicaunio.uniowork.com.br 2>&1 || true'
+            'uapi --output=json SubDomain addsubdomain domain=uniosaude rootdomain=uniowork.com.br dir=uniosaude.uniowork.com.br 2>&1 || true'
 
       - name: Upload and run server setup
         env:
-          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home2/joabef36/unio-clinicaunio' }}
-          DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML || '/home2/joabef36/clinicaunio.uniowork.com.br' }}
-          DEFAULT_URI: ${{ vars.DEFAULT_URI || 'https://clinicaunio.uniowork.com.br' }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home2/joabef36/unio-uniosaude' }}
+          DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML || '/home2/joabef36/uniosaude.uniowork.com.br' }}
+          DEFAULT_URI: ${{ vars.DEFAULT_URI || 'https://uniosaude.uniowork.com.br' }}
         run: |
           bash scripts/ci-retry.sh scp scripts/setup-product-env-server.sh \
             "${DEPLOY_SSH_ALIAS}:/tmp/setup-product-env-server.sh"
@@ -53,8 +53,8 @@ jobs:
             printf 'UNIO_ORGANISMO_ENABLED=true\n'
             printf 'UNIO_ORGANISMO_PULSO_HOME=true\n'
             if [[ "${{ inputs.create_env }}" == "true" ]]; then
-              printf 'APP_SECRET=%s\n' "${{ secrets.APP_SECRET_CLINICAUNIO }}"
-              printf 'DATABASE_URL=%s\n' "${{ secrets.DATABASE_URL_CLINICAUNIO }}"
+              printf 'APP_SECRET=%s\n' "${{ secrets.APP_SECRET_UNIOSAUDE }}"
+              printf 'DATABASE_URL=%s\n' "${{ secrets.DATABASE_URL_UNIOSAUDE }}"
             fi
           } > "$REMOTE_ENV"
 

@@ -5,6 +5,8 @@ namespace App\Twig;
 use App\Platform\AiAssistant;
 use App\Entity\Empresa;
 use App\Service\EmpresaBrandingService;
+use App\Service\Organismo\OrganismoCopyService;
+use App\Service\Organismo\OrganismoFeature;
 use App\Service\PlatformConfigService;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
@@ -18,6 +20,8 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
     public function __construct(
         private PlatformConfigService $config,
         private EmpresaBrandingService $empresaBranding,
+        private OrganismoCopyService $organismoCopy,
+        private OrganismoFeature $organismoFeature,
     ) {}
 
     /** @return array<string,mixed> */
@@ -60,12 +64,11 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
     /** @param 'logo'|'full'|'mark'|'favicon' $variant */
     public function assetSrc(string $variant = 'full'): string
     {
-        $key = match ($variant) {
-            'logo', 'main' => 'logo_url',
-            'mark'           => 'logo_mark_url',
-            'favicon'        => 'favicon_url',
-            default          => 'logo_full_url',
-        };
+        $key = $this->assetKey($variant);
+
+        if ($this->usesSaudeBrandAsset($variant, $key)) {
+            return PlatformConfigService::SAUDE_LOGO_ASSET;
+        }
 
         return $this->config->resolveAssetUrl($key);
     }
@@ -73,14 +76,38 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
     /** @param 'logo'|'full'|'mark'|'favicon' $variant */
     public function assetCustom(string $variant = 'full'): bool
     {
-        $key = match ($variant) {
+        $key = $this->assetKey($variant);
+
+        if ($this->config->hasCustomAsset($key)) {
+            return true;
+        }
+
+        return $this->usesSaudeBrandAsset($variant, $key);
+    }
+
+    /** @param 'logo'|'full'|'mark'|'favicon' $variant */
+    private function assetKey(string $variant): string
+    {
+        return match ($variant) {
             'logo', 'main' => 'logo_url',
             'mark'           => 'logo_mark_url',
             'favicon'        => 'favicon_url',
             default          => 'logo_full_url',
         };
+    }
 
-        return $this->config->hasCustomAsset($key);
+    /** @param 'logo'|'full'|'mark'|'favicon' $variant */
+    private function usesSaudeBrandAsset(string $variant, string $key): bool
+    {
+        if (!$this->organismoFeature->isEnabled() || !$this->organismoCopy->isClinicProfile()) {
+            return false;
+        }
+
+        if ($this->config->hasCustomAsset($key)) {
+            return false;
+        }
+
+        return \in_array($variant, ['full', 'logo', 'main', 'mark', 'favicon'], true);
     }
 
     public function accentRgb(): string

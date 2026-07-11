@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'GitHub environment (production | clinicaunio)'
+        description: 'GitHub environment (production | uniosaude)'
         required: true
         default: production
         type: choice
         options:
           - production
-          - clinicaunio
+          - uniosaude
       deploy_path:
         description: 'Caminho da app no servidor'
         required: false
@@ -40,7 +40,7 @@ jobs:
 
       - name: Auditoria do banco
         env:
-          DEPLOY_PATH: ${{ inputs.deploy_path != '' && inputs.deploy_path || (inputs.environment == 'clinicaunio' && '/home2/joabef36/unio-clinicaunio' || '/home2/joabef36/unio') }}
+          DEPLOY_PATH: ${{ inputs.deploy_path != '' && inputs.deploy_path || (inputs.environment == 'uniosaude' && '/home2/joabef36/unio-uniosaude' || '/home2/joabef36/unio') }}
         run: |
           bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
             "cd '${DEPLOY_PATH}' && sed -i 's/\r$//' scripts/audit-database.sh 2>/dev/null || true && bash scripts/audit-database.sh"

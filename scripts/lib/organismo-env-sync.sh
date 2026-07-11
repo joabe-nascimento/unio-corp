@@ -68,10 +68,15 @@ organismo_env_sync_for_uri() {
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_TAGLINE 'Sites, sistemas e projetos que evoluem.'
       echo "Organismo: perfil Studio sincronizado em $env_file"
       ;;
+    https://uniosaude.uniowork.com.br|http://uniosaude.uniowork.com.br)
+      organismo_env_ensure "$env_file" UNIO_ORGANISMO_ENABLED true
+      organismo_env_ensure "$env_file" UNIO_ORGANISMO_PULSO_HOME true
+      echo "Organismo: uniosaude — defaults YAML da clínica (sem sobrescrever marca)"
+      ;;
     https://clinicaunio.uniowork.com.br|http://clinicaunio.uniowork.com.br)
       organismo_env_ensure "$env_file" UNIO_ORGANISMO_ENABLED true
       organismo_env_ensure "$env_file" UNIO_ORGANISMO_PULSO_HOME true
-      echo "Organismo: clinicaunio — defaults YAML da clínica (sem sobrescrever marca)"
+      echo "Organismo: clinicaunio (legado) — defaults YAML da clínica"
       ;;
   esac
 }
