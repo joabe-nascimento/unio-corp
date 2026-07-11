@@ -146,7 +146,7 @@ final class PosOperatorioPacienteService
 
             ->setNome(trim((string) ($data['nome'] ?? '')))
 
-            ->setTelefoneContato(trim((string) ($data['telefone'] ?? '')) ?: null)
+            ->setTelefoneContato($this->normalizePhone((string) ($data['telefone'] ?? '')))
 
             ->setStatus(PosOperatorioPaciente::STATUS_ATIVO);
 
@@ -189,7 +189,7 @@ final class PosOperatorioPacienteService
 
         $paciente->setProcedimento(trim((string) ($data['procedimento'] ?? '')) ?: null);
 
-        $paciente->setTelefoneContato(trim((string) ($data['telefone'] ?? '')) ?: null);
+        $paciente->setTelefoneContato($this->normalizePhone((string) ($data['telefone'] ?? '')));
 
 
 
@@ -629,7 +629,7 @@ final class PosOperatorioPacienteService
 
         $paciente->setContatoEmergencia(trim((string) ($data['contato_emergencia'] ?? '')) ?: null);
 
-        $paciente->setTelefoneEmergencia(trim((string) ($data['telefone_emergencia'] ?? '')) ?: null);
+        $paciente->setTelefoneEmergencia($this->normalizePhone((string) ($data['telefone_emergencia'] ?? '')));
 
         $paciente->setObservacoes(trim((string) ($data['observacoes'] ?? '')) ?: null);
 
@@ -662,6 +662,13 @@ final class PosOperatorioPacienteService
         }
 
         $paciente->setCpf($digits);
+    }
+
+    private function normalizePhone(string $raw): ?string
+    {
+        $digits = BrPersonFormat::digitsOnly(trim($raw));
+
+        return $digits !== null && $digits !== '' ? $digits : null;
     }
 
 

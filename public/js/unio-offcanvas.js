@@ -95,6 +95,9 @@
         if (window.UnioColorPicker && typeof window.UnioColorPicker.refresh === 'function') {
             window.UnioColorPicker.refresh();
         }
+        if (window.UnioInputMasks && typeof window.UnioInputMasks.scan === 'function') {
+            window.UnioInputMasks.scan(root);
+        }
         focusFirst(root);
     }
 

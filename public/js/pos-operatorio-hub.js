@@ -66,6 +66,9 @@
                 if (window.ClinicPacienteForm && typeof window.ClinicPacienteForm.refresh === 'function') {
                     window.ClinicPacienteForm.refresh();
                 }
+                if (window.UnioInputMasks && typeof window.UnioInputMasks.scan === 'function') {
+                    window.UnioInputMasks.scan(host);
+                }
             })
             .catch(function () {
                 host.innerHTML = '<p class="text-danger small mb-0">Não foi possível carregar. Tente novamente.</p>';

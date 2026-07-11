@@ -94,6 +94,9 @@
         }
 
         refreshPreview();
+        if (window.UnioInputMasks && typeof window.UnioInputMasks.scan === 'function') {
+            window.UnioInputMasks.scan(root);
+        }
     }
 
     function scan() {
