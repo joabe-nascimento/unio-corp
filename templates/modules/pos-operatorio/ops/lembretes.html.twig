@@ -1,1 +1,74 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Lembretes · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Lembretes' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Questionários pendentes e canais de notificação' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: reminders.pendentes_hoje, label: 'Pendentes hoje', icon: 'fa-bell', tone: 'amber', variant: reminders.pendentes_hoje > 0 ? 'warning' : '' },
+], mb: 'mb-0' } %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="clinic-ops-panels">
+    <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">Canais</h3>
+        <ul class="clinic-ops-list">
+            {% for canal in reminders.canais %}
+            <li>
+                <strong>{{ canal.nome }}</strong>
+                <span class="badge-perfil {{ canal.status == 'active' ? 'success' : 'default' }}">{{ canal.status }}</span>
+                <span class="d-block text-muted small">{{ canal.desc }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">Escalação</h3>
+        <ul class="clinic-ops-list">
+            {% for step in reminders.escalacao %}
+            <li>{{ step.horas }}h — {{ step.acao }} <span class="text-muted">({{ step.status }})</span></li>
+            {% endfor %}
+        </ul>
+    </section>
+</div>
+
+<section class="unio-card mt-3">
+    <h3 class="clinic-ops-panel__title px-3 pt-3">Pacientes sem resposta hoje</h3>
+    {% if reminders.pacientes is empty %}
+    <p class="text-muted px-3 pb-3 mb-0">Todos responderam o questionário de hoje.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>D+</th>
+                    <th>Contato</th>
+                    <th>Médico</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in reminders.pacientes %}
+                <tr>
+                    <td><strong>{{ p.nome }}</strong> <span class="text-muted small">{{ p.codigo }}</span></td>
+                    <td>{{ p.dia_pos|default('—') }}</td>
+                    <td class="small">{{ p.telefone|default('—') }}<br>{{ p.email|default('') }}</td>
+                    <td>{{ p.medico|default('—') }}</td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

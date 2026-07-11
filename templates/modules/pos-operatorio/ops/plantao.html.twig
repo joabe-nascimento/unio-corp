@@ -1,1 +1,64 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Plantão · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Plantão e SLA' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = plantao.roteamento %}
+{% set hub_search_hidden = true %}
+
+{% block hub_content %}
+<div class="clinic-ops-panels clinic-ops-panels--3 mb-3">
+    <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">SLA por prioridade</h3>
+        <dl class="clinic-ops-stats">
+            <div><dt>P1</dt><dd>{{ plantao.sla_p1_min }} min</dd></div>
+            <div><dt>P2</dt><dd>{{ plantao.sla_p2_min }} min</dd></div>
+            <div><dt>P3</dt><dd>{{ plantao.sla_p3_min }} min</dd></div>
+            <div><dt>P4</dt><dd>{{ plantao.sla_p4_min }} min</dd></div>
+        </dl>
+    </section>
+
+    <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">Roteamento</h3>
+        <p class="text-muted small mb-0">{{ plantao.roteamento }}</p>
+        <a href="{{ path('app_pos_operatorio_config') }}" class="btn-unio-ghost btn-sm mt-3">Ver configurações</a>
+    </section>
+
+    <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">Ações rápidas</h3>
+        <div class="d-flex flex-column gap-2">
+            <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">Sala crítica P1</a>
+            <a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">Fila de alertas</a>
+        </div>
+    </section>
+</div>
+
+<section class="unio-card">
+    <h3 class="clinic-ops-panel__title px-3 pt-3">Médicos com pacientes ativos</h3>
+    {% if plantao.plantonistas is empty %}
+    <p class="text-muted px-3 pb-3 mb-0">Nenhum médico com pacientes em acompanhamento.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Médico</th>
+                    <th>E-mail</th>
+                    <th>Pacientes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in plantao.plantonistas %}
+                <tr>
+                    <td><strong>{{ m.nome }}</strong></td>
+                    <td>{{ m.email|default('—') }}</td>
+                    <td>{{ m.pacientes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

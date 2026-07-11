@@ -1,1 +1,22 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Produtos · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Produtos da plataforma' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Ative pós-operatório, carteirinha digital e guia médico por clínica' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_content %}
+<form method="post">
+    <input type="hidden" name="_token" value="{{ csrf_token('clinic_products') }}">
+    {% include 'components/clinic/clinic_products_grid.html.twig' with {
+        products: clinic_products,
+        show_toggle: true,
+        focus_product: focus_product
+    } %}
+    <div class="mt-4">
+        <button type="submit" class="btn-unio">Salvar produtos</button>
+    </div>
+</form>
+{% endblock %}

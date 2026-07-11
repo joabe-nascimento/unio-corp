@@ -1,1 +1,44 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Integrações · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Integrações' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'WhatsApp, PEP, webhooks e tempo real' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_content %}
+<div class="clinic-ops-grid mb-4">
+    {% for int in integrations %}
+    <article class="unio-card clinic-ops-card p-3">
+        <div class="clinic-ops-card__body">
+            <strong class="clinic-ops-card__title">{{ int.nome }}</strong>
+            <p class="clinic-ops-card__desc">{{ int.desc }}</p>
+            <span class="badge-perfil {{ int.status == 'active' ? 'success' : 'default' }}">{{ int.status }}</span>
+        </div>
+        {% if int.route %}
+        <a href="{{ path(int.route) }}" class="btn-unio-ghost btn-sm mt-2">{{ int.route_label|default('Abrir') }}</a>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+
+<section class="unio-card p-4">
+    <h3 class="clinic-ops-panel__title">Webhook de alertas</h3>
+    <p class="text-muted small">Notificações P1 e questionários pendentes para sistemas externos.</p>
+    <form method="post" action="{{ path('app_pos_operatorio_integracoes_webhook') }}" class="mt-3">
+        <input type="hidden" name="_token" value="{{ csrf_token('clinic_webhook') }}">
+        <div class="form-group">
+            <label for="webhook_url">URL do webhook</label>
+            <input id="webhook_url" name="webhook_url" type="url" class="form-control"
+                   value="{{ integration_config.webhook_url|default('') }}"
+                   placeholder="https://...">
+        </div>
+        <label class="d-flex align-items-center gap-2 mb-3">
+            <input type="checkbox" name="lembretes_sms" value="1"{{ integration_config.lembretes_sms|default(false) ? ' checked' : '' }}>
+            <span>Habilitar lembretes SMS (quando disponível)</span>
+        </label>
+        <button type="submit" class="btn-unio">Salvar integração</button>
+    </form>
+</section>
+{% endblock %}

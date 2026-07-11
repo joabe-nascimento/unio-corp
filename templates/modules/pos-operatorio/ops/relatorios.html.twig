@@ -1,1 +1,35 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Relatórios · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Relatórios' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Indicadores e exportações para auditoria' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: reports.resumo, mb: 'mb-0' } %}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-3">
+    <h3 class="clinic-ops-panel__title">Exportações disponíveis</h3>
+    <div class="clinic-ops-grid mt-3">
+        {% for export in reports.exports %}
+        <article class="unio-card clinic-ops-card p-3">
+            <strong class="clinic-ops-card__title">{{ export.nome }}</strong>
+            <p class="clinic-ops-card__desc">Formato {{ export.formato }}</p>
+            {% if export.id == 'questionarios' and export.status == 'active' %}
+            <a href="{{ path('app_pos_operatorio_relatorios_export_questionarios') }}" class="btn-unio btn-sm mt-2">Baixar CSV</a>
+            {% elseif export.id == 'alertas' and export.status == 'active' %}
+            <a href="{{ path('app_pos_operatorio_relatorios_export_alertas') }}" class="btn-unio btn-sm mt-2">Baixar CSV</a>
+            {% elseif export.id == 'auditoria' and export.status == 'active' %}
+            <a href="{{ path('app_pos_operatorio_relatorios_export_auditoria') }}" class="btn-unio btn-sm mt-2">Baixar CSV</a>
+            {% else %}
+            <span class="badge-perfil default mt-2">{{ export.status }}</span>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

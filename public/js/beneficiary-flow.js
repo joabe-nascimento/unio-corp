@@ -67,4 +67,46 @@
             document.body.classList.remove('is-printing-carteirinha');
         });
     }
+
+    function initIdcardWidget(widget) {
+        if (widget.dataset.idcardReady === '1') {
+            return;
+        }
+        widget.dataset.idcardReady = '1';
+
+        var card = widget.querySelector('[data-idcard-flip]');
+        var tabs = widget.querySelectorAll('[data-idcard-tab]');
+        if (!card || !tabs.length) {
+            return;
+        }
+
+        function setSide(side) {
+            var flipped = side === 'verso';
+            card.classList.toggle('is-flipped', flipped);
+            card.setAttribute('aria-pressed', flipped ? 'true' : 'false');
+            card.setAttribute('aria-label', flipped
+                ? 'Carteira digital. Toque para ver a frente.'
+                : 'Carteira digital. Toque para ver o verso.');
+
+            tabs.forEach(function (tab) {
+                var active = tab.getAttribute('data-idcard-tab') === side;
+                tab.classList.toggle('is-active', active);
+                tab.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+        }
+
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                setSide(tab.getAttribute('data-idcard-tab') || 'frente');
+            });
+        });
+
+        card.addEventListener('click', function () {
+            setSide(card.classList.contains('is-flipped') ? 'frente' : 'verso');
+        });
+    }
+
+    document.querySelectorAll('[data-idcard-widget]').forEach(initIdcardWidget);
 })();

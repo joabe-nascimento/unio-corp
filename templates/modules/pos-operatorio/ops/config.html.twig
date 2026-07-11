@@ -1,1 +1,42 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Configurações · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Configurações clínicas' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'SLA, regras de alerta e perfis de acesso' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_content %}
+<div class="clinic-ops-panels clinic-ops-panels--3">
+    <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">SLA de alertas</h3>
+        <ul class="clinic-ops-list">
+            {% for sla in config.sla %}
+            <li><strong>{{ sla.prioridade }}</strong> — {{ sla.minutos }} min <span class="text-muted">({{ sla.desc }})</span></li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">Regras automáticas</h3>
+        <ul class="clinic-ops-list">
+            {% for regra in config.regras %}
+            <li>
+                {{ regra.titulo }}
+                <span class="badge-perfil success">{{ regra.status }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">Perfis</h3>
+        <ul class="clinic-ops-list">
+            {% for perfil in config.perfis %}
+            <li><strong>{{ perfil.perfil }}</strong> — {{ perfil.acesso }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+</div>
+{% endblock %}

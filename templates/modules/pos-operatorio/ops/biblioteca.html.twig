@@ -1,1 +1,44 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Biblioteca · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Biblioteca de protocolos' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Modelos prontos por procedimento — importe para sua clínica' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_protocolos') }}" class="btn-unio-ghost btn-sm">Meus protocolos</a>
+{% endblock %}
+
+{% block hub_content %}
+<div class="clinic-ops-grid">
+    {% for tpl in templates %}
+    <article class="unio-card clinic-ops-card p-3">
+        <div class="clinic-ops-card__body">
+            <strong class="clinic-ops-card__title">{{ tpl.nome }}</strong>
+            <p class="clinic-ops-card__desc">{{ tpl.descricao }}</p>
+            <p class="text-muted small mb-0">{{ tpl.duracao_dias }} dias · {{ tpl.checklist|length }} marcos</p>
+        </div>
+        <form method="post" action="{{ path('app_pos_operatorio_biblioteca_importar', { slug: tpl.slug }) }}" class="mt-3">
+            <input type="hidden" name="_token" value="{{ csrf_token('clinic_biblioteca') }}">
+            <button type="submit" class="btn-unio btn-sm btn-block">Importar para a clínica</button>
+        </form>
+    </article>
+    {% endfor %}
+</div>
+
+{% if protocolos is not empty %}
+<section class="unio-card mt-4 p-3">
+    <h3 class="clinic-ops-panel__title">Já cadastrados na clínica</h3>
+    <ul class="clinic-ops-list">
+        {% for pr in protocolos %}
+        <li>
+            <a href="{{ path('app_pos_operatorio_protocolo_editar', { id: pr.id }) }}">{{ pr.nome }}</a>
+            <span class="text-muted"> — {{ pr.duracaoDias }} dias</span>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% endblock %}

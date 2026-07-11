@@ -1,1 +1,50 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}O que fazer agora · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'O que fazer agora' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Fila unificada ? alertas, questionários e retornos' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: queue.stats.total, label: 'Itens na fila', icon: 'fa-list-check', tone: 'sky' },
+    { value: queue.stats.p1, label: 'P1 abertos', icon: 'fa-fire', tone: 'rose', variant: queue.stats.p1 > 0 ? 'danger' : '', pulse: queue.stats.p1 > 0, route: 'app_pos_operatorio_sala_critica' },
+    { value: queue.stats.questionarios, label: 'Questionários pendentes', icon: 'fa-clipboard-list', tone: 'amber' },
+    { value: queue.stats.retornos, label: 'Retornos hoje', icon: 'fa-calendar-check', tone: 'teal' },
+], mb: 'mb-0' } %}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card">
+    {% if queue.items is empty %}
+    <p class="text-muted p-4 mb-0">Nenhuma ação pendente ? pulso estável.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Paciente</th>
+                    <th>Detalhe</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in queue.items %}
+                <tr>
+                    <td><span class="badge-perfil {{ item.tone == 'danger' ? 'danger' : (item.tone == 'warning' ? 'warning' : 'default') }}">{{ item.type_label }}</span></td>
+                    <td><strong>{{ item.title }}</strong><span class="d-block text-muted small">{{ item.meta }}</span></td>
+                    <td>{{ item.subtitle }}</td>
+                    <td class="text-right">
+                        <a href="{{ path(item.route, item.route_params|default({})) }}" class="btn-unio btn-sm">{{ item.action_label }}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

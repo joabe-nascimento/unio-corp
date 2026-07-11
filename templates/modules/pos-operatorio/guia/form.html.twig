@@ -1,1 +1,71 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}{{ is_edit ? 'Editar' : 'Novo' }} guia médico{% endblock %}
+
+{% set hub_page_title = is_edit ? 'Editar guia médico' : 'Novo guia médico' %}
+{% set hub_page_eyebrow = 'Portal do paciente' %}
+{% set hub_page_subtitle = 'Fases da recuperação, orientações e sinais de alerta' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_guia_medico') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1"></i> Voltar
+</a>
+{% endblock %}
+
+{% macro lines_field(name, label, value) %}
+<div class="form-group clinic-guia-form__wide">
+    <label for="{{ name }}">{{ label }}</label>
+    <textarea id="{{ name }}" name="{{ name }}" class="form-control" rows="4" placeholder="Uma orientação por linha">{{ value is iterable ? value|join("\n") : value }}</textarea>
+</div>
+{% endmacro %}
+
+{% block hub_content %}
+<section class="unio-card clinic-guia-form">
+    <form method="post">
+        <input type="hidden" name="_token" value="{{ csrf_token('guia_medico_' ~ (guia.id|default('novo'))) }}">
+
+        <div class="clinic-guia-form__grid">
+            <div class="form-group">
+                <label for="nome">Nome do guia *</label>
+                <input id="nome" name="nome" class="form-control" required value="{{ guia.nome|default('') }}">
+            </div>
+            <div class="form-group">
+                <label for="tipo_procedimento">Tipo de procedimento (match)</label>
+                <input id="tipo_procedimento" name="tipo_procedimento" class="form-control"
+                       value="{{ guia.tipo_procedimento|default('') }}"
+                       placeholder="Ex.: herniorrafia, artroscopia">
+            </div>
+            <div class="form-group clinic-guia-form__wide">
+                <label for="subtitulo">Subtítulo no portal</label>
+                <input id="subtitulo" name="subtitulo" class="form-control" value="{{ guia.subtitulo|default('') }}">
+            </div>
+            <div class="form-group clinic-guia-form__wide">
+                <label for="contato_rapido">Contato rápido</label>
+                <input id="contato_rapido" name="contato_rapido" class="form-control" value="{{ guia.contato_rapido|default('') }}">
+            </div>
+        </div>
+
+        {{ _self.lines_field('orientacoes_aguda', 'Fase aguda (D+0 a D+2)', guia.orientacoes_aguda|default([])) }}
+        {{ _self.lines_field('orientacoes_intermediaria', 'Fase intermediária', guia.orientacoes_intermediaria|default([])) }}
+        {{ _self.lines_field('orientacoes_retorno', 'Fase de retorno', guia.orientacoes_retorno|default([])) }}
+        {{ _self.lines_field('orientacoes_alta', 'Alta do acompanhamento', guia.orientacoes_alta|default([])) }}
+        {{ _self.lines_field('sinais_alerta', 'Sinais de alerta', guia.sinais_alerta|default([])) }}
+
+        <div class="clinic-guia-form__checks">
+            <label class="d-flex align-items-center gap-2">
+                <input type="checkbox" name="ativo" value="1"{{ guia.ativo|default(true) ? ' checked' : '' }}>
+                <span>Guia ativo</span>
+            </label>
+            <label class="d-flex align-items-center gap-2">
+                <input type="checkbox" name="padrao" value="1"{{ guia.padrao|default(false) ? ' checked' : '' }}>
+                <span>Usar como padrão da clínica</span>
+            </label>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn-unio">Salvar guia</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

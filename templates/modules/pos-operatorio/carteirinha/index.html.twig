@@ -1,1 +1,87 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Carteirinha digital · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Carteirinha digital' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Emissão vinculada ao paciente com foto, validade e código de verificação' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_content %}
+<div class="clinic-carteirinha-layout">
+    <section class="unio-card clinic-carteirinha-panel">
+        <h3 class="clinic-ops-panel__title px-3 pt-3">Emitidas recentemente</h3>
+        {% if emitidos is empty %}
+        <p class="text-muted px-3 pb-3 mb-0">Nenhuma carteirinha emitida ainda.</p>
+        {% else %}
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Plano</th>
+                        <th>Validade</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in emitidos %}
+                    <tr>
+                        <td>
+                            <strong>{{ p.nome }}</strong>
+                            <span class="d-block text-muted small">{{ p.codigo }}</span>
+                        </td>
+                        <td>{{ planos[p.carteirinhaPlano]|default(p.carteirinhaPlano) }}</td>
+                        <td>{{ p.carteirinhaValidaAte ? p.carteirinhaValidaAte|date('d/m/Y') : '—' }}</td>
+                        <td class="text-right">
+                            <a href="{{ path('app_pos_operatorio_carteirinha_paciente', { id: p.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="unio-card clinic-carteirinha-panel">
+        <h3 class="clinic-ops-panel__title px-3 pt-3">Pacientes para emitir</h3>
+        {% if pacientes is empty %}
+        <p class="text-muted px-3 pb-3 mb-0">Cadastre pacientes para emitir carteirinhas.</p>
+        {% else %}
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Procedimento</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pacientes %}
+                    <tr>
+                        <td><strong>{{ p.nome }}</strong></td>
+                        <td>{{ p.procedimento|default('—') }}</td>
+                        <td>
+                            {% if p.hasCarteirinhaAtiva %}
+                            <span class="badge-perfil success">Ativa</span>
+                            {% else %}
+                            <span class="badge-perfil default">Sem emissão</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <a href="{{ path('app_pos_operatorio_carteirinha_paciente', { id: p.id }) }}" class="btn-unio btn-sm">
+                                {{ p.hasCarteirinhaAtiva ? 'Gerenciar' : 'Emitir' }}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

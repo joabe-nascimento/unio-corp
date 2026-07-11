@@ -1,1 +1,59 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Guia médico · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Guia médico' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Orientações por fase exibidas no portal do paciente' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_guia_medico_novo') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1"></i> Novo guia
+</a>
+{% endblock %}
+
+{% block hub_content %}
+{% if guias is empty %}
+<section class="unio-card p-4">
+    <p class="text-muted mb-3">Nenhum guia cadastrado. O sistema usa o modelo padrão até você criar um.</p>
+    <a href="{{ path('app_pos_operatorio_guia_medico_novo') }}" class="btn-unio">Criar primeiro guia</a>
+</section>
+{% else %}
+<div class="clinic-guia-list">
+    {% for guia in guias %}
+    <article class="unio-card clinic-guia-card">
+        <header class="clinic-guia-card__head">
+            <div>
+                <h3>{{ guia.nome }}</h3>
+                {% if guia.tipo_procedimento %}
+                <p class="text-muted small mb-0">{{ guia.tipo_procedimento }}</p>
+                {% endif %}
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                {% if guia.padrao|default(false) %}
+                <span class="badge-perfil success">Padrão</span>
+                {% endif %}
+                <span class="badge-perfil {{ guia.ativo|default(true) ? 'default' : 'warning' }}">
+                    {{ guia.ativo|default(true) ? 'Ativo' : 'Inativo' }}
+                </span>
+            </div>
+        </header>
+        <p class="text-muted small">{{ guia.subtitulo|default('') }}</p>
+        <ul class="clinic-guia-card__preview">
+            {% for line in guia.orientacoes_aguda|default([])|slice(0, 2) %}
+            <li>{{ line }}</li>
+            {% endfor %}
+        </ul>
+        <footer class="d-flex gap-2 mt-3">
+            <a href="{{ path('app_pos_operatorio_guia_medico_editar', { id: guia.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+            <form method="post" action="{{ path('app_pos_operatorio_guia_medico_excluir', { id: guia.id }) }}" onsubmit="return confirm('Remover este guia?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('guia_medico_delete_' ~ guia.id) }}">
+                <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
+            </form>
+        </footer>
+    </article>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

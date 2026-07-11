@@ -1,772 +1,220 @@
 {% set _tema = platform_config.tema|default('dark') %}
+{% set _brand = organismo.copy.brand_name|default(platform_config.plataforma_nome|default('Unio')) %}
+{% set _slogan = organismo.enabled|default(false)
+    ? 'Saúde que acompanha.'
+    : platform_config.plataforma_tagline|default('Pessoas. Processos. Resultados.') %}
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="{{ _tema }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if active_tab == 'register' %}Criar Conta{% else %}Entrar{% endif %} | Unio</title>
+    <title>{% if active_tab == 'register' %}Criar Conta{% else %}Entrar{% endif %} | {{ _brand }}</title>
     <script>try{var _p=new URLSearchParams(location.search);var _t=_p.get('theme')||localStorage.getItem('unio-theme')||'{{ _tema }}';document.documentElement.setAttribute('data-theme',_t);if(_p.get('theme'))localStorage.setItem('unio-theme',_t);}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/auth-login.css') }}?v=7">
     {% include 'components/unio_theme_vars.html.twig' %}
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            background: var(--bg);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            color: var(--text-1);
-            transition: background 0.2s ease, color 0.2s ease;
-        }
-
-        .auth-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            width: 100%;
-            height: 100vh;
-            height: 100dvh;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        /* ── Lado esquerdo ──────────────────────────────── */
-        .auth-left {
-            background: #10131c;
-            padding: 56px 64px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            min-height: 0;
-            transition: background 0.2s ease;
-        }
-
-        [data-theme="light"] .auth-left {
-            background: #dcebf2;
-        }
-
-        .auth-left-bg {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .auth-left-bg::after {
-            content: none;
-        }
-
-        .auth-deco {
-            position: absolute;
-            pointer-events: none;
-            user-select: none;
-            filter: brightness(0);
-        }
-
-        .auth-deco--mesh {
-            inset: -8% -12%;
-            width: 124%;
-            height: 116%;
-            object-fit: cover;
-            opacity: 0.28;
-        }
-
-        [data-theme="light"] .auth-deco--mesh {
-            opacity: 0.16;
-        }
-
-        .auth-deco--orbit {
-            top: 8%;
-            right: 6%;
-            width: min(28vw, 200px);
-            height: auto;
-            opacity: 0.42;
-        }
-
-        [data-theme="light"] .auth-deco--orbit { opacity: 0.2; }
-
-        .auth-deco--chip {
-            top: 22%;
-            right: 18%;
-            width: min(18vw, 130px);
-            height: auto;
-            opacity: 0.36;
-        }
-
-        [data-theme="light"] .auth-deco--chip { opacity: 0.16; }
-
-        .auth-deco--nodes {
-            bottom: 14%;
-            left: 4%;
-            width: min(32vw, 220px);
-            height: auto;
-            opacity: 0.48;
-        }
-
-        [data-theme="light"] .auth-deco--nodes { opacity: 0.22; }
-
-        .auth-deco--circuit {
-            bottom: 28%;
-            right: 2%;
-            width: min(22vw, 160px);
-            height: auto;
-            opacity: 0.32;
-        }
-
-        [data-theme="light"] .auth-deco--circuit { opacity: 0.14; }
-
-        [data-theme="dark"] .auth-deco--orbit,
-        [data-theme="dark"] .auth-deco--chip,
-        [data-theme="dark"] .auth-deco--nodes,
-        [data-theme="dark"] .auth-deco--circuit {
-            opacity: 0.38;
-        }
-
-        [data-theme="dark"] .auth-deco--mesh {
-            opacity: 0.22;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .auth-deco { animation: none !important; }
-        }
-
-        .auth-left-inner,
-        .auth-left-footer {
-            position: relative;
-            z-index: 1;
-        }
-
-        .auth-left-inner {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 28px;
-            min-height: 0;
-            text-align: center;
-        }
-
-        .auth-left-footer {
-            flex-shrink: 0;
-            padding-top: 32px;
-            align-self: stretch;
-            text-align: center;
-        }
-
-        /* ── Logotipo estático ─────────────────────────── */
-        .auth-logo {
-            width: 100%;
-            max-width: 420px;
-            margin-inline: auto;
-            line-height: 0;
-        }
-
-        .auth-logo__img,
-        .auth-logo img,
-        .auth-logo object,
-        .auth-logo svg {
-            display: block;
-            width: 100%;
-            height: auto;
-            max-height: min(52vh, 380px);
-            object-fit: contain;
-        }
-
-        .auth-slogan {
-            width: 100%;
-            max-width: min(92%, 420px);
-            margin-inline: auto;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 0.2em 0.55em;
-            font-family: 'Inter', sans-serif;
-            font-size: clamp(15px, 2.1vw, 18px);
-            font-weight: 500;
-            letter-spacing: 0.01em;
-            line-height: 1.35;
-            color: rgba(255, 255, 255, 0.78);
-        }
-
-        [data-theme="light"] .auth-slogan {
-            color: #475569;
-        }
-
-        .auth-slogan__word {
-            white-space: nowrap;
-        }
-
-        .auth-slogan__dot {
-            color: var(--accent, #3D5AE8);
-            font-weight: 700;
-        }
-
-        .auth-slogan__img {
-            display: none !important;
-        }
-
-        .auth-left .platform-support__item {
-            color: rgba(255, 255, 255, 0.48);
-        }
-
-        [data-theme="light"] .auth-left .platform-support__item {
-            color: var(--text-3);
-        }
-
-        .auth-left .platform-support__item:hover {
-            color: rgba(255, 255, 255, 0.78);
-        }
-
-        [data-theme="light"] .auth-left .platform-support__item:hover {
-            color: var(--accent);
-        }
-
-        /* ── Lado direito ───────────────────────────────── */
-        .auth-right {
-            background: #0C0D18;
-            padding: 48px 56px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 0;
-            overflow-y: auto;
-            transition: background 0.2s ease;
-        }
-
-        [data-theme="light"] .auth-right {
-            background: var(--layout-bg);
-        }
-
-        .auth-right-inner {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        /* ── Tabs ───────────────────────────────────────── */
-        .auth-tabs {
-            display: flex;
-            gap: 0;
-            margin-bottom: 32px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .auth-tab {
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-3);
-            cursor: pointer;
-            border: none;
-            background: none;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
-            transition: color 0.2s, border-color 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .auth-tab:hover { color: var(--text-2); }
-
-        .auth-tab.active {
-            color: var(--text-1);
-            border-bottom-color: var(--accent);
-        }
-
-        /* ── Formulário ─────────────────────────────────── */
-        .auth-panel { display: none; }
-        .auth-panel.active { display: block; }
-
-        .auth-panel h3 {
-            color: var(--text-1);
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 4px;
-        }
-
-        .auth-panel .sub {
-            color: var(--text-2);
-            font-size: 12px;
-            margin-bottom: 24px;
-        }
-
-        .form-group { margin-bottom: 14px; }
-
-        .form-label {
-            color: var(--text-2);
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .form-control {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            border-radius: 7px;
-            color: var(--text-1);
-            padding: 10px 13px;
-            font-size: 13px;
-            font-family: inherit;
-            width: 100%;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-        }
-
-        [data-theme="light"] .form-control {
-            background: var(--input-bg);
-            border-color: var(--border-2);
-        }
-
-        .form-control:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-dim);
-        }
-
-        .form-control::placeholder { color: var(--text-3); }
-        .form-control.is-invalid { border-color: rgba(239,68,68,0.45); }
-
-        .invalid-feedback {
-            color: #f87171;
-            font-size: 11px;
-            margin-top: 4px;
-            display: block;
-        }
-
-        .form-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .form-row label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--text-2);
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .form-row label input { accent-color: var(--accent); }
-
-        .form-row a {
-            color: var(--accent);
-            font-size: 12px;
-            text-decoration: none;
-            opacity: 0.85;
-        }
-
-        .form-row a:hover { opacity: 1; }
-
-        .btn-primary {
-            width: 100%;
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 7px;
-            padding: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.15s;
-            margin-top: 4px;
-        }
-
-        .btn-primary:hover {
-            background: var(--action-hover);
-            transform: translateY(-1px);
-        }
-
-        /* ── Alertas ────────────────────────────────────── */
-        .alert {
-            border-radius: 7px;
-            padding: 10px 13px;
-            font-size: 12px;
-            margin-bottom: 18px;
-        }
-
-        .alert-danger {
-            background: rgba(239,68,68,0.09);
-            border: 1px solid rgba(239,68,68,0.22);
-            color: #f87171;
-        }
-
-        .alert-success {
-            background: rgba(34,197,94,0.09);
-            border: 1px solid rgba(34,197,94,0.22);
-            color: #4ade80;
-        }
-
-        [data-theme="light"] .alert-success {
-            color: #15803d;
-        }
-
-        .form-row-cols {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        /* ── Divider ────────────────────────────────────── */
-        .auth-divider {
-            text-align: center;
-            margin: 14px 0 0;
-            font-size: 12px;
-            color: var(--text-3);
-        }
-
-        .auth-divider a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        /* ── Suporte (rodapé do painel esquerdo) ─────────── */
-        .platform-support { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 20px; }
-        .platform-support__item {
-            font-size: 12.5px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* ── Alternador de tema ─────────────────────────── */
-        .theme-float {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 100;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--text-2);
-            font-size: 14px;
-            transition: color 0.15s, border-color 0.15s, background 0.15s;
-        }
-
-        .theme-float:hover {
-            color: var(--text-1);
-            border-color: var(--border-2);
-            background: var(--surface-2);
-        }
-
-        .auth-back-home {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: color 0.15s, border-color 0.15s, background 0.15s;
-            z-index: 2;
-        }
-
-        .auth-back-home--banner {
-            position: absolute;
-            top: 20px;
-            left: 24px;
-            right: auto;
-            color: rgba(255, 255, 255, 0.88);
-            border: 1px solid rgba(255, 255, 255, 0.32);
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .auth-back-home--banner:hover {
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.52);
-            background: rgba(255, 255, 255, 0.16);
-            text-decoration: none;
-        }
-
-        [data-theme="light"] .auth-back-home--banner {
-            color: var(--text-2);
-            border-color: var(--border-2);
-            background: rgba(255, 255, 255, 0.65);
-        }
-
-        [data-theme="light"] .auth-back-home--banner:hover {
-            color: var(--text-1);
-            border-color: var(--accent-line);
-            background: #fff;
-        }
-
-        .auth-back-home--form {
-            display: none;
-            margin-bottom: 20px;
-            color: var(--text-3);
-            border: 1px solid var(--border);
-            background: var(--surface-2);
-        }
-
-        .auth-back-home--form:hover {
-            color: var(--accent);
-            border-color: var(--accent-line);
-            background: var(--accent-dim);
-            text-decoration: none;
-        }
-
-        .auth-back-home i {
-            font-size: 11px;
-        }
-
-        /* ── Responsive ─────────────────────────────────── */
-        @media (max-width: 900px) {
-            .auth-wrapper {
-                grid-template-columns: 1fr;
-                height: auto;
-                min-height: 100vh;
-                min-height: 100dvh;
-                overflow-y: auto;
-            }
-            html, body { overflow: auto; }
-            .auth-left {
-                min-height: 280px;
-                padding: 32px 28px;
-            }
-            .auth-back-home--banner {
-                top: 16px;
-                left: 20px;
-            }
-            .auth-logo,
-            .auth-logo__img,
-            .auth-logo img,
-            .auth-logo object { max-height: 200px; max-width: 320px; }
-            .auth-slogan { max-width: 280px; font-size: 15px; }
-            .auth-left { display: flex; }
-        }
-
-        @media (max-width: 640px) {
-            .auth-left { display: none; }
-            .auth-right { padding: 36px 24px; }
-            .auth-back-home--banner { display: none; }
-            .auth-back-home--form { display: inline-flex; }
-        }
-    </style>
 </head>
-<body>
+<body class="auth-page">
 
-{% include 'components/guest_theme_toggle.html.twig' %}
+<div class="auth-scene" aria-hidden="true">
+    <div class="auth-scene__gradient"></div>
+    <div class="auth-scene__grid"></div>
+    <div class="auth-scene__orb auth-scene__orb--1"></div>
+    <div class="auth-scene__orb auth-scene__orb--2"></div>
+    <div class="auth-scene__ecg"></div>
+</div>
 
-<div class="auth-wrapper">
+<header class="auth-topbar">
+    <a href="{{ path('app_home') }}" class="auth-back">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Voltar para a página inicial
+    </a>
+    <div class="auth-topbar__actions">
+        {% if platform_config.registro_publico ?? true %}
+            {% if active_tab == 'login' %}
+            <a href="{{ path('app_register') }}" class="auth-topbar__register">Criar conta</a>
+            {% else %}
+            <a href="{{ path('app_login') }}" class="auth-topbar__register">Entrar</a>
+            {% endif %}
+        {% endif %}
+        {% include 'components/guest_theme_toggle.html.twig' %}
+    </div>
+</header>
 
-    {# ── Lado esquerdo ── #}
-    <div class="auth-left">
-        <div class="auth-left-bg" aria-hidden="true">
-            <img class="auth-deco auth-deco--mesh"
-                 src="{{ asset('images/auth/mesh-network.svg') }}" alt="">
-            <img class="auth-deco auth-deco--orbit"
-                 src="{{ asset('images/auth/deco-orbit.svg') }}" alt="">
-            <img class="auth-deco auth-deco--chip"
-                 src="{{ asset('images/auth/deco-chip.svg') }}" alt="">
-            <img class="auth-deco auth-deco--nodes"
-                 src="{{ asset('images/auth/deco-nodes-cluster.svg') }}" alt="">
-            <img class="auth-deco auth-deco--circuit"
-                 src="{{ asset('images/auth/deco-circuit.svg') }}" alt="">
-        </div>
-
-        <a href="{{ path('app_home') }}" class="auth-back-home auth-back-home--banner">
-            <i class="fas fa-arrow-left" aria-hidden="true"></i>
-            Voltar para a página inicial
-        </a>
-
-        <div class="auth-left-inner">
+<main class="auth-main">
+    <section class="auth-brand" aria-label="Sobre a plataforma">
+        <div class="auth-brand__content">
             {% include 'components/auth_logo_animated.html.twig' only %}
-            {% include 'components/auth_slogan.html.twig' only %}
+
+            <h1 class="auth-brand__title">{{ _slogan }}</h1>
         </div>
 
-        <div class="auth-left-footer">
+        <footer class="auth-brand__footer">
             {% include 'components/platform_support.html.twig' with { extra_class: ' platform-support--auth' } %}
             {% include 'components/platform_legal.html.twig' with { variant: 'auth', extra_class: ' platform-legal--auth' } %}
-        </div>
-    </div>
+        </footer>
+    </section>
 
-    {# ── Lado direito ── #}
-    <div class="auth-right">
-    <div class="auth-right-inner">
+    <section class="auth-form-zone" aria-label="Acesso à plataforma">
+        <div class="auth-card">
+            <div class="auth-card__mobile-logo">
+                {% include 'components/platform_logo.html.twig' with { variant: 'full', width: 160, height: 48 } only %}
+            </div>
 
-        <a href="{{ path('app_home') }}" class="auth-back-home auth-back-home--form">
-            <i class="fas fa-arrow-left" aria-hidden="true"></i>
-            Voltar para a página inicial
-        </a>
+            <div class="auth-panel {{ active_tab == 'login' ? 'is-active' : '' }}" id="panel-login">
+                <h2 class="auth-panel__title">Bem-vindo de volta</h2>
+                <p class="auth-panel__sub">Entre com suas credenciais para acessar a plataforma</p>
 
-        {# ── Tabs ── #}
-        <div class="auth-tabs">
-            <a href="{{ path('app_login') }}"
-               class="auth-tab {{ active_tab == 'login' ? 'active' : '' }}">
-                Entrar
-            </a>
-            {% if platform_config.registro_publico ?? true %}
-            <a href="{{ path('app_register') }}"
-               class="auth-tab {{ active_tab == 'register' ? 'active' : '' }}">
-                Criar conta
-            </a>
-            {% endif %}
-        </div>
-
-        {# ──────────────────────────── PAINEL LOGIN ──────────────────────────── #}
-        <div class="auth-panel {{ active_tab == 'login' ? 'active' : '' }}" id="panel-login">
-
-            <h3>Bem-vindo de volta</h3>
-            <p class="sub">Entre com suas credenciais para acessar a plataforma</p>
-
-            {% for msg in app.flashes('register_success') %}
-                <div class="alert alert-success">{{ msg }}</div>
-            {% endfor %}
-
-            {% for msg in app.flashes('auth_info') %}
-                <div class="alert alert-success">{{ msg }}</div>
-            {% endfor %}
-
-            {% for msg in app.flashes('auth_error') %}
-                <div class="alert alert-danger">{{ msg }}</div>
-            {% endfor %}
-
-            {% if app.debug %}
-                {% for msg in app.flashes('auth_dev_reset_link') %}
-                    <div class="alert alert-danger" style="word-break: break-all;">{{ msg }}</div>
+                {% for msg in app.flashes('register_success') %}
+                    <div class="auth-alert auth-alert--success">{{ msg }}</div>
                 {% endfor %}
-            {% endif %}
-
-            {% if error %}
-                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-            {% endif %}
-
-            <form method="post" action="{{ path('app_login') }}">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-                <div class="form-group">
-                    <label class="form-label" for="email">E-mail</label>
-                    <input class="form-control" id="email" type="email" name="email"
-                           value="{{ last_username }}" placeholder="seu@email.com"
-                           autocomplete="email"{% if active_tab == 'login' %} autofocus{% endif %} required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="password">Senha</label>
-                    <input class="form-control" id="password" type="password" name="password"
-                           placeholder="••••••••" autocomplete="current-password" required>
-                </div>
-
-                <div class="form-row">
-                    <label>
-                        <input type="checkbox" name="_remember_me">
-                        Lembrar-me por 7 dias
-                    </label>
-                    <a href="{{ path('app_forgot_password') }}">Esqueci a senha</a>
-                </div>
-
-                <button type="submit" class="btn-primary">Entrar na plataforma</button>
-            </form>
-
-            {% if platform_config.registro_publico ?? true %}
-            <p class="auth-divider">
-                Não tem conta? <a href="{{ path('app_register') }}">Criar conta grátis</a>
-            </p>
-            {% endif %}
-        </div>
-
-        {# ──────────────────────────── PAINEL CADASTRO ──────────────────────── #}
-        {% if registrationForm is defined and registrationForm %}
-        <div class="auth-panel {{ active_tab == 'register' ? 'active' : '' }}" id="panel-register">
-
-            <h3>Criar conta</h3>
-            <p class="sub">Preencha os dados para acessar a plataforma</p>
-
-            {% for msg in app.flashes('register_error') %}
-                <div class="alert alert-danger">{{ msg }}</div>
-            {% endfor %}
-
-            {{ form_start(registrationForm, {
-                'action': path('app_register'),
-                'method': 'POST',
-                'attr': {'novalidate': 'novalidate'}
-            }) }}
-
-                <div class="form-group">
-                    <label class="form-label" for="{{ registrationForm.nome.vars.id }}">Nome completo</label>
-                    {{ form_widget(registrationForm.nome, {'attr': (active_tab == 'register' ? {'class': 'form-control' ~ (registrationForm.nome.vars.errors|length ? ' is-invalid' : ''), 'autofocus': 'autofocus'} : {'class': 'form-control' ~ (registrationForm.nome.vars.errors|length ? ' is-invalid' : '')})}) }}
-                    {% if registrationForm.nome.vars.errors|length %}
-                        <span class="invalid-feedback">{{ registrationForm.nome.vars.errors[0].message }}</span>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="{{ registrationForm.email.vars.id }}">E-mail</label>
-                    {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control' ~ (registrationForm.email.vars.errors|length ? ' is-invalid' : '')}}) }}
-                    {% if registrationForm.email.vars.errors|length %}
-                        <span class="invalid-feedback">{{ registrationForm.email.vars.errors[0].message }}</span>
-                    {% endif %}
-                </div>
-
-                <div class="form-row-cols">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ registrationForm.plainPassword.first.vars.id }}">Senha</label>
-                        {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control' ~ (registrationForm.plainPassword.vars.errors|length ? ' is-invalid' : '')}}) }}
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="{{ registrationForm.plainPassword.second.vars.id }}">Confirmar senha</label>
-                        {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control' ~ (registrationForm.plainPassword.vars.errors|length ? ' is-invalid' : '')}}) }}
-                    </div>
-                </div>
-                {% if registrationForm.plainPassword.vars.errors|length %}
-                    <span class="invalid-feedback" style="margin-top:-8px;margin-bottom:10px;">{{ registrationForm.plainPassword.vars.errors[0].message }}</span>
+                {% for msg in app.flashes('auth_info') %}
+                    <div class="auth-alert auth-alert--success">{{ msg }}</div>
+                {% endfor %}
+                {% for msg in app.flashes('auth_error') %}
+                    <div class="auth-alert auth-alert--danger">{{ msg }}</div>
+                {% endfor %}
+                {% if app.debug %}
+                    {% for msg in app.flashes('auth_dev_reset_link') %}
+                        <div class="auth-alert auth-alert--danger" style="word-break: break-all;">{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+                {% if error %}
+                    <div class="auth-alert auth-alert--danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
                 {% endif %}
 
-                <div class="register-legal-check">
-                    {{ form_widget(registrationForm.aceitoTermos) }}
-                    <label for="{{ registrationForm.aceitoTermos.vars.id }}">
-                        Li e aceito os
-                        <a href="{{ path('app_legal_termos') }}" target="_blank" rel="noopener noreferrer">Termos de Uso</a>
-                        e a
-                        <a href="{{ path('app_legal_privacidade') }}" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.
-                    </label>
+                <form method="post" action="{{ path('app_login') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <div class="auth-field">
+                        <label class="auth-field__label" for="email">E-mail</label>
+                        <div class="auth-field__wrap">
+                            <i class="fas fa-envelope auth-field__icon" aria-hidden="true"></i>
+                            <input class="auth-field__input" id="email" type="email" name="email"
+                                   value="{{ last_username }}" placeholder="seu@email.com"
+                                   autocomplete="email"{% if active_tab == 'login' %} autofocus{% endif %} required>
+                        </div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label class="auth-field__label" for="password">Senha</label>
+                        <div class="auth-field__wrap">
+                            <i class="fas fa-lock auth-field__icon" aria-hidden="true"></i>
+                            <input class="auth-field__input" id="password" type="password" name="password"
+                                   placeholder="••••••••" autocomplete="current-password" required>
+                        </div>
+                    </div>
+
+                    <div class="auth-row">
+                        <label>
+                            <input type="checkbox" name="_remember_me">
+                            Lembrar-me por 7 dias
+                        </label>
+                        <a href="{{ path('app_forgot_password') }}">Esqueci a senha</a>
+                    </div>
+
+                    <button type="submit" class="auth-submit">Entrar na plataforma</button>
+                </form>
+
+                {% if platform_config.registro_publico ?? true %}
+                <div class="auth-card__register">
+                    <span class="auth-card__register-label">Ainda não tem conta?</span>
+                    <a href="{{ path('app_register') }}" class="auth-register-btn">Criar conta grátis</a>
                 </div>
-                {% if registrationForm.aceitoTermos.vars.errors|length %}
-                    <span class="invalid-feedback" style="display:block;margin-top:-8px;margin-bottom:12px">{{ registrationForm.aceitoTermos.vars.errors[0].message }}</span>
                 {% endif %}
+            </div>
 
-                <button type="submit" class="btn-primary">Criar minha conta</button>
+            {% if registrationForm is defined and registrationForm %}
+            <div class="auth-panel {{ active_tab == 'register' ? 'is-active' : '' }}" id="panel-register">
+                <h2 class="auth-panel__title">Criar conta</h2>
+                <p class="auth-panel__sub">Preencha os dados para acessar a plataforma</p>
 
-            {{ form_end(registrationForm) }}
+                {% for msg in app.flashes('register_error') %}
+                    <div class="auth-alert auth-alert--danger">{{ msg }}</div>
+                {% endfor %}
 
-            <p class="auth-divider">
-                Já tem conta? <a href="{{ path('app_login') }}">Fazer login</a>
-            </p>
+                {{ form_start(registrationForm, {
+                    action: path('app_register'),
+                    method: 'POST',
+                    attr: { novalidate: 'novalidate' }
+                }) }}
+
+                    <div class="auth-field">
+                        <label class="auth-field__label" for="{{ registrationForm.nome.vars.id }}">Nome completo</label>
+                        <div class="auth-field__wrap">
+                            <i class="fas fa-user auth-field__icon" aria-hidden="true"></i>
+                            {{ form_widget(registrationForm.nome, { attr: (active_tab == 'register' ? {
+                                class: 'auth-field__input' ~ (registrationForm.nome.vars.errors|length ? ' is-invalid' : ''),
+                                autofocus: 'autofocus'
+                            } : {
+                                class: 'auth-field__input' ~ (registrationForm.nome.vars.errors|length ? ' is-invalid' : '')
+                            }) }) }}
+                        </div>
+                        {% if registrationForm.nome.vars.errors|length %}
+                            <span class="invalid-feedback">{{ registrationForm.nome.vars.errors[0].message }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="auth-field">
+                        <label class="auth-field__label" for="{{ registrationForm.email.vars.id }}">E-mail</label>
+                        <div class="auth-field__wrap">
+                            <i class="fas fa-envelope auth-field__icon" aria-hidden="true"></i>
+                            {{ form_widget(registrationForm.email, { attr: {
+                                class: 'auth-field__input' ~ (registrationForm.email.vars.errors|length ? ' is-invalid' : '')
+                            } }) }}
+                        </div>
+                        {% if registrationForm.email.vars.errors|length %}
+                            <span class="invalid-feedback">{{ registrationForm.email.vars.errors[0].message }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="auth-cols">
+                        <div class="auth-field">
+                            <label class="auth-field__label" for="{{ registrationForm.plainPassword.first.vars.id }}">Senha</label>
+                            {{ form_widget(registrationForm.plainPassword.first, { attr: {
+                                class: 'auth-field__input' ~ (registrationForm.plainPassword.vars.errors|length ? ' is-invalid' : '')
+                            } }) }}
+                        </div>
+                        <div class="auth-field">
+                            <label class="auth-field__label" for="{{ registrationForm.plainPassword.second.vars.id }}">Confirmar</label>
+                            {{ form_widget(registrationForm.plainPassword.second, { attr: {
+                                class: 'auth-field__input' ~ (registrationForm.plainPassword.vars.errors|length ? ' is-invalid' : '')
+                            } }) }}
+                        </div>
+                    </div>
+                    {% if registrationForm.plainPassword.vars.errors|length %}
+                        <span class="invalid-feedback" style="margin-top:-8px;margin-bottom:10px;">{{ registrationForm.plainPassword.vars.errors[0].message }}</span>
+                    {% endif %}
+
+                    <div class="register-legal-check">
+                        {{ form_widget(registrationForm.aceitoTermos) }}
+                        <label for="{{ registrationForm.aceitoTermos.vars.id }}">
+                            Li e aceito os
+                            <a href="{{ path('app_legal_termos') }}" target="_blank" rel="noopener noreferrer">Termos de Uso</a>
+                            e a
+                            <a href="{{ path('app_legal_privacidade') }}" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.
+                        </label>
+                    </div>
+                    {% if registrationForm.aceitoTermos.vars.errors|length %}
+                        <span class="invalid-feedback" style="display:block;margin-top:-8px;margin-bottom:12px">{{ registrationForm.aceitoTermos.vars.errors[0].message }}</span>
+                    {% endif %}
+
+                    <button type="submit" class="auth-submit">Criar minha conta</button>
+
+                {{ form_end(registrationForm) }}
+
+                <p class="auth-footnote">
+                    Já tem conta? <a href="{{ path('app_login') }}">Fazer login</a>
+                </p>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
+    </section>
+</main>
 
-    </div>{# /auth-right-inner #}
-    </div>{# /auth-right #}
-</div>{# /auth-wrapper #}
 {% include 'components/cookie_consent_banner.html.twig' %}
 <script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
 </body>

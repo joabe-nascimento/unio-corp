@@ -1,1 +1,56 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Retornos · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Retornos previstos' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Marcos do protocolo e consultas nos próximos 7 dias' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<span class="badge-perfil default">{{ retornos.proximos_7_dias }} marco(s) na janela</span>
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card">
+    {% if retornos.items is empty %}
+    <p class="text-muted p-4 mb-0">Nenhum retorno previsto na janela atual.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Marco</th>
+                    <th>Dia pós-op</th>
+                    <th>Quando</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in retornos.items %}
+                <tr class="{{ r.hoje ? 'admin-table-row--highlight' : '' }}">
+                    <td>
+                        <strong>{{ r.paciente_nome }}</strong>
+                        <span class="d-block text-muted small">{{ r.paciente_codigo }} · {{ r.procedimento }}</span>
+                    </td>
+                    <td>{{ r.marco }}</td>
+                    <td>D+{{ r.dia_pos }} ? D+{{ r.dia_marco }}</td>
+                    <td>
+                        {% if r.hoje %}
+                        <span class="badge-perfil warning">Hoje</span>
+                        {% else %}
+                        {{ r.quando }}
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: r.paciente_id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,1 +1,75 @@
-¿
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Carteirinha · {{ paciente.nome }}{% endblock %}
+
+{% set hub_page_title = paciente.nome %}
+{% set hub_page_eyebrow = 'Carteirinha digital' %}
+{% set hub_page_subtitle = paciente.codigo ~ ' · ' ~ (paciente.procedimento|default('Procedimento')) %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_carteirinha') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1"></i> Voltar
+</a>
+<a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: paciente.id }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-folder-open mr-1"></i> Ficha
+</a>
+{% endblock %}
+
+{% block hub_content %}
+<div class="clinic-carteirinha-paciente">
+    <section class="unio-card clinic-carteirinha-paciente__actions">
+        <h3 class="clinic-ops-panel__title">Emissão</h3>
+
+        {% if tem_emissao %}
+        <p class="text-muted small mb-3">
+            Código <strong>{{ paciente.carteirinhaVerificacao }}</strong>
+            · válida até {{ paciente.carteirinhaValidaAte|date('d/m/Y') }}
+        </p>
+        {% else %}
+        <p class="text-muted small mb-3">Nenhuma carteirinha ativa para este paciente.</p>
+        {% endif %}
+
+        <form method="post" action="{{ path('app_pos_operatorio_carteirinha_emitir', { id: paciente.id }) }}" class="clinic-carteirinha-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('carteirinha_emitir_' ~ paciente.id) }}">
+            <div class="form-group">
+                <label class="unio-form-label" for="plano">Plano visual</label>
+                <select id="plano" name="plano" class="form-control">
+                    {% for key, label in planos %}
+                    <option value="{{ key }}"{{ theme == key ? ' selected' : '' }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="unio-form-label" for="validade_dias">Validade (dias)</label>
+                <input id="validade_dias" name="validade_dias" type="number" min="7" max="90" class="form-control" value="14">
+            </div>
+            <button type="submit" class="btn-unio btn-block">
+                {{ tem_emissao ? 'Reemitir carteirinha' : 'Emitir carteirinha' }}
+            </button>
+        </form>
+
+        <form method="post" action="{{ path('app_pos_operatorio_carteirinha_foto', { id: paciente.id }) }}" enctype="multipart/form-data" class="clinic-carteirinha-form mt-3">
+            <input type="hidden" name="_token" value="{{ csrf_token('carteirinha_foto_' ~ paciente.id) }}">
+            <div class="form-group">
+                <label class="unio-form-label" for="foto">Foto do paciente</label>
+                <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" class="form-control-file">
+            </div>
+            <button type="submit" class="btn-unio-ghost btn-sm">Atualizar foto</button>
+        </form>
+
+        {% if tem_emissao %}
+        <form method="post" action="{{ path('app_pos_operatorio_carteirinha_revogar', { id: paciente.id }) }}" class="mt-3" onsubmit="return confirm('Revogar carteirinha deste paciente?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('carteirinha_revogar_' ~ paciente.id) }}">
+            <button type="submit" class="btn-unio-ghost btn-sm text-danger">Revogar emissão</button>
+        </form>
+        {% endif %}
+    </section>
+
+    <section class="clinic-carteirinha-paciente__preview">
+        <div class="clinic-carteirinha-paciente__preview mkt-carteirinha-page">
+            {% include 'components/marketing/digital_id_card.html.twig' with { card: card, theme: theme } %}
+        </div>
+    </section>
+</div>
+{% endblock %}
