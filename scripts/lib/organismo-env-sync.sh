@@ -50,7 +50,7 @@ organismo_env_sync_for_uri() {
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL_ARTIGO 'do projeto'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL_PLURAL 'Projetos'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_MATURIDADE 'Painel de entregas'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_SECTION_CLIENTS 'Projetos'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_SECTION_CLIENTS 'Relação com cliente'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_PACIENTES 'Clientes'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_SALA_CRITICA 'Prioridade alta'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_ALERTAS 'Alertas'

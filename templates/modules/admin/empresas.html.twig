@@ -1,16 +1,17 @@
 {% extends 'layout/page_list.html.twig' %}
-{% block title %}Empresas — Administração{% endblock %}
-{% set page_list_title = 'Empresas' %}
+{% set _crm = organismo.enabled|default(false) and not org_clinic|default(false) %}
+{% block title %}{{ _crm ? 'Clientes' : 'Empresas' }} — Administração{% endblock %}
+{% set page_list_title = _crm ? 'Clientes' : 'Empresas' %}
 {% set page_list_actions_in_top = true %}
 
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_admin_empresas') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: 'Nova empresa',
+    btn_label: _crm ? 'Novo cliente' : 'Nova empresa',
     btn_icon: 'fa-plus',
     btn_opens: 'admin-nova-empresa',
     search_in_section: true,
-    search_placeholder: 'Buscar por nome, CNPJ ou setor…',
+    search_placeholder: _crm ? 'Buscar por nome, documento ou segmento…' : 'Buscar por nome, CNPJ ou setor…',
     search_name: 'q',
     search_value: busca
 } %}
@@ -27,21 +28,21 @@
 {% block page_list_content %}
 {% if empresas is empty %}
     {% include 'components/empty_state.html.twig' with {
-        icon: 'fa-building-slash',
-        title: 'Nenhuma empresa encontrada',
-        text: 'Ajuste o filtro ou cadastre uma nova empresa.'
+        icon: _crm ? 'fa-handshake' : 'fa-building-slash',
+        title: _crm ? 'Nenhum cliente encontrado' : 'Nenhuma empresa encontrada',
+        text: _crm ? 'Ajuste o filtro ou cadastre um novo cliente.' : 'Ajuste o filtro ou cadastre uma nova empresa.'
     } %}
 {% else %}
 <div class="unio-card p-0">
     <table class="admin-table">
         <thead>
             <tr>
-                <th>Empresa</th>
-                <th>CNPJ</th>
-                <th>Setor</th>
-                <th>Usuários</th>
+                <th>{{ _crm ? 'Cliente' : 'Empresa' }}</th>
+                <th>{{ _crm ? 'CNPJ / Documento' : 'CNPJ' }}</th>
+                <th>{{ _crm ? 'Segmento' : 'Setor' }}</th>
+                <th>{{ _crm ? 'Contatos' : 'Usuários' }}</th>
                 <th>Status</th>
-                <th>Cadastro</th>
+                <th>{{ _crm ? 'Desde' : 'Cadastro' }}</th>
                 <th></th>
             </tr>
         </thead>
@@ -54,9 +55,9 @@
             <td>{{ e.usuarios|length }}</td>
             <td>
                 {% if e.ativo %}
-                    {% include 'components/status_badge.html.twig' with { label: 'Ativa', variant: 'success' } %}
+                    {% include 'components/status_badge.html.twig' with { label: 'Ativo', variant: 'success' } %}
                 {% else %}
-                    {% include 'components/status_badge.html.twig' with { label: 'Inativa', variant: 'secondary' } %}
+                    {% include 'components/status_badge.html.twig' with { label: 'Inativo', variant: 'secondary' } %}
                 {% endif %}
             </td>
             <td class="admin-table-date">{{ e.criadoEm|date('d/m/Y') }}</td>
@@ -77,7 +78,7 @@
                     <button type="submit"
                             class="btn-unio-ghost btn-xs {{ e.ativo ? 'btn-danger-ghost' : '' }}"
                             title="{{ e.ativo ? 'Desativar' : 'Ativar' }}"
-                            onclick="return confirm('{{ e.ativo ? 'Desativar' : 'Ativar' }} empresa {{ e.nome|e('js') }}?')">
+                            onclick="return confirm('{{ e.ativo ? 'Desativar' : 'Ativar' }} {{ _crm ? 'cliente' : 'empresa' }} {{ e.nome|e('js') }}?')">
                         <i class="fas {{ e.ativo ? 'fa-ban' : 'fa-check-circle' }}" aria-hidden="true"></i>
                     </button>
                 </form>
@@ -88,16 +89,21 @@
     </table>
 </div>
 {% endif %}
-<p class="admin-list-count">{{ empresas|length }} empresa{{ empresas|length != 1 ? 's' : '' }} encontrada{{ empresas|length != 1 ? 's' : '' }}</p>
+<p class="admin-list-count">
+    {{ empresas|length }}
+    {{ _crm
+        ? (empresas|length != 1 ? 'clientes encontrados' : 'cliente encontrado')
+        : (empresas|length != 1 ? 'empresas encontradas' : 'empresa encontrada')
+    }}
+</p>
 {% endblock %}
 
 {% block page_overlays %}
-{# ── Offcanvas: Nova empresa ── #}
 {% embed 'components/unio_offcanvas.html.twig' with {
     id: 'admin-nova-empresa',
-    title: 'Nova Empresa',
-    subtitle: 'Cadastre um tenant ou empresa',
-    icon: 'fa-building-circle-check',
+    title: _crm ? 'Novo cliente' : 'Nova Empresa',
+    subtitle: _crm ? 'Cadastre um cliente e acompanhe a relação comercial' : 'Cadastre um tenant ou empresa',
+    icon: _crm ? 'fa-handshake' : 'fa-building-circle-check',
     size: 'md',
     open: app.request.query.getBoolean('open_novo')
 } %}
@@ -105,16 +111,16 @@
     <form method="post" action="{{ path('app_admin_empresa_nova') }}" class="unio-form" id="adminNovaEmpresaForm">
         <input type="hidden" name="_token" value="{{ csrf_form }}">
         {% include 'components/unio_form_field.html.twig' with {
-            id: 'nova_empresa_nome', name: 'nome', label: 'Nome da empresa',
-            placeholder: 'Ex.: Unio Demo', required: true
+            id: 'nova_empresa_nome', name: 'nome', label: _crm ? 'Nome do cliente' : 'Nome da empresa',
+            placeholder: _crm ? 'Ex.: União Médica' : 'Ex.: Unio Demo', required: true
         } %}
         {% include 'components/unio_form_field.html.twig' with {
-            id: 'nova_empresa_cnpj', name: 'cnpj', label: 'CNPJ',
+            id: 'nova_empresa_cnpj', name: 'cnpj', label: _crm ? 'CNPJ / Documento' : 'CNPJ',
             placeholder: '00.000.000/0001-00', required: true
         } %}
         {% include 'components/unio_form_field.html.twig' with {
-            id: 'nova_empresa_setor', name: 'setor', label: 'Setor',
-            placeholder: 'Ex.: Tecnologia'
+            id: 'nova_empresa_setor', name: 'setor', label: _crm ? 'Segmento' : 'Setor',
+            placeholder: _crm ? 'Ex.: Saúde, Educação, Varejo' : 'Ex.: Tecnologia'
         } %}
         {% include 'components/unio_form_field.html.twig' with {
             id: 'nova_empresa_logo', name: 'logo', label: 'Logo (URL)',
@@ -125,17 +131,16 @@
     {% block offcanvas_footer %}
     <div class="unio-offcanvas-footer">
         <button type="submit" form="adminNovaEmpresaForm" class="btn-unio">
-            <i class="fas fa-check mr-1"></i> Cadastrar
+            <i class="fas fa-check mr-1"></i> {{ _crm ? 'Cadastrar cliente' : 'Cadastrar' }}
         </button>
         <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
     </div>
     {% endblock %}
 {% endembed %}
 
-{# ── Offcanvas: Editar empresa ── #}
 {% embed 'components/unio_offcanvas.html.twig' with {
     id: 'admin-editar-empresa',
-    title: 'Editar Empresa',
+    title: _crm ? 'Editar cliente' : 'Editar Empresa',
     icon: 'fa-pen-to-square',
     size: 'md'
 } %}
@@ -146,15 +151,15 @@
           id="adminEditarEmpresaForm">
         <input type="hidden" name="_token" value="{{ csrf_form }}">
         {% include 'components/unio_form_field.html.twig' with {
-            id: 'edit_empresa_nome', name: 'nome', label: 'Nome da empresa', required: true
+            id: 'edit_empresa_nome', name: 'nome', label: _crm ? 'Nome do cliente' : 'Nome da empresa', required: true
         } %}
         {% include 'components/unio_form_field.html.twig' with {
-            id: 'edit_empresa_cnpj', name: 'cnpj', label: 'CNPJ',
+            id: 'edit_empresa_cnpj', name: 'cnpj', label: _crm ? 'CNPJ / Documento' : 'CNPJ',
             placeholder: 'Deixe em branco para manter'
         } %}
         {% include 'components/unio_form_field.html.twig' with {
-            id: 'edit_empresa_setor', name: 'setor', label: 'Setor',
-            placeholder: 'Ex.: Tecnologia'
+            id: 'edit_empresa_setor', name: 'setor', label: _crm ? 'Segmento' : 'Setor',
+            placeholder: _crm ? 'Ex.: Saúde, Educação' : 'Ex.: Tecnologia'
         } %}
         {% include 'components/unio_form_field.html.twig' with {
             id: 'edit_empresa_logo', name: 'logo', label: 'Logo (URL)',
@@ -163,7 +168,7 @@
         <div class="unio-form-group">
             <label class="unio-form-check d-flex align-items-center gap-2" for="edit_empresa_ativo">
                 <input type="checkbox" id="edit_empresa_ativo" name="ativo" value="1" class="unio-checkbox">
-                <span>Empresa ativa</span>
+                <span>{{ _crm ? 'Cliente ativo' : 'Empresa ativa' }}</span>
             </label>
         </div>
     </form>
