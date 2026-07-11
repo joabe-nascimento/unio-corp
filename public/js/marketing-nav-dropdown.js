@@ -75,7 +75,11 @@
                         if (el) {
                             e.preventDefault();
                             close();
-                            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            if (window.MktNavHash && window.MktNavHash.scrollToHash) {
+                                window.MktNavHash.scrollToHash(target.hash, 'smooth');
+                            } else {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
                             window.history.replaceState(null, '', target.pathname + target.search + target.hash);
                         }
                     }

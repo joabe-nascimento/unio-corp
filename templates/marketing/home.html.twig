@@ -14,12 +14,12 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=17">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=18">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
     {% if org_clinic|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=33">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=26">
-    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=22">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=41">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=28">
+    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=24">
     {% endif %}
     <style>
     /* ── Clínica overrides ── */
@@ -106,12 +106,7 @@
             <button type="button" class="mkt-theme-btn mkt-theme-btn--v2" id="guestThemeToggle" title="Alternar tema" aria-label="Alternar tema">
                 <i class="fas fa-sun" id="guestThemeIcon" aria-hidden="true"></i>
             </button>
-            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--ghost-v2">Entrar</a>
-            {% if platform_config.registro_publico ?? true %}
-            <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
-            {% else %}
             <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
-            {% endif %}
         </div>
     </div>
 </header>
@@ -146,7 +141,7 @@
                         <i class="fas fa-arrow-right" aria-hidden="true"></i>
                     </a>
                     {% if org_clinic|default(false) %}
-                    <a href="#experiencia-paciente" class="mkt-btn mkt-btn--surface mkt-btn--lg">Ver carteirinha e guia</a>
+                    <a href="#carterinha-digital" class="mkt-btn mkt-btn--surface mkt-btn--lg">Ver carteirinha e guia</a>
                     {% elseif platform_config.registro_publico ?? true %}
                     <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--surface mkt-btn--lg">Criar conta</a>
                     {% endif %}
@@ -1748,8 +1743,9 @@
 })();
 </script>
 
-<script src="{{ asset('js/marketing-home-rich.js') }}?v=8" defer></script>
-<script src="{{ asset('js/marketing-nav-dropdown.js') }}?v=2" defer></script>
+<script src="{{ asset('js/marketing-home-rich.js') }}?v=9" defer></script>
+<script src="{{ asset('js/marketing-nav-hash.js') }}?v=1" defer></script>
+<script src="{{ asset('js/marketing-nav-dropdown.js') }}?v=3" defer></script>
 {% if org_clinic|default(false) %}
 <script src="{{ asset('js/marketing-carteirinha.js') }}?v=6" defer></script>
 {% endif %}
