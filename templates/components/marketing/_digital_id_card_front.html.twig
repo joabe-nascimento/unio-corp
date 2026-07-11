@@ -52,11 +52,20 @@
                 <dt>CPF</dt>
                 <dd>{{ card.cpf_masked }}</dd>
             </div>
-            {% endif %}
             <div class="mkt-idcard__field">
                 <dt>Emitido em</dt>
                 <dd>{{ card.emitido_em|default('—') }}</dd>
             </div>
+            {% else %}
+            <div class="mkt-idcard__field">
+                <dt>Emitido em</dt>
+                <dd>{{ card.emitido_em|default('—') }}</dd>
+            </div>
+            <div class="mkt-idcard__field">
+                <dt>Protocolo</dt>
+                <dd>{{ card.protocolo|default('—') }}</dd>
+            </div>
+            {% endif %}
             <div class="mkt-idcard__field mkt-idcard__field--wide">
                 <dt>Procedimento</dt>
                 <dd>{{ card.procedimento|default('Procedimento') }}</dd>
@@ -65,10 +74,17 @@
                 <dt>Médico</dt>
                 <dd>{{ card.medico|default('—') }}</dd>
             </div>
+            {% if card.cpf_masked|default(null) %}
             <div class="mkt-idcard__field">
                 <dt>Protocolo</dt>
                 <dd>{{ card.protocolo|default('—') }}</dd>
             </div>
+            {% else %}
+            <div class="mkt-idcard__field">
+                <dt>Cirurgia</dt>
+                <dd>{{ card.cirurgia|default('—') }}</dd>
+            </div>
+            {% endif %}
         </dl>
         <span class="mkt-idcard__footer-bar">
             <span class="mkt-idcard__type">Carteira digital</span>
