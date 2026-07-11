@@ -2,11 +2,13 @@
 
 namespace App\Service\Organismo;
 
+use App\Entity\DevProjeto;
 use App\Entity\Empresa;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\RhFerias;
 use App\Entity\RhOnboardingProcess;
 use App\Entity\User;
+use App\Repository\DevProjetoRepository;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\RhFeriasRepository;
 use App\Repository\RhOnboardingProcessRepository;
@@ -21,10 +23,12 @@ final class PulsoCenaProvider
 {
     public function __construct(
         private OrganismoFeature $organismo,
+        private OrganismoCopyService $copy,
         private RhOnboardingProcessRepository $onboardingRepo,
         private RhFeriasRepository $feriasRepo,
         private TiChamadoRepository $chamadoRepo,
         private PosOperatorioPacienteRepository $pacienteRepo,
+        private DevProjetoRepository $projetoRepo,
         private NavigationService $navigation,
         private UrlGeneratorInterface $router,
     ) {
@@ -37,12 +41,14 @@ final class PulsoCenaProvider
     {
         if ($empresa === null) {
             return $this->organismo->isEnabled()
-                ? $this->mockClinicCenas(null)
+                ? ($this->copy->isClinicProfile() ? $this->mockClinicCenas(null) : $this->mockStudioCenas(null))
                 : $this->mockCenas(null);
         }
 
         if ($this->organismo->isEnabled()) {
-            return $this->getClinicCenas($empresa);
+            return $this->copy->isClinicProfile()
+                ? $this->getClinicCenas($empresa)
+                : $this->getStudioCenas($empresa);
         }
 
         $cenas = [];
@@ -94,6 +100,68 @@ final class PulsoCenaProvider
         }
 
         return $cenas;
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function getStudioCenas(Empresa $empresa): array
+    {
+        $cenas = [];
+
+        foreach ($this->projetoRepo->findRecentActive($empresa, 4) as $projeto) {
+            $cenas[] = $this->cenaFromProjeto($projeto);
+        }
+
+        if ($cenas === []) {
+            return $this->mockStudioCenas($empresa);
+        }
+
+        return $cenas;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function cenaFromProjeto(DevProjeto $projeto): array
+    {
+        $referencia = $projeto->getAtualizadoEm();
+        $dias = max(0, (int) $referencia->diff(new \DateTimeImmutable())->days);
+        $estado = $projeto->getStatus() === DevProjeto::STATUS_EM_ANDAMENTO ? 'ativa' : 'aguardando';
+
+        return [
+            'id' => 'projeto-' . $projeto->getId(),
+            'titulo' => $projeto->getNome(),
+            'tipo' => 'projeto',
+            'praticas' => ['entrega'],
+            'estado' => $estado,
+            'dias_aberta' => $dias,
+            'condutor' => $projeto->getCodigo() ?: $projeto->getArea(),
+            'url' => $this->router->generate('app_core_projetos_show', ['id' => $projeto->getId()]),
+            'mock' => false,
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mockStudioCenas(?Empresa $empresa): array
+    {
+        $suffix = $empresa !== null ? (string) $empresa->getId() : '0';
+
+        return [
+            [
+                'id' => 'mock-studio-projeto-' . $suffix,
+                'titulo' => 'Cadastrar primeiro projeto',
+                'tipo' => 'projeto',
+                'praticas' => ['entrega'],
+                'estado' => 'aguardando',
+                'dias_aberta' => 0,
+                'condutor' => null,
+                'url' => $this->router->generate('app_core_projetos', ['open_novo' => 1]),
+                'mock' => true,
+            ],
+        ];
     }
 
     /**

@@ -44,4 +44,30 @@ class DevTarefaRepository extends ServiceEntityRepository
 
         return $grouped;
     }
+
+    public function countPrioridadeAlta(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->andWhere('t.empresa = :empresa')
+            ->andWhere('t.prioridade = :p')
+            ->andWhere('t.status != :done')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('p', 'ALTA')
+            ->setParameter('done', DevTarefa::STATUS_CONCLUIDO)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countAbertas(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->andWhere('t.empresa = :empresa')
+            ->andWhere('t.status != :done')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('done', DevTarefa::STATUS_CONCLUIDO)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

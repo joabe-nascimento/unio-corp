@@ -73,92 +73,118 @@
 {% endfor %}
 
 {% else %}
-{# ── Studio / legado ── #}
+{# ── Studio — plataforma base ── #}
+{% set _studio = clinic_nav_badges|default({}) %}
 <li class="nav-item">
     <a href="{{ path('app_maturidade') }}" class="nav-link {{ route starts with 'app_maturidade' ? 'active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas {{ _clinic ? 'fa-stethoscope' : 'fa-chart-line' }} nav-icon" aria-hidden="true"></i>
+            <i class="fas fa-chart-line nav-icon" aria-hidden="true"></i>
         </span>
-        <p>{{ copy.nav_maturidade|default(_clinic ? 'Painel de Recuperação' : 'Painel de entregas') }}</p>
+        <p>{{ copy.nav_maturidade|default('Painel de entregas') }}</p>
     </a>
 </li>
 
 <li class="sidebar-hub-separator" aria-hidden="true"></li>
 <li class="nav-item sidebar-hub-heading-item">
     <div class="sidebar-hub-heading">
-        <span class="sidebar-hub-heading-label">{{ copy.nav_section_clients|default(_clinic ? 'Pacientes' : 'Projetos') }}</span>
+        <span class="sidebar-hub-heading-label">Clientes &amp; volume</span>
     </div>
 </li>
 
 <li class="nav-item">
-    <a href="{{ path('app_pos_operatorio_pacientes') }}" class="nav-link {{ route starts with 'app_pos_operatorio_paciente' or route == 'app_pos_operatorio_pacientes' ? 'active' : '' }}">
+    <a href="{{ path('app_admin_empresas') }}" class="nav-link {{ route starts with 'app_admin_empresa' ? 'active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas {{ _clinic ? 'fa-user-injured' : 'fa-folder-open' }} nav-icon" aria-hidden="true"></i>
-        </span>
-        <p>{{ copy.nav_pacientes|default(_clinic ? 'Pacientes' : 'Clientes') }}</p>
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="nav-link {{ route == 'app_pos_operatorio_sala_critica' ? 'active' : '' }}">
-        <span class="nav-icon-slot">
-            <i class="fas {{ _clinic ? 'fa-bed-pulse' : 'fa-flag' }} nav-icon" aria-hidden="true"></i>
-            {% if badges.sala_critica|default(0) > 0 %}
-            <span class="nav-clinic-badge nav-clinic-badge--danger">{{ badges.sala_critica }}</span>
+            <i class="fas fa-building nav-icon" aria-hidden="true"></i>
+            {% if _studio.clientes|default(0) > 0 %}
+            <span class="nav-clinic-badge">{{ _studio.clientes }}</span>
             {% endif %}
         </span>
-        <p>{{ copy.nav_sala_critica|default(_clinic ? 'Sala Crítica' : 'Prioridade alta') }}</p>
+        <p>Carteira de clientes</p>
     </a>
 </li>
 
 <li class="nav-item">
-    <a href="{{ path('app_pos_operatorio_alertas') }}" class="nav-link {{ route starts with 'app_pos_operatorio_alerta' ? 'active' : '' }}">
+    <a href="{{ path('app_publicidade_clientes') }}" class="nav-link {{ route == 'app_publicidade_clientes' ? 'active' : '' }}">
+        <span class="nav-icon-slot">
+            <i class="fas fa-address-book nav-icon" aria-hidden="true"></i>
+        </span>
+        <p>Contatos &amp; contas</p>
+    </a>
+</li>
+
+<li class="sidebar-hub-separator" aria-hidden="true"></li>
+<li class="nav-item sidebar-hub-heading-item">
+    <div class="sidebar-hub-heading">
+        <span class="sidebar-hub-heading-label">{{ copy.nav_section_deliverables|default('Projetos') }}</span>
+    </div>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_core_projetos') }}" class="nav-link {{ route starts with 'app_core_projetos' ? 'active' : '' }}">
+        <span class="nav-icon-slot">
+            <i class="fas fa-diagram-project nav-icon" aria-hidden="true"></i>
+            {% if _studio.projetos_ativos|default(0) > 0 %}
+            <span class="nav-clinic-badge">{{ _studio.projetos_ativos }}</span>
+            {% endif %}
+        </span>
+        <p>Projetos desenvolvidos</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_core_projetos', { view: 'kanban' }) }}" class="nav-link">
+        <span class="nav-icon-slot">
+            <i class="fas fa-flag nav-icon" aria-hidden="true"></i>
+            {% if _studio.prioridade_alta|default(0) > 0 %}
+            <span class="nav-clinic-badge nav-clinic-badge--danger">{{ _studio.prioridade_alta }}</span>
+            {% endif %}
+        </span>
+        <p>Prioridade alta</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_maturidade') }}" class="nav-link">
+        <span class="nav-icon-slot">
+            <i class="fas fa-scale-balanced nav-icon" aria-hidden="true"></i>
+            {% if _studio.balanceamento|default(0) > 0 %}
+            <span class="nav-clinic-badge">{{ _studio.balanceamento }}%</span>
+            {% endif %}
+        </span>
+        <p>Balanceamento</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_notifications') }}" class="nav-link {{ route == 'app_notifications' ? 'active' : '' }}">
         <span class="nav-icon-slot">
             <i class="fas fa-triangle-exclamation nav-icon" aria-hidden="true"></i>
-            {% if badges.alertas|default(0) > 0 %}
-            <span class="nav-clinic-badge nav-clinic-badge--warning">{{ badges.alertas }}</span>
+            {% if _studio.alertas|default(0) > 0 %}
+            <span class="nav-clinic-badge nav-clinic-badge--warning">{{ _studio.alertas }}</span>
             {% endif %}
         </span>
         <p>{{ copy.nav_alertas|default('Alertas') }}</p>
     </a>
 </li>
 
+{% if studio_nav_modules|default([])|length > 0 %}
 <li class="sidebar-hub-separator" aria-hidden="true"></li>
 <li class="nav-item sidebar-hub-heading-item">
     <div class="sidebar-hub-heading">
-        <span class="sidebar-hub-heading-label">{{ copy.nav_section_deliverables|default(_clinic ? 'Acompanhamento' : 'Produção') }}</span>
+        <span class="sidebar-hub-heading-label">Módulos desenvolvidos</span>
     </div>
 </li>
-
+{% for mod in studio_nav_modules %}
 <li class="nav-item">
-    <a href="{{ path('app_pos_operatorio_protocolos') }}" class="nav-link {{ route starts with 'app_pos_operatorio_protocolo' ? 'active' : '' }}">
+    <a href="{{ path(mod.route) }}" class="nav-link {{ route starts with mod.route ? 'active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas {{ _clinic ? 'fa-file-medical' : 'fa-book' }} nav-icon" aria-hidden="true"></i>
+            <i class="fas {{ mod.icon }} nav-icon" aria-hidden="true"></i>
         </span>
-        <p>{{ copy.nav_protocolos|default(_clinic ? 'Protocolos' : 'Playbooks') }}</p>
+        <p>{{ mod.label }}</p>
     </a>
 </li>
-
-<li class="nav-item">
-    <a href="{{ path('app_pos_operatorio_questionarios') }}" class="nav-link {{ route == 'app_pos_operatorio_questionarios' ? 'active' : '' }}">
-        <span class="nav-icon-slot">
-            <i class="fas fa-clipboard-list nav-icon" aria-hidden="true"></i>
-            {% if badges.questionarios|default(0) > 0 %}
-            <span class="nav-clinic-badge">{{ badges.questionarios }}</span>
-            {% endif %}
-        </span>
-        <p>{{ copy.nav_questionarios|default(_clinic ? 'Questionários' : 'Check-ins') }}</p>
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ path('app_portal_patient_login') }}" class="nav-link" target="_blank" rel="noopener">
-        <span class="nav-icon-slot">
-            <i class="fas {{ _clinic ? 'fa-person-circle-check' : 'fa-globe' }} nav-icon" aria-hidden="true"></i>
-        </span>
-        <p>{{ copy.nav_portal|default(_clinic ? 'Portal do Paciente' : 'Portal do cliente') }}</p>
-    </a>
-</li>
+{% endfor %}
+{% endif %}
 {% endif %}
 
 <li class="sidebar-hub-separator" aria-hidden="true"></li>

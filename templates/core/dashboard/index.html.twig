@@ -44,19 +44,20 @@
     {% set _badges = clinic_nav_badges|default({}) %}
     {% set _copy = organismo.copy|default({}) %}
     <section class="clinic-home-kpis" aria-label="Indicadores em tempo real">
+        {% if org_clinic|default(false) %}
         {% include 'components/kpi_row.html.twig' with { items: [
             {
                 value: _badges.pacientes_ativos|default(0),
-                label: _copy.nav_pacientes|default(org_clinic|default(false) ? 'Pacientes' : 'Clientes'),
-                icon: org_clinic|default(false) ? 'fa-user-injured' : 'fa-folder-open',
+                label: _copy.nav_pacientes|default('Pacientes'),
+                icon: 'fa-user-injured',
                 tone: 'sky',
                 route: 'app_pos_operatorio_pacientes',
                 sub: 'Em acompanhamento ativo'
             },
             {
                 value: _badges.sala_critica|default(0),
-                label: _copy.nav_sala_critica|default('Prioridade alta'),
-                icon: org_clinic|default(false) ? 'fa-bed-pulse' : 'fa-flag',
+                label: _copy.nav_sala_critica|default('Sala Crítica'),
+                icon: 'fa-bed-pulse',
                 tone: 'rose',
                 variant: _badges.sala_critica|default(0) > 0 ? 'danger' : '',
                 pulse: _badges.sala_critica|default(0) > 0,
@@ -74,52 +75,141 @@
             },
             {
                 value: _badges.questionarios|default(0),
-                label: _copy.nav_questionarios|default('Check-ins'),
+                label: _copy.nav_questionarios|default('Questionários'),
                 icon: 'fa-clipboard-list',
                 tone: 'lavender',
                 route: 'app_pos_operatorio_questionarios',
                 sub: 'Respostas pendentes hoje'
             },
         ], mb: 'mb-0' } %}
+        {% else %}
+        {% include 'components/kpi_row.html.twig' with { items: [
+            {
+                value: _badges.clientes|default(0),
+                label: 'Clientes ativos',
+                icon: 'fa-building',
+                tone: 'sky',
+                route: 'app_admin_empresas',
+                sub: 'Volume na carteira'
+            },
+            {
+                value: _badges.projetos_ativos|default(0),
+                label: 'Projetos em andamento',
+                icon: 'fa-diagram-project',
+                tone: 'indigo',
+                route: 'app_core_projetos',
+                sub: _badges.projetos_total|default(0) ~ ' no total'
+            },
+            {
+                value: (_badges.balanceamento|default(0)) ~ '%',
+                label: 'Balanceamento',
+                icon: 'fa-scale-balanced',
+                tone: 'sage',
+                route: 'app_maturidade',
+                sub: 'Progresso médio das entregas'
+            },
+            {
+                value: _badges.modulos|default(0),
+                label: 'Módulos prontos',
+                icon: 'fa-cubes',
+                tone: 'lavender',
+                route: 'app_maturidade',
+                sub: _badges.projetos_concluidos|default(0) ~ ' projetos concluídos'
+            },
+        ], mb: 'mb-0' } %}
+        {% endif %}
     </section>
 
     <section class="clinic-home-actions">
         <h2 class="clinic-home-actions__label">Começar por</h2>
         <div class="clinic-home-actions__grid">
+            {% if org_clinic|default(false) %}
             <a href="{{ path('app_pos_operatorio_pacientes', { open_novo: 1 }) }}" class="clinic-action-card clinic-action-card--primary">
-                <span class="clinic-action-card__icon"><i class="fas {{ org_clinic|default(false) ? 'fa-user-plus' : 'fa-folder-plus' }}" aria-hidden="true"></i></span>
+                <span class="clinic-action-card__icon"><i class="fas fa-user-plus" aria-hidden="true"></i></span>
                 <div class="clinic-action-card__body">
-                    <span class="clinic-action-card__title">{{ org_clinic|default(false) ? 'Novo paciente' : 'Novo projeto' }}</span>
-                    <span class="clinic-action-card__desc">{{ org_clinic|default(false) ? 'Cadastrar e iniciar acompanhamento' : 'Cadastrar cliente e iniciar entrega' }}</span>
+                    <span class="clinic-action-card__title">Novo paciente</span>
+                    <span class="clinic-action-card__desc">Cadastrar e iniciar acompanhamento</span>
                 </div>
                 <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
             </a>
             <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="clinic-action-card">
                 <span class="clinic-action-card__icon clinic-action-card__icon--rose"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
                 <div class="clinic-action-card__body">
-                    <span class="clinic-action-card__title">{{ organismo.copy.nav_sala_critica|default('Prioridade alta') }}</span>
-                    <span class="clinic-action-card__desc">Itens que precisam de atenção imediata</span>
+                    <span class="clinic-action-card__title">{{ organismo.copy.nav_sala_critica|default('Sala Crítica') }}</span>
+                    <span class="clinic-action-card__desc">Casos que precisam de atenção imediata</span>
                 </div>
                 <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
             </a>
             <a href="{{ path('app_pos_operatorio_protocolos') }}" class="clinic-action-card">
                 <span class="clinic-action-card__icon clinic-action-card__icon--green"><i class="fas fa-clipboard-list" aria-hidden="true"></i></span>
                 <div class="clinic-action-card__body">
-                    <span class="clinic-action-card__title">{{ organismo.copy.nav_protocolos|default('Playbooks') }}</span>
-                    <span class="clinic-action-card__desc">{{ org_clinic|default(false) ? 'Guias de recuperação por procedimento' : 'Templates e fluxos de implementação' }}</span>
+                    <span class="clinic-action-card__title">{{ organismo.copy.nav_protocolos|default('Protocolos') }}</span>
+                    <span class="clinic-action-card__desc">Guias de recuperação por procedimento</span>
                 </div>
                 <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
             </a>
             <a href="{{ path('app_pos_operatorio_questionarios') }}" class="clinic-action-card">
                 <span class="clinic-action-card__icon clinic-action-card__icon--violet"><i class="fas fa-envelope-open-text" aria-hidden="true"></i></span>
                 <div class="clinic-action-card__body">
-                    <span class="clinic-action-card__title">{{ organismo.copy.nav_questionarios|default('Check-ins') }}</span>
-                    <span class="clinic-action-card__desc">{{ org_clinic|default(false) ? 'Respostas diárias dos pacientes' : 'Respostas pendentes de revisão' }}</span>
+                    <span class="clinic-action-card__title">{{ organismo.copy.nav_questionarios|default('Questionários') }}</span>
+                    <span class="clinic-action-card__desc">Respostas diárias dos pacientes</span>
                 </div>
                 <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
             </a>
+            {% else %}
+            <a href="{{ path('app_core_projetos', { open_novo: 1 }) }}" class="clinic-action-card clinic-action-card--primary">
+                <span class="clinic-action-card__icon"><i class="fas fa-folder-plus" aria-hidden="true"></i></span>
+                <div class="clinic-action-card__body">
+                    <span class="clinic-action-card__title">Novo projeto</span>
+                    <span class="clinic-action-card__desc">Cadastrar cliente e iniciar entrega</span>
+                </div>
+                <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
+            </a>
+            <a href="{{ path('app_admin_empresas') }}" class="clinic-action-card">
+                <span class="clinic-action-card__icon clinic-action-card__icon--sky"><i class="fas fa-building" aria-hidden="true"></i></span>
+                <div class="clinic-action-card__body">
+                    <span class="clinic-action-card__title">Carteira de clientes</span>
+                    <span class="clinic-action-card__desc">Gerenciar contas e volume de clientes</span>
+                </div>
+                <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
+            </a>
+            <a href="{{ path('app_maturidade') }}" class="clinic-action-card">
+                <span class="clinic-action-card__icon clinic-action-card__icon--green"><i class="fas fa-scale-balanced" aria-hidden="true"></i></span>
+                <div class="clinic-action-card__body">
+                    <span class="clinic-action-card__title">Balanceamento</span>
+                    <span class="clinic-action-card__desc">Radar de maturidade e prioridades entre áreas</span>
+                </div>
+                <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
+            </a>
+            <a href="{{ path('app_core_projetos', { view: 'kanban' }) }}" class="clinic-action-card">
+                <span class="clinic-action-card__icon clinic-action-card__icon--violet"><i class="fas fa-flag" aria-hidden="true"></i></span>
+                <div class="clinic-action-card__body">
+                    <span class="clinic-action-card__title">Prioridade alta</span>
+                    <span class="clinic-action-card__desc">Tarefas e entregas que exigem foco agora</span>
+                </div>
+                <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
+            </a>
+            {% endif %}
         </div>
     </section>
+
+    {% if not org_clinic|default(false) and studio_nav_modules|default([])|length > 0 %}
+    <section class="clinic-home-modules studio-home-modules" aria-labelledby="studioModulesHeading">
+        <header class="clinic-home-activity__head">
+            <i class="fas fa-cubes" aria-hidden="true"></i>
+            <h2 id="studioModulesHeading">Módulos desenvolvidos</h2>
+        </header>
+        <div class="studio-module-cards studio-module-cards--dashboard">
+            {% for mod in studio_nav_modules %}
+            <a href="{{ path(mod.route) }}" class="studio-module-card">
+                <span class="studio-module-card__icon"><i class="fas {{ mod.icon }}" aria-hidden="true"></i></span>
+                <span class="studio-module-card__title">{{ mod.label }}</span>
+                <span class="studio-module-card__desc">{{ mod.desc }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
 
     <section class="clinic-home-activity">
         <header class="clinic-home-activity__head">

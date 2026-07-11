@@ -9,7 +9,10 @@ use App\Service\GlobalSearchService;
 use App\Service\NavigationService;
 use App\Service\OnboardingTourService;
 use App\Service\Organismo\ClinicNavBadgeService;
+use App\Service\Organismo\OrganismoCopyService;
 use App\Service\Organismo\OrganismoFeature;
+use App\Service\Organismo\StudioModuleNavService;
+use App\Service\Organismo\StudioNavBadgeService;
 use App\Service\PageBackResolver;
 use App\Service\PlatformNotificationService;
 use App\Service\WorkspaceService;
@@ -45,7 +48,10 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private TiGrantService $tiGrants,
         private OnboardingTourService $onboardingTour,
         private OrganismoFeature $organismoFeature,
+        private OrganismoCopyService $organismoCopy,
         private ClinicNavBadgeService $clinicNavBadges,
+        private StudioNavBadgeService $studioNavBadges,
+        private StudioModuleNavService $studioModuleNav,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -85,10 +91,22 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             $this->twig->addGlobal('nav_show_tenant_empresas', false);
             $this->twig->addGlobal('nav_show_admin', false);
             $this->twig->addGlobal('platform_modules', []);
-            $this->twig->addGlobal(
-                'clinic_nav_badges',
-                $this->clinicNavBadges->forEmpresa($empresa),
-            );
+            if ($this->organismoCopy->isClinicProfile()) {
+                $this->twig->addGlobal(
+                    'clinic_nav_badges',
+                    $this->clinicNavBadges->forEmpresa($empresa),
+                );
+                $this->twig->addGlobal('studio_nav_modules', []);
+            } else {
+                $this->twig->addGlobal(
+                    'clinic_nav_badges',
+                    $this->studioNavBadges->forEmpresa($empresa, \count($empresas)),
+                );
+                $this->twig->addGlobal(
+                    'studio_nav_modules',
+                    $this->studioModuleNav->forSidebar(),
+                );
+            }
         }
 
         $notificationsUnread = $empresa !== null ? $this->notifications->countUnread($empresa, $user) : 0;

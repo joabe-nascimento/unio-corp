@@ -17,11 +17,13 @@ final class PulsoService
 {
     public function __construct(
         private OrganismoFeature $organismo,
+        private OrganismoCopyService $copy,
         private PulsoCenaProvider $cenaProvider,
         private DashboardStatsService $dashboardStats,
         private RhOnboardingProcessRepository $onboardingRepo,
         private RhFeriasRepository $feriasRepo,
         private PosOperatorioPacienteRepository $pacienteRepo,
+        private StudioNavBadgeService $studioBadges,
     ) {
     }
 
@@ -72,7 +74,9 @@ final class PulsoService
         }
 
         if ($this->organismo->isEnabled()) {
-            return $this->buildClinicSinais($empresa);
+            return $this->copy->isClinicProfile()
+                ? $this->buildClinicSinais($empresa)
+                : $this->buildStudioSinais($empresa);
         }
 
         $sinais = [];
@@ -92,6 +96,49 @@ final class PulsoService
                 'tipo' => 'ferias_pendentes',
                 'valor' => $ferias,
                 'rotulo' => 'Férias aguardando aprovação',
+            ];
+        }
+
+        if ($sinais === []) {
+            $sinais[] = [
+                'tipo' => 'pulso_estavel',
+                'valor' => '—',
+                'rotulo' => 'Pulso estável — nenhum sinal urgente',
+            ];
+        }
+
+        return $sinais;
+    }
+
+    /**
+     * @return list<array{tipo: string, valor: int|string, rotulo: string, url?: string}>
+     */
+    private function buildStudioSinais(Empresa $empresa): array
+    {
+        $badges = $this->studioBadges->forEmpresa($empresa, 1);
+        $sinais = [];
+
+        if ($badges['projetos_ativos'] > 0) {
+            $sinais[] = [
+                'tipo' => 'projetos_ativos',
+                'valor' => $badges['projetos_ativos'],
+                'rotulo' => 'Projetos em andamento',
+            ];
+        }
+
+        if ($badges['prioridade_alta'] > 0) {
+            $sinais[] = [
+                'tipo' => 'prioridade_alta',
+                'valor' => $badges['prioridade_alta'],
+                'rotulo' => 'Tarefas de prioridade alta',
+            ];
+        }
+
+        if ($badges['balanceamento'] > 0) {
+            $sinais[] = [
+                'tipo' => 'balanceamento',
+                'valor' => $badges['balanceamento'] . '%',
+                'rotulo' => 'Balanceamento médio das entregas',
             ];
         }
 

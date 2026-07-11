@@ -1,26 +1,26 @@
 ﻿{% extends 'base.html.twig' %}
 {% import 'macros/organismo_icon.html.twig' as orgicon %}
 
-{% block title %}{{ org_brand_label|default('Unio Clínica') }}{% endblock %}
+{% block title %}{{ org_brand_label|default('Unio') }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=9">
+    <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=10">
 {% endblock %}
 
 {% block page_toolbar_layout %}yes{% endblock %}
 {% block page_scroll_mode %}flow{% endblock %}
 
 {% block content %}
-{% set headline = snapshot.pulso.headline|default('') %}
+{% set _clinic = org_clinic|default(false) %}
 <div class="pulso-root" id="pulsoRoot" data-api-url="{{ pulso_api_url }}">
 
-    <header class="pulso-hero pulso-hero--clinica">
+    <header class="pulso-hero{% if _clinic %} pulso-hero--clinica{% else %} pulso-hero--studio{% endif %}">
         <div class="pulso-hero__identity">
-            {{ orgicon.nav('fa-house-medical', 'sky', 'lg') }}
+            {{ orgicon.nav(_clinic ? 'fa-house-medical' : 'fa-house', 'sky', 'lg') }}
             <div class="pulso-hero__text">
-                <h1 class="pulso-hero__title">{{ org_brand_label|default('Unio Clínica') }}</h1>
-                <p class="pulso-hero__sub pulso-hero__slogan">{{ organismo.copy.brand_slogan|default('Saúde que acompanha.') }}</p>
+                <h1 class="pulso-hero__title">{{ org_brand_label|default('Unio') }}</h1>
+                <p class="pulso-hero__sub pulso-hero__slogan">{{ organismo.copy.brand_slogan|default('Evolui com você.') }}</p>
             </div>
         </div>
         <div class="pulso-hero__actions">
@@ -36,10 +36,10 @@
 
     <div class="pulso-metrics" role="list">
         <div class="pulso-metric pulso-metric--sky" role="listitem">
-            {{ orgicon.nav('fa-user-injured', 'sky', 'sm') }}
+            {{ orgicon.nav(_clinic ? 'fa-user-injured' : 'fa-diagram-project', 'sky', 'sm') }}
             <div class="pulso-metric__body">
                 <span class="pulso-metric__value" data-pulso-stat="ativas">{{ snapshot.pulso.cenas_ativas|default(0) }}</span>
-                <span class="pulso-metric__label">{{ organismo.copy.pulso_projects_active|default('Projetos ativos') }}</span>
+                <span class="pulso-metric__label">{{ organismo.copy.pulso_projects_active|default(_clinic ? 'Pacientes ativos' : 'Projetos ativos') }}</span>
             </div>
         </div>
         <div class="pulso-metric pulso-metric--amber" role="listitem">
@@ -52,7 +52,7 @@
         <div class="pulso-metric pulso-metric--sage pulso-metric--wide" role="listitem">
             {{ orgicon.nav('fa-triangle-exclamation', 'rose', 'sm') }}
             <div class="pulso-metric__body">
-                <span class="pulso-metric__label">Alertas recentes</span>
+                <span class="pulso-metric__label">Sinais recentes</span>
                 <ul class="pulso-sinais-list" id="pulsoSinaisList">
                     {% for sinal in snapshot.sinais|default([]) %}
                     <li class="pulso-sinal-item">
@@ -61,7 +61,7 @@
                     </li>
                     {% else %}
                     <li class="pulso-sinal-item pulso-sinal-item--empty">
-                        <span class="pulso-sinal-item__rotulo">Nenhum alerta no momento</span>
+                        <span class="pulso-sinal-item__rotulo">Nenhum sinal urgente no momento</span>
                     </li>
                     {% endfor %}
                 </ul>
@@ -71,15 +71,15 @@
 
     <section class="pulso-cenas-section" aria-labelledby="pulsoCenasHeading">
         <h2 id="pulsoCenasHeading" class="pulso-section-title">
-            <i class="fas fa-bed-pulse" aria-hidden="true"></i>
-            {{ organismo.copy.pulso_cases_heading|default('Entregas em andamento') }}
+            <i class="fas {{ _clinic ? 'fa-bed-pulse' : 'fa-folder-open' }}" aria-hidden="true"></i>
+            {{ organismo.copy.pulso_cases_heading|default(_clinic ? 'Casos em acompanhamento' : 'Projetos em andamento') }}
         </h2>
         <div class="pulso-cenas-grid" id="pulsoCenasGrid">
             {% for cena in snapshot.cenas|default([]) %}
             {% include 'core/pulso/_cena_card.html.twig' with { cena: cena } %}
             {% else %}
             <div class="pulso-empty">
-                {{ orgicon.nav('fa-heart-pulse', 'sky', 'xl') }}
+                {{ orgicon.nav(_clinic ? 'fa-heart-pulse' : 'fa-layer-group', 'sky', 'xl') }}
                 <p>{{ organismo.copy.pulso_empty|default('Nenhuma entrega ativa — tudo em dia.') }}</p>
             </div>
             {% endfor %}
@@ -90,7 +90,7 @@
     <section class="pulso-kpis-section" aria-labelledby="pulsoKpisHeading">
         <h2 id="pulsoKpisHeading" class="pulso-section-title">
             <i class="fas fa-chart-line" aria-hidden="true"></i>
-            {{ organismo.copy.pulso_kpis_heading|default('Sinais do studio') }}
+            {{ organismo.copy.pulso_kpis_heading|default('Sinais do organismo') }}
         </h2>
         <div class="pulso-kpis-grid">
             {% for kpi in snapshot.kpis %}
@@ -99,6 +99,24 @@
                 <span class="pulso-kpi-tile__value">{{ kpi.value }}</span>
                 <span class="pulso-kpi-tile__label">{{ kpi.label }}</span>
             </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not _clinic and studio_nav_modules|default([])|length > 0 %}
+    <section class="pulso-modules-section" aria-labelledby="pulsoModulesHeading">
+        <h2 id="pulsoModulesHeading" class="pulso-section-title">
+            <i class="fas fa-cubes" aria-hidden="true"></i>
+            Módulos da plataforma
+        </h2>
+        <div class="studio-module-cards">
+            {% for mod in studio_nav_modules %}
+            <a href="{{ path(mod.route) }}" class="studio-module-card">
+                <span class="studio-module-card__icon"><i class="fas {{ mod.icon }}" aria-hidden="true"></i></span>
+                <span class="studio-module-card__title">{{ mod.label }}</span>
+                <span class="studio-module-card__desc">{{ mod.desc }}</span>
+            </a>
             {% endfor %}
         </div>
     </section>
