@@ -29,7 +29,7 @@ final class StudioLandingService
                 'desc' => 'Portais, comunicação e operações para faculdades e redes educacionais.',
                 'icon' => 'fa-graduation-cap',
                 'theme' => 'educacao',
-                'url' => '#cases-reais',
+                'url' => '#funcionalidades',
                 'badge' => 'Case UNEF',
                 'external' => false,
             ],
