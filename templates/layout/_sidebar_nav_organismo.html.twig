@@ -31,10 +31,12 @@
 </li>
 {% for product in clinic_products|default([]) %}
 {% if product.enabled|default(true) %}
+{% set _prod_route = product.route|default('') %}
+{% set _prod_prefix = product.route_prefix|default(_prod_route) %}
 <li class="nav-item">
     <a href="{{ path(product.route, product.route_params|default({})) }}"
-       class="nav-link{{ not product.enabled|default(true) ? ' nav-link--muted' : '' }}"
-       {% if not product.enabled|default(true) %}title="Produto desativado — ative em Produtos"{% endif %}>
+       class="nav-link{{ route == _prod_route or (_prod_prefix != '' and route starts with _prod_prefix) ? ' active' : '' }}{{ not product.enabled|default(true) ? ' nav-link--muted' : '' }}"
+       {% if not product.enabled|default(true) %}title="Produto desativado — ative em Produtos"{% elseif product.route_hint|default('') %}title="{{ product.route_hint }}"{% endif %}>
         <span class="nav-icon-slot">
             <i class="fas {{ product.icon }} nav-icon" aria-hidden="true"></i>
         </span>
