@@ -94,6 +94,10 @@ ci_report_step "$CI_REPORT_STEP"
 $PHP_BIN bin/console cache:clear --env=prod --no-warmup
 $PHP_BIN bin/console cache:warmup --env=prod
 
+CI_REPORT_STEP="Migrar branding legado (admin_config)"
+ci_report_step "$CI_REPORT_STEP"
+bash "$ROOT/scripts/lib/migrate-legacy-branding.sh" "$DEPLOY_PATH" || true
+
 link_public_dir() {
   local rel="$1"
   local src="$DEPLOY_PATH/public/$rel"

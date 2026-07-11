@@ -95,7 +95,8 @@ class PlatformConfigService
         }
 
         $this->cacheMtime = $mtime;
-        $this->cache      = $this->sanitizeAssetUrls(array_merge(self::DEFAULTS, $this->loadRaw()));
+        $merged           = array_merge(self::DEFAULTS, $this->loadRaw());
+        $this->cache      = $this->sanitizeAssetUrls($this->normalizeLegacyBranding($merged));
 
         return $this->cache;
     }
@@ -279,6 +280,28 @@ class PlatformConfigService
         }
 
         return json_decode(file_get_contents($this->cfgFile) ?: '{}', true) ?? [];
+    }
+
+    /** @param array<string,mixed> $config */
+    private function normalizeLegacyBranding(array $config): array
+    {
+        $legacy = ['Cuidado que continua.', 'Cuidado que continua'];
+        $newTagline = self::DEFAULTS['plataforma_tagline'];
+
+        foreach (['plataforma_tagline', 'rodape_texto'] as $key) {
+            if (!isset($config[$key])) {
+                continue;
+            }
+            $value = trim((string) $config[$key]);
+            if ($value === '' && $key === 'rodape_texto') {
+                continue;
+            }
+            if ($value === '' || \in_array($value, $legacy, true)) {
+                $config[$key] = $newTagline;
+            }
+        }
+
+        return $config;
     }
 
     /** @param array<string,mixed> $config */
