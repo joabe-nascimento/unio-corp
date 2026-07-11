@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ organismo.copy.brand_name|default('Unio Clínica') }} — {{ organismo.copy.marketing_tagline|default('Cuidado que continua.') }}</title>
-    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio') }} — {{ organismo.copy.marketing_tagline|default('Sites, sistemas e projetos que evoluem.') }}">
+    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio Clínica') }} — {{ organismo.copy.marketing_tagline|default('Cuidado que continua.') }}">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
@@ -16,6 +16,9 @@
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=16">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
+    {% if org_clinic|default(false) %}
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=1">
+    {% endif %}
     <style>
     /* ── Clínica overrides ── */
     :root {
@@ -73,7 +76,7 @@
     .mkt-preview-module i { color: #4b72be; }
     </style>
 </head>
-<body class="marketing-home mkt-v2">
+<body class="marketing-home mkt-v2{% if org_clinic|default(false) %} mkt-clinic{% endif %}">
 
 <header class="mkt-header mkt-header--v2">
     <div class="mkt-header-inner mkt-header-inner--v2">
@@ -114,7 +117,7 @@
         <div class="mkt-hero-inner mkt-hero-inner--v2">
             <div class="mkt-hero-copy mkt-hero-copy--v2">
                 <span class="clinic-hero-slogan">
-                    <i class="fas fa-code" aria-hidden="true"></i>
+                    <i class="fas {{ org_clinic|default(false) ? 'fa-heart-pulse' : 'fa-code' }}" aria-hidden="true"></i>
                     {{ organismo.copy.marketing_eyebrow|default(org_clinic|default(false) ? 'Plataforma clínica pós-operatória' : 'Studio digital') }}
                 </span>
                 <p class="mkt-hero-eyebrow mkt-hero-eyebrow--v2">
