@@ -39,6 +39,7 @@ jobs:
         env:
           DEFAULT_URI: ${{ inputs.default_uri }}
           PATHS: ${{ inputs.paths }}
+          SERVER_IP: ${{ vars.DEPLOY_SERVER_IP || '50.6.138.130' }}
         run: |
           set -euo pipefail
           host="${DEFAULT_URI#https://}"
@@ -59,6 +60,15 @@ jobs:
               failed=1
             else
               echo "OK   http://${host}${path} (vhost local) → HTTP $code"
+            fi
+            https_code=$(ssh "${DEPLOY_SSH_ALIAS}" \
+              "curl -sS -o /dev/null -w '%{http_code}' --resolve '${host}:443:${SERVER_IP}' -k --connect-timeout 10 --max-time 20 'https://${host}${path}'" \
+              || echo '000')
+            if [[ "$https_code" != '200' && "$https_code" != '302' ]]; then
+              echo "FAIL https://${host}${path} (via IP ${SERVER_IP}) → HTTP $https_code"
+              failed=1
+            else
+              echo "OK   https://${host}${path} (via IP ${SERVER_IP}) → HTTP $https_code"
             fi
           done <<< "$PATHS"
           if [[ "$failed" -ne 0 ]]; then

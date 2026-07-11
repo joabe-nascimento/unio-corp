@@ -68,10 +68,34 @@ else
   echo "  AVISO: app ainda nao deployada em ${DEPLOY_PATH}"
 fi
 
-echo "[5/6] Smoke (forca DNS local para o IP do servidor)..."
-HTTP_CODE="$(curl -sS -o /dev/null -w '%{http_code}' \
-  --resolve "${FQDN}:443:${SERVER_IP}" -k "https://${FQDN}/login" 2>/dev/null || echo '000')"
-echo "  HTTPS /login => HTTP ${HTTP_CODE}"
+echo "[5/6] Reparar document root e Apache..."
+if command -v uapi >/dev/null 2>&1; then
+  uapi --output=json SubDomain changedocroot \
+    domain="${SUB}" rootdomain="${ROOT_DOMAIN}" docroot="${FQDN}" >/dev/null 2>&1 \
+    && echo "  docroot confirmado: ${PUBLIC_HTML}" \
+    || echo "  AVISO: changedocroot nao aplicou (subdominio pode ja estar OK)"
+fi
+if [[ -x /scripts/rebuildhttpdconf ]]; then
+  /scripts/rebuildhttpdconf 2>/dev/null && echo "  rebuildhttpdconf OK" || true
+fi
+if [[ -x /scripts/restartsrv_httpd ]]; then
+  /scripts/restartsrv_httpd 2>/dev/null && echo "  restartsrv_httpd OK" || true
+fi
+
+echo "[6/6] Smoke (vhost local + HTTPS publico via IP)..."
+HTTP_LOCAL="$(curl -sS -o /dev/null -w '%{http_code}' \
+  -H "Host: ${FQDN}" --connect-timeout 10 --max-time 20 \
+  "http://127.0.0.1/login" 2>/dev/null || echo '000')"
+echo "  HTTP  vhost local /login => ${HTTP_LOCAL}"
+
+HTTPS_EXT="$(curl -sS -o /dev/null -w '%{http_code}' \
+  --resolve "${FQDN}:443:${SERVER_IP}" -k --connect-timeout 10 --max-time 20 \
+  "https://${FQDN}/login" 2>/dev/null || echo '000')"
+echo "  HTTPS externo /login => ${HTTPS_EXT}"
+
+if [[ "$HTTPS_EXT" != "200" && "$HTTPS_EXT" != "302" ]]; then
+  echo "  AVISO: HTTPS ainda nao responde — aguarde AutoSSL (5-30 min) ou rode setup de novo."
+fi
 
 echo ""
 echo "=== DNS HostGator (ns1136) ==="

@@ -27,8 +27,7 @@ mkdir -p "$PUBLIC_HTML"
 chmod -R ug+rwx "$DEPLOY_PATH/var" "$DEPLOY_PATH/public/uploads" 2>/dev/null || true
 
 INDEX_PHP="$PUBLIC_HTML/index.php"
-if [[ ! -f "$INDEX_PHP" ]]; then
-  cat > "$INDEX_PHP" <<PHP
+cat > "$INDEX_PHP" <<PHP
 <?php
 
 use App\\Kernel;
@@ -39,10 +38,7 @@ return static function (array \$context) {
     return new Kernel(\$context['APP_ENV'], (bool) \$context['APP_DEBUG']);
 };
 PHP
-  echo "Criado: $INDEX_PHP"
-else
-  echo "Mantido: $INDEX_PHP (ja existia)"
-fi
+echo "Atualizado: $INDEX_PHP"
 
 HTACCESS="$PUBLIC_HTML/.htaccess"
 if [[ ! -f "$HTACCESS" ]]; then
@@ -69,7 +65,32 @@ DirectoryIndex index.php
 HTA
   echo "Criado: $HTACCESS"
 else
-  echo "Mantido: $HTACCESS (ja existia)"
+  if ! grep -q 'RewriteRule \^ index.php' "$HTACCESS" 2>/dev/null; then
+    cat > "$HTACCESS" <<'HTA'
+DirectoryIndex index.php
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    DirectoryIndex index.php
+</IfModule>
+HTA
+    echo "Reparado: $HTACCESS (faltava rewrite Symfony)"
+  else
+    echo "Mantido: $HTACCESS (rewrite OK)"
+  fi
 fi
 
 ENV_FILE="$DEPLOY_PATH/.env.local"
