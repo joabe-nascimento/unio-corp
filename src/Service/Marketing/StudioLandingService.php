@@ -186,6 +186,18 @@ final class StudioLandingService
         ];
     }
 
+    /** @return array<string, mixed>|null */
+    public function hubById(string $id): ?array
+    {
+        foreach ($this->hubs() as $hub) {
+            if (($hub['id'] ?? '') === $id) {
+                return $hub;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @param list<string> $highlights
      * @param list<array{value: string, label: string}> $kpis

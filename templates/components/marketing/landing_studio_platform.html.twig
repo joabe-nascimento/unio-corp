@@ -73,12 +73,11 @@
     </div>
     <div class="mkt-rich-modules__grid mkt-rich-modules__grid--six" data-studio-modules-grid>
         {% for hub in _hubs %}
-        <button
-            type="button"
+        <a
+            href="{{ path('app_marketing_modulo_show', { id: hub.id|default('') }) }}"
+            target="_blank"
+            rel="noopener noreferrer"
             class="mkt-rich-module-card mkt-studio-hub-card mkt-reveal{% if loop.index > 1 %} mkt-reveal--delay-{{ loop.index - 1 }}{% endif %}"
-            data-studio-module-trigger="{{ hub.id|default('') }}"
-            aria-expanded="false"
-            aria-controls="mkt-studio-module-detail"
         >
             {% if hub.image|default('') %}
             <img class="mkt-rich-module-card__bg" src="{{ hub.image }}" alt="" loading="lazy" width="800" height="600">
@@ -87,19 +86,11 @@
                 <span class="mkt-rich-module-card__icon"><i class="fas {{ hub.icon|default('fa-cube') }}" aria-hidden="true"></i></span>
                 <h3>{{ hub.label|default('Módulo') }}</h3>
                 <p>{{ hub.desc|default('') }}</p>
-                <span class="mkt-studio-hub-card__hint">Ver o que acontece <i class="fas fa-chevron-right" aria-hidden="true"></i></span>
+                <span class="mkt-studio-hub-card__hint">Ver o que acontece <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
             </div>
-        </button>
+        </a>
         {% endfor %}
     </div>
-
-    <div class="mkt-studio-module-detail" id="mkt-studio-module-detail" hidden aria-live="polite">
-        <div class="mkt-studio-module-detail__inner" data-studio-module-slot></div>
-    </div>
-
-    {% for hub in _hubs %}
-        {% include 'components/marketing/_studio_module_panel.html.twig' with { hub: hub } only %}
-    {% endfor %}
 </section>
 
 <section class="mkt-rich-numbers mkt-reveal" id="cases-reais" aria-label="Cases e indicadores">
