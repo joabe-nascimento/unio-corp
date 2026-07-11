@@ -75,8 +75,9 @@
 {% else %}
 {# ── Studio — plataforma base ── #}
 {% set _studio = clinic_nav_badges|default({}) %}
+{% set _maturidade_tab = app.request.query.get('tab', '') %}
 <li class="nav-item">
-    <a href="{{ path('app_maturidade') }}" class="nav-link {{ route starts with 'app_maturidade' ? 'active' : '' }}">
+    <a href="{{ path('app_maturidade') }}" class="nav-link {{ route starts with 'app_maturidade' and _maturidade_tab not in ['entregas', 'prioridades'] ? 'active' : '' }}">
         <span class="nav-icon-slot">
             <i class="fas fa-chart-line nav-icon" aria-hidden="true"></i>
         </span>
@@ -144,7 +145,7 @@
 </li>
 
 <li class="nav-item">
-    <a href="{{ path('app_maturidade') }}" class="nav-link">
+    <a href="{{ path('app_maturidade', { tab: 'entregas' }) }}" class="nav-link {{ route starts with 'app_maturidade' and _maturidade_tab == 'entregas' ? 'active' : '' }}">
         <span class="nav-icon-slot">
             <i class="fas fa-scale-balanced nav-icon" aria-hidden="true"></i>
             {% if _studio.balanceamento|default(0) > 0 %}

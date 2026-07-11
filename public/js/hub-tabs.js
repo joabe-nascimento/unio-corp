@@ -66,6 +66,32 @@
         }
     }
 
+    function resolveTabName() {
+        var params = new URLSearchParams(global.location.search);
+        var queryTab = (params.get('tab') || '').trim();
+        if (queryTab && (tabExists(queryTab) || panelExists(queryTab))) {
+            return queryTab;
+        }
+
+        var hashTab = (global.location.hash || '').replace('#', '').trim();
+        if (hashTab && (tabExists(hashTab) || panelExists(hashTab))) {
+            return hashTab;
+        }
+
+        return '';
+    }
+
+    function buildTabUrl(name) {
+        var url = new URL(global.location.href);
+        url.hash = '';
+        if (name && name !== 'overview') {
+            url.searchParams.set('tab', name);
+        } else {
+            url.searchParams.delete('tab');
+        }
+        return url.pathname + url.search;
+    }
+
     function activateTab(name, options) {
         options = options || {};
         if (!name || (!tabExists(name) && !panelExists(name))) {
@@ -110,12 +136,9 @@
         }
 
         if (!options.silent) {
-            var nextUrl = global.location.pathname + global.location.search;
-            if (name && name !== 'overview') {
-                nextUrl += '#' + name;
-            }
+            var nextUrl = buildTabUrl(name);
             var current = global.location.pathname + global.location.search + global.location.hash;
-            if (current !== nextUrl && (name !== 'overview' || global.location.hash)) {
+            if (current !== nextUrl) {
                 global.history.replaceState(null, '', nextUrl);
             }
             if (!options.noScroll) {
@@ -131,14 +154,12 @@
             return;
         }
 
-        var hashTab = (global.location.hash || '').replace('#', '').trim();
-        if (hashTab && (tabExists(hashTab) || panelExists(hashTab))) {
-            activateTab(hashTab, { silent: true });
+        var tabName = resolveTabName();
+        if (tabName) {
+            activateTab(tabName, { silent: true });
             return;
         }
-        if (!hashTab) {
-            activateTab('overview', { silent: true });
-        }
+        activateTab('overview', { silent: true });
     }
 
     function onDocumentClick(event) {
@@ -170,11 +191,14 @@
             if (normPath(url.pathname) !== normPath(global.location.pathname)) {
                 return;
             }
-            var hashTab = (url.hash || '').replace('#', '').trim();
-            if (!hashTab || (!tabExists(hashTab) && !panelExists(hashTab))) {
+            var linkedTab = (url.searchParams.get('tab') || '').trim();
+            if (!linkedTab) {
+                linkedTab = (url.hash || '').replace('#', '').trim();
+            }
+            if (!linkedTab || (!tabExists(linkedTab) && !panelExists(linkedTab))) {
                 return;
             }
-            if (activateTab(hashTab)) {
+            if (activateTab(linkedTab)) {
                 event.preventDefault();
             }
         } catch (e) {
