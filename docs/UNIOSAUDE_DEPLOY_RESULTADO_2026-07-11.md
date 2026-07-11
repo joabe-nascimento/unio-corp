@@ -76,5 +76,5 @@ powershell -ExecutionPolicy Bypass -File scripts\deploy-uniosaude-manual.ps1
 Ver [UNIOSAUDE_ACESSOS.md](UNIOSAUDE_ACESSOS.md):
 
 ```
-gestor@unio.dev / unio123
+renata.oliveira@unio.dev / unio123
 ```

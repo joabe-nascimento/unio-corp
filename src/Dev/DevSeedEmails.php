@@ -43,4 +43,20 @@ final class DevSeedEmails
     {
         return self::LEGACY[$email] ?? null;
     }
+
+    /** Identificador estável de membro (grants / matriz) a partir do e-mail. */
+    public static function memberSlotId(string $email): string
+    {
+        foreach (self::LEGACY as $canonical => $legacy) {
+            if ($email === $canonical || $email === $legacy) {
+                $local = explode('@', $canonical)[0] ?? $canonical;
+
+                return str_replace('.', '-', $local);
+            }
+        }
+
+        $local = explode('@', $email)[0] ?? $email;
+
+        return str_replace('.', '-', $local);
+    }
 }

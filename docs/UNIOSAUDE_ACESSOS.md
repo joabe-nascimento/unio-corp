@@ -1,63 +1,40 @@
 # Unio Saúde — acessos e credenciais (produção)
 
 **URL:** https://uniosaude.uniowork.com.br  
-**Atualizado:** jul/2026 (após deploy manual)
+**Senha demo (todas as contas abaixo):** `unio123`
+
+Contas com **nomes reais** — sem e-mails genéricos (`gestor@`, `tenant@`, etc.).
 
 ---
 
 ## Login da plataforma (`/login`)
 
-### Contas que funcionam hoje no servidor
+### Contas principais (Unio Demo)
 
-O banco de produção (`joabef36_unio_clinicaunio`) ainda usa os **e-mails legados** do seed antigo.  
-**Senha de todas:** `unio123`
-
-| E-mail | Perfil | Uso recomendado |
-|--------|--------|-----------------|
-| **`gestor@unio.dev`** | GESTOR | **Principal** — médico/gestor clínico (Renata demo) |
-| `tenant@unio.dev` | TENANT | Dono do tenant / visão ampla |
-| `supervisor@unio.dev` | SUPERVISOR | Supervisor |
-| `gestor.eq@unio.dev` | GESTOR_EQUIPE | Gestor de equipe |
-| `sup.eq@unio.dev` | SUPERVISOR_EQUIPE | Supervisor de equipe |
-| `membro@unio.dev` | MEMBRO | Membro da equipe |
-| `gestor@nexus.dev` | GESTOR | Empresa demo Nexus |
-| `gestor@edu360.dev` | GESTOR | Empresa demo Edu360 |
+| Nome | E-mail | Perfil | Uso |
+|------|--------|--------|-----|
+| **Renata Oliveira** | **`renata.oliveira@unio.dev`** | GESTOR | **Principal** — médica / pós-operatório |
+| Joabe Nascimento | `joabe.nascimento@unio.dev` | TENANT | Dono do tenant / visão ampla |
+| Ricardo Costa | `ricardo.costa@unio.dev` | GESTOR_EQUIPE | Gestor de equipe |
+| Ana Paula Ribeiro | `ana.ribeiro@unio.dev` | SUPERVISOR | Supervisora |
+| Felipe Martins | `felipe.martins@unio.dev` | SUPERVISOR_EQUIPE | Supervisor de equipe |
+| Lucas Santos | `lucas.santos@unio.dev` | MEMBRO | Membro da equipe |
 
 ### Entrada rápida (copiar)
 
 ```
-E-mail: gestor@unio.dev
+E-mail: renata.oliveira@unio.dev
 Senha:  unio123
 ```
 
 Após login → redireciona para `/pulso`.
 
-### E-mails novos (`@unio.dev` com nome) — ainda não no servidor
+### Outras empresas demo
 
-Estes aparecem na documentação de desenvolvimento, mas **não existem** no banco de produção até rodar o seed:
-
-| E-mail novo | Equivalente legado |
-|-------------|-------------------|
-| `renata.oliveira@unio.dev` | `gestor@unio.dev` |
-| `joabe.nascimento@unio.dev` | `tenant@unio.dev` |
-| `ricardo.costa@unio.dev` | `gestor.eq@unio.dev` |
-
-Para criar/atualizar no servidor (uma vez, com cuidado):
-
-```bash
-cd /home2/joabef36/unio-uniosaude
-php bin/console app:seed-users --allow-prod --no-interaction
-php bin/console app:seed-product-grants --force --allow-prod --no-interaction
-```
-
-Depois disso, `renata.oliveira@unio.dev` / `unio123` também passará a funcionar.
-
-### `joabe@uniowork.com.br` — não use no login demo
-
-O navegador pode **preencher automaticamente** esse e-mail (conta real / PLATFORM_OWNER).  
-Ele **não está** na tabela `user` desta instância — o login falha se a senha não coincidir.
-
-Conta pessoal do dono (quando configurada): `joabe@uniowork.com.br` — senha definida via workflow **Setup PLATFORM_OWNER**, não é `unio123` por padrão.
+| Nome | E-mail | Empresa |
+|------|--------|---------|
+| Marcela Ferreira | `marcela.ferreira@nexus.dev` | Nexus Saúde |
+| Patrícia Almeida | `patricia.almeida@edu360.dev` | Edu360 |
 
 ---
 
@@ -78,22 +55,30 @@ Use **dois** identificadores diferentes nos passos 1 e 2:
 | Código | `PO-0042` |
 | Carteirinha | `PM-24K9X7Q1` |
 
-Exemplo: CPF no passo 1 + código no passo 2.
+---
+
+## Conta pessoal do dono (não é demo)
+
+`joabe@uniowork.com.br` — conta **PLATFORM_OWNER** (produção Unio geral).  
+Não usar no login demo da instância Unio Saúde; senha não é `unio123`.
 
 ---
 
-## Rotas úteis (staff logado)
+## Atualizar contas no servidor
 
-| Rota | Descrição |
-|------|-----------|
-| `/pulso` | Home pós-login |
-| `/medico/protocolos` | Alias → protocolos pós-operatório |
-| `/pos-operatorio/protocolos` | Protocolos (canônica) |
-| `/clinica/portal/login` | Portal paciente |
+Se o banco ainda tiver e-mails legados, rode no servidor:
+
+```bash
+cd /home2/joabef36/unio-uniosaude
+php bin/console app:seed-users --allow-prod --no-interaction
+php bin/console app:seed-product-grants --force --allow-prod --no-interaction
+```
+
+O seed **renomeia** `gestor@unio.dev` → `renata.oliveira@unio.dev` (e demais) sem apagar dados.
 
 ---
 
 ## Documentos relacionados
 
-- [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md) — deploy manual
-- [OPERACAO_INDICE.md](OPERACAO_INDICE.md) — índice geral
+- [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md)
+- [OPERACAO_INDICE.md](OPERACAO_INDICE.md)

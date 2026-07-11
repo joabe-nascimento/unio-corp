@@ -281,7 +281,7 @@ php bin/console app:seed-rh-processes --fresh  # recria processos demo
 
 Credenciais típicas de dev (ver `SeedUsersCommand`):
 
-- `tenant@unio.dev` / `unio123`
+- `joabe.nascimento@unio.dev` / `unio123`
 
 ### Testes
 

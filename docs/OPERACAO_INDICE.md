@@ -29,8 +29,9 @@ Documentação da instância **uniosaude** (Unio Saúde, deploy dedicado).
 | **URL** | https://uniosaude.uniowork.com.br |
 | **Deploy** | [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md) — push → GitHub; produção → script manual |
 | **Servidor** | `/home2/joabef36/unio-uniosaude` |
-| **Login staff (produção)** | **`gestor@unio.dev` / `unio123`** — ver [UNIOSAUDE_ACESSOS.md](UNIOSAUDE_ACESSOS.md) |
-| **Login paciente (carteirinha)** | CPF `529.982.247-25` + código `PO-0042` (dois passos) |
+| **Login staff (produção)** | **`renata.oliveira@unio.dev` / `unio123`** — ver [UNIOSAUDE_ACESSOS.md](UNIOSAUDE_ACESSOS.md) |
+| **Login tenant** | `joabe.nascimento@unio.dev` / `unio123` |
+| **Carteirinha demo** | CPF `529.982.247-25` + código `PO-0042` (dois passos) |
 
 ## Fluxo de acesso
 

@@ -14,22 +14,22 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
- * Escopos de permissùo por hub/produto.
- * Membros vùm do banco (empresa ativa); grants do banco com fallback em DEFAULT_GRANTS.
- * Tenant nùo aparece na matriz: acesso total implùcito.
+ * Escopos de permiss?o por hub/produto.
+ * Membros v?m do banco (empresa ativa); grants do banco com fallback em DEFAULT_GRANTS.
+ * Tenant n?o aparece na matriz: acesso total impl?cito.
  */
 class PermissionService
 {
     /** @var list<array{id: string, label: string, class: string, nivel: int, description: string}> */
     public const ASSIGNABLE_PROFILES = [
-        ['id' => 'MEMBRO', 'label' => 'Membro', 'class' => 'membro', 'nivel' => 1, 'description' => 'Acesso de participaùùo: visualiza e usa o produto, sem gerenciar pessoas ou configuraùùes.'],
-        ['id' => 'SUPERVISOR_EQUIPE', 'label' => 'Supervisor de Equipe', 'class' => 'supervisor-equipe', 'nivel' => 2, 'description' => 'Coordena a equipe no produto: acompanha entregas, aprova aùùes do time e orienta o dia a dia.'],
-        ['id' => 'SUPERVISOR', 'label' => 'Supervisor Geral', 'class' => 'supervisor', 'nivel' => 3, 'description' => 'Supervisiona vùrias equipes ou frentes do hub, com visùo ampla de processos e indicadores.'],
-        ['id' => 'GESTOR_EQUIPE', 'label' => 'Gestor de Equipe', 'class' => 'gestor-equipe', 'nivel' => 4, 'description' => 'Gerencia membros e permissùes da equipe nos produtos em que atua.'],
-        ['id' => 'GESTOR', 'label' => 'Gestor', 'class' => 'gestor', 'nivel' => 5, 'description' => 'Controle amplo do produto ou mùdulo: configuraùùes, acessos e operaùùo completa da ùrea.'],
+        ['id' => 'MEMBRO', 'label' => 'Membro', 'class' => 'membro', 'nivel' => 1, 'description' => 'Acesso de participa??o: visualiza e usa o produto, sem gerenciar pessoas ou configura??es.'],
+        ['id' => 'SUPERVISOR_EQUIPE', 'label' => 'Supervisor de Equipe', 'class' => 'supervisor-equipe', 'nivel' => 2, 'description' => 'Coordena a equipe no produto: acompanha entregas, aprova a??es do time e orienta o dia a dia.'],
+        ['id' => 'SUPERVISOR', 'label' => 'Supervisor Geral', 'class' => 'supervisor', 'nivel' => 3, 'description' => 'Supervisiona v?rias equipes ou frentes do hub, com vis?o ampla de processos e indicadores.'],
+        ['id' => 'GESTOR_EQUIPE', 'label' => 'Gestor de Equipe', 'class' => 'gestor-equipe', 'nivel' => 4, 'description' => 'Gerencia membros e permiss?es da equipe nos produtos em que atua.'],
+        ['id' => 'GESTOR', 'label' => 'Gestor', 'class' => 'gestor', 'nivel' => 5, 'description' => 'Controle amplo do produto ou m?dulo: configura??es, acessos e opera??o completa da ?rea.'],
     ];
 
-    /** Nùvel numùrico do perfil assignùvel (para comparar grants). */
+    /** N?vel num?rico do perfil assign?vel (para comparar grants). */
     public static function profileNivel(string $profileId): int
     {
         foreach (self::ASSIGNABLE_PROFILES as $profile) {
@@ -63,7 +63,7 @@ class PermissionService
         return 'default';
     }
 
-    /** Painel/aba Permissùes ù perfil global ou grant ? Gestor de Equipe no escopo. */
+    /** Painel/aba Permiss?es ? perfil global ou grant ? Gestor de Equipe no escopo. */
     public function canManagePermissions(User $user, ?string $scope = null): bool
     {
         if ($user->hasPlatformAccess()) {
@@ -88,7 +88,7 @@ class PermissionService
     }
 
     /**
-     * Editor com grant granular sù pode salvar escopos em que ù gestor.
+     * Editor com grant granular s? pode salvar escopos em que ? gestor.
      *
      * @param array<string, string> $grantsMap keys "scope:productId" => perfil_id
      */
@@ -137,63 +137,65 @@ class PermissionService
         return false;
     }
 
-    private const NO_ACCESS_DESCRIPTION = 'Sem permissùo neste produto ou hub ù o membro nùo consegue acessar a ùrea.';
+    private const NO_ACCESS_DESCRIPTION = 'Sem permiss?o neste produto ou hub ? o membro n?o consegue acessar a ?rea.';
 
     /** @var array<string, array{equipe: string, cargo: string}> */
     private const MEMBER_META = [
-        'gestor@unio.dev' => ['equipe' => 'PMO', 'cargo' => 'Gestor de Operaùùes'],
-        'gestor.eq@unio.dev' => ['equipe' => 'Squad Backend', 'cargo' => 'Gestor de Equipe'],
-        'supervisor@unio.dev' => ['equipe' => 'ù', 'cargo' => 'Supervisor Geral'],
-        'sup.eq@unio.dev' => ['equipe' => 'Obras e Projetos', 'cargo' => 'Supervisor de Campo'],
-        'membro@unio.dev' => ['equipe' => 'Design & Marca', 'cargo' => 'Analista'],
+        DevSeedEmails::RENATA => ['equipe' => 'PMO', 'cargo' => 'Gestor de Operacoes'],
+        DevSeedEmails::RICARDO => ['equipe' => 'Squad Backend', 'cargo' => 'Gestor de Equipe'],
+        DevSeedEmails::ANA_PAULA => ['equipe' => 'Cirurgia geral', 'cargo' => 'Supervisor Geral'],
+        DevSeedEmails::FELIPE => ['equipe' => 'Obras e Projetos', 'cargo' => 'Supervisor de Campo'],
+        DevSeedEmails::LUCAS => ['equipe' => 'Design & Marca', 'cargo' => 'Analista'],
+        DevSeedEmails::MARCELA => ['equipe' => 'Nexus Sa?de', 'cargo' => 'Gestora'],
+        DevSeedEmails::PATRICIA => ['equipe' => 'Edu360', 'cargo' => 'Gestora'],
     ];
 
     /**
-     * Membros ilustrativos quando a empresa ativa nùo tem usuùrios no banco (preview de hubs).
+     * Membros ilustrativos quando a empresa ativa n?o tem usu?rios no banco (preview de hubs).
      *
      * @var array<string, list<array{id: string, nome: string, email: string, perfil: string, equipe: string, cargo: string}>>
      */
     private const SCOPE_MOCK_MEMBERS = [
         'hub_pos_operatorio' => [
             [
-                'id' => 'gestor',
-                'nome' => 'Dr. Renato Almeida',
-                'email' => 'gestor@unio.dev',
+                'id' => 'renata-oliveira',
+                'nome' => 'Renata Oliveira',
+                'email' => DevSeedEmails::RENATA,
                 'perfil' => 'GESTOR',
-                'equipe' => 'Coordenaùùo Pùs-Op',
-                'cargo' => 'Coordenador clùnico',
+                'equipe' => 'Coordena??o P?s-Op',
+                'cargo' => 'Coordenador cl?nico',
             ],
             [
-                'id' => 'gestor-eq',
-                'nome' => 'Enf. Camila Ribeiro',
-                'email' => 'gestor.eq@unio.dev',
+                'id' => 'ricardo-costa',
+                'nome' => 'Ricardo Costa',
+                'email' => DevSeedEmails::RICARDO,
                 'perfil' => 'GESTOR_EQUIPE',
-                'equipe' => 'Enfermagem clùnica',
-                'cargo' => 'Enfermeira responsùvel',
+                'equipe' => 'Enfermagem cl?nica',
+                'cargo' => 'Enfermeira respons?vel',
             ],
             [
-                'id' => 'supervisor',
-                'nome' => 'Dr. Paulo Menezes',
-                'email' => 'supervisor@unio.dev',
+                'id' => 'ana-ribeiro',
+                'nome' => 'Ana Paula Ribeiro',
+                'email' => DevSeedEmails::ANA_PAULA,
                 'perfil' => 'SUPERVISOR',
                 'equipe' => 'Cirurgia geral',
-                'cargo' => 'Mùdico supervisor',
+                'cargo' => 'M?dico supervisor',
             ],
             [
-                'id' => 'sup-eq',
-                'nome' => 'Enf. Lucas Ferreira',
-                'email' => 'sup.eq@unio.dev',
+                'id' => 'felipe-martins',
+                'nome' => 'Felipe Martins',
+                'email' => DevSeedEmails::FELIPE,
                 'perfil' => 'SUPERVISOR_EQUIPE',
-                'equipe' => 'Plantùo noturno',
-                'cargo' => 'Supervisor de plantùo',
+                'equipe' => 'Plant?o noturno',
+                'cargo' => 'Supervisor de plant?o',
             ],
             [
-                'id' => 'membro',
-                'nome' => 'Ana Beatriz Santos',
-                'email' => 'membro@unio.dev',
+                'id' => 'lucas-santos',
+                'nome' => 'Lucas Santos',
+                'email' => DevSeedEmails::LUCAS,
                 'perfil' => 'MEMBRO',
                 'equipe' => 'Acompanhamento',
-                'cargo' => 'Assistente de pùs-operatùrio',
+                'cargo' => 'Assistente de p?s-operat?rio',
             ],
         ],
     ];
@@ -201,17 +203,17 @@ class PermissionService
     /** @var array<string, array{label: string, subtitle: string, products: list<array{id: string, label: string}>}> */
     public const SCOPES = [
         'hub_operacoes' => [
-            'label' => 'Nùcleo de Operaùùes',
-            'subtitle' => 'Permissùes por produto deste hub',
+            'label' => 'N?cleo de Opera??es',
+            'subtitle' => 'Permiss?es por produto deste hub',
             'products' => [
                 ['id' => 'rh', 'label' => 'Recursos Humanos'],
-                ['id' => 'pessoas', 'label' => 'Gestùo de Pessoas'],
+                ['id' => 'pessoas', 'label' => 'Gest?o de Pessoas'],
                 ['id' => 'engenharia', 'label' => 'Obras e Projetos'],
             ],
         ],
         'hub_talentos' => [
-            'label' => 'Nùcleo de Talentos',
-            'subtitle' => 'Permissùes por produto deste hub',
+            'label' => 'N?cleo de Talentos',
+            'subtitle' => 'Permiss?es por produto deste hub',
             'products' => [
                 ['id' => 'banco', 'label' => 'Banco de Talentos'],
                 ['id' => 'vagas', 'label' => 'Vagas'],
@@ -220,172 +222,172 @@ class PermissionService
             ],
         ],
         'hub_maturidade' => [
-            'label' => 'Nùcleo de Maturidade',
-            'subtitle' => 'Permissùes por produto deste hub',
+            'label' => 'N?cleo de Maturidade',
+            'subtitle' => 'Permiss?es por produto deste hub',
             'products' => [
-                ['id' => 'avaliacao', 'label' => 'Avaliaùùo'],
-                ['id' => 'plano', 'label' => 'Plano de Aùùo'],
-                ['id' => 'historico', 'label' => 'Histùrico'],
+                ['id' => 'avaliacao', 'label' => 'Avalia??o'],
+                ['id' => 'plano', 'label' => 'Plano de A??o'],
+                ['id' => 'historico', 'label' => 'Hist?rico'],
                 ['id' => 'radar', 'label' => 'Radar'],
             ],
         ],
         'hub_admin' => [
-            'label' => 'Administraùùo',
-            'subtitle' => 'Permissùes da plataforma',
+            'label' => 'Administra??o',
+            'subtitle' => 'Permiss?es da plataforma',
             'products' => [
-                ['id' => 'usuarios', 'label' => 'Usuùrios'],
+                ['id' => 'usuarios', 'label' => 'Usu?rios'],
                 ['id' => 'empresas', 'label' => 'Empresas'],
-                ['id' => 'configuracoes', 'label' => 'Configuraùùes'],
+                ['id' => 'configuracoes', 'label' => 'Configura??es'],
             ],
         ],
         'hub_comercial' => [
-            'label' => 'Nùcleo Comercial',
+            'label' => 'N?cleo Comercial',
             'subtitle' => 'CRM e pipeline comercial',
             'products' => [],
         ],
         'hub_beneficios' => [
-            'label' => 'Nùcleo Benefùcios',
-            'subtitle' => 'Marketplace de benefùcios',
+            'label' => 'N?cleo Benef?cios',
+            'subtitle' => 'Marketplace de benef?cios',
             'products' => [],
         ],
         'hub_academy' => [
-            'label' => 'Nùcleo Academy',
-            'subtitle' => 'Educaùùo e trilhas de aprendizado',
+            'label' => 'N?cleo Academy',
+            'subtitle' => 'Educa??o e trilhas de aprendizado',
             'products' => [],
         ],
         'hub_parceiros' => [
-            'label' => 'Nùcleo Parceiros',
+            'label' => 'N?cleo Parceiros',
             'subtitle' => 'Rede de parceiros e revenda',
             'products' => [],
         ],
         'hub_financeiro' => [
-            'label' => 'Nùcleo Financeiro',
-            'subtitle' => 'Tesouraria e orùamento de pessoal',
+            'label' => 'N?cleo Financeiro',
+            'subtitle' => 'Tesouraria e or?amento de pessoal',
             'products' => [],
         ],
         'hub_compliance' => [
-            'label' => 'Nùcleo Compliance',
+            'label' => 'N?cleo Compliance',
             'subtitle' => 'Normas, LGPD e auditorias',
             'products' => [],
         ],
         'hub_analytics' => [
-            'label' => 'Nùcleo Analytics',
+            'label' => 'N?cleo Analytics',
             'subtitle' => 'BI e indicadores',
             'products' => [],
         ],
         'hub_juridico' => [
-            'label' => 'Nùcleo Jurùdico',
+            'label' => 'N?cleo Jur?dico',
             'subtitle' => 'Trabalhista e contratos',
             'products' => [],
         ],
         'hub_clima' => [
-            'label' => 'Nùcleo Clima',
+            'label' => 'N?cleo Clima',
             'subtitle' => 'Engajamento e eNPS',
             'products' => [],
         ],
         'hub_sst' => [
-            'label' => 'Nùcleo SST',
-            'subtitle' => 'Saùde e seguranùa do trabalho',
+            'label' => 'N?cleo SST',
+            'subtitle' => 'Sa?de e seguran?a do trabalho',
             'products' => [],
         ],
         'hub_comunicacao' => [
-            'label' => 'Nùcleo Comunicaùùo',
+            'label' => 'N?cleo Comunica??o',
             'subtitle' => 'Mural e cultura interna',
             'products' => [],
         ],
         'hub_publicidade' => [
-            'label' => 'Nùcleo Publicidade',
+            'label' => 'N?cleo Publicidade',
             'subtitle' => 'Marca, campanhas e criativos',
             'products' => [
                 ['id' => 'campanhas', 'label' => 'Campanhas'],
                 ['id' => 'clientes', 'label' => 'Clientes'],
                 ['id' => 'criativos', 'label' => 'Criativos'],
-                ['id' => 'metricas', 'label' => 'Mùtricas'],
+                ['id' => 'metricas', 'label' => 'M?tricas'],
             ],
         ],
         'hub_obras' => [
-            'label' => 'Nùcleo Obras e Projetos',
-            'subtitle' => 'Engenharia e execuùùo de obras',
+            'label' => 'N?cleo Obras e Projetos',
+            'subtitle' => 'Engenharia e execu??o de obras',
             'products' => [
                 ['id' => 'projetos', 'label' => 'Projetos'],
                 ['id' => 'cronograma', 'label' => 'Cronograma'],
-                ['id' => 'orcamentos', 'label' => 'Orùamentos'],
+                ['id' => 'orcamentos', 'label' => 'Or?amentos'],
                 ['id' => 'equipes', 'label' => 'Equipes de Campo'],
             ],
         ],
         'hub_portal' => [
-            'label' => 'Nùcleo Portal do Colaborador',
-            'subtitle' => 'Autoserviùo do colaborador',
+            'label' => 'N?cleo Portal do Colaborador',
+            'subtitle' => 'Autoservi?o do colaborador',
             'products' => [],
         ],
         'hub_recrutamento' => [
-            'label' => 'Nùcleo Recrutamento',
-            'subtitle' => 'Seleùùo e pipeline de talentos',
+            'label' => 'N?cleo Recrutamento',
+            'subtitle' => 'Sele??o e pipeline de talentos',
             'products' => [
                 ['id' => 'vagas', 'label' => 'Vagas'],
                 ['id' => 'pipeline', 'label' => 'Pipeline'],
             ],
         ],
         'hub_esg' => [
-            'label' => 'Nùcleo ESG',
+            'label' => 'N?cleo ESG',
             'subtitle' => 'Sustentabilidade e impacto',
             'products' => [],
         ],
         'hub_suprimentos' => [
-            'label' => 'Nùcleo Suprimentos',
+            'label' => 'N?cleo Suprimentos',
             'subtitle' => 'Compras e estoque',
             'products' => [],
         ],
         'hub_ti' => [
-            'label' => 'Nùcleo TI',
-            'subtitle' => 'NOC Center ù Service desk',
+            'label' => 'N?cleo TI',
+            'subtitle' => 'NOC Center ? Service desk',
             'products' => [
                 ['id' => 'chamados', 'label' => 'Chamados'],
-                ['id' => 'catalogo', 'label' => 'Catùlogo'],
+                ['id' => 'catalogo', 'label' => 'Cat?logo'],
                 ['id' => 'kb', 'label' => 'Base de Conhecimento'],
                 ['id' => 'problemas', 'label' => 'Problemas'],
                 ['id' => 'meus_chamados', 'label' => 'Meus Chamados'],
                 ['id' => 'sla', 'label' => 'SLA'],
-                ['id' => 'manutencoes', 'label' => 'Manutenùùes'],
+                ['id' => 'manutencoes', 'label' => 'Manuten??es'],
                 ['id' => 'ativos', 'label' => 'Ativos'],
-                ['id' => 'licencas', 'label' => 'Licenùas'],
-                ['id' => 'integracoes', 'label' => 'Integraùùes'],
+                ['id' => 'licencas', 'label' => 'Licen?as'],
+                ['id' => 'integracoes', 'label' => 'Integra??es'],
                 ['id' => 'cortex', 'label' => 'Cortex Ops'],
                 ['id' => 'analytics', 'label' => 'Analytics'],
                 ['id' => 'novidades', 'label' => 'Novidades'],
             ],
         ],
         'hub_expansao' => [
-            'label' => 'Nùcleo Expansùo',
+            'label' => 'N?cleo Expans?o',
             'subtitle' => 'Franquias e novos mercados',
             'products' => [],
         ],
         'hub_qualidade' => [
-            'label' => 'Nùcleo Qualidade',
-            'subtitle' => 'ISO, auditorias e nùo conformidades',
+            'label' => 'N?cleo Qualidade',
+            'subtitle' => 'ISO, auditorias e n?o conformidades',
             'products' => [],
         ],
         'hub_facilities' => [
-            'label' => 'Nùcleo Facilities',
-            'subtitle' => 'Predial, frota e manutenùùo',
+            'label' => 'N?cleo Facilities',
+            'subtitle' => 'Predial, frota e manuten??o',
             'products' => [],
         ],
         'hub_patrimonio' => [
-            'label' => 'Nùcleo Patrimùnio',
-            'subtitle' => 'Inventùrio e ativos',
+            'label' => 'N?cleo Patrim?nio',
+            'subtitle' => 'Invent?rio e ativos',
             'products' => [],
         ],
         'hub_conhecimento' => [
-            'label' => 'Nùcleo Conhecimento',
+            'label' => 'N?cleo Conhecimento',
             'subtitle' => 'Wiki, SOPs e playbooks',
             'products' => [],
         ],
         'hub_integracoes' => [
-            'label' => 'Nùcleo Integraùùes',
+            'label' => 'N?cleo Integra??es',
             'subtitle' => 'APIs, conectores e webhooks',
             'products' => [
-                ['id' => 'observatorio', 'label' => 'Observatùrio Causal'],
-                ['id' => 'catalogo', 'label' => 'Catùlogo'],
+                ['id' => 'observatorio', 'label' => 'Observat?rio Causal'],
+                ['id' => 'catalogo', 'label' => 'Cat?logo'],
                 ['id' => 'conectores', 'label' => 'Conectores'],
                 ['id' => 'webhooks', 'label' => 'Webhooks'],
                 ['id' => 'mapeamentos', 'label' => 'Mapeamentos'],
@@ -395,38 +397,38 @@ class PermissionService
             ],
         ],
         'hub_customer_success' => [
-            'label' => 'Nùcleo Customer Success',
-            'subtitle' => 'Pùs-venda e retenùùo',
+            'label' => 'N?cleo Customer Success',
+            'subtitle' => 'P?s-venda e reten??o',
             'products' => [],
         ],
         'hub_inovacao' => [
-            'label' => 'Nùcleo Inovaùùo',
+            'label' => 'N?cleo Inova??o',
             'subtitle' => 'Labs e experimentos',
             'products' => [
                 ['id' => 'pipeline', 'label' => 'Pipeline'],
-                ['id' => 'laboratorio', 'label' => 'Laboratùrio'],
+                ['id' => 'laboratorio', 'label' => 'Laborat?rio'],
                 ['id' => 'experimentos', 'label' => 'Experimentos'],
                 ['id' => 'backlog', 'label' => 'Backlog'],
                 ['id' => 'analytics', 'label' => 'Analytics'],
-                ['id' => 'conexoes', 'label' => 'Conexùes'],
+                ['id' => 'conexoes', 'label' => 'Conex?es'],
                 ['id' => 'impact', 'label' => 'Impacto'],
-                ['id' => 'tendencias', 'label' => 'Tendùncias'],
-                ['id' => 'portfolio', 'label' => 'Portfùlio'],
+                ['id' => 'tendencias', 'label' => 'Tend?ncias'],
+                ['id' => 'portfolio', 'label' => 'Portf?lio'],
                 ['id' => 'novidades', 'label' => 'Novidades'],
             ],
         ],
         'hub_holdings' => [
-            'label' => 'Nùcleo Multi-empresa',
-            'subtitle' => 'Holdings e visùo consolidada',
+            'label' => 'N?cleo Multi-empresa',
+            'subtitle' => 'Holdings e vis?o consolidada',
             'products' => [],
         ],
         'hub_seguros' => [
-            'label' => 'Nùcleo Seguros',
-            'subtitle' => 'Seguros e benefùcios corporativos',
+            'label' => 'N?cleo Seguros',
+            'subtitle' => 'Seguros e benef?cios corporativos',
             'products' => [],
         ],
         'hub_saude_ocupacional' => [
-            'label' => 'Nùcleo Saùde Ocupacional',
+            'label' => 'N?cleo Sa?de Ocupacional',
             'subtitle' => 'PCMSO, exames e medicina do trabalho',
             'products' => [
                 ['id' => 'pcmso', 'label' => 'PCMSO'],
@@ -434,111 +436,111 @@ class PermissionService
                 ['id' => 'aso', 'label' => 'ASO'],
                 ['id' => 'agendamentos', 'label' => 'Agendamentos'],
                 ['id' => 'afastamentos', 'label' => 'Afastamentos'],
-                ['id' => 'prontuario', 'label' => 'Prontuùrio ocupacional'],
+                ['id' => 'prontuario', 'label' => 'Prontu?rio ocupacional'],
             ],
         ],
         'hub_pos_operatorio' => [
-            'label' => 'Unio Saùde',
-            'subtitle' => 'Acompanhamento clùnico pùs-cirùrgico',
+            'label' => 'Unio Sa?de',
+            'subtitle' => 'Acompanhamento cl?nico p?s-cir?rgico',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
                 ['id' => 'protocolos', 'label' => 'Protocolos'],
-                ['id' => 'questionarios', 'label' => 'Questionùrios'],
-                ['id' => 'alertas', 'label' => 'Alertas clùnicos'],
-                ['id' => 'painel', 'label' => 'Painel de recuperaùùo'],
+                ['id' => 'questionarios', 'label' => 'Question?rios'],
+                ['id' => 'alertas', 'label' => 'Alertas cl?nicos'],
+                ['id' => 'painel', 'label' => 'Painel de recupera??o'],
                 ['id' => 'portal_paciente', 'label' => 'Portal do paciente'],
             ],
         ],
         'hub_licitacoes' => [
-            'label' => 'Nùcleo Licitaùùes',
-            'subtitle' => 'Contratos pùblicos e B2G',
+            'label' => 'N?cleo Licita??es',
+            'subtitle' => 'Contratos p?blicos e B2G',
             'products' => [],
         ],
         'hub_marketing' => [
-            'label' => 'Nùcleo Marketing',
+            'label' => 'N?cleo Marketing',
             'subtitle' => 'Demand gen, leads e campanhas',
             'products' => [],
         ],
         'hub_lakehouse' => [
-            'label' => 'Nùcleo Data & Lakehouse',
+            'label' => 'N?cleo Data & Lakehouse',
             'subtitle' => 'Dados brutos e pipelines',
             'products' => [],
         ],
         'hub_franquias' => [
-            'label' => 'Nùcleo Franquias & Unidades',
+            'label' => 'N?cleo Franquias & Unidades',
             'subtitle' => 'Rede de unidades e franqueados',
             'products' => [],
         ],
         'hub_seguranca_info' => [
-            'label' => 'Nùcleo Seguranùa da Informaùùo',
-            'subtitle' => 'LGPD tùcnica e incidentes',
+            'label' => 'N?cleo Seguran?a da Informa??o',
+            'subtitle' => 'LGPD t?cnica e incidentes',
             'products' => [],
         ],
         'hub_pmo' => [
-            'label' => 'Nùcleo PMO',
-            'subtitle' => 'Projetos internos e governanùa',
+            'label' => 'N?cleo PMO',
+            'subtitle' => 'Projetos internos e governan?a',
             'products' => [],
         ],
         'hub_treinamento_regulatorio' => [
-            'label' => 'Nùcleo Treinamento Regulatùrio',
-            'subtitle' => 'NR, certificaùùes e obrigaùùes',
+            'label' => 'N?cleo Treinamento Regulat?rio',
+            'subtitle' => 'NR, certifica??es e obriga??es',
             'products' => [],
         ],
         'hub_terceiros' => [
-            'label' => 'Nùcleo Gestùo de Terceiros',
-            'subtitle' => 'PJ, fornecedores e mùo de obra',
+            'label' => 'N?cleo Gest?o de Terceiros',
+            'subtitle' => 'PJ, fornecedores e m?o de obra',
             'products' => [],
         ],
         'product_rh' => [
             'label' => 'Recursos Humanos',
-            'subtitle' => 'Permissùes por ùrea do mùdulo',
+            'subtitle' => 'Permiss?es por ?rea do m?dulo',
             'products' => [
-                ['id' => 'funcionarios', 'label' => 'Funcionùrios'],
-                ['id' => 'admissoes', 'label' => 'Admissùes'],
-                ['id' => 'ferias', 'label' => 'Fùrias'],
+                ['id' => 'funcionarios', 'label' => 'Funcion?rios'],
+                ['id' => 'admissoes', 'label' => 'Admiss?es'],
+                ['id' => 'ferias', 'label' => 'F?rias'],
                 ['id' => 'folha', 'label' => 'Folha'],
                 ['id' => 'portal', 'label' => 'Portal do colaborador'],
                 ['id' => 'recrutamento', 'label' => 'Recrutamento'],
                 ['id' => 'ponto', 'label' => 'Ponto'],
-                ['id' => 'comunicacao', 'label' => 'Comunicaùùo'],
+                ['id' => 'comunicacao', 'label' => 'Comunica??o'],
                 ['id' => 'organograma', 'label' => 'Organograma'],
                 ['id' => 'auditoria', 'label' => 'Auditoria'],
                 ['id' => 'workflows', 'label' => 'Workflows'],
                 ['id' => 'folha_legal', 'label' => 'Folha legal'],
-                ['id' => 'contabilidade', 'label' => 'Provisùes'],
+                ['id' => 'contabilidade', 'label' => 'Provis?es'],
                 ['id' => 'esocial', 'label' => 'eSocial'],
                 ['id' => 'assinatura', 'label' => 'Assinatura digital'],
                 ['id' => 'analytics', 'label' => 'Analytics RH'],
             ],
         ],
         'product_pessoas' => [
-            'label' => 'Gestùo de Pessoas',
-            'subtitle' => 'Permissùes por ùrea do mùdulo',
+            'label' => 'Gest?o de Pessoas',
+            'subtitle' => 'Permiss?es por ?rea do m?dulo',
             'products' => [
                 ['id' => 'membros', 'label' => 'Membros'],
                 ['id' => 'equipes', 'label' => 'Equipes'],
                 ['id' => 'cargos', 'label' => 'Cargos'],
-                ['id' => 'avaliacao', 'label' => 'Avaliaùùo'],
+                ['id' => 'avaliacao', 'label' => 'Avalia??o'],
             ],
         ],
         'product_engenharia' => [
             'label' => 'Obras e Projetos',
-            'subtitle' => 'Permissùes por ùrea do mùdulo',
+            'subtitle' => 'Permiss?es por ?rea do m?dulo',
             'products' => [
                 ['id' => 'projetos', 'label' => 'Projetos'],
                 ['id' => 'cronograma', 'label' => 'Cronograma'],
-                ['id' => 'orcamentos', 'label' => 'Orùamentos'],
+                ['id' => 'orcamentos', 'label' => 'Or?amentos'],
                 ['id' => 'equipes', 'label' => 'Equipes de Campo'],
             ],
         ],
         'product_publicidade' => [
-            'label' => 'Marca e Comunicaùùo',
-            'subtitle' => 'Permissùes por ùrea do mùdulo',
+            'label' => 'Marca e Comunica??o',
+            'subtitle' => 'Permiss?es por ?rea do m?dulo',
             'products' => [
                 ['id' => 'campanhas', 'label' => 'Campanhas'],
                 ['id' => 'clientes', 'label' => 'Clientes'],
                 ['id' => 'criativos', 'label' => 'Criativos'],
-                ['id' => 'metricas', 'label' => 'Mùtricas'],
+                ['id' => 'metricas', 'label' => 'M?tricas'],
             ],
         ],
         'product_core' => [
@@ -555,17 +557,17 @@ class PermissionService
     public const ALL_HUB_GROUPS = [
         [
             'id' => 'hub_operacoes',
-            'label' => 'Nùcleo de Operaùùes',
+            'label' => 'N?cleo de Opera??es',
             'scope' => 'hub_operacoes',
             'products' => [
                 ['id' => 'rh', 'label' => 'Recursos Humanos'],
-                ['id' => 'pessoas', 'label' => 'Gestùo de Pessoas'],
+                ['id' => 'pessoas', 'label' => 'Gest?o de Pessoas'],
                 ['id' => 'engenharia', 'label' => 'Obras e Projetos'],
             ],
         ],
         [
             'id' => 'hub_talentos',
-            'label' => 'Nùcleo de Talentos',
+            'label' => 'N?cleo de Talentos',
             'scope' => 'hub_talentos',
             'products' => [
                 ['id' => 'banco', 'label' => 'Banco de Talentos'],
@@ -576,122 +578,122 @@ class PermissionService
         ],
         [
             'id' => 'hub_maturidade',
-            'label' => 'Nùcleo de Maturidade',
+            'label' => 'N?cleo de Maturidade',
             'scope' => 'hub_maturidade',
             'products' => [
-                ['id' => 'avaliacao', 'label' => 'Avaliaùùo'],
-                ['id' => 'plano', 'label' => 'Plano de Aùùo'],
-                ['id' => 'historico', 'label' => 'Histùrico'],
+                ['id' => 'avaliacao', 'label' => 'Avalia??o'],
+                ['id' => 'plano', 'label' => 'Plano de A??o'],
+                ['id' => 'historico', 'label' => 'Hist?rico'],
                 ['id' => 'radar', 'label' => 'Radar'],
             ],
         ],
         [
             'id' => 'hub_admin',
-            'label' => 'Administraùùo',
+            'label' => 'Administra??o',
             'scope' => 'hub_admin',
             'products' => [
-                ['id' => 'usuarios', 'label' => 'Usuùrios'],
+                ['id' => 'usuarios', 'label' => 'Usu?rios'],
                 ['id' => 'empresas', 'label' => 'Empresas'],
-                ['id' => 'configuracoes', 'label' => 'Configuraùùes'],
+                ['id' => 'configuracoes', 'label' => 'Configura??es'],
             ],
         ],
         [
             'id' => 'hub_comercial',
-            'label' => 'Nùcleo Comercial',
+            'label' => 'N?cleo Comercial',
             'scope' => 'hub_comercial',
             'products' => [],
         ],
         [
             'id' => 'hub_beneficios',
-            'label' => 'Nùcleo Benefùcios',
+            'label' => 'N?cleo Benef?cios',
             'scope' => 'hub_beneficios',
             'products' => [],
         ],
         [
             'id' => 'hub_academy',
-            'label' => 'Nùcleo Academy',
+            'label' => 'N?cleo Academy',
             'scope' => 'hub_academy',
             'products' => [],
         ],
         [
             'id' => 'hub_parceiros',
-            'label' => 'Nùcleo Parceiros',
+            'label' => 'N?cleo Parceiros',
             'scope' => 'hub_parceiros',
             'products' => [],
         ],
         [
             'id' => 'hub_financeiro',
-            'label' => 'Nùcleo Financeiro',
+            'label' => 'N?cleo Financeiro',
             'scope' => 'hub_financeiro',
             'products' => [],
         ],
         [
             'id' => 'hub_compliance',
-            'label' => 'Nùcleo Compliance',
+            'label' => 'N?cleo Compliance',
             'scope' => 'hub_compliance',
             'products' => [],
         ],
         [
             'id' => 'hub_analytics',
-            'label' => 'Nùcleo Analytics',
+            'label' => 'N?cleo Analytics',
             'scope' => 'hub_analytics',
             'products' => [],
         ],
         [
             'id' => 'hub_juridico',
-            'label' => 'Nùcleo Jurùdico',
+            'label' => 'N?cleo Jur?dico',
             'scope' => 'hub_juridico',
             'products' => [],
         ],
         [
             'id' => 'hub_clima',
-            'label' => 'Nùcleo Clima',
+            'label' => 'N?cleo Clima',
             'scope' => 'hub_clima',
             'products' => [],
         ],
         [
             'id' => 'hub_sst',
-            'label' => 'Nùcleo SST',
+            'label' => 'N?cleo SST',
             'scope' => 'hub_sst',
             'products' => [],
         ],
         [
             'id' => 'hub_comunicacao',
-            'label' => 'Nùcleo Comunicaùùo',
+            'label' => 'N?cleo Comunica??o',
             'scope' => 'hub_comunicacao',
             'products' => [],
         ],
         [
             'id' => 'hub_publicidade',
-            'label' => 'Nùcleo Publicidade',
+            'label' => 'N?cleo Publicidade',
             'scope' => 'hub_publicidade',
             'products' => [
                 ['id' => 'campanhas', 'label' => 'Campanhas'],
                 ['id' => 'clientes', 'label' => 'Clientes'],
                 ['id' => 'criativos', 'label' => 'Criativos'],
-                ['id' => 'metricas', 'label' => 'Mùtricas'],
+                ['id' => 'metricas', 'label' => 'M?tricas'],
             ],
         ],
         [
             'id' => 'hub_obras',
-            'label' => 'Nùcleo Obras e Projetos',
+            'label' => 'N?cleo Obras e Projetos',
             'scope' => 'hub_obras',
             'products' => [
                 ['id' => 'projetos', 'label' => 'Projetos'],
                 ['id' => 'cronograma', 'label' => 'Cronograma'],
-                ['id' => 'orcamentos', 'label' => 'Orùamentos'],
+                ['id' => 'orcamentos', 'label' => 'Or?amentos'],
                 ['id' => 'equipes', 'label' => 'Equipes de Campo'],
             ],
         ],
         [
             'id' => 'hub_portal',
-            'label' => 'Nùcleo Portal do Colaborador',
+            'label' => 'N?cleo Portal do Colaborador',
             'scope' => 'hub_portal',
             'products' => [],
         ],
         [
             'id' => 'hub_recrutamento',
-            'label' => 'Nùcleo Recrutamento',
+            'label' => 'N?cleo Recrutamento',
             'scope' => 'hub_recrutamento',
             'products' => [
                 ['id' => 'vagas', 'label' => 'Vagas'],
@@ -700,31 +702,31 @@ class PermissionService
         ],
         [
             'id' => 'hub_esg',
-            'label' => 'Nùcleo ESG',
+            'label' => 'N?cleo ESG',
             'scope' => 'hub_esg',
             'products' => [],
         ],
         [
             'id' => 'hub_suprimentos',
-            'label' => 'Nùcleo Suprimentos',
+            'label' => 'N?cleo Suprimentos',
             'scope' => 'hub_suprimentos',
             'products' => [],
         ],
         [
             'id' => 'hub_ti',
-            'label' => 'Nùcleo TI',
+            'label' => 'N?cleo TI',
             'scope' => 'hub_ti',
             'products' => [
                 ['id' => 'chamados', 'label' => 'Chamados'],
-                ['id' => 'catalogo', 'label' => 'Catùlogo'],
+                ['id' => 'catalogo', 'label' => 'Cat?logo'],
                 ['id' => 'kb', 'label' => 'Base de Conhecimento'],
                 ['id' => 'problemas', 'label' => 'Problemas'],
                 ['id' => 'meus_chamados', 'label' => 'Meus Chamados'],
                 ['id' => 'sla', 'label' => 'SLA'],
-                ['id' => 'manutencoes', 'label' => 'Manutenùùes'],
+                ['id' => 'manutencoes', 'label' => 'Manuten??es'],
                 ['id' => 'ativos', 'label' => 'Ativos'],
-                ['id' => 'licencas', 'label' => 'Licenùas'],
-                ['id' => 'integracoes', 'label' => 'Integraùùes'],
+                ['id' => 'licencas', 'label' => 'Licen?as'],
+                ['id' => 'integracoes', 'label' => 'Integra??es'],
                 ['id' => 'cortex', 'label' => 'Cortex Ops'],
                 ['id' => 'analytics', 'label' => 'Analytics'],
                 ['id' => 'novidades', 'label' => 'Novidades'],
@@ -732,41 +734,41 @@ class PermissionService
         ],
         [
             'id' => 'hub_expansao',
-            'label' => 'Nùcleo Expansùo',
+            'label' => 'N?cleo Expans?o',
             'scope' => 'hub_expansao',
             'products' => [],
         ],
         [
             'id' => 'hub_qualidade',
-            'label' => 'Nùcleo Qualidade',
+            'label' => 'N?cleo Qualidade',
             'scope' => 'hub_qualidade',
             'products' => [],
         ],
         [
             'id' => 'hub_facilities',
-            'label' => 'Nùcleo Facilities',
+            'label' => 'N?cleo Facilities',
             'scope' => 'hub_facilities',
             'products' => [],
         ],
         [
             'id' => 'hub_patrimonio',
-            'label' => 'Nùcleo Patrimùnio',
+            'label' => 'N?cleo Patrim?nio',
             'scope' => 'hub_patrimonio',
             'products' => [],
         ],
         [
             'id' => 'hub_conhecimento',
-            'label' => 'Nùcleo Conhecimento',
+            'label' => 'N?cleo Conhecimento',
             'scope' => 'hub_conhecimento',
             'products' => [],
         ],
         [
             'id' => 'hub_integracoes',
-            'label' => 'Nùcleo Integraùùes',
+            'label' => 'N?cleo Integra??es',
             'scope' => 'hub_integracoes',
             'products' => [
-                ['id' => 'observatorio', 'label' => 'Observatùrio Causal'],
-                ['id' => 'catalogo', 'label' => 'Catùlogo'],
+                ['id' => 'observatorio', 'label' => 'Observat?rio Causal'],
+                ['id' => 'catalogo', 'label' => 'Cat?logo'],
                 ['id' => 'conectores', 'label' => 'Conectores'],
                 ['id' => 'webhooks', 'label' => 'Webhooks'],
                 ['id' => 'mapeamentos', 'label' => 'Mapeamentos'],
@@ -777,42 +779,42 @@ class PermissionService
         ],
         [
             'id' => 'hub_customer_success',
-            'label' => 'Nùcleo Customer Success',
+            'label' => 'N?cleo Customer Success',
             'scope' => 'hub_customer_success',
             'products' => [],
         ],
         [
             'id' => 'hub_inovacao',
-            'label' => 'Nùcleo Inovaùùo',
+            'label' => 'N?cleo Inova??o',
             'scope' => 'hub_inovacao',
             'products' => [
                 ['id' => 'pipeline', 'label' => 'Pipeline'],
-                ['id' => 'laboratorio', 'label' => 'Laboratùrio'],
+                ['id' => 'laboratorio', 'label' => 'Laborat?rio'],
                 ['id' => 'experimentos', 'label' => 'Experimentos'],
                 ['id' => 'backlog', 'label' => 'Backlog'],
                 ['id' => 'analytics', 'label' => 'Analytics'],
-                ['id' => 'conexoes', 'label' => 'Conexùes'],
+                ['id' => 'conexoes', 'label' => 'Conex?es'],
                 ['id' => 'impact', 'label' => 'Impacto'],
-                ['id' => 'tendencias', 'label' => 'Tendùncias'],
-                ['id' => 'portfolio', 'label' => 'Portfùlio'],
+                ['id' => 'tendencias', 'label' => 'Tend?ncias'],
+                ['id' => 'portfolio', 'label' => 'Portf?lio'],
                 ['id' => 'novidades', 'label' => 'Novidades'],
             ],
         ],
         [
             'id' => 'hub_holdings',
-            'label' => 'Nùcleo Multi-empresa',
+            'label' => 'N?cleo Multi-empresa',
             'scope' => 'hub_holdings',
             'products' => [],
         ],
         [
             'id' => 'hub_seguros',
-            'label' => 'Nùcleo Seguros',
+            'label' => 'N?cleo Seguros',
             'scope' => 'hub_seguros',
             'products' => [],
         ],
         [
             'id' => 'hub_saude_ocupacional',
-            'label' => 'Nùcleo Saùde Ocupacional',
+            'label' => 'N?cleo Sa?de Ocupacional',
             'scope' => 'hub_saude_ocupacional',
             'products' => [
                 ['id' => 'pcmso', 'label' => 'PCMSO'],
@@ -820,67 +822,67 @@ class PermissionService
                 ['id' => 'aso', 'label' => 'ASO'],
                 ['id' => 'agendamentos', 'label' => 'Agendamentos'],
                 ['id' => 'afastamentos', 'label' => 'Afastamentos'],
-                ['id' => 'prontuario', 'label' => 'Prontuùrio ocupacional'],
+                ['id' => 'prontuario', 'label' => 'Prontu?rio ocupacional'],
             ],
         ],
         [
             'id' => 'hub_pos_operatorio',
-            'label' => 'Unio Saùde',
+            'label' => 'Unio Sa?de',
             'scope' => 'hub_pos_operatorio',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
                 ['id' => 'protocolos', 'label' => 'Protocolos'],
-                ['id' => 'questionarios', 'label' => 'Questionùrios'],
-                ['id' => 'alertas', 'label' => 'Alertas clùnicos'],
-                ['id' => 'painel', 'label' => 'Painel de recuperaùùo'],
+                ['id' => 'questionarios', 'label' => 'Question?rios'],
+                ['id' => 'alertas', 'label' => 'Alertas cl?nicos'],
+                ['id' => 'painel', 'label' => 'Painel de recupera??o'],
                 ['id' => 'portal_paciente', 'label' => 'Portal do paciente'],
             ],
         ],
         [
             'id' => 'hub_licitacoes',
-            'label' => 'Nùcleo Licitaùùes',
+            'label' => 'N?cleo Licita??es',
             'scope' => 'hub_licitacoes',
             'products' => [],
         ],
         [
             'id' => 'hub_marketing',
-            'label' => 'Nùcleo Marketing',
+            'label' => 'N?cleo Marketing',
             'scope' => 'hub_marketing',
             'products' => [],
         ],
         [
             'id' => 'hub_lakehouse',
-            'label' => 'Nùcleo Data & Lakehouse',
+            'label' => 'N?cleo Data & Lakehouse',
             'scope' => 'hub_lakehouse',
             'products' => [],
         ],
         [
             'id' => 'hub_franquias',
-            'label' => 'Nùcleo Franquias & Unidades',
+            'label' => 'N?cleo Franquias & Unidades',
             'scope' => 'hub_franquias',
             'products' => [],
         ],
         [
             'id' => 'hub_seguranca_info',
-            'label' => 'Nùcleo Seguranùa da Informaùùo',
+            'label' => 'N?cleo Seguran?a da Informa??o',
             'scope' => 'hub_seguranca_info',
             'products' => [],
         ],
         [
             'id' => 'hub_pmo',
-            'label' => 'Nùcleo PMO',
+            'label' => 'N?cleo PMO',
             'scope' => 'hub_pmo',
             'products' => [],
         ],
         [
             'id' => 'hub_treinamento_regulatorio',
-            'label' => 'Nùcleo Treinamento Regulatùrio',
+            'label' => 'N?cleo Treinamento Regulat?rio',
             'scope' => 'hub_treinamento_regulatorio',
             'products' => [],
         ],
         [
             'id' => 'hub_terceiros',
-            'label' => 'Nùcleo Gestùo de Terceiros',
+            'label' => 'N?cleo Gest?o de Terceiros',
             'scope' => 'hub_terceiros',
             'products' => [],
         ],
@@ -889,19 +891,19 @@ class PermissionService
             'label' => 'Recursos Humanos',
             'scope' => 'product_rh',
             'products' => [
-                ['id' => 'funcionarios', 'label' => 'Funcionùrios'],
-                ['id' => 'admissoes', 'label' => 'Admissùes'],
-                ['id' => 'ferias', 'label' => 'Fùrias'],
+                ['id' => 'funcionarios', 'label' => 'Funcion?rios'],
+                ['id' => 'admissoes', 'label' => 'Admiss?es'],
+                ['id' => 'ferias', 'label' => 'F?rias'],
                 ['id' => 'folha', 'label' => 'Folha'],
                 ['id' => 'portal', 'label' => 'Portal do colaborador'],
                 ['id' => 'recrutamento', 'label' => 'Recrutamento'],
                 ['id' => 'ponto', 'label' => 'Ponto'],
-                ['id' => 'comunicacao', 'label' => 'Comunicaùùo'],
+                ['id' => 'comunicacao', 'label' => 'Comunica??o'],
                 ['id' => 'organograma', 'label' => 'Organograma'],
                 ['id' => 'auditoria', 'label' => 'Auditoria'],
                 ['id' => 'workflows', 'label' => 'Workflows'],
                 ['id' => 'folha_legal', 'label' => 'Folha legal'],
-                ['id' => 'contabilidade', 'label' => 'Provisùes'],
+                ['id' => 'contabilidade', 'label' => 'Provis?es'],
                 ['id' => 'esocial', 'label' => 'eSocial'],
                 ['id' => 'assinatura', 'label' => 'Assinatura digital'],
                 ['id' => 'analytics', 'label' => 'Analytics RH'],
@@ -909,13 +911,13 @@ class PermissionService
         ],
         [
             'id' => 'product_pessoas',
-            'label' => 'Gestùo de Pessoas',
+            'label' => 'Gest?o de Pessoas',
             'scope' => 'product_pessoas',
             'products' => [
                 ['id' => 'membros', 'label' => 'Membros'],
                 ['id' => 'equipes', 'label' => 'Equipes'],
                 ['id' => 'cargos', 'label' => 'Cargos'],
-                ['id' => 'avaliacao', 'label' => 'Avaliaùùo'],
+                ['id' => 'avaliacao', 'label' => 'Avalia??o'],
             ],
         ],
         [
@@ -925,19 +927,19 @@ class PermissionService
             'products' => [
                 ['id' => 'projetos', 'label' => 'Projetos'],
                 ['id' => 'cronograma', 'label' => 'Cronograma'],
-                ['id' => 'orcamentos', 'label' => 'Orùamentos'],
+                ['id' => 'orcamentos', 'label' => 'Or?amentos'],
                 ['id' => 'equipes', 'label' => 'Equipes de Campo'],
             ],
         ],
         [
             'id' => 'product_publicidade',
-            'label' => 'Marca e Comunicaùùo',
+            'label' => 'Marca e Comunica??o',
             'scope' => 'product_publicidade',
             'products' => [
                 ['id' => 'campanhas', 'label' => 'Campanhas'],
                 ['id' => 'clientes', 'label' => 'Clientes'],
                 ['id' => 'criativos', 'label' => 'Criativos'],
-                ['id' => 'metricas', 'label' => 'Mùtricas'],
+                ['id' => 'metricas', 'label' => 'M?tricas'],
             ],
         ],
     ];
@@ -945,161 +947,161 @@ class PermissionService
     /** @var array<string, array<string, array<string, string>>> scope => member_id => product_id => perfil_id */
     public const DEFAULT_GRANTS = [
         'hub_operacoes' => [
-            'gestor' => ['rh' => 'GESTOR', 'pessoas' => 'GESTOR', 'engenharia' => 'GESTOR_EQUIPE'],
-            'gestor-eq' => ['rh' => 'GESTOR_EQUIPE', 'pessoas' => 'GESTOR_EQUIPE', 'engenharia' => 'SUPERVISOR'],
-            'supervisor' => ['rh' => 'SUPERVISOR', 'pessoas' => 'SUPERVISOR_EQUIPE', 'engenharia' => 'MEMBRO'],
-            'sup-eq' => ['rh' => 'SUPERVISOR_EQUIPE', 'pessoas' => 'MEMBRO', 'engenharia' => 'MEMBRO'],
-            'membro' => ['rh' => 'MEMBRO', 'pessoas' => 'MEMBRO'],
+            'renata-oliveira' => ['rh' => 'GESTOR', 'pessoas' => 'GESTOR', 'engenharia' => 'GESTOR_EQUIPE'],
+            'ricardo-costa' => ['rh' => 'GESTOR_EQUIPE', 'pessoas' => 'GESTOR_EQUIPE', 'engenharia' => 'SUPERVISOR'],
+            'ana-ribeiro' => ['rh' => 'SUPERVISOR', 'pessoas' => 'SUPERVISOR_EQUIPE', 'engenharia' => 'MEMBRO'],
+            'felipe-martins' => ['rh' => 'SUPERVISOR_EQUIPE', 'pessoas' => 'MEMBRO', 'engenharia' => 'MEMBRO'],
+            'lucas-santos' => ['rh' => 'MEMBRO', 'pessoas' => 'MEMBRO'],
         ],
         'hub_talentos' => [
-            'gestor' => ['banco' => 'GESTOR', 'vagas' => 'GESTOR', 'trilhas' => 'GESTOR_EQUIPE', 'mentorias' => 'GESTOR_EQUIPE'],
-            'gestor-eq' => ['banco' => 'GESTOR_EQUIPE', 'vagas' => 'SUPERVISOR', 'trilhas' => 'SUPERVISOR_EQUIPE'],
-            'supervisor' => ['banco' => 'SUPERVISOR', 'vagas' => 'SUPERVISOR_EQUIPE'],
-            'membro' => ['banco' => 'MEMBRO'],
+            'renata-oliveira' => ['banco' => 'GESTOR', 'vagas' => 'GESTOR', 'trilhas' => 'GESTOR_EQUIPE', 'mentorias' => 'GESTOR_EQUIPE'],
+            'ricardo-costa' => ['banco' => 'GESTOR_EQUIPE', 'vagas' => 'SUPERVISOR', 'trilhas' => 'SUPERVISOR_EQUIPE'],
+            'ana-ribeiro' => ['banco' => 'SUPERVISOR', 'vagas' => 'SUPERVISOR_EQUIPE'],
+            'lucas-santos' => ['banco' => 'MEMBRO'],
         ],
         'hub_maturidade' => [
-            'gestor' => ['avaliacao' => 'GESTOR', 'plano' => 'GESTOR', 'historico' => 'GESTOR_EQUIPE', 'radar' => 'GESTOR_EQUIPE'],
-            'supervisor' => ['avaliacao' => 'SUPERVISOR', 'plano' => 'SUPERVISOR_EQUIPE'],
-            'membro' => ['avaliacao' => 'MEMBRO'],
+            'renata-oliveira' => ['avaliacao' => 'GESTOR', 'plano' => 'GESTOR', 'historico' => 'GESTOR_EQUIPE', 'radar' => 'GESTOR_EQUIPE'],
+            'ana-ribeiro' => ['avaliacao' => 'SUPERVISOR', 'plano' => 'SUPERVISOR_EQUIPE'],
+            'lucas-santos' => ['avaliacao' => 'MEMBRO'],
         ],
         'hub_recrutamento' => [
-            'gestor' => ['vagas' => 'GESTOR', 'pipeline' => 'GESTOR'],
-            'gestor-eq' => ['vagas' => 'GESTOR_EQUIPE', 'pipeline' => 'SUPERVISOR'],
-            'supervisor' => ['vagas' => 'SUPERVISOR', 'pipeline' => 'SUPERVISOR_EQUIPE'],
+            'renata-oliveira' => ['vagas' => 'GESTOR', 'pipeline' => 'GESTOR'],
+            'ricardo-costa' => ['vagas' => 'GESTOR_EQUIPE', 'pipeline' => 'SUPERVISOR'],
+            'ana-ribeiro' => ['vagas' => 'SUPERVISOR', 'pipeline' => 'SUPERVISOR_EQUIPE'],
         ],
         'hub_admin' => [
-            'gestor' => ['usuarios' => 'GESTOR', 'empresas' => 'GESTOR', 'configuracoes' => 'GESTOR_EQUIPE'],
+            'renata-oliveira' => ['usuarios' => 'GESTOR', 'empresas' => 'GESTOR', 'configuracoes' => 'GESTOR_EQUIPE'],
         ],
         'product_rh' => [
-            'gestor' => [
+            'renata-oliveira' => [
                 'funcionarios' => 'GESTOR', 'admissoes' => 'GESTOR', 'ferias' => 'GESTOR_EQUIPE', 'folha' => 'GESTOR',
                 'portal' => 'GESTOR_EQUIPE', 'recrutamento' => 'GESTOR', 'ponto' => 'GESTOR_EQUIPE',
                 'comunicacao' => 'GESTOR', 'organograma' => 'GESTOR', 'auditoria' => 'GESTOR',
                 'workflows' => 'GESTOR', 'folha_legal' => 'GESTOR', 'contabilidade' => 'GESTOR',
                 'esocial' => 'GESTOR', 'assinatura' => 'GESTOR', 'analytics' => 'GESTOR',
             ],
-            'supervisor' => [
+            'ana-ribeiro' => [
                 'funcionarios' => 'SUPERVISOR', 'ferias' => 'SUPERVISOR_EQUIPE', 'folha' => 'SUPERVISOR',
                 'portal' => 'MEMBRO', 'recrutamento' => 'SUPERVISOR', 'ponto' => 'SUPERVISOR_EQUIPE',
                 'comunicacao' => 'SUPERVISOR', 'organograma' => 'SUPERVISOR', 'auditoria' => 'SUPERVISOR',
                 'workflows' => 'SUPERVISOR_EQUIPE', 'folha_legal' => 'SUPERVISOR', 'contabilidade' => 'SUPERVISOR',
                 'esocial' => 'SUPERVISOR_EQUIPE', 'assinatura' => 'SUPERVISOR_EQUIPE', 'analytics' => 'SUPERVISOR',
             ],
-            'membro' => [
+            'lucas-santos' => [
                 'funcionarios' => 'MEMBRO', 'portal' => 'MEMBRO', 'ponto' => 'MEMBRO', 'comunicacao' => 'MEMBRO',
                 'organograma' => 'MEMBRO', 'analytics' => 'MEMBRO',
             ],
         ],
         'product_pessoas' => [
-            'gestor' => ['membros' => 'GESTOR', 'equipes' => 'GESTOR', 'cargos' => 'GESTOR_EQUIPE', 'avaliacao' => 'GESTOR_EQUIPE'],
-            'gestor-eq' => ['membros' => 'GESTOR_EQUIPE', 'equipes' => 'SUPERVISOR'],
-            'supervisor' => ['membros' => 'SUPERVISOR_EQUIPE', 'equipes' => 'SUPERVISOR', 'cargos' => 'SUPERVISOR_EQUIPE', 'avaliacao' => 'SUPERVISOR'],
-            'sup-eq' => ['membros' => 'MEMBRO', 'equipes' => 'SUPERVISOR_EQUIPE'],
-            'membro' => ['membros' => 'MEMBRO'],
+            'renata-oliveira' => ['membros' => 'GESTOR', 'equipes' => 'GESTOR', 'cargos' => 'GESTOR_EQUIPE', 'avaliacao' => 'GESTOR_EQUIPE'],
+            'ricardo-costa' => ['membros' => 'GESTOR_EQUIPE', 'equipes' => 'SUPERVISOR'],
+            'ana-ribeiro' => ['membros' => 'SUPERVISOR_EQUIPE', 'equipes' => 'SUPERVISOR', 'cargos' => 'SUPERVISOR_EQUIPE', 'avaliacao' => 'SUPERVISOR'],
+            'felipe-martins' => ['membros' => 'MEMBRO', 'equipes' => 'SUPERVISOR_EQUIPE'],
+            'lucas-santos' => ['membros' => 'MEMBRO'],
         ],
         'product_engenharia' => [
-            'gestor' => ['projetos' => 'GESTOR', 'cronograma' => 'GESTOR_EQUIPE', 'orcamentos' => 'GESTOR', 'equipes' => 'SUPERVISOR'],
-            'supervisor' => ['projetos' => 'SUPERVISOR_EQUIPE', 'equipes' => 'SUPERVISOR_EQUIPE'],
+            'renata-oliveira' => ['projetos' => 'GESTOR', 'cronograma' => 'GESTOR_EQUIPE', 'orcamentos' => 'GESTOR', 'equipes' => 'SUPERVISOR'],
+            'ana-ribeiro' => ['projetos' => 'SUPERVISOR_EQUIPE', 'equipes' => 'SUPERVISOR_EQUIPE'],
         ],
         'product_publicidade' => [
-            'gestor' => ['campanhas' => 'GESTOR', 'clientes' => 'GESTOR', 'criativos' => 'GESTOR_EQUIPE', 'metricas' => 'GESTOR_EQUIPE'],
+            'renata-oliveira' => ['campanhas' => 'GESTOR', 'clientes' => 'GESTOR', 'criativos' => 'GESTOR_EQUIPE', 'metricas' => 'GESTOR_EQUIPE'],
         ],
         'product_core' => [
-            'gestor' => ['projetos' => 'GESTOR', 'metas' => 'GESTOR'],
-            'gestor-eq' => ['projetos' => 'GESTOR_EQUIPE', 'metas' => 'GESTOR_EQUIPE'],
-            'supervisor' => ['projetos' => 'SUPERVISOR', 'metas' => 'SUPERVISOR'],
+            'renata-oliveira' => ['projetos' => 'GESTOR', 'metas' => 'GESTOR'],
+            'ricardo-costa' => ['projetos' => 'GESTOR_EQUIPE', 'metas' => 'GESTOR_EQUIPE'],
+            'ana-ribeiro' => ['projetos' => 'SUPERVISOR', 'metas' => 'SUPERVISOR'],
         ],
         'hub_ti' => [
-            'gestor' => [
+            'renata-oliveira' => [
                 'chamados' => 'GESTOR', 'catalogo' => 'GESTOR', 'kb' => 'GESTOR', 'problemas' => 'GESTOR',
                 'meus_chamados' => 'GESTOR', 'sla' => 'GESTOR', 'manutencoes' => 'GESTOR', 'ativos' => 'GESTOR',
                 'licencas' => 'GESTOR', 'integracoes' => 'GESTOR', 'cortex' => 'GESTOR', 'analytics' => 'GESTOR',
                 'novidades' => 'GESTOR',
             ],
-            'gestor-eq' => [
+            'ricardo-costa' => [
                 'chamados' => 'GESTOR_EQUIPE', 'catalogo' => 'GESTOR_EQUIPE', 'kb' => 'GESTOR_EQUIPE',
                 'problemas' => 'GESTOR_EQUIPE', 'meus_chamados' => 'GESTOR_EQUIPE', 'sla' => 'GESTOR_EQUIPE',
                 'manutencoes' => 'GESTOR_EQUIPE', 'ativos' => 'GESTOR_EQUIPE', 'licencas' => 'GESTOR_EQUIPE',
                 'integracoes' => 'GESTOR_EQUIPE', 'cortex' => 'GESTOR_EQUIPE', 'analytics' => 'GESTOR_EQUIPE',
                 'novidades' => 'GESTOR_EQUIPE',
             ],
-            'supervisor' => [
+            'ana-ribeiro' => [
                 'chamados' => 'SUPERVISOR', 'catalogo' => 'SUPERVISOR', 'kb' => 'SUPERVISOR_EQUIPE',
                 'problemas' => 'SUPERVISOR', 'meus_chamados' => 'MEMBRO', 'sla' => 'SUPERVISOR',
                 'manutencoes' => 'SUPERVISOR', 'ativos' => 'SUPERVISOR', 'licencas' => 'SUPERVISOR',
                 'integracoes' => 'SUPERVISOR', 'cortex' => 'SUPERVISOR', 'analytics' => 'SUPERVISOR',
                 'novidades' => 'SUPERVISOR_EQUIPE',
             ],
-            'sup-eq' => [
+            'felipe-martins' => [
                 'chamados' => 'SUPERVISOR_EQUIPE', 'catalogo' => 'SUPERVISOR_EQUIPE', 'kb' => 'SUPERVISOR_EQUIPE',
                 'problemas' => 'SUPERVISOR_EQUIPE', 'meus_chamados' => 'MEMBRO', 'sla' => 'SUPERVISOR_EQUIPE',
                 'manutencoes' => 'SUPERVISOR_EQUIPE', 'ativos' => 'SUPERVISOR_EQUIPE', 'licencas' => 'SUPERVISOR_EQUIPE',
                 'integracoes' => 'SUPERVISOR_EQUIPE', 'cortex' => 'SUPERVISOR_EQUIPE', 'analytics' => 'SUPERVISOR_EQUIPE',
                 'novidades' => 'MEMBRO',
             ],
-            'membro' => [
+            'lucas-santos' => [
                 'catalogo' => 'MEMBRO', 'meus_chamados' => 'MEMBRO', 'novidades' => 'MEMBRO',
             ],
         ],
         'hub_pos_operatorio' => [
-            'gestor' => [
+            'renata-oliveira' => [
                 'pacientes' => 'GESTOR', 'protocolos' => 'GESTOR', 'questionarios' => 'GESTOR',
                 'alertas' => 'GESTOR', 'painel' => 'GESTOR', 'portal_paciente' => 'GESTOR',
             ],
-            'gestor-eq' => [
+            'ricardo-costa' => [
                 'pacientes' => 'GESTOR_EQUIPE', 'protocolos' => 'GESTOR_EQUIPE', 'questionarios' => 'GESTOR_EQUIPE',
                 'alertas' => 'GESTOR_EQUIPE', 'painel' => 'GESTOR_EQUIPE',
             ],
-            'supervisor' => [
+            'ana-ribeiro' => [
                 'pacientes' => 'SUPERVISOR', 'alertas' => 'SUPERVISOR', 'painel' => 'SUPERVISOR',
                 'questionarios' => 'SUPERVISOR_EQUIPE',
             ],
-            'sup-eq' => [
+            'felipe-martins' => [
                 'pacientes' => 'SUPERVISOR_EQUIPE', 'alertas' => 'SUPERVISOR_EQUIPE', 'painel' => 'SUPERVISOR_EQUIPE',
             ],
-            'membro' => [
+            'lucas-santos' => [
                 'portal_paciente' => 'MEMBRO', 'questionarios' => 'MEMBRO',
             ],
         ],
         'hub_saude_ocupacional' => [
-            'gestor' => [
+            'renata-oliveira' => [
                 'pcmso' => 'GESTOR', 'exames' => 'GESTOR', 'aso' => 'GESTOR',
                 'agendamentos' => 'GESTOR', 'afastamentos' => 'GESTOR', 'prontuario' => 'GESTOR',
             ],
-            'gestor-eq' => [
+            'ricardo-costa' => [
                 'pcmso' => 'GESTOR_EQUIPE', 'exames' => 'GESTOR_EQUIPE', 'aso' => 'GESTOR_EQUIPE',
                 'agendamentos' => 'GESTOR_EQUIPE', 'afastamentos' => 'GESTOR_EQUIPE', 'prontuario' => 'GESTOR_EQUIPE',
             ],
-            'supervisor' => [
+            'ana-ribeiro' => [
                 'pcmso' => 'SUPERVISOR', 'exames' => 'SUPERVISOR', 'aso' => 'SUPERVISOR',
                 'agendamentos' => 'SUPERVISOR_EQUIPE', 'afastamentos' => 'SUPERVISOR', 'prontuario' => 'SUPERVISOR_EQUIPE',
             ],
-            'sup-eq' => [
+            'felipe-martins' => [
                 'exames' => 'SUPERVISOR_EQUIPE', 'aso' => 'SUPERVISOR_EQUIPE',
                 'agendamentos' => 'SUPERVISOR_EQUIPE', 'afastamentos' => 'SUPERVISOR_EQUIPE',
             ],
-            'membro' => [
+            'lucas-santos' => [
                 'agendamentos' => 'MEMBRO', 'aso' => 'MEMBRO',
             ],
         ],
         'hub_integracoes' => [
-            'gestor' => [
+            'renata-oliveira' => [
                 'observatorio' => 'GESTOR', 'catalogo' => 'GESTOR', 'conectores' => 'GESTOR', 'webhooks' => 'GESTOR',
                 'mapeamentos' => 'GESTOR', 'api_keys' => 'GESTOR', 'logs' => 'GESTOR', 'playbooks' => 'GESTOR',
             ],
-            'gestor-eq' => [
+            'ricardo-costa' => [
                 'observatorio' => 'GESTOR_EQUIPE', 'catalogo' => 'GESTOR_EQUIPE', 'conectores' => 'GESTOR_EQUIPE', 'webhooks' => 'GESTOR_EQUIPE',
                 'mapeamentos' => 'GESTOR_EQUIPE', 'api_keys' => 'GESTOR_EQUIPE', 'logs' => 'SUPERVISOR', 'playbooks' => 'GESTOR_EQUIPE',
             ],
-            'supervisor' => [
+            'ana-ribeiro' => [
                 'observatorio' => 'SUPERVISOR', 'catalogo' => 'SUPERVISOR', 'conectores' => 'SUPERVISOR', 'webhooks' => 'SUPERVISOR',
                 'mapeamentos' => 'SUPERVISOR_EQUIPE', 'api_keys' => 'SUPERVISOR', 'logs' => 'SUPERVISOR', 'playbooks' => 'SUPERVISOR',
             ],
-            'sup-eq' => [
+            'felipe-martins' => [
                 'observatorio' => 'SUPERVISOR_EQUIPE', 'catalogo' => 'SUPERVISOR_EQUIPE', 'conectores' => 'SUPERVISOR_EQUIPE', 'webhooks' => 'SUPERVISOR_EQUIPE',
                 'logs' => 'SUPERVISOR_EQUIPE', 'playbooks' => 'MEMBRO',
             ],
-            'membro' => [
+            'lucas-santos' => [
                 'observatorio' => 'MEMBRO', 'catalogo' => 'MEMBRO', 'logs' => 'MEMBRO', 'playbooks' => 'MEMBRO',
             ],
         ],
@@ -1213,26 +1215,26 @@ class PermissionService
     }
 
     /**
-     * Persiste grants granulares de um membro (substitui todos os registros do usuùrio).
+     * Persiste grants granulares de um membro (substitui todos os registros do usu?rio).
      *
      * @param array<string, string> $grantsMap keys "scope:productId" => perfil_id (vazio = sem acesso)
      *
-     * @return int nùmero de grants gravados
+     * @return int n?mero de grants gravados
      */
     public function saveMemberGrants(string $memberId, array $grantsMap, User $editor): int
     {
         if (!$this->canEditorSaveGrants($editor, $grantsMap)) {
-            throw new AccessDeniedException('Sem permissùo para alterar grants.');
+            throw new AccessDeniedException('Sem permiss?o para alterar grants.');
         }
 
         $empresa = $this->workspace->getActiveEmpresa($editor) ?? $editor->getEmpresa();
         $target = $this->resolveUserForMemberId($memberId, $empresa);
         if (!$target) {
-            throw new \InvalidArgumentException('Membro nùo encontrado nesta empresa.');
+            throw new \InvalidArgumentException('Membro n?o encontrado nesta empresa.');
         }
 
         if (\in_array($target->getPerfil(), ['TENANT', 'PLATFORM_OWNER'], true)) {
-            throw new \InvalidArgumentException('Permissùes de contas globais da plataforma nùo sùo editùveis.');
+            throw new \InvalidArgumentException('Permiss?es de contas globais da plataforma n?o s?o edit?veis.');
         }
 
         $grantsMap = $this->syncOperacoesHubGrants($grantsMap);
@@ -1338,7 +1340,7 @@ class PermissionService
     public function buildScopeGrantSummary(string $scope, array $grantsInScope): array
     {
         if (!isset(self::SCOPES[$scope])) {
-            return ['label' => 'ù', 'class' => 'none', 'description' => 'Escopo nùo encontrado.'];
+            return ['label' => '?', 'class' => 'none', 'description' => 'Escopo n?o encontrado.'];
         }
 
         $values = [];
@@ -1353,7 +1355,7 @@ class PermissionService
             return [
                 'label' => 'Sem acesso',
                 'class' => 'none',
-                'description' => 'Sem permissùo neste escopo ù produtos desta aba bloqueados.',
+                'description' => 'Sem permiss?o neste escopo ? produtos desta aba bloqueados.',
             ];
         }
 
@@ -1394,9 +1396,7 @@ class PermissionService
 
     public static function memberIdFromEmail(string $email): string
     {
-        $local = explode('@', $email)[0] ?? $email;
-
-        return str_replace('.', '-', $local);
+        return DevSeedEmails::memberSlotId($email);
     }
 
     /**
@@ -1419,7 +1419,7 @@ class PermissionService
     }
 
     /**
-     * Membros da empresa para busca global e painel de permissùes.
+     * Membros da empresa para busca global e painel de permiss?es.
      *
      * @return list<array{id: string, nome: string, email: string, initials: string, equipe: string, cargo: string, perfil_global: string, perfil_label: string, perfil_class: string, ficha_id: int|null, user_id: int|null}>
      */
@@ -1477,7 +1477,7 @@ class PermissionService
         $funcionario = $this->funcionarioRepo->findOneByUser($empresa, $user)
             ?? $this->funcionarioRepo->findOneByEmail($empresa, $email);
 
-        $equipe = 'ù';
+        $equipe = '?';
         $cargo = $user->getPerfilLabel();
         if ($funcionario) {
             $cargo = $funcionario->getCargo() ?: $cargo;

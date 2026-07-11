@@ -243,7 +243,7 @@ chmod -R ug+rwx var/
 chmod -R ug+rwx public/uploads/
 ```
 
-Login padrão seed (altere depois): ver saída de `app:seed-users` (ex. `gestor@unio.dev` / `unio123`).
+Login padrão seed (altere depois): ver saída de `app:seed-users` (ex. `renata.oliveira@unio.dev` / `unio123`).
 
 ---
 

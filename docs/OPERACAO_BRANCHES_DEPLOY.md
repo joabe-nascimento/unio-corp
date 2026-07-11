@@ -130,6 +130,15 @@ Depois: `bash scripts/sync-branches.sh production` para alinhar espelhos.
 - Cada `git push origin production` → validate + deploy
 - Preferir validação local antes do push quando possível
 
+### `uniosaude` — Unio Saúde (instância dedicada)
+
+- **URL:** https://uniosaude.uniowork.com.br
+- **Servidor:** `/home2/joabef36/unio-uniosaude`
+- **Push** → só GitHub; **não** atualiza o site
+- **Produção** → `powershell -ExecutionPolicy Bypass -File scripts\deploy-uniosaude-manual.ps1`
+- **GitHub Actions** no push desativado (billing jul/2026); disparo manual opcional
+- Guia: [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md)
+
 ### `product/*` — módulos
 
 | Branch | Escopo |
