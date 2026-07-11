@@ -57,7 +57,7 @@ final class StudioLandingService
                 'Recrutamento, cargos, folha e portal do colaborador.',
                 'fa-users',
                 'app_rh',
-                'https://images.unsplash.com/photo-1521737711866-ece3fd7a9fca?auto=format&fit=crop&w=800&q=80',
+                'images/marketing/modules/rh.jpg',
                 'Centralize admissões, movimentações e comunicação com colaboradores. O módulo conecta recrutamento, cargos, folha e portal do colaborador na mesma shell.',
                 ['Admissão digital com checklist', 'Portal do colaborador sem app', 'Organograma e cargos versionados', 'Integração com folha e benefícios'],
                 [
@@ -79,7 +79,7 @@ final class StudioLandingService
                 'Projetos, entregas e playbooks de implementação.',
                 'fa-compass-drafting',
                 'app_engenharia',
-                'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80',
+                'images/marketing/modules/engenharia.jpg',
                 'Acompanhe obras e projetos digitais com entregas rastreáveis, playbooks reutilizáveis e visão de prioridade para a equipe técnica.',
                 ['Playbooks por tipo de entrega', 'Marcos e SLA por projeto', 'Biblioteca de implementação', 'Alertas de desvio de prazo'],
                 [
@@ -101,7 +101,7 @@ final class StudioLandingService
                 'Acompanhamento clínico modular para clínicas e hospitais.',
                 'fa-user-nurse',
                 'app_pos_operatorio',
-                'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80',
+                'images/marketing/modules/pos-operatorio.jpg',
                 'Produto vertical Unio Saúde: protocolos pós-cirúrgicos, alertas clínicos, questionários e portal do paciente em um módulo ativável.',
                 ['Protocolos por procedimento', 'Fila P1–P4 com SLA', 'Questionários diários do paciente', 'Carteirinha e guia integrados'],
                 [
@@ -123,7 +123,7 @@ final class StudioLandingService
                 'Chamados, integrações e experimentação controlada.',
                 'fa-microchip',
                 'app_ti',
-                'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
+                'images/marketing/modules/ti.jpg',
                 'Gerencie chamados, integrações e experimentos com trilha de aprovação. Ideal para squads que precisam de ritmo sem perder governança.',
                 ['Fila de chamados com prioridade', 'Integrações e webhooks', 'Ambiente de experimentação', 'Histórico e SLA por área'],
                 [
@@ -145,7 +145,7 @@ final class StudioLandingService
                 'Indicadores, compliance e trilhas de aprovação.',
                 'fa-chart-pie',
                 'app_financeiro',
-                'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80',
+                'images/marketing/modules/financeiro.jpg',
                 'Indicadores, compliance e fluxos de aprovação em um painel único — da solicitação à trilha auditável.',
                 ['Dashboard de indicadores', 'Trilhas de aprovação', 'Exportação para auditoria', 'Alertas de desvio orçamentário'],
                 [
@@ -167,7 +167,7 @@ final class StudioLandingService
                 'Governança, indicadores e fluxo entre áreas.',
                 'fa-sitemap',
                 'app_hub_operacoes',
-                'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80',
+                'images/marketing/modules/operacoes.jpg',
                 'Visão transversal da operação: prioridades entre áreas, indicadores cruzados e governança sem silos.',
                 ['Painel multi-módulo', 'Prioridades entre áreas', 'Indicadores cruzados', 'Rituais e check-ins de gestão'],
                 [

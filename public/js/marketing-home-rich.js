@@ -32,9 +32,12 @@
         });
     });
 
-    document.querySelectorAll('.mkt-rich-module-card__bg').forEach(function (img) {
+    document.querySelectorAll('.mkt-rich-module-card__bg, .mkt-studio-info__thumb').forEach(function (img) {
         img.addEventListener('error', function () {
-            img.src = 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80';
+            var fallback = img.getAttribute('data-fallback') || '/images/marketing/modules/fallback.jpg';
+            if (img.src.indexOf(fallback) === -1) {
+                img.src = fallback;
+            }
         });
     });
 
