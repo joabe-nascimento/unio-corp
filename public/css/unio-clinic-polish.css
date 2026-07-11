@@ -1,0 +1,432 @@
+/**
+ * Unio Clínica — refinamentos visuais (apenas body.org-clinic)
+ * Complementa unio-organismo.css sem afetar o perfil Studio.
+ */
+
+/* ── Tokens clínica ── */
+body.org-clinic.unio-organismo {
+    --clinic-glow: rgba(75, 114, 190, 0.14);
+    --clinic-glow-soft: rgba(75, 114, 190, 0.06);
+    --clinic-teal-soft: rgba(90, 154, 154, 0.1);
+    --clinic-radius-lg: 18px;
+    --clinic-shadow: 0 8px 32px rgba(30, 42, 58, 0.06);
+    --clinic-shadow-hover: 0 14px 40px rgba(75, 114, 190, 0.12);
+}
+
+/* ── Fundo da página — gradiente calmo ── */
+[data-theme="light"] body.org-clinic.unio-organismo.layout-inset-shell .content-wrapper,
+[data-theme="light"] body.org-clinic.unio-organismo.layout-inset-shell .content,
+[data-theme="light"] body.org-clinic.unio-organismo.layout-inset-shell .app-page-scroll {
+    background:
+        radial-gradient(ellipse 80% 50% at 100% 0%, var(--clinic-glow-soft) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 0% 100%, var(--clinic-teal-soft) 0%, transparent 50%),
+        var(--org-page) !important;
+}
+
+/* ── Sidebar — seções e badges ── */
+body.org-clinic .nav-sidebar .sidebar-hub-heading-label {
+    position: relative;
+    padding-left: 10px;
+    color: var(--org-blue-text);
+    letter-spacing: 0.08em;
+}
+
+body.org-clinic .nav-sidebar .sidebar-hub-heading-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 10px;
+    border-radius: 99px;
+    background: linear-gradient(180deg, var(--org-blue) 0%, #6a9ec4 100%);
+}
+
+body.org-clinic .nav-sidebar > .nav-item > .nav-link.active,
+body.org-clinic .nav-sidebar > .nav-item > .nav-link.organismo-practice-link.active {
+    background: linear-gradient(135deg, #4b72be 0%, #5a86c8 100%) !important;
+    box-shadow: 0 4px 14px rgba(75, 114, 190, 0.32) !important;
+}
+
+body.org-clinic .nav-clinic-badge {
+    border-radius: 99px;
+    min-width: 16px;
+    padding: 1px 5px;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1.3;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+body.org-clinic .nav-clinic-badge--danger {
+    animation: clinic-badge-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes clinic-badge-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.35); }
+    50% { box-shadow: 0 0 0 4px rgba(185, 28, 28, 0); }
+}
+
+/* ── Dashboard — hero em card ── */
+body.org-clinic .clinic-home--clinic {
+    gap: 28px;
+}
+
+body.org-clinic .clinic-home-hero--clinic {
+    padding: clamp(28px, 4vw, 40px);
+    background: var(--org-surface);
+    border: 1px solid var(--org-border-soft);
+    border-radius: var(--clinic-radius-lg);
+    box-shadow: var(--clinic-shadow);
+    overflow: hidden;
+}
+
+body.org-clinic .clinic-home-hero--clinic::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 92% 8%, var(--clinic-glow) 0%, transparent 42%),
+        linear-gradient(135deg, rgba(234, 240, 251, 0.9) 0%, transparent 48%);
+    pointer-events: none;
+}
+
+body.org-clinic .clinic-home-hero--clinic::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--org-blue) 0%, #6a9ec4 50%, #5a9a9a 100%);
+    pointer-events: none;
+}
+
+body.org-clinic .clinic-home-hero__slogan {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--org-blue-soft);
+    border-radius: 99px;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+}
+
+body.org-clinic .clinic-home-hero__slogan::before {
+    content: '\f21e';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 11px;
+    opacity: 0.85;
+}
+
+body.org-clinic .clinic-home-hero__title {
+    letter-spacing: -1.5px;
+}
+
+body.org-clinic .clinic-home-hero__highlights {
+    border-top: none;
+    padding-top: 0;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+body.org-clinic .clinic-home-hero__highlights li {
+    padding: 8px 14px;
+    margin: 0;
+    border: 1px solid var(--org-border-soft);
+    border-right: 1px solid var(--org-border-soft);
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 1px 3px rgba(30, 42, 58, 0.04);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+body.org-clinic .clinic-home-hero__highlights li:hover {
+    border-color: rgba(75, 114, 190, 0.35);
+    box-shadow: 0 4px 12px var(--clinic-glow-soft);
+}
+
+body.org-clinic .clinic-home-hero__highlights li i {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--org-blue-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+/* ── Cards de ação ── */
+body.org-clinic .clinic-home-actions__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+@media (max-width: 1199.98px) {
+    body.org-clinic .clinic-home-actions__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    body.org-clinic .clinic-home-actions__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+body.org-clinic .clinic-action-card {
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(30, 42, 58, 0.04);
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.org-clinic .clinic-action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--clinic-shadow-hover);
+}
+
+body.org-clinic .clinic-action-card--primary {
+    background: linear-gradient(145deg, #4b72be 0%, #3d61a8 100%);
+    border-color: transparent;
+}
+
+body.org-clinic .clinic-action-card--primary:hover {
+    background: linear-gradient(145deg, #557dc8 0%, #4b72be 100%);
+    transform: translateY(-3px);
+}
+
+body.org-clinic .clinic-action-card__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+}
+
+body.org-clinic .clinic-action-card:hover .clinic-action-card__arrow {
+    opacity: 0.7;
+    transform: translateX(2px);
+}
+
+body.org-clinic .clinic-action-card__arrow {
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+/* ── Atividade recente ── */
+body.org-clinic .clinic-home-activity {
+    border-radius: var(--clinic-radius-lg);
+    box-shadow: var(--clinic-shadow);
+    position: relative;
+}
+
+body.org-clinic .clinic-home-activity::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--org-blue) 20%, #6a9ec4 80%, transparent);
+    opacity: 0.35;
+}
+
+body.org-clinic .clinic-home-activity__head {
+    background: linear-gradient(180deg, rgba(234, 240, 251, 0.55) 0%, transparent 100%);
+}
+
+body.org-clinic .clinic-activity-empty-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.08);
+    animation: clinic-calm-pulse 3s ease-in-out infinite;
+}
+
+@keyframes clinic-calm-pulse {
+    0%, 100% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.08); }
+    50% { box-shadow: 0 0 0 14px rgba(34, 197, 94, 0); }
+}
+
+/* ── Painel de Recuperação (maturidade) ── */
+body.org-clinic .clinic-hub-block {
+    border-radius: var(--clinic-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--clinic-shadow);
+    border-color: var(--org-border-soft);
+}
+
+body.org-clinic .clinic-metric {
+    position: relative;
+    transition: background 0.16s ease;
+}
+
+body.org-clinic .clinic-metric::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    border-radius: 99px;
+    opacity: 0.85;
+}
+
+body.org-clinic .clinic-metric:nth-child(1)::before { background: var(--org-blue); }
+body.org-clinic .clinic-metric:nth-child(2)::before { background: #e15a64; }
+body.org-clinic .clinic-metric:nth-child(3)::before { background: #16a34a; }
+body.org-clinic .clinic-metric:nth-child(4)::before { background: #7c3aed; }
+
+body.org-clinic .clinic-metric:hover {
+    background: rgba(234, 240, 251, 0.45);
+}
+
+body.org-clinic .clinic-hub-panel__head {
+    background: linear-gradient(180deg, rgba(234, 240, 251, 0.4) 0%, transparent 100%);
+}
+
+body.org-clinic .clinic-placeholder__icon {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+    background: linear-gradient(145deg, var(--org-blue-soft) 0%, #f0f5fc 100%);
+    box-shadow: 0 8px 24px var(--clinic-glow-soft);
+}
+
+body.org-clinic .clinic-placeholder__btn {
+    border-radius: 99px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(75, 114, 190, 0.28);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+body.org-clinic .clinic-placeholder__btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(75, 114, 190, 0.35);
+    color: #fff;
+    text-decoration: none;
+}
+
+body.org-clinic .clinic-hub-subtab-panel__empty {
+    padding: 20px;
+    border-radius: 14px;
+    background: rgba(234, 240, 251, 0.35);
+    border: 1px dashed var(--org-border-soft);
+}
+
+body.org-clinic .clinic-empty-check {
+    color: #22c55e;
+    filter: drop-shadow(0 2px 6px rgba(34, 197, 94, 0.2));
+}
+
+/* ── Badges e status ── */
+body.org-clinic .clinic-status,
+body.org-clinic .clinic-priority,
+body.org-clinic .clinic-day-badge,
+body.org-clinic .clinic-severity {
+    border-radius: 99px;
+}
+
+body.org-clinic .clinic-code {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--org-blue-text);
+    background: var(--org-blue-soft);
+    border-radius: 99px;
+}
+
+/* ── Tabelas ── */
+body.org-clinic .clinic-data-table tbody tr {
+    transition: background 0.14s ease;
+}
+
+body.org-clinic .clinic-data-table tbody tr:hover {
+    background: rgba(234, 240, 251, 0.55);
+}
+
+/* ── Ficha do paciente (offcanvas) ── */
+body.org-clinic .clinic-ficha-offcanvas-hero {
+    margin: -4px -4px 0;
+    padding: 18px 18px 16px;
+    border-bottom: none;
+    border-radius: 14px 14px 0 0;
+    background:
+        linear-gradient(135deg, rgba(75, 114, 190, 0.08) 0%, rgba(90, 154, 154, 0.06) 100%),
+        var(--org-surface);
+}
+
+body.org-clinic .clinic-ficha-offcanvas-kpis {
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(30, 42, 58, 0.04);
+}
+
+body.org-clinic .clinic-ficha-offcanvas-kpis .clinic-metric::before {
+    left: 12px;
+    right: 12px;
+}
+
+body.org-clinic .clinic-timeline-item__icon {
+    border-radius: 50%;
+}
+
+/* ── Abas do hub clínico ── */
+body.org-clinic .org-clinic-nav__tab--rich.active,
+body.org-clinic .org-clinic-nav__tab.active {
+    color: var(--org-blue);
+    border-bottom-color: var(--org-blue);
+}
+
+body.org-clinic .org-clinic-nav__tab--rich {
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+body.org-clinic .org-clinic-nav__tab--rich:hover {
+    background: rgba(234, 240, 251, 0.65);
+}
+
+/* ── Pulso (home alternativa) ── */
+body.org-clinic .pulso-hero {
+    border-radius: var(--clinic-radius-lg);
+    box-shadow: var(--clinic-shadow);
+    border: 1px solid var(--org-border-soft);
+    background:
+        radial-gradient(circle at 100% 0%, var(--clinic-glow-soft) 0%, transparent 50%),
+        var(--org-surface);
+}
+
+body.org-clinic .pulso-cena-card {
+    border-radius: 14px;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+body.org-clinic .pulso-cena-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--clinic-shadow-hover);
+}
+
+body.org-clinic .pulso-kpi-tile {
+    border-radius: 14px;
+}
+
+/* ── Dark theme ── */
+html[data-theme="dark"] body.org-clinic.unio-organismo.layout-inset-shell .content-wrapper,
+html[data-theme="dark"] body.org-clinic.unio-organismo.layout-inset-shell .content {
+    background: var(--org-page) !important;
+}
+
+html[data-theme="dark"] body.org-clinic .clinic-home-hero--clinic {
+    background: var(--org-surface);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="dark"] body.org-clinic .clinic-home-hero__highlights li {
+    background: rgba(255, 255, 255, 0.04);
+}

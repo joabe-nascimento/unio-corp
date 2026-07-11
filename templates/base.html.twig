@@ -69,7 +69,10 @@
     }
     </style>
     {% if organismo.enabled|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=36">
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=37">
+    {% if org_clinic|default(false) %}
+    <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish.css') }}?v=1">
+    {% endif %}
     {% endif %}
 
     {% block stylesheets %}{% endblock %}
@@ -78,7 +81,7 @@
     {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
-<body class="hold-transition sidebar-mini{% if not organismo.enabled|default(false) %} sidebar-collapse{% endif %} layout-fixed layout-inset-shell{% if organismo.enabled|default(false) %} unio-organismo{% endif %}"{% block body_attrs %}{% endblock %}>
+<body class="hold-transition sidebar-mini{% if not organismo.enabled|default(false) %} sidebar-collapse{% endif %} layout-fixed layout-inset-shell{% if organismo.enabled|default(false) %} unio-organismo{% endif %}{% if org_clinic|default(false) %} org-clinic{% endif %}"{% block body_attrs %}{% endblock %}>
 <script>
 (function () {
     'use strict';
