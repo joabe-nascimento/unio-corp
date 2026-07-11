@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       create_env:
-        description: 'Criar .env.local se nao existir (precisa secrets APP_SECRET_UNIOSAUDE e DATABASE_URL_UNIOSAUDE)'
+        description: 'Criar .env.local (usa secrets CLINICAUNIO ou migra do servidor legado)'
         required: false
-        default: false
+        default: true
         type: boolean
 
 jobs:
@@ -31,10 +31,18 @@ jobs:
           ssh_port: ${{ secrets.DEPLOY_SSH_PORT }}
           canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
 
-      - name: Ensure cPanel subdomain
+      - name: Subdominio cPanel + migracao legado
+        env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home2/joabef36/unio-uniosaude' }}
+          DEPLOY_PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML || '/home2/joabef36/uniosaude.uniowork.com.br' }}
+          DEFAULT_URI: ${{ vars.DEFAULT_URI || 'https://uniosaude.uniowork.com.br' }}
         run: |
+          bash scripts/ci-retry.sh scp scripts/setup-uniosaude-hostgator.sh \
+            "${DEPLOY_SSH_ALIAS}:/tmp/setup-uniosaude-hostgator.sh"
           bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
-            'uapi --output=json SubDomain addsubdomain domain=uniosaude rootdomain=uniowork.com.br dir=uniosaude.uniowork.com.br 2>&1 || true'
+            "sed -i 's/\r$//' /tmp/setup-uniosaude-hostgator.sh && chmod +x /tmp/setup-uniosaude-hostgator.sh && \
+             DEPLOY_PATH='${DEPLOY_PATH}' PUBLIC_HTML='${DEPLOY_PUBLIC_HTML}' DEFAULT_URI='${DEFAULT_URI}' \
+             bash /tmp/setup-uniosaude-hostgator.sh; rm -f /tmp/setup-uniosaude-hostgator.sh"
 
       - name: Upload and run server setup
         env:
@@ -53,8 +61,8 @@ jobs:
             printf 'UNIO_ORGANISMO_ENABLED=true\n'
             printf 'UNIO_ORGANISMO_PULSO_HOME=true\n'
             if [[ "${{ inputs.create_env }}" == "true" ]]; then
-              printf 'APP_SECRET=%s\n' "${{ secrets.APP_SECRET_UNIOSAUDE }}"
-              printf 'DATABASE_URL=%s\n' "${{ secrets.DATABASE_URL_UNIOSAUDE }}"
+              printf 'APP_SECRET=%s\n' "${{ secrets.APP_SECRET_CLINICAUNIO }}"
+              printf 'DATABASE_URL=%s\n' "${{ secrets.DATABASE_URL_CLINICAUNIO }}"
             fi
           } > "$REMOTE_ENV"
 
