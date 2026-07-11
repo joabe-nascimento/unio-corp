@@ -170,4 +170,41 @@ class PosOperatorioPacienteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findByCpfGlobal(string $cpf): ?PosOperatorioPaciente
+    {
+        $cpf = preg_replace('/\D+/', '', $cpf) ?? '';
+        if ($cpf === '' || strlen($cpf) !== 11) {
+            return null;
+        }
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.cpf = :cpf')
+            ->setParameter('cpf', $cpf)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function existsByCpf(Empresa $empresa, string $cpf, ?int $excludeId = null): bool
+    {
+        $cpf = preg_replace('/\D+/', '', $cpf) ?? '';
+        if ($cpf === '' || strlen($cpf) !== 11) {
+            return false;
+        }
+
+        $qb = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.cpf = :cpf')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('cpf', $cpf);
+
+        if ($excludeId !== null) {
+            $qb->andWhere('p.id != :excludeId')
+                ->setParameter('excludeId', $excludeId);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
 }

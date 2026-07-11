@@ -48,6 +48,9 @@ class PosOperatorioPaciente
     #[ORM\Column(length: 160)]
     private string $nome = '';
 
+    #[ORM\Column(length: 11, nullable: true)]
+    private ?string $cpf = null;
+
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $procedimento = null;
 
@@ -189,6 +192,18 @@ class PosOperatorioPaciente
     public function setNome(string $nome): static
     {
         $this->nome = $nome;
+
+        return $this;
+    }
+
+    public function getCpf(): ?string
+    {
+        return $this->cpf;
+    }
+
+    public function setCpf(?string $cpf): static
+    {
+        $this->cpf = $cpf;
 
         return $this;
     }

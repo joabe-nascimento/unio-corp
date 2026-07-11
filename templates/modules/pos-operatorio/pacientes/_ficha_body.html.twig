@@ -12,6 +12,24 @@
                         <dd><code class="admin-table-mono">{{ paciente.codigo }}</code></dd>
                     </div>
                     <div class="pos-op-detail-grid__row">
+                        <dt>CPF</dt>
+                        <dd>
+                            {% if paciente.cpf %}
+                                {{ paciente.cpf|slice(0,3) }}.{{ paciente.cpf|slice(3,3) }}.{{ paciente.cpf|slice(6,3) }}-{{ paciente.cpf|slice(9,2) }}
+                            {% else %}
+                                <span class="text-muted">Não informado</span>
+                                <button type="button"
+                                        class="btn btn-link btn-sm p-0 ml-1 align-baseline"
+                                        data-unio-offcanvas-open="pos-op-paciente-edit"
+                                        data-pos-op-paciente-edit="{{ paciente.id }}"
+                                        data-pos-op-paciente-nome="{{ paciente|pos_op_paciente_nome|e('html_attr') }}"
+                                        data-pos-op-paciente-codigo="{{ paciente.codigo|e('html_attr') }}">
+                                    Cadastrar
+                                </button>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
                         <dt>Data da cirurgia</dt>
                         <dd>{{ paciente.dataCirurgia ? paciente.dataCirurgia|date('d/m/Y') : '—' }}</dd>
                     </div>
@@ -103,6 +121,7 @@
                     {% if paciente.hasCarteirinhaAtiva() %}
                     <span class="clinic-status clinic-status--success">Emissão ativa</span>
                     <span class="text-muted small d-block mt-1">Código {{ paciente.carteirinhaVerificacao }} · válida até {{ paciente.carteirinhaValidaAte|date('d/m/Y') }}</span>
+                    <span class="text-muted small d-block">Portal: use <code>{{ paciente.codigo }}</code> + <code>{{ paciente.carteirinhaVerificacao }}</code>{% if paciente.cpf %} ou CPF cadastrado{% endif %}.</span>
                     {% else %}
                     <span class="text-muted">Nenhuma carteirinha emitida.</span>
                     {% endif %}

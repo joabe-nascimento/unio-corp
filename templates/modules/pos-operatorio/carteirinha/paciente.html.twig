@@ -69,6 +69,8 @@
             <input type="hidden" name="_token" value="{{ csrf_token('carteirinha_revogar_' ~ paciente.id) }}">
             <button type="submit" class="btn-unio-ghost btn-sm text-danger">Revogar emissão</button>
         </form>
+
+        {% include 'modules/pos-operatorio/carteirinha/_share_paciente.html.twig' %}
         {% endif %}
     </section>
 
@@ -86,6 +88,9 @@
 {{ parent() }}
 <script src="{{ asset('js/marketing-carteirinha.js') }}?v=7" defer></script>
 <script src="{{ asset('js/clinic-carteirinha-preview.js') }}?v=1" defer></script>
+{% if tem_emissao %}
+<script src="{{ asset('js/clinic-carteirinha-share.js') }}?v=1" defer></script>
+{% endif %}
 <script>
 (function () {
     document.querySelectorAll('[data-clinic-file-input]').forEach(function (input) {

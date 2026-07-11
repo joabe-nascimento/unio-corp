@@ -16,6 +16,7 @@
     document.querySelectorAll('[data-benef-form]').forEach(function (form) {
         var input = form.querySelector('[data-benef-identificador]');
         var label = form.querySelector('[data-benef-field-label]');
+        var cpfHint = form.querySelector('[data-benef-cpf-hint]');
         var methods = form.querySelectorAll('[data-benef-method]');
 
         function applyMethod(method) {
@@ -24,6 +25,9 @@
             input.placeholder = placeholders[method] || '';
             input.value = '';
             input.removeAttribute('data-cpf-mask');
+            if (cpfHint) {
+                cpfHint.hidden = method !== 'cpf';
+            }
             if (method === 'cpf') {
                 input.setAttribute('data-cpf-mask', '');
                 input.setAttribute('inputmode', 'numeric');

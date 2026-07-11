@@ -14,6 +14,13 @@
                 <input id="{{ _pfx }}nome" name="nome" class="form-control" required autocomplete="name"
                        value="{{ paciente ? paciente.nome : '' }}">
             </div>
+            <div class="form-group">
+                <label for="{{ _pfx }}cpf">CPF</label>
+                <input id="{{ _pfx }}cpf" name="cpf" class="form-control" type="text" inputmode="numeric"
+                       autocomplete="off" placeholder="000.000.000-00"
+                       value="{{ paciente and paciente.cpf ? paciente.cpf|slice(0,3) ~ '.' ~ paciente.cpf|slice(3,3) ~ '.' ~ paciente.cpf|slice(6,3) ~ '-' ~ paciente.cpf|slice(9,2) : '' }}">
+                <small class="text-muted">Usado na carteirinha digital e validação no portal do paciente.</small>
+            </div>
             <div class="form-group mb-0">
                 <label for="{{ _pfx }}data_cirurgia">Data da cirurgia *</label>
                 <input id="{{ _pfx }}data_cirurgia" name="data_cirurgia" type="date" class="form-control"

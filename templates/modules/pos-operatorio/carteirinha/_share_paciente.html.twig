@@ -1,0 +1,92 @@
+{# Dados de acesso ao portal — exibido após emissão ativa #}
+{% set portal_url = absolute_url(path('app_carteirinha_digital')) %}
+{% set cpf_fmt = paciente.cpf ? (paciente.cpf|slice(0,3) ~ '.' ~ paciente.cpf|slice(3,3) ~ '.' ~ paciente.cpf|slice(6,3) ~ '-' ~ paciente.cpf|slice(9,2)) : null %}
+{% set whatsapp_lines = [
+    'Olá ' ~ paciente.nome|split(' ')|first ~ '! Sua carteirinha digital está pronta.',
+    '',
+    'Acesse: ' ~ portal_url,
+    '',
+    'Na validação, use dois dados diferentes:',
+    '• Código do paciente: ' ~ paciente.codigo,
+    '• Código da carteirinha: ' ~ paciente.carteirinhaVerificacao,
+] %}
+{% if cpf_fmt %}
+    {% set whatsapp_lines = whatsapp_lines|merge(['• CPF (alternativa): ' ~ cpf_fmt]) %}
+{% endif %}
+{% set whatsapp_lines = whatsapp_lines|merge(['', 'Válida até ' ~ paciente.carteirinhaValidaAte|date('d/m/Y') ~ '.']) %}
+{% set whatsapp_message = whatsapp_lines|join("\n") %}
+{% set whatsapp_phone = paciente.telefoneContato|default('')|replace({' ': '', '(': '', ')': '', '-': ''}) %}
+{% set whatsapp_url = whatsapp_phone|length == 11 ? ('https://wa.me/55' ~ whatsapp_phone ~ '?text=' ~ whatsapp_message|url_encode) : null %}
+
+<section class="clinic-carteirinha-share" data-clinic-carteirinha-share>
+    <h4 class="clinic-carteirinha-share__title">
+        <i class="fas fa-paper-plane" aria-hidden="true"></i> Enviar ao paciente
+    </h4>
+    <p class="clinic-carteirinha-share__lead text-muted small">
+        Compartilhe o link e os códigos de validação. No portal, o paciente informa dois dados diferentes em duas etapas.
+    </p>
+
+    <dl class="clinic-carteirinha-share__codes">
+        <div>
+            <dt>Código do paciente</dt>
+            <dd>
+                <code>{{ paciente.codigo }}</code>
+                <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ paciente.codigo }}" title="Copiar">
+                    <i class="fas fa-copy" aria-hidden="true"></i>
+                </button>
+            </dd>
+        </div>
+        <div>
+            <dt>Código da carteirinha</dt>
+            <dd>
+                <code>{{ paciente.carteirinhaVerificacao }}</code>
+                <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ paciente.carteirinhaVerificacao }}" title="Copiar">
+                    <i class="fas fa-copy" aria-hidden="true"></i>
+                </button>
+            </dd>
+        </div>
+        {% if cpf_fmt %}
+        <div>
+            <dt>CPF cadastrado</dt>
+            <dd>
+                <code>{{ cpf_fmt }}</code>
+                <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ cpf_fmt }}" title="Copiar">
+                    <i class="fas fa-copy" aria-hidden="true"></i>
+                </button>
+            </dd>
+        </div>
+        {% else %}
+        <div class="clinic-carteirinha-share__warn">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            <span>Sem CPF no cadastro — use <strong>{{ paciente.codigo }}</strong> + <strong>{{ paciente.carteirinhaVerificacao }}</strong> no portal.</span>
+            <a href="{{ path('app_pos_operatorio_pacientes', { open_edit: paciente.id }) }}" class="btn-unio-ghost btn-sm">Cadastrar CPF</a>
+        </div>
+        {% endif %}
+    </dl>
+
+    <div class="clinic-carteirinha-share__portal">
+        <span class="clinic-carteirinha-share__portal-label">Portal do paciente</span>
+        <div class="clinic-carteirinha-share__portal-row">
+            <code class="clinic-carteirinha-share__portal-url">{{ portal_url }}</code>
+            <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ portal_url }}" title="Copiar link">
+                <i class="fas fa-copy" aria-hidden="true"></i>
+            </button>
+            <a href="{{ portal_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener">
+                Abrir <i class="fas fa-arrow-up-right-from-square ml-1" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="clinic-carteirinha-share__actions">
+        <button type="button" class="btn-unio-ghost btn-sm btn-block" data-copy-text="{{ whatsapp_message }}">
+            <i class="fas fa-copy mr-1" aria-hidden="true"></i> Copiar mensagem
+        </button>
+        {% if whatsapp_url %}
+        <a href="{{ whatsapp_url }}" class="btn-unio btn-sm btn-block" target="_blank" rel="noopener">
+            <i class="fab fa-whatsapp mr-1" aria-hidden="true"></i> Enviar no WhatsApp
+        </a>
+        {% else %}
+        <p class="text-muted small mb-0">Cadastre o telefone do paciente para habilitar envio direto no WhatsApp.</p>
+        {% endif %}
+    </div>
+</section>

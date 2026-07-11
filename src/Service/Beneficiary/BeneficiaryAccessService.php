@@ -5,6 +5,7 @@ namespace App\Service\Beneficiary;
 use App\Entity\PosOperatorioPaciente;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\Marketing\ClinicPatientProductService;
+use App\Support\BrPersonFormat;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -286,7 +287,7 @@ final class BeneficiaryAccessService
         return match ($method) {
             self::METHOD_CODIGO => array_filter([$this->pacientes->findByCodigoGlobal(strtoupper(trim($value)))]),
             self::METHOD_VERIFICACAO => array_filter([$this->pacientes->findByVerificacaoGlobal(strtoupper(trim($value)))]),
-            self::METHOD_CPF => [],
+            self::METHOD_CPF => array_filter([$this->pacientes->findByCpfGlobal($value)]),
             default => [],
         };
     }
@@ -300,12 +301,16 @@ final class BeneficiaryAccessService
         $secondary = $this->detectSecondaryMethod($secondaryValue);
         $codigo = strtoupper(trim($patient->getCodigo()));
         $verificacao = strtoupper(trim((string) $patient->getCarteirinhaVerificacao()));
+        $cpf = (string) ($patient->getCpf() ?? '');
 
         return match ($secondary) {
             self::METHOD_CODIGO => $this->valuesMatch(self::METHOD_CODIGO, $secondaryValue, $codigo)
                 && $this->primaryMatchesPatient($patient, $primaryMethod, $primaryValue),
             self::METHOD_VERIFICACAO => $verificacao !== ''
                 && $this->valuesMatch(self::METHOD_VERIFICACAO, $secondaryValue, $verificacao)
+                && $this->primaryMatchesPatient($patient, $primaryMethod, $primaryValue),
+            self::METHOD_CPF => $cpf !== ''
+                && $this->valuesMatch(self::METHOD_CPF, $secondaryValue, $cpf)
                 && $this->primaryMatchesPatient($patient, $primaryMethod, $primaryValue),
             default => false,
         };
@@ -320,6 +325,8 @@ final class BeneficiaryAccessService
                 $value,
                 (string) $patient->getCarteirinhaVerificacao(),
             ),
+            self::METHOD_CPF => $patient->getCpf() !== null
+                && $this->valuesMatch(self::METHOD_CPF, $value, $patient->getCpf()),
             default => false,
         };
     }
@@ -331,7 +338,8 @@ final class BeneficiaryAccessService
             return self::METHOD_CODIGO;
         }
 
-        if (strlen($this->digitsOnly($trim)) === 11) {
+        $digits = $this->digitsOnly($trim);
+        if (strlen($digits) === 11 && BrPersonFormat::isValidCpf($digits)) {
             return self::METHOD_CPF;
         }
 

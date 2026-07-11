@@ -20,6 +20,7 @@ use App\Entity\User;
 
 use App\PosOperatorio\PosOperatorioDisplay;
 use App\PosOperatorio\PosOperatorioTimelineFormatter;
+use App\Support\BrPersonFormat;
 
 use App\Repository\PosOperatorioPacienteRepository;
 
@@ -156,6 +157,7 @@ final class PosOperatorioPacienteService
         $this->applyProcedimentoFromProtocolo($paciente, $data);
 
         $this->applyContactExtras($paciente, $data);
+        $this->applyCpf($paciente, $empresa, $data);
 
         $this->applyDataCirurgia($paciente, (string) ($data['data_cirurgia'] ?? ''));
 
@@ -212,6 +214,7 @@ final class PosOperatorioPacienteService
         $this->applyProcedimentoFromProtocolo($paciente, $data);
 
         $this->applyContactExtras($paciente, $data);
+        $this->applyCpf($paciente, $paciente->getEmpresa(), $data);
 
         $this->applyDataCirurgia($paciente, (string) ($data['data_cirurgia'] ?? ''));
 
@@ -630,6 +633,35 @@ final class PosOperatorioPacienteService
 
         $paciente->setObservacoes(trim((string) ($data['observacoes'] ?? '')) ?: null);
 
+    }
+
+    private function applyCpf(PosOperatorioPaciente $paciente, Empresa $empresa, array $data): void
+    {
+        if (!array_key_exists('cpf', $data)) {
+            return;
+        }
+
+        $raw = trim((string) ($data['cpf'] ?? ''));
+        if ($raw === '') {
+            $paciente->setCpf(null);
+
+            return;
+        }
+
+        if (!BrPersonFormat::isValidCpf($raw)) {
+            throw new \InvalidArgumentException('CPF inválido.');
+        }
+
+        $digits = BrPersonFormat::digitsOnly($raw);
+        if ($digits === null) {
+            throw new \InvalidArgumentException('CPF inválido.');
+        }
+
+        if ($this->repository->existsByCpf($empresa, $digits, $paciente->getId())) {
+            throw new \InvalidArgumentException('Já existe paciente com este CPF na clínica.');
+        }
+
+        $paciente->setCpf($digits);
     }
 
 

@@ -466,7 +466,13 @@ final class PosOperatorioPacienteController extends AbstractController
 
         if ($paciente) {
 
-            $this->service->update($paciente, $data, $user);
+            try {
+                $this->service->update($paciente, $data, $user);
+            } catch (\InvalidArgumentException $e) {
+                $this->addFlash('error', $e->getMessage());
+
+                return $this->redirectToList($paciente, true);
+            }
 
             $this->addFlash('success', 'Paciente atualizado.');
 
@@ -478,7 +484,13 @@ final class PosOperatorioPacienteController extends AbstractController
 
 
 
-        $novo = $this->service->create($empresa, $data, $user);
+        try {
+            $novo = $this->service->create($empresa, $data, $user);
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToList(null, false);
+        }
 
         $this->addFlash('success', 'Paciente cadastrado.');
 
