@@ -36,7 +36,7 @@ class PlatformConfigService
         'logo_url'      => self::DEFAULT_LOGO_ASSET,
         'logo_full_url' => self::DEFAULT_LOGO_ASSET,
         'logo_mark_url' => '/images/logos/logo-placeholder-mark.svg',
-        'favicon_url'   => '/images/logos/favicon-placeholder.svg',
+        'favicon_url'   => '/images/logos/favicon-unio.svg',
     ];
 
     private const MIN_ASSET_BYTES = 200;
