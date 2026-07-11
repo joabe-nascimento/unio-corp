@@ -55,7 +55,8 @@ mkdir -p var/cache var/log var/sessions var/backups/db \
   public/uploads/users \
   public/uploads/chat/voice \
   public/uploads/chat/files \
-  public/uploads/config
+  public/uploads/config \
+  public/uploads/clinic/pacientes
 
 chmod -R ug+rwx var public/uploads 2>/dev/null || true
 
@@ -117,7 +118,7 @@ link_public_dir() {
 
 CI_REPORT_STEP="Symlinks public_html → unio/public"
 ci_report_step "$CI_REPORT_STEP"
-for dir in css js images vendor; do
+for dir in css js images vendor uploads; do
   link_public_dir "$dir"
 done
 

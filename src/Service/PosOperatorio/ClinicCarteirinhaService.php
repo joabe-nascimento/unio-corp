@@ -19,6 +19,7 @@ final class ClinicCarteirinhaService
     ];
 
     private const UPLOAD_DIR = 'public/uploads/clinic/pacientes';
+    private const UPLOAD_PUBLIC_PREFIX = '/uploads/clinic/pacientes/';
     private const MAX_PHOTO_BYTES = 2_097_152;
     private const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -93,7 +94,7 @@ final class ClinicCarteirinhaService
 
         $filename = sprintf('pac-%d-%s.%s', $paciente->getId(), bin2hex(random_bytes(6)), $ext);
         $file->move($dir, $filename);
-        $paciente->setFotoPath(self::UPLOAD_DIR . '/' . $filename);
+        $paciente->setFotoPath(self::UPLOAD_PUBLIC_PREFIX . $filename);
         $this->em->flush();
     }
 
@@ -210,7 +211,12 @@ final class ClinicCarteirinhaService
             return null;
         }
 
-        return '/' . ltrim(str_replace('\\', '/', $path), '/');
+        $path = str_replace('\\', '/', $path);
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, strlen('public'));
+        }
+
+        return str_starts_with($path, '/') ? $path : '/' . $path;
     }
 
     private function gerarCodigoVerificacao(Empresa $empresa): string
@@ -231,9 +237,32 @@ final class ClinicCarteirinhaService
             return;
         }
 
-        $full = $this->projectDir . '/' . ltrim($path, '/');
-        if (is_file($full)) {
+        $full = $this->resolveFotoFilesystemPath($path);
+        if ($full !== null && is_file($full)) {
             @unlink($full);
         }
+    }
+
+    private function resolveFotoFilesystemPath(string $path): ?string
+    {
+        $path = str_replace('\\', '/', $path);
+
+        if (str_starts_with($path, self::UPLOAD_PUBLIC_PREFIX)) {
+            return $this->projectDir . '/public' . $path;
+        }
+
+        if (str_starts_with($path, '/uploads/clinic/pacientes/')) {
+            return $this->projectDir . '/public' . $path;
+        }
+
+        if (str_starts_with($path, 'public/uploads/clinic/pacientes/')) {
+            return $this->projectDir . '/' . $path;
+        }
+
+        if (str_starts_with($path, self::UPLOAD_DIR . '/')) {
+            return $this->projectDir . '/' . $path;
+        }
+
+        return null;
     }
 }
