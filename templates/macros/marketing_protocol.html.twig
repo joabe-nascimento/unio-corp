@@ -1,0 +1,22 @@
+{% macro step(state, day, text) %}
+<li class="mkt-protocol-rail__step{{ state ? ' ' ~ state : '' }}">
+    <div class="mkt-protocol-rail__rail" aria-hidden="true">
+        <span class="mkt-protocol-rail__marker"></span>
+    </div>
+    <div class="mkt-protocol-rail__content">
+        <span class="mkt-protocol-rail__day">{{ day }}</span>
+        <p class="mkt-protocol-rail__text">{{ text }}</p>
+    </div>
+</li>
+{% endmacro %}
+
+{% macro timeline(title, steps, extra_class) %}
+<div class="mkt-protocol-rail{{ extra_class ? ' ' ~ extra_class : '' }}">
+    <p class="mkt-protocol-rail__title">{{ title }}</p>
+    <ol class="mkt-protocol-rail__steps">
+        {% for step in steps %}
+            {{ _self.step(step.state|default(''), step.day, step.text) }}
+        {% endfor %}
+    </ol>
+</div>
+{% endmacro %}

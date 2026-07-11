@@ -18,7 +18,7 @@ use App\Service\WorkspaceService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Unio Clínica — dashboard pós-operatório (dados reais ou preview ilustrativo).
+ * UNIO SAÚDE — dashboard pós-operatório (dados reais ou preview ilustrativo).
  */
 final class PosOperatorioService
 {

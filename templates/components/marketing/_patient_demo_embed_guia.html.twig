@@ -1,0 +1,47 @@
+{# Preview do fluxo do guia médico (após validar) #}
+{% set _card = card|default({}) %}
+{% set _access = access|default({}) %}
+
+<div class="mkt-home-patient-products__demo mkt-home-guia-embed mkt-patient-demo-embed">
+    <div class="mkt-home-patient-embed__top">
+        <ol class="mkt-home-patient-embed__steps" aria-label="Etapas de acesso">
+            <li class="{{ active_step|default(1) == 1 ? 'is-active' : '' }}"><span>1</span> Identificação</li>
+            <li class="{{ active_step|default(1) >= 2 ? 'is-active' : '' }}"><span>2</span> Confirmação</li>
+        </ol>
+
+        <div class="mkt-home-patient-embed__access" aria-label="Códigos de demonstração">
+            <p class="mkt-home-patient-embed__access-label">Acesso de demonstração</p>
+            <dl class="mkt-home-patient-embed__access-codes">
+                <div>
+                    <dt>CPF</dt>
+                    <dd><code>{{ _access.cpf_masked|default('529.982.247-25') }}</code></dd>
+                </div>
+                <div>
+                    <dt>Código</dt>
+                    <dd><code>{{ _access.codigo|default('PO-0042') }}</code></dd>
+                </div>
+                <div>
+                    <dt>Carteirinha</dt>
+                    <dd><code>{{ _access.verificacao|default('PM-24K9X7Q1') }}</code></dd>
+                </div>
+            </dl>
+            <p class="mkt-home-patient-embed__access-hint">Use dois dados diferentes — ex.: CPF + código, ou CPF + carteirinha.</p>
+        </div>
+    </div>
+
+    <div class="mkt-home-patient-embed__preview">
+        <div class="mkt-home-guia-mock" aria-hidden="true">
+            <p class="mkt-home-guia-mock__label">Após validar, você vê:</p>
+            <div class="mkt-home-guia-mock__hero">
+                <span class="mkt-home-guia-mock__phase">Fase intermediária</span>
+                <strong class="mkt-home-guia-mock__name">{{ _card.nome|default('Ana Costa') }}</strong>
+                <span class="mkt-home-guia-mock__meta">{{ _card.procedimento|default('Herniorrafia inguinal') }} · D+{{ _card.dia_pos|default(3) }}</span>
+            </div>
+            <ol class="mkt-home-guia-mock__timeline">
+                <li class="is-done"><span>D+1</span> Repouso e analgesia</li>
+                <li class="is-current"><span>D+3</span> Curativo e mobilização</li>
+                <li><span>D+7</span> Retorno ambulatorial</li>
+            </ol>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,38 @@
+{# Fila unificada — centro de operações clínica #}
+{% set _items = items|default(queue.items|default([])) %}
+{% set _compact = compact|default(false) %}
+{% if _compact %}
+{% set _items = _items|slice(0, 5) %}
+{% endif %}
+
+<section class="clinic-work-queue{% if _compact %} clinic-work-queue--compact{% endif %}">
+    {% if _items is empty %}
+    <div class="clinic-work-queue__empty unio-card">
+        <span class="org-icon org-icon--md org-icon--sage" aria-hidden="true"><i class="fas fa-circle-check"></i></span>
+        <div>
+            <strong>Tudo em dia</strong>
+            <p>Nenhum item urgente na fila agora.</p>
+        </div>
+    </div>
+    {% else %}
+    <ol class="clinic-work-queue__list">
+        {% for item in _items %}
+        <li class="clinic-work-queue__item unio-card">
+            <div class="clinic-work-queue__type clinic-work-queue__type--{{ item.tone|default('sky') }}">
+                {{ item.type_label }}
+            </div>
+            <div class="clinic-work-queue__main">
+                <strong class="clinic-work-queue__title">{{ item.title }}</strong>
+                <p class="clinic-work-queue__subtitle">{{ item.subtitle }}</p>
+                <span class="clinic-work-queue__meta">{{ item.meta }}</span>
+            </div>
+            <div class="clinic-work-queue__action">
+                <a href="{{ path(item.route, item.route_params|default({})) }}" class="btn-unio btn-sm">
+                    {{ item.action_label|default('Abrir') }}
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ol>
+    {% endif %}
+</section>

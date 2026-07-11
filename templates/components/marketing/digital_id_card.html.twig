@@ -1,0 +1,48 @@
+{# Carteirinha digital — formato horizontal (cartão de identidade) #}
+{% set card = card|default({}) %}
+{% set theme = theme|default('essencial') %}
+
+{% if static|default(false) %}
+<div class="mkt-idcard-static-sheet">
+    <div class="mkt-idcard-static-block mkt-idcard-static-block--front">
+        <div class="mkt-idcard mkt-idcard--landscape mkt-idcard--{{ theme }} mkt-idcard-static">
+            <div class="mkt-idcard__face mkt-idcard__face--front">
+                {% include 'components/marketing/_digital_id_card_front.html.twig' %}
+            </div>
+        </div>
+    </div>
+    <div class="mkt-idcard-static-block mkt-idcard-static-block--back">
+        <div class="mkt-idcard mkt-idcard--landscape mkt-idcard--{{ theme }} mkt-idcard-static">
+            <div class="mkt-idcard__face mkt-idcard__face--back">
+                {% include 'components/marketing/_digital_id_card_back.html.twig' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="mkt-idcard-widget" data-idcard-widget>
+    <div class="mkt-idcard-widget__tabs" role="tablist" aria-label="Lados da carteirinha">
+        <button type="button" class="is-active" role="tab" aria-selected="true" data-idcard-tab="frente">Frente</button>
+        <button type="button" role="tab" aria-selected="false" data-idcard-tab="verso">Verso</button>
+    </div>
+
+    <div class="mkt-idcard-widget__scene">
+        <button type="button"
+                class="mkt-idcard mkt-idcard--landscape mkt-idcard--{{ theme }}"
+                data-idcard-flip
+                aria-label="Carteira digital. Toque para ver o verso."
+                aria-pressed="false">
+            <span class="mkt-idcard__face mkt-idcard__face--front" data-idcard-face="frente">
+                {% include 'components/marketing/_digital_id_card_front.html.twig' %}
+            </span>
+            <span class="mkt-idcard__face mkt-idcard__face--back" data-idcard-face="verso">
+                {% include 'components/marketing/_digital_id_card_back.html.twig' %}
+            </span>
+        </button>
+    </div>
+    <p class="mkt-idcard-widget__flip-hint">
+        <i class="fas fa-rotate" aria-hidden="true"></i>
+        Toque no cartão para ver frente e verso
+    </p>
+</div>
+{% endif %}

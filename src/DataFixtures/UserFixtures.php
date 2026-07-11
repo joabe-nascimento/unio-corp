@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Dev\DevSeedEmails;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -14,12 +15,12 @@ class UserFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $users = [
-            ['nome' => 'Tenant Master',       'email' => 'tenant@unio.dev',     'perfil' => 'TENANT'],
-            ['nome' => 'Gestor Oliveira',      'email' => 'gestor@unio.dev',     'perfil' => 'GESTOR'],
-            ['nome' => 'Gestor Equipe Costa',  'email' => 'gestor.eq@unio.dev',  'perfil' => 'GESTOR_EQUIPE'],
-            ['nome' => 'Supervisor Geral',     'email' => 'supervisor@unio.dev', 'perfil' => 'SUPERVISOR'],
-            ['nome' => 'Supervisor Equipe',    'email' => 'sup.eq@unio.dev',     'perfil' => 'SUPERVISOR_EQUIPE'],
-            ['nome' => 'Membro Santos',        'email' => 'membro@unio.dev',     'perfil' => 'MEMBRO'],
+            ['nome' => 'Joabe Nascimento',    'email' => DevSeedEmails::JOABE,     'perfil' => 'TENANT'],
+            ['nome' => 'Renata Oliveira',     'email' => DevSeedEmails::RENATA,    'perfil' => 'GESTOR'],
+            ['nome' => 'Ricardo Costa',       'email' => DevSeedEmails::RICARDO,   'perfil' => 'GESTOR_EQUIPE'],
+            ['nome' => 'Ana Paula Ribeiro',   'email' => DevSeedEmails::ANA_PAULA, 'perfil' => 'SUPERVISOR'],
+            ['nome' => 'Felipe Martins',      'email' => DevSeedEmails::FELIPE,    'perfil' => 'SUPERVISOR_EQUIPE'],
+            ['nome' => 'Lucas Santos',        'email' => DevSeedEmails::LUCAS,     'perfil' => 'MEMBRO'],
         ];
 
         foreach ($users as $data) {

@@ -47,8 +47,8 @@ class PlatformConfigService
     // ── Defaults ──────────────────────────────────────────────────────
 
     private const DEFAULTS = [
-        'plataforma_nome'     => 'Unio',
-        'plataforma_tagline'  => 'Pessoas. Processos. Resultados.',
+        'plataforma_nome'     => 'Unio Saúde',
+        'plataforma_tagline'  => 'Cuidado que continua.',
         'logo_url'            => '',
         'logo_mark_url'       => '',
         'logo_full_url'       => '',

@@ -1,0 +1,44 @@
+name: Setup Production (server)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+
+    env:
+      DEPLOY_SSH_ALIAS: hg-deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH HostGator
+        uses: ./.github/actions/hostgator-ssh
+        with:
+          ssh_key: ${{ secrets.DEPLOY_SSH_KEY }}
+          ssh_host: ${{ secrets.DEPLOY_SSH_HOST }}
+          ssh_user: ${{ secrets.DEPLOY_SSH_USER }}
+          ssh_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          canonical_host: ${{ vars.DEPLOY_SSH_CANONICAL_HOST }}
+
+      - name: Upload and run production setup
+        env:
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home2/joabef36/unio' }}
+          PUBLIC_HTML: ${{ vars.DEPLOY_PUBLIC_HTML || '/home2/joabef36/public_html' }}
+          DEFAULT_URI: https://uniowork.com.br
+        run: |
+          bash scripts/ci-retry.sh scp scripts/setup-production-hostgator.sh scripts/setup-product-env-server.sh \
+            "${DEPLOY_SSH_ALIAS}:/tmp/"
+
+          bash scripts/ci-retry.sh ssh "${DEPLOY_SSH_ALIAS}" \
+            'sed -i "s/\r$//" /tmp/setup-production-hostgator.sh /tmp/setup-product-env-server.sh && \
+             chmod +x /tmp/setup-production-hostgator.sh && \
+             DEPLOY_PATH='"'"'${{ vars.DEPLOY_PATH || '/home2/joabef36/unio' }}'"'"' \
+             PUBLIC_HTML='"'"'${{ vars.DEPLOY_PUBLIC_HTML || '/home2/joabef36/public_html' }}'"'"' \
+             bash /tmp/setup-production-hostgator.sh; \
+             rm -f /tmp/setup-production-hostgator.sh /tmp/setup-product-env-server.sh; \
+             ls -la "$DEPLOY_PATH/.env.local" 2>/dev/null; ls -la "$PUBLIC_HTML/index.php" 2>/dev/null'

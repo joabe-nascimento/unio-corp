@@ -9,78 +9,11 @@
 {% set hub_show_tabs = false %}
 
 {% block hub_content %}
-<section class="unio-card p-4" style="max-width: 640px;">
-    <form method="post">
+<section class="unio-card p-4" style="max-width: 720px;">
+    <form method="post" data-clinic-paciente-form>
         <input type="hidden" name="_token" value="{{ csrf_token('pos_op_paciente') }}">
 
-        <div class="form-group">
-            <label for="nome">Nome completo *</label>
-            <input id="nome" name="nome" class="form-control" required value="{{ paciente ? paciente.nome : '' }}">
-        </div>
-
-        <div class="form-group">
-            <label for="procedimento">Procedimento</label>
-            <input id="procedimento" name="procedimento" class="form-control" value="{{ paciente ? paciente.procedimento : '' }}">
-        </div>
-
-        <div class="form-group">
-            <label for="data_cirurgia">Data da cirurgia</label>
-            <input id="data_cirurgia" name="data_cirurgia" type="date" class="form-control"
-                   value="{{ paciente and paciente.dataCirurgia ? paciente.dataCirurgia|date('Y-m-d') : '' }}">
-        </div>
-
-        <div class="form-group">
-            <label for="telefone">Telefone de contato</label>
-            <input id="telefone" name="telefone" class="form-control" value="{{ paciente ? paciente.telefoneContato : '' }}">
-        </div>
-
-        <div class="form-group">
-            <label for="protocolo_id">Protocolo</label>
-            <select id="protocolo_id" name="protocolo_id" class="form-control">
-                <option value="">— Selecione —</option>
-                {% for pr in protocolos %}
-                <option value="{{ pr.id }}"{{ paciente and paciente.protocolo and paciente.protocolo.id == pr.id ? ' selected' : '' }}>
-                    {{ pr.nome }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="medico_id">Médico responsável</label>
-            <select id="medico_id" name="medico_id" class="form-control">
-                <option value="">— Selecione —</option>
-                {% for m in medicos %}
-                <option value="{{ m.id }}"{{ paciente and paciente.medicoResponsavel and paciente.medicoResponsavel.id == m.id ? ' selected' : '' }}>
-                    {{ m.nome }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="portal_user_id">Usuário do portal (login do paciente)</label>
-            <select id="portal_user_id" name="portal_user_id" class="form-control">
-                <option value="">— Nenhum —</option>
-                {% for u in portal_users %}
-                <option value="{{ u.id }}"{{ paciente and paciente.portalUser and paciente.portalUser.id == u.id ? ' selected' : '' }}>
-                    {{ u.nome }} ({{ u.email }})
-                </option>
-                {% endfor %}
-            </select>
-            <small class="text-muted">Este usuário acessa o questionário em /pos-operatorio/portal</small>
-        </div>
-
-        {% if paciente %}
-        <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" name="status" class="form-control">
-                {% for st in ['ativo', 'pendente', 'encerrado'] %}
-                <option value="{{ st }}"{{ paciente.status == st ? ' selected' : '' }}>{{ st|capitalize }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        {% endif %}
+        {% include 'modules/pos-operatorio/pacientes/_form_fields.html.twig' %}
 
         <div class="d-flex gap-2 mt-4">
             <button type="submit" class="btn-unio">Salvar</button>
@@ -88,6 +21,11 @@
         </div>
     </form>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/clinic-paciente-form.js') }}?v=1" defer></script>
 {% endblock %}
 
 {% block body_attrs %}{% if not org_clinic|default(false) %} data-active-hub="pos_operatorio"{% endif %}{% endblock %}

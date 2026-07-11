@@ -437,7 +437,7 @@ class PermissionService
             ],
         ],
         'hub_pos_operatorio' => [
-            'label' => 'Unio Clínica',
+            'label' => 'Unio Saúde',
             'subtitle' => 'Acompanhamento clínico pós-cirúrgico',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
@@ -824,7 +824,7 @@ class PermissionService
         ],
         [
             'id' => 'hub_pos_operatorio',
-            'label' => 'Unio Clínica',
+            'label' => 'Unio Saúde',
             'scope' => 'hub_pos_operatorio',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],

@@ -1,0 +1,49 @@
+{# Guia médico — demonstração pública #}
+{% import 'macros/marketing_protocol.html.twig' as protocol %}
+{% set guia = guia|default({}) %}
+
+<section class="mkt-guia-product" aria-label="{{ guia.titulo|default('Guia médico') }}">
+    <header class="mkt-guia-product__head">
+        <div>
+            <p class="mkt-section-eyebrow">Produto independente</p>
+            <h1 class="mkt-guia-product__title">{{ guia.titulo }}</h1>
+            <p class="mkt-guia-product__sub">{{ guia.subtitulo }}</p>
+        </div>
+        <span class="mkt-guia-product__phase">{{ guia.fase_label }}</span>
+    </header>
+
+    <p class="mkt-guia-product__phase-desc">{{ guia.fase_descricao }}</p>
+
+    {% if guia.procedimento|default(null) %}
+    <p class="mkt-guia-product__proc"><strong>Procedimento:</strong> {{ guia.procedimento }}</p>
+    {% endif %}
+
+    <div class="mkt-guia-product__layout">
+        {% if guia.marco_steps|default([])|length > 0 %}
+        <article class="mkt-guia-product__card">
+            {{ protocol.timeline('Marcos típicos', guia.marco_steps, 'mkt-protocol-rail--compact mkt-protocol-rail--patient') }}
+        </article>
+        {% endif %}
+
+        {% if guia.orientacoes|default([])|length > 0 %}
+        <article class="mkt-guia-product__card">
+            <h2 class="mkt-guia-product__card-label">Orientações desta fase</h2>
+            <ul class="mkt-guia-product__tips">
+                {% for dica in guia.orientacoes %}
+                <li>{{ dica }}</li>
+                {% endfor %}
+            </ul>
+        </article>
+        {% endif %}
+
+        <article class="mkt-guia-product__card mkt-guia-product__card--alert">
+            <h2 class="mkt-guia-product__card-label">Quando procurar ajuda</h2>
+            <ul class="mkt-guia-product__alerts">
+                {% for sinal in guia.sinais_alerta|default([]) %}
+                <li><i class="fas fa-circle-exclamation" aria-hidden="true"></i>{{ sinal }}</li>
+                {% endfor %}
+            </ul>
+            <p class="mkt-guia-product__contact">{{ guia.contato_rapido }}</p>
+        </article>
+    </div>
+</section>

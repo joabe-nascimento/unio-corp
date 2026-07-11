@@ -1,71 +1,159 @@
 {# Campos compartilhados — formulário paciente (offcanvas / partial) #}
 {% set _pfx = field_prefix|default('') %}
+{% set _clinic = org_clinic|default(false) %}
+{% set _selected_protocol = paciente and paciente.protocolo ? paciente.protocolo.id : null %}
 
-<div class="form-group">
-    <label for="{{ _pfx }}nome">Nome completo *</label>
-    <input id="{{ _pfx }}nome" name="nome" class="form-control" required value="{{ paciente ? paciente.nome : '' }}">
-</div>
+<div class="clinic-paciente-form" data-clinic-paciente-form>
+    <div class="clinic-paciente-form__sections">
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-user-injured" aria-hidden="true"></i> Identificação
+            </legend>
+            <div class="form-group">
+                <label for="{{ _pfx }}nome">Nome completo *</label>
+                <input id="{{ _pfx }}nome" name="nome" class="form-control" required autocomplete="name"
+                       value="{{ paciente ? paciente.nome : '' }}">
+            </div>
+            <div class="form-group mb-0">
+                <label for="{{ _pfx }}data_cirurgia">Data da cirurgia *</label>
+                <input id="{{ _pfx }}data_cirurgia" name="data_cirurgia" type="date" class="form-control"
+                       {{ not paciente ? 'required' : '' }}
+                       max="{{ 'now'|date('Y-m-d') }}"
+                       value="{{ paciente and paciente.dataCirurgia ? paciente.dataCirurgia|date('Y-m-d') : '' }}">
+            </div>
+        </fieldset>
 
-<div class="form-group">
-    <label for="{{ _pfx }}procedimento">Procedimento</label>
-    <input id="{{ _pfx }}procedimento" name="procedimento" class="form-control" value="{{ paciente ? paciente.procedimento : '' }}">
-</div>
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-phone" aria-hidden="true"></i> Contato
+            </legend>
+            <div class="row">
+                <div class="col-md-6 form-group mb-md-0">
+                    <label for="{{ _pfx }}telefone">Telefone/WhatsApp</label>
+                    <input id="{{ _pfx }}telefone" name="telefone" class="form-control" type="tel" inputmode="tel"
+                           placeholder="(00) 00000-0000"
+                           value="{{ paciente ? paciente.telefoneContato : '' }}">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}email_contato">E-mail do paciente</label>
+                    <input id="{{ _pfx }}email_contato" name="email_contato" class="form-control" type="email" autocomplete="email"
+                           placeholder="paciente@email.com"
+                           value="{{ paciente ? paciente.emailContato : '' }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 form-group mb-md-0">
+                    <label for="{{ _pfx }}contato_emergencia">Contato de emergência</label>
+                    <input id="{{ _pfx }}contato_emergencia" name="contato_emergencia" class="form-control"
+                           placeholder="Nome do familiar ou responsável"
+                           value="{{ paciente ? paciente.contatoEmergencia : '' }}">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}telefone_emergencia">Telefone de emergência</label>
+                    <input id="{{ _pfx }}telefone_emergencia" name="telefone_emergencia" class="form-control" type="tel"
+                           placeholder="(00) 00000-0000"
+                           value="{{ paciente ? paciente.telefoneEmergencia : '' }}">
+                </div>
+            </div>
+        </fieldset>
 
-<div class="form-group">
-    <label for="{{ _pfx }}data_cirurgia">Data da cirurgia</label>
-    <input id="{{ _pfx }}data_cirurgia" name="data_cirurgia" type="date" class="form-control"
-           value="{{ paciente and paciente.dataCirurgia ? paciente.dataCirurgia|date('Y-m-d') : '' }}">
-</div>
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-notes-medical" aria-hidden="true"></i> Observações clínicas
+            </legend>
+            <div class="form-group mb-0">
+                <label for="{{ _pfx }}observacoes" class="sr-only">Observações clínicas</label>
+                <textarea id="{{ _pfx }}observacoes" name="observacoes" class="form-control" rows="3"
+                          placeholder="Alergias, comorbidades, orientações pós-alta, medicamentos em uso…">{{ paciente ? paciente.observacoes : '' }}</textarea>
+            </div>
+        </fieldset>
 
-<div class="form-group">
-    <label for="{{ _pfx }}telefone">Telefone de contato</label>
-    <input id="{{ _pfx }}telefone" name="telefone" class="form-control" value="{{ paciente ? paciente.telefoneContato : '' }}">
-</div>
+        <details class="clinic-form-advanced">
+            <summary>Equipe e portal do paciente</summary>
+            <div class="clinic-form-advanced__body">
+                <div class="form-group">
+                    <label for="{{ _pfx }}medico_id">Médico responsável</label>
+                    <select id="{{ _pfx }}medico_id" name="medico_id" class="form-control">
+                        <option value="">— Selecione —</option>
+                        {% for m in medicos %}
+                        <option value="{{ m.id }}"{{ (paciente and paciente.medicoResponsavel and paciente.medicoResponsavel.id == m.id) or (not paciente and current_user_id|default(null) == m.id) ? ' selected' : '' }}>
+                            {{ m.nome }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Padrão: você ({{ app.user.nome|split(' ')|first }})</small>
+                </div>
+                <div class="form-group mb-0">
+                    <label for="{{ _pfx }}portal_user_id">Login no portal do paciente</label>
+                    <select id="{{ _pfx }}portal_user_id" name="portal_user_id" class="form-control">
+                        <option value="">— Vincular depois —</option>
+                        {% for u in portal_users %}
+                        <option value="{{ u.id }}"{{ paciente and paciente.portalUser and paciente.portalUser.id == u.id ? ' selected' : '' }}>
+                            {{ u.nome }} ({{ u.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Opcional no cadastro — o paciente pode responder questionários diários pelo portal.</small>
+                </div>
+            </div>
+        </details>
 
-<div class="form-group">
-    <label for="{{ _pfx }}protocolo_id">Protocolo</label>
-    <select id="{{ _pfx }}protocolo_id" name="protocolo_id" class="form-control">
-        <option value="">— Selecione —</option>
-        {% for pr in protocolos %}
-        <option value="{{ pr.id }}"{{ paciente and paciente.protocolo and paciente.protocolo.id == pr.id ? ' selected' : '' }}>
-            {{ pr.nome }}
-        </option>
-        {% endfor %}
-    </select>
-</div>
+        <fieldset class="clinic-form-section clinic-form-section--procedimento">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-file-medical" aria-hidden="true"></i> Procedimento
+            </legend>
+            <div class="form-group mb-0">
+                <label for="{{ _pfx }}protocolo_id">Procedimento *</label>
+                <select id="{{ _pfx }}protocolo_id" name="protocolo_id" class="form-control" data-clinic-protocol-select
+                        {{ not paciente ? 'required' : '' }}>
+                    <option value="">— Selecione o procedimento —</option>
+                    {% for pr in protocolos %}
+                    <option value="{{ pr.id }}"
+                            data-procedimento="{{ pr.nome|e('html_attr') }}"
+                            data-dias="{{ pr.duracaoDias }}"
+                            data-checklist="{{ pr.checklist|length }}"
+                            {{ _selected_protocol == pr.id ? ' selected' : '' }}>
+                        {{ pr.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if protocolos is empty %}
+                <small class="text-danger d-block mt-1">
+                    Nenhum protocolo ativo.
+                    <a href="{{ path('app_pos_operatorio_protocolo_novo') }}">Criar protocolo</a>
+                </small>
+                {% else %}
+                <small class="text-muted">Lista baseada nos protocolos cadastrados — vincula checklist e alertas automaticamente.</small>
+                {% endif %}
+                <input type="hidden" id="{{ _pfx }}procedimento" name="procedimento"
+                       value="{{ paciente ? paciente.procedimento : '' }}">
+            </div>
+        </fieldset>
 
-<div class="form-group">
-    <label for="{{ _pfx }}medico_id">Médico responsável</label>
-    <select id="{{ _pfx }}medico_id" name="medico_id" class="form-control">
-        <option value="">— Selecione —</option>
-        {% for m in medicos %}
-        <option value="{{ m.id }}"{{ paciente and paciente.medicoResponsavel and paciente.medicoResponsavel.id == m.id ? ' selected' : '' }}>
-            {{ m.nome }}
-        </option>
-        {% endfor %}
-    </select>
-</div>
+        <div class="clinic-paciente-preview unio-card" id="{{ _pfx }}paciente-preview" hidden>
+            <div class="clinic-paciente-preview__head">
+                <span class="org-icon org-icon--sm org-icon--sky" aria-hidden="true"><i class="fas fa-heart-pulse"></i></span>
+                <div>
+                    <strong class="clinic-paciente-preview__title">Resumo do acompanhamento</strong>
+                    <p class="clinic-paciente-preview__sub" data-clinic-preview-phase>Selecione procedimento e data da cirurgia</p>
+                </div>
+            </div>
+            <dl class="clinic-paciente-preview__metrics">
+                <div><dt>Fase atual</dt><dd data-clinic-preview-dia>—</dd></div>
+                <div><dt>Duração</dt><dd data-clinic-preview-dias>—</dd></div>
+                <div><dt>Marcos</dt><dd data-clinic-preview-marcos>—</dd></div>
+            </dl>
+        </div>
 
-<div class="form-group">
-    <label for="{{ _pfx }}portal_user_id">Usuário do portal (login do paciente)</label>
-    <select id="{{ _pfx }}portal_user_id" name="portal_user_id" class="form-control">
-        <option value="">— Nenhum —</option>
-        {% for u in portal_users %}
-        <option value="{{ u.id }}"{{ paciente and paciente.portalUser and paciente.portalUser.id == u.id ? ' selected' : '' }}>
-            {{ u.nome }} ({{ u.email }})
-        </option>
-        {% endfor %}
-    </select>
-    <small class="text-muted">Este usuário acessa o questionário no Portal do Paciente</small>
+        {% if paciente %}
+        <div class="form-group">
+            <label for="{{ _pfx }}status">Status do acompanhamento</label>
+            <select id="{{ _pfx }}status" name="status" class="form-control">
+                {% for st in ['ativo', 'pendente', 'encerrado'] %}
+                <option value="{{ st }}"{{ paciente.status == st ? ' selected' : '' }}>{{ st|capitalize }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+    </div>
 </div>
-
-{% if paciente %}
-<div class="form-group">
-    <label for="{{ _pfx }}status">Status</label>
-    <select id="{{ _pfx }}status" name="status" class="form-control">
-        {% for st in ['ativo', 'pendente', 'encerrado'] %}
-        <option value="{{ st }}"{{ paciente.status == st ? ' selected' : '' }}>{{ st|capitalize }}</option>
-        {% endfor %}
-    </select>
-</div>
-{% endif %}

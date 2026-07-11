@@ -2,6 +2,7 @@
 
 namespace App\Tests\Service;
 
+use App\Dev\DevSeedEmails;
 use App\Repository\UserRepository;
 use App\Security\ProductGrantAccess;
 use App\Service\Organismo\OrganismoFeature;
@@ -27,7 +28,7 @@ class SystemValidationServiceTest extends KernelTestCase
             self::markTestSkipped('Banco indisponível para testes de integração — configure .env.test.local ou .env.local.');
         }
 
-        if (!$this->users->findOneBy(['email' => 'gestor@unio.dev'])) {
+        if (!$this->users->findOneBy(['email' => DevSeedEmails::RENATA])) {
             self::markTestSkipped('Seed ausente — execute app:seed-users antes dos testes de integração.');
         }
     }
@@ -47,7 +48,7 @@ class SystemValidationServiceTest extends KernelTestCase
 
     public function testMembroCannotCreateMemberRoute(): void
     {
-        $user = $this->users->findOneBy(['email' => 'membro@unio.dev']);
+        $user = $this->users->findOneBy(['email' => DevSeedEmails::LUCAS]);
         self::assertNotNull($user);
 
         $grants = static::getContainer()->get(ProductGrantAccess::class);
@@ -56,7 +57,7 @@ class SystemValidationServiceTest extends KernelTestCase
 
     public function testGestorCanManagePessoasPermissions(): void
     {
-        $user = $this->users->findOneBy(['email' => 'gestor@unio.dev']);
+        $user = $this->users->findOneBy(['email' => DevSeedEmails::RENATA]);
         self::assertNotNull($user);
 
         $permissions = static::getContainer()->get(\App\Service\PermissionService::class);
@@ -65,9 +66,9 @@ class SystemValidationServiceTest extends KernelTestCase
 
     public function testTenantHasActiveClinic(): void
     {
-        $user = $this->users->findOneBy(['email' => 'tenant@unio.dev']);
+        $user = $this->users->findOneBy(['email' => DevSeedEmails::JOABE]);
         if (!$user) {
-            self::markTestSkipped('tenant@unio.dev não encontrado no seed.');
+            self::markTestSkipped(DevSeedEmails::JOABE . ' não encontrado no seed.');
         }
 
         $workspace = static::getContainer()->get(\App\Service\WorkspaceService::class);

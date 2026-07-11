@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Dev\DevSeedEmails;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Security\ProductGrantAccess;
@@ -14,21 +15,21 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 final class SystemValidationService
 {
     private const SEED_EMAILS = [
-        'tenant@unio.dev',
-        'gestor@unio.dev',
-        'membro@unio.dev',
-        'supervisor@unio.dev',
+        DevSeedEmails::JOABE,
+        DevSeedEmails::RENATA,
+        DevSeedEmails::LUCAS,
+        DevSeedEmails::ANA_PAULA,
     ];
 
     /** @var array<string, array<string, bool>> */
     private const ROUTE_EXPECTATIONS = [
-        'membro@unio.dev' => [
+        DevSeedEmails::LUCAS => [
             'app_pessoas' => true,
             'app_pessoas_membro_novo' => false,
             'app_core_projetos' => false,
             'app_core_tarefa_nova' => false,
         ],
-        'gestor@unio.dev' => [
+        DevSeedEmails::RENATA => [
             'app_pessoas' => true,
             'app_pessoas_membro_novo' => true,
             'app_core_projetos' => true,
@@ -36,13 +37,13 @@ final class SystemValidationService
             'app_core_tarefa_editar' => true,
             'app_core_tarefa_excluir' => true,
         ],
-        'supervisor@unio.dev' => [
+        DevSeedEmails::ANA_PAULA => [
             'app_pessoas' => true,
             'app_pessoas_membro_novo' => false,
             'app_core_projetos' => true,
             'app_core_tarefa_nova' => true,
         ],
-        'tenant@unio.dev' => [
+        DevSeedEmails::JOABE => [
             'app_core_projetos' => true,
             'app_pessoas_membro_novo' => true,
         ],
@@ -87,7 +88,7 @@ final class SystemValidationService
 
         $missingSeeds = [];
         foreach (self::SEED_EMAILS as $email) {
-            if (!$this->userRepo->findOneBy(['email' => $email])) {
+            if (!$this->findSeedUser($email)) {
                 $missingSeeds[] = $email;
             }
         }
@@ -100,7 +101,7 @@ final class SystemValidationService
 
         if (!$this->organismo->isEnabled()) {
             foreach (self::ROUTE_EXPECTATIONS as $email => $routes) {
-                $user = $this->userRepo->findOneBy(['email' => $email]);
+                $user = $this->findSeedUser($email);
                 if (!$user) {
                     continue;
                 }
@@ -121,52 +122,52 @@ final class SystemValidationService
                 }
             }
 
-            $membro = $this->userRepo->findOneBy(['email' => 'membro@unio.dev']);
+            $membro = $this->findSeedUser(DevSeedEmails::LUCAS);
             if ($membro) {
                 $this->authenticateAs($membro);
                 if ($this->permissions->canManagePermissions($membro)) {
-                    $failures[] = 'membro@unio.dev não deve gerenciar permissões globais';
+                    $failures[] = DevSeedEmails::LUCAS . ' não deve gerenciar permissões globais';
                 }
                 if ($this->grants->grantAtLeast($membro, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
-                    $failures[] = 'membro@unio.dev não deve criar membros';
+                    $failures[] = DevSeedEmails::LUCAS . ' não deve criar membros';
                 }
                 if ($this->navigation->showProjetosMetas($membro)) {
-                    $failures[] = 'membro@unio.dev não deve ver Projetos e Metas';
+                    $failures[] = DevSeedEmails::LUCAS . ' não deve ver Projetos e Metas';
                 }
             }
 
-            $gestor = $this->userRepo->findOneBy(['email' => 'gestor@unio.dev']);
+            $gestor = $this->findSeedUser(DevSeedEmails::RENATA);
             if ($gestor) {
                 $this->authenticateAs($gestor);
                 if (!$this->permissions->canManagePermissions($gestor, 'product_pessoas')) {
-                    $failures[] = 'gestor@unio.dev deve gerenciar permissões em Pessoas';
+                    $failures[] = DevSeedEmails::RENATA . ' deve gerenciar permissões em Pessoas';
                 }
                 if (!$this->grants->grantAtLeast($gestor, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
-                    $failures[] = 'gestor@unio.dev deve poder criar membros';
+                    $failures[] = DevSeedEmails::RENATA . ' deve poder criar membros';
                 }
             }
 
-            $tenant = $this->userRepo->findOneBy(['email' => 'tenant@unio.dev']);
+            $tenant = $this->findSeedUser(DevSeedEmails::JOABE);
             if ($tenant) {
                 $empresas = $this->workspace->getAvailableEmpresas($tenant);
                 if (\count($empresas) < 2) {
-                    $failures[] = 'tenant@unio.dev deve ver múltiplas empresas no workspace';
+                    $failures[] = DevSeedEmails::JOABE . ' deve ver múltiplas empresas no workspace';
                 } else {
-                    $reports[] = sprintf('Tenant workspace: %d empresas', \count($empresas));
+                    $reports[] = sprintf('Workspace multi-clínica: %d empresas', \count($empresas));
                 }
             }
 
             $gestorEmpresas = $gestor ? $this->workspace->getAvailableEmpresas($gestor) : [];
             if ($gestor && \count($gestorEmpresas) !== 1) {
-                $failures[] = 'gestor@unio.dev deve ter exatamente 1 empresa no workspace';
+                $failures[] = DevSeedEmails::RENATA . ' deve ter exatamente 1 empresa no workspace';
             }
 
             if ($gestor && !$this->navigation->showProjetosMetas($gestor)) {
-                $failures[] = 'gestor@unio.dev deve ver navegação Projetos e Metas';
+                $failures[] = DevSeedEmails::RENATA . ' deve ver navegação Projetos e Metas';
             }
         } else {
-            foreach (['tenant@unio.dev', 'gestor@unio.dev'] as $email) {
-                $user = $this->userRepo->findOneBy(['email' => $email]);
+            foreach ([DevSeedEmails::JOABE, DevSeedEmails::RENATA] as $email) {
+                $user = $this->findSeedUser($email);
                 if (!$user) {
                     continue;
                 }
@@ -208,6 +209,23 @@ final class SystemValidationService
     private const ORGANISMO_CORE_ROUTES = [
         'app_pulso',
     ];
+
+    private function findSeedUser(string $email): ?User
+    {
+        $user = $this->userRepo->findOneBy(['email' => $email]);
+        if ($user instanceof User) {
+            return $user;
+        }
+
+        $legacy = DevSeedEmails::LEGACY[$email] ?? null;
+        if ($legacy === null) {
+            return null;
+        }
+
+        $legacyUser = $this->userRepo->findOneBy(['email' => $legacy]);
+
+        return $legacyUser instanceof User ? $legacyUser : null;
+    }
 
     private function authenticateAs(User $user): void
     {

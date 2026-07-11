@@ -7,17 +7,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organismo.copy.brand_name|default('Unio Clínica') }} — {{ organismo.copy.marketing_tagline|default('Cuidado que continua.') }}</title>
-    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio Clínica') }} — {{ organismo.copy.marketing_tagline|default('Cuidado que continua.') }}">
+    <title>{{ organismo.copy.brand_name|default('Unio Saúde') }} | {{ organismo.copy.marketing_tagline|default('Cuidado que continua.') }}</title>
+    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio Saúde') }} | {{ organismo.copy.marketing_tagline|default('Cuidado que continua.') }}">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=16">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=17">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
     {% if org_clinic|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=30">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=25">
+    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=22">
     {% endif %}
     <style>
     /* ── Clínica overrides ── */
@@ -33,18 +35,17 @@
     .mkt-hero-v2-orb--cyan { background: radial-gradient(circle at 40% 50%, rgba(75,114,190,.18) 0%, transparent 70%) !important; }
     .mkt-hero-v2-orb--indigo { background: radial-gradient(circle at 60% 50%, rgba(100,149,237,.14) 0%, transparent 70%) !important; }
 
-    /* Preview sidebar — azul clínico */
+    /* Preview sidebar, azul clínico */
     .mkt-preview-nav-item--active { background: #4b72be !important; color: #fff !important; }
     .mkt-preview-kpi--accent { color: #4b72be !important; }
     .mkt-preview-module--highlight { border-color: #4b72be !important; background: #eaf0fb !important; }
     .mkt-preview-module--highlight i { color: #4b72be !important; }
 
     /* Feature icons */
-    .mkt-feature-icon { background: #eaf0fb !important; color: #4b72be !important; }
-    .mkt-hub-icon { background: #eaf0fb !important; color: #4b72be !important; }
-    .mkt-pillar-icon { background: #eaf0fb !important; color: #4b72be !important; }
-    .mkt-metric-icon { background: #eaf0fb !important; color: #4b72be !important; }
-    .mkt-metric-card--accent { border-top-color: #4b72be !important; }
+    .mkt-feature-icon { display: none !important; }
+    .mkt-pillar-icon { display: none !important; }
+    .mkt-metric-icon { display: none !important; }
+    .mkt-metric-card--accent { background: var(--surface-2) !important; border-color: var(--border) !important; }
     .mkt-metric-card--accent .mkt-metric-val { color: #4b72be !important; }
     .mkt-bar-fill { background: #4b72be !important; }
     .mkt-outcome-val { color: #4b72be !important; }
@@ -77,20 +78,28 @@
     </style>
 </head>
 <body class="marketing-home mkt-v2{% if org_clinic|default(false) %} mkt-clinic{% endif %}">
+{% import 'macros/marketing_protocol.html.twig' as protocol %}
 
 <header class="mkt-header mkt-header--v2">
     <div class="mkt-header-inner mkt-header-inner--v2">
-        <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ organismo.copy.brand_name|default('Unio Clínica') }}">
+        <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ organismo.copy.brand_name|default('Unio Saúde') }}">
             {% include 'components/platform_logo.html.twig' with {
                 variant: 'full',
                 class: 'mkt-logo mkt-logo--v2' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
             } only %}
         </a>
-        <nav class="mkt-nav mkt-nav--v2" aria-label="Navegação principal">
+        <nav class="mkt-nav mkt-nav--v2 mkt-nav--clinic-products" aria-label="Navegação principal">
+            {% if org_clinic|default(false) %}
+            {% include 'components/marketing/clinic_product_nav.html.twig' with { mkt_nav_active: 'home' } only %}
+            {% else %}
             <a href="#recursos">Recursos</a>
+            <a href="#modulos">Módulos</a>
             <a href="#funcionalidades">Funcionalidades</a>
             <a href="#como-funciona">Como funciona</a>
+            {% endif %}
+            {% if not org_clinic|default(false) %}
             <a href="#faq">FAQ</a>
+            {% endif %}
         </nav>
         <div class="mkt-header-actions mkt-header-actions--v2">
             <button type="button" class="mkt-theme-btn mkt-theme-btn--v2" id="guestThemeToggle" title="Alternar tema" aria-label="Alternar tema">
@@ -128,22 +137,25 @@
                     {{ organismo.copy.hero_title|default('Acompanhamento pós-cirúrgico') }}{% if organismo.copy.hero_title_accent|default('') %}, <span class="mkt-gradient-text">{{ organismo.copy.hero_title_accent }}</span>{% endif %}
                 </h1>
                 <p class="mkt-hero-lead mkt-hero-lead--v2">
-                    {{ organismo.copy.hero_desc|default('Unio Clínica reúne cadastro de pacientes, protocolos de recuperação, alertas clínicos e questionários de acompanhamento.') }}
+                    {{ organismo.copy.hero_desc|default('Unio Saúde reúne cadastro de pacientes, protocolos de recuperação, alertas clínicos e questionários de acompanhamento.') }}
                 </p>
                 <div class="mkt-hero-cta mkt-hero-cta--v2">
                     <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">
                         Acessar plataforma
                         <i class="fas fa-arrow-right" aria-hidden="true"></i>
                     </a>
-                    {% if platform_config.registro_publico ?? true %}
+                    {% if org_clinic|default(false) %}
+                    <a href="#experiencia-paciente" class="mkt-btn mkt-btn--surface mkt-btn--lg">Ver carteirinha e guia</a>
+                    {% elseif platform_config.registro_publico ?? true %}
                     <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--surface mkt-btn--lg">Criar conta</a>
                     {% endif %}
                 </div>
                 <div class="mkt-hero-chips">
                     {% if org_clinic|default(false) %}
                     <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
-                    <span class="mkt-hero-chip"><i class="fas fa-bed-pulse" aria-hidden="true"></i> Pós-operatório</span>
-                    <span class="mkt-hero-chip"><i class="fas fa-bell" aria-hidden="true"></i> Alertas em tempo real</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-id-card" aria-hidden="true"></i> Carteirinha digital</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-book-medical" aria-hidden="true"></i> Guia médico</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-user-nurse" aria-hidden="true"></i> Pós-operatório</span>
                     {% else %}
                     <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
                     <span class="mkt-hero-chip"><i class="fas fa-code" aria-hidden="true"></i> Sites &amp; sistemas</span>
@@ -157,7 +169,7 @@
                         <span class="mkt-preview-dot mkt-preview-dot--r"></span>
                         <span class="mkt-preview-dot mkt-preview-dot--y"></span>
                         <span class="mkt-preview-dot mkt-preview-dot--g"></span>
-                        <span class="mkt-preview-url">uniowork.com.br{% if org_clinic|default(false) %} — clínica{% else %} — studio{% endif %}</span>
+                        <span class="mkt-preview-url">uniowork.com.br{% if org_clinic|default(false) %}, clínica{% else %}, studio{% endif %}</span>
                     </div>
                     <div class="mkt-preview-layout">
                         <div class="mkt-preview-sidebar">
@@ -193,17 +205,17 @@
                                     <i class="fas fa-user-injured" aria-hidden="true"></i>
                                     <div><strong>Pacientes</strong><span>Recuperação e acompanhamento</span></div>
                                 </div>
-                                <div class="mkt-preview-module">
-                                    <i class="fas fa-bed-pulse" aria-hidden="true"></i>
-                                    <div><strong>Sala Crítica</strong><span>Monitoramento contínuo</span></div>
-                                </div>
-                                <div class="mkt-preview-module">
-                                    <i class="fas fa-file-medical" aria-hidden="true"></i>
-                                    <div><strong>Protocolos</strong><span>Guias clínicos ativos</span></div>
-                                </div>
                                 <div class="mkt-preview-module mkt-preview-module--highlight">
-                                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
-                                    <div><strong>Vitória</strong><span>Copiloto clínico</span></div>
+                                    <i class="fas fa-id-card" aria-hidden="true"></i>
+                                    <div><strong>Carteirinha</strong><span>Identidade digital com foto</span></div>
+                                </div>
+                                <div class="mkt-preview-module">
+                                    <i class="fas fa-book-medical" aria-hidden="true"></i>
+                                    <div><strong>Guia médico</strong><span>Orientações por fase D+n</span></div>
+                                </div>
+                                <div class="mkt-preview-module">
+                                    <i class="fas fa-bell" aria-hidden="true"></i>
+                                    <div><strong>Alertas</strong><span>Fila P1–P4 com SLA</span></div>
                                 </div>
                                 {% else %}
                                 <div class="mkt-preview-module">
@@ -234,6 +246,20 @@
     {# ── Faixa de confiança ── #}
     <div class="mkt-pro-strip" aria-label="Diferenciais clínicos">
         <div class="mkt-pro-strip-inner">
+            {% if org_clinic|default(false) %}
+            <div class="mkt-pro-badge">
+                <i class="fas fa-id-card" aria-hidden="true"></i>
+                <div><strong>Carteirinha digital</strong><span>Foto, QR e validação</span></div>
+            </div>
+            <div class="mkt-pro-badge">
+                <i class="fas fa-book-medical" aria-hidden="true"></i>
+                <div><strong>Guia médico</strong><span>Orientações no portal</span></div>
+            </div>
+            <div class="mkt-pro-badge">
+                <i class="fas fa-user-nurse" aria-hidden="true"></i>
+                <div><strong>Pós-operatório</strong><span>Protocolos e alertas</span></div>
+            </div>
+            {% else %}
             <div class="mkt-pro-badge">
                 <i class="fas fa-shield-halved" aria-hidden="true"></i>
                 <div><strong>LGPD conforme</strong><span>Dados de saúde protegidos</span></div>
@@ -242,6 +268,7 @@
                 <i class="fas fa-heart-pulse" aria-hidden="true"></i>
                 <div><strong>Pós-operatório</strong><span>Do procedimento à alta</span></div>
             </div>
+            {% endif %}
             <div class="mkt-pro-badge">
                 <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
                 <div><strong>Alertas em tempo real</strong><span>Notificações críticas imediatas</span></div>
@@ -257,6 +284,511 @@
         </div>
     </div>
 
+    {% if org_clinic|default(false) %}
+    {% include 'components/marketing/landing_patient_products.html.twig' %}
+    {% endif %}
+
+    {% if org_clinic|default(false) %}
+    {# ── Spotlight visual (referência editorial) ── #}
+    <section class="mkt-rich-spotlight mkt-reveal" aria-labelledby="mkt-spotlight-title">
+        <div class="mkt-rich-spotlight__grid">
+            <div class="mkt-rich-spotlight__copy">
+                <p class="mkt-section-eyebrow">Acompanhamento contínuo</p>
+                <h2 id="mkt-spotlight-title">Cuidado que não termina na sala de cirurgia</h2>
+                <p>
+                    Assim como clínicas de referência investem na jornada completa do paciente,
+                    a {{ organismo.copy.brand_name|default('Unio Saúde') }} conecta equipe e paciente
+                    do procedimento à alta, com protocolos, alertas e portal em tempo real.
+                </p>
+                <ul class="mkt-rich-spotlight__list mkt-rich-spotlight__list--clean">
+                    <li>Monitoramento diário com questionários inteligentes</li>
+                    <li>Alertas P1–P4 com SLA e fila de triagem</li>
+                    <li>Portal do paciente responsivo, sem app</li>
+                </ul>
+                <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">
+                    Conhecer a plataforma <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div class="mkt-rich-spotlight__visual mkt-reveal mkt-reveal--delay-1" aria-hidden="true">
+                <div class="mkt-spotlight-board">
+                    <details class="mkt-rich-day-card mkt-rich-day-card--interactive">
+                        <summary class="mkt-rich-day-card__summary">
+                            <div class="mkt-rich-day-card__head">
+                                <strong>Resumo do dia</strong>
+                                <span>11/07/2026</span>
+                            </div>
+                            <div class="mkt-rich-day-card__stats">
+                                <div><strong>42</strong><span>Pacientes ativos</span></div>
+                                <div><strong>89%</strong><span>Questionários</span></div>
+                                <div><strong>2</strong><span>Em triagem</span></div>
+                            </div>
+                            <span class="mkt-rich-day-card__cta">Ver insights</span>
+                        </summary>
+                        <div class="mkt-day-insight mkt-day-insight--compact">
+                            <ul>
+                                <li>97% dos protocolos em dia, 3 pendências de D+3 aguardando resposta.</li>
+                                <li>SLA médio P1 em 12 min; fila com João Pereira e Maria Silva.</li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    <div class="mkt-spotlight-board__chips">
+                        <span>97% protocolos OK</span>
+                        <span class="is-warn">2 alertas em triagem</span>
+                    </div>
+
+                    <div class="mkt-spotlight-board__main">
+                        {{ protocol.timeline('Linha do protocolo', [
+                            {state: 'is-done', day: 'D+1', text: 'Checklist inicial'},
+                            {state: 'is-current', day: 'D+3', text: 'Questionário respondido'},
+                            {state: '', day: 'D+7', text: 'Retorno ambulatorial'},
+                        ], 'mkt-protocol-rail--compact') }}
+                        <div class="mkt-spotlight-board__metrics">
+                            <div><strong>12 min</strong><span>SLA médio P1</span></div>
+                            <div><strong>6</strong><span>Retornos hoje</span></div>
+                            <div><strong>100%</strong><span>LGPD OK</span></div>
+                        </div>
+                    </div>
+
+                    <div class="mkt-spotlight-board__patient">
+                        <img class="mkt-spotlight-board__avatar" src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=120&q=80" alt="" width="44" height="44" loading="lazy">
+                        <div class="mkt-spotlight-board__patient-body">
+                            <strong>João Pereira · D+3 · Herniorrafia</strong>
+                            <span>Dor 3/10 · Sem febre · Renata Oliveira acompanha</span>
+                            <div class="mkt-spotlight-board__tags">
+                                <span>Risco baixo</span>
+                                <span>Portal ativo</span>
+                                <span>LGPD OK</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── Módulos principais (cards visuais) ── #}
+    <section class="mkt-rich-modules" id="modulos" aria-labelledby="mkt-modules-title">
+        <div class="mkt-rich-modules__head mkt-reveal">
+            <p class="mkt-section-eyebrow">Centro clínico integrado</p>
+            <h2 id="mkt-modules-title">Pós-operatório, carteirinha e guia no dia a dia</h2>
+            <p class="mkt-section-sub">Módulos modulares: use tudo junto ou só o que sua clínica precisa.</p>
+        </div>
+        <div class="mkt-rich-modules__grid mkt-rich-modules__grid--six">
+            <a href="{{ path('app_login') }}" class="mkt-rich-module-card mkt-reveal">
+                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
+                <div class="mkt-rich-module-card__body">
+                    <strong>Pacientes</strong>
+                    <span>Ficha, evolução e histórico completo</span>
+                </div>
+            </a>
+            <a href="{{ path('app_login') }}" class="mkt-rich-module-card mkt-reveal mkt-reveal--delay-1">
+                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
+                <div class="mkt-rich-module-card__body">
+                    <strong>Sala Crítica</strong>
+                    <span>Monitoramento intensivo em tempo real</span>
+                </div>
+            </a>
+            <a href="{{ path('app_carteirinha_digital') }}" class="mkt-rich-module-card mkt-reveal mkt-reveal--delay-2">
+                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1584515935687-48fd4ac045fb?auto=format&fit=crop&w=800&h=600&q=80" alt="" loading="lazy" width="800" height="600">
+                <div class="mkt-rich-module-card__body">
+                    <span class="mkt-rich-module-card__icon"><i class="fas fa-id-card" aria-hidden="true"></i></span>
+                    <strong>Carteirinha digital</strong>
+                    <span>Identidade com foto e validação</span>
+                </div>
+            </a>
+            <a href="{{ path('app_guia_medico_beneficiario') }}" class="mkt-rich-module-card mkt-reveal mkt-reveal--delay-3">
+                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
+                <div class="mkt-rich-module-card__body">
+                    <span class="mkt-rich-module-card__icon"><i class="fas fa-book-medical" aria-hidden="true"></i></span>
+                    <strong>Guia médico</strong>
+                    <span>Orientações e sinais de alerta</span>
+                </div>
+            </a>
+            <a href="{{ path('app_login') }}" class="mkt-rich-module-card mkt-reveal">
+                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
+                <div class="mkt-rich-module-card__body">
+                    <strong>Alertas inteligentes</strong>
+                    <span>Fila P1–P4, SLA e triagem clínica</span>
+                </div>
+            </a>
+            <a href="{{ path('app_login') }}" class="mkt-rich-module-card mkt-reveal mkt-reveal--delay-1">
+                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
+                <div class="mkt-rich-module-card__body">
+                    <strong>Relatórios &amp; LGPD</strong>
+                    <span>Exportação CSV, auditoria e consentimento</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    {# ── Equipe médica × Portal do paciente ── #}
+    <section class="mkt-rich-journey" id="equipe-paciente" aria-labelledby="mkt-journey-title">
+        <div class="mkt-rich-journey__head mkt-reveal">
+            <p class="mkt-section-eyebrow">Dois lados, uma jornada</p>
+            <h2 id="mkt-journey-title">O que cada um enxerga na plataforma</h2>
+            <p class="mkt-section-sub">Resumos do dia, linha do protocolo e informações clínicas, sem ruído visual.</p>
+        </div>
+        <div class="mkt-rich-journey__grid">
+            <article class="mkt-rich-journey-panel mkt-reveal">
+                <div class="mkt-rich-journey-panel__photo mkt-rich-journey-panel__photo--team" style="background-image:url('https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=900&q=80')" aria-hidden="true"></div>
+                <div class="mkt-rich-journey-panel__body">
+                    <span class="mkt-rich-journey-panel__badge">Equipe médica</span>
+                    <h3>Painel clínico completo</h3>
+
+                    <details class="mkt-rich-day-card mkt-rich-day-card--interactive">
+                        <summary class="mkt-rich-day-card__summary">
+                            <div class="mkt-rich-day-card__head">
+                                <strong>Resumo do dia</strong>
+                                <span>11/07/2026</span>
+                            </div>
+                            <div class="mkt-rich-day-card__stats">
+                                <div><strong>3</strong><span>Alertas abertos</span></div>
+                                <div><strong>42</strong><span>Pacientes ativos</span></div>
+                                <div><strong>89%</strong><span>Questionários</span></div>
+                            </div>
+                            <span class="mkt-rich-day-card__cta">Ver insights</span>
+                        </summary>
+                        <div class="mkt-day-insight">
+                            <p class="mkt-day-insight__lead">Panorama operacional de hoje na clínica:</p>
+                            <ul>
+                                <li><strong>P1 ativo:</strong> João Pereira, dor 8/10 há 6 min; Renata Oliveira assumiu triagem.</li>
+                                <li><strong>Engajamento:</strong> 89% dos questionários D+3 respondidos antes das 18h.</li>
+                                <li><strong>Retornos:</strong> 6 consultas D+7 confirmadas para amanhã.</li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    {{ protocol.timeline('Fila de triagem', [
+                        {state: 'is-current', day: 'P1', text: 'João Pereira, dor 8/10 · há 6 min'},
+                        {state: '', day: 'P2', text: 'Maria Silva, D+3 pendente'},
+                        {state: 'is-done', day: 'P3', text: 'Retorno D+7 confirmado'},
+                    ], '') }}
+
+                    <ul class="mkt-rich-journey-panel__features">
+                        <li>Ficha com procedimento, D+n e médico responsável</li>
+                        <li>Sala crítica, triagem e exportação CSV</li>
+                        <li>Trilha LGPD e consentimento versionado</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="mkt-rich-journey-panel mkt-rich-journey-panel--patient mkt-reveal mkt-reveal--delay-1">
+                <div class="mkt-rich-journey-panel__photo mkt-rich-journey-panel__photo--patient" style="background-image:url('https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&w=900&q=80')" aria-hidden="true"></div>
+                <div class="mkt-rich-journey-panel__body">
+                    <span class="mkt-rich-journey-panel__badge mkt-rich-journey-panel__badge--patient">Portal do paciente</span>
+                    <h3>Acompanhamento no celular</h3>
+
+                    <details class="mkt-rich-day-card mkt-rich-day-card--patient mkt-rich-day-card--interactive">
+                        <summary class="mkt-rich-day-card__summary">
+                            <div class="mkt-rich-day-card__head">
+                                <strong>Resumo do dia</strong>
+                                <span>D+3 · Herniorrafia</span>
+                            </div>
+                            <div class="mkt-rich-day-card__stats">
+                                <div><strong>Enviado</strong><span>Questionário</span></div>
+                                <div><strong>3/10</strong><span>Dor</span></div>
+                                <div><strong>Baixo</strong><span>Risco</span></div>
+                            </div>
+                            <span class="mkt-rich-day-card__cta">Ver insights</span>
+                        </summary>
+                        <div class="mkt-day-insight mkt-day-insight--patient">
+                            <p class="mkt-day-insight__lead">O que João Pereira vê no portal hoje:</p>
+                            <ul>
+                                <li><strong>Questionário D+3</strong> respondido às 09:14, dor 3/10, sem febre.</li>
+                                <li><strong>Próximo passo:</strong> retirada de curativo orientada; retorno D+7 em 11/07.</li>
+                                <li><strong>Contato:</strong> botão de ajuda disponível se sintomas piorarem.</li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    {{ protocol.timeline('Linha do protocolo', [
+                        {state: 'is-done', day: 'D+1', text: 'Repouso relativo'},
+                        {state: 'is-current', day: 'D+3', text: 'Retirada de curativo'},
+                        {state: '', day: 'D+7', text: 'Retorno ambulatorial'},
+                    ], 'mkt-protocol-rail--patient') }}
+
+                    <ul class="mkt-rich-journey-panel__features">
+                        <li>Acesso por link, sem instalar aplicativo</li>
+                        <li>Questionário diário e histórico de respostas</li>
+                        <li>Contato com a clínica quando necessário</li>
+                    </ul>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    {# ── Antes × Depois ── #}
+    <section class="mkt-rich-compare mkt-reveal" id="antes-depois" aria-labelledby="mkt-compare-title">
+        <div class="mkt-rich-compare__head">
+            <p class="mkt-section-eyebrow">Transformação operacional</p>
+            <h2 id="mkt-compare-title">Do improviso ao acompanhamento estruturado</h2>
+            <p class="mkt-section-sub">O que muda quando a clínica centraliza pós-operatório, alertas e portal do paciente.</p>
+        </div>
+        <div class="mkt-rich-compare__grid">
+            <article class="mkt-rich-compare__col mkt-rich-compare__col--before">
+                <h3>Antes</h3>
+                <ul>
+                    <li>Planilha paralela e ligações individuais</li>
+                    <li>Alertas no grupo de WhatsApp, sem prioridade</li>
+                    <li>Retorno D+7 dependendo da memória da equipe</li>
+                    <li>Sem histórico unificado de questionários</li>
+                    <li>LGPD e auditoria difíceis de comprovar</li>
+                </ul>
+            </article>
+            <article class="mkt-rich-compare__col mkt-rich-compare__col--after">
+                <h3>Com {{ organismo.copy.brand_name|default('Unio Saúde') }}</h3>
+                <ul>
+                    <li>Questionários automáticos por marco D+n</li>
+                    <li>Fila P1 a P4 com SLA e triagem clínica</li>
+                    <li>Linha de protocolo rastreável por paciente</li>
+                    <li>Portal do paciente com histórico de respostas</li>
+                    <li>Trilha LGPD, consentimento e exportação CSV</li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    {# ── Casos por procedimento ── #}
+    <section class="mkt-rich-procedures" id="casos-procedimento" aria-labelledby="mkt-proc-title">
+        <div class="mkt-rich-procedures__head mkt-reveal">
+            <p class="mkt-section-eyebrow">Protocolos reais</p>
+            <h2 id="mkt-proc-title">Cada cirurgia com marcos, questionários e alertas próprios</h2>
+            <p class="mkt-section-sub">Não é um fluxo genérico: o sistema adapta etapas e regras por tipo de procedimento.</p>
+        </div>
+        <div class="mkt-rich-procedures__grid">
+            <article class="mkt-rich-procedure-card mkt-reveal">
+                <div class="mkt-rich-procedure-card__photo" style="background-image:url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=700&q=80')" aria-hidden="true"></div>
+                <div class="mkt-rich-procedure-card__body">
+                    <h3>Herniorrafia</h3>
+                    <p>Recuperação ambulatorial com foco em dor, febre e sinais de complicação local.</p>
+                </div>
+                <div class="mkt-rich-procedure-card__protocol">
+                    {{ protocol.timeline('Marcos típicos', [
+                        {state: 'is-done', day: 'D+1', text: 'Repouso e analgesia'},
+                        {state: 'is-current', day: 'D+3', text: 'Curativo e mobilização'},
+                        {state: '', day: 'D+7', text: 'Retorno ambulatorial'},
+                    ], 'mkt-protocol-rail--compact') }}
+                </div>
+                <div class="mkt-rich-procedure-card__footer">
+                    <ul class="mkt-rich-procedure-card__alerts">
+                        <li><strong>P1:</strong> dor 8/10 ou febre persistente</li>
+                        <li><strong>P2:</strong> questionário D+3 pendente</li>
+                    </ul>
+                </div>
+            </article>
+            <article class="mkt-rich-procedure-card mkt-reveal mkt-reveal--delay-1">
+                <div class="mkt-rich-procedure-card__photo" style="background-image:url('https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=700&q=80')" aria-hidden="true"></div>
+                <div class="mkt-rich-procedure-card__body">
+                    <h3>Apendicectomia</h3>
+                    <p>Monitoramento de dor abdominal, aceitação alimentar e sinais de infecção.</p>
+                </div>
+                <div class="mkt-rich-procedure-card__protocol">
+                    {{ protocol.timeline('Marcos típicos', [
+                        {state: 'is-done', day: 'D+1', text: 'Dieta e deambulação'},
+                        {state: 'is-current', day: 'D+3', text: 'Avaliação de dor'},
+                        {state: '', day: 'D+7', text: 'Retirada de pontos'},
+                    ], 'mkt-protocol-rail--compact') }}
+                </div>
+                <div class="mkt-rich-procedure-card__footer">
+                    <ul class="mkt-rich-procedure-card__alerts">
+                        <li><strong>P1:</strong> dor intensa ou vômitos repetidos</li>
+                        <li><strong>P3:</strong> atraso no retorno D+7</li>
+                    </ul>
+                </div>
+            </article>
+            <article class="mkt-rich-procedure-card mkt-reveal mkt-reveal--delay-2">
+                <div class="mkt-rich-procedure-card__photo" style="background-image:url('https://images.unsplash.com/photo-1551601651-2a8555f1a136?auto=format&fit=crop&w=700&q=80')" aria-hidden="true"></div>
+                <div class="mkt-rich-procedure-card__body">
+                    <h3>Colecistectomia</h3>
+                    <p>Acompanhamento de náusea, dor em hipocôndrio e recuperação de atividades.</p>
+                </div>
+                <div class="mkt-rich-procedure-card__protocol">
+                    {{ protocol.timeline('Marcos típicos', [
+                        {state: 'is-done', day: 'D+1', text: 'Repouso relativo'},
+                        {state: 'is-current', day: 'D+3', text: 'Retorno gradual'},
+                        {state: '', day: 'D+14', text: 'Alta monitorada'},
+                    ], 'mkt-protocol-rail--compact') }}
+                </div>
+                <div class="mkt-rich-procedure-card__footer">
+                    <ul class="mkt-rich-procedure-card__alerts">
+                        <li><strong>P2:</strong> náusea persistente após D+2</li>
+                        <li><strong>P4:</strong> lembrete de retorno D+14</li>
+                    </ul>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    {# ── Gestão clínica ── #}
+    <section class="mkt-rich-management" id="pos-operatorio" aria-labelledby="mkt-mgmt-title">
+        <div class="mkt-rich-management__inner mkt-reveal">
+            <div class="mkt-rich-management__copy">
+                <p class="mkt-section-eyebrow">Visão da diretoria</p>
+                <h2 id="mkt-mgmt-title">Gestão clínica com indicadores que importam</h2>
+                <p>Taxa de aderência, SLA de alertas e reinternações evitadas em um painel único para reuniões e tomada de decisão.</p>
+                <ul class="mkt-rich-management__list">
+                    <li>Exportação CSV de alertas, questionários e auditoria</li>
+                    <li>Comparativo semanal de aderência por procedimento</li>
+                    <li>Indicadores prontos para reunião clínica mensal</li>
+                </ul>
+            </div>
+            <div class="mkt-rich-management__panel">
+                <details class="mkt-rich-day-card mkt-rich-day-card--interactive">
+                    <summary class="mkt-rich-day-card__summary">
+                        <div class="mkt-rich-day-card__head">
+                            <strong>Resumo do mês</strong>
+                            <span>Julho/2026</span>
+                        </div>
+                        <div class="mkt-rich-day-card__stats">
+                            <div><strong>91%</strong><span>Aderência</span></div>
+                            <div><strong>−38%</strong><span>Reinternações</span></div>
+                            <div><strong>11 min</strong><span>SLA médio</span></div>
+                        </div>
+                        <span class="mkt-rich-day-card__cta">Ver insights</span>
+                    </summary>
+                    <div class="mkt-day-insight">
+                        <p class="mkt-day-insight__lead">Destaques para a gestão:</p>
+                        <ul>
+                            <li>Herniorrafia lidera aderência com 94% de questionários no prazo.</li>
+                            <li>2 alertas P1 no mês, ambos resolvidos dentro do SLA.</li>
+                            <li>42 pacientes ativos, 6 altas programadas para esta semana.</li>
+                        </ul>
+                    </div>
+                </details>
+                <div class="mkt-rich-management__kpis">
+                    <div><strong>6</strong><span>Procedimentos monitorados</span></div>
+                    <div><strong>100%</strong><span>Consentimentos LGPD</span></div>
+                    <div><strong>4.9</strong><span>Satisfação paciente</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── Operação em tempo real ── #}
+    <section class="mkt-rich-live" id="operacao-tempo-real" aria-labelledby="mkt-live-title">
+        <div class="mkt-rich-live__head mkt-reveal">
+            <p class="mkt-section-eyebrow">Operação ao vivo</p>
+            <h2 id="mkt-live-title">O que a clínica enxerga agora</h2>
+            <p class="mkt-section-sub">Indicadores ilustrativos de uma operação ativa, atualizados em tempo real no painel.</p>
+        </div>
+        <div class="mkt-rich-live__strip mkt-reveal">
+            <div class="mkt-rich-live__stat">
+                <strong class="mkt-live-pulse" data-live="42">42</strong>
+                <span>Pacientes ativos</span>
+            </div>
+            <div class="mkt-rich-live__stat">
+                <strong class="mkt-live-pulse" data-live="89">89%</strong>
+                <span>Questionários hoje</span>
+            </div>
+            <div class="mkt-rich-live__stat">
+                <strong class="mkt-live-pulse" data-live="2">2</strong>
+                <span>Em triagem</span>
+            </div>
+            <div class="mkt-rich-live__stat">
+                <strong class="mkt-live-pulse" data-live="12">12 min</strong>
+                <span>SLA médio P1</span>
+            </div>
+            <div class="mkt-rich-live__stat">
+                <strong class="mkt-live-pulse" data-live="97">97%</strong>
+                <span>Protocolos OK</span>
+            </div>
+        </div>
+        <div class="mkt-rich-live__queue mkt-reveal mkt-reveal--delay-1">
+            <p class="mkt-rich-live__queue-title">Fila agora</p>
+            <ul>
+                <li><span class="mkt-rich-live__pri mkt-rich-live__pri--p1">P1</span> João Pereira · dor 8/10 · há 6 min</li>
+                <li><span class="mkt-rich-live__pri mkt-rich-live__pri--p2">P2</span> Maria Silva · D+3 pendente · há 2 h</li>
+                <li><span class="mkt-rich-live__pri">P3</span> Retorno D+7 confirmado · há 4 h</li>
+            </ul>
+        </div>
+    </section>
+
+    {# ── Por que escolher ── #}
+    <section class="mkt-rich-why" aria-labelledby="mkt-why-title">
+        <div class="mkt-rich-why__inner">
+            <div class="mkt-section-head mkt-reveal">
+                <p class="mkt-section-eyebrow">Motivos de sobra</p>
+                <h2 class="mkt-section-title" id="mkt-why-title">Por que clínicas escolhem a {{ organismo.copy.brand_name|default('Unio Saúde') }}</h2>
+            </div>
+            <div class="mkt-rich-why__grid">
+                <article class="mkt-rich-why-card mkt-reveal">
+                    <h3>Experiência clínica</h3>
+                    <p>Fluxos pensados para pós-operatório, protocolos, marcos e questionários por dia D+n.</p>
+                </article>
+                <article class="mkt-rich-why-card mkt-reveal mkt-reveal--delay-1">
+                    <h3>Segurança</h3>
+                    <p>Dados de saúde isolados por clínica, consentimento LGPD e trilha de auditoria completa.</p>
+                </article>
+                <article class="mkt-rich-why-card mkt-reveal mkt-reveal--delay-2">
+                    <h3>Qualidade</h3>
+                    <p>Indicadores de aderência, SLA de alertas e relatórios exportáveis para gestão.</p>
+                </article>
+                <article class="mkt-rich-why-card mkt-reveal mkt-reveal--delay-3">
+                    <h3>Satisfação</h3>
+                    <p>Portal engaja o paciente; a equipe responde antes da complicação se agravar.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    {# ── Case União Médica + números de impacto ── #}
+    <section class="mkt-rich-numbers mkt-reveal" aria-label="Case União Médica e indicadores da plataforma">
+        <div class="mkt-rich-numbers__inner">
+            <div class="mkt-rich-numbers__lead">
+                <div class="mkt-rich-numbers__client">
+                    <div class="mkt-rich-numbers__client-logos">
+                        <img
+                            class="mkt-rich-numbers__client-logo"
+                            src="{{ asset('images/logos/uniao-medica.jpg') }}"
+                            alt="União Médica"
+                            width="220"
+                            height="64"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                        <img
+                            class="mkt-rich-numbers__client-logo mkt-rich-numbers__client-logo--unef"
+                            src="{{ asset('images/logos/unef-horizontal-branca.png') }}"
+                            alt="UNEF — Centro Universitário de Feira de Santana"
+                            width="180"
+                            height="48"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </div>
+                    <span class="mkt-rich-numbers__client-badge">Cases reais</span>
+                </div>
+                <h2>A {{ organismo.copy.brand_name|default('Unio Saúde') }} é mais</h2>
+                <p>Mais visibilidade para a equipe. Mais segurança para o paciente. Mais controle para a gestão.</p>
+                <p class="mkt-rich-numbers__case">Já desenvolvemos para a União Médica de Feira de Santana e para a UNEF de Feira de Santana — em saúde e educação.</p>
+            </div>
+            <div class="mkt-rich-numbers__stat">
+                <span class="mkt-rich-numbers__stat-val"><span class="mkt-count" data-to="100">0</span>%</span>
+                <span class="mkt-rich-numbers__stat-label">Rastreabilidade</span>
+            </div>
+            <div class="mkt-rich-numbers__stat">
+                <span class="mkt-rich-numbers__stat-val">24/7</span>
+                <span class="mkt-rich-numbers__stat-label">Monitoramento</span>
+            </div>
+            <div class="mkt-rich-numbers__stat">
+                <span class="mkt-rich-numbers__stat-val">−50%</span>
+                <span class="mkt-rich-numbers__stat-label">Reinternações*</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="mkt-rich-cta-band mkt-reveal">
+        <div class="mkt-rich-cta-band__inner">
+            <div>
+                <h3>Pronto para estruturar seu pós-operatório?</h3>
+                <p>Acesse a plataforma, cadastre pacientes e ative protocolos em minutos.</p>
+            </div>
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">Quero conhecer a plataforma</a>
+        </div>
+    </div>
+    {% endif %}
+
     {# ── Métricas ── #}
     <div class="mkt-section-wrap mkt-section-wrap--alt">
     <section class="mkt-section mkt-section--metrics" id="metricas" aria-labelledby="mkt-metrics-title">
@@ -265,33 +797,39 @@
                 <p class="mkt-section-eyebrow">Plataforma em números</p>
                 <h2 class="mkt-section-title" id="mkt-metrics-title">Uma clínica mais segura, mais conectada</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Acompanhamento contínuo, protocolos estruturados e alertas inteligentes — tudo em um só lugar.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Acompanhamento contínuo, protocolos estruturados e alertas inteligentes, tudo em um só lugar.</p>
         </div>
 
-        <div class="mkt-metric-grid">
+        <div class="mkt-metric-grid mkt-metric-grid--six">
             <div class="mkt-metric-card">
-                <div class="mkt-metric-icon"><i class="fas fa-user-injured" aria-hidden="true"></i></div>
                 <div class="mkt-metric-val">∞</div>
                 <span class="mkt-metric-label">Pacientes gerenciados</span>
-                <span class="mkt-metric-sub">Fichas, histórico e evolução</span>
+                <span class="mkt-metric-sub">Fichas, histórico e evolução clínica</span>
             </div>
             <div class="mkt-metric-card">
-                <div class="mkt-metric-icon"><i class="fas fa-file-medical" aria-hidden="true"></i></div>
                 <div class="mkt-metric-val"><span class="mkt-count" data-to="100">0</span><sup>%</sup></div>
                 <span class="mkt-metric-label">Protocolos rastreáveis</span>
-                <span class="mkt-metric-sub">Do procedimento ao pós-alta</span>
+                <span class="mkt-metric-sub">Do procedimento ao pós-alta monitorada</span>
             </div>
             <div class="mkt-metric-card">
-                <div class="mkt-metric-icon"><i class="fas fa-bell" aria-hidden="true"></i></div>
                 <div class="mkt-metric-val">24/7</div>
                 <span class="mkt-metric-label">Monitoramento de alertas</span>
-                <span class="mkt-metric-sub">Notificações críticas em tempo real</span>
+                <span class="mkt-metric-sub">Fila P1–P4 com SLA configurável</span>
             </div>
-            <div class="mkt-metric-card mkt-metric-card--accent">
-                <div class="mkt-metric-icon"><i class="fas fa-clipboard-list" aria-hidden="true"></i></div>
+            <div class="mkt-metric-card">
                 <div class="mkt-metric-val"><span class="mkt-count" data-to="0">0</span></div>
                 <span class="mkt-metric-label">Falhas sem rastreio</span>
-                <span class="mkt-metric-sub">Auditoria completa de ações</span>
+                <span class="mkt-metric-sub">Auditoria completa de acessos e ações</span>
+            </div>
+            <div class="mkt-metric-card">
+                <div class="mkt-metric-val"><span class="mkt-count" data-to="100">0</span><sup>%</sup></div>
+                <span class="mkt-metric-label">Consentimentos LGPD</span>
+                <span class="mkt-metric-sub">Registro versionado no portal do paciente</span>
+            </div>
+            <div class="mkt-metric-card">
+                <div class="mkt-metric-val"><span class="mkt-count" data-to="89">0</span><sup>%</sup></div>
+                <span class="mkt-metric-label">Questionários respondidos</span>
+                <span class="mkt-metric-sub">Engajamento médio da base ativa</span>
             </div>
         </div>
 
@@ -333,35 +871,35 @@
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Recursos</p>
-                <h2 class="mkt-section-title" id="mkt-features-title">Tudo que sua clínica precisa — em um único lugar</h2>
+                <h2 class="mkt-section-title" id="mkt-features-title">Tudo que sua clínica precisa, em um único lugar</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Módulos pensados para o ciclo clínico completo — do procedimento ao acompanhamento pós-alta.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Módulos pensados para o ciclo clínico completo, do procedimento ao acompanhamento pós-alta.</p>
         </div>
         <div class="mkt-features">
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-user-injured" aria-hidden="true"></i></div>
                 <h3>Gestão de pacientes</h3>
-                <p>Ficha completa, histórico de procedimentos, evoluções e documentos — com acesso rápido e busca inteligente.</p>
+                <p>Ficha completa, histórico de procedimentos, evoluções e documentos, com acesso rápido e busca inteligente.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-bed-pulse" aria-hidden="true"></i></div>
                 <h3>Sala Crítica</h3>
-                <p>Painel em tempo real com status dos pacientes mais críticos — alertas visuais e escalonamento imediato.</p>
+                <p>Painel em tempo real com status dos pacientes mais críticos, alertas visuais e escalonamento imediato.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></div>
                 <h3>Alertas inteligentes</h3>
-                <p>Notificações baseadas em regras clínicas — desvios de protocolo, respostas a questionários e sinais de risco.</p>
+                <p>Notificações baseadas em regras clínicas, desvios de protocolo, respostas a questionários e sinais de risco.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-file-medical" aria-hidden="true"></i></div>
                 <h3>Protocolos clínicos</h3>
-                <p>Crie, gerencie e monitore protocolos de recuperação — com etapas, responsáveis e rastreabilidade completa.</p>
+                <p>Crie, gerencie e monitore protocolos de recuperação, com etapas, responsáveis e rastreabilidade completa.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-clipboard-list" aria-hidden="true"></i></div>
                 <h3>Questionários de acompanhamento</h3>
-                <p>Envie questionários automáticos por etapa de recuperação — respostas processadas e alertas gerados automaticamente.</p>
+                <p>Envie questionários automáticos por etapa de recuperação, respostas processadas e alertas gerados automaticamente.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-person-circle-check" aria-hidden="true"></i></div>
@@ -371,7 +909,7 @@
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></div>
                 <h3>Permissões por perfil</h3>
-                <p>Médicos, enfermeiros, recepcionistas e administradores — cada perfil com acesso exato ao que precisa.</p>
+                <p>Médicos, enfermeiros, recepcionistas e administradores, cada perfil com acesso exato ao que precisa.</p>
             </article>
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-chart-line" aria-hidden="true"></i></div>
@@ -381,7 +919,7 @@
             <article class="mkt-feature">
                 <div class="mkt-feature-icon"><i class="fas fa-mobile-screen" aria-hidden="true"></i></div>
                 <h3>Mobile e responsivo</h3>
-                <p>Acesse de qualquer dispositivo — interface adaptada para uso clínico em tablet, celular e desktop.</p>
+                <p>Acesse de qualquer dispositivo, interface adaptada para uso clínico em tablet, celular e desktop.</p>
             </article>
         </div>
     </section>
@@ -394,13 +932,12 @@
                 <p class="mkt-section-eyebrow">Ciclo clínico completo</p>
                 <h2 class="mkt-section-title" id="mkt-funcs-title">Do centro cirúrgico ao retorno do paciente</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Cada módulo cobre uma etapa crítica do acompanhamento — integrados, sem lacunas no cuidado.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Cada módulo cobre uma etapa crítica do acompanhamento, todos integrados e sem lacunas no cuidado.</p>
         </div>
-        <div class="mkt-pillars">
+        <div class="mkt-pillars mkt-pillars--clean">
             <article class="mkt-pillar">
-                <div class="mkt-pillar-icon"><i class="fas fa-user-injured" aria-hidden="true"></i></div>
                 <h3>Registro e evolução</h3>
-                <p>Cada paciente tem uma ficha viva — procedimento realizado, equipe responsável, histórico de alertas e questionários respondidos. Tudo rastreável.</p>
+                <p>Cada paciente tem uma ficha viva, procedimento realizado, equipe responsável, histórico de alertas e questionários respondidos. Tudo rastreável.</p>
                 <ul class="mkt-pillar-list">
                     <li>Ficha completa com histórico</li>
                     <li>Busca rápida por nome ou procedimento</li>
@@ -408,9 +945,8 @@
                 </ul>
             </article>
             <article class="mkt-pillar">
-                <div class="mkt-pillar-icon"><i class="fas fa-file-medical" aria-hidden="true"></i></div>
                 <h3>Protocolos padronizados</h3>
-                <p>Defina protocolos por tipo de procedimento — com etapas, prazos e ações esperadas. O sistema monitora automaticamente o cumprimento.</p>
+                <p>Defina protocolos por tipo de procedimento, com etapas, prazos e ações esperadas. O sistema monitora automaticamente o cumprimento.</p>
                 <ul class="mkt-pillar-list">
                     <li>Criação visual de protocolos</li>
                     <li>Atribuição automática por procedimento</li>
@@ -418,9 +954,27 @@
                 </ul>
             </article>
             <article class="mkt-pillar">
-                <div class="mkt-pillar-icon"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></div>
                 <h3>Alertas e triagem</h3>
-                <p>Quando um questionário indica risco ou um protocolo não é cumprido no prazo, a equipe é notificada imediatamente — com prioridade e contexto.</p>
+                <p>Quando um questionário indica risco ou um protocolo não é cumprido no prazo, a equipe é notificada imediatamente, com prioridade e contexto.</p>
+                <details class="mkt-pillar-day mkt-pillar-day--interactive">
+                    <summary class="mkt-pillar-day__summary">
+                        <div class="mkt-pillar-day__head">
+                            <strong>Resumo do dia</strong>
+                            <span>3 alertas · 2 em triagem</span>
+                        </div>
+                        <div class="mkt-pillar-day__stats">
+                            <div><strong>P1</strong><span>João Pereira · 6 min</span></div>
+                            <div><strong>P2</strong><span>Maria Silva · D+3</span></div>
+                        </div>
+                        <span class="mkt-rich-day-card__cta">Ver insights</span>
+                    </summary>
+                    <div class="mkt-day-insight mkt-day-insight--compact">
+                        <ul>
+                            <li>Fila priorizada: P1 aguardando há 6 min, meta SLA 15 min.</li>
+                            <li>2 questionários D+3 pendentes há mais de 4 h.</li>
+                        </ul>
+                    </div>
+                </details>
                 <ul class="mkt-pillar-list">
                     <li>Regras de alerta configuráveis</li>
                     <li>Fila de triagem priorizada</li>
@@ -428,9 +982,28 @@
                 </ul>
             </article>
             <article class="mkt-pillar">
-                <div class="mkt-pillar-icon"><i class="fas fa-person-circle-check" aria-hidden="true"></i></div>
                 <h3>Portal e engajamento</h3>
-                <p>O paciente acessa um portal seguro para responder questionários, visualizar orientações e registrar sintomas — de onde estiver.</p>
+                <p>O paciente acessa um portal seguro para responder questionários, visualizar orientações e registrar sintomas, de onde estiver.</p>
+                <details class="mkt-pillar-day mkt-pillar-day--patient mkt-pillar-day--interactive">
+                    <summary class="mkt-pillar-day__summary">
+                        <div class="mkt-pillar-day__head">
+                            <strong>Resumo do dia</strong>
+                            <span>D+3 · Herniorrafia</span>
+                        </div>
+                        <span class="mkt-rich-day-card__cta">Ver insights</span>
+                    </summary>
+                    <div class="mkt-day-insight mkt-day-insight--patient mkt-day-insight--compact">
+                        <ul>
+                            <li>Questionário respondido, risco baixo, sem sinais de alerta.</li>
+                            <li>Próximo marco: retorno ambulatorial em D+7.</li>
+                        </ul>
+                    </div>
+                </details>
+                {{ protocol.timeline('Linha do protocolo', [
+                    {state: 'is-done', day: 'D+1', text: 'Repouso relativo'},
+                    {state: 'is-current', day: 'D+3', text: 'Questionário enviado'},
+                    {state: '', day: 'D+7', text: 'Retorno ambulatorial'},
+                ], 'mkt-protocol-rail--compact') }}
                 <ul class="mkt-pillar-list">
                     <li>Acesso por link seguro</li>
                     <li>Questionários por etapa de recuperação</li>
@@ -448,7 +1021,7 @@
                 <p class="mkt-section-eyebrow">Visão da clínica em tempo real</p>
                 <h2 class="mkt-section-title" id="mkt-dash-title">Tudo que importa, visível de um só painel</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Pacientes ativos, alertas críticos, protocolos em andamento — sem precisar abrir vários sistemas.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Pacientes ativos, alertas críticos, protocolos em andamento, sem precisar abrir vários sistemas.</p>
         </div>
         <div class="mkt-dashboard-preview">
             <div class="mkt-dash-window">
@@ -458,7 +1031,7 @@
                     </div>
                     <div class="mkt-dash-chrome-title">
                         <i class="fas fa-heart-pulse" aria-hidden="true"></i>
-                        {{ org_brand_label|default('Unio Clínica') }} — Visão Geral
+                        {{ org_brand_label|default('Unio Saúde') }}, Visão Geral
                     </div>
                     <div class="mkt-dash-live">
                         <span class="mkt-dash-live-dot" aria-hidden="true"></span>
@@ -520,7 +1093,7 @@
                     <div class="mkt-dash-main-left">
                         <div class="mkt-dash-chart-card mkt-dash-chart-card--wide">
                             <div class="mkt-dash-chart-head">
-                                <span><i class="fas fa-chart-column" aria-hidden="true"></i> Novos pacientes — últimos 7 dias</span>
+                                <span><i class="fas fa-chart-column" aria-hidden="true"></i> Novos pacientes, últimos 7 dias</span>
                                 <span class="mkt-dash-chart-badge">Pico: Qui · 9 pacientes</span>
                             </div>
                             <div class="mkt-dash-bar-chart" aria-label="Gráfico de barras: novos pacientes por dia da semana">
@@ -543,8 +1116,8 @@
                                 <li class="mkt-dash-ticket mkt-dash-ticket--p1">
                                     <span class="mkt-dash-ticket-pri">C1</span>
                                     <div class="mkt-dash-ticket-body">
-                                        <strong>Paciente relata dor intensa — pós lap.</strong>
-                                        <span>#A-412 · há 8 min · Dra. Carla M.</span>
+                                        <strong>Paciente relata dor intensa, pós lap.</strong>
+                                        <span>#A-412 · há 8 min · Renata Oliveira</span>
                                     </div>
                                     <span class="mkt-dash-ticket-status mkt-dash-ticket-status--open">Triagem</span>
                                 </li>
@@ -615,19 +1188,37 @@
                             </div>
                         </div>
 
-                        <div class="mkt-dash-vitoria">
-                            <div class="mkt-dash-vitoria-head">
-                                <span class="mkt-dash-vitoria-avatar"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i></span>
-                                <div>
-                                    <strong>Vitória · Insight clínico</strong>
-                                    <span>Há 3 min</span>
-                                </div>
+                        <div class="mkt-dash-queue">
+                            <div class="mkt-dash-queue__head">
+                                <strong>Fila de triagem</strong>
+                                <span>3 pendentes · há 3 min</span>
                             </div>
-                            <p>3 pacientes com questionário D+3 pendente há mais de 6h. Sugiro contato proativo — histórico indica maior risco de complicação neste perfil.</p>
-                            <div class="mkt-dash-vitoria-actions">
-                                <span class="mkt-dash-vitoria-btn"><i class="fas fa-user-injured" aria-hidden="true"></i> Ver pacientes</span>
-                                <span class="mkt-dash-vitoria-btn mkt-dash-vitoria-btn--ghost">Dispensar</span>
-                            </div>
+                            <ul class="mkt-dash-queue__list">
+                                <li class="mkt-dash-queue__item mkt-dash-queue__item--p1">
+                                    <span class="mkt-dash-queue__pri">P1</span>
+                                    <div>
+                                        <strong>João Pereira, dor 8/10</strong>
+                                        <span>Herniorrafia · D+1</span>
+                                    </div>
+                                    <em>6 min</em>
+                                </li>
+                                <li class="mkt-dash-queue__item mkt-dash-queue__item--p2">
+                                    <span class="mkt-dash-queue__pri">P2</span>
+                                    <div>
+                                        <strong>Maria Silva, questionário D+3</strong>
+                                        <span>Apendicectomia · pendente</span>
+                                    </div>
+                                    <em>2 h</em>
+                                </li>
+                                <li class="mkt-dash-queue__item">
+                                    <span class="mkt-dash-queue__pri">P3</span>
+                                    <div>
+                                        <strong>Retorno D+7 confirmado</strong>
+                                        <span>Protocolo concluído</span>
+                                    </div>
+                                    <em>4 h</em>
+                                </li>
+                            </ul>
                         </div>
 
                         <div class="mkt-dash-mini-row">
@@ -651,7 +1242,7 @@
                     </div>
                 </div>
 
-                <p class="mkt-dash-footnote"><i class="fas fa-circle-info" aria-hidden="true"></i> Dados ilustrativos — preview da visão geral da clínica em {{ _pnome }}.</p>
+                <p class="mkt-dash-footnote"><i class="fas fa-circle-info" aria-hidden="true"></i> Dados ilustrativos, preview da visão geral da clínica em {{ _pnome }}.</p>
             </div>
         </div>
     </section>
@@ -664,7 +1255,7 @@
                     <p class="mkt-section-eyebrow">Como funciona</p>
                     <h2 class="mkt-section-title" id="mkt-steps-title">Do procedimento ao acompanhamento, em quatro passos</h2>
                 </div>
-                <p class="mkt-section-sub mkt-section-sub--left">Um fluxo claro — do registro do paciente até a alta monitorada.</p>
+                <p class="mkt-section-sub mkt-section-sub--left">Um fluxo claro, do registro do paciente até a alta monitorada.</p>
             </div>
             <ol class="mkt-steps">
                 <li class="mkt-step">
@@ -678,7 +1269,7 @@
                     <span class="mkt-step-num">2</span>
                     <div class="mkt-step-body">
                         <h3>Ative o protocolo</h3>
-                        <p>O sistema associa automaticamente o protocolo correto e agenda questionários por etapa — D+1, D+3, D+7 e pós-alta.</p>
+                        <p>O sistema associa automaticamente o protocolo correto e agenda questionários por etapa, D+1, D+3, D+7 e pós-alta.</p>
                     </div>
                 </li>
                 <li class="mkt-step">
@@ -692,7 +1283,7 @@
                     <span class="mkt-step-num">4</span>
                     <div class="mkt-step-body">
                         <h3>Alta com rastreio completo</h3>
-                        <p>Toda a jornada do paciente fica documentada — prontuário exportável e histórico para decisões futuras.</p>
+                        <p>Toda a jornada do paciente fica documentada, prontuário exportável e histórico para decisões futuras.</p>
                     </div>
                 </li>
             </ol>
@@ -722,53 +1313,44 @@
         </section>
     </div>
 
-    {# ── Vitória ── #}
-    <section class="mkt-section" id="vitoria" aria-labelledby="mkt-helia-title">
+    {# ── Fluxo operacional ── #}
+    <section class="mkt-section" id="fluxo-clinico" aria-labelledby="mkt-flow-title">
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
-                <p class="mkt-section-eyebrow">Assistente clínico inteligente</p>
-                <h2 class="mkt-section-title" id="mkt-helia-title">Conheça a Vitória — sua copiloto na clínica</h2>
+                <p class="mkt-section-eyebrow">Operação clínica</p>
+                <h2 class="mkt-section-title" id="mkt-flow-title">Do cadastro à alta, tudo conectado</h2>
             </div>
-            <p class="mkt-section-sub mkt-section-sub--left">Sugere ações, identifica riscos e contextualiza o estado dos pacientes — em tempo real, dentro do sistema.</p>
+            <p class="mkt-section-sub mkt-section-sub--left">Cadastro, protocolo, questionário, alerta e relatório, sem planilhas paralelas nem ligações perdidas.</p>
         </div>
         <div class="mkt-helia-capabilities">
             <article class="mkt-helia-cap">
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                <div>
+                    <strong>Cadastro inteligente</strong>
+                    <span>Procedimento, médico responsável e protocolo associados automaticamente no primeiro registro.</span>
+                </div>
+            </article>
+            <article class="mkt-helia-cap">
+                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                <div>
+                    <strong>Questionários por D+n</strong>
+                    <span>Escalas de dor, febre e sintomas, respostas alimentam alertas e a ficha do paciente.</span>
+                </div>
+            </article>
+            <article class="mkt-helia-cap">
                 <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
                 <div>
-                    <strong>Identificação de riscos</strong>
-                    <span>Analisa padrões de resposta e sinaliza pacientes com maior probabilidade de complicação.</span>
+                    <strong>Triagem com SLA</strong>
+                    <span>Fila priorizada P1–P4, assumir alerta, registrar conduta e histórico de ações.</span>
                 </div>
             </article>
             <article class="mkt-helia-cap">
-                <i class="fas fa-list-check" aria-hidden="true"></i>
+                <i class="fas fa-file-export" aria-hidden="true"></i>
                 <div>
-                    <strong>Próximas ações sugeridas</strong>
-                    <span>Indica questionários pendentes, protocolos atrasados e contatos prioritários do dia.</span>
+                    <strong>Relatórios e LGPD</strong>
+                    <span>Exportação CSV de alertas, questionários e trilha de auditoria para gestão e compliance.</span>
                 </div>
             </article>
-            <article class="mkt-helia-cap">
-                <i class="fas fa-chart-simple" aria-hidden="true"></i>
-                <div>
-                    <strong>Leitura de indicadores</strong>
-                    <span>Interpreta KPIs da clínica — taxa de alertas, aderência a protocolos e satisfação dos pacientes.</span>
-                </div>
-            </article>
-            <article class="mkt-helia-cap">
-                <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-                <div>
-                    <strong>Orientação à equipe</strong>
-                    <span>Novos membros da equipe aprendem o sistema com assistência guiada — sem treinamentos extensos.</span>
-                </div>
-            </article>
-        </div>
-        <div class="mkt-helia-examples" aria-label="Exemplos de perguntas para a Vitória">
-            <p class="mkt-helia-examples-label">Exemplos do que você pode perguntar:</p>
-            <div class="mkt-helia-examples-grid">
-                <span>"Quais pacientes têm questionário pendente hoje?"</span>
-                <span>"Há alertas críticos em aberto agora?"</span>
-                <span>"Qual a taxa de aderência ao protocolo esta semana?"</span>
-                <span>"Como registrar um novo paciente?"</span>
-            </div>
         </div>
     </section>
 
@@ -802,17 +1384,17 @@
             <h2 class="mkt-section-title" id="mkt-dep-title">O que dizem os profissionais de saúde</h2>
             <p class="mkt-section-sub">Médicos, enfermeiros e gestores que centralizaram o acompanhamento pós-operatório.</p>
         </div>
-        <div class="mkt-testimonials">
+        <div class="mkt-testimonials mkt-rich-carousel" role="list">
             <article class="mkt-testimonial">
                 <div class="mkt-testimonial-stars" aria-label="5 estrelas">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
                 <blockquote>"Antes ligávamos para cada paciente manualmente. Com {{ _pnome }}, os questionários chegam automáticos e os alertas chegam antes da complicação. Nosso índice de reinternação caiu pela metade."</blockquote>
                 <div class="mkt-testimonial-author">
-                    <div class="mkt-testimonial-avatar"><i class="fas fa-user-doctor" aria-hidden="true"></i></div>
-                    <div>
-                        <strong>Dra. Carla Mendonça</strong>
-                        <span>Cirurgiã · Clínica BioVida</span>
+                    <img class="mkt-testimonial-avatar" src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=120&q=80" alt="" width="44" height="44" loading="lazy">
+                    <div class="mkt-testimonial-author__text">
+                        <strong>Dra. Renata Oliveira</strong>
+                        <span>Coordenadora clínica · Unio Saúde</span>
                     </div>
                 </div>
             </article>
@@ -820,10 +1402,10 @@
                 <div class="mkt-testimonial-stars" aria-label="5 estrelas">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
-                <blockquote>"A Sala Crítica mudou tudo para a nossa equipe de enfermagem. Sabemos em tempo real quem precisa de atenção — sem precisar ligar, checar planilha ou esperar retorno do paciente."</blockquote>
+                <blockquote>"A Sala Crítica mudou tudo para a nossa equipe de enfermagem. Sabemos em tempo real quem precisa de atenção, sem ligar, checar planilha ou esperar retorno do paciente."</blockquote>
                 <div class="mkt-testimonial-author">
-                    <div class="mkt-testimonial-avatar"><i class="fas fa-user-nurse" aria-hidden="true"></i></div>
-                    <div>
+                    <img class="mkt-testimonial-avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80" alt="" width="44" height="44" loading="lazy">
+                    <div class="mkt-testimonial-author__text">
                         <strong>Ana Lúcia Ferreira</strong>
                         <span>Enfermeira-chefe · Instituto Saúde</span>
                     </div>
@@ -835,14 +1417,15 @@
                 </div>
                 <blockquote>"O portal do paciente gerou um nível de engajamento que nunca tivemos. Os pacientes respondem os questionários, a equipe reage aos alertas. O cuidado realmente continua após a alta."</blockquote>
                 <div class="mkt-testimonial-author">
-                    <div class="mkt-testimonial-avatar"><i class="fas fa-user-tie" aria-hidden="true"></i></div>
-                    <div>
+                    <img class="mkt-testimonial-avatar" src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=120&q=80" alt="" width="44" height="44" loading="lazy">
+                    <div class="mkt-testimonial-author__text">
                         <strong>Marcos Teixeira</strong>
                         <span>Diretor médico · Clínica Renova</span>
                     </div>
                 </div>
             </article>
         </div>
+        <p class="mkt-rich-carousel-hint"><i class="fas fa-arrows-left-right" aria-hidden="true"></i> Arraste para ver mais depoimentos</p>
     </section>
     </div>
 
@@ -864,7 +1447,7 @@
             <div class="mkt-outcome">
                 <span class="mkt-outcome-val">100%</span>
                 <strong>Rastreabilidade do ciclo</strong>
-                <span>Toda a jornada do paciente documentada — do procedimento à alta.</span>
+                <span>Toda a jornada do paciente documentada, do procedimento à alta.</span>
             </div>
             <div class="mkt-outcome">
                 <span class="mkt-outcome-val">−70%</span>
@@ -889,34 +1472,101 @@
                 <p class="mkt-section-sub">Respostas rápidas sobre {{ _pnome }} antes de começar.</p>
             </div>
             <div class="mkt-faq">
+                {% if org_clinic|default(false) %}
+                <div class="mkt-faq-personas" data-faq-personas>
+                    <div class="mkt-faq-personas__tabs" role="tablist" aria-label="FAQ por perfil">
+                        <button type="button" class="is-active" role="tab" aria-selected="true" data-faq-tab="medico">Médico</button>
+                        <button type="button" role="tab" aria-selected="false" data-faq-tab="enfermagem">Enfermagem</button>
+                        <button type="button" role="tab" aria-selected="false" data-faq-tab="gestao">Gestão</button>
+                        <button type="button" role="tab" aria-selected="false" data-faq-tab="paciente">Paciente</button>
+                    </div>
+                    <div class="mkt-faq-personas__panel is-active" role="tabpanel" data-faq-panel="medico">
+                        <details class="mkt-faq-item" open>
+                            <summary>Como acompanho a evolução pós-operatória?</summary>
+                            <p>Cada paciente tem ficha com procedimento, D+n, linha de protocolo e histórico de questionários. Alertas críticos aparecem na fila com contexto clínico.</p>
+                        </details>
+                        <details class="mkt-faq-item">
+                            <summary>Posso personalizar protocolos por cirurgia?</summary>
+                            <p>Sim. Você define marcos, prazos e questionários por tipo de procedimento. No cadastro, o protocolo correto é associado automaticamente.</p>
+                        </details>
+                        <details class="mkt-faq-item">
+                            <summary>Consigo exportar dados para reunião clínica?</summary>
+                            <p>Sim. Exportação CSV de alertas, questionários e indicadores de aderência por período e procedimento.</p>
+                        </details>
+                    </div>
+                    <div class="mkt-faq-personas__panel" role="tabpanel" data-faq-panel="enfermagem" hidden>
+                        <details class="mkt-faq-item" open>
+                            <summary>Como funciona a fila P1 a P4?</summary>
+                            <p>Respostas de risco e desvios de protocolo geram alertas priorizados. A equipe assume o caso, registra conduta e acompanha o SLA.</p>
+                        </details>
+                        <details class="mkt-faq-item">
+                            <summary>O que fazer com paciente silencioso?</summary>
+                            <p>O painel destaca questionários pendentes há mais tempo. Você pode acionar contato proativo antes do retorno ambulatorial.</p>
+                        </details>
+                        <details class="mkt-faq-item">
+                            <summary>A Sala Crítica substitui o prontuário?</summary>
+                            <p>Não. Ela centraliza monitoramento e triagem pós-alta, complementando o prontuário com alertas e respostas em tempo real.</p>
+                        </details>
+                    </div>
+                    <div class="mkt-faq-personas__panel" role="tabpanel" data-faq-panel="gestao" hidden>
+                        <details class="mkt-faq-item" open>
+                            <summary>Quais indicadores a diretoria acompanha?</summary>
+                            <p>Aderência a protocolos, SLA de alertas, questionários respondidos, reinternações evitadas e satisfação do paciente no portal.</p>
+                        </details>
+                        <details class="mkt-faq-item">
+                            <summary>A plataforma escala para mais de uma unidade?</summary>
+                            <p>Sim. Cada clínica opera em workspace isolado, com usuários ilimitados por perfil e relatórios exportáveis.</p>
+                        </details>
+                        <details class="mkt-faq-item">
+                            <summary>Como fica a conformidade LGPD?</summary>
+                            <p>Consentimento versionado, trilha de auditoria, isolamento por clínica e controle de acesso por cargo.</p>
+                        </details>
+                    </div>
+                    <div class="mkt-faq-personas__panel" role="tabpanel" data-faq-panel="paciente" hidden>
+                        <details class="mkt-faq-item" open>
+                            <summary>Preciso instalar aplicativo?</summary>
+                            <p>Não. O acesso é por link seguro no navegador do celular, tablet ou computador.</p>
+                        </details>
+                        <details class="mkt-faq-item">
+                            <summary>Com que frequência responderei questionários?</summary>
+                            <p>Depende do protocolo do seu procedimento, geralmente nos marcos D+1, D+3, D+7 e etapas de retorno.</p>
+                        </details>
+                        <details class="mkt-faq-item">
+                            <summary>E se eu precisar de ajuda urgente?</summary>
+                            <p>Respostas de risco geram alerta imediato para a equipe. Em caso de piora, use o canal de contato indicado pela clínica.</p>
+                        </details>
+                    </div>
+                </div>
+                {% else %}
                 <details class="mkt-faq-item">
                     <summary>O que é {{ _pnome }} e o que ela resolve?</summary>
                     <p>É uma plataforma de acompanhamento pós-operatório com gestão de pacientes, protocolos clínicos, sala crítica, alertas em tempo real, questionários automáticos e portal do paciente. Resolve o problema do cuidado fragmentado após procedimentos cirúrgicos.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>Como funciona o acompanhamento automático?</summary>
-                    <p>Ao cadastrar um paciente com o procedimento realizado, o sistema associa o protocolo correspondente e agenda questionários para as etapas definidas (D+1, D+3, D+7, etc.). Os pacientes recebem o questionário via portal e as respostas são analisadas — alertas são gerados automaticamente quando há indicadores de risco.</p>
+                    <p>Ao cadastrar um paciente com o procedimento realizado, o sistema associa o protocolo correspondente e agenda questionários para as etapas definidas (D+1, D+3, D+7, etc.). Os pacientes recebem o questionário via portal e as respostas são analisadas, alertas são gerados automaticamente quando há indicadores de risco.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>O paciente precisa instalar algum aplicativo?</summary>
-                    <p>Não. O portal do paciente é acessado via navegador por link seguro — funciona em qualquer celular, tablet ou computador, sem instalação.</p>
+                    <p>Não. O portal do paciente é acessado via navegador por link seguro, funciona em qualquer celular, tablet ou computador, sem instalação.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>A plataforma é compatível com a LGPD?</summary>
-                    <p>Sim. Dados de saúde são tratados com isolamento por clínica, trilha de auditoria completa, consentimento e controle de acesso granular por perfil — em conformidade com a LGPD.</p>
+                    <p>Sim. Dados de saúde são tratados com isolamento por clínica, trilha de auditoria completa, consentimento e controle de acesso granular por perfil, em conformidade com a LGPD.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>Posso configurar diferentes protocolos por tipo de procedimento?</summary>
-                    <p>Sim. Você cria protocolos personalizados por tipo de cirurgia ou procedimento — com etapas, prazos e questionários específicos. A associação automática é feita no cadastro do paciente.</p>
+                    <p>Sim. Você cria protocolos personalizados por tipo de cirurgia ou procedimento, com etapas, prazos e questionários específicos. A associação automática é feita no cadastro do paciente.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>Quantos usuários e pacientes a plataforma suporta?</summary>
-                    <p>A arquitetura é escalável — adequada para clínicas de pequeno, médio e grande porte. Cada clínica opera em workspace isolado, com usuários ilimitados por perfil.</p>
+                    <p>A arquitetura é escalável, adequada para clínicas de pequeno, médio e grande porte. Cada clínica opera em workspace isolado, com usuários ilimitados por perfil.</p>
                 </details>
                 <details class="mkt-faq-item">
-                    <summary>A Vitória IA substitui o julgamento clínico?</summary>
-                    <p>Não — ela apoia. A Vitória identifica padrões, sugere ações e contextualiza indicadores para que a equipe tome decisões mais rápidas e informadas. O julgamento clínico sempre permanece com o profissional de saúde.</p>
+                    <summary>Como funciona a fila de alertas e triagem?</summary>
+                    <p>Respostas de questionários e desvios de protocolo geram alertas classificados de P1 a P4. A equipe visualiza a fila com SLA, assume o caso, registra a conduta e exporta relatórios quando necessário.</p>
                 </details>
+                {% endif %}
             </div>
         </section>
     </div>
@@ -927,12 +1577,12 @@
             <div class="mkt-cta-banner-inner">
                 <div class="mkt-cta-copy">
                     <h2 id="mkt-cta-title">Cuidado que não para na sala de cirurgia.</h2>
-                    <p>Acesse {{ _pnome }}, registre seus pacientes e comece o acompanhamento estruturado — protocolos, alertas e portal do paciente em um só lugar.</p>
+                    <p>Acesse {{ _pnome }}, registre seus pacientes e comece o acompanhamento estruturado, protocolos, alertas e portal do paciente em um só lugar.</p>
                     <ul class="mkt-cta-list">
                         <li><i class="fas fa-check" aria-hidden="true"></i> Gestão completa de pacientes pós-operatórios</li>
                         <li><i class="fas fa-check" aria-hidden="true"></i> Protocolos, alertas e sala crítica integrados</li>
                         <li><i class="fas fa-check" aria-hidden="true"></i> Portal do paciente e questionários automáticos</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Vitória IA e conformidade LGPD</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Relatórios exportáveis e conformidade LGPD</li>
                     </ul>
                 </div>
                 <div class="mkt-cta-banner-actions">
@@ -961,7 +1611,7 @@
                     class: 'mkt-footer-logo mkt-logo' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
                 } only %}
                 <p class="mkt-footer-tagline">{{ platform_config.rodape_texto|default(organismo.copy.marketing_tagline|default('Cuidado que continua.')) }}</p>
-                <p class="mkt-footer-desc">{{ organismo.copy.hero_desc|default('Studio digital — projetos, entregas e portal do cliente integrados.') }}</p>
+                <p class="mkt-footer-desc">{{ organismo.copy.hero_desc|default('Studio digital, projetos, entregas e portal do cliente integrados.') }}</p>
                 {% include 'components/platform_support.html.twig' with { extra_class: ' mkt-footer-support' } %}
             </div>
 
@@ -972,7 +1622,11 @@
                     <li><a href="#funcionalidades">Funcionalidades</a></li>
                     <li><a href="#dashboard-preview">Dashboard</a></li>
                     <li><a href="#como-funciona">Como funciona</a></li>
-                    <li><a href="#vitoria">Vitória IA</a></li>
+                    <li><a href="#equipe-paciente">Equipe &amp; paciente</a></li>
+                    <li><a href="{{ path('app_carteirinha_digital') }}">Carteirinha digital</a></li>
+                    <li><a href="#casos-procedimento">Casos clínicos</a></li>
+                    <li><a href="#pos-operatorio">Gestão</a></li>
+                    <li><a href="#operacao-tempo-real">Operação</a></li>
                     <li><a href="#resultados">Impacto clínico</a></li>
                     <li><a href="#faq">FAQ</a></li>
                 </ul>
@@ -1061,9 +1715,9 @@
                 if (e.isIntersecting) { e.target.classList.add('mkt-bars--visible'); barIo.unobserve(e.target); }
             });
         }, { threshold: 0.2 });
-        document.querySelectorAll('.mkt-bars, .mkt-dash-bar-chart, .mkt-sla-bars').forEach(function(el) { barIo.observe(el); });
+        document.querySelectorAll('.mkt-bars.mkt-dash-bar-chart.mkt-sla-bars').forEach(function(el) { barIo.observe(el); });
     } else {
-        document.querySelectorAll('.mkt-bars, .mkt-dash-bar-chart, .mkt-sla-bars').forEach(function(el) { el.classList.add('mkt-bars--visible'); });
+        document.querySelectorAll('.mkt-bars.mkt-dash-bar-chart.mkt-sla-bars').forEach(function(el) { el.classList.add('mkt-bars--visible'); });
     }
 
     function applyTheme(t) {
@@ -1093,6 +1747,11 @@
 })();
 </script>
 
+<script src="{{ asset('js/marketing-home-rich.js') }}?v=8" defer></script>
+<script src="{{ asset('js/marketing-nav-dropdown.js') }}?v=2" defer></script>
+{% if org_clinic|default(false) %}
+<script src="{{ asset('js/marketing-carteirinha.js') }}?v=6" defer></script>
+{% endif %}
 {% include 'components/cookie_consent_banner.html.twig' %}
 <link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=3">
 <script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>

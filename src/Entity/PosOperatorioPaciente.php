@@ -60,11 +60,38 @@ class PosOperatorioPaciente
     #[ORM\Column(length: 40, nullable: true)]
     private ?string $telefoneContato = null;
 
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $emailContato = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $contatoEmergencia = null;
+
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $telefoneEmergencia = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $observacoes = null;
+
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $consentimentoLgpdEm = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $criadoEm;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $fotoPath = null;
+
+    #[ORM\Column(length: 24, nullable: true)]
+    private ?string $carteirinhaPlano = null;
+
+    #[ORM\Column(length: 32, nullable: true)]
+    private ?string $carteirinhaVerificacao = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $carteirinhaEmitidaEm = null;
+
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $carteirinhaValidaAte = null;
 
     /** @var Collection<int, PosOperatorioQuestionarioResposta> */
     #[ORM\OneToMany(mappedBy: 'paciente', targetEntity: PosOperatorioQuestionarioResposta::class, cascade: ['persist'])]
@@ -214,6 +241,54 @@ class PosOperatorioPaciente
         return $this;
     }
 
+    public function getEmailContato(): ?string
+    {
+        return $this->emailContato;
+    }
+
+    public function setEmailContato(?string $emailContato): static
+    {
+        $this->emailContato = $emailContato;
+
+        return $this;
+    }
+
+    public function getContatoEmergencia(): ?string
+    {
+        return $this->contatoEmergencia;
+    }
+
+    public function setContatoEmergencia(?string $contatoEmergencia): static
+    {
+        $this->contatoEmergencia = $contatoEmergencia;
+
+        return $this;
+    }
+
+    public function getTelefoneEmergencia(): ?string
+    {
+        return $this->telefoneEmergencia;
+    }
+
+    public function setTelefoneEmergencia(?string $telefoneEmergencia): static
+    {
+        $this->telefoneEmergencia = $telefoneEmergencia;
+
+        return $this;
+    }
+
+    public function getObservacoes(): ?string
+    {
+        return $this->observacoes;
+    }
+
+    public function setObservacoes(?string $observacoes): static
+    {
+        $this->observacoes = $observacoes;
+
+        return $this;
+    }
+
     public function getConsentimentoLgpdEm(): ?\DateTimeImmutable
     {
         return $this->consentimentoLgpdEm;
@@ -229,6 +304,79 @@ class PosOperatorioPaciente
     public function getCriadoEm(): \DateTimeImmutable
     {
         return $this->criadoEm;
+    }
+
+    public function getFotoPath(): ?string
+    {
+        return $this->fotoPath;
+    }
+
+    public function setFotoPath(?string $fotoPath): static
+    {
+        $this->fotoPath = $fotoPath;
+
+        return $this;
+    }
+
+    public function getCarteirinhaPlano(): ?string
+    {
+        return $this->carteirinhaPlano;
+    }
+
+    public function setCarteirinhaPlano(?string $carteirinhaPlano): static
+    {
+        $this->carteirinhaPlano = $carteirinhaPlano;
+
+        return $this;
+    }
+
+    public function getCarteirinhaVerificacao(): ?string
+    {
+        return $this->carteirinhaVerificacao;
+    }
+
+    public function setCarteirinhaVerificacao(?string $carteirinhaVerificacao): static
+    {
+        $this->carteirinhaVerificacao = $carteirinhaVerificacao;
+
+        return $this;
+    }
+
+    public function getCarteirinhaEmitidaEm(): ?\DateTimeImmutable
+    {
+        return $this->carteirinhaEmitidaEm;
+    }
+
+    public function setCarteirinhaEmitidaEm(?\DateTimeImmutable $carteirinhaEmitidaEm): static
+    {
+        $this->carteirinhaEmitidaEm = $carteirinhaEmitidaEm;
+
+        return $this;
+    }
+
+    public function getCarteirinhaValidaAte(): ?\DateTimeImmutable
+    {
+        return $this->carteirinhaValidaAte;
+    }
+
+    public function setCarteirinhaValidaAte(?\DateTimeImmutable $carteirinhaValidaAte): static
+    {
+        $this->carteirinhaValidaAte = $carteirinhaValidaAte;
+
+        return $this;
+    }
+
+    public function hasCarteirinhaAtiva(): bool
+    {
+        if ($this->carteirinhaVerificacao === null || $this->carteirinhaEmitidaEm === null) {
+            return false;
+        }
+
+        if ($this->carteirinhaValidaAte === null) {
+            return true;
+        }
+
+        return $this->carteirinhaValidaAte >= new \DateTimeImmutable('today');
     }
 
     /** @return Collection<int, PosOperatorioQuestionarioResposta> */

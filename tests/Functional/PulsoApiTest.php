@@ -2,6 +2,8 @@
 
 namespace App\Tests\Functional;
 
+use App\Dev\DevSeedEmails;
+
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class PulsoApiTest extends WebTestCase
@@ -23,7 +25,7 @@ final class PulsoApiTest extends WebTestCase
         self::assertResponseIsSuccessful();
 
         $client->submitForm('Entrar na plataforma', [
-            'email' => 'gestor@unio.dev',
+            'email' => DevSeedEmails::RENATA,
             'password' => 'unio123',
         ]);
         self::assertResponseRedirects();
@@ -44,7 +46,7 @@ final class PulsoApiTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/login');
         $client->submitForm('Entrar na plataforma', [
-            'email' => 'gestor@unio.dev',
+            'email' => DevSeedEmails::RENATA,
             'password' => 'unio123',
         ]);
         $client->followRedirect();

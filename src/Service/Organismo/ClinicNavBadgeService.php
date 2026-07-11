@@ -16,22 +16,33 @@ final class ClinicNavBadgeService
         private PosOperatorioPacienteRepository $pacientes,
     ) {}
 
-    /** @return array{sala_critica: int, alertas: int, questionarios: int, pacientes_ativos: int} */
+    /** @return array{sala_critica: int, alertas: int, questionarios: int, pacientes_ativos: int, pacientes_alerta: int, precisa_acao: int} */
     public function forEmpresa(?Empresa $empresa): array
     {
         if ($empresa === null) {
-            return ['sala_critica' => 0, 'alertas' => 0, 'questionarios' => 0, 'pacientes_ativos' => 0];
+            return [
+                'sala_critica' => 0,
+                'alertas' => 0,
+                'questionarios' => 0,
+                'pacientes_ativos' => 0,
+                'pacientes_alerta' => 0,
+                'precisa_acao' => 0,
+            ];
         }
 
         $queue = $this->alertQueue->buildQueue($empresa);
         $stats = $queue['stats'];
         $qStats = $this->questionarios->buildList($empresa, 1)['stats'];
+        $pacientesAlerta = $this->pacientes->countByStatus($empresa, \App\Entity\PosOperatorioPaciente::STATUS_ALERTA);
+        $precisaAcao = $stats['p1'] + $qStats['pendentes'];
 
         return [
             'sala_critica' => $stats['p1'],
             'alertas' => $stats['abertos'] + $stats['em_atendimento'],
             'questionarios' => $qStats['pendentes'],
             'pacientes_ativos' => $this->pacientes->countAtivosByEmpresa($empresa),
+            'pacientes_alerta' => $pacientesAlerta,
+            'precisa_acao' => $precisaAcao,
         ];
     }
 }

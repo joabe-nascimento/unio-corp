@@ -7,7 +7,7 @@ use App\Entity\Empresa;
 use App\Entity\PosOperatorioEvento;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\PosOperatorioProtocolo;
-use App\Entity\User;
+use App\Dev\DevSeedEmails;
 use App\Repository\EmpresaRepository;
 use App\Repository\UserRepository;
 use App\Service\PosOperatorio\PosOperatorioEventRecorder;
@@ -22,7 +22,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:pos-operatorio:seed',
-    description: 'Popula protocolos e pacientes demo da Unio Clínica',
+    description: 'Popula protocolos e pacientes demo da UNIO SAÚDE',
 )]
 final class PosOperatorioSeedCommand extends Command
 {
@@ -65,7 +65,8 @@ final class PosOperatorioSeedCommand extends Command
             return Command::FAILURE;
         }
 
-        $medico = $this->userRepo->findOneBy(['empresa' => $empresa], ['id' => 'ASC']);
+        $medico = $this->userRepo->findOneBy(['email' => DevSeedEmails::RENATA])
+            ?? $this->userRepo->findOneBy(['empresa' => $empresa], ['id' => 'ASC']);
         if (!$medico instanceof User) {
             $medico = $this->userRepo->findOneBy([], ['id' => 'ASC']);
         }
@@ -76,6 +77,7 @@ final class PosOperatorioSeedCommand extends Command
         ]);
 
         if ($existing && !$input->getOption('force')) {
+            $this->syncDemoPatientNames($empresa);
             $io->warning('Seed já existe (PO-DEMO-001). Use --force para recriar.');
 
             return Command::SUCCESS;
@@ -89,11 +91,31 @@ final class PosOperatorioSeedCommand extends Command
         $protocolo = (new PosOperatorioProtocolo())
             ->setEmpresa($empresa)
             ->setNome('Apendicectomia laparoscópica')
-            ->setTipoProcedimento('apendicectomia')
+            ->setTipoProcedimento('apendicectomia-lap')
             ->setDuracaoDias(14)
             ->setChecklist([
                 ['dia' => 1, 'item' => 'Repouso relativo'],
                 ['dia' => 3, 'item' => 'Retirada de curativo'],
+                ['dia' => 7, 'item' => 'Retorno ambulatorial'],
+                ['dia' => 14, 'item' => 'Alta do acompanhamento'],
+            ])
+            ->setPerguntas([
+                ['id' => 'dor', 'tipo' => 'escala', 'label' => 'Nível de dor'],
+                ['id' => 'febre', 'tipo' => 'numero', 'label' => 'Temperatura'],
+            ])
+            ->setRegrasAlerta(['dor_p1_min' => 8, 'febre_p2_min' => 38.5])
+            ->setAtivo(true);
+
+        $protocoloHernio = (new PosOperatorioProtocolo())
+            ->setEmpresa($empresa)
+            ->setNome('Herniorrafia inguinal')
+            ->setTipoProcedimento('herniorrafia-inguinal')
+            ->setDuracaoDias(21)
+            ->setChecklist([
+                ['dia' => 1, 'item' => 'Gelo local e repouso relativo'],
+                ['dia' => 5, 'item' => 'Evitar esforço abdominal'],
+                ['dia' => 7, 'item' => 'Retorno ambulatorial'],
+                ['dia' => 21, 'item' => 'Encerramento do protocolo'],
             ])
             ->setPerguntas([
                 ['id' => 'dor', 'tipo' => 'escala', 'label' => 'Nível de dor'],
@@ -107,7 +129,7 @@ final class PosOperatorioSeedCommand extends Command
             ->setProtocolo($protocolo)
             ->setMedicoResponsavel($medico)
             ->setCodigo('PO-DEMO-001')
-            ->setNome('Maria Silva Demo')
+            ->setNome('Maria Silva')
             ->setProcedimento('Apendicectomia laparoscópica')
             ->setDataCirurgia(new \DateTimeImmutable('-3 days'))
             ->setStatus(PosOperatorioPaciente::STATUS_ATIVO)
@@ -115,24 +137,25 @@ final class PosOperatorioSeedCommand extends Command
 
         $pacienteAlerta = (new PosOperatorioPaciente())
             ->setEmpresa($empresa)
-            ->setProtocolo($protocolo)
+            ->setProtocolo($protocoloHernio)
             ->setMedicoResponsavel($medico)
             ->setCodigo('PO-DEMO-002')
-            ->setNome('João Pereira Demo')
+            ->setNome('João Pereira')
             ->setProcedimento('Herniorrafia inguinal')
             ->setDataCirurgia(new \DateTimeImmutable('-1 day'))
             ->setStatus(PosOperatorioPaciente::STATUS_PENDENTE)
             ->setTelefoneContato('+5511999990002');
 
         $this->em->persist($protocolo);
+        $this->em->persist($protocoloHernio);
         $this->em->persist($pacienteOk);
         $this->em->persist($pacienteAlerta);
 
-        $this->events->record($pacienteOk, PosOperatorioEvento::TIPO_CADASTRO, 'Paciente demo cadastrado', $medico);
-        $this->events->record($pacienteAlerta, PosOperatorioEvento::TIPO_CADASTRO, 'Paciente demo cadastrado', $medico);
+        $this->events->record($pacienteOk, PosOperatorioEvento::TIPO_CADASTRO, 'Paciente cadastrado', $medico);
+        $this->events->record($pacienteAlerta, PosOperatorioEvento::TIPO_CADASTRO, 'Paciente cadastrado', $medico);
         $this->em->flush();
 
-        $portalUser = $this->userRepo->findOneBy(['email' => 'tenant@unio.dev']) ?? $medico;
+        $portalUser = $this->userRepo->findOneBy(['email' => DevSeedEmails::JOABE]) ?? $medico;
         if ($portalUser instanceof User) {
             $pacienteOk->setPortalUser($portalUser);
             $this->em->flush();
@@ -152,10 +175,33 @@ final class PosOperatorioSeedCommand extends Command
         ], $medico);
 
         $io->success(sprintf(
-            'Seed Unio Clínica criado para «%s»: PO-DEMO-001 (estável) e PO-DEMO-002 (alerta esperado).',
+            'Seed UNIO SAÚDE criado para «%s»: PO-DEMO-001 (estável) e PO-DEMO-002 (alerta esperado).',
             $empresa->getNome() ?? 'workspace',
         ));
 
         return Command::SUCCESS;
+    }
+
+    private function syncDemoPatientNames(Empresa $empresa): void
+    {
+        $repo = $this->em->getRepository(PosOperatorioPaciente::class);
+        $map = [
+            'PO-DEMO-001' => 'Maria Silva',
+            'PO-DEMO-002' => 'João Pereira',
+        ];
+        $changed = false;
+        foreach ($map as $codigo => $nome) {
+            $paciente = $repo->findOneBy(['empresa' => $empresa, 'codigo' => $codigo]);
+            if (!$paciente instanceof PosOperatorioPaciente) {
+                continue;
+            }
+            if ($paciente->getNome() !== $nome) {
+                $paciente->setNome($nome);
+                $changed = true;
+            }
+        }
+        if ($changed) {
+            $this->em->flush();
+        }
     }
 }

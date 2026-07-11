@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 const BASE = process.env.UNIO_BASE_URL || 'http://127.0.0.1:8000';
-const EMAIL = process.env.UNIO_TEST_EMAIL || 'tenant@unio.dev';
+const EMAIL = process.env.UNIO_TEST_EMAIL || 'joabe.nascimento@unio.dev';
 const PASSWORD = process.env.UNIO_TEST_PASSWORD || 'unio123';
 
 async function main() {

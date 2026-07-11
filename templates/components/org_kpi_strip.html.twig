@@ -2,7 +2,7 @@
   org_kpi_strip — faixa premium de KPIs (padrão Organismo / Clínica / Studio)
 
   Props:
-    items   (array)  { value, label, sub?, icon?, tone?, variant?, route?, route_params?, href?,
+    items   (array)  { label, value?, sub?, icon?, tone?, variant?, route?, route_params?, href?,
                        delta?, delta_variant?, pulse?, span?, value_html?, sublist?, kpi_key? }
     layout  (string) strip | tiles | compact  (default: strip)
     class   (string) classes extras no container
@@ -31,14 +31,14 @@
         <div class="org-kpi-strip__body">
             {% if item.value_html|default('') %}
             <span class="org-kpi-strip__value org-kpi-strip__value--custom{% if _variant %} org-kpi-strip__value--{{ _variant }}{% endif %}">{{ item.value_html|raw }}</span>
-            {% else %}
+            {% elseif item.value is defined or item.kpi_key|default('') %}
             <span class="org-kpi-strip__value{% if _variant %} org-kpi-strip__value--{{ _variant }}{% endif %}"
                   {% if item.kpi_key|default('') %} data-recrutamento-pipeline-kpi="{{ item.kpi_key }}"{% endif %}
-                  {% if item.kpi_data|default('') %} {{ item.kpi_data|raw }}{% endif %}>{{ item.value }}</span>
+                  {% if item.kpi_data|default('') %} {{ item.kpi_data|raw }}{% endif %}>{{ item.value|default('') }}</span>
             {% endif %}
-            <span class="org-kpi-strip__label">{{ item.label }}</span>
+            <span class="org-kpi-strip__label"{% if item.label_title|default('') %} title="{{ item.label_title }}"{% endif %}>{{ item.label }}</span>
             {% if item.sub|default('') %}
-            <span class="org-kpi-strip__sub">{{ item.sub }}</span>
+            <span class="org-kpi-strip__sub"{% if item.sub_title|default(item.sub) %} title="{{ item.sub_title|default(item.sub) }}"{% endif %}>{{ item.sub }}</span>
             {% endif %}
             {% if item.delta|default('') %}
             <span class="org-kpi-strip__delta org-kpi-strip__delta--{{ item.delta_variant|default('ok') }}">{{ item.delta }}</span>

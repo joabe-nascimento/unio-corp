@@ -1,0 +1,31 @@
+<span class="mkt-idcard__stripe" aria-hidden="true"></span>
+<span class="mkt-idcard__back-body">
+    <span class="mkt-idcard__back-head">
+        <span class="mkt-idcard__back-title">Dados clínicos e contato</span>
+        {% if card.codigo|default(null) %}
+        <span class="mkt-idcard__back-ref">{{ card.codigo }}</span>
+        {% endif %}
+    </span>
+    <dl class="mkt-idcard__dl">
+        <div><dt>Paciente</dt><dd>{{ card.nome|default('—') }}</dd></div>
+        <div><dt>Médico</dt><dd>{{ card.medico|default('—') }}</dd></div>
+        <div><dt>Cirurgia</dt><dd>{{ card.cirurgia|default('—') }}</dd></div>
+        <div><dt>Protocolo</dt><dd>{{ card.protocolo|default('—') }}</dd></div>
+        {% if card.cpf_masked|default(null) %}
+        <div><dt>CPF</dt><dd>{{ card.cpf_masked }}</dd></div>
+        {% endif %}
+        <div><dt>Válido até</dt><dd>{{ card.valido_ate|default('—') }}</dd></div>
+    </dl>
+    <span class="mkt-idcard__back-section">Contato</span>
+    <dl class="mkt-idcard__dl mkt-idcard__dl--contact">
+        {% if card.suporte|default(null) %}
+        <div class="mkt-idcard__dl-item--wide"><dt>Suporte</dt><dd>{{ card.suporte }}</dd></div>
+        {% endif %}
+        <div><dt>Telefone</dt><dd>{{ card.telefone|default('—') }}</dd></div>
+        <div><dt>Emergência</dt><dd>{{ card.emergencia|default('—') }}</dd></div>
+    </dl>
+    <span class="mkt-idcard__verify">
+        <span class="mkt-idcard__verify-label">Verificação</span>
+        <code>{{ card.verificacao|default('--------') }}</code>
+    </span>
+</span>

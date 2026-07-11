@@ -2,6 +2,8 @@
 
 namespace App\Tests\Controller\Security;
 
+use App\Dev\DevSeedEmails;
+
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -11,8 +13,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  */
 final class ProductGrantHttpTest extends WebTestCase
 {
-    private const GESTOR_EMAIL = 'gestor@unio.dev';
-    private const SUPERVISOR_EMAIL = 'supervisor@unio.dev';
+    private const GESTOR_EMAIL = DevSeedEmails::RENATA;
+    private const SUPERVISOR_EMAIL = DevSeedEmails::ANA_PAULA;
     private const PASS = 'unio123';
 
     public function testGestorAccessesRhFeriasAndRecrutamento(): void

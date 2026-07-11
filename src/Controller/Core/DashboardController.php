@@ -5,6 +5,8 @@ namespace App\Controller\Core;
 use App\Service\DashboardStatsService;
 use App\Service\NavigationService;
 use App\Service\OnboardingProgressService;
+use App\Service\Organismo\OrganismoCopyService;
+use App\Service\PosOperatorio\ClinicOperationsService;
 use App\Service\WelcomeAnalyticsService;
 use App\Service\WelcomeService;
 use App\Service\WorkspaceService;
@@ -24,6 +26,8 @@ class DashboardController extends AbstractController
         DashboardStatsService $dashboardStats,
         WelcomeAnalyticsService $analytics,
         OnboardingProgressService $onboardingProgress,
+        OrganismoCopyService $organismoCopy,
+        ClinicOperationsService $clinicOperations,
     ): Response {
         /** @var \App\Entity\User $user */
         $user     = $this->getUser();
@@ -31,6 +35,10 @@ class DashboardController extends AbstractController
         $empresas = $workspaceService->getAvailableEmpresas($user);
         $layout   = $navigation->getLayout($user);
         $dt       = $welcome->getDateTimeInfo();
+        $clinicQueue = null;
+        if ($organismoCopy->isClinicProfile() && $empresa !== null) {
+            $clinicQueue = $clinicOperations->buildWorkQueue($empresa);
+        }
 
         return $this->render('core/dashboard/index.html.twig', [
             'layout'          => $layout,
@@ -45,6 +53,7 @@ class DashboardController extends AbstractController
             'time_label'      => $dt['time_label'],
             'weekday'         => $dt['weekday'],
             'onboarding'      => $onboardingProgress->build($user, $empresa, \count($empresas)),
+            'clinic_queue'    => $clinicQueue,
         ]);
     }
 }

@@ -2,13 +2,15 @@
 
 namespace App\Tests\Controller\Core;
 
+use App\Dev\DevSeedEmails;
+
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class DevComponentsControllerTest extends WebTestCase
 {
-    private const GESTOR_EMAIL = 'gestor@unio.dev';
+    private const GESTOR_EMAIL = DevSeedEmails::RENATA;
     private const GESTOR_PASS = 'unio123';
 
     public function testGestorCanAccessComponentsGuide(): void

@@ -8,7 +8,11 @@ namespace App\Service\PosOperatorio;
 
 use App\Entity\Empresa;
 
+use App\Entity\PosOperatorioPaciente;
+
 use App\Entity\PosOperatorioProtocolo;
+
+use App\PosOperatorio\ClinicProtocolLibrary;
 
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -35,6 +39,190 @@ final class PosOperatorioProtocoloService
     {
 
         return $this->repository->findBy(['empresa' => $empresa], ['nome' => 'ASC']);
+
+    }
+
+
+
+    /** Garante todos os modelos da biblioteca e devolve lista sem duplicatas para o formulário. */
+
+    /** @return list<PosOperatorioProtocolo> */
+
+    public function listForPacienteForm(Empresa $empresa, ?PosOperatorioPaciente $paciente = null): array
+
+    {
+
+        $this->ensureLibraryProtocols($empresa);
+
+
+
+        return $this->dedupeForForm($this->listByEmpresa($empresa), $paciente?->getProtocolo()?->getId());
+
+    }
+
+
+
+    public function ensureLibraryProtocols(Empresa $empresa): void
+
+    {
+
+        foreach (ClinicProtocolLibrary::templates() as $template) {
+
+            if ($this->findMatchingTemplate($empresa, $template) !== null) {
+
+                continue;
+
+            }
+
+            $this->importFromTemplate($empresa, $template);
+
+        }
+
+    }
+
+
+
+    /** @param array{slug?: string, nome?: string, tipo?: string} $template */
+
+    public function findMatchingTemplate(Empresa $empresa, array $template): ?PosOperatorioProtocolo
+
+    {
+
+        $slug = mb_strtolower(trim((string) ($template['slug'] ?? '')));
+
+        $tipo = mb_strtolower(trim((string) ($template['tipo'] ?? '')));
+
+        $nome = mb_strtolower(trim((string) ($template['nome'] ?? '')));
+
+
+
+        foreach ($this->listByEmpresa($empresa) as $protocolo) {
+
+            $protocoloNome = mb_strtolower(trim($protocolo->getNome()));
+
+            $protocoloTipo = mb_strtolower(trim((string) ($protocolo->getTipoProcedimento() ?? '')));
+
+
+
+            if ($nome !== '' && $protocoloNome === $nome) {
+
+                return $protocolo;
+
+            }
+
+            if ($tipo !== '' && $protocoloTipo === $tipo) {
+
+                return $protocolo;
+
+            }
+
+            if ($slug !== '' && $protocoloTipo === $slug) {
+
+                return $protocolo;
+
+            }
+
+            // Compatibilidade com seeds antigos (tipo curto, ex.: "apendicectomia")
+
+            if ($slug === 'apendicectomia-lap' && $protocoloTipo === 'apendicectomia' && str_contains($protocoloNome, 'apendicectomia')) {
+
+                return $protocolo;
+
+            }
+
+        }
+
+
+
+        return null;
+
+    }
+
+
+
+    /** @return PosOperatorioProtocolo|null Protocolo existente ou recém-importado */
+
+    public function importFromTemplateIfMissing(Empresa $empresa, array $template): ?PosOperatorioProtocolo
+
+    {
+
+        $existing = $this->findMatchingTemplate($empresa, $template);
+
+        if ($existing instanceof PosOperatorioProtocolo) {
+
+            return $existing;
+
+        }
+
+
+
+        return $this->importFromTemplate($empresa, $template);
+
+    }
+
+
+
+    /** @return list<PosOperatorioProtocolo> */
+
+    private function dedupeForForm(array $protocolos, ?int $selectedId): array
+
+    {
+
+        $byKey = [];
+
+        foreach ($protocolos as $protocolo) {
+
+            if (!$protocolo instanceof PosOperatorioProtocolo) {
+
+                continue;
+
+            }
+
+            if (!$protocolo->isAtivo() && $protocolo->getId() !== $selectedId) {
+
+                continue;
+
+            }
+
+            $key = mb_strtolower(trim($protocolo->getNome()));
+
+            if ($key === '') {
+
+                continue;
+
+            }
+
+            if (!isset($byKey[$key])) {
+
+                $byKey[$key] = $protocolo;
+
+                continue;
+
+            }
+
+            $existing = $byKey[$key];
+
+            if ($protocolo->getId() === $selectedId) {
+
+                $byKey[$key] = $protocolo;
+
+            } elseif ($existing->getId() !== $selectedId && (int) $protocolo->getId() < (int) $existing->getId()) {
+
+                $byKey[$key] = $protocolo;
+
+            }
+
+        }
+
+
+
+        $result = array_values($byKey);
+
+        usort($result, static fn (PosOperatorioProtocolo $a, PosOperatorioProtocolo $b): int => strcasecmp($a->getNome(), $b->getNome()));
+
+
+
+        return $result;
 
     }
 
@@ -94,6 +282,26 @@ final class PosOperatorioProtocoloService
 
         return $protocolo;
 
+    }
+
+
+
+    /** @param array<string, mixed> $template */
+    public function importFromTemplate(Empresa $empresa, array $template): PosOperatorioProtocolo
+    {
+        $checklistText = implode("\n", array_map(
+            static fn (array $i): string => ($i['dia'] ?? '') . ': ' . ($i['item'] ?? ''),
+            $template['checklist'] ?? [],
+        ));
+
+        return $this->create($empresa, [
+            'nome' => $template['nome'] ?? 'Protocolo',
+            'tipo' => $template['tipo'] ?? '',
+            'duracao_dias' => $template['duracao_dias'] ?? 14,
+            'checklist_text' => $checklistText,
+            'regras_dor_p1' => $template['regras']['dor_p1_min'] ?? 8,
+            'regras_febre_p2' => $template['regras']['febre_p2_min'] ?? 38.5,
+        ]);
     }
 
 

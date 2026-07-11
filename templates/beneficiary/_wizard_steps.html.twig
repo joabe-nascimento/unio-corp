@@ -1,0 +1,17 @@
+{# Wizard — passos da carteirinha #}
+<ol class="benef-wizard" aria-label="Etapas">
+    {% for i in 1..total_steps %}
+    <li class="benef-wizard__step{{ i < step ? ' is-done' : '' }}{{ i == step ? ' is-current' : '' }}">
+        <span class="benef-wizard__dot" aria-hidden="true">
+            {% if i < step %}<i class="fas fa-check"></i>{% else %}{{ i }}{% endif %}
+        </span>
+        <span class="benef-wizard__label">
+            {% if i == 1 %}Identificação
+            {% elseif i == 2 %}Confirmação
+            {% elseif i == 3 %}Visualizar
+            {% else %}Baixar
+            {% endif %}
+        </span>
+    </li>
+    {% endfor %}
+</ol>

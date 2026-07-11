@@ -1,0 +1,50 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Carteirinha digital{% endblock %}
+{% block benef_product %}Carteirinha digital{% endblock %}
+{% set benef_nav_active = 'carteirinha' %}
+{% set _preview = demo_preview|default({}) %}
+
+{% block benef_content %}
+<section class="benef-shell benef-shell--split">
+    {% include 'beneficiary/_wizard_steps.html.twig' %}
+
+    <div class="benef-product-intro">
+        <div class="benef-product-intro__access">
+            <div class="benef-card">
+                <header class="benef-card__head">
+                    <div>
+                        <h1>Acessar carteirinha digital</h1>
+                        <p>Validação em duas etapas para proteger seus dados clínicos.</p>
+                    </div>
+                </header>
+
+                {% for msg in app.flashes('error') %}
+                <div class="benef-alert benef-alert--error" role="alert">{{ msg }}</div>
+                {% endfor %}
+
+                {% include 'beneficiary/_access_form_identify.html.twig' with { csrf_name: 'beneficiary_carteirinha' } %}
+
+                <details class="benef-demo-hint">
+                    <summary>Ver dados de demonstração</summary>
+                    <ul>
+                        <li><strong>CPF:</strong> {{ demo_hints.cpf_masked }}</li>
+                        <li><strong>Código:</strong> {{ demo_hints.codigo }}</li>
+                        <li><strong>Carteirinha:</strong> {{ demo_hints.verificacao }}</li>
+                    </ul>
+                    <p class="benef-demo-hint__note">Use dois dados diferentes nos passos 1 e 2.</p>
+                </details>
+            </div>
+        </div>
+
+        <aside class="benef-product-intro__preview" aria-label="Prévia do que você verá após validar">
+            {% include 'components/marketing/_patient_demo_embed_carteirinha.html.twig' with {
+                card: _preview.card|default({}),
+                theme: _preview.theme|default('premium'),
+                access: _preview.access|default({}),
+                active_step: 1
+            } %}
+        </aside>
+    </div>
+</section>
+{% endblock %}

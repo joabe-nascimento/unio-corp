@@ -1,0 +1,55 @@
+{# Guia médico — marcos e orientações #}
+{% set guia = guia_medico|default(null) %}
+{% if guia %}
+<section class="pos-portal-guide" aria-label="{{ guia.titulo }}">
+    <header class="pos-portal-guide__head">
+        <div>
+            <h2 class="pos-portal-guide__title">{{ guia.titulo }}</h2>
+            <p class="pos-portal-guide__sub">{{ guia.subtitulo }}</p>
+        </div>
+        <span class="pos-portal-guide__phase-badge">{{ guia.fase_label }}</span>
+    </header>
+
+    <p class="pos-portal-guide__phase-desc">{{ guia.fase_descricao }}</p>
+
+    {% if guia.marcos|default([])|length > 0 %}
+    <article class="pos-portal-guide__card">
+        <h3 class="pos-portal-guide__card-label">Marcos típicos</h3>
+        <ol class="pos-protocol-steps">
+            {% for marco in guia.marcos %}
+            <li class="pos-protocol-steps__item pos-protocol-steps__item--{{ marco.state }}">
+                <div class="pos-protocol-steps__rail" aria-hidden="true">
+                    <span class="pos-protocol-steps__marker"></span>
+                </div>
+                <div class="pos-protocol-steps__content">
+                    <span class="pos-protocol-steps__day">D+{{ marco.dia }}</span>
+                    <p class="pos-protocol-steps__text">{{ marco.item }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </article>
+    {% endif %}
+
+    {% if guia.orientacoes|default([])|length > 0 %}
+    <article class="pos-portal-guide__card">
+        <h3 class="pos-portal-guide__card-label">Orientações desta fase</h3>
+        <ul class="pos-portal-guide__tips">
+            {% for dica in guia.orientacoes %}
+            <li>{{ dica }}</li>
+            {% endfor %}
+        </ul>
+    </article>
+    {% endif %}
+
+    <article class="pos-portal-guide__card pos-portal-guide__card--alert">
+        <h3 class="pos-portal-guide__card-label">Quando procurar ajuda</h3>
+        <ul class="pos-portal-guide__alerts">
+            {% for sinal in guia.sinais_alerta %}
+            <li><i class="fas fa-circle-exclamation" aria-hidden="true"></i>{{ sinal }}</li>
+            {% endfor %}
+        </ul>
+        <p class="pos-portal-guide__contact">{{ guia.contato_rapido }}</p>
+    </article>
+</section>
+{% endif %}

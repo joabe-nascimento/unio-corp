@@ -18,6 +18,8 @@ use App\Service\PosOperatorio\PosOperatorioPacienteService;
 
 use App\Service\PosOperatorio\PosOperatorioProtocoloService;
 
+use App\Service\PosOperatorio\PosOperatorioReminderService;
+
 use App\Service\WorkspaceService;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -56,6 +58,8 @@ final class PosOperatorioPacienteController extends AbstractController
 
         private PosOperatorioAuditService $audit,
 
+        private PosOperatorioReminderService $reminderService,
+
     ) {}
 
 
@@ -79,6 +83,8 @@ final class PosOperatorioPacienteController extends AbstractController
                 'pos_section' => 'pacientes',
 
                 'pacientes' => $this->service->listByEmpresa($empresa),
+
+                'silenciosos_hoje' => $this->service->silentTodayIds($empresa),
 
             ],
 
@@ -240,6 +246,120 @@ final class PosOperatorioPacienteController extends AbstractController
 
 
 
+    #[Route('/{id}/evolucao', name: 'app_pos_operatorio_paciente_evolucao', requirements: ['id' => '\d+'], methods: ['POST'])]
+
+    public function evolucao(int $id, Request $request): Response
+
+    {
+
+        $empresa = $this->requireEmpresa();
+
+        $paciente = $this->service->findForEmpresa($empresa, $id);
+
+        if (!$paciente) {
+
+            throw $this->createNotFoundException();
+
+        }
+
+
+
+        if (!$this->isCsrfTokenValid('pos_op_evolucao_' . $id, (string) $request->request->get('_csrf_token'))) {
+
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $id]);
+
+        }
+
+
+
+        /** @var User $user */
+
+        $user = $this->getUser();
+
+        $nota = trim((string) $request->request->get('nota', ''));
+
+
+
+        try {
+
+            $this->service->recordEvolucao($paciente, $user, $nota);
+
+            $this->addFlash('success', 'Nota de evolução registrada.');
+
+        } catch (\InvalidArgumentException) {
+
+            $this->addFlash('error', 'Escreva a nota de evolução antes de salvar.');
+
+        }
+
+
+
+        return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $id]);
+
+    }
+
+
+
+    #[Route('/{id}/lembrete', name: 'app_pos_operatorio_paciente_lembrete', requirements: ['id' => '\d+'], methods: ['POST'])]
+
+    public function lembrete(int $id, Request $request): Response
+
+    {
+
+        $empresa = $this->requireEmpresa();
+
+        $paciente = $this->service->findForEmpresa($empresa, $id);
+
+        if (!$paciente) {
+
+            throw $this->createNotFoundException();
+
+        }
+
+
+
+        if (!$this->isCsrfTokenValid('pos_op_lembrete_' . $id, (string) $request->request->get('_csrf_token'))) {
+
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $id]);
+
+        }
+
+
+
+        /** @var User $user */
+
+        $user = $this->getUser();
+
+        $result = $this->reminderService->sendQuestionnaireReminder($paciente, $user);
+
+
+
+        if ($result['enviado']) {
+
+            $this->addFlash('success', 'Lembrete de questionário enviado ao médico responsável.');
+
+        } elseif ($result['motivo'] === 'already_sent') {
+
+            $this->addFlash('info', 'Já existe lembrete registrado hoje para este paciente.');
+
+        } else {
+
+            $this->addFlash('error', 'Paciente sem médico responsável para receber o lembrete.');
+
+        }
+
+
+
+        return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $id]);
+
+    }
+
+
+
     /** @return array<string, mixed> */
 
     private function formContext(\App\Entity\Empresa $empresa, ?\App\Entity\PosOperatorioPaciente $paciente): array
@@ -247,6 +367,8 @@ final class PosOperatorioPacienteController extends AbstractController
     {
 
         $usuarios = $this->userRepo->findActiveByEmpresa($empresa);
+
+        $protocolos = $this->protocoloService->listForPacienteForm($empresa, $paciente);
 
 
 
@@ -258,11 +380,13 @@ final class PosOperatorioPacienteController extends AbstractController
 
             'paciente' => $paciente,
 
-            'protocolos' => $this->protocoloService->listByEmpresa($empresa),
+            'protocolos' => $protocolos,
 
             'medicos' => $usuarios,
 
             'portal_users' => $usuarios,
+
+            'current_user_id' => $this->getUser() instanceof User ? $this->getUser()->getId() : null,
 
         ];
 
@@ -309,6 +433,34 @@ final class PosOperatorioPacienteController extends AbstractController
         $user = $this->getUser();
 
         $data = $request->request->all();
+
+
+
+        if (!$paciente) {
+
+            if ((int) ($data['protocolo_id'] ?? 0) <= 0) {
+
+                $this->addFlash('error', 'Selecione o procedimento (protocolo).');
+
+                return $this->redirectToList(null, false);
+
+            }
+
+            if (trim((string) ($data['data_cirurgia'] ?? '')) === '') {
+
+                $this->addFlash('error', 'Informe a data da cirurgia para calcular a fase pós-operatória.');
+
+                return $this->redirectToList(null, false);
+
+            }
+
+            if ((int) ($data['medico_id'] ?? 0) <= 0) {
+
+                $data['medico_id'] = $user->getId();
+
+            }
+
+        }
 
 
 

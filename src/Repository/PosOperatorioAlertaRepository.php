@@ -80,6 +80,20 @@ class PosOperatorioAlertaRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return list<PosOperatorioAlerta> */
+    public function findForExportByEmpresa(Empresa $empresa, int $limit = 5000): array
+    {
+        return $this->createQueryBuilder('a')
+            ->innerJoin('a.paciente', 'p')
+            ->addSelect('p')
+            ->andWhere('a.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('a.criadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countAbertosByPaciente(\App\Entity\PosOperatorioPaciente $paciente, ?int $exceptId = null): int
     {
         $qb = $this->createQueryBuilder('a')
@@ -94,5 +108,19 @@ class PosOperatorioAlertaRepository extends ServiceEntityRepository
         }
 
         return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    public function hasOpenAlertWithMotivo(\App\Entity\PosOperatorioPaciente $paciente, string $motivoContains): bool
+    {
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.paciente = :paciente')
+            ->andWhere('a.status IN (:statuses)')
+            ->andWhere('a.motivo LIKE :motivo')
+            ->setParameter('paciente', $paciente)
+            ->setParameter('statuses', [PosOperatorioAlerta::STATUS_ABERTO, PosOperatorioAlerta::STATUS_EM_ATENDIMENTO])
+            ->setParameter('motivo', '%' . $motivoContains . '%')
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
     }
 }

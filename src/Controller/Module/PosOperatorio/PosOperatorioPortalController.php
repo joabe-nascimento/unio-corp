@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\PosOperatorio\PosOperatorioAuditService;
 use App\Service\PosOperatorio\PosOperatorioPacienteService;
+use App\Service\PosOperatorio\PosOperatorioPortalInteractionService;
 use App\Service\PosOperatorio\PosOperatorioPortalService;
 use App\Service\PosOperatorio\PosOperatorioQuestionarioService;
 use App\Service\WorkspaceService;
@@ -29,6 +30,7 @@ final class PosOperatorioPortalController extends AbstractController
         private PosOperatorioPacienteService $pacienteService,
         private PosOperatorioQuestionarioService $questionarioService,
         private PosOperatorioPortalService $portalService,
+        private PosOperatorioPortalInteractionService $portalInteraction,
         private PosOperatorioAuditService $audit,
         private EntityManagerInterface $em,
     ) {}
@@ -162,6 +164,69 @@ final class PosOperatorioPortalController extends AbstractController
         $respostas = $this->collectRespostas($request, $portalView['perguntas']);
         $this->questionarioService->submit($paciente, $respostas, $user);
         $this->addFlash('success', 'Questionário enviado. A equipe clínica foi notificada se necessário.');
+
+        return $this->redirectToRoute('app_pos_operatorio_portal');
+    }
+
+    #[Route('/portal/ajuda', name: 'app_pos_operatorio_portal_ajuda', methods: ['POST'])]
+    public function requestHelp(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('pos_portal_ajuda', (string) $request->request->get('_csrf_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_portal');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+        $paciente = $this->resolvePortalPaciente($user);
+        if ($paciente === null || !$this->audit->hasConsent($paciente)) {
+            $this->addFlash('error', 'Acompanhamento indisponível.');
+
+            return $this->redirectToRoute('app_pos_operatorio_portal');
+        }
+
+        $mensagem = trim((string) $request->request->get('mensagem', ''));
+        $result = $this->portalInteraction->requestHelp(
+            $paciente,
+            $user,
+            $mensagem !== '' ? $mensagem : null,
+        );
+
+        if ($result['already_open']) {
+            $this->addFlash('info', 'Sua solicitação já está com a equipe. Aguarde o contato.');
+        } else {
+            $this->addFlash('success', 'Pedido de ajuda enviado. A equipe foi notificada.');
+        }
+
+        return $this->redirectToRoute('app_pos_operatorio_portal');
+    }
+
+    #[Route('/portal/retorno', name: 'app_pos_operatorio_portal_retorno', methods: ['POST'])]
+    public function confirmRetorno(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('pos_portal_retorno', (string) $request->request->get('_csrf_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_portal');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+        $paciente = $this->resolvePortalPaciente($user);
+        if ($paciente === null || !$this->audit->hasConsent($paciente)) {
+            $this->addFlash('error', 'Acompanhamento indisponível.');
+
+            return $this->redirectToRoute('app_pos_operatorio_portal');
+        }
+
+        if (!$this->portalInteraction->confirmRetorno($paciente, $user)) {
+            $this->addFlash('info', 'Retorno já confirmado hoje.');
+
+            return $this->redirectToRoute('app_pos_operatorio_portal');
+        }
+
+        $this->addFlash('success', 'Retorno confirmado. A clínica foi avisada.');
 
         return $this->redirectToRoute('app_pos_operatorio_portal');
     }

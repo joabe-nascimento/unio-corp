@@ -47,6 +47,7 @@
                     <th>Fase</th>
                     <th>Médico</th>
                     <th>Status</th>
+                    <th>Portal hoje</th>
                     <th class="text-right">Ações</th>
                 </tr>
             </thead>
@@ -59,6 +60,13 @@
                     <td>{% if p.diaPosOperatorio is not null %}D+{{ p.diaPosOperatorio }}{% else %}—{% endif %}</td>
                     <td>{{ p.medicoResponsavel ? p.medicoResponsavel.nome : '—' }}</td>
                     <td>{{ p.status|pos_op_status_label }}</td>
+                    <td>
+                        {% if silenciosos_hoje[p.id]|default(false) %}
+                        {% include 'components/status_badge.html.twig' with { label: 'Sem resposta', variant: 'warning' } %}
+                        {% else %}
+                        <span class="text-muted small">—</span>
+                        {% endif %}
+                    </td>
                     <td class="text-right">
                         <div class="pos-op-paciente-row-actions">
                             <button type="button"
@@ -85,7 +93,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" class="text-muted p-4">
+                    <td colspan="8" class="text-muted p-4">
                         Nenhum paciente cadastrado.
                         <button type="button" class="btn btn-link btn-sm p-0 align-baseline" data-unio-offcanvas-open="pos-op-paciente-form">
                             Cadastrar agora
@@ -113,7 +121,8 @@
 
 {% block javascripts %}
 {{ parent() }}
-<script src="{{ asset('js/pos-operatorio-hub.js') }}?v=4"></script>
+<script src="{{ asset('js/clinic-paciente-form.js') }}?v=1" defer></script>
+<script src="{{ asset('js/pos-operatorio-hub.js') }}?v=5"></script>
 <script>
 (function () {
     if (window.UnioOffcanvas && typeof window.UnioOffcanvas.refresh === 'function') {

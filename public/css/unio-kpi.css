@@ -87,27 +87,10 @@ a.org-kpi-strip__item:hover {
     }
 }
 
-/* Accent top line */
+/* Accent top line — desativado (visual limpo, cor só no ícone) */
 .org-kpi-strip__item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 18px;
-    right: 18px;
-    height: 2px;
-    border-radius: 99px;
-    opacity: 0.9;
+    display: none;
 }
-
-.org-kpi-strip__item--sky::before    { background: #6a9ec4; }
-.org-kpi-strip__item--sage::before    { background: #6a9f7a; }
-.org-kpi-strip__item--lavender::before { background: #8a7fb8; }
-.org-kpi-strip__item--teal::before   { background: #5a9a9a; }
-.org-kpi-strip__item--amber::before  { background: #c9a04a; }
-.org-kpi-strip__item--plum::before   { background: #9a7fb8; }
-.org-kpi-strip__item--rose::before   { background: #e15a64; }
-.org-kpi-strip__item--blue::before   { background: #4b72be; }
-.org-kpi-strip__item--danger::before { background: #b91c1c; }
 
 .org-kpi-strip__item--pulse::after {
     content: '';
@@ -320,15 +303,98 @@ a.org-kpi-strip__item:hover {
     }
 }
 
-/* ── Alias legado: clinic-metric → mesmo visual ── */
-.clinic-hub-metrics,
-.clinic-ficha-page-kpis,
-.clinic-ficha-offcanvas-kpis {
+/* ── Alias legado: clinic-metric (somente páginas que ainda usam o markup antigo) ── */
+.clinic-hub-metrics {
     display: contents;
 }
 
 .clinic-metric {
     display: contents;
+}
+
+.clinic-ficha-page-kpis {
+    display: contents;
+}
+
+/* Ficha offcanvas — container real (não display:contents) */
+.clinic-ficha-offcanvas-kpis {
+    display: block;
+    width: 100%;
+}
+
+.clinic-ficha-offcanvas-kpis .org-kpi-strip--compact {
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Ficha lateral — layout compacto legível (sem truncar labels) */
+.org-kpi-strip--ficha.org-kpi-strip--compact .org-kpi-strip__item {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    gap: 6px;
+    padding: 10px 6px;
+    min-height: 0;
+}
+
+.org-kpi-strip--ficha.org-kpi-strip--compact .org-kpi-strip__icon {
+    width: 32px;
+    height: 32px;
+    margin-top: 0;
+    font-size: 12px;
+}
+
+.org-kpi-strip--ficha.org-kpi-strip--compact .org-kpi-strip__body {
+    width: 100%;
+}
+
+.org-kpi-strip--ficha.org-kpi-strip--compact .org-kpi-strip__value {
+    font-size: 1.05rem;
+    line-height: 1.15;
+}
+
+.org-kpi-strip--ficha.org-kpi-strip--compact .org-kpi-strip__label {
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.2;
+    hyphens: auto;
+}
+
+.org-kpi-strip--ficha.org-kpi-strip--compact .org-kpi-strip__sub {
+    font-size: 9.5px;
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.25;
+    max-height: 2.5em;
+}
+
+@media (max-width: 767.98px) {
+    .clinic-ficha-offcanvas-kpis .org-kpi-strip--compact {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .clinic-ficha-offcanvas-kpis .org-kpi-strip--compact {
+        grid-template-columns: 1fr;
+    }
+
+    .clinic-ficha-offcanvas-kpis .org-kpi-strip--compact .org-kpi-strip__item + .org-kpi-strip__item {
+        border-left: none;
+        border-top: 1px solid var(--org-border-soft, #e4eaf4);
+    }
 }
 
 /* Pulso — alinhar métricas ao padrão */

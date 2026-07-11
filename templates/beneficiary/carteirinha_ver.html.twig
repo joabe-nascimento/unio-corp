@@ -1,0 +1,41 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Sua carteirinha{% endblock %}
+{% block benef_product %}Carteirinha digital{% endblock %}
+{% set benef_nav_active = 'carteirinha' %}
+
+{% block benef_topbar_actions %}
+<a href="{{ path('app_carteirinha_digital_sair') }}" class="benef-topbar__logout">Sair</a>
+{% endblock %}
+
+{% block benef_content %}
+<section class="benef-shell">
+    {% include 'beneficiary/_wizard_steps.html.twig' %}
+
+    <div class="benef-card benef-card--wide">
+        <header class="benef-card__head">
+            <div>
+                <h1>Sua carteirinha está pronta</h1>
+                <p>Confira frente e verso antes de baixar.{% if is_demo %} <em>Modo demonstração.</em>{% endif %}</p>
+            </div>
+        </header>
+
+        <div class="benef-carteirinha-col">
+            <div class="benef-carteirinha-stage">
+                <div class="benef-carteirinha-preview mkt-carteirinha-page">
+                    {% include 'components/marketing/digital_id_card.html.twig' with { card: card, theme: theme } %}
+                </div>
+            </div>
+
+            <form method="post" action="{{ path('app_carteirinha_digital', { passo: '3' }) }}" class="benef-form benef-form--inline">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('beneficiary_carteirinha') }}">
+                <button type="submit" class="benef-btn benef-btn--primary benef-btn--block">
+                    Continuar para download <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script src="{{ asset('js/marketing-carteirinha.js') }}?v=6" defer></script>
+{% endblock %}

@@ -2,13 +2,15 @@
 
 namespace App\Tests\Controller\Pessoas;
 
+use App\Dev\DevSeedEmails;
+
 use App\Repository\PessoasCargoRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class PessoasCargosControllerTest extends WebTestCase
 {
-    private const GESTOR_EMAIL = 'gestor@unio.dev';
+    private const GESTOR_EMAIL = DevSeedEmails::RENATA;
     private const GESTOR_PASS  = 'unio123';
 
     public function testCargosPageLoadsWithOffcanvasForm(): void

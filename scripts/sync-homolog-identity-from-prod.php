@@ -50,7 +50,7 @@ function exportIdentity(Connection $prod, string $file): void
         'empresa' => $prod->fetchAllAssociative('SELECT * FROM empresa ORDER BY id'),
         'user' => $prod->fetchAllAssociative('SELECT * FROM `user` ORDER BY id'),
         'user_product_grant' => $prod->fetchAllAssociative('SELECT * FROM user_product_grant ORDER BY id'),
-        'gestor_password_hash' => $prod->fetchOne("SELECT password FROM `user` WHERE email = 'gestor@unio.dev' LIMIT 1"),
+        'gestor_password_hash' => $prod->fetchOne("SELECT password FROM `user` WHERE email IN ('renata.oliveira@unio.dev', 'gestor@unio.dev') ORDER BY CASE WHEN email = 'renata.oliveira@unio.dev' THEN 0 ELSE 1 END LIMIT 1"),
     ];
     file_put_contents($file, json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
     echo 'Exportado: ' . count($data['empresa']) . ' empresas, ' . count($data['user']) . " usuarios -> {$file}\n";

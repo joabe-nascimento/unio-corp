@@ -140,5 +140,81 @@ final class PosOperatorioReminderService
 
     }
 
+
+
+    /** @return array{enviado: bool, motivo: string|null} */
+
+    public function sendQuestionnaireReminder(PosOperatorioPaciente $paciente, User $autor): array
+
+    {
+
+        $today = new \DateTimeImmutable('today');
+
+
+
+        if ($this->eventoRepo->hasLembreteOnDate($paciente, $today)) {
+
+            return ['enviado' => false, 'motivo' => 'already_sent'];
+
+        }
+
+
+
+        $destinatario = $paciente->getMedicoResponsavel();
+
+        if (!$destinatario instanceof User) {
+
+            return ['enviado' => false, 'motivo' => 'no_doctor'];
+
+        }
+
+
+
+        $this->notifications->notify(
+
+            $paciente->getEmpresa(),
+
+            $destinatario,
+
+            'pos_operatorio',
+
+            'lembrete_questionario',
+
+            sprintf('Questionário pendente — %s', $paciente->getCodigo()),
+
+            sprintf('%s ainda não respondeu o questionário de hoje (D+%d).', $paciente->getNome(), $paciente->getDiaPosOperatorio() ?? 0),
+
+            'app_pos_operatorio_questionarios',
+
+            [],
+
+            'fa-bell',
+
+            'info',
+
+        );
+
+
+
+        $this->events->record(
+
+            $paciente,
+
+            PosOperatorioEvento::TIPO_LEMBRETE,
+
+            sprintf('Lembrete de questionário enviado por %s', $autor->getNome() ?? $autor->getEmail()),
+
+            $autor,
+
+        );
+
+        $this->em->flush();
+
+
+
+        return ['enviado' => true, 'motivo' => null];
+
+    }
+
 }
 

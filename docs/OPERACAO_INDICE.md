@@ -1,6 +1,6 @@
-# Operação Unio Clínica — índice (jul/2026)
+﻿# Operação Unio Saúde — índice (jul/2026)
 
-Documentação da instância **clinicaunio** (Unio Clínica, deploy dedicado).
+Documentação da instância **clinicaunio** (Unio Saúde, deploy dedicado).
 
 | Documento | Conteúdo |
 |-----------|----------|

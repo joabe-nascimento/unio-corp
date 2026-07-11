@@ -63,6 +63,62 @@ final class PosOperatorioPacienteService
 
 
 
+    /** @return array<int, true> */
+
+    public function silentTodayIds(Empresa $empresa): array
+
+    {
+
+        $today = new \DateTimeImmutable('today');
+
+        $ids = [];
+
+        foreach ($this->repository->findActiveWithoutQuestionarioToday($empresa, $today) as $paciente) {
+
+            $ids[(int) $paciente->getId()] = true;
+
+        }
+
+
+
+        return $ids;
+
+    }
+
+
+
+    public function recordEvolucao(PosOperatorioPaciente $paciente, User $autor, string $texto): void
+
+    {
+
+        $texto = trim($texto);
+
+        if ($texto === '') {
+
+            throw new \InvalidArgumentException('Nota de evolução vazia.');
+
+        }
+
+
+
+        $this->events->record(
+
+            $paciente,
+
+            PosOperatorioEvento::TIPO_EVOLUCAO,
+
+            mb_substr($texto, 0, 2000),
+
+            $autor,
+
+        );
+
+        $this->em->flush();
+
+    }
+
+
+
     public function findForEmpresa(Empresa $empresa, int $id): ?PosOperatorioPaciente
 
     {
@@ -89,8 +145,6 @@ final class PosOperatorioPacienteService
 
             ->setNome(trim((string) ($data['nome'] ?? '')))
 
-            ->setProcedimento(trim((string) ($data['procedimento'] ?? '')) ?: null)
-
             ->setTelefoneContato(trim((string) ($data['telefone'] ?? '')) ?: null)
 
             ->setStatus(PosOperatorioPaciente::STATUS_ATIVO);
@@ -98,6 +152,10 @@ final class PosOperatorioPacienteService
 
 
         $this->applyRelations($paciente, $empresa, $data);
+
+        $this->applyProcedimentoFromProtocolo($paciente, $data);
+
+        $this->applyContactExtras($paciente, $data);
 
         $this->applyDataCirurgia($paciente, (string) ($data['data_cirurgia'] ?? ''));
 
@@ -150,6 +208,10 @@ final class PosOperatorioPacienteService
 
 
         $this->applyRelations($paciente, $paciente->getEmpresa(), $data);
+
+        $this->applyProcedimentoFromProtocolo($paciente, $data);
+
+        $this->applyContactExtras($paciente, $data);
 
         $this->applyDataCirurgia($paciente, (string) ($data['data_cirurgia'] ?? ''));
 
@@ -239,6 +301,28 @@ final class PosOperatorioPacienteService
 
         $portalUser = $paciente->getPortalUser();
 
+        $today = new \DateTimeImmutable('today');
+
+        $questionarioHoje = null;
+
+        foreach ($paciente->getQuestionarios() as $qr) {
+
+            if (!$qr instanceof PosOperatorioQuestionarioResposta) {
+
+                continue;
+
+            }
+
+            if ($qr->getDataReferencia()->format('Y-m-d') === $today->format('Y-m-d')) {
+
+                $questionarioHoje = $qr;
+
+                break;
+
+            }
+
+        }
+
         $protocolo = $paciente->getProtocolo();
 
         $checklist = $protocolo?->getChecklist() ?? PosOperatorioProtocoloDefaults::checklistBasico();
@@ -303,6 +387,12 @@ final class PosOperatorioPacienteService
 
             ] : null,
 
+            'portal_questionario_hoje' => $questionarioHoje !== null,
+
+            'portal_questionario_hoje_em' => $questionarioHoje?->getRespondidoEm()->format('H:i'),
+
+            'portal_vinculado' => $portalUser !== null,
+
             'checklist_progress' => $checklistProgress,
 
             'consentimento_em' => $paciente->getConsentimentoLgpdEm()?->format('d/m/Y H:i'),
@@ -360,6 +450,8 @@ final class PosOperatorioPacienteService
                 PosOperatorioEvento::TIPO_QUESTIONARIO => 'Questionário',
                 PosOperatorioEvento::TIPO_CONSENTIMENTO => 'Consentimento LGPD',
                 PosOperatorioEvento::TIPO_LEMBRETE => 'Lembrete',
+                PosOperatorioEvento::TIPO_EVOLUCAO => 'Evolução clínica',
+                PosOperatorioEvento::TIPO_RETORNO => 'Retorno confirmado',
                 PosOperatorioEvento::TIPO_VITORIA => 'Vitória AI',
                 PosOperatorioEvento::TIPO_ACESSO_FICHA => 'Acesso à ficha',
                 PosOperatorioEvento::TIPO_CHAT => 'Chat clínico',
@@ -373,6 +465,8 @@ final class PosOperatorioPacienteService
                 PosOperatorioEvento::TIPO_QUESTIONARIO => 'fa-file-medical',
                 PosOperatorioEvento::TIPO_CONSENTIMENTO => 'fa-shield-halved',
                 PosOperatorioEvento::TIPO_LEMBRETE => 'fa-bell',
+                PosOperatorioEvento::TIPO_EVOLUCAO => 'fa-notes-medical',
+                PosOperatorioEvento::TIPO_RETORNO => 'fa-calendar-check',
                 PosOperatorioEvento::TIPO_VITORIA => 'fa-sparkles',
                 PosOperatorioEvento::TIPO_ACESSO_FICHA => 'fa-eye',
                 PosOperatorioEvento::TIPO_CHAT => 'fa-comments',
@@ -383,6 +477,8 @@ final class PosOperatorioPacienteService
                 PosOperatorioEvento::TIPO_QUESTIONARIO => 'ok',
                 PosOperatorioEvento::TIPO_CADASTRO => 'accent',
                 PosOperatorioEvento::TIPO_VITORIA => 'ai',
+                PosOperatorioEvento::TIPO_EVOLUCAO => 'accent',
+                PosOperatorioEvento::TIPO_RETORNO => 'ok',
                 default => 'info',
             },
         ];
@@ -504,6 +600,8 @@ final class PosOperatorioPacienteService
 
         if ($raw === '') {
 
+            $paciente->setDataCirurgia(null);
+
             return;
 
         }
@@ -515,6 +613,46 @@ final class PosOperatorioPacienteService
             $paciente->setDataCirurgia($dt);
 
         }
+
+    }
+
+
+
+    private function applyContactExtras(PosOperatorioPaciente $paciente, array $data): void
+
+    {
+
+        $paciente->setEmailContato(trim((string) ($data['email_contato'] ?? '')) ?: null);
+
+        $paciente->setContatoEmergencia(trim((string) ($data['contato_emergencia'] ?? '')) ?: null);
+
+        $paciente->setTelefoneEmergencia(trim((string) ($data['telefone_emergencia'] ?? '')) ?: null);
+
+        $paciente->setObservacoes(trim((string) ($data['observacoes'] ?? '')) ?: null);
+
+    }
+
+
+
+    private function applyProcedimentoFromProtocolo(PosOperatorioPaciente $paciente, array $data): void
+
+    {
+
+        $protocolo = $paciente->getProtocolo();
+
+        if ($protocolo === null) {
+
+            $paciente->setProcedimento(trim((string) ($data['procedimento'] ?? '')) ?: null);
+
+            return;
+
+        }
+
+
+
+        $label = trim($protocolo->getNome());
+
+        $paciente->setProcedimento($label !== '' ? $label : null);
 
     }
 

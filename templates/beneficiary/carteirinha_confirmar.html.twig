@@ -1,0 +1,29 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Confirmar identidade{% endblock %}
+{% block benef_product %}Carteirinha digital{% endblock %}
+{% set benef_nav_active = 'carteirinha' %}
+
+{% block benef_content %}
+<section class="benef-shell">
+    {% include 'beneficiary/_wizard_steps.html.twig' %}
+
+    <div class="benef-card">
+        <header class="benef-card__head">
+            <div>
+                <h1>Confirme sua identidade</h1>
+                <p>Segunda validação antes de exibir a carteirinha.</p>
+            </div>
+        </header>
+
+        {% for msg in app.flashes('error') %}
+        <div class="benef-alert benef-alert--error" role="alert">{{ msg }}</div>
+        {% endfor %}
+
+        {% include 'beneficiary/_access_form_confirm.html.twig' with {
+            csrf_name: 'beneficiary_carteirinha',
+            back_url: path('app_carteirinha_digital')
+        } %}
+    </div>
+</section>
+{% endblock %}

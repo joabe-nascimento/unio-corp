@@ -47,12 +47,14 @@ final class LgpdRequestMailer
             $this->emailComposer->renderHtmlFooter()
         );
 
+        $brand = (string) $this->platformConfig->get('plataforma_nome', 'Unio Saúde');
+
         $this->mailer->send(
             (new Email())
                 ->from($this->mailerFrom)
                 ->to($destino)
                 ->replyTo($data['email'])
-                ->subject('[Unio LGPD] ' . $tipoLabel)
+                ->subject(sprintf('[%s LGPD] %s', $brand, $tipoLabel))
                 ->text($textBody)
                 ->html('<div style="font-family:sans-serif;max-width:560px;margin:0 auto">' . $htmlBody . '</div>')
         );

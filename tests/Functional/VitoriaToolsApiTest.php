@@ -2,6 +2,8 @@
 
 namespace App\Tests\Functional;
 
+use App\Dev\DevSeedEmails;
+
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class VitoriaToolsApiTest extends WebTestCase
@@ -21,7 +23,7 @@ final class VitoriaToolsApiTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/login');
         $client->submitForm('Entrar na plataforma', [
-            'email' => 'gestor@unio.dev',
+            'email' => DevSeedEmails::RENATA,
             'password' => 'unio123',
         ]);
         $client->followRedirect();
@@ -48,7 +50,7 @@ final class VitoriaToolsApiTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/login');
         $client->submitForm('Entrar na plataforma', [
-            'email' => 'gestor@unio.dev',
+            'email' => DevSeedEmails::RENATA,
             'password' => 'unio123',
         ]);
         $client->followRedirect();

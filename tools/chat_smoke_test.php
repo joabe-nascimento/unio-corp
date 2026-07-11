@@ -1,6 +1,7 @@
 <?php
 
 use App\Entity\User;
+use App\Dev\DevSeedEmails;
 use App\Kernel;
 use App\Service\ChatService;
 use Symfony\Component\Dotenv\Dotenv;
@@ -19,8 +20,8 @@ $chat = $container->get(ChatService::class);
 $em = $container->get('doctrine')->getManager();
 
 $userRepo = $em->getRepository(User::class);
-$userA = $userRepo->findOneBy(['email' => 'gestor@unio.dev']);
-$userB = $userRepo->findOneBy(['email' => 'membro@unio.dev']);
+$userA = $userRepo->findOneBy(['email' => DevSeedEmails::RENATA]);
+$userB = $userRepo->findOneBy(['email' => DevSeedEmails::LUCAS]);
 
 if (!$userA || !$userB) {
     fwrite(STDERR, "Users not found.\n");

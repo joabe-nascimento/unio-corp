@@ -2,6 +2,8 @@
 
 namespace App\Command;
 
+use App\Dev\DevSeedEmails;
+
 use App\Service\Vitoria\VitoriaClient;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -74,7 +76,7 @@ final class VitoriaSmokeTestCommand extends Command
             $loginPost = $client->request('POST', rtrim($this->defaultUri, '/') . '/login', [
                 'headers' => ['Cookie' => implode('; ', $jar)],
                 'body' => [
-                    'email' => 'tenant@unio.dev',
+                    'email' => DevSeedEmails::JOABE,
                     'password' => 'unio123',
                     '_csrf_token' => $m[1] ?? '',
                 ],

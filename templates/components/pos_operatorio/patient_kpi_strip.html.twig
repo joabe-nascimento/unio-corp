@@ -8,17 +8,22 @@
 {% set _status_label = paciente.status|pos_op_status_label %}
 {% set _proximo_val = proximo_checklist ? ('D+' ~ proximo_checklist.dia) : 'Concluído' %}
 {% set _proximo_sub = proximo_checklist ? proximo_checklist.item : 'Protocolo em dia' %}
+{% if _variant == 'offcanvas' and _proximo_sub|length > 28 %}
+    {% set _proximo_sub = _proximo_sub|slice(0, 26) ~ '…' %}
+{% endif %}
 
 {% set _items = [
     {
         value: dia_pos is not null ? 'D+' ~ dia_pos : '—',
-        label: 'Dia pós-op',
+        label: _variant == 'offcanvas' ? 'Pós-op' : 'Dia pós-op',
+        label_title: 'Dia pós-operatório',
         icon: 'fa-calendar-day',
         tone: 'sky'
     },
     {
         value: alertas_abertos,
-        label: 'Alertas abertos',
+        label: _variant == 'offcanvas' ? 'Alertas' : 'Alertas abertos',
+        label_title: 'Alertas abertos',
         icon: 'fa-triangle-exclamation',
         tone: 'rose',
         variant: alertas_abertos > 0 ? 'danger' : '',
@@ -42,21 +47,24 @@
 {% else %}
     {% set _items = _items|merge([{
         value: ultima_resposta ? ultima_resposta.scoreRisco : '—',
-        label: 'Último score',
+        label: 'Score',
+        label_title: 'Último score de risco',
         icon: 'fa-chart-line',
         tone: 'lavender',
         variant: _score_variant
     }, {
         value: _proximo_val,
-        label: 'Próximo passo',
+        label: 'Próximo',
+        label_title: 'Próximo passo do protocolo',
         icon: 'fa-shoe-prints',
         tone: 'teal',
-        sub: _proximo_sub
+        sub: _proximo_sub,
+        sub_title: _proximo_sub
     }]) %}
 {% endif %}
 
 {% include 'components/org_kpi_strip.html.twig' with {
     layout: layout|default(_variant == 'offcanvas' ? 'compact' : 'strip'),
-    class: class|default(''),
+    class: (class|default('')) ~ (_variant == 'offcanvas' ? ' org-kpi-strip--ficha' : ''),
     items: _items
 } %}

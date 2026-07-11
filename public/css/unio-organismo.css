@@ -106,19 +106,48 @@ body.unio-organismo.layout-inset-shell {
     --clinic-page-x: clamp(24px, 3vw, 40px);
 }
 
+body.unio-organismo.layout-inset-shell {
+    overflow: hidden;
+}
+
 body.unio-organismo.layout-inset-shell .wrapper {
     padding: 0 !important;
-    min-height: 100vh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
     align-items: stretch;
 }
 
 body.unio-organismo.layout-inset-shell .main-sidebar {
-    min-height: 100vh;
+    min-height: 0;
+    max-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     align-self: stretch;
 }
 
+body.unio-organismo.layout-inset-shell .main-sidebar > .sidebar {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.unio-organismo.layout-inset-shell .main-sidebar > .sidebar-top,
+body.unio-organismo.layout-inset-shell .main-sidebar > .sidebar-bottom {
+    flex-shrink: 0;
+}
+
 body.unio-organismo.layout-inset-shell .app-inset-main {
-    min-height: 100vh;
+    min-height: 0;
+    max-height: 100dvh;
+    height: 100%;
+    flex: 1 1 auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -128,12 +157,30 @@ body.unio-organismo.layout-inset-shell .content-wrapper {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
 }
 
 body.unio-organismo.layout-inset-shell .app-inset-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     border-radius: 0 !important;
     border-width: 0 !important;
     box-shadow: none !important;
+}
+
+body.unio-organismo.layout-inset-shell .app-page-chrome {
+    flex-shrink: 0;
+}
+
+body.unio-organismo.layout-inset-shell .content-wrapper > .app-page-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 body.unio-organismo.layout-inset-shell .main-header.navbar,
@@ -162,6 +209,12 @@ body.unio-organismo.layout-inset-shell .brand-link {
 [data-theme="light"] body.unio-organismo.layout-inset-shell .app-page-scroll,
 [data-theme="light"] body.unio-organismo.layout-inset-shell .app-page-chrome {
     background: var(--org-page) !important;
+}
+
+/* Fundo preenche área rolável mesmo com conteúdo curto */
+body.unio-organismo.layout-inset-shell .content-wrapper > .app-page-scroll--flow {
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 [data-theme="light"] body.unio-organismo.layout-inset-shell .app-inset-panel {
@@ -1344,6 +1397,52 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 .unio-organismo .page-body-inner--organismo {
     padding: 20px var(--clinic-page-x, clamp(24px, 3vw, 40px)) 32px;
     min-height: 0;
+}
+
+/* Páginas curtas com painel inferior — preenche sem quebrar o fluxo do footer */
+.unio-organismo .page-body-inner--organismo:has(.clinic-questionarios-foot) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.unio-organismo .page-body-inner--organismo:has(.clinic-questionarios-foot) > .hub-tab-panel--active {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 0;
+}
+
+/* Formulário de protocolo — duas colunas */
+.clinic-protocol-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 16px;
+    align-items: start;
+}
+
+.clinic-protocol-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: sticky;
+    top: 16px;
+}
+
+.clinic-questionarios-foot {
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+@media (max-width: 1199.98px) {
+    .clinic-protocol-form {
+        grid-template-columns: 1fr;
+    }
+
+    .clinic-protocol-aside {
+        position: static;
+    }
 }
 
 .unio-organismo .page-body-inner--organismo:has(.clinic-hub-overview) {
@@ -3001,14 +3100,32 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 }
 
 /* Desktop clínica: toggle recolhe para ícones (respeita sidebar-collapse) */
-@media (min-width: 1200px) {
-    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item {
+@media (min-width: 992px) {
+    /* Largura da rail — inset shell (992px+, não só 1200px) */
+    body.unio-organismo.layout-inset-shell.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) {
+        width: 4.6rem !important;
+        min-width: 4.6rem !important;
+        max-width: 4.6rem !important;
+        flex: 0 0 4.6rem !important;
+    }
+
+    body.unio-organismo.layout-inset-shell.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover {
+        width: var(--sidebar-width, 260px) !important;
+        min-width: var(--sidebar-width, 260px) !important;
+        max-width: var(--sidebar-width, 260px) !important;
+        flex: 0 0 var(--sidebar-width, 260px) !important;
+        z-index: 1050;
+        box-shadow: 4px 0 24px rgba(30, 42, 58, 0.1);
+    }
+
+    /* ── Rail recolhida (somente quando NÃO está em hover) ── */
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .nav-sidebar > .nav-item {
         display: flex;
         justify-content: center;
         width: 100%;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .nav-sidebar > .nav-item > .nav-link {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
@@ -3019,40 +3136,63 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
         min-height: 36px !important;
         margin: 2px auto !important;
         padding: 0 !important;
+        overflow: hidden !important;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link > p {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .nav-sidebar > .nav-item > .nav-link > p,
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .nav-sidebar > .nav-item > .nav-link > .nav-clinic-hint {
         display: none !important;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot {
         grid-column: auto;
         margin: 0;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot .nav-clinic-badge {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot .nav-clinic-badge {
         top: -2px;
         right: -4px;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-heading-item,
-    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-separator {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .sidebar-hub-heading-item {
         display: none !important;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .sidebar-hub-heading {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .sidebar-hub-separator {
+        display: block !important;
+        height: 0;
+        margin: 7px 10px;
+        padding: 0;
+        border: none;
+        border-top: 1px solid var(--org-sidebar-border, rgba(75, 114, 190, 0.14));
+        opacity: 1;
+        list-style: none;
+        pointer-events: none;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .sidebar-hub-heading {
         display: none !important;
     }
 
-    /* Hover na rail: expande labels como AdminLTE padrão */
-    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar {
+        border-right: 1px solid var(--org-sidebar-border) !important;
+        box-shadow: inset -1px 0 0 rgba(75, 114, 190, 0.06);
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar > .sidebar-top {
+        border-bottom: 1px solid var(--org-sidebar-border);
+    }
+
+    /* ── Hover: expande com labels legíveis ── */
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .nav-sidebar > .nav-item {
         display: block !important;
         width: 100%;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link {
         display: grid !important;
-        grid-template-columns: 22px minmax(0, 1fr);
+        grid-template-columns: 22px minmax(0, 1fr) !important;
+        grid-template-rows: auto !important;
         justify-items: start;
         align-items: center !important;
         width: calc(100% - 16px) !important;
@@ -3062,19 +3202,54 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
         min-height: 40px !important;
         margin: 2px 8px !important;
         padding: 10px 14px !important;
+        overflow: visible !important;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link > p {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link > .nav-icon-slot {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        align-self: center !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link > p {
         display: block !important;
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: auto !important;
+        max-width: 100% !important;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-heading-item,
-    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-separator {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .nav-sidebar > .nav-item > .nav-link > .nav-clinic-hint {
+        display: none !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .sidebar-hub-heading-item {
         display: list-item !important;
     }
 
-    body.unio-organismo.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-hub-heading {
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .sidebar-hub-separator {
+        display: block !important;
+        height: 0;
+        margin: 7px 14px;
+        padding: 0;
+        border: none;
+        border-top: 1px solid var(--org-sidebar-border, rgba(75, 114, 190, 0.14));
+        opacity: 1;
+        list-style: none;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .sidebar-hub-heading {
         display: flex !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover > .sidebar-top .org-sidebar-brand {
+        justify-content: flex-start !important;
+        padding-left: 14px !important;
     }
 }
 
@@ -3383,20 +3558,39 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 }
 
 .unio-organismo .clinic-ficha-offcanvas-kpis {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0;
+    display: block;
+    width: 100%;
+    margin-bottom: 0;
+    border: none;
+}
+
+.unio-organismo .clinic-ficha-offcanvas-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: var(--org-ink-muted);
+    background: var(--org-surface);
     border: 1px solid var(--org-border-soft);
     border-top: none;
-    margin-bottom: 16px;
+    border-radius: 0 0 12px 12px;
 }
 
-@media (max-width: 767.98px) {
-    .unio-organismo .clinic-ficha-offcanvas-kpis {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+.unio-organismo .clinic-ficha-offcanvas-meta__procedure {
+    font-weight: 700;
+    color: var(--org-ink-soft);
 }
 
+.unio-organismo .clinic-ficha-offcanvas-meta__phase {
+    font-weight: 600;
+    color: var(--org-blue-text);
+}
+
+/* Legado — métricas antigas (.clinic-metric) */
 .unio-organismo .clinic-ficha-offcanvas-kpis .clinic-metric {
     border-right: 1px solid var(--org-border-soft);
     border-bottom: none;
@@ -3445,8 +3639,15 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 }
 
 .unio-organismo .clinic-ficha-offcanvas .pos-op-timeline-v2__card {
-    border-color: var(--org-border-soft);
-    background: var(--org-page);
+    border: 1px solid var(--org-border-soft);
+    background: var(--org-surface);
+    box-shadow: 0 1px 4px rgba(30, 42, 58, 0.04);
+}
+
+.unio-organismo .clinic-ficha-offcanvas .pos-op-timeline-v2__date {
+    background: var(--org-surface);
+    border-radius: 8px;
+    margin-bottom: 4px;
 }
 
 .unio-organismo .clinic-ficha-offcanvas-footer {

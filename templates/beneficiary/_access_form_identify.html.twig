@@ -1,0 +1,34 @@
+{# Formulário de identificação do beneficiário #}
+<form method="post" class="benef-form" data-benef-form>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token(csrf_name) }}">
+    <input type="hidden" name="passo" value="1">
+
+    <fieldset class="benef-method-picker">
+        <legend>Como você quer se identificar?</legend>
+        <div class="benef-method-picker__grid">
+            <label class="benef-method-card">
+                <input type="radio" name="metodo" value="cpf" checked data-benef-method>
+                <strong>CPF</strong>
+                <span>Documento do beneficiário</span>
+            </label>
+            <label class="benef-method-card">
+                <input type="radio" name="metodo" value="codigo" data-benef-method>
+                <strong>Código do paciente</strong>
+                <span>Ex.: PO-0042</span>
+            </label>
+            <label class="benef-method-card">
+                <input type="radio" name="metodo" value="verificacao" data-benef-method>
+                <strong>Código da carteirinha</strong>
+                <span>Verificação impressa</span>
+            </label>
+        </div>
+    </fieldset>
+
+    <label class="benef-field">
+        <span data-benef-field-label>CPF do beneficiário</span>
+        <input type="text" name="identificador" id="benef-identificador" autocomplete="off" required
+               placeholder="000.000.000-00" data-benef-identificador>
+    </label>
+
+    <button type="submit" class="benef-btn benef-btn--primary benef-btn--block">Continuar</button>
+</form>

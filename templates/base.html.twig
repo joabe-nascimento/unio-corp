@@ -69,10 +69,10 @@
     }
     </style>
     {% if organismo.enabled|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=38">
-    <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=47">
+    <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=6">
     {% if org_clinic|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish.css') }}?v=15">
     {% endif %}
     {% endif %}
 
@@ -169,6 +169,10 @@
             {% include 'components/sidebar_ambient_sound.html.twig' with {
                 user_id: app.user.id
             } only %}
+        </div>
+        {% elseif app.user and organismo.enabled|default(false) and org_clinic|default(false) %}
+        <div class="sidebar-bottom sidebar-bottom--clinic">
+            {% include 'components/clinic_sidebar_pulse.html.twig' %}
         </div>
         {% endif %}
     </aside>

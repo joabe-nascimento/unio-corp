@@ -1,0 +1,52 @@
+{# Cards de produtos clínicos — dashboard e página de produtos #}
+{% set _products = products|default(clinic_products|default([])) %}
+{% set _compact = compact|default(false) %}
+{% set _show_toggle = show_toggle|default(false) %}
+
+<section class="clinic-products-grid{% if _compact %} clinic-products-grid--compact{% endif %}" aria-label="Produtos clínicos">
+    {% for product in _products %}
+    <article
+        id="produto-{{ product.id }}"
+        class="clinic-product-card unio-card{% if not product.enabled|default(true) %} clinic-product-card--disabled{% endif %}{% if focus_product|default('') == product.id %} clinic-product-card--focus{% endif %}"
+    >
+        <header class="clinic-product-card__head">
+            <span class="org-icon org-icon--md org-icon--{{ product.tone|default('sky') }}" aria-hidden="true">
+                <i class="fas {{ product.icon }}"></i>
+            </span>
+            <div class="clinic-product-card__titles">
+                <h3 class="clinic-product-card__title">{{ product.label }}</h3>
+                <p class="clinic-product-card__desc">{{ product.desc }}</p>
+            </div>
+            <span class="clinic-product-card__status clinic-product-card__status--{{ product.enabled|default(true) ? 'on' : 'off' }}">
+                {{ product.enabled|default(true) ? 'Ativo' : 'Desativado' }}
+            </span>
+        </header>
+
+        <ul class="clinic-product-card__capabilities">
+            {% for item in product.capabilities|default([]) %}
+            <li><i class="fas fa-check" aria-hidden="true"></i> {{ item }}</li>
+            {% endfor %}
+        </ul>
+
+        <footer class="clinic-product-card__foot">
+            {% if _show_toggle %}
+            <label class="clinic-product-card__toggle">
+                <input type="checkbox" name="product_{{ product.id }}" value="1"{{ product.enabled|default(true) ? ' checked' : '' }}>
+                <span>Usar na clínica</span>
+            </label>
+            {% endif %}
+
+            {% if product.enabled|default(true) and product.route|default(null) %}
+            <a href="{{ path(product.route, product.route_params|default({})) }}" class="btn-unio-primary btn-sm">
+                {{ product.route_label|default('Abrir') }}
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+            {% elseif product.marketing_route|default(null) %}
+            <a href="{{ path(product.marketing_route, product.marketing_params|default({})) }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener">
+                Ver demonstração
+            </a>
+            {% endif %}
+        </footer>
+    </article>
+    {% endfor %}
+</section>

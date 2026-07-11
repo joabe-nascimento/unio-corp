@@ -118,6 +118,12 @@ final class PosOperatorioAlertService
         $desc = sprintf('Alerta %s resolvido', $alerta->getPrioridade());
         if ($nota) {
             $desc .= ': ' . $nota;
+            $this->events->record(
+                $paciente,
+                \App\Entity\PosOperatorioEvento::TIPO_CHAT,
+                $nota,
+                $user,
+            );
         }
         $this->events->record($paciente, \App\Entity\PosOperatorioEvento::TIPO_ALERTA, $desc, $user);
         $this->em->flush();

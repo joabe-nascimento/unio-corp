@@ -18,6 +18,15 @@ class PosOperatorioEvento
     public const TIPO_ACESSO_FICHA = 'acesso_ficha';
     public const TIPO_CONSENTIMENTO = 'consentimento';
     public const TIPO_LEMBRETE = 'lembrete';
+    public const TIPO_EVOLUCAO = 'evolucao';
+    public const TIPO_RETORNO = 'retorno';
+
+    /** @var list<string> */
+    public const TIPOS_VISIVEIS_PACIENTE = [
+        self::TIPO_CHAT,
+        self::TIPO_EVOLUCAO,
+        self::TIPO_RETORNO,
+    ];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

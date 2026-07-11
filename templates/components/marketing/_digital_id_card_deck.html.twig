@@ -1,0 +1,45 @@
+{# Baralho 3D — três planos, cada um com beneficiário diferente #}
+{% set _plans = plans|default([]) %}
+<div class="mkt-idcard-deck-wrap is-layer-3" data-idcard-deck-wrap>
+    <div class="mkt-idcard-deck mkt-carteirinha-page" data-idcard-deck role="group" aria-label="Carteirinhas digitais por plano">
+        <div class="mkt-idcard-deck__floor" aria-hidden="true"></div>
+        <div class="mkt-idcard-deck__glow" aria-hidden="true"></div>
+        {% for plan in _plans %}
+        <button type="button"
+                class="mkt-idcard-deck__layer mkt-idcard-deck__layer--{{ loop.index }}{{ loop.index == 3 ? ' is-active' : '' }}"
+                data-deck-layer="{{ loop.index }}"
+                style="--deck-i: {{ loop.index0 }};"
+                aria-pressed="{{ loop.index == 3 ? 'true' : 'false' }}"
+                aria-label="Carteirinha de {{ plan.nome|default('Beneficiário') }}, {{ plan.label|default('Plano') }}">
+            <span class="mkt-idcard mkt-idcard--landscape mkt-idcard--{{ plan.theme|default('essencial') }} mkt-idcard-deck__card">
+                <span class="mkt-idcard-deck__edge" aria-hidden="true"></span>
+                <span class="mkt-idcard__face mkt-idcard__face--front">
+                    {% include 'components/marketing/_digital_id_card_front.html.twig' with { card: plan } %}
+                </span>
+            </span>
+        </button>
+        {% endfor %}
+    </div>
+
+    <p class="mkt-idcard-deck__hint">
+        <i class="fas fa-hand-pointer" aria-hidden="true"></i>
+        Clique na carteirinha ou no beneficiário para destacar
+    </p>
+
+    <ul class="mkt-idcard-deck__legend">
+        {% for plan in _plans %}
+        <li>
+            <button type="button"
+                    class="mkt-idcard-deck__legend-btn mkt-idcard-deck__legend-btn--{{ loop.index }}{{ loop.index == 3 ? ' is-active' : '' }}"
+                    data-deck-legend="{{ loop.index }}"
+                    aria-pressed="{{ loop.index == 3 ? 'true' : 'false' }}">
+                <span class="mkt-idcard-deck__dot mkt-idcard-deck__dot--{{ plan.theme|default('essencial') }}"></span>
+                <span class="mkt-idcard-deck__legend-text">
+                    <span class="mkt-idcard-deck__legend-name">{{ plan.nome|default('Beneficiário') }}</span>
+                    <span class="mkt-idcard-deck__legend-plan mkt-idcard-deck__legend-plan--{{ plan.theme|default('essencial') }}">{{ plan.label|default(plan.plano_label|default('Plano'))|replace({'Plano ': ''}) }}</span>
+                </span>
+            </button>
+        </li>
+        {% endfor %}
+    </ul>
+</div>

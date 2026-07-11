@@ -1,0 +1,26 @@
+{# Grid de capacidades — dashboard e páginas de ops #}
+{% set _features = features|default(clinic_nav_features|default([])) %}
+{% set _exclude = exclude|default([]) %}
+
+<section class="clinic-ops-grid" aria-label="Capacidades">
+    {% for feature in _features %}
+    {% if feature.id not in _exclude and feature.status|default('active') == 'active' %}
+    <a href="{{ feature.external|default(false) ? path(feature.route) : path(feature.route) }}"
+       class="clinic-ops-card unio-card"
+       {% if feature.external|default(false) %}target="_blank" rel="noopener"{% endif %}>
+        <span class="org-icon org-icon--md org-icon--{{ feature.tone|default('sky') }}" aria-hidden="true">
+            <i class="fas {{ feature.icon }}"></i>
+        </span>
+        <div class="clinic-ops-card__body">
+            <strong class="clinic-ops-card__title">{{ feature.title }}</strong>
+            <p class="clinic-ops-card__desc">{{ feature.desc }}</p>
+        </div>
+        {% set _badge_key = feature.badge_key|default('') %}
+        {% if _badge_key and clinic_nav_badges[_badge_key]|default(0) > 0 %}
+        <span class="clinic-ops-card__badge">{{ clinic_nav_badges[_badge_key] }}</span>
+        {% endif %}
+        <i class="fas fa-arrow-right clinic-ops-card__arrow" aria-hidden="true"></i>
+    </a>
+    {% endif %}
+    {% endfor %}
+</section>

@@ -2,13 +2,15 @@
 
 namespace App\Tests\Controller\Module\Recrutamento;
 
+use App\Dev\DevSeedEmails;
+
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class RecrutamentoModuleControllerTest extends WebTestCase
 {
-    private const GESTOR_EMAIL = 'gestor@unio.dev';
+    private const GESTOR_EMAIL = DevSeedEmails::RENATA;
     private const PASS = 'unio123';
 
     public function testRecrutamentoHubLoadsForGestor(): void

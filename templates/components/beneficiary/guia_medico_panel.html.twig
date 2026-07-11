@@ -1,0 +1,99 @@
+{# Painel do guia médico — beneficiário #}
+{% set guia = guia_medico|default(null) %}
+{% if guia %}
+<section class="benef-guia-panel" aria-label="{{ guia.titulo|default('Guia médico') }}">
+
+    <p class="benef-guia-panel__intro">{{ guia.fase_descricao }}</p>
+
+    {% if checklist_hoje|default([])|length > 0 %}
+    <article class="benef-guia-panel__card benef-guia-panel__card--highlight">
+        <header class="benef-guia-panel__card-head">
+            <i class="fas fa-sun" aria-hidden="true"></i>
+            <h2>O que fazer hoje</h2>
+        </header>
+        <ul class="benef-guia-panel__today-list">
+            {% for item in checklist_hoje %}
+            <li>
+                <span class="benef-guia-panel__today-day">D+{{ item.dia }}</span>
+                <span>{{ item.item }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </article>
+    {% endif %}
+
+    {% if guia.marcos|default([])|length > 0 %}
+    <article class="benef-guia-panel__card">
+        <header class="benef-guia-panel__card-head">
+            <i class="fas fa-route" aria-hidden="true"></i>
+            <h2>Marcos da recuperação</h2>
+        </header>
+        <ol class="benef-guia-timeline">
+            {% for marco in guia.marcos %}
+            {% set _state = marco.state in ['done', 'current'] ? marco.state : 'pending' %}
+            <li class="benef-guia-timeline__item benef-guia-timeline__item--{{ _state }}">
+                <div class="benef-guia-timeline__rail" aria-hidden="true">
+                    <span class="benef-guia-timeline__marker"></span>
+                </div>
+                <div class="benef-guia-timeline__body">
+                    <span class="benef-guia-timeline__day">D+{{ marco.dia }}</span>
+                    <p class="benef-guia-timeline__text">{{ marco.item }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </article>
+    {% endif %}
+
+    {% if guia.orientacoes|default([])|length > 0 %}
+    <article class="benef-guia-panel__card">
+        <header class="benef-guia-panel__card-head">
+            <i class="fas fa-list-check" aria-hidden="true"></i>
+            <h2>Cuidados desta fase</h2>
+        </header>
+        <ul class="benef-guia-panel__tips">
+            {% for dica in guia.orientacoes %}
+            <li>{{ dica }}</li>
+            {% endfor %}
+        </ul>
+    </article>
+    {% endif %}
+
+    {% if lembretes|default([])|length > 0 %}
+    <article class="benef-guia-panel__card benef-guia-panel__card--soft">
+        <header class="benef-guia-panel__card-head">
+            <i class="fas fa-bell" aria-hidden="true"></i>
+            <h2>Lembretes importantes</h2>
+        </header>
+        <div class="benef-guia-lembretes">
+            {% for item in lembretes %}
+            <div class="benef-guia-lembretes__item">
+                <span class="benef-guia-lembretes__icon" aria-hidden="true">
+                    <i class="fas {{ item.icon|default('fa-circle-info') }}"></i>
+                </span>
+                <div>
+                    <strong>{{ item.titulo }}</strong>
+                    <p>{{ item.texto }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+    {% endif %}
+
+    <article class="benef-guia-panel__card benef-guia-panel__card--alert">
+        <header class="benef-guia-panel__card-head">
+            <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+            <h2>Quando procurar ajuda</h2>
+        </header>
+        <ul class="benef-guia-panel__alerts">
+            {% for sinal in guia.sinais_alerta|default([]) %}
+            <li>{{ sinal }}</li>
+            {% endfor %}
+        </ul>
+        {% if guia.contato_rapido|default(null) %}
+        <p class="benef-guia-panel__contact">{{ guia.contato_rapido }}</p>
+        {% endif %}
+    </article>
+</section>
+{% endif %}

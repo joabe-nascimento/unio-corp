@@ -40,10 +40,39 @@
                         <dd>{{ paciente.telefoneContato|default('—') }}</dd>
                     </div>
                     <div class="pos-op-detail-grid__row">
+                        <dt>E-mail</dt>
+                        <dd>{{ paciente.emailContato|default('—') }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
+                        <dt>Emergência</dt>
+                        <dd>
+                            {% if paciente.contatoEmergencia or paciente.telefoneEmergencia %}
+                                {{ paciente.contatoEmergencia|default('—') }}
+                                {% if paciente.telefoneEmergencia %}<span class="text-muted"> · {{ paciente.telefoneEmergencia }}</span>{% endif %}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </dd>
+                    </div>
+                    {% if paciente.observacoes %}
+                    <div class="pos-op-detail-grid__row pos-op-detail-grid__row--wide">
+                        <dt>Observações</dt>
+                        <dd>{{ paciente.observacoes }}</dd>
+                    </div>
+                    {% endif %}
+                    <div class="pos-op-detail-grid__row">
                         <dt>Portal do paciente</dt>
                         <dd>
                             {% if portal_user %}
                                 {{ portal_user.nome }} <span class="text-muted">({{ portal_user.email }})</span>
+                                {% if portal_vinculado|default(false) %}
+                                <div class="pos-op-portal-sync mt-1">
+                                    <span class="pos-op-portal-sync__badge pos-op-portal-sync__badge--{{ portal_questionario_hoje|default(false) ? 'ok' : 'pending' }}">
+                                        <i class="fas {{ portal_questionario_hoje|default(false) ? 'fa-circle-check' : 'fa-clock' }}" aria-hidden="true"></i>
+                                        Questionário hoje: {{ portal_questionario_hoje|default(false) ? ('respondido às ' ~ portal_questionario_hoje_em) : 'pendente no portal' }}
+                                    </span>
+                                </div>
+                                {% endif %}
                             {% else %}
                                 <span class="text-muted">Não vinculado</span>
                                 <button type="button"
@@ -62,6 +91,43 @@
                         <dd>{{ consentimento_em|default('Pendente no portal') }}</dd>
                     </div>
                 </dl>
+            </section>
+
+            {% if clinic_products_enabled.carteirinha_digital|default(true) %}
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Carteirinha digital',
+                    subtitle: 'Identidade clínica do paciente'
+                } %}
+                <p class="px-3 pb-3 mb-0">
+                    {% if paciente.hasCarteirinhaAtiva() %}
+                    <span class="clinic-status clinic-status--success">Emissão ativa</span>
+                    <span class="text-muted small d-block mt-1">Código {{ paciente.carteirinhaVerificacao }} · válida até {{ paciente.carteirinhaValidaAte|date('d/m/Y') }}</span>
+                    {% else %}
+                    <span class="text-muted">Nenhuma carteirinha emitida.</span>
+                    {% endif %}
+                    <a href="{{ path('app_pos_operatorio_carteirinha_paciente', { id: paciente.id }) }}" class="btn-unio-ghost btn-sm mt-2">
+                        <i class="fas fa-id-card" aria-hidden="true"></i> Gerenciar carteirinha
+                    </a>
+                </p>
+            </section>
+            {% endif %}
+
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Nota de evolução',
+                    subtitle: 'Registro visível ao paciente no portal'
+                } %}
+                <form method="post" action="{{ path('app_pos_operatorio_paciente_evolucao', {id: paciente.id}) }}" class="px-3 pb-3">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_op_evolucao_' ~ paciente.id) }}">
+                    <div class="form-group mb-2">
+                        <label for="pos-op-evolucao-{{ paciente.id }}" class="small text-muted mb-1">Evolução clínica</label>
+                        <textarea id="pos-op-evolucao-{{ paciente.id }}" name="nota" class="form-control" rows="3" required placeholder="Ex.: paciente estável, dor controlada, orientado sobre curativo"></textarea>
+                    </div>
+                    <button type="submit" class="btn-unio-primary btn-sm">
+                        <i class="fas fa-notes-medical mr-1" aria-hidden="true"></i> Salvar evolução
+                    </button>
+                </form>
             </section>
 
             {% if checklist_progress|length > 0 %}
@@ -125,6 +191,26 @@
         </div>
 
         <div class="col-xl-4 pos-op-ficha-side">
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Ações rápidas',
+                    subtitle: 'Comunicação com o paciente'
+                } %}
+                <div class="px-3 pb-3 d-flex flex-wrap gap-2">
+                    {% if not portal_questionario_hoje|default(false) and portal_vinculado|default(false) %}
+                    <form method="post" action="{{ path('app_pos_operatorio_paciente_lembrete', {id: paciente.id}) }}" class="d-inline">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_op_lembrete_' ~ paciente.id) }}">
+                        <button type="submit" class="btn-unio-ghost btn-sm">
+                            <i class="fas fa-bell mr-1" aria-hidden="true"></i> Lembrete de questionário
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">
+                        <i class="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i> Fila de alertas
+                    </a>
+                </div>
+            </section>
+
             {% if alertas|length > 0 %}
             <section class="unio-card pos-op-ficha-card mb-4">
                 {% include 'components/section_header.html.twig' with {

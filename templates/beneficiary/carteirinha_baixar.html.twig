@@ -1,0 +1,66 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Baixar carteirinha{% endblock %}
+{% block benef_product %}Carteirinha digital{% endblock %}
+{% set benef_nav_active = 'carteirinha' %}
+
+{% block benef_topbar_actions %}
+<a href="{{ path('app_carteirinha_digital_sair') }}" class="benef-topbar__logout">Sair</a>
+{% endblock %}
+
+{% block benef_content %}
+<section class="benef-shell">
+    {% include 'beneficiary/_wizard_steps.html.twig' %}
+
+    <div class="benef-card benef-card--wide">
+        <header class="benef-card__head">
+            <div>
+                <h1>Baixar ou imprimir</h1>
+                <p>Confira frente e verso, depois salve em PDF ou imprima para apresentar na recepção.</p>
+            </div>
+        </header>
+
+        <div class="benef-carteirinha-col">
+            <div class="benef-carteirinha-stage">
+                <div class="benef-carteirinha-preview benef-carteirinha-screen mkt-carteirinha-page">
+                    {% include 'components/marketing/digital_id_card.html.twig' with { card: card, theme: theme } %}
+                </div>
+            </div>
+
+            <div class="benef-download-actions">
+                <button type="button" class="benef-btn benef-btn--primary" data-benef-print>
+                    <i class="fas fa-print" aria-hidden="true"></i> Imprimir / Salvar PDF
+                </button>
+                <a href="{{ path('app_guia_medico_beneficiario') }}" class="benef-btn benef-btn--surface">
+                    <i class="fas fa-book-medical" aria-hidden="true"></i> Abrir guia médico
+                </a>
+            </div>
+        </div>
+
+        <ul class="benef-download-tips">
+            <li>
+                <i class="fas fa-print" aria-hidden="true"></i>
+                <span class="benef-download-tips__text">Use <strong>Retrato</strong>, desmarque <strong>Cabeçalhos e rodapés</strong> e marque <strong>Gráficos de fundo</strong>.</span>
+            </li>
+            <li>
+                <i class="fas fa-mobile-screen" aria-hidden="true"></i>
+                <span class="benef-download-tips__text">No celular, use Imprimir → Salvar como PDF.</span>
+            </li>
+            <li>
+                <i class="fas fa-qrcode" aria-hidden="true"></i>
+                <span class="benef-download-tips__text">Apresente o código de verificação na recepção.</span>
+            </li>
+            <li>
+                <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                <span class="benef-download-tips__text">Não compartilhe capturas em redes públicas.</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="benef-carteirinha-print-only mkt-carteirinha-page" aria-hidden="true">
+        {% include 'components/marketing/digital_id_card.html.twig' with { card: card, theme: theme, static: true } %}
+    </div>
+</section>
+
+<script src="{{ asset('js/marketing-carteirinha.js') }}?v=6" defer></script>
+{% endblock %}

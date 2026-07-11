@@ -6,7 +6,7 @@
  */
 
 $base = getenv('SMOKE_BASE_URL') ?: 'http://127.0.0.1:8000';
-$email = 'tenant@unio.dev';
+$email = 'joabe.nascimento@unio.dev';
 $pass  = 'unio123';
 
 $cookie = tempnam(sys_get_temp_dir(), 'smoke-cfg-');

@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Command\Concern\ProdSeedGuardTrait;
+use App\Dev\DevSeedEmails;
 use App\Entity\Empresa;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,18 +61,25 @@ class SeedUsersCommand extends Command
         $io->text('Empresas: 3 sincronizadas (IDs preservados).');
 
         $seedUsers = [
-            ['nome' => 'Tenant Master',    'email' => 'tenant@unio.dev',     'perfil' => 'TENANT',            'empresa' => null],
-            ['nome' => 'Gestor Oliveira',   'email' => 'gestor@unio.dev',     'perfil' => 'GESTOR',            'empresa' => $empresas[0]],
-            ['nome' => 'Gestor Costa',      'email' => 'gestor.eq@unio.dev',  'perfil' => 'GESTOR_EQUIPE',     'empresa' => $empresas[0]],
-            ['nome' => 'Supervisor Geral',  'email' => 'supervisor@unio.dev', 'perfil' => 'SUPERVISOR',        'empresa' => $empresas[0]],
-            ['nome' => 'Supervisor Equipe', 'email' => 'sup.eq@unio.dev',     'perfil' => 'SUPERVISOR_EQUIPE', 'empresa' => $empresas[0]],
-            ['nome' => 'Membro Santos',     'email' => 'membro@unio.dev',     'perfil' => 'MEMBRO',            'empresa' => $empresas[0]],
-            ['nome' => 'Gestor Nexus',      'email' => 'gestor@nexus.dev',    'perfil' => 'GESTOR',            'empresa' => $empresas[1]],
-            ['nome' => 'Gestor Edu360',     'email' => 'gestor@edu360.dev',   'perfil' => 'GESTOR',            'empresa' => $empresas[2]],
+            ['nome' => 'Joabe Nascimento',   'email' => DevSeedEmails::JOABE,     'perfil' => 'TENANT',            'empresa' => null],
+            ['nome' => 'Renata Oliveira',    'email' => DevSeedEmails::RENATA,    'perfil' => 'GESTOR',            'empresa' => $empresas[0]],
+            ['nome' => 'Ricardo Costa',      'email' => DevSeedEmails::RICARDO,   'perfil' => 'GESTOR_EQUIPE',     'empresa' => $empresas[0]],
+            ['nome' => 'Ana Paula Ribeiro',  'email' => DevSeedEmails::ANA_PAULA, 'perfil' => 'SUPERVISOR',        'empresa' => $empresas[0]],
+            ['nome' => 'Felipe Martins',     'email' => DevSeedEmails::FELIPE,    'perfil' => 'SUPERVISOR_EQUIPE', 'empresa' => $empresas[0]],
+            ['nome' => 'Lucas Santos',       'email' => DevSeedEmails::LUCAS,     'perfil' => 'MEMBRO',            'empresa' => $empresas[0]],
+            ['nome' => 'Marcela Ferreira',   'email' => DevSeedEmails::MARCELA,   'perfil' => 'GESTOR',            'empresa' => $empresas[1]],
+            ['nome' => 'Patrícia Almeida',   'email' => DevSeedEmails::PATRICIA,  'perfil' => 'GESTOR',            'empresa' => $empresas[2]],
         ];
 
         foreach ($seedUsers as $data) {
-            $user = $userRepo->findOneBy(['email' => $data['email']]) ?? new User();
+            $user = $userRepo->findOneBy(['email' => $data['email']]);
+            if (!$user instanceof User) {
+                $legacy = DevSeedEmails::LEGACY[$data['email']] ?? null;
+                if ($legacy !== null) {
+                    $user = $userRepo->findOneBy(['email' => $legacy]);
+                }
+            }
+            $user ??= new User();
             $isNew = $user->getId() === null;
             $user->setNome($data['nome'])->setEmail($data['email'])->setPerfil($data['perfil']);
             $user->setRoles([$user->getRolePrincipal()]);

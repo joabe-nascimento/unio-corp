@@ -1,11 +1,14 @@
 {% extends 'layout/hub.html.twig' %}
 
+
+
 {% block title %}{{ protocolo ? 'Editar' : 'Novo' }} protocolo{% if not org_clinic %} · Pós-Operatório{% endif %}{% endblock %}
+
 {% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
 
+
+
 {% set hub_page_eyebrow = org_clinic ? org_brand_label : '' %}
-
-
 
 {% set hub_page_title = protocolo ? 'Editar protocolo' : 'Novo protocolo' %}
 
@@ -19,135 +22,273 @@
 
 {% block hub_content %}
 
-<section class="unio-card p-4" style="max-width: 720px;">
+<div class="clinic-protocol-form">
 
-    <form method="post">
+    <section class="unio-card p-4 clinic-protocol-form__main">
 
-        <input type="hidden" name="_token" value="{{ csrf_token('pos_op_protocolo') }}">
+        <form method="post" id="clinic-protocol-form">
 
-
-
-        <div class="form-group">
-
-            <label for="nome">Nome *</label>
-
-            <input id="nome" name="nome" class="form-control" required value="{{ protocolo ? protocolo.nome : '' }}">
-
-        </div>
+            <input type="hidden" name="_token" value="{{ csrf_token('pos_op_protocolo') }}">
 
 
 
-        <div class="row">
+            <div class="form-group">
 
-            <div class="col-md-6 form-group">
+                <label for="nome">Nome *</label>
 
-                <label for="tipo">Tipo de procedimento</label>
-
-                <input id="tipo" name="tipo" class="form-control" value="{{ protocolo ? protocolo.tipoProcedimento : '' }}">
+                <input id="nome" name="nome" class="form-control" required value="{{ protocolo ? protocolo.nome : '' }}">
 
             </div>
 
-            <div class="col-md-6 form-group">
-
-                <label for="duracao_dias">Duração (dias)</label>
-
-                <input id="duracao_dias" name="duracao_dias" type="number" min="1" class="form-control"
-
-                       value="{{ protocolo ? protocolo.duracaoDias : 14 }}">
-
-            </div>
-
-        </div>
 
 
+            <div class="row">
 
-        <div class="form-group">
+                <div class="col-md-6 form-group">
 
-            <label for="checklist_text">Checklist por dia pós-operatório</label>
+                    <label for="tipo">Tipo de procedimento</label>
 
-            <textarea id="checklist_text" name="checklist_text" class="form-control font-monospace" rows="6"
-
-                      placeholder="1: Repouso relativo&#10;3: Retirada de curativo">{{ checklist_text|default('') }}</textarea>
-
-            <small class="text-muted">Um item por linha, formato <code>DIA: descrição</code></small>
-
-        </div>
-
-
-
-        <fieldset class="border rounded p-3 mb-3">
-
-            <legend class="small text-muted px-1 mb-0">Regras de alerta (triagem)</legend>
-
-            <div class="row mt-2">
-
-                <div class="col-md-6 form-group mb-0">
-
-                    <label for="regras_dor_p1">Dor mínima para P1</label>
-
-                    <input id="regras_dor_p1" name="regras_dor_p1" type="number" min="0" max="10" class="form-control"
-
-                           value="{{ regras_dor_p1|default(8) }}">
+                    <input id="tipo" name="tipo" class="form-control" value="{{ protocolo ? protocolo.tipoProcedimento : '' }}">
 
                 </div>
 
-                <div class="col-md-6 form-group mb-0">
+                <div class="col-md-6 form-group">
 
-                    <label for="regras_febre_p2">Febre mínima para P2 (°C)</label>
+                    <label for="duracao_dias">Duração (dias)</label>
 
-                    <input id="regras_febre_p2" name="regras_febre_p2" type="number" step="0.1" class="form-control"
+                    <input id="duracao_dias" name="duracao_dias" type="number" min="1" class="form-control"
 
-                           value="{{ regras_febre_p2|default(38.5) }}">
+                           value="{{ protocolo ? protocolo.duracaoDias : 14 }}">
 
                 </div>
 
             </div>
 
-        </fieldset>
 
 
+            <div class="form-group">
 
-        {% if protocolo %}
+                <label for="checklist_text">Checklist por dia pós-operatório</label>
 
-        <div class="mb-3">
+                <textarea id="checklist_text" name="checklist_text" class="form-control font-monospace" rows="6"
 
-            <p class="small text-muted mb-1">
+                          placeholder="1: Repouso relativo&#10;3: Retirada de curativo">{{ checklist_text|default('') }}</textarea>
 
-                {{ protocolo.perguntas|length }} pergunta(s) no portal ·
-
-                {{ protocolo.checklist|length }} item(ns) no checklist
-
-            </p>
-
-            <div class="form-check">
-
-                <input type="checkbox" class="form-check-input" id="ativo" name="ativo" value="1"{{ protocolo.ativo ? ' checked' : '' }}>
-
-                <label class="form-check-label" for="ativo">Protocolo ativo</label>
+                <small class="text-muted">Um item por linha, formato <code>DIA: descrição</code></small>
 
             </div>
 
-        </div>
-
-        {% else %}
-
-        <p class="small text-muted">As perguntas padrão do portal (dor, febre, náusea, sangramento) serão aplicadas automaticamente.</p>
-
-        {% endif %}
 
 
+            <fieldset class="border rounded p-3 mb-3">
 
-        <div class="d-flex gap-2 mt-4">
+                <legend class="small text-muted px-1 mb-0">Regras de alerta (triagem)</legend>
 
-            <button type="submit" class="btn-unio">Salvar</button>
+                <div class="row mt-2">
 
-            <a href="{{ path('app_pos_operatorio_protocolos') }}" class="btn-unio-ghost">Cancelar</a>
+                    <div class="col-md-6 form-group mb-0">
 
-        </div>
+                        <label for="regras_dor_p1">Dor mínima para P1</label>
 
-    </form>
+                        <input id="regras_dor_p1" name="regras_dor_p1" type="number" min="0" max="10" class="form-control"
 
-</section>
+                               value="{{ regras_dor_p1|default(8) }}">
+
+                    </div>
+
+                    <div class="col-md-6 form-group mb-0">
+
+                        <label for="regras_febre_p2">Febre mínima para P2 (°C)</label>
+
+                        <input id="regras_febre_p2" name="regras_febre_p2" type="number" step="0.1" class="form-control"
+
+                               value="{{ regras_febre_p2|default(38.5) }}">
+
+                    </div>
+
+                </div>
+
+            </fieldset>
+
+
+
+            {% if protocolo %}
+
+            <div class="mb-3">
+
+                <p class="small text-muted mb-1">
+
+                    {{ protocolo.perguntas|length }} pergunta(s) no portal ·
+
+                    {{ protocolo.checklist|length }} item(ns) no checklist
+
+                </p>
+
+                <div class="form-check">
+
+                    <input type="checkbox" class="form-check-input" id="ativo" name="ativo" value="1"{{ protocolo.ativo ? ' checked' : '' }}>
+
+                    <label class="form-check-label" for="ativo">Protocolo ativo</label>
+
+                </div>
+
+            </div>
+
+            {% else %}
+
+            <p class="small text-muted">As perguntas padrão do portal (dor, febre, náusea, sangramento) serão aplicadas automaticamente.</p>
+
+            {% endif %}
+
+
+
+            <div class="d-flex gap-2 mt-4">
+
+                <button type="submit" class="btn-unio">Salvar</button>
+
+                <a href="{{ path('app_pos_operatorio_protocolos') }}" class="btn-unio-ghost">Cancelar</a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+
+    <aside class="clinic-protocol-aside" aria-label="Prévia do protocolo">
+
+        <section class="unio-card clinic-protocol-aside__card">
+
+            <header class="clinic-protocol-aside__head">
+
+                <span class="org-icon org-icon--sm org-icon--sky" aria-hidden="true"><i class="fas fa-eye"></i></span>
+
+                <div>
+
+                    <h3 class="clinic-protocol-aside__title">Prévia ao vivo</h3>
+
+                    <p class="clinic-protocol-aside__sub">Como o paciente verá o acompanhamento</p>
+
+                </div>
+
+            </header>
+
+
+
+            <dl class="clinic-protocol-aside__metrics">
+
+                <div>
+
+                    <dt>Duração</dt>
+
+                    <dd><span id="clinic-protocol-preview-dias">{{ protocolo ? protocolo.duracaoDias : 14 }}</span> dias</dd>
+
+                </div>
+
+                <div>
+
+                    <dt>Alerta P1</dt>
+
+                    <dd>Dor ≥ <span id="clinic-protocol-preview-dor">{{ regras_dor_p1|default(8) }}</span></dd>
+
+                </div>
+
+                <div>
+
+                    <dt>Alerta P2</dt>
+
+                    <dd>Febre ≥ <span id="clinic-protocol-preview-febre">{{ regras_febre_p2|default(38.5) }}</span> °C</dd>
+
+                </div>
+
+            </dl>
+
+
+
+            <div class="clinic-protocol-aside__section">
+
+                <h4 class="clinic-protocol-aside__label">Checklist pós-operatório</h4>
+
+                <ul class="pos-op-protocol-progress clinic-protocol-preview-list" id="clinic-protocol-preview-checklist"></ul>
+
+                <p class="clinic-protocol-aside__empty text-muted" id="clinic-protocol-preview-empty" hidden>
+
+                    Adicione itens no formato <code>DIA: descrição</code> para ver a prévia.
+
+                </p>
+
+            </div>
+
+
+
+            {% if protocolo %}
+
+            <div class="clinic-protocol-aside__status">
+
+                {% include 'components/status_badge.html.twig' with {
+
+                    label: protocolo.ativo ? 'Ativo' : 'Inativo',
+
+                    variant: protocolo.ativo ? 'success' : 'secondary'
+
+                } %}
+
+                <span class="clinic-protocol-aside__status-meta">
+
+                    {{ protocolo.perguntas|length }} perguntas · {{ protocolo.checklist|length }} marcos
+
+                </span>
+
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <section class="unio-card clinic-protocol-aside__card clinic-protocol-aside__tips">
+
+            <header class="clinic-protocol-aside__head clinic-protocol-aside__head--compact">
+
+                <span class="org-icon org-icon--sm org-icon--amber" aria-hidden="true"><i class="fas fa-lightbulb"></i></span>
+
+                <h3 class="clinic-protocol-aside__title">Dicas rápidas</h3>
+
+            </header>
+
+            <ul class="clinic-protocol-aside__tips-list">
+
+                <li>Use marcos nos dias 1, 3, 7 e 14 para cobrir a recuperação inicial.</li>
+
+                <li>P1 dispara alerta imediato; P2 exige confirmação da equipe.</li>
+
+                <li>O portal envia questionário diário com base neste protocolo.</li>
+
+            </ul>
+
+            <a href="{{ path('app_pos_operatorio_protocolos') }}" class="btn-unio-ghost btn-sm clinic-protocol-aside__link">
+
+                <i class="fas fa-list mr-1" aria-hidden="true"></i> Ver todos os protocolos
+
+            </a>
+
+        </section>
+
+    </aside>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block javascripts %}
+
+{{ parent() }}
+
+<script src="{{ asset('js/clinic-protocol-form.js') }}?v=1" defer></script>
 
 {% endblock %}
 

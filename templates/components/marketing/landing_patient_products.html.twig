@@ -1,0 +1,52 @@
+{# Landing — seções spotlight: carteirinha + guia médico #}
+{% set _card = landing_card|default({}) %}
+{% set _guia = landing_guia|default({}) %}
+{% set _plans = landing_plans|default([]) %}
+
+<section class="mkt-product-spotlight mkt-reveal" id="carterinha-digital" aria-labelledby="mkt-product-carteirinha-title">
+    <div class="mkt-product-spotlight__grid">
+        <div class="mkt-product-spotlight__copy">
+            <p class="mkt-section-eyebrow">Carteirinha digital</p>
+            <h2 id="mkt-product-carteirinha-title">Identidade clínica com validação em duas etapas</h2>
+            <p>
+                Carteira digital com foto, frente e verso, código de verificação e download para recepção.
+                Três planos visuais para cada nível de atendimento da sua clínica.
+            </p>
+            <ul class="mkt-rich-spotlight__list mkt-rich-spotlight__list--clean">
+                <li>Frente e verso com dados clínicos e contato</li>
+                <li>Validação dupla: CPF, código ou carteirinha</li>
+                <li>Download e impressão para apresentar na recepção</li>
+            </ul>
+            <a href="{{ path('app_carteirinha_digital') }}" class="mkt-btn mkt-btn--glow">
+                Acessar carteirinha <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+        <div class="mkt-product-spotlight__visual mkt-product-spotlight__visual--bare mkt-reveal mkt-reveal--delay-1">
+            {% include 'components/marketing/_digital_id_card_deck.html.twig' with { plans: _plans } %}
+        </div>
+    </div>
+</section>
+
+<section class="mkt-product-spotlight mkt-product-spotlight--alt mkt-reveal" id="guia-medico" aria-labelledby="mkt-product-guia-title">
+    <div class="mkt-product-spotlight__grid mkt-product-spotlight__grid--reverse">
+        <div class="mkt-product-spotlight__copy">
+            <p class="mkt-section-eyebrow">Guia médico</p>
+            <h2 id="mkt-product-guia-title">Orientações por fase na palma da mão</h2>
+            <p>
+                Após o acesso seguro, o paciente vê o protocolo do dia, marcos da recuperação,
+                checklist e sinais de alerta — tudo sincronizado com o pós-operatório.
+            </p>
+            <ul class="mkt-rich-spotlight__list mkt-rich-spotlight__list--clean">
+                <li>Linha do protocolo com marcos D+1, D+3, D+7…</li>
+                <li>Orientações e lembretes do dia</li>
+                <li>Sinais de alerta com contato rápido da clínica</li>
+            </ul>
+            <a href="{{ path('app_guia_medico_beneficiario') }}" class="mkt-btn mkt-btn--glow">
+                Acessar guia médico <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+        <div class="mkt-product-spotlight__visual mkt-reveal mkt-reveal--delay-1">
+            {% include 'components/marketing/_landing_guia_visual.html.twig' with { guia: _guia, card: _card } %}
+        </div>
+    </div>
+</section>

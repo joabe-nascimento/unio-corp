@@ -85,6 +85,29 @@ final class PosOperatorioTriageService
             }
         }
 
+        $nausea = (string) ($respostas['nausea'] ?? '');
+        if (\in_array($nausea, ['sim', 'Sim', '1', 'true'], true)) {
+            $score += 15;
+            $motivos[] = 'Náusea ou vômito reportado';
+            if ($prioridade === 'P4') {
+                $prioridade = 'P3';
+            }
+        }
+
+        $obs = mb_strtolower((string) ($paciente->getObservacoes() ?? ''));
+        if ($obs !== '') {
+            foreach (['anticoagul', 'idoso', 'diabetes', 'cardiopat', 'imunossup'] as $term) {
+                if (str_contains($obs, $term)) {
+                    $score += 10;
+                    $motivos[] = 'Perfil de risco clínico (observações)';
+                    if ($prioridade === 'P4') {
+                        $prioridade = 'P3';
+                    }
+                    break;
+                }
+            }
+        }
+
         $score = min(100, max(0, $score));
         if ($motivos === []) {
             $motivos[] = 'Evolução dentro do esperado';

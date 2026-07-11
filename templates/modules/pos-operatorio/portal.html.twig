@@ -1,33 +1,48 @@
 {% extends 'layout/portal_patient.html.twig' %}
 
-{% set portal_page_title = 'Acompanhamento pós-operatório' %}
-{% set portal_page_subtitle = org_brand_label|default(empresa ? empresa.nome : '') %}
+{% set portal_page_title = 'Pós-operatório' %}
+{% set portal_page_subtitle = clinica_nome|default(org_brand_label|default(empresa ? empresa.nome : '')) %}
 
 {% block portal_title %}Acompanhamento pós-operatório{% endblock %}
 
+{% block portal_topbar_meta %}
+{% if paciente %}
+<div class="pos-portal-topbar__meta">
+    {% if dia_pos is not null %}
+    <span class="pos-portal-topbar__chip">D+{{ dia_pos }}</span>
+    {% endif %}
+    {% if has_consent|default(false) %}
+        {% if questionario_resumo %}
+        <span class="pos-portal-topbar__chip pos-portal-topbar__chip--ok">Enviado hoje</span>
+        {% else %}
+        <span class="pos-portal-topbar__chip pos-portal-topbar__chip--warn">Responder hoje</span>
+        {% endif %}
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
 {% block portal_content %}
     {% if not paciente %}
-        <section class="unio-card p-4 mb-3 pos-portal-card--info">
-            <div class="pos-portal-card__icon" aria-hidden="true"><i class="fas fa-user-lock"></i></div>
-            {% include 'components/section_header.html.twig' with {
-                title: 'Acompanhamento não encontrado',
-                subtitle: 'Este login não está vinculado a um paciente ativo.'
-            } %}
-            <p class="text-muted small mb-3">
+        <section class="pos-portal-panel pos-portal-panel--info">
+            <div class="pos-portal-panel__icon" aria-hidden="true"><i class="fas fa-user-lock"></i></div>
+            <h2 class="pos-portal-panel__title">Acompanhamento não encontrado</h2>
+            <p class="pos-portal-panel__sub">Este login não está vinculado a um paciente ativo.</p>
+            <p class="pos-portal-panel__text">
                 Se você é paciente, confirme com a clínica se seu acesso já foi liberado.
-                Se entrou com a conta da equipe, use o <a href="{{ path('app_portal_patient_login') }}">login do portal do paciente</a>
+                Se entrou com a conta da equipe, use o
+                <a href="{{ path('app_portal_patient_login') }}">login do portal do paciente</a>
                 com as credenciais que a clínica enviou.
             </p>
-            <a href="{{ path('app_portal_patient_logout') }}" class="btn-unio btn-sm">Sair e tentar outro login</a>
+            <a href="{{ path('app_portal_patient_logout') }}" class="pos-portal-btn pos-portal-btn--primary">Sair e tentar outro login</a>
         </section>
 
     {% elseif not has_consent %}
-        <section class="unio-card p-4">
-            {% include 'components/section_header.html.twig' with {
-                title: 'Consentimento LGPD',
-                subtitle: 'Autorização para tratamento de dados sensíveis de saúde'
-            } %}
-            <p class="text-muted small mb-3">
+        <section class="pos-portal-panel">
+            <div class="pos-portal-panel__content">
+            <h2 class="pos-portal-panel__title">Consentimento LGPD</h2>
+            <p class="pos-portal-panel__sub">Autorização para tratamento de dados sensíveis de saúde</p>
+            <p class="pos-portal-panel__text">
                 Autorizo o tratamento dos meus <strong>dados sensíveis de saúde</strong> para acompanhamento
                 pós-operatório, conforme a Política de Privacidade da clínica e a LGPD (Art. 11).
             </p>
@@ -42,22 +57,41 @@
                     <input type="checkbox" name="aceite" value="1" required>
                     <span>Li e concordo com o tratamento dos meus dados de saúde</span>
                 </label>
-                <button type="submit" class="btn-unio">Continuar para o questionário</button>
+                <button type="submit" class="pos-portal-btn pos-portal-btn--primary pos-portal-btn--block">Continuar para o questionário</button>
             </form>
+            </div>
         </section>
 
     {% else %}
-        <section class="pos-portal-hero mb-3" aria-label="Resumo do paciente">
+        {% if alerta_equipe|default(null) and alerta_equipe.ativo %}
+        <div class="pos-portal-banner pos-portal-banner--care" role="status">
+            <i class="fas fa-user-nurse" aria-hidden="true"></i>
+            <div>
+                <strong>{{ alerta_equipe.em_atendimento ? 'Equipe em contato' : 'Atenção da equipe' }}</strong>
+                <p>{{ alerta_equipe.mensagem }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <section class="pos-portal-hero" aria-label="Resumo do paciente">
             <div class="pos-portal-hero__main">
-                <h2 class="pos-portal-hero__name">{{ paciente.nome }}</h2>
+                <p class="pos-portal-hero__eyebrow">{{ status_label|default('Recuperação ativa') }}</p>
+                <h1 class="pos-portal-hero__name">{{ paciente.nome }}</h1>
                 <p class="pos-portal-hero__meta">
-                    <code>{{ paciente.codigo }}</code>
-                    <span aria-hidden="true">·</span>
-                    {{ paciente.procedimento|default('Procedimento') }}
+                    <span class="pos-portal-hero__code">{{ paciente.codigo }}</span>
+                    {{ procedimento_label|default(paciente.procedimento|default('Procedimento')) }}
                 </p>
-                {% if protocolo_nome %}
-                <p class="pos-portal-hero__protocol"><i class="fas fa-clipboard-list" aria-hidden="true"></i> {{ protocolo_nome }}</p>
-                {% endif %}
+                <dl class="pos-portal-hero__facts">
+                    {% if data_cirurgia_label %}
+                    <div><dt>Cirurgia</dt><dd>{{ data_cirurgia_label }}</dd></div>
+                    {% endif %}
+                    {% if medico_nome %}
+                    <div><dt>Médico</dt><dd>{{ medico_nome }}</dd></div>
+                    {% endif %}
+                    {% if duracao_dias %}
+                    <div><dt>Protocolo</dt><dd>{{ duracao_dias }} dias</dd></div>
+                    {% endif %}
+                </dl>
             </div>
             {% if dia_pos is not null %}
             <div class="pos-portal-hero__badge" aria-label="Dia pós-operatório">
@@ -67,148 +101,366 @@
             {% endif %}
         </section>
 
-        {% set kpi_items = [
-            {
-                value: questionario_resumo ? 'Enviado' : 'Pendente',
-                label: 'Questionário de hoje',
-                icon: questionario_resumo ? 'fa-circle-check' : 'fa-file-medical',
-                sub: questionario_resumo ? ('Hoje às ' ~ questionario_resumo.respondido_em|split(' ')|last) : 'Preencha abaixo'
-            }
-        ] %}
-        {% if questionario_resumo %}
-            {% set kpi_items = kpi_items|merge([
-                { value: questionario_resumo.score, label: 'Score de risco', icon: 'fa-chart-line' },
-                { value: (questionario_resumo.dor ?? '—') ~ '/10', label: 'Dor', icon: 'fa-heart-pulse' },
-                { value: (questionario_resumo.febre ?? '—') ~ ' °C', label: 'Temperatura', icon: 'fa-temperature-half' }
-            ]) %}
-        {% elseif medico_nome %}
-            {% set kpi_items = kpi_items|merge([
-                { value: medico_nome, label: 'Médico responsável', icon: 'fa-user-doctor' }
-            ]) %}
+        {% if duracao_dias and dia_pos is not null %}
+        <section class="pos-portal-progress" aria-label="Progresso da recuperação">
+            <div class="pos-portal-progress__head">
+                <span class="pos-portal-progress__label">Recuperação</span>
+                <span class="pos-portal-progress__value">{{ progress_pct|default(0) }}%</span>
+            </div>
+            <div class="pos-portal-progress__track" role="progressbar" aria-valuenow="{{ progress_pct|default(0) }}" aria-valuemin="0" aria-valuemax="100">
+                <span class="pos-portal-progress__fill" style="width: {{ progress_pct|default(0) }}%"></span>
+            </div>
+            {% if fase_label %}
+            <p class="pos-portal-progress__phase">{{ fase_label }}</p>
+            {% endif %}
+        </section>
         {% endif %}
-        {% include 'components/kpi_row.html.twig' with { items: kpi_items, mb: 'mb-3', extra_class: 'pos-portal-kpis' } %}
 
-        <div class="row g-3 pos-portal-grid align-items-start">
-            {% if checklist_hoje|length > 0 or medico_email or paciente.telefoneContato %}
-            <div class="col-lg-4 pos-portal-grid__aside">
-                {% if checklist_hoje|length > 0 %}
-                <section class="unio-card p-0 pos-portal-card--orientacoes">
-                    {% include 'components/section_header.html.twig' with {
-                        title: 'Orientações de hoje',
-                        subtitle: 'Protocolo pós-operatório'
-                    } %}
-                    <div class="pos-portal-card-body">
-                        <ul class="pos-portal-checklist">
-                            {% for item in checklist_hoje %}
-                            <li class="pos-portal-checklist__item">
-                                <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
-                                <span class="pos-portal-checklist__text">{{ item.item }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                        {% if checklist_proximos|default([])|length > 0 %}
-                        <details class="pos-portal-details">
-                            <summary>Próximas etapas do protocolo</summary>
-                            <ul class="pos-portal-checklist pos-portal-checklist--muted">
-                                {% for item in checklist_proximos %}
-                                <li class="pos-portal-checklist__item">
-                                    <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
-                                    <span class="pos-portal-checklist__text">{{ item.item }}</span>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </details>
-                        {% endif %}
+        {% include 'components/pos_operatorio/medical_guide.html.twig' with { guia_medico: guia_medico|default(null) } %}
+
+        <section class="pos-portal-panel pos-portal-panel--day" aria-label="Resumo do dia">
+            <header class="pos-portal-panel__head">
+                <h2 class="pos-portal-panel__title">Resumo do dia</h2>
+                <p class="pos-portal-panel__sub">{{ 'now'|date('d/m/Y') }}{% if dia_pos is not null %} · D+{{ dia_pos }}{% endif %}{% if procedimento_label %} · {{ procedimento_label }}{% endif %}</p>
+            </header>
+            <div class="pos-portal-panel__content">
+                <div class="pos-portal-day-grid">
+                    <div class="pos-portal-day-stat">
+                        <strong>{{ questionario_resumo ? 'Enviado' : 'Pendente' }}</strong>
+                        <span>Questionário de hoje</span>
                     </div>
-                </section>
+                    <div class="pos-portal-day-stat">
+                        <strong>{% if questionario_resumo %}{{ questionario_resumo.dor ?? '—' }}/10{% else %}—{% endif %}</strong>
+                        <span>Nível de dor</span>
+                    </div>
+                    <div class="pos-portal-day-stat">
+                        <strong>{% if questionario_resumo %}{{ questionario_resumo.score }}{% else %}—{% endif %}</strong>
+                        <span>Score de risco</span>
+                    </div>
+                    <div class="pos-portal-day-stat">
+                        <strong>{{ dias_respondidos|default(0) }}</strong>
+                        <span>Dias respondidos</span>
+                    </div>
+                </div>
+
+                {% if fase_label %}
+                <p class="pos-portal-day-phase">{{ fase_label }}</p>
                 {% endif %}
 
-                {% if medico_email or paciente.telefoneContato %}
-                <section class="unio-card p-0{% if checklist_hoje|length > 0 %} mt-3{% endif %} pos-portal-card--contact">
-                    {% include 'components/section_header.html.twig' with { title: 'Contato da equipe' } %}
-                    <dl class="pos-portal-dl pos-portal-dl--compact px-3 pb-3">
-                        {% if medico_nome %}<dt>Médico</dt><dd>{{ medico_nome }}</dd>{% endif %}
-                        {% if medico_email %}<dt>E-mail</dt><dd><a href="mailto:{{ medico_email }}">{{ medico_email }}</a></dd>{% endif %}
-                        {% if paciente.telefoneContato %}<dt>Telefone</dt><dd>{{ paciente.telefoneContato }}</dd>{% endif %}
-                    </dl>
-                </section>
+                {% if checklist_hoje|default([])|length > 0 %}
+                <div class="pos-portal-day-focus">
+                    <strong>Orientação de hoje</strong>
+                    <p>{{ checklist_hoje[0].item }}</p>
+                </div>
+                {% endif %}
+
+                {% if checklist_progress|default([])|length > 0 %}
+                <div class="pos-portal-day-protocol">
+                    <p class="pos-portal-day-protocol__title">Linha do protocolo</p>
+                    <ol class="pos-portal-timeline pos-portal-timeline--compact">
+                        {% for step in checklist_progress|slice(0, 4) %}
+                        <li class="pos-portal-timeline__item{{ step.done ? ' is-done' : '' }}{{ step.current ? ' is-current' : '' }}">
+                            <span class="pos-portal-timeline__dot" aria-hidden="true"></span>
+                            <div class="pos-portal-timeline__body">
+                                <span class="pos-portal-timeline__day">D+{{ step.dia }}</span>
+                                <span class="pos-portal-timeline__text">{{ step.item }}</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </div>
                 {% endif %}
             </div>
+        </section>
+
+        <div class="pos-portal-status{% if questionario_resumo %} pos-portal-status--answered{% endif %}" role="list">
+            <article class="pos-portal-status__card pos-portal-status__card--{{ questionario_resumo ? 'done' : 'pending' }}" role="listitem">
+                <span class="pos-portal-status__icon" aria-hidden="true">
+                    <i class="fas {{ questionario_resumo ? 'fa-circle-check' : 'fa-file-medical' }}"></i>
+                </span>
+                <div class="pos-portal-status__body">
+                    <strong class="pos-portal-status__value">{{ questionario_resumo ? 'Enviado' : 'Aguardando você' }}</strong>
+                    <span class="pos-portal-status__label">Questionário de hoje</span>
+                    <span class="pos-portal-status__hint">{{ questionario_resumo ? ('Hoje às ' ~ questionario_resumo.respondido_em|split(' ')|last) : 'Preencha o formulário abaixo' }}</span>
+                </div>
+            </article>
+
+            <article class="pos-portal-status__card" role="listitem">
+                <span class="pos-portal-status__icon" aria-hidden="true"><i class="fas fa-calendar-check"></i></span>
+                <div class="pos-portal-status__body">
+                    <strong class="pos-portal-status__value">{{ dias_respondidos|default(0) }}</strong>
+                    <span class="pos-portal-status__label">Dias respondidos</span>
+                    <span class="pos-portal-status__hint">Desde a cirurgia</span>
+                </div>
+            </article>
+
+            {% if questionario_resumo %}
+            <article class="pos-portal-status__card" role="listitem">
+                <span class="pos-portal-status__icon" aria-hidden="true"><i class="fas fa-chart-line"></i></span>
+                <div class="pos-portal-status__body">
+                    <strong class="pos-portal-status__value">{{ questionario_resumo.score }}</strong>
+                    <span class="pos-portal-status__label">Score de risco</span>
+                    <span class="pos-portal-status__hint">Atualizado hoje</span>
+                </div>
+            </article>
+            <article class="pos-portal-status__card" role="listitem">
+                <span class="pos-portal-status__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></span>
+                <div class="pos-portal-status__body">
+                    <strong class="pos-portal-status__value">{{ questionario_resumo.dor ?? '—' }}/10</strong>
+                    <span class="pos-portal-status__label">Dor</span>
+                </div>
+            </article>
+            {% elseif medico_nome %}
+            <article class="pos-portal-status__card" role="listitem">
+                <span class="pos-portal-status__icon" aria-hidden="true"><i class="fas fa-user-doctor"></i></span>
+                <div class="pos-portal-status__body">
+                    <strong class="pos-portal-status__value pos-portal-status__value--sm">{{ medico_nome }}</strong>
+                    <span class="pos-portal-status__label">Médico responsável</span>
+                </div>
+            </article>
+            {% endif %}
+        </div>
+
+        <div class="pos-portal-stack">
+            <section class="pos-portal-panel pos-portal-panel--actions" aria-label="Ações rápidas">
+                <header class="pos-portal-panel__head">
+                    <h2 class="pos-portal-panel__title">Precisa de ajuda?</h2>
+                    <p class="pos-portal-panel__sub">A equipe clínica recebe o pedido na fila de atendimento</p>
+                </header>
+                <div class="pos-portal-panel__content">
+                    {% if ajuda_pendente|default(false) %}
+                    <p class="pos-portal-help-status">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                        Seu pedido já está com a equipe. Aguarde o contato.
+                    </p>
+                    {% else %}
+                    <form method="post" action="{{ path('app_pos_operatorio_portal_ajuda') }}" class="pos-portal-form pos-portal-form--help">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_portal_ajuda') }}">
+                        <div class="pos-portal-field">
+                            <label class="pos-portal-field__label" for="ajuda_mensagem">Mensagem (opcional)</label>
+                            <textarea class="pos-portal-textarea" id="ajuda_mensagem" name="mensagem" rows="2" placeholder="Descreva o que está sentindo ou sua dúvida"></textarea>
+                        </div>
+                        <button type="submit" class="pos-portal-btn pos-portal-btn--care pos-portal-btn--block">
+                            <i class="fas fa-hand-holding-medical" aria-hidden="true"></i>
+                            Preciso de ajuda
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </section>
+
+            {% if retorno_hoje|default(null) %}
+            <section class="pos-portal-panel pos-portal-panel--retorno" aria-label="Retorno ambulatorial">
+                <header class="pos-portal-panel__head">
+                    <h2 class="pos-portal-panel__title">Retorno hoje</h2>
+                    <p class="pos-portal-panel__sub">D+{{ retorno_hoje.dia }} · {{ retorno_hoje.item }}</p>
+                </header>
+                <div class="pos-portal-panel__content">
+                    {% if retorno_confirmado|default(false) %}
+                    <p class="pos-portal-retorno-ok">
+                        <i class="fas fa-circle-check" aria-hidden="true"></i>
+                        Retorno confirmado. A clínica foi avisada.
+                    </p>
+                    {% else %}
+                    <p class="pos-portal-panel__text">Confirme se comparecerá ao retorno agendado para hoje.</p>
+                    <form method="post" action="{{ path('app_pos_operatorio_portal_retorno') }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_portal_retorno') }}">
+                        <button type="submit" class="pos-portal-btn pos-portal-btn--primary pos-portal-btn--block">
+                            Confirmar retorno de hoje
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </section>
             {% endif %}
 
-            <div class="col-lg-{{ (checklist_hoje|length > 0 or medico_email or paciente.telefoneContato) ? '8' : '12' }} pos-portal-grid__main">
-                <section class="unio-card p-0 pos-portal-card--questionario">
-                    {% include 'components/section_header.html.twig' with {
-                        title: 'Questionário de hoje',
-                        subtitle: questionario_resumo ? 'Respostas registradas' : 'Preencha e envie uma vez por dia'
-                    } %}
+            {% if mensagens_equipe|default([])|length > 0 %}
+            <section class="pos-portal-panel" aria-label="Mensagens da equipe">
+                <header class="pos-portal-panel__head">
+                    <h2 class="pos-portal-panel__title">Mensagens da equipe</h2>
+                    <p class="pos-portal-panel__sub">Respostas e orientações clínicas</p>
+                </header>
+                <div class="pos-portal-panel__content">
+                    <ul class="pos-portal-messages">
+                        {% for msg in mensagens_equipe %}
+                        <li class="pos-portal-messages__item{{ msg.origem == 'Você' ? ' is-self' : '' }}">
+                            <header class="pos-portal-messages__head">
+                                <strong>{{ msg.origem }}</strong>
+                                <time datetime="{{ msg.data_label }} {{ msg.hora }}">{{ msg.data_label }} · {{ msg.hora }}</time>
+                            </header>
+                            <p>{{ msg.texto }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+            {% endif %}
 
-                    <div class="px-3 pb-3">
-                        {% if questionario_resumo %}
-                        <div class="pos-portal-success">
-                            <div class="pos-portal-success__head">
-                                <i class="fas fa-circle-check" aria-hidden="true"></i>
-                                <strong>Enviado hoje às {{ questionario_resumo.respondido_em|split(' ')|last }}</strong>
-                            </div>
-                            <p class="text-muted small mb-0">Novo questionário disponível amanhã. Em piora, contate a clínica.</p>
+            <section class="pos-portal-panel pos-portal-panel--questionario" id="questionario-hoje">
+                <header class="pos-portal-panel__head">
+                    <h2 class="pos-portal-panel__title">Questionário de hoje</h2>
+                    <p class="pos-portal-panel__sub">{{ questionario_resumo ? 'Respostas registradas na clínica' : 'Preencha e envie uma vez por dia' }}</p>
+                </header>
+
+                <div class="pos-portal-panel__content">
+                    {% if questionario_resumo %}
+                    <div class="pos-portal-success">
+                        <div class="pos-portal-success__head">
+                            <i class="fas fa-circle-check" aria-hidden="true"></i>
+                            <strong>Enviado hoje às {{ questionario_resumo.respondido_em|split(' ')|last }}</strong>
                         </div>
-                        {% else %}
-                        <form method="post" action="{{ path('app_pos_operatorio_portal_questionario') }}" class="pos-portal-form pos-portal-form--questionario">
-                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_portal_q') }}">
-
-                            {% for pergunta in perguntas %}
-                                {% set pid = pergunta.id %}
-                                {% set tipo = pergunta.tipo|default('texto') %}
-                                <div class="pos-portal-field{% if tipo == 'texto' %} pos-portal-field--full{% endif %}">
-                                    <label class="pos-portal-field__label" for="q_{{ pid }}">{{ pergunta.label }}</label>
-
-                                    {% if tipo == 'escala' %}
-                                    <div class="pos-portal-range-wrap">
-                                        <input type="range" class="pos-portal-range" id="q_{{ pid }}" name="{{ pid }}"
-                                               min="{{ pergunta.min|default(0) }}" max="{{ pergunta.max|default(10) }}"
-                                               value="{{ pergunta.default|default(3) }}" data-range-out="out_{{ pid }}">
-                                        <output id="out_{{ pid }}" class="pos-portal-range__out">{{ pergunta.default|default(3) }}</output>
-                                    </div>
-                                    <div class="pos-portal-range-labels">
-                                        <span>Sem dor</span><span>Intensa</span>
-                                    </div>
-                                    {% elseif tipo == 'numero' %}
-                                    <input type="number" step="{{ pergunta.step|default(0.1) }}" class="pos-portal-input"
-                                           id="q_{{ pid }}" name="{{ pid }}" placeholder="{{ pergunta.placeholder|default('36.5') }}">
-                                    {% elseif tipo == 'select' %}
-                                    <select class="pos-portal-select" id="q_{{ pid }}" name="{{ pid }}">
-                                        {% for op in pergunta.opcoes|default([]) %}
-                                        <option value="{{ op.value }}">{{ op.label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    {% else %}
-                                    <textarea class="pos-portal-textarea" id="q_{{ pid }}" name="{{ pid }}" rows="2"
-                                              {% if not pergunta.optional|default(false) %}required{% endif %}></textarea>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-
-                            <button type="submit" class="btn-unio pos-portal-field--full">
-                                <i class="fas fa-paper-plane mr-1" aria-hidden="true"></i> Enviar questionário
-                            </button>
-                        </form>
-                        {% endif %}
+                        <p class="pos-portal-success__text">A equipe recebeu suas respostas. Novo questionário amanhã. Em piora, contate a clínica.</p>
                     </div>
-                </section>
-            </div>
+                    {% else %}
+                    <form method="post" action="{{ path('app_pos_operatorio_portal_questionario') }}" class="pos-portal-form pos-portal-form--questionario">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_portal_q') }}">
+
+                        {% for pergunta in perguntas %}
+                            {% set pid = pergunta.id %}
+                            {% set tipo = pergunta.tipo|default('texto') %}
+                            <div class="pos-portal-field">
+                                <label class="pos-portal-field__label" for="q_{{ pid }}">{{ pergunta.label }}</label>
+
+                                {% if tipo == 'escala' %}
+                                <div class="pos-portal-range-wrap">
+                                    <input type="range" class="pos-portal-range" id="q_{{ pid }}" name="{{ pid }}"
+                                           min="{{ pergunta.min|default(0) }}" max="{{ pergunta.max|default(10) }}"
+                                           value="{{ pergunta.default|default(3) }}" data-range-out="out_{{ pid }}">
+                                    <output id="out_{{ pid }}" class="pos-portal-range__out" for="q_{{ pid }}">{{ pergunta.default|default(3) }}</output>
+                                </div>
+                                <div class="pos-portal-range-labels">
+                                    <span>Sem dor</span><span>Intensa</span>
+                                </div>
+                                {% elseif tipo == 'numero' %}
+                                <input type="number" step="{{ pergunta.step|default(0.1) }}" class="pos-portal-input"
+                                       id="q_{{ pid }}" name="{{ pid }}" inputmode="decimal"
+                                       placeholder="{{ pergunta.placeholder|default('36.5') }}">
+                                {% elseif tipo == 'select' %}
+                                <select class="pos-portal-select" id="q_{{ pid }}" name="{{ pid }}">
+                                    {% for op in pergunta.opcoes|default([]) %}
+                                    <option value="{{ op.value }}">{{ op.label }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% else %}
+                                <textarea class="pos-portal-textarea" id="q_{{ pid }}" name="{{ pid }}" rows="3"
+                                          {% if not pergunta.optional|default(false) %}required{% endif %}></textarea>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <button type="submit" class="pos-portal-btn pos-portal-btn--primary pos-portal-btn--block">Enviar questionário de hoje</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </section>
+
+            {% if checklist_hoje|default([])|length > 0 %}
+            <section class="pos-portal-panel">
+                <header class="pos-portal-panel__head">
+                    <h2 class="pos-portal-panel__title">Orientações de hoje</h2>
+                    <p class="pos-portal-panel__sub">{{ protocolo_nome|default('Protocolo pós-operatório') }}</p>
+                </header>
+                <div class="pos-portal-panel__content">
+                <ul class="pos-portal-checklist">
+                    {% for item in checklist_hoje %}
+                    <li class="pos-portal-checklist__item">
+                        <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
+                        <span class="pos-portal-checklist__text">{{ item.item }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% if checklist_proximos|default([])|length > 0 %}
+                <details class="pos-portal-details">
+                    <summary>Próximas etapas</summary>
+                    <ul class="pos-portal-checklist pos-portal-checklist--muted">
+                        {% for item in checklist_proximos %}
+                        <li class="pos-portal-checklist__item">
+                            <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
+                            <span class="pos-portal-checklist__text">{{ item.item }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </details>
+                {% endif %}
+                </div>
+            </section>
+            {% endif %}
+
+            {% if checklist_progress|default([])|length > 0 %}
+            <section class="pos-portal-panel">
+                <header class="pos-portal-panel__head">
+                    <h2 class="pos-portal-panel__title">Linha do protocolo</h2>
+                    <p class="pos-portal-panel__sub">Marcos da recuperação</p>
+                </header>
+                <div class="pos-portal-panel__content">
+                <ol class="pos-portal-timeline">
+                    {% for step in checklist_progress %}
+                    <li class="pos-portal-timeline__item{{ step.done ? ' is-done' : '' }}{{ step.current ? ' is-current' : '' }}">
+                        <span class="pos-portal-timeline__dot" aria-hidden="true"></span>
+                        <div class="pos-portal-timeline__body">
+                            <span class="pos-portal-timeline__day">D+{{ step.dia }}</span>
+                            <span class="pos-portal-timeline__text">{{ step.item }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ol>
+                </div>
+            </section>
+            {% endif %}
+
+            {% if historico_questionarios|default([])|length > 0 %}
+            <section class="pos-portal-panel">
+                <header class="pos-portal-panel__head">
+                    <h2 class="pos-portal-panel__title">Histórico recente</h2>
+                    <p class="pos-portal-panel__sub">Questionários enviados</p>
+                </header>
+                <div class="pos-portal-panel__content">
+                <ul class="pos-portal-history">
+                    {% for item in historico_questionarios %}
+                    <li class="pos-portal-history__item">
+                        <span class="pos-portal-history__date">{{ item.data_label }}</span>
+                        <strong>D+{{ item.dia_pos ?? '—' }} · Score {{ item.score }}</strong>
+                        <p>Dor {{ item.dor ?? '—' }}/10{% if item.febre is not null %} · Febre {{ item.febre }}°C{% endif %}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                </div>
+            </section>
+            {% endif %}
+
+            {% if medico_nome or medico_email or paciente.telefoneContato or telefone_emergencia %}
+            <section class="pos-portal-panel pos-portal-panel--contact">
+                <header class="pos-portal-panel__head">
+                    <h2 class="pos-portal-panel__title">Contato da clínica</h2>
+                </header>
+                <div class="pos-portal-panel__content">
+                <dl class="pos-portal-contact">
+                    {% if medico_nome %}
+                    <div><dt>Médico</dt><dd>{{ medico_nome }}</dd></div>
+                    {% endif %}
+                    {% if medico_email %}
+                    <div><dt>E-mail</dt><dd><a href="mailto:{{ medico_email }}">{{ medico_email }}</a></dd></div>
+                    {% endif %}
+                    {% if paciente.telefoneContato %}
+                    <div><dt>Telefone</dt><dd><a href="tel:{{ paciente.telefoneContato|replace({' ': '', '-': '', '(': '', ')': ''}) }}">{{ paciente.telefoneContato }}</a></dd></div>
+                    {% endif %}
+                    {% if contato_emergencia %}
+                    <div><dt>Contato emergência</dt><dd>{{ contato_emergencia }}{% if telefone_emergencia %} · {{ telefone_emergencia }}{% endif %}</dd></div>
+                    {% endif %}
+                </dl>
+                </div>
+            </section>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}
 
 {% block portal_javascripts %}
 <script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('{{ asset('pos-operatorio/sw.js') }}').catch(function () {});
-}
-document.querySelectorAll('.pos-portal-range').forEach(function (input) {
-    var outId = input.getAttribute('data-range-out');
-    var out = outId ? document.getElementById(outId) : null;
-    function sync() { if (out) out.textContent = input.value; }
+document.querySelectorAll('[data-range-out]').forEach(function (input) {
+    var out = document.getElementById(input.getAttribute('data-range-out'));
+    if (!out) return;
+    var sync = function () { out.textContent = input.value; };
     input.addEventListener('input', sync);
     sync();
 });

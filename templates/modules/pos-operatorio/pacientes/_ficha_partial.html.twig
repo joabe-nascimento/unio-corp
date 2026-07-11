@@ -13,11 +13,6 @@
     <div class="clinic-ficha-offcanvas-hero__main">
         <span class="clinic-code">{{ paciente.codigo }}</span>
         <h3 class="clinic-ficha-offcanvas-hero__name">{{ _nome }}</h3>
-        <p class="clinic-ficha-offcanvas-hero__sub">
-            {{ paciente.procedimento|default('Procedimento não informado') }}
-            {% if dia_pos is not null %} · D+{{ dia_pos }}{% endif %}
-            {% if protocolo_dias %} · protocolo {{ protocolo_dias }} dias{% endif %}
-        </p>
     </div>
     <span class="clinic-status clinic-status--{% if paciente.status == 'alerta' %}danger{% elseif paciente.status == 'pendente' %}muted{% elseif paciente.status == 'encerrado' %}muted{% else %}success{% endif %}">
         {{ _status }}
@@ -27,5 +22,15 @@
 <div class="clinic-ficha-offcanvas-kpis">
     {% include 'components/pos_operatorio/patient_kpi_strip.html.twig' with { variant: 'offcanvas' } %}
 </div>
+
+<p class="clinic-ficha-offcanvas-meta">
+    <span class="clinic-ficha-offcanvas-meta__procedure">{{ paciente.procedimento|default('Procedimento não informado') }}</span>
+    {% if dia_pos is not null or protocolo_dias %}
+    <span class="clinic-ficha-offcanvas-meta__phase">
+        {% if dia_pos is not null %}D+{{ dia_pos }}{% endif %}
+        {% if protocolo_dias %}{% if dia_pos is not null %} · {% endif %}protocolo {{ protocolo_dias }} dias{% endif %}
+    </span>
+    {% endif %}
+</p>
 
 {% include 'modules/pos-operatorio/pacientes/_ficha_body.html.twig' %}

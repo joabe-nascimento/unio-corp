@@ -3,7 +3,7 @@
 namespace App\PosOperatorio;
 
 /**
- * Catálogo de módulos da Unio Clínica — sidebar e navegação.
+ * Catálogo de módulos da UNIO SAÚDE — sidebar e navegação.
  */
 final class PosOperatorioModuleCatalog
 {

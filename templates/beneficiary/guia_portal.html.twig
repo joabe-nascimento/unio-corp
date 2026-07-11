@@ -1,0 +1,96 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}{{ paciente_nome }} · Guia médico{% endblock %}
+{% block benef_product %}Guia médico{% endblock %}
+{% set benef_nav_active = 'guia' %}
+
+{% block benef_topbar_actions %}
+<a href="{{ path('app_guia_medico_beneficiario_sair') }}" class="benef-topbar__logout">Sair</a>
+{% endblock %}
+
+{% block benef_content %}
+<div class="benef-guia-app">
+    <section class="benef-guia-hero" aria-label="Resumo do beneficiário">
+        <div class="benef-guia-hero__badges">
+            <span class="benef-guia-hero__phase">{{ guia_medico.fase_label|default(fase_label)|default('Guia ativo') }}</span>
+            {% if dia_pos is not null %}
+            <span class="benef-guia-hero__chip">D+{{ dia_pos }}</span>
+            {% endif %}
+        </div>
+        <h1 class="benef-guia-hero__name">{{ paciente_nome }}</h1>
+        <p class="benef-guia-hero__meta">
+            <span class="benef-guia-hero__code">{{ paciente_codigo }}</span>
+            {{ procedimento_label }}
+        </p>
+        {% if clinica_nome %}
+        <p class="benef-guia-hero__clinic"><i class="fas fa-hospital" aria-hidden="true"></i> {{ clinica_nome }}</p>
+        {% endif %}
+        <dl class="benef-guia-hero__facts">
+            {% if data_cirurgia_label %}
+            <div><dt>Cirurgia</dt><dd>{{ data_cirurgia_label }}</dd></div>
+            {% endif %}
+            {% if medico_nome %}
+            <div><dt>Médico</dt><dd>{{ medico_nome }}</dd></div>
+            {% endif %}
+            {% if proximo_retorno|default(null) %}
+            <div><dt>Próximo passo</dt><dd>{{ proximo_retorno }}</dd></div>
+            {% endif %}
+        </dl>
+    </section>
+
+    {% if duracao_dias and dia_pos is not null %}
+    <section class="benef-guia-progress" aria-label="Progresso da recuperação">
+        <div class="benef-guia-progress__head">
+            <span>Recuperação</span>
+            <strong>{{ progress_pct }}%</strong>
+        </div>
+        <div class="benef-guia-progress__track" role="progressbar" aria-valuenow="{{ progress_pct }}" aria-valuemin="0" aria-valuemax="100">
+            <span class="benef-guia-progress__fill" style="width: {{ progress_pct }}%"></span>
+        </div>
+        <p class="benef-guia-progress__hint">{{ guia_medico.subtitulo|default('Orientações personalizadas do seu protocolo') }}</p>
+    </section>
+    {% endif %}
+
+    {% include 'components/beneficiary/guia_medico_panel.html.twig' with {
+        guia_medico: guia_medico,
+        checklist_hoje: checklist_hoje,
+        lembretes: lembretes|default([])
+    } %}
+
+    <section class="benef-guia-actions" aria-labelledby="benef-guia-actions-title">
+        <h2 id="benef-guia-actions-title">Precisa de algo agora?</h2>
+        <div class="benef-guia-actions__grid">
+            <a href="{{ path('app_carteirinha_digital') }}" class="benef-guia-actions__item">
+                <i class="fas fa-id-card" aria-hidden="true"></i>
+                <strong>Carteirinha</strong>
+                <span>Baixar identidade digital</span>
+            </a>
+            <a href="{{ path('app_portal_patient_login') }}" class="benef-guia-actions__item">
+                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                <strong>Portal clínico</strong>
+                <span>Questionário e equipe</span>
+            </a>
+            {% if telefone_clinica %}
+            <a href="tel:{{ telefone_clinica|replace({' ': '', '-': '', '(': '', ')': ''}) }}" class="benef-guia-actions__item benef-guia-actions__item--call">
+                <i class="fas fa-phone" aria-hidden="true"></i>
+                <strong>Ligar</strong>
+                <span>{{ telefone_clinica }}</span>
+            </a>
+            {% endif %}
+        </div>
+        {% if contato_emergencia %}
+        <div class="benef-guia-actions__emergency">
+            <i class="fas fa-truck-medical" aria-hidden="true"></i>
+            <div>
+                <strong>Contato de emergência</strong>
+                <p>{{ contato_emergencia }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    {% if is_demo %}
+    <p class="benef-demo-badge"><i class="fas fa-flask" aria-hidden="true"></i> Demonstração · Ana Costa, herniorrafia D+3</p>
+    {% endif %}
+</div>
+{% endblock %}

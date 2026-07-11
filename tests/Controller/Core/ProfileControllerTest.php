@@ -2,13 +2,15 @@
 
 namespace App\Tests\Controller\Core;
 
+use App\Dev\DevSeedEmails;
+
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class ProfileControllerTest extends WebTestCase
 {
-    private const GESTOR_EMAIL = 'gestor@unio.dev';
+    private const GESTOR_EMAIL = DevSeedEmails::RENATA;
     private const PASS = 'unio123';
 
     public function testProfilePageLoadsWithForms(): void
@@ -38,7 +40,7 @@ final class ProfileControllerTest extends WebTestCase
 
         $user = static::getContainer()->get(UserRepository::class)->findOneBy(['email' => self::GESTOR_EMAIL]);
         self::assertNotNull($user);
-        $user->setNome('Gestor Unio');
+        $user->setNome('Renata Oliveira');
         static::getContainer()->get('doctrine')->getManager()->flush();
     }
 

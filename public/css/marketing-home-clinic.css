@@ -48,9 +48,41 @@
     box-shadow: var(--mkt-clinic-shadow), 0 0 0 1px rgba(75, 114, 190, 0.12);
 }
 
+.marketing-home.mkt-clinic .mkt-preview-module > i,
+.marketing-home.mkt-clinic .mkt-preview-nav-item i {
+    display: none;
+}
+
+/* Sidebar sem ícones: trilho de pontos em vez de quadrados vazios */
+.marketing-home.mkt-clinic .mkt-preview-nav-item {
+    width: 8px;
+    height: 8px;
+    min-width: 8px;
+    min-height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(75, 114, 190, 0.22);
+    color: transparent;
+    font-size: 0;
+    box-shadow: none;
+}
+
+.marketing-home.mkt-clinic .mkt-preview-nav-item--active {
+    width: 8px;
+    height: 28px;
+    border-radius: 999px;
+    background: #4b72be;
+    box-shadow: none;
+}
+
 .marketing-home.mkt-clinic .mkt-preview-module {
-    border-radius: 12px;
-    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    gap: 0;
+}
+
+.marketing-home.mkt-clinic .mkt-preview-module--highlight {
+    border-color: #4b72be !important;
+    background: #eaf0fb !important;
+    box-shadow: 0 4px 16px rgba(75, 114, 190, 0.1);
 }
 
 .marketing-home.mkt-clinic .mkt-preview-module:hover {
@@ -236,9 +268,11 @@
 }
 
 .marketing-home.mkt-clinic .mkt-testimonial-avatar {
-    border-radius: 14px;
-    background: rgba(75, 114, 190, 0.15) !important;
-    color: #6a9ec4 !important;
+    border-radius: 999px;
+    background: #e2e8f0 !important;
+    border: 2px solid rgba(75, 114, 190, 0.14) !important;
+    color: transparent !important;
+    object-fit: cover;
 }
 
 /* Outcomes */
@@ -280,4 +314,1522 @@
 
 .marketing-home.mkt-clinic .mkt-section-title {
     letter-spacing: -0.5px;
+}
+
+/* Navbar de produtos clínicos */
+.marketing-home.mkt-clinic .mkt-v2 .mkt-header-inner--v2 {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px 20px;
+    overflow: visible;
+}
+
+.mkt-v2 .mkt-nav--clinic-products {
+    width: 100%;
+    flex: 1;
+    justify-content: center;
+    justify-self: center;
+    margin: 0;
+    min-width: 0;
+    overflow: visible;
+}
+
+.mkt-v2 .mkt-header-actions--v2 {
+    flex-shrink: 0;
+    margin-left: 0;
+    justify-self: end;
+}
+
+.mkt-v2 .mkt-brand--v2 {
+    justify-self: start;
+}
+
+.mkt-nav--clinic-products {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-wrap: nowrap;
+}
+
+.mkt-nav--clinic-products > a,
+.mkt-header-product-nav > a,
+.benef-topbar__nav > a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mkt-v2-muted, #64748b);
+    padding: 8px 14px;
+    border-radius: 100px;
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 1.2;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.mkt-nav--clinic-products > a:hover,
+.mkt-header-product-nav > a:hover,
+.benef-topbar__nav > a:hover {
+    color: var(--mkt-v2-text, #0f172a);
+    background: var(--mkt-v2-surface, #f8fafc);
+}
+
+/* Dropdown Produtos — integrado à nav */
+.mkt-nav-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.mkt-nav-dropdown__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 8px 12px 8px 14px;
+    border: none;
+    border-radius: 100px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--mkt-v2-muted, #64748b);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.mkt-nav-dropdown__trigger:focus {
+    outline: none;
+}
+
+.mkt-nav-dropdown__trigger:focus-visible {
+    box-shadow: 0 0 0 2px rgba(75, 114, 190, 0.35);
+}
+
+.mkt-nav-dropdown.is-open .mkt-nav-dropdown__trigger {
+    color: var(--mkt-v2-text, #0f172a);
+    background: var(--mkt-v2-surface, #f8fafc);
+    box-shadow: inset 0 0 0 1px rgba(75, 114, 190, 0.2);
+}
+
+.mkt-nav-dropdown__panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 210px;
+    padding: 6px;
+    border-radius: 16px;
+    background: var(--mkt-v2-bg-elevated, #fff);
+    border: 1px solid var(--mkt-v2-border, rgba(15, 23, 42, 0.08));
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+    z-index: 500;
+}
+
+.mkt-nav-dropdown__panel:not([hidden]) {
+    display: block;
+}
+
+.mkt-nav-dropdown__trigger.is-active {
+    color: var(--mkt-v2-text, #0f172a);
+    font-weight: 600;
+}
+
+.mkt-nav-dropdown__trigger:hover {
+    color: var(--mkt-v2-text, #0f172a);
+    background: var(--mkt-v2-surface, #f8fafc);
+}
+
+.mkt-nav-dropdown__caret {
+    font-size: 9px;
+    opacity: 0.7;
+    transition: transform 0.2s ease;
+}
+
+.mkt-nav-dropdown.is-open .mkt-nav-dropdown__caret {
+    transform: rotate(180deg);
+}
+
+.mkt-nav-dropdown__panel[hidden] {
+    display: none !important;
+}
+
+.mkt-nav-dropdown__panel a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mkt-v2-text, #334155);
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.mkt-nav-dropdown__panel a i {
+    display: none;
+}
+
+.mkt-nav-dropdown__panel a:hover {
+    background: var(--mkt-v2-surface, #f8fafc);
+    color: var(--mkt-v2-text, #0f172a);
+}
+
+.mkt-nav-dropdown__panel a.is-active {
+    background: #eaf0fb;
+    color: #3d61a8;
+    font-weight: 600;
+}
+
+.mkt-header-product-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+    flex-wrap: nowrap;
+}
+
+/* Landing — carteirinha + guia na página principal */
+.mkt-home-patient-products {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 24px 24px;
+}
+
+.mkt-home-patient-products__head {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 32px;
+}
+
+.mkt-home-patient-products__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.mkt-home-patient-products__panel {
+    background: var(--mkt-v2-bg-elevated, #fff);
+    border: 1px solid var(--mkt-v2-border, rgba(15, 23, 42, 0.1));
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 12px 40px rgba(30, 42, 58, 0.06);
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.mkt-home-patient-products__demo {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mkt-home-patient-products__panel-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 12px;
+}
+
+.mkt-home-patient-products__panel-head h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.mkt-home-patient-products__panel-head p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--mkt-v2-muted, #64748b);
+    line-height: 1.4;
+}
+
+.mkt-home-patient-products__link {
+    font-size: 12px;
+    font-weight: 800;
+    color: #4b72be;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.mkt-home-patient-products__icon {
+    display: none;
+}
+
+.mkt-home-carteirinha-embed,
+.mkt-home-guia-embed {
+    padding: 14px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.mkt-home-patient-embed__top {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.mkt-home-patient-embed__preview {
+    margin-top: auto;
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.mkt-home-guia-embed .mkt-home-patient-embed__preview {
+    aspect-ratio: 1.586 / 1;
+}
+
+.mkt-home-carteirinha-embed .mkt-home-patient-embed__preview {
+    aspect-ratio: 1.586 / 1;
+}
+
+.mkt-home-patient-embed__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.mkt-home-patient-embed__steps li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #eaf0fb;
+    font-size: 11px;
+    font-weight: 700;
+    color: #3d61a8;
+}
+
+.mkt-home-patient-embed__steps span {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #4b72be;
+    color: #fff;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.mkt-home-patient-embed__access {
+    padding: 12px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid rgba(75, 114, 190, 0.15);
+}
+
+.mkt-home-patient-embed__access-label,
+.mkt-home-patient-embed__preview-label {
+    margin: 0 0 10px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.mkt-home-patient-embed__access-codes {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 0;
+}
+
+.mkt-home-patient-embed__access-codes > div {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 8px;
+    align-items: center;
+}
+
+.mkt-home-patient-embed__access-codes dt {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.mkt-home-patient-embed__access-codes dd {
+    margin: 0;
+}
+
+.mkt-home-patient-embed__access-codes code {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.02em;
+}
+
+.mkt-home-patient-embed__access-hint {
+    margin: 10px 0 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #64748b;
+}
+
+/* Carteirinha — preview do cartão */
+/* Carteirinha — preview com destaque (igual card do dashboard) */
+.mkt-home-carteirinha-embed__card {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid rgba(75, 114, 190, 0.35);
+    background: linear-gradient(135deg, #eaf0fb 0%, #f5f8fc 100%);
+    box-shadow: 0 8px 24px rgba(75, 114, 190, 0.12);
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard-widget {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 6px;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard-widget__tabs {
+    align-self: center;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard-widget__scene {
+    position: relative;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 140px;
+    aspect-ratio: 1.586 / 1;
+    perspective: none;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard-widget__flip-hint {
+    flex-shrink: 0;
+    margin: 0;
+    font-size: 10px;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard,
+.mkt-home-carteirinha-embed__card .mkt-idcard--landscape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    aspect-ratio: unset;
+    transform-style: flat;
+    transition: none;
+    overflow: hidden;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard--landscape.is-flipped {
+    transform: none !important;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard--landscape .mkt-idcard__face {
+    min-height: 100%;
+    border-radius: 14px;
+    transform: none !important;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard--landscape.is-flipped .mkt-idcard__face--front {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard--landscape:not(.is-flipped) .mkt-idcard__face--back {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard--landscape.is-flipped .mkt-idcard__face--back {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard--landscape .mkt-idcard__hint {
+    pointer-events: none;
+}
+
+.mkt-home-carteirinha-embed__card .mkt-idcard--landscape .mkt-idcard__hint i {
+    display: inline-block;
+}
+
+.mkt-home-patient-products__cta {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    margin-top: 0;
+    flex-shrink: 0;
+}
+
+.mkt-home-guia-mock {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #4b72be 0%, #5a84cc 55%, #6b93d4 100%);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(75, 114, 190, 0.2);
+}
+
+.mkt-home-guia-mock__label,
+.mkt-home-patient-embed__preview-label {
+    margin: 0 0 10px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.mkt-home-guia-mock__label {
+    color: inherit;
+    opacity: 0.85;
+}
+
+.mkt-home-guia-mock__hero {
+    margin-bottom: 10px;
+}
+
+.mkt-home-guia-mock__phase {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 10px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.mkt-home-guia-mock__name {
+    display: block;
+    font-family: 'Sora', 'Nunito', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.mkt-home-guia-mock__meta {
+    display: block;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.mkt-home-guia-mock__timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mkt-home-guia-mock__timeline li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.3;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.mkt-home-guia-mock__timeline li span {
+    flex-shrink: 0;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.mkt-home-guia-mock__timeline li.is-done {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.mkt-home-guia-mock__timeline li.is-current {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.mkt-home-guia-embed .mkt-protocol-rail {
+    width: 100%;
+    min-width: 0;
+}
+
+.mkt-home-guia-embed .mkt-protocol-rail__step {
+    width: 100%;
+}
+
+.mkt-home-guia-embed .mkt-protocol-rail__text {
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.mkt-home-guia-embed__phase {
+    margin-bottom: 12px;
+}
+
+.mkt-home-guia-embed__badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #eaf0fb;
+    color: #3d61a8;
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.mkt-home-guia-embed__phase p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #475569;
+}
+
+.mkt-home-guia-embed__tips {
+    margin: 12px 0 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: #334155;
+}
+
+.mkt-home-guia-embed__alerts {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    color: #b45309;
+}
+
+.mkt-home-guia-embed__alerts li {
+    margin-bottom: 6px;
+}
+
+.mkt-home-patient-products__cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.mkt-idcard-showcase--cta {
+    padding-top: 24px;
+    padding-bottom: 48px;
+}
+
+/* Landing — teasers dos fluxos beneficiário (legado) */
+.mkt-home-benef-teaser {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.mkt-home-benef-teaser__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.mkt-home-benef-teaser__steps li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #eaf0fb;
+    font-size: 11px;
+    font-weight: 700;
+    color: #3d61a8;
+}
+
+.mkt-home-benef-teaser__steps span {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #4b72be;
+    color: #fff;
+    font-size: 10px;
+}
+
+.mkt-home-benef-teaser__card {
+    width: 100%;
+    max-width: 340px;
+}
+
+.mkt-home-benef-teaser__card .mkt-idcard-widget {
+    width: 100%;
+}
+
+.mkt-home-benef-teaser__cta {
+    width: 100%;
+    max-width: 340px;
+    justify-content: center;
+    text-align: center;
+}
+
+.mkt-home-benef-guia-preview__features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.mkt-home-benef-guia-preview__features li {
+    display: block;
+    font-size: 13px;
+    color: #334155;
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.4;
+}
+
+.mkt-home-benef-guia-preview__features li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #4b72be;
+}
+
+@media (max-width: 991px) {
+    .mkt-home-patient-products__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mkt-home-patient-products__panel-head {
+        grid-template-columns: 1fr;
+    }
+
+    .mkt-home-patient-products__link {
+        justify-self: start;
+    }
+}
+
+/* ── Seções spotlight: carteirinha + guia na landing ── */
+.mkt-product-spotlight {
+    padding: 64px 24px;
+    max-width: var(--mkt-v2-max, 1200px);
+    margin: 0 auto;
+}
+
+.mkt-product-spotlight--alt {
+    padding-top: 0;
+}
+
+.mkt-product-spotlight__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.mkt-product-spotlight__grid--reverse .mkt-product-spotlight__copy {
+    order: 2;
+}
+
+.mkt-product-spotlight__grid--reverse .mkt-product-spotlight__visual {
+    order: 1;
+}
+
+.mkt-product-spotlight__copy h2 {
+    margin: 0 0 14px;
+    font-family: 'Sora', 'Nunito', sans-serif;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--mkt-v2-text, #0f172a);
+}
+
+.mkt-product-spotlight__copy p {
+    margin: 0 0 18px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--mkt-v2-muted, #64748b);
+}
+
+.mkt-product-spotlight__copy .mkt-rich-spotlight__list {
+    margin-bottom: 24px;
+}
+
+.mkt-product-spotlight__visual {
+    position: relative;
+    border-radius: 20px;
+    overflow: visible;
+    padding: 20px;
+    background: var(--mkt-v2-bg-elevated, #fff);
+    border: 1px solid var(--mkt-v2-border, rgba(15, 23, 42, 0.08));
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06);
+}
+
+.mkt-product-spotlight__visual--bare {
+    padding: 0 28px 0 12px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+}
+
+.mkt-product-spotlight__visual--bare .mkt-idcard-deck-wrap {
+    margin-left: 0;
+    margin-right: auto;
+    max-width: min(440px, 100%);
+}
+
+/* Baralho 3D — três carteirinhas */
+.mkt-idcard-deck-wrap {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 4px;
+}
+
+.mkt-idcard-deck-wrap .mkt-idcard-deck {
+    margin-bottom: 40px;
+}
+
+.mkt-idcard-deck-wrap:not(:hover) {
+    animation: mkt-deck-float 5s ease-in-out infinite;
+}
+
+@keyframes mkt-deck-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.mkt-idcard-deck {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    aspect-ratio: 1.586 / 1;
+    perspective: 2000px;
+    perspective-origin: 44% 36%;
+    padding: 32px 0 8px;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--deck-tilt-y, 0deg)) rotateY(var(--deck-tilt-x, 0deg));
+    transition: transform 0.2s ease-out;
+    will-change: transform;
+}
+
+.mkt-idcard-deck__floor {
+    position: absolute;
+    left: 50%;
+    bottom: -2%;
+    transform: translateX(-50%) rotateX(78deg);
+    width: 78%;
+    height: 36%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(15, 23, 42, 0.16) 0%, rgba(15, 23, 42, 0.04) 55%, transparent 75%);
+    filter: blur(4px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.mkt-idcard-deck__glow {
+    position: absolute;
+    left: 50%;
+    bottom: 2%;
+    transform: translateX(-50%);
+    width: 88%;
+    height: 32%;
+    background: radial-gradient(ellipse at center, rgba(75, 114, 190, 0.32) 0%, rgba(201, 162, 39, 0.1) 42%, transparent 74%);
+    filter: blur(12px);
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.4s ease;
+}
+
+.mkt-idcard-deck:hover .mkt-idcard-deck__glow,
+.mkt-idcard-deck-wrap.is-layer-1 .mkt-idcard-deck__glow,
+.mkt-idcard-deck-wrap.is-layer-2 .mkt-idcard-deck__glow,
+.mkt-idcard-deck-wrap.is-layer-3 .mkt-idcard-deck__glow {
+    opacity: 1.15;
+}
+
+.mkt-idcard-deck__layer {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 92%;
+    aspect-ratio: 1.586 / 1;
+    transform-style: preserve-3d;
+    transform-origin: center 122%;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: left;
+    transition:
+        transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.45s ease,
+        filter 0.45s ease,
+        z-index 0s linear 0.32s;
+    transition-delay: calc(var(--deck-i, 0) * 55ms);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mkt-idcard-deck__layer:focus-visible .mkt-idcard-deck__card {
+    outline: 2px solid rgba(75, 114, 190, 0.65);
+    outline-offset: 4px;
+}
+
+.mkt-idcard-deck__layer.is-active .mkt-idcard-deck__card {
+    box-shadow:
+        0 36px 72px rgba(15, 23, 42, 0.4),
+        0 14px 32px rgba(201, 162, 39, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+}
+
+.mkt-idcard-deck__layer--1 {
+    transform: translateX(-64%) translateY(22px) translateZ(-110px) rotateY(-28deg) rotateZ(-6deg) scale(0.82);
+    z-index: 1;
+    opacity: 0.82;
+    filter: brightness(0.9) saturate(0.95);
+}
+
+.mkt-idcard-deck__layer--2 {
+    transform: translateX(-52%) translateY(10px) translateZ(-45px) rotateY(-14deg) rotateZ(-2deg) scale(0.9);
+    z-index: 2;
+    opacity: 0.92;
+    filter: brightness(0.96) saturate(0.98);
+}
+
+.mkt-idcard-deck__layer--3 {
+    transform: translateX(-46%) translateY(-10px) translateZ(50px) rotateY(10deg) rotateZ(2deg) scale(1);
+    z-index: 3;
+    opacity: 1;
+    filter: brightness(1) saturate(1.02);
+}
+
+.mkt-idcard-deck:hover .mkt-idcard-deck__layer--1,
+.mkt-idcard-deck-wrap.is-layer-3:not(.is-layer-1):not(.is-layer-2) .mkt-idcard-deck__layer--1 {
+    transform: translateX(-78%) translateY(26px) translateZ(-130px) rotateY(-38deg) rotateZ(-8deg) scale(0.8);
+    opacity: 0.88;
+}
+
+.mkt-idcard-deck:hover .mkt-idcard-deck__layer--2,
+.mkt-idcard-deck-wrap.is-layer-3:not(.is-layer-1):not(.is-layer-2) .mkt-idcard-deck__layer--2 {
+    transform: translateX(-54%) translateY(6px) translateZ(-20px) rotateY(-6deg) rotateZ(0deg) scale(0.92);
+    opacity: 0.96;
+}
+
+.mkt-idcard-deck:hover .mkt-idcard-deck__layer--3,
+.mkt-idcard-deck-wrap.is-layer-3 .mkt-idcard-deck__layer--3 {
+    transform: translateX(-34%) translateY(-18px) translateZ(80px) rotateY(14deg) rotateZ(3deg) scale(1.02);
+}
+
+.mkt-idcard-deck-wrap.is-layer-1 .mkt-idcard-deck__layer--1 {
+    transform: translateX(-34%) translateY(-18px) translateZ(80px) rotateY(14deg) rotateZ(3deg) scale(1.02);
+    z-index: 5;
+    opacity: 1;
+    filter: brightness(1) saturate(1.05);
+    transition-delay: 0ms;
+}
+
+.mkt-idcard-deck-wrap.is-layer-1 .mkt-idcard-deck__layer--2 {
+    transform: translateX(-58%) translateY(14px) translateZ(-60px) rotateY(-20deg) rotateZ(-4deg) scale(0.86);
+    z-index: 2;
+    opacity: 0.75;
+}
+
+.mkt-idcard-deck-wrap.is-layer-1 .mkt-idcard-deck__layer--3 {
+    transform: translateX(-72%) translateY(24px) translateZ(-120px) rotateY(-32deg) rotateZ(-6deg) scale(0.8);
+    z-index: 1;
+    opacity: 0.65;
+}
+
+.mkt-idcard-deck-wrap.is-layer-2 .mkt-idcard-deck__layer--2 {
+    transform: translateX(-34%) translateY(-18px) translateZ(80px) rotateY(14deg) rotateZ(3deg) scale(1.02);
+    z-index: 5;
+    opacity: 1;
+    filter: brightness(1) saturate(1.05);
+    transition-delay: 0ms;
+}
+
+.mkt-idcard-deck-wrap.is-layer-2 .mkt-idcard-deck__layer--1 {
+    transform: translateX(-72%) translateY(24px) translateZ(-120px) rotateY(-32deg) rotateZ(-6deg) scale(0.8);
+    z-index: 1;
+    opacity: 0.65;
+}
+
+.mkt-idcard-deck-wrap.is-layer-2 .mkt-idcard-deck__layer--3 {
+    transform: translateX(-58%) translateY(14px) translateZ(-60px) rotateY(-20deg) rotateZ(-4deg) scale(0.86);
+    z-index: 2;
+    opacity: 0.75;
+}
+
+.mkt-idcard-deck .mkt-idcard-deck__card {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+.mkt-idcard-deck__edge {
+    position: absolute;
+    top: 3%;
+    left: -2px;
+    width: 3px;
+    height: 94%;
+    border-radius: 2px 0 0 2px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(15, 23, 42, 0.25));
+    transform: translateZ(-1px);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.mkt-idcard-deck__layer--3 .mkt-idcard-deck__edge {
+    opacity: 0.25;
+}
+
+.mkt-idcard-deck__layer--1 .mkt-idcard-deck__card,
+.mkt-idcard-deck__layer--2 .mkt-idcard-deck__card {
+    box-shadow:
+        -4px 0 12px rgba(15, 23, 42, 0.08),
+        0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.mkt-idcard-deck__layer--1 .mkt-idcard-deck__card {
+    box-shadow:
+        -6px 0 16px rgba(15, 23, 42, 0.1),
+        0 8px 22px rgba(15, 23, 42, 0.14),
+        0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.mkt-idcard-deck__layer--2 .mkt-idcard-deck__card {
+    box-shadow:
+        -5px 0 14px rgba(15, 23, 42, 0.09),
+        0 16px 36px rgba(15, 23, 42, 0.2),
+        0 1px 0 rgba(255, 255, 255, 0.08) inset;
+}
+
+.mkt-idcard-deck__layer--3 .mkt-idcard-deck__card {
+    box-shadow:
+        0 28px 56px rgba(15, 23, 42, 0.36),
+        0 10px 24px rgba(201, 162, 39, 0.14),
+        0 1px 0 rgba(255, 255, 255, 0.14) inset;
+}
+
+.mkt-idcard-deck:hover .mkt-idcard-deck__layer--3 .mkt-idcard-deck__card,
+.mkt-idcard-deck-wrap.is-layer-1 .mkt-idcard-deck__layer--1 .mkt-idcard-deck__card,
+.mkt-idcard-deck-wrap.is-layer-2 .mkt-idcard-deck__layer--2 .mkt-idcard-deck__card,
+.mkt-idcard-deck-wrap.is-layer-3 .mkt-idcard-deck__layer--3 .mkt-idcard-deck__card {
+    box-shadow:
+        0 36px 72px rgba(15, 23, 42, 0.4),
+        0 14px 32px rgba(201, 162, 39, 0.2),
+        0 1px 0 rgba(255, 255, 255, 0.16) inset;
+}
+
+.mkt-idcard-deck__layer--3 .mkt-idcard__shine {
+    animation: mkt-deck-shine 4s ease-in-out infinite;
+}
+
+@keyframes mkt-deck-shine {
+    0%, 100% { opacity: 0.55; transform: translateX(-8%); }
+    50% { opacity: 0.9; transform: translateX(8%); }
+}
+
+.mkt-idcard-deck__hint {
+    margin: 0 0 12px;
+    padding: 0;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--mkt-v2-muted, #64748b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.mkt-idcard-deck__hint i {
+    font-size: 10px;
+    opacity: 0.85;
+}
+
+.mkt-idcard-deck__legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    align-items: stretch;
+}
+
+.mkt-idcard-deck__legend-btn {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 10px 6px;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mkt-idcard-deck__legend-btn:hover,
+.mkt-idcard-deck__legend-btn.is-active,
+.mkt-idcard-deck__legend-btn:focus-visible {
+    background: rgba(75, 114, 190, 0.07);
+    border-color: rgba(75, 114, 190, 0.14);
+    transform: translateY(-2px);
+}
+
+.mkt-idcard-deck__legend-btn.is-active {
+    background: rgba(75, 114, 190, 0.1);
+    border-color: rgba(75, 114, 190, 0.22);
+    box-shadow: 0 6px 16px rgba(75, 114, 190, 0.1);
+}
+
+.mkt-idcard-deck__legend-btn--1 {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.mkt-idcard-deck__legend-btn--3 {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.mkt-idcard-deck__legend-btn--1 .mkt-idcard-deck__legend-text {
+    align-items: flex-start;
+}
+
+.mkt-idcard-deck__legend-btn--3 .mkt-idcard-deck__legend-text {
+    align-items: flex-end;
+}
+
+.mkt-idcard-deck__legend-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.mkt-idcard-deck__legend-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--mkt-v2-text, #0f172a);
+    line-height: 1.2;
+}
+
+.mkt-idcard-deck__legend-plan {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+.mkt-idcard-deck__legend-plan--essencial {
+    background: rgba(75, 114, 190, 0.12);
+    color: #3d61a8;
+}
+
+.mkt-idcard-deck__legend-plan--profissional {
+    background: rgba(45, 138, 138, 0.12);
+    color: #1f6b6b;
+}
+
+.mkt-idcard-deck__legend-plan--premium {
+    background: rgba(201, 162, 39, 0.14);
+    color: #9a7b1a;
+}
+
+.mkt-idcard-deck__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+.mkt-idcard-deck__dot--essencial {
+    background: linear-gradient(135deg, #4b72be, #5a8fd4);
+}
+
+.mkt-idcard-deck__dot--profissional {
+    background: linear-gradient(135deg, #2d8a8a, #5a9a9a);
+}
+
+.mkt-idcard-deck__dot--premium {
+    background: linear-gradient(135deg, #9a7b1a, #c9a227);
+}
+
+/* Painel do guia médico na landing */
+.mkt-guia-board {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 2px;
+}
+
+.mkt-guia-board__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.mkt-guia-board__head strong {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--mkt-v2-text, #0f172a);
+}
+
+.mkt-guia-board__head span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--mkt-v2-muted, #64748b);
+}
+
+.mkt-guia-board__hero {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #4b72be 0%, #5a84cc 55%, #6b93d4 100%);
+    color: #fff;
+}
+
+.mkt-guia-board__phase {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 10px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.mkt-guia-board__name {
+    display: block;
+    font-family: 'Sora', 'Nunito', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.mkt-guia-board__meta {
+    display: block;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.mkt-guia-board__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mkt-guia-board__chips span {
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.mkt-guia-board__chips .is-warn {
+    background: rgba(217, 119, 6, 0.08);
+    color: #b45309;
+    border-color: rgba(217, 119, 6, 0.16);
+}
+
+.mkt-guia-board__main {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 14px;
+    align-items: start;
+}
+
+.mkt-guia-board__metrics {
+    display: grid;
+    gap: 8px;
+}
+
+.mkt-guia-board__metrics > div {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.mkt-guia-board__metrics strong {
+    display: block;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 2px;
+}
+
+.mkt-guia-board__metrics span {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.mkt-guia-board__patient {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.mkt-guia-board__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+}
+
+.mkt-guia-board__patient-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.mkt-guia-board__patient strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.mkt-guia-board__patient-body > span {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.45;
+}
+
+.mkt-guia-board__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.mkt-guia-board__tags span {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #fff;
+    color: #64748b;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+/* Etapa ativa no demo embed */
+.mkt-home-patient-embed__steps li.is-active {
+    background: #4b72be;
+    color: #fff;
+}
+
+.mkt-home-patient-embed__steps li.is-active span {
+    background: #fff;
+    color: #4b72be;
+}
+
+.mkt-patient-demo-embed {
+    flex: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mkt-idcard-deck-wrap {
+        animation: none;
+    }
+
+    .mkt-idcard-deck__layer--3 .mkt-idcard__shine {
+        animation: none;
+    }
+
+    .mkt-idcard-deck {
+        transition: none;
+    }
+}
+
+@media (max-width: 991px) {
+    .mkt-product-spotlight__grid,
+    .mkt-product-spotlight__grid--reverse {
+        grid-template-columns: 1fr;
+        gap: 36px;
+    }
+
+    .mkt-product-spotlight__grid--reverse .mkt-product-spotlight__copy,
+    .mkt-product-spotlight__grid--reverse .mkt-product-spotlight__visual {
+        order: unset;
+    }
+
+    .mkt-product-spotlight__visual--bare {
+        padding: 0;
+    }
+
+    .mkt-product-spotlight__visual--bare .mkt-idcard-deck-wrap {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .mkt-guia-board__main {
+        grid-template-columns: 1fr;
+    }
+
+    .mkt-idcard-deck-wrap {
+        max-width: min(340px, 100%);
+    }
+
+    .mkt-idcard-deck-wrap .mkt-idcard-deck {
+        margin-bottom: 32px;
+    }
+
+    .mkt-idcard-deck__legend {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .mkt-idcard-deck__legend-btn,
+    .mkt-idcard-deck__legend-btn--1,
+    .mkt-idcard-deck__legend-btn--3 {
+        align-items: center;
+        text-align: center;
+    }
+
+    .mkt-idcard-deck__legend-btn--1 .mkt-idcard-deck__legend-text,
+    .mkt-idcard-deck__legend-btn--3 .mkt-idcard-deck__legend-text {
+        align-items: center;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .mkt-product-spotlight {
+        padding: 48px 16px;
+    }
+
+    .mkt-product-spotlight--alt {
+        padding-top: 0;
+    }
+
+    .mkt-product-spotlight__grid,
+    .mkt-product-spotlight__grid--reverse {
+        gap: 28px;
+    }
+
+    .mkt-idcard-deck-wrap {
+        max-width: min(300px, calc(100vw - 48px));
+    }
+
+    .mkt-idcard-deck {
+        padding-top: 24px;
+    }
+
+    .mkt-idcard-deck__legend {
+        grid-template-columns: 1fr;
+    }
+
+    .mkt-idcard-deck__legend-btn--1,
+    .mkt-idcard-deck__legend-btn--3 {
+        align-items: center;
+        text-align: center;
+    }
 }

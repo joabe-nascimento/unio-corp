@@ -1,0 +1,27 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Confirmar acesso{% endblock %}
+{% block benef_product %}Guia médico{% endblock %}
+{% set benef_nav_active = 'guia' %}
+
+{% block benef_content %}
+<section class="benef-shell">
+    <div class="benef-card">
+        <header class="benef-card__head">
+            <div>
+                <h1>Confirme seu acesso</h1>
+                <p>Informe um segundo dado para liberar o guia médico personalizado.</p>
+            </div>
+        </header>
+
+        {% for msg in app.flashes('error') %}
+        <div class="benef-alert benef-alert--error" role="alert">{{ msg }}</div>
+        {% endfor %}
+
+        {% include 'beneficiary/_access_form_confirm.html.twig' with {
+            csrf_name: 'beneficiary_guia',
+            back_url: path('app_guia_medico_beneficiario')
+        } %}
+    </div>
+</section>
+{% endblock %}

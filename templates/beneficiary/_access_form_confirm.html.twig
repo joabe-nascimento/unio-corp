@@ -1,0 +1,36 @@
+{# Segunda validação — confirma identidade #}
+{% set method_labels = {
+    'cpf': 'CPF',
+    'codigo': 'código do paciente',
+    'verificacao': 'código da carteirinha'
+} %}
+{% set confirm_hints = {
+    'cpf': 'Informe seu código do paciente (PO-…) ou código da carteirinha.',
+    'codigo': 'Informe seu CPF ou código de verificação da carteirinha.',
+    'verificacao': 'Informe seu CPF ou código do paciente (PO-…).'
+} %}
+
+<form method="post" class="benef-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token(csrf_name) }}">
+    <input type="hidden" name="passo" value="2">
+
+    <div class="benef-confirm-banner">
+        <i class="fas fa-user-shield" aria-hidden="true"></i>
+        <div>
+            <strong>Quase lá — confirme sua identidade</strong>
+            <p>Você informou o {{ method_labels[pending.method]|default('identificador') }}. Agora precisamos de um segundo dado para liberar o acesso.</p>
+        </div>
+    </div>
+
+    <label class="benef-field">
+        <span>Segundo dado de confirmação</span>
+        <input type="text" name="confirmacao" autocomplete="off" required
+               placeholder="{{ confirm_hints[pending.method]|default('CPF, PO-… ou código da carteirinha') }}">
+        <small class="benef-field__hint">Use um dado diferente do primeiro passo.</small>
+    </label>
+
+    <div class="benef-form__actions">
+        <a href="{{ back_url }}" class="benef-btn benef-btn--ghost">Voltar</a>
+        <button type="submit" class="benef-btn benef-btn--primary">Validar e continuar</button>
+    </div>
+</form>

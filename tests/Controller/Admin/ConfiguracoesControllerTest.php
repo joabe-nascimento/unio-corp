@@ -2,6 +2,8 @@
 
 namespace App\Tests\Controller\Admin;
 
+use App\Dev\DevSeedEmails;
+
 use App\Repository\UserRepository;
 use App\Service\PlatformConfigService;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -10,7 +12,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ConfiguracoesControllerTest extends WebTestCase
 {
-    private const TENANT_EMAIL = 'tenant@unio.dev';
+    private const TENANT_EMAIL = DevSeedEmails::JOABE;
     private const TENANT_PASS  = 'unio123';
 
     private KernelBrowser $client;

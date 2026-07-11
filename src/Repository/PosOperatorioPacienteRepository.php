@@ -120,4 +120,54 @@ class PosOperatorioPacienteRepository extends ServiceEntityRepository
 
         return $max;
     }
+
+    /** @return list<PosOperatorioPaciente> */
+    public function findComCarteirinha(Empresa $empresa): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.carteirinhaVerificacao IS NOT NULL')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('p.carteirinhaEmitidaEm', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByCarteirinhaVerificacao(Empresa $empresa, string $codigo): ?PosOperatorioPaciente
+    {
+        return $this->findOneBy([
+            'empresa' => $empresa,
+            'carteirinhaVerificacao' => strtoupper(trim($codigo)),
+        ]);
+    }
+
+    public function findByCodigoGlobal(string $codigo): ?PosOperatorioPaciente
+    {
+        $codigo = strtoupper(trim($codigo));
+        if ($codigo === '') {
+            return null;
+        }
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.codigo = :codigo')
+            ->setParameter('codigo', $codigo)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findByVerificacaoGlobal(string $codigo): ?PosOperatorioPaciente
+    {
+        $codigo = strtoupper(trim($codigo));
+        if ($codigo === '') {
+            return null;
+        }
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.carteirinhaVerificacao = :codigo')
+            ->setParameter('codigo', $codigo)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

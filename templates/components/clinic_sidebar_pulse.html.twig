@@ -1,0 +1,148 @@
+{# Resumo dinâmico — sidebar clínica (badges + atalhos) #}
+
+{% set badges = clinic_nav_badges|default({}) %}
+
+{% set _precisa = badges.precisa_acao|default(0) %}
+
+{% set _fab_href = _precisa > 0 ? path('app_pos_operatorio_trabalho') : path('app_pos_operatorio_pacientes', { open_novo: 1 }) %}
+
+{% set _fab_label = _precisa > 0 ? 'Fila do dia' : 'Novo paciente' %}
+
+{% set _fab_icon = _precisa > 0 ? 'fa-list-check' : 'fa-user-plus' %}
+
+
+
+<div class="clinic-sidebar-pulse" aria-label="Resumo clínico">
+
+    <a href="{{ _fab_href }}"
+
+       class="clinic-sidebar-pulse__fab"
+
+       title="{{ _fab_label }}"
+
+       aria-label="{{ _fab_label }}">
+
+        <i class="fas {{ _fab_icon }}" aria-hidden="true"></i>
+
+        {% if _precisa > 0 %}
+
+        <span class="clinic-sidebar-pulse__fab-badge" aria-hidden="true">{{ _precisa > 9 ? '9+' : _precisa }}</span>
+
+        {% endif %}
+
+    </a>
+
+
+
+    <div class="clinic-sidebar-pulse__full">
+
+        {% if _precisa > 0 %}
+
+        <div class="clinic-sidebar-pulse__alert" role="status">
+
+            <i class="fas fa-bell" aria-hidden="true"></i>
+
+            <span><strong>{{ _precisa }}</strong> para hoje</span>
+
+        </div>
+
+        {% endif %}
+
+
+
+        <dl class="clinic-sidebar-pulse__stats">
+
+            <div>
+
+                <dt>Ativos</dt>
+
+                <dd>{{ badges.pacientes_ativos|default(0) }}</dd>
+
+            </div>
+
+            <div>
+
+                <dt>P1</dt>
+
+                <dd class="{{ badges.sala_critica|default(0) > 0 ? 'is-danger' : '' }}">{{ badges.sala_critica|default(0) }}</dd>
+
+            </div>
+
+            <div>
+
+                <dt>Pendentes</dt>
+
+                <dd class="{{ badges.questionarios|default(0) > 0 ? 'is-warning' : '' }}">{{ badges.questionarios|default(0) }}</dd>
+
+            </div>
+
+        </dl>
+
+
+
+        <div class="clinic-sidebar-pulse__actions">
+
+            {% if _precisa > 0 %}
+
+            <a href="{{ path('app_pos_operatorio_trabalho') }}"
+
+               class="clinic-sidebar-pulse__btn clinic-sidebar-pulse__btn--primary">
+
+                <i class="fas fa-list-check" aria-hidden="true"></i>
+
+                <span>Fila do dia</span>
+
+            </a>
+
+            {% else %}
+
+            <a href="{{ path('app_pos_operatorio_pacientes', { open_novo: 1 }) }}"
+
+               class="clinic-sidebar-pulse__btn clinic-sidebar-pulse__btn--primary">
+
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+
+                <span>Novo paciente</span>
+
+            </a>
+
+            {% endif %}
+
+            {% if badges.sala_critica|default(0) > 0 %}
+
+            <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="clinic-sidebar-pulse__btn">
+
+                <i class="fas fa-bed-pulse" aria-hidden="true"></i>
+
+                <span>Sala crítica</span>
+
+            </a>
+
+            {% elseif badges.questionarios|default(0) > 0 %}
+
+            <a href="{{ path('app_pos_operatorio_questionarios') }}" class="clinic-sidebar-pulse__btn">
+
+                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+
+                <span>Questionários</span>
+
+            </a>
+
+            {% else %}
+
+            <a href="{{ path('app_pos_operatorio_alertas') }}" class="clinic-sidebar-pulse__btn">
+
+                <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+
+                <span>Alertas</span>
+
+            </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+

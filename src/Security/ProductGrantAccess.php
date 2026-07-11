@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Repository\UserProductGrantRepository;
 use App\Security\Voter\ProductGrantVoter;
+use App\Service\Organismo\OrganismoFeature;
 use App\Service\PermissionService;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -168,6 +169,7 @@ final class ProductGrantAccess
     public function __construct(
         private Security $security,
         private UserProductGrantRepository $grantRepo,
+        private OrganismoFeature $organismoFeature,
     ) {
     }
 
@@ -458,6 +460,16 @@ final class ProductGrantAccess
             'elevated' => false,
             'global_label' => $globalLabel,
         ];
+
+        if ($this->organismoFeature->isEnabled()) {
+            $meta = PermissionService::memberMetaForEmail($user->getEmail());
+            if ($meta !== null) {
+                $result['label'] = $meta['cargo'];
+                $result['global_label'] = $meta['cargo'];
+
+                return $result;
+            }
+        }
 
         if ($user->hasPlatformAccess()) {
             return $result;

@@ -32,7 +32,7 @@
 {% endblock %}
 
 {% block hub_content %}
-<section class="unio-card">
+<section class="unio-card clinic-questionarios-table">
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
@@ -79,4 +79,44 @@
         </table>
     </div>
 </section>
+
+<div class="clinic-questionarios-foot">
+    <section class="unio-card clinic-questionarios-help">
+        <header class="clinic-questionarios-help__head">
+            <span class="org-icon org-icon--sm org-icon--lavender" aria-hidden="true"><i class="fas fa-circle-info"></i></span>
+            <div>
+                <h3 class="clinic-questionarios-help__title">Como interpretar os scores</h3>
+                <p class="clinic-questionarios-help__sub">Triagem automática com base nas respostas do portal</p>
+            </div>
+        </header>
+        <div class="clinic-questionarios-help__grid">
+            <div class="clinic-questionarios-help__item">
+                {% include 'components/status_badge.html.twig' with { label: '0–39', variant: 'success' } %}
+                <p>Recuperação dentro do esperado. Sem ação imediata.</p>
+            </div>
+            <div class="clinic-questionarios-help__item">
+                {% include 'components/status_badge.html.twig' with { label: '40–69', variant: 'warning' } %}
+                <p>Atenção moderada. Revisar na próxima rodada de triagem.</p>
+            </div>
+            <div class="clinic-questionarios-help__item">
+                {% include 'components/status_badge.html.twig' with { label: '70+', variant: 'danger' } %}
+                <p>Risco elevado. Verificar alertas e abrir a ficha do paciente.</p>
+            </div>
+        </div>
+        <div class="clinic-questionarios-help__actions">
+            {% if stats.pendentes > 0 %}
+            <span class="clinic-questionarios-help__pending">
+                <i class="fas fa-clock" aria-hidden="true"></i>
+                {{ stats.pendentes }} paciente{{ stats.pendentes > 1 ? 's' : '' }} aguardando resposta hoje
+            </span>
+            {% endif %}
+            <a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">
+                <i class="fas fa-bell mr-1" aria-hidden="true"></i> Ver alertas
+            </a>
+            <a href="{{ path('app_pos_operatorio_pacientes') }}" class="btn-unio-ghost btn-sm">
+                <i class="fas fa-user-injured mr-1" aria-hidden="true"></i> Pacientes
+            </a>
+        </div>
+    </section>
+</div>
 {% endblock %}

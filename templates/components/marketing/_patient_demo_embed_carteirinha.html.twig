@@ -1,0 +1,43 @@
+{# Preview do fluxo da carteirinha (após validar) #}
+{% set _card = card|default({}) %}
+{% set _access = access|default({}) %}
+
+<div class="mkt-home-patient-products__demo mkt-home-carteirinha-embed mkt-patient-demo-embed">
+    <div class="mkt-home-patient-embed__top">
+        <ol class="mkt-home-patient-embed__steps" aria-label="Etapas de acesso">
+            <li class="{{ active_step|default(1) == 1 ? 'is-active' : '' }}"><span>1</span> Identificação</li>
+            <li class="{{ active_step|default(1) == 2 ? 'is-active' : '' }}"><span>2</span> Confirmação</li>
+            <li class="{{ active_step|default(1) >= 3 ? 'is-active' : '' }}"><span>3</span> Visualizar</li>
+            <li class="{{ active_step|default(1) >= 4 ? 'is-active' : '' }}"><span>4</span> Baixar</li>
+        </ol>
+
+        <div class="mkt-home-patient-embed__access" aria-label="Códigos de demonstração">
+            <p class="mkt-home-patient-embed__access-label">Acesso de demonstração</p>
+            <dl class="mkt-home-patient-embed__access-codes">
+                <div>
+                    <dt>CPF</dt>
+                    <dd><code>{{ _access.cpf_masked|default('529.982.247-25') }}</code></dd>
+                </div>
+                <div>
+                    <dt>Código</dt>
+                    <dd><code>{{ _access.codigo|default('PO-0042') }}</code></dd>
+                </div>
+                <div>
+                    <dt>Carteirinha</dt>
+                    <dd><code>{{ _access.verificacao|default('PM-24K9X7Q1') }}</code></dd>
+                </div>
+            </dl>
+            <p class="mkt-home-patient-embed__access-hint">Use dois dados diferentes — ex.: CPF + código, ou CPF + carteirinha.</p>
+        </div>
+    </div>
+
+    <div class="mkt-home-patient-embed__preview">
+        <div class="mkt-home-carteirinha-embed__card mkt-carteirinha-page">
+            <p class="mkt-home-patient-embed__preview-label">Após validar, você vê:</p>
+            {% include 'components/marketing/digital_id_card.html.twig' with {
+                card: _card,
+                theme: theme|default('premium')
+            } %}
+        </div>
+    </div>
+</div>

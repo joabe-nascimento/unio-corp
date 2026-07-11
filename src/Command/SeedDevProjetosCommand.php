@@ -119,7 +119,7 @@ class SeedDevProjetosCommand extends Command
         $this->service->createTarefa($rh, 'Componentizar admissões/demissões', null, DevTarefa::STATUS_CONCLUIDO, 'ALTA');
         $this->service->createTarefa($rh, 'Merge product/core', null, DevTarefa::STATUS_CONCLUIDO, 'MEDIA');
 
-        $io->success('Demo em /core/projetos — login gestor@unio.dev, workspace Unio Demo.');
+        $io->success('Demo em /core/projetos — login renata.oliveira@unio.dev, workspace Unio Demo.');
 
         return Command::SUCCESS;
     }

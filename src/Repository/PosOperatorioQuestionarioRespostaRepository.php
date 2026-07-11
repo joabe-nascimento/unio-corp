@@ -52,6 +52,30 @@ class PosOperatorioQuestionarioRespostaRepository extends ServiceEntityRepositor
 
     /** @return list<PosOperatorioQuestionarioResposta> */
 
+    public function findRecentByPaciente(PosOperatorioPaciente $paciente, int $limit = 7): array
+
+    {
+
+        return $this->createQueryBuilder('q')
+
+            ->andWhere('q.paciente = :paciente')
+
+            ->setParameter('paciente', $paciente)
+
+            ->orderBy('q.dataReferencia', 'DESC')
+
+            ->setMaxResults($limit)
+
+            ->getQuery()
+
+            ->getResult();
+
+    }
+
+
+
+    /** @return list<PosOperatorioQuestionarioResposta> */
+
     public function findRecentByEmpresa(Empresa $empresa, int $limit = 50): array
 
     {
@@ -103,6 +127,22 @@ class PosOperatorioQuestionarioRespostaRepository extends ServiceEntityRepositor
     }
 
 
+
+    /** @return list<PosOperatorioQuestionarioResposta> */
+    public function findByEmpresaSince(Empresa $empresa, \DateTimeImmutable $since, int $limit = 5000): array
+    {
+        return $this->createQueryBuilder('q')
+            ->innerJoin('q.paciente', 'p')
+            ->addSelect('p')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('q.dataReferencia >= :since')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('since', $since)
+            ->orderBy('q.dataReferencia', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 
     public function countPacientesPendentesHoje(Empresa $empresa, \DateTimeImmutable $day): int
 

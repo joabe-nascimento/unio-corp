@@ -63,6 +63,9 @@
                 if (typeof onLoaded === 'function') {
                     onLoaded(host);
                 }
+                if (window.ClinicPacienteForm && typeof window.ClinicPacienteForm.refresh === 'function') {
+                    window.ClinicPacienteForm.refresh();
+                }
             })
             .catch(function () {
                 host.innerHTML = '<p class="text-danger small mb-0">Não foi possível carregar. Tente novamente.</p>';
