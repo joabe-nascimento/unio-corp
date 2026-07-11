@@ -232,7 +232,7 @@ final class StudioLandingService
             [
                 'name' => 'UNEF',
                 'sector' => 'Educação',
-                'logo' => 'unef.svg',
+                'logo' => 'unef-horizontal-branca.png',
                 'text' => 'Presença digital e sistemas para instituição de ensino superior, com marca própria.',
             ],
         ];
