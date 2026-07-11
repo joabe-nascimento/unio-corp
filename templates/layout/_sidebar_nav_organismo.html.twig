@@ -132,7 +132,7 @@
 </li>
 
 <li class="nav-item">
-    <a href="{{ path('app_core_projetos', { view: 'kanban' }) }}" class="nav-link">
+    <a href="{{ path('app_core_projetos', { view: 'kanban' }) }}" class="nav-link {{ route starts with 'app_core_projetos' and app.request.query.get('view') == 'kanban' ? 'active' : '' }}">
         <span class="nav-icon-slot">
             <i class="fas fa-flag nav-icon" aria-hidden="true"></i>
             {% if _studio.prioridade_alta|default(0) > 0 %}
@@ -166,25 +166,6 @@
         <p>{{ copy.nav_alertas|default('Alertas') }}</p>
     </a>
 </li>
-
-{% if studio_nav_modules|default([])|length > 0 %}
-<li class="sidebar-hub-separator" aria-hidden="true"></li>
-<li class="nav-item sidebar-hub-heading-item">
-    <div class="sidebar-hub-heading">
-        <span class="sidebar-hub-heading-label">Módulos desenvolvidos</span>
-    </div>
-</li>
-{% for mod in studio_nav_modules %}
-<li class="nav-item">
-    <a href="{{ path(mod.route) }}" class="nav-link {{ route starts with mod.route ? 'active' : '' }}">
-        <span class="nav-icon-slot">
-            <i class="fas {{ mod.icon }} nav-icon" aria-hidden="true"></i>
-        </span>
-        <p>{{ mod.label }}</p>
-    </a>
-</li>
-{% endfor %}
-{% endif %}
 {% endif %}
 
 <li class="sidebar-hub-separator" aria-hidden="true"></li>

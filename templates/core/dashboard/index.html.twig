@@ -109,12 +109,14 @@
                 sub: 'Progresso médio das entregas'
             },
             {
-                value: _badges.modulos|default(0),
-                label: 'Módulos prontos',
-                icon: 'fa-cubes',
-                tone: 'lavender',
-                route: 'app_maturidade',
-                sub: _badges.projetos_concluidos|default(0) ~ ' projetos concluídos'
+                value: _badges.prioridade_alta|default(0),
+                label: 'Prioridade alta',
+                icon: 'fa-flag',
+                tone: 'rose',
+                variant: _badges.prioridade_alta|default(0) > 0 ? 'danger' : '',
+                route: 'app_core_projetos',
+                route_params: { view: 'kanban' },
+                sub: 'Tarefas que exigem foco agora'
             },
         ], mb: 'mb-0' } %}
         {% endif %}
@@ -192,24 +194,6 @@
             {% endif %}
         </div>
     </section>
-
-    {% if not org_clinic|default(false) and studio_nav_modules|default([])|length > 0 %}
-    <section class="clinic-home-modules studio-home-modules" aria-labelledby="studioModulesHeading">
-        <header class="clinic-home-activity__head">
-            <i class="fas fa-cubes" aria-hidden="true"></i>
-            <h2 id="studioModulesHeading">Módulos desenvolvidos</h2>
-        </header>
-        <div class="studio-module-cards studio-module-cards--dashboard">
-            {% for mod in studio_nav_modules %}
-            <a href="{{ path(mod.route) }}" class="studio-module-card">
-                <span class="studio-module-card__icon"><i class="fas {{ mod.icon }}" aria-hidden="true"></i></span>
-                <span class="studio-module-card__title">{{ mod.label }}</span>
-                <span class="studio-module-card__desc">{{ mod.desc }}</span>
-            </a>
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
 
     <section class="clinic-home-activity">
         <header class="clinic-home-activity__head">

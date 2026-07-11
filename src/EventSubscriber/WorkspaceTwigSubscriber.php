@@ -11,7 +11,6 @@ use App\Service\OnboardingTourService;
 use App\Service\Organismo\ClinicNavBadgeService;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\Organismo\OrganismoFeature;
-use App\Service\Organismo\StudioModuleNavService;
 use App\Service\Organismo\StudioNavBadgeService;
 use App\Service\PageBackResolver;
 use App\Service\PlatformNotificationService;
@@ -51,7 +50,6 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
         private OrganismoCopyService $organismoCopy,
         private ClinicNavBadgeService $clinicNavBadges,
         private StudioNavBadgeService $studioNavBadges,
-        private StudioModuleNavService $studioModuleNav,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -102,10 +100,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
                     'clinic_nav_badges',
                     $this->studioNavBadges->forEmpresa($empresa, \count($empresas)),
                 );
-                $this->twig->addGlobal(
-                    'studio_nav_modules',
-                    $this->studioModuleNav->forSidebar(),
-                );
+                $this->twig->addGlobal('studio_nav_modules', []);
             }
         }
 

@@ -13,7 +13,6 @@ final class StudioNavBadgeService
     public function __construct(
         private DevProjetoRepository $projetos,
         private DevTarefaRepository $tarefas,
-        private StudioModuleNavService $modules,
     ) {
     }
 
@@ -25,7 +24,6 @@ final class StudioNavBadgeService
      *     projetos_concluidos: int,
      *     prioridade_alta: int,
      *     alertas: int,
-     *     modulos: int,
      *     balanceamento: int
      * }
      */
@@ -45,7 +43,6 @@ final class StudioNavBadgeService
             'projetos_concluidos' => $concluidos,
             'prioridade_alta' => $this->tarefas->countPrioridadeAlta($empresa),
             'alertas' => $this->tarefas->countAbertas($empresa),
-            'modulos' => \count($this->modules->forSidebar()),
             'balanceamento' => $this->projetos->averageProgressoAtivos($empresa),
         ];
     }
@@ -60,7 +57,6 @@ final class StudioNavBadgeService
             'projetos_concluidos' => 0,
             'prioridade_alta' => 0,
             'alertas' => 0,
-            'modulos' => 0,
             'balanceamento' => 0,
         ];
     }

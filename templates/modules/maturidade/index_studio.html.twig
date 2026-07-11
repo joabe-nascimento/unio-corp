@@ -1,0 +1,123 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Painel de entregas{% endblock %}
+{% block permissions_scope %}{% endblock %}
+{% set hub_page_title = organismo.copy.nav_maturidade|default('Painel de entregas') %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Situação dos projetos, prioridades e balanceamento das entregas' %}
+{% set hub_show_tabs = true %}
+{% set hub_use_clinic_tabs = true %}
+{% set hub_clinic_tabs = [
+    { id: 'overview', label: 'Visão geral', hint: 'Projetos em andamento' },
+    { id: 'prioridades', label: 'Prioridades', hint: 'Tarefas de alta prioridade' },
+    { id: 'entregas', label: 'Entregas', hint: 'Progresso e conclusões' },
+] %}
+{% set _badges = studio_badges|default({}) %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: [
+        { value: _badges.clientes|default(0), label: 'Clientes ativos', icon: 'fa-building', tone: 'sky', route: 'app_admin_empresas' },
+        { value: _badges.projetos_ativos|default(0), label: 'Projetos em andamento', icon: 'fa-diagram-project', tone: 'indigo', route: 'app_core_projetos' },
+        { value: _badges.prioridade_alta|default(0), label: 'Prioridade alta', icon: 'fa-flag', tone: 'rose', variant: _badges.prioridade_alta|default(0) > 0 ? 'danger' : '', route: 'app_core_projetos', route_params: { view: 'kanban' } },
+        { value: (_badges.balanceamento|default(0)) ~ '%', label: 'Balanceamento', icon: 'fa-scale-balanced', tone: 'sage' },
+    ], mb: 'mb-0' } %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="clinic-hub-overview">
+    <div class="clinic-hub-block">
+        <section class="clinic-hub-panel clinic-hub-panel--main clinic-hub-panel--full">
+            <header class="clinic-hub-panel__head">
+                <div class="clinic-hub-panel__head-text">
+                    <h2 class="clinic-hub-panel__title">Projetos em andamento</h2>
+                    <p class="clinic-hub-panel__sub">Visão consolidada das entregas da carteira</p>
+                </div>
+                <a href="{{ path('app_core_projetos', { open_novo: 1 }) }}" class="btn-unio btn-sm">
+                    <i class="fas fa-folder-plus" aria-hidden="true"></i> Novo projeto
+                </a>
+            </header>
+            <div class="clinic-hub-panel__body">
+                {% if projetos|default([])|length > 0 %}
+                <div class="clinic-hub-tab-panel" style="display:grid;gap:8px;">
+                    {% for projeto in projetos %}
+                    <a href="{{ path('app_core_projetos_show', { id: projeto.id }) }}" class="clinic-ficha-action">
+                        <i class="fas fa-diagram-project" aria-hidden="true"></i>
+                        {{ projeto.nome }} · {{ projeto.progresso }}% · {{ projeto.statusLabel }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="clinic-hub-panel__body--placeholder">
+                    <div class="clinic-placeholder">
+                        <span class="clinic-placeholder__icon"><i class="fas fa-folder-open"></i></span>
+                        <p class="clinic-placeholder__title">Nenhum projeto em andamento</p>
+                        <p class="clinic-placeholder__sub">Cadastre o primeiro projeto para acompanhar entregas e prioridades.</p>
+                        <a href="{{ path('app_core_projetos', { open_novo: 1 }) }}" class="clinic-placeholder__btn">
+                            <i class="fas fa-folder-plus" aria-hidden="true"></i> Novo projeto
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block hub_extra_panels %}
+<div class="hub-tab-panel" data-hub-panel="prioridades" role="tabpanel" hidden>
+    <div class="clinic-hub-overview">
+        <div class="clinic-hub-block">
+            <div class="clinic-hub-tab-panel">
+                {% if _badges.prioridade_alta|default(0) > 0 %}
+                <div class="clinic-hub-subtab-panel__empty">
+                    <i class="fas fa-flag clinic-empty-check clinic-empty-check--warn" aria-hidden="true"></i>
+                    <div>
+                        <p class="clinic-hub-subtab-panel__title">{{ _badges.prioridade_alta }} tarefa(s) de alta prioridade</p>
+                        <p class="clinic-hub-subtab-panel__sub">Revise o kanban para redistribuir foco da equipe.</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="clinic-hub-subtab-panel__empty">
+                    <i class="fas fa-circle-check clinic-empty-check" aria-hidden="true"></i>
+                    <div>
+                        <p class="clinic-hub-subtab-panel__title">Sem prioridades críticas</p>
+                        <p class="clinic-hub-subtab-panel__sub">Nenhuma tarefa de alta prioridade pendente no momento.</p>
+                    </div>
+                </div>
+                {% endif %}
+                <a href="{{ path('app_core_projetos', { view: 'kanban' }) }}" class="clinic-ficha-action">
+                    <i class="fas fa-flag" aria-hidden="true"></i> Abrir kanban
+                </a>
+                <a href="{{ path('app_notifications') }}" class="clinic-ficha-action">
+                    <i class="fas fa-bell" aria-hidden="true"></i> Ver alertas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="hub-tab-panel" data-hub-panel="entregas" role="tabpanel" hidden>
+    <div class="clinic-hub-overview">
+        <div class="clinic-hub-block">
+            <div class="clinic-hub-tab-panel">
+                <div class="clinic-hub-subtab-panel__empty">
+                    <i class="fas fa-chart-line clinic-empty-check clinic-empty-check--muted" aria-hidden="true"></i>
+                    <div>
+                        <p class="clinic-hub-subtab-panel__title">Balanceamento {{ _badges.balanceamento|default(0) }}%</p>
+                        <p class="clinic-hub-subtab-panel__sub">
+                            {{ _badges.projetos_concluidos|default(0) }} projeto(s) concluído(s) ·
+                            {{ _badges.projetos_ativos|default(0) }} em andamento
+                        </p>
+                    </div>
+                </div>
+                <a href="{{ path('app_core_projetos') }}" class="clinic-ficha-action">
+                    <i class="fas fa-diagram-project" aria-hidden="true"></i> Ver todos os projetos
+                </a>
+                <a href="{{ path('app_admin_empresas') }}" class="clinic-ficha-action">
+                    <i class="fas fa-building" aria-hidden="true"></i> Carteira de clientes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
