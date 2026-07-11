@@ -116,9 +116,22 @@ No servidor, o log completo fica em:
 
 | | GitHub Actions | Manual (este guia) |
 |--|----------------|-------------------|
-| Dispara em | push `uniosaude` | você roda o `.ps1` |
+| Dispara em | *Run workflow* (push desativado jul/2026) | você roda o `.ps1` |
 | Requer | billing Actions + secrets | chave SSH no PC |
 | Atualiza produção | Sim | Sim |
-| Substituem um ao outro? | Não — escolha um fluxo |
+| X vermelho no commit? | Só se rodar workflow e falhar | Não |
 
-**Recomendação atual:** `git push` para versionar + `deploy-uniosaude-manual.ps1` para publicar enquanto o billing do Actions estiver bloqueado.
+**Recomendação atual:** `git push` para versionar + `deploy-uniosaude-manual.ps1` para publicar.
+
+**Guia completo (billing, X vermelho, troubleshooting):** [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md)
+
+---
+
+## Windows — armadilhas
+
+| Problema | Solução |
+|----------|---------|
+| `scp: stat local "2222"` | Script já usa `-P` no scp (não `-p`) |
+| `DEPLOY_PATH` com `\r` no servidor | Script grava `deploy-remote.env` com LF |
+| `cd` falha com "Nova pasta" | Use aspas: `cd "C:\projetos\Nova pasta\unio-corp\unio-corp"` |
+| Repo "not a git repository" | Entre na pasta **unio-corp\unio-corp**, não na pai |

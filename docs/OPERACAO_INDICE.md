@@ -11,6 +11,7 @@ Documentação da instância **uniosaude** (Unio Saúde, deploy dedicado).
 | [DNS_UNIOWORK_UNIOSAUDE.md](DNS_UNIOWORK_UNIOSAUDE.md) | DNS e subdomínio uniosaude |
 | [UNIOSAUDE_DEPLOY_REPAIR.md](UNIOSAUDE_DEPLOY_REPAIR.md) | Vhost HTTPS, reparo manual e pós-deploy automático |
 | [DEPLOY_MANUAL_UNIOSAUDE.md](DEPLOY_MANUAL_UNIOSAUDE.md) | **Deploy manual PC → HostGator (sem Actions)** |
+| [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md) | **Operação atual: push vs manual, X vermelho, billing** |
 | [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md) | Pipeline SSH HostGator |
 | [DEPLOY_AGORA.md](DEPLOY_AGORA.md) | Checklist rápido de deploy |
 | [OPERACAO_VALIDACAO_LOCAL.md](OPERACAO_VALIDACAO_LOCAL.md) | Validação antes do push |
@@ -24,7 +25,7 @@ Documentação da instância **uniosaude** (Unio Saúde, deploy dedicado).
 |------|--------|
 | **Branch** | `uniosaude` |
 | **URL** | https://uniosaude.uniowork.com.br |
-| **Deploy** | push `uniosaude` → GitHub; produção via [DEPLOY_MANUAL_UNIOSAUDE.md](DEPLOY_MANUAL_UNIOSAUDE.md) (Actions no push desativado) |
+| **Deploy** | [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md) — push → GitHub; produção → script manual |
 | **Servidor** | `/home2/joabef36/unio-uniosaude` |
 | **Login staff demo** | `renata.oliveira@unio.dev` / `unio123` |
 | **Login paciente demo** | `joabe.nascimento@unio.dev` / `unio123` |

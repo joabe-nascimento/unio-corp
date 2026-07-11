@@ -12,12 +12,14 @@ Guia para quando o site responde **404 HostGator** em HTTPS, scripts antigos no 
 
 ## Automático em todo deploy
 
-A partir deste guia, cada deploy via GitHub Actions executa no servidor (`scripts/deploy-server.sh`):
+Tanto o deploy manual quanto o GitHub Actions (quando ativo) executam no servidor `scripts/deploy-server.sh`, que inclui:
 
 1. **`scripts/lib/sync-public-html-entrypoint.sh`** — regrava `index.php` e `.htaccess` no `public_html` do subdomínio
 2. **`scripts/lib/repair-subdomain-vhost.sh`** — confirma docroot no cPanel, rebuild Apache e smoke HTTP/HTTPS
 
-O workflow **Deploy Unio Saúde** também roda smoke externo (`smoke-test-hostgator-reusable.yml`) com validação HTTPS.
+O workflow **Deploy Unio Saúde** (disparo manual) também roda smoke externo (`smoke-test-hostgator-reusable.yml`).
+
+> **jul/2026:** deploy no **push** da branch `uniosaude` está **desativado** (billing Actions). Ver [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md).
 
 ## Setup inicial (uma vez)
 
@@ -97,7 +99,8 @@ curl -sI --resolve uniosaude.uniowork.com.br:443:50.6.138.130 -k https://uniosau
 | `HTTPS /login => HTTP 404` | `index.php` antigo ou docroot SSL incorreto |
 | `Mantido: .../index.php (ja existia)` | Script antigo no servidor (antes do fix que sempre regrava) |
 | `line 1: ﻿#!/usr/bin/env: No such file` | BOM UTF-8 no shebang de `setup-product-env-server.sh` (corrigido no repo) |
-| GitHub Actions falha em ~4s | Billing/limit — job nem inicia |
+| GitHub Actions falha em ~4s | Billing/limit — job nem inicia (ver [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md)) |
+| X vermelho no commit `uniosaude` | Mesmo caso — **não** indica bug no código; use deploy manual |
 | `[5/6] Smoke (forca DNS local...)` | `setup-uniosaude-hostgator.sh` antigo (sem rebuild Apache) |
 | DNS OK, site 404 | Problema de vhost Apache, não de DNS |
 
@@ -133,5 +136,6 @@ dig +short uniosaude.uniowork.com.br @8.8.8.8
 ## Documentos relacionados
 
 - [DNS_UNIOWORK_UNIOSAUDE.md](DNS_UNIOWORK_UNIOSAUDE.md)
+- [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md)
 - [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md)
 - [OPERACAO_BRANCHES_DEPLOY.md](OPERACAO_BRANCHES_DEPLOY.md)
