@@ -1,0 +1,131 @@
+{# Landing central Unio — verticais, hubs e cases #}
+{% set _verticals = studio_verticals|default([]) %}
+{% set _hubs = studio_hubs|default([]) %}
+{% set _cases = studio_cases|default([]) %}
+
+<section class="mkt-studio-verticals mkt-reveal" id="verticais" aria-labelledby="mkt-studio-verticals-title">
+    <div class="mkt-studio-verticals__head">
+        <p class="mkt-section-eyebrow">Ecossistema Unio</p>
+        <h2 id="mkt-studio-verticals-title">Uma base visual, vários setores</h2>
+        <p class="mkt-section-sub">O mesmo organismo digital serve saúde, educação e operações corporativas — com produtos e hubs que você ativa conforme o projeto.</p>
+    </div>
+    <div class="mkt-studio-verticals__grid">
+        {% for v in _verticals %}
+        <article class="mkt-studio-vertical-card mkt-studio-vertical-card--{{ v.theme|default('corp') }} mkt-reveal{% if loop.index > 1 %} mkt-reveal--delay-{{ loop.index - 1 }}{% endif %}">
+            <span class="mkt-studio-vertical-card__badge">{{ v.badge|default('') }}</span>
+            <span class="mkt-studio-vertical-card__icon" aria-hidden="true"><i class="fas {{ v.icon|default('fa-layer-group') }}"></i></span>
+            <p class="mkt-studio-vertical-card__eyebrow">{{ v.label|default('') }}</p>
+            <h3>{{ v.title|default('') }}</h3>
+            <p>{{ v.desc|default('') }}</p>
+            <a href="{{ v.url|default('#') }}" class="mkt-studio-vertical-card__link"{% if v.external|default(false) %} target="_blank" rel="noopener noreferrer"{% endif %}>
+                Conhecer <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="mkt-rich-spotlight mkt-reveal" aria-labelledby="mkt-studio-spotlight-title">
+    <div class="mkt-rich-spotlight__grid">
+        <div class="mkt-rich-spotlight__copy">
+            <p class="mkt-section-eyebrow">Plataforma central</p>
+            <h2 id="mkt-studio-spotlight-title">Organismo digital para equipes que constroem produtos</h2>
+            <p>
+                {{ organismo.copy.brand_name|default('Unio') }} reúne hubs, entregas, playbooks e portal do cliente
+                com a mesma identidade visual refinada dos produtos verticais — começando pelo que importa e evoluindo por módulos.
+            </p>
+            <ul class="mkt-rich-spotlight__list mkt-rich-spotlight__list--clean">
+                <li>Sidebar modular com Pulso, Lumen e hubs por área</li>
+                <li>Playbooks e check-ins para ritmo de entrega</li>
+                <li>Portal do cliente sem app — link seguro no navegador</li>
+            </ul>
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">
+                Entrar na plataforma <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+        <div class="mkt-rich-spotlight__visual mkt-reveal mkt-reveal--delay-1" aria-hidden="true">
+            <div class="mkt-spotlight-board mkt-spotlight-board--studio">
+                <div class="mkt-spotlight-board__row">
+                    <span class="mkt-spotlight-board__pill is-active"><i class="fas fa-house"></i> Pulso</span>
+                    <span class="mkt-spotlight-board__pill"><i class="fas fa-folder-open"></i> Projetos</span>
+                    <span class="mkt-spotlight-board__pill"><i class="fas fa-book"></i> Playbooks</span>
+                </div>
+                <div class="mkt-spotlight-board__kpis">
+                    <div><strong>12</strong><span>Projetos ativos</span></div>
+                    <div><strong>3</strong><span>Prioridade alta</span></div>
+                    <div class="is-accent"><strong>97%</strong><span>Entregas OK</span></div>
+                </div>
+                <div class="mkt-spotlight-board__modules">
+                    <div class="is-highlight"><i class="fas fa-wand-magic-sparkles"></i><div><strong>Lumen</strong><span>Assistente do studio</span></div></div>
+                    <div><i class="fas fa-bell"></i><div><strong>Alertas</strong><span>Fila com SLA</span></div></div>
+                    <div><i class="fas fa-person-circle-check"></i><div><strong>Portal</strong><span>Acesso do cliente</span></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mkt-rich-modules" id="modulos-studio" aria-labelledby="mkt-studio-hubs-title">
+    <div class="mkt-rich-modules__head mkt-reveal">
+        <p class="mkt-section-eyebrow">Hubs da plataforma</p>
+        <h2 id="mkt-studio-hubs-title">Módulos prontos para ativar no seu workspace</h2>
+        <p class="mkt-section-sub">RH, engenharia, saúde, TI, finanças e mais — mesma shell, mesma experiência.</p>
+    </div>
+    <div class="mkt-rich-modules__grid mkt-rich-modules__grid--six">
+        {% for hub in _hubs %}
+        <a href="{{ path(hub.route|default('app_login')) }}" class="mkt-rich-module-card mkt-studio-hub-card mkt-reveal{% if loop.index > 1 %} mkt-reveal--delay-{{ loop.index - 1 }}{% endif %}">
+            <div class="mkt-rich-module-card__body mkt-studio-hub-card__body">
+                <span class="mkt-rich-module-card__icon"><i class="fas {{ hub.icon|default('fa-cube') }}" aria-hidden="true"></i></span>
+                <h3>{{ hub.label|default('Hub') }}</h3>
+                <p>{{ hub.desc|default('') }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="mkt-rich-numbers mkt-reveal" id="cases-reais" aria-label="Cases e indicadores">
+    <div class="mkt-rich-numbers__inner">
+        <div class="mkt-rich-numbers__lead">
+            <div class="mkt-rich-numbers__client">
+                <div class="mkt-rich-numbers__client-logos">
+                    {% for c in _cases %}
+                    <img
+                        class="mkt-rich-numbers__client-logo{{ '.svg' in c.logo ? ' mkt-rich-numbers__client-logo--unef' : '' }}"
+                        src="{{ asset('images/logos/' ~ c.logo) }}"
+                        alt="{{ c.name|default('Cliente') }}"
+                        width="120"
+                        height="40"
+                        loading="lazy"
+                    >
+                    {% endfor %}
+                </div>
+                <span class="mkt-rich-numbers__client-badge">Cases reais</span>
+            </div>
+            <h3>Projetos que já rodam com a Unio</h3>
+            <p class="mkt-rich-numbers__case">Saúde e educação com a mesma base: identidade consistente, portais e operações digitais.</p>
+        </div>
+        <div class="mkt-rich-numbers__stat">
+            <span class="mkt-rich-numbers__stat-val"><span class="mkt-count" data-to="100">0</span>%</span>
+            <span class="mkt-rich-numbers__stat-label">Rastreabilidade</span>
+        </div>
+        <div class="mkt-rich-numbers__stat">
+            <span class="mkt-rich-numbers__stat-val">24/7</span>
+            <span class="mkt-rich-numbers__stat-label">Monitoramento</span>
+        </div>
+        <div class="mkt-rich-numbers__stat">
+            <span class="mkt-rich-numbers__stat-val">+6</span>
+            <span class="mkt-rich-numbers__stat-label">Hubs planejados</span>
+        </div>
+    </div>
+</section>
+
+<div class="mkt-rich-cta-band mkt-reveal">
+    <div class="mkt-rich-cta-band__inner">
+        <div>
+            <h3>Pronto para estruturar seu próximo projeto?</h3>
+            <p>Entre na plataforma, explore os hubs e ative o que faz sentido para sua operação.</p>
+        </div>
+        <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">Acessar {{ organismo.copy.brand_name|default('Unio') }}</a>
+    </div>
+</div>

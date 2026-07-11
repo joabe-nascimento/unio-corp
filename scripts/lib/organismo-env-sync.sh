@@ -40,12 +40,12 @@ organismo_env_sync_for_uri() {
     https://uniowork.com.br|http://uniowork.com.br)
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_ENABLED true
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_HOME true
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_NAME 'Unio Studio'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_SLOGAN 'Sites, sistemas e projetos que evoluem.'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE 'Desenvolvimento de sites, apps'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE_ACCENT 'e projetos digitais.'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_DESC 'Unio Studio reúne gestão de projetos, entregas, playbooks de implementação e portal do cliente — um ambiente pensado para equipes que constroem sites, sistemas e produtos digitais com clareza e ritmo.'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_LUMEN_SUBTITLE 'Assistente do studio'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_NAME 'Unio'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_SLOGAN 'Plataforma que evolui com você.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE 'Sites, sistemas e produtos'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE_ACCENT 'em um só organismo.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_DESC 'Unio reúne hubs modulares para saúde, educação e operações corporativas — com a mesma identidade visual refinada, portal do cliente e assistente Lumen.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_LUMEN_SUBTITLE 'Assistente inteligente'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL 'Projeto'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL_ARTIGO 'do projeto'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL_PLURAL 'Projetos'
@@ -61,17 +61,43 @@ organismo_env_sync_for_uri() {
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_PROJECTS_ACTIVE 'Projetos ativos'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_IN_PROGRESS 'Em andamento'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_CASES_HEADING 'Entregas em andamento'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_KPIS_HEADING 'Sinais do studio'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_KPIS_HEADING 'Sinais do organismo'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_EMPTY 'Nenhuma entrega ativa — tudo em dia.'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HUB_HERO_TITLE 'Painel de projetos'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_EYEBROW 'Studio digital'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_TAGLINE 'Sites, sistemas e projetos que evoluem.'
-      echo "Organismo: perfil Studio sincronizado em $env_file"
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_EYEBROW 'Plataforma digital modular'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_TAGLINE 'Plataforma que evolui com você.'
+      echo "Organismo: perfil Unio (central) sincronizado em $env_file"
       ;;
     https://uniosaude.uniowork.com.br|http://uniosaude.uniowork.com.br)
-      organismo_env_ensure "$env_file" UNIO_ORGANISMO_ENABLED true
-      organismo_env_ensure "$env_file" UNIO_ORGANISMO_PULSO_HOME true
-      echo "Organismo: uniosaude — defaults YAML da clínica (sem sobrescrever marca)"
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_ENABLED true
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_HOME true
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_NAME 'Unio Saúde'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_SLOGAN 'Saúde que acompanha.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE 'Gestão clínica integrada'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE_ACCENT 'modular e humana.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_DESC 'Unio Saúde reúne pós-operatório, carteirinha digital e guia médico. Ative só os produtos que sua clínica precisa.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_LUMEN_SUBTITLE 'Assistente clínico'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL 'Clínica'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL_ARTIGO 'da clínica'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL_PLURAL 'Clínicas'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_MATURIDADE 'Painel de Recuperação'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_SECTION_CLIENTS 'Pacientes'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_PACIENTES 'Pacientes'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_SALA_CRITICA 'Sala Crítica'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_ALERTAS 'Alertas'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_SECTION_DELIVERABLES 'Acompanhamento'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_PROTOCOLOS 'Protocolos'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_QUESTIONARIOS 'Questionários'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_NAV_PORTAL 'Portal do Paciente'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_PROJECTS_ACTIVE 'Pacientes ativos'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_IN_PROGRESS 'Em acompanhamento'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_CASES_HEADING 'Casos em andamento'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_KPIS_HEADING 'Sinais vitais da clínica'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_EMPTY 'Nenhum caso ativo — tudo tranquilo na clínica.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HUB_HERO_TITLE 'Painel clínico'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_EYEBROW 'Plataforma clínica modular'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_TAGLINE 'Saúde que acompanha.'
+      echo "Organismo: perfil Unio Saúde sincronizado em $env_file"
       ;;
     https://clinicaunio.uniowork.com.br|http://clinicaunio.uniowork.com.br)
       organismo_env_ensure "$env_file" UNIO_ORGANISMO_ENABLED true

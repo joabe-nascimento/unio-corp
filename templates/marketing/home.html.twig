@@ -7,8 +7,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organismo.copy.brand_name|default('Unio Saúde') }} | {{ organismo.copy.marketing_tagline|default('Saúde que acompanha.') }}</title>
-    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio Saúde') }} | {{ organismo.copy.marketing_tagline|default('Saúde que acompanha.') }}">
+    <title>{{ organismo.copy.brand_name|default('Unio') }} | {{ organismo.copy.marketing_tagline|default('Plataforma que evolui com você.') }}</title>
+    <meta name="description" content="{{ organismo.copy.brand_name|default('Unio') }} | {{ organismo.copy.marketing_tagline|default('Plataforma que evolui com você.') }}">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
@@ -16,10 +16,10 @@
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=17">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=37">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=27">
     {% if org_clinic|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=33">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=26">
-    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=22">
+    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=24">
     {% endif %}
     <style>
     /* ── Clínica overrides ── */
@@ -78,7 +78,7 @@
     .mkt-preview-module i { color: #4b72be; }
     </style>
 </head>
-<body class="marketing-home mkt-v2{% if org_clinic|default(false) %} mkt-clinic{% endif %}">
+<body class="marketing-home mkt-v2{% if org_clinic|default(false) %} mkt-clinic{% else %} mkt-studio{% endif %}">
 {% import 'macros/marketing_protocol.html.twig' as protocol %}
 
 <header class="mkt-header mkt-header--v2">
@@ -93,8 +93,9 @@
             {% if org_clinic|default(false) %}
             {% include 'components/marketing/clinic_product_nav.html.twig' with { mkt_nav_active: 'home' } only %}
             {% else %}
+            <a href="#verticais">Verticais</a>
+            <a href="#modulos-studio">Hubs</a>
             <a href="#recursos">Recursos</a>
-            <a href="#modulos">Módulos</a>
             <a href="#funcionalidades">Funcionalidades</a>
             <a href="#como-funciona">Como funciona</a>
             {% endif %}
@@ -263,11 +264,15 @@
             {% else %}
             <div class="mkt-pro-badge">
                 <i class="fas fa-shield-halved" aria-hidden="true"></i>
-                <div><strong>LGPD conforme</strong><span>Dados de saúde protegidos</span></div>
+                <div><strong>LGPD conforme</strong><span>Dados protegidos por workspace</span></div>
             </div>
             <div class="mkt-pro-badge">
                 <i class="fas fa-heart-pulse" aria-hidden="true"></i>
-                <div><strong>Pós-operatório</strong><span>Do procedimento à alta</span></div>
+                <div><strong>Unio Saúde</strong><span>Produto vertical ativo</span></div>
+            </div>
+            <div class="mkt-pro-badge">
+                <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                <div><strong>Educação</strong><span>Cases UNEF e instituições</span></div>
             </div>
             {% endif %}
             <div class="mkt-pro-badge">
@@ -276,7 +281,7 @@
             </div>
             <div class="mkt-pro-badge">
                 <i class="fas fa-person-circle-check" aria-hidden="true"></i>
-                <div><strong>Portal do paciente</strong><span>Acesso e questionários online</span></div>
+                <div><strong>{{ org_clinic|default(false) ? 'Portal do paciente' : 'Portal do cliente' }}</strong><span>Acesso e check-ins online</span></div>
             </div>
             <div class="mkt-pro-badge">
                 <i class="fas fa-mobile-screen" aria-hidden="true"></i>
@@ -790,6 +795,7 @@
     </div>
     {% endif %}
 
+    {% if org_clinic|default(false) %}
     {# ── Métricas ── #}
     <div class="mkt-section-wrap mkt-section-wrap--alt">
     <section class="mkt-section mkt-section--metrics" id="metricas" aria-labelledby="mkt-metrics-title">
@@ -1464,6 +1470,10 @@
         <p class="mkt-chart-note" style="text-align:center;margin-top:16px">Estimativas baseadas em clínicas com acompanhamento pós-operatório estruturado versus abordagem manual.</p>
     </section>
 
+    {% else %}
+    {% include 'components/marketing/landing_studio_platform.html.twig' %}
+    {% endif %}
+
     {# ── FAQ ── #}
     <div class="mkt-section-wrap mkt-section-wrap--alt">
         <section class="mkt-section" id="faq" aria-labelledby="mkt-faq-title">
@@ -1540,32 +1550,28 @@
                 </div>
                 {% else %}
                 <details class="mkt-faq-item">
-                    <summary>O que é {{ _pnome }} e o que ela resolve?</summary>
-                    <p>É uma plataforma de acompanhamento pós-operatório com gestão de pacientes, protocolos clínicos, sala crítica, alertas em tempo real, questionários automáticos e portal do paciente. Resolve o problema do cuidado fragmentado após procedimentos cirúrgicos.</p>
+                    <summary>O que é a plataforma Unio?</summary>
+                    <p>É o organismo digital central da Unio — hubs modulares para saúde, educação, RH, engenharia, TI e finanças, com portal do cliente, playbooks e assistente Lumen.</p>
                 </details>
                 <details class="mkt-faq-item">
-                    <summary>Como funciona o acompanhamento automático?</summary>
-                    <p>Ao cadastrar um paciente com o procedimento realizado, o sistema associa o protocolo correspondente e agenda questionários para as etapas definidas (D+1, D+3, D+7, etc.). Os pacientes recebem o questionário via portal e as respostas são analisadas, alertas são gerados automaticamente quando há indicadores de risco.</p>
+                    <summary>Qual a relação com o Unio Saúde?</summary>
+                    <p>Unio Saúde é o produto vertical para clínicas (pós-operatório, carteirinha, guia médico), hospedado em uniosaude.uniowork.com.br. A mesma base visual e tecnológica alimenta o site central e os produtos verticais.</p>
                 </details>
                 <details class="mkt-faq-item">
-                    <summary>O paciente precisa instalar algum aplicativo?</summary>
-                    <p>Não. O portal do paciente é acessado via navegador por link seguro, funciona em qualquer celular, tablet ou computador, sem instalação.</p>
+                    <summary>Posso usar só alguns módulos?</summary>
+                    <p>Sim. Cada workspace ativa os hubs que fazem sentido — RH, engenharia, saúde, financeiro e outros — sem precisar implantar tudo de uma vez.</p>
+                </details>
+                <details class="mkt-faq-item">
+                    <summary>Funciona para educação e corporativo?</summary>
+                    <p>Sim. Já desenvolvemos para instituições como UNEF (educação) e União Médica (saúde). A plataforma adapta portais, comunicação e operações por setor.</p>
+                </details>
+                <details class="mkt-faq-item">
+                    <summary>O cliente precisa instalar aplicativo?</summary>
+                    <p>Não. O portal do cliente é acessado por link seguro no navegador — celular, tablet ou desktop.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>A plataforma é compatível com a LGPD?</summary>
-                    <p>Sim. Dados de saúde são tratados com isolamento por clínica, trilha de auditoria completa, consentimento e controle de acesso granular por perfil, em conformidade com a LGPD.</p>
-                </details>
-                <details class="mkt-faq-item">
-                    <summary>Posso configurar diferentes protocolos por tipo de procedimento?</summary>
-                    <p>Sim. Você cria protocolos personalizados por tipo de cirurgia ou procedimento, com etapas, prazos e questionários específicos. A associação automática é feita no cadastro do paciente.</p>
-                </details>
-                <details class="mkt-faq-item">
-                    <summary>Quantos usuários e pacientes a plataforma suporta?</summary>
-                    <p>A arquitetura é escalável, adequada para clínicas de pequeno, médio e grande porte. Cada clínica opera em workspace isolado, com usuários ilimitados por perfil.</p>
-                </details>
-                <details class="mkt-faq-item">
-                    <summary>Como funciona a fila de alertas e triagem?</summary>
-                    <p>Respostas de questionários e desvios de protocolo geram alertas classificados de P1 a P4. A equipe visualiza a fila com SLA, assume o caso, registra a conduta e exporta relatórios quando necessário.</p>
+                    <p>Sim. Workspaces isolados, trilha de auditoria, consentimento e controle de acesso por perfil.</p>
                 </details>
                 {% endif %}
             </div>
@@ -1577,6 +1583,7 @@
         <div class="mkt-cta-banner">
             <div class="mkt-cta-banner-inner">
                 <div class="mkt-cta-copy">
+                    {% if org_clinic|default(false) %}
                     <h2 id="mkt-cta-title">Cuidado que não para na sala de cirurgia.</h2>
                     <p>Acesse {{ _pnome }}, registre seus pacientes e comece o acompanhamento estruturado, protocolos, alertas e portal do paciente em um só lugar.</p>
                     <ul class="mkt-cta-list">
@@ -1585,6 +1592,16 @@
                         <li><i class="fas fa-check" aria-hidden="true"></i> Portal do paciente e questionários automáticos</li>
                         <li><i class="fas fa-check" aria-hidden="true"></i> Relatórios exportáveis e conformidade LGPD</li>
                     </ul>
+                    {% else %}
+                    <h2 id="mkt-cta-title">Um organismo para todos os seus projetos digitais.</h2>
+                    <p>Acesse {{ organismo.copy.brand_name|default('Unio') }}, explore os hubs e conecte saúde, educação e operações com a mesma identidade visual.</p>
+                    <ul class="mkt-cta-list">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Hubs modulares: RH, engenharia, saúde, TI e mais</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Playbooks, check-ins e portal do cliente</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Unio Saúde como produto vertical pronto</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> LGPD, auditoria e workspaces isolados</li>
+                    </ul>
+                    {% endif %}
                 </div>
                 <div class="mkt-cta-banner-actions">
                     <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--white">
