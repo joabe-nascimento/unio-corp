@@ -33,8 +33,13 @@ Depois abra https://uniosaude.uniowork.com.br/login
 
 ## Setup inicial
 
-Workflow **Setup Unio Saúde (server)** no GitHub Actions, ou via SSH:
+Workflow **Setup Unio Saúde (server)** no GitHub Actions, ou no Terminal do cPanel (sem SSH).
+
+Guia completo (reparo 404 HTTPS, billing, smoke): **[UNIOSAUDE_DEPLOY_REPAIR.md](UNIOSAUDE_DEPLOY_REPAIR.md)**
 
 ```bash
-bash /tmp/setup-uniosaude-hostgator.sh
+export DEPLOY_PATH=/home2/joabef36/unio-uniosaude
+export PUBLIC_HTML=/home2/joabef36/uniosaude.uniowork.com.br
+export DEFAULT_URI=https://uniosaude.uniowork.com.br
+bash "$DEPLOY_PATH/scripts/repair-uniosaude-now.sh"
 ```

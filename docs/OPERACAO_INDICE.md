@@ -9,6 +9,7 @@ Documentação da instância **uniosaude** (Unio Saúde, deploy dedicado).
 | [HUB_POS_OPERATORIO_INTEGRACAO.md](HUB_POS_OPERATORIO_INTEGRACAO.md) | Integração do hub clínico |
 | [ROADMAP_TRANSICAO_ORGANISMO.md](ROADMAP_TRANSICAO_ORGANISMO.md) | Transição UI Organismo / Pulso |
 | [DNS_UNIOWORK_UNIOSAUDE.md](DNS_UNIOWORK_UNIOSAUDE.md) | DNS e subdomínio uniosaude |
+| [UNIOSAUDE_DEPLOY_REPAIR.md](UNIOSAUDE_DEPLOY_REPAIR.md) | Vhost HTTPS, reparo manual e pós-deploy automático |
 | [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md) | Pipeline SSH HostGator |
 | [DEPLOY_AGORA.md](DEPLOY_AGORA.md) | Checklist rápido de deploy |
 | [OPERACAO_VALIDACAO_LOCAL.md](OPERACAO_VALIDACAO_LOCAL.md) | Validação antes do push |

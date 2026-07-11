@@ -186,6 +186,18 @@ if command -v uapi >/dev/null 2>&1 && [[ -n "$VHOST" ]]; then
   uapi --output=json SSL start_autossl_check 2>/dev/null || true
 fi
 
+CI_REPORT_STEP="Symfony entrypoint em public_html"
+ci_report_step "$CI_REPORT_STEP"
+# shellcheck source=lib/sync-public-html-entrypoint.sh
+source "$ROOT/scripts/lib/sync-public-html-entrypoint.sh"
+
+if [[ -n "${DEFAULT_URI:-}" ]]; then
+  CI_REPORT_STEP="Reparo vhost subdominio (Apache)"
+  ci_report_step "$CI_REPORT_STEP"
+  export DEFAULT_URI
+  bash "$ROOT/scripts/lib/repair-subdomain-vhost.sh" || echo "AVISO: repair-subdomain-vhost (nao bloqueia deploy)"
+fi
+
 CI_REPORT_STEP="Registrar revisão de deploy"
 ci_report_step "$CI_REPORT_STEP"
 mkdir -p var/deploy

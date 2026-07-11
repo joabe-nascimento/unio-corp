@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # Setup inicial de ambiente de produto/homolog (ex.: RH em rh.uniowork.com.br).
 # Uso manual ou via GitHub Actions (setup-product-rh.yml):
 #
@@ -15,7 +15,6 @@ set -euo pipefail
 DEPLOY_PATH="${DEPLOY_PATH:?DEPLOY_PATH obrigatorio}"
 PUBLIC_HTML="${PUBLIC_HTML:?PUBLIC_HTML obrigatorio}"
 DEFAULT_URI="${DEFAULT_URI:?DEFAULT_URI obrigatorio (ex.: https://rh.uniowork.com.br)}"
-APP_DIR_NAME="$(basename "$DEPLOY_PATH")"
 
 echo "== Setup produto: $DEFAULT_URI"
 echo "   app:  $DEPLOY_PATH"
@@ -26,72 +25,9 @@ mkdir -p "$PUBLIC_HTML"
 
 chmod -R ug+rwx "$DEPLOY_PATH/var" "$DEPLOY_PATH/public/uploads" 2>/dev/null || true
 
-INDEX_PHP="$PUBLIC_HTML/index.php"
-cat > "$INDEX_PHP" <<PHP
-<?php
-
-use App\\Kernel;
-
-require_once __DIR__.'/../${APP_DIR_NAME}/vendor/autoload_runtime.php';
-
-return static function (array \$context) {
-    return new Kernel(\$context['APP_ENV'], (bool) \$context['APP_DEBUG']);
-};
-PHP
-echo "Atualizado: $INDEX_PHP"
-
-HTACCESS="$PUBLIC_HTML/.htaccess"
-if [[ ! -f "$HTACCESS" ]]; then
-  cat > "$HTACCESS" <<'HTA'
-DirectoryIndex index.php
-
-<IfModule mod_negotiation.c>
-    Options -MultiViews
-</IfModule>
-
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
-</IfModule>
-
-<IfModule !mod_rewrite.c>
-    DirectoryIndex index.php
-</IfModule>
-HTA
-  echo "Criado: $HTACCESS"
-else
-  if ! grep -q 'RewriteRule \^ index.php' "$HTACCESS" 2>/dev/null; then
-    cat > "$HTACCESS" <<'HTA'
-DirectoryIndex index.php
-
-<IfModule mod_negotiation.c>
-    Options -MultiViews
-</IfModule>
-
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
-</IfModule>
-
-<IfModule !mod_rewrite.c>
-    DirectoryIndex index.php
-</IfModule>
-HTA
-    echo "Reparado: $HTACCESS (faltava rewrite Symfony)"
-  else
-    echo "Mantido: $HTACCESS (rewrite OK)"
-  fi
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/sync-public-html-entrypoint.sh
+source "${SCRIPT_DIR}/lib/sync-public-html-entrypoint.sh"
 
 ENV_FILE="$DEPLOY_PATH/.env.local"
 ENV_BASE="$DEPLOY_PATH/.env"
