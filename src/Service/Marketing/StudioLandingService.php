@@ -227,13 +227,13 @@ final class StudioLandingService
                 'name' => 'União Médica',
                 'sector' => 'Saúde',
                 'logo' => 'uniao-medica.jpg',
-                'text' => 'Operação clínica e comunicação com pacientes em ambiente digital unificado.',
+                'text' => 'Sistema clínico e comunicação com pacientes, com identidade visual própria da operadora.',
             ],
             [
                 'name' => 'UNEF',
                 'sector' => 'Educação',
                 'logo' => 'unef.svg',
-                'text' => 'Presença digital e sistemas para instituição de ensino superior.',
+                'text' => 'Presença digital e sistemas para instituição de ensino superior, com marca própria.',
             ],
         ];
     }
