@@ -94,9 +94,11 @@ final class PosOperatorioCarteirinhaController extends AbstractController
             $this->addFlash('success', 'Carteirinha emitida para ' . $paciente->getNome() . '.');
         } catch (\Throwable $e) {
             $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToRoute('app_pos_operatorio_carteirinha_paciente', ['id' => $id]);
         }
 
-        return $this->redirectToRoute('app_pos_operatorio_carteirinha_paciente', ['id' => $id]);
+        return $this->redirectToRoute('app_pos_operatorio_carteirinha_paciente', ['id' => $id, '_fragment' => 'enviar']);
     }
 
     #[Route('/paciente/{id}/foto', name: 'app_pos_operatorio_carteirinha_foto', requirements: ['id' => '\d+'], methods: ['POST'])]
