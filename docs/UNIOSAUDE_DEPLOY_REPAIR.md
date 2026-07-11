@@ -107,6 +107,17 @@ curl -sI --resolve uniosaude.uniowork.com.br:443:50.6.138.130 -k https://uniosau
 2. **AutoSSL** — após criar subdomínio, HTTPS pode levar 5–30 min; smoke pode mostrar 404 temporário.
 3. **Scripts desatualizados no servidor** — resolvido após um deploy bem-sucedido; até lá use reparo manual acima.
 
+## Deploy manual do PC (sem GitHub Actions)
+
+Enquanto o billing do Actions estiver bloqueado, publique com:
+
+```powershell
+cd C:\projetos\Nova pasta\unio-corp\unio-corp
+powershell -ExecutionPolicy Bypass -File scripts\deploy-uniosaude-manual.ps1
+```
+
+Guia completo: [DEPLOY_MANUAL_UNIOSAUDE.md](DEPLOY_MANUAL_UNIOSAUDE.md)
+
 ## Verificação rápida
 
 ```bash
