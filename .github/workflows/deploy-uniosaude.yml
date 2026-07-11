@@ -1,0 +1,40 @@
+name: Deploy Unio Saúde
+
+on:
+  push:
+    branches:
+      - uniosaude
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-uniosaude-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate-reusable.yml
+    with:
+      git_branch: uniosaude
+
+  deploy:
+    needs: validate
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      github_environment: uniosaude
+      deploy_path_default: /home2/joabef36/unio-uniosaude
+      deploy_public_html_default: /home2/joabef36/uniosaude.uniowork.com.br
+      archive_remote_name: deploy-uniosaude.tar.gz
+      skip_unio_platform_steps: false
+      report_artifact_prefix: deploy-report-uniosaude
+      failure_summary_title: Falha no deploy Unio Saúde
+    secrets: inherit
+
+  smoke_test:
+    needs: deploy
+    uses: ./.github/workflows/smoke-test-hostgator-reusable.yml
+    with:
+      default_uri: https://uniosaude.uniowork.com.br
+      paths: |
+        /
+        /login
+    secrets: inherit
