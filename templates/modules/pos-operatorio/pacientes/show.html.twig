@@ -44,18 +44,14 @@
 
 {% block hub_kpis %}
 {% if org_clinic|default(false) %}
-<div class="page-lead-kpis page-lead-kpis--organismo">
-    {% include 'components/pos_operatorio/patient_kpi_strip.html.twig' with { variant: 'full' } %}
-</div>
+{% include 'components/pos_operatorio/patient_kpi_strip.html.twig' with { variant: 'full' } %}
 {% else %}
-<div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
+{% include 'components/kpi_row.html.twig' with { items: [
         { value: dia_pos is not null ? 'D+' ~ dia_pos : '—', label: 'Dia pós-op', icon: 'fa-calendar-day', tone: 'sky' },
         { value: alertas_abertos, label: 'Alertas abertos', icon: 'fa-triangle-exclamation', tone: 'rose', variant: alertas_abertos > 0 ? 'danger' : '', pulse: alertas_abertos > 0 },
         { value: paciente.status|capitalize, label: 'Status clínico', icon: 'fa-heart-pulse', tone: 'sage' },
         { value: ultima_resposta ? ultima_resposta.scoreRisco : '—', label: 'Último score', icon: 'fa-chart-line', tone: 'lavender', variant: ultima_resposta and ultima_resposta.scoreRisco >= 70 ? 'danger' : (ultima_resposta and ultima_resposta.scoreRisco >= 40 ? 'warning' : '') },
     ], mb: 'mb-0' } %}
-</div>
 {% endif %}
 {% endblock %}
 

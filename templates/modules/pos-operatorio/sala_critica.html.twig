@@ -23,14 +23,12 @@
 {% endblock %}
 
 {% block hub_kpis %}
-<div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
+{% include 'components/kpi_row.html.twig' with { items: [
         { value: p1_count, label: 'Incidentes P1', icon: 'fa-fire', tone: 'rose', variant: p1_count > 0 ? 'danger' : 'success', pulse: p1_count > 0 },
         { value: severity_score|default(0), label: 'Índice severidade', icon: 'fa-heart-pulse', tone: 'amber', variant: severity_level|default('stable') == 'critical' ? 'danger' : (severity_level|default('stable') == 'elevated' ? 'warning' : '') },
         { value: stats.em_atendimento|default(0), label: 'Em atendimento', icon: 'fa-user-nurse', tone: 'sage' },
         { value: stats.abertos|default(0), label: 'Aguardando triagem', icon: 'fa-inbox', tone: 'sky', route: 'app_pos_operatorio_alertas' },
     ], mb: 'mb-0' } %}
-</div>
 {% endblock %}
 
 {% block hub_content %}
