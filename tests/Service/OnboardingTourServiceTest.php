@@ -13,6 +13,7 @@ use App\Entity\User;
 use App\Repository\UserProductGrantRepository;
 
 use App\Security\ProductGrantAccess;
+use App\Service\Organismo\OrganismoFeature;
 
 use App\Service\NavigationService;
 
@@ -326,7 +327,10 @@ final class OnboardingTourServiceTest extends TestCase
 
         $security = $this->createMock(Security::class);
 
-        $grants = new ProductGrantAccess($security, $grantRepo);
+        $organismoFeature = $this->createMock(OrganismoFeature::class);
+        $organismoFeature->method('isEnabled')->willReturn(false);
+
+        $grants = new ProductGrantAccess($security, $grantRepo, $organismoFeature);
 
 
 

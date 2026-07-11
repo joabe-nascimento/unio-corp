@@ -17,6 +17,7 @@ use App\Service\RhOnboardingService;
 use App\Service\PlatformNotificationService;
 use App\Service\PlatformNotificationPresenter;
 use App\Security\ProductGrantAccess;
+use App\Service\Organismo\OrganismoFeature;
 use App\Repository\UserRepository;
 use App\Repository\PlatformNotificacaoRepository;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -38,6 +39,7 @@ class RhRecrutamentoConvertTest extends TestCase
             new ProductGrantAccess(
                 $this->createMock(Security::class),
                 $this->createMock(UserProductGrantRepository::class),
+                $this->createMock(OrganismoFeature::class),
             ),
         );
     }
