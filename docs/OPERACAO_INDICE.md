@@ -24,7 +24,7 @@ Documentação da instância **uniosaude** (Unio Saúde, deploy dedicado).
 |------|--------|
 | **Branch** | `uniosaude` |
 | **URL** | https://uniosaude.uniowork.com.br |
-| **Deploy** | push `uniosaude` → GitHub; produção via [DEPLOY_MANUAL_UNIOSAUDE.md](DEPLOY_MANUAL_UNIOSAUDE.md) ou Actions |
+| **Deploy** | push `uniosaude` → GitHub; produção via [DEPLOY_MANUAL_UNIOSAUDE.md](DEPLOY_MANUAL_UNIOSAUDE.md) (Actions no push desativado) |
 | **Servidor** | `/home2/joabef36/unio-uniosaude` |
 | **Login staff demo** | `renata.oliveira@unio.dev` / `unio123` |
 | **Login paciente demo** | `joabe.nascimento@unio.dev` / `unio123` |
