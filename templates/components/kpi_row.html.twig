@@ -1,19 +1,18 @@
 {#
-  kpi_row — linha de KPIs componentizada
-  Props:
-    items   (array)   cada item: { value, label, sub?, route?, trend? }
-    mb      (string, opt)  margem bottom Bootstrap, ex: 'mb-3'. Default: 'mb-3'
+  kpi_row — linha de KPIs componentizada (Organismo usa org_kpi_strip premium)
 
-  Uso:
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: '0', label: 'Total', sub: 'Cadastrados' },
-        { value: '3', label: 'Ativos', route: 'app_rh_funcionarios' },
-    ]} %}
+  Props:
+    items   (array)   cada item: { value, label, sub?, icon?, tone?, variant?, route?,
+                       route_params?, href?, delta?, delta_variant?, pulse?, span?,
+                       value_html?, sublist?, kpi_key?, trend? }
+    mb      (string, opt)  margem bottom Bootstrap (legado sem organismo). Default: 'mb-3'
+    extra_class (string, opt)
+    layout  (string, opt) strip | tiles | compact — repassado ao org_kpi_strip
 #}
 {% set n = items|length %}
 {% if organismo.enabled|default(false) %}
 <div class="page-lead-kpis page-lead-kpis--organismo{% if extra_class is defined and extra_class %} {{ extra_class }}{% endif %}">
-    {% include 'components/org_kpi_strip.html.twig' with { items: items } %}
+    {% include 'components/org_kpi_strip.html.twig' with { items: items, layout: layout|default('strip') } %}
 </div>
 {% else %}
 {% set col_class = n == 1 ? 'col-12'

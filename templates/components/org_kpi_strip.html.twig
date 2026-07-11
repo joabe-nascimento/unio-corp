@@ -1,17 +1,64 @@
-{# Faixa compacta de KPIs — Organismo #}
-{% set _tones = ['sky', 'sage', 'lavender', 'teal', 'amber', 'plum'] %}
-<div class="org-kpi-strip" role="list">
+{#
+  org_kpi_strip — faixa premium de KPIs (padrão Organismo / Clínica / Studio)
+
+  Props:
+    items   (array)  { value, label, sub?, icon?, tone?, variant?, route?, route_params?, href?,
+                       delta?, delta_variant?, pulse?, span?, value_html?, sublist?, kpi_key? }
+    layout  (string) strip | tiles | compact  (default: strip)
+    class   (string) classes extras no container
+#}
+{% set _tones = ['sky', 'sage', 'lavender', 'teal', 'amber', 'plum', 'rose', 'blue'] %}
+{% set _layout = layout|default('strip') %}
+<div class="org-kpi-strip org-kpi-strip--{{ _layout }}{% if class|default('') %} {{ class }}{% endif %}" role="list">
     {% for item in items %}
-    {% set _tone = _tones[loop.index0 % _tones|length] %}
-    <div class="org-kpi-strip__item" role="listitem">
-        <span class="org-dot org-dot--{{ _tone }} org-dot--sm" aria-hidden="true"></span>
+    {% set _tone = item.tone|default(_tones[loop.index0 % _tones|length]) %}
+    {% set _variant = item.variant|default('') %}
+    {% set _span = item.span|default(1) %}
+    {% set _tag = (item.route|default('') or item.href|default('')) ? 'a' : 'article' %}
+    {% set _href = item.href|default(item.route|default('') ? path(item.route, item.route_params|default({})) : '') %}
+    <{{ _tag }}
+        class="org-kpi-strip__item org-kpi-strip__item--{{ _tone }}{% if _variant %} org-kpi-strip__item--{{ _variant }}{% endif %}{% if item.pulse|default(false) %} org-kpi-strip__item--pulse{% endif %}{% if _span > 1 %} org-kpi-strip__item--span-{{ _span }}{% endif %}"
+        role="listitem"
+        {% if _href %}href="{{ _href }}"{% endif %}
+    >
+        {% if item.icon|default('') %}
+        <span class="org-kpi-strip__icon" aria-hidden="true">
+            <i class="fas {{ item.icon }}"></i>
+        </span>
+        {% else %}
+        <span class="org-dot org-dot--{{ _tone }} org-dot--sm org-kpi-strip__dot" aria-hidden="true"></span>
+        {% endif %}
         <div class="org-kpi-strip__body">
-            <span class="org-kpi-strip__value"{% if item.kpi_key|default('') %} data-recrutamento-pipeline-kpi="{{ item.kpi_key }}"{% endif %}>{{ item.value }}</span>
+            {% if item.value_html|default('') %}
+            <span class="org-kpi-strip__value org-kpi-strip__value--custom{% if _variant %} org-kpi-strip__value--{{ _variant }}{% endif %}">{{ item.value_html|raw }}</span>
+            {% else %}
+            <span class="org-kpi-strip__value{% if _variant %} org-kpi-strip__value--{{ _variant }}{% endif %}"
+                  {% if item.kpi_key|default('') %} data-recrutamento-pipeline-kpi="{{ item.kpi_key }}"{% endif %}
+                  {% if item.kpi_data|default('') %} {{ item.kpi_data|raw }}{% endif %}>{{ item.value }}</span>
+            {% endif %}
             <span class="org-kpi-strip__label">{{ item.label }}</span>
             {% if item.sub|default('') %}
             <span class="org-kpi-strip__sub">{{ item.sub }}</span>
             {% endif %}
+            {% if item.delta|default('') %}
+            <span class="org-kpi-strip__delta org-kpi-strip__delta--{{ item.delta_variant|default('ok') }}">{{ item.delta }}</span>
+            {% endif %}
+            {% if item.sublist|default([])|length > 0 %}
+            <ul class="org-kpi-strip__sublist"{% if item.sublist_id|default('') %} id="{{ item.sublist_id }}"{% endif %}>
+                {% for row in item.sublist %}
+                <li class="org-kpi-strip__sublist-item">
+                    {% if row.valor|default('') %}<span class="org-kpi-strip__sublist-val">{{ row.valor }}</span>{% endif %}
+                    <span class="org-kpi-strip__sublist-lbl">{{ row.rotulo|default(row.label|default('')) }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </div>
-    </div>
+        {% if item.trend|default('') %}
+        <span class="org-kpi-strip__trend org-kpi-strip__trend--{{ item.trend }}" aria-hidden="true">
+            <i class="fas fa-arrow-{{ item.trend == 'up' ? 'up' : 'down' }}"></i>
+        </span>
+        {% endif %}
+    </{{ _tag }}>
     {% endfor %}
 </div>

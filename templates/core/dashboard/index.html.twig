@@ -41,6 +41,48 @@
         </div>
     </header>
 
+    {% set _badges = clinic_nav_badges|default({}) %}
+    {% set _copy = organismo.copy|default({}) %}
+    <section class="clinic-home-kpis" aria-label="Indicadores em tempo real">
+        {% include 'components/kpi_row.html.twig' with { items: [
+            {
+                value: _badges.pacientes_ativos|default(0),
+                label: _copy.nav_pacientes|default(org_clinic|default(false) ? 'Pacientes' : 'Clientes'),
+                icon: org_clinic|default(false) ? 'fa-user-injured' : 'fa-folder-open',
+                tone: 'sky',
+                route: 'app_pos_operatorio_pacientes',
+                sub: 'Em acompanhamento ativo'
+            },
+            {
+                value: _badges.sala_critica|default(0),
+                label: _copy.nav_sala_critica|default('Prioridade alta'),
+                icon: org_clinic|default(false) ? 'fa-bed-pulse' : 'fa-flag',
+                tone: 'rose',
+                variant: _badges.sala_critica|default(0) > 0 ? 'danger' : '',
+                pulse: _badges.sala_critica|default(0) > 0,
+                route: 'app_pos_operatorio_sala_critica',
+                sub: 'Alertas P1'
+            },
+            {
+                value: _badges.alertas|default(0),
+                label: _copy.nav_alertas|default('Alertas'),
+                icon: 'fa-triangle-exclamation',
+                tone: 'amber',
+                variant: _badges.alertas|default(0) > 0 ? 'warning' : '',
+                route: 'app_pos_operatorio_alertas',
+                sub: 'Na fila de triagem'
+            },
+            {
+                value: _badges.questionarios|default(0),
+                label: _copy.nav_questionarios|default('Check-ins'),
+                icon: 'fa-clipboard-list',
+                tone: 'lavender',
+                route: 'app_pos_operatorio_questionarios',
+                sub: 'Respostas pendentes hoje'
+            },
+        ], mb: 'mb-0' } %}
+    </section>
+
     <section class="clinic-home-actions">
         <h2 class="clinic-home-actions__label">Começar por</h2>
         <div class="clinic-home-actions__grid">

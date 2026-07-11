@@ -25,33 +25,7 @@
 </header>
 
 <div class="clinic-ficha-offcanvas-kpis">
-    <article class="clinic-metric">
-        <span class="clinic-metric__label">Dia pós-op</span>
-        <span class="clinic-metric__value">{{ dia_pos is not null ? 'D+' ~ dia_pos : '—' }}</span>
-    </article>
-    <article class="clinic-metric">
-        <span class="clinic-metric__label">Alertas abertos</span>
-        <span class="clinic-metric__value{% if alertas_abertos > 0 %} clinic-metric__value--danger{% endif %}">{{ alertas_abertos }}</span>
-    </article>
-    <article class="clinic-metric">
-        <span class="clinic-metric__label">Último score</span>
-        <span class="clinic-metric__value{% if ultima_resposta and ultima_resposta.scoreRisco >= 70 %} clinic-metric__value--danger{% elseif ultima_resposta and ultima_resposta.scoreRisco >= 40 %} clinic-metric__value--warning{% endif %}">
-            {{ ultima_resposta ? ultima_resposta.scoreRisco : '—' }}
-        </span>
-    </article>
-    <article class="clinic-metric">
-        <span class="clinic-metric__label">Próximo passo</span>
-        <span class="clinic-metric__value clinic-metric__value--compact" title="{{ proximo_checklist ? proximo_checklist.item : '' }}">
-            {% if proximo_checklist %}
-                D+{{ proximo_checklist.dia }}
-            {% else %}
-                Concluído
-            {% endif %}
-        </span>
-        {% if proximo_checklist %}
-        <span class="clinic-metric__hint">{{ proximo_checklist.item }}</span>
-        {% endif %}
-    </article>
+    {% include 'components/pos_operatorio/patient_kpi_strip.html.twig' with { variant: 'offcanvas' } %}
 </div>
 
 {% include 'modules/pos-operatorio/pacientes/_ficha_body.html.twig' %}

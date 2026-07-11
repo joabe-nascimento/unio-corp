@@ -35,38 +35,36 @@
     </header>
 
     <div class="pulso-metrics" role="list">
-        <div class="pulso-metric pulso-metric--sky" role="listitem">
-            {{ orgicon.nav('fa-user-injured', 'sky', 'sm') }}
-            <div class="pulso-metric__body">
-                <span class="pulso-metric__value" data-pulso-stat="ativas">{{ snapshot.pulso.cenas_ativas|default(0) }}</span>
-                <span class="pulso-metric__label">{{ organismo.copy.pulso_projects_active|default('Projetos ativos') }}</span>
-            </div>
-        </div>
-        <div class="pulso-metric pulso-metric--amber" role="listitem">
-            {{ orgicon.nav('fa-hourglass-half', 'amber', 'sm') }}
-            <div class="pulso-metric__body">
-                <span class="pulso-metric__value" data-pulso-stat="aguardando">{{ snapshot.pulso.cenas_aguardando|default(0) }}</span>
-                <span class="pulso-metric__label">{{ organismo.copy.pulso_in_progress|default('Em andamento') }}</span>
-            </div>
-        </div>
-        <div class="pulso-metric pulso-metric--sage pulso-metric--wide" role="listitem">
-            {{ orgicon.nav('fa-triangle-exclamation', 'rose', 'sm') }}
-            <div class="pulso-metric__body">
-                <span class="pulso-metric__label">Alertas recentes</span>
-                <ul class="pulso-sinais-list" id="pulsoSinaisList">
-                    {% for sinal in snapshot.sinais|default([]) %}
-                    <li class="pulso-sinal-item">
-                        <span class="pulso-sinal-item__valor">{{ sinal.valor }}</span>
-                        <span class="pulso-sinal-item__rotulo">{{ sinal.rotulo }}</span>
-                    </li>
-                    {% else %}
-                    <li class="pulso-sinal-item pulso-sinal-item--empty">
-                        <span class="pulso-sinal-item__rotulo">Nenhum alerta no momento</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+        {% set _sinais = [] %}
+        {% for sinal in snapshot.sinais|default([]) %}
+            {% set _sinais = _sinais|merge([{ valor: sinal.valor, rotulo: sinal.rotulo }]) %}
+        {% else %}
+            {% set _sinais = [{ rotulo: 'Nenhum alerta no momento' }] %}
+        {% endfor %}
+        {% include 'components/org_kpi_strip.html.twig' with { items: [
+            {
+                value: snapshot.pulso.cenas_ativas|default(0),
+                label: organismo.copy.pulso_projects_active|default('Projetos ativos'),
+                icon: org_clinic|default(false) ? 'fa-user-injured' : 'fa-folder-open',
+                tone: 'sky',
+                kpi_data: 'data-pulso-stat="ativas"'
+            },
+            {
+                value: snapshot.pulso.cenas_aguardando|default(0),
+                label: organismo.copy.pulso_in_progress|default('Em andamento'),
+                icon: 'fa-hourglass-half',
+                tone: 'amber',
+                kpi_data: 'data-pulso-stat="aguardando"'
+            },
+            {
+                label: 'Alertas recentes',
+                icon: 'fa-triangle-exclamation',
+                tone: 'rose',
+                span: 2,
+                sublist: _sinais,
+                sublist_id: 'pulsoSinaisList'
+            }
+        ] } %}
     </div>
 
     <section class="pulso-cenas-section" aria-labelledby="pulsoCenasHeading">
@@ -93,13 +91,16 @@
             {{ organismo.copy.pulso_kpis_heading|default('Sinais do studio') }}
         </h2>
         <div class="pulso-kpis-grid">
+            {% set _kpi_items = [] %}
             {% for kpi in snapshot.kpis %}
-            <div class="pulso-kpi-tile">
-                {{ orgicon.nav(kpi.icon, 'neutral', 'md') }}
-                <span class="pulso-kpi-tile__value">{{ kpi.value }}</span>
-                <span class="pulso-kpi-tile__label">{{ kpi.label }}</span>
-            </div>
+                {% set _kpi_items = _kpi_items|merge([{
+                    value: kpi.value,
+                    label: kpi.label,
+                    icon: kpi.icon|default('fa-chart-line'),
+                    tone: loop.index is odd ? 'sky' : 'lavender'
+                }]) %}
             {% endfor %}
+            {% include 'components/org_kpi_strip.html.twig' with { items: _kpi_items, layout: 'tiles' } %}
         </div>
     </section>
     {% endif %}
