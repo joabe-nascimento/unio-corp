@@ -76,6 +76,10 @@
 {# ── Studio — plataforma base ── #}
 {% set _studio = clinic_nav_badges|default({}) %}
 {% set _maturidade_tab = app.request.query.get('tab', '') %}
+{% set _projetos_view = app.request.query.get('view') %}
+{% if route == 'app_core_projetos' and (_projetos_view is null or _projetos_view == '') %}
+    {% set _projetos_view = 'kanban' %}
+{% endif %}
 <li class="nav-item">
     <a href="{{ path('app_maturidade') }}" class="nav-link {{ route starts with 'app_maturidade' and _maturidade_tab not in ['entregas', 'prioridades'] ? 'active' : '' }}">
         <span class="nav-icon-slot">
@@ -121,7 +125,7 @@
 </li>
 
 <li class="nav-item">
-    <a href="{{ path('app_core_projetos') }}" class="nav-link {{ route starts with 'app_core_projetos' ? 'active' : '' }}">
+    <a href="{{ path('app_core_projetos', { view: 'lista' }) }}" class="nav-link {{ route starts with 'app_core_projetos' and _projetos_view != 'kanban' ? 'active' : '' }}">
         <span class="nav-icon-slot">
             <i class="fas fa-diagram-project nav-icon" aria-hidden="true"></i>
             {% if _studio.projetos_ativos|default(0) > 0 %}
@@ -133,7 +137,7 @@
 </li>
 
 <li class="nav-item">
-    <a href="{{ path('app_core_projetos', { view: 'kanban' }) }}" class="nav-link {{ route starts with 'app_core_projetos' and app.request.query.get('view') == 'kanban' ? 'active' : '' }}">
+    <a href="{{ path('app_core_projetos', { view: 'kanban' }) }}" class="nav-link {{ route starts with 'app_core_projetos' and _projetos_view == 'kanban' ? 'active' : '' }}">
         <span class="nav-icon-slot">
             <i class="fas fa-flag nav-icon" aria-hidden="true"></i>
             {% if _studio.prioridade_alta|default(0) > 0 %}
