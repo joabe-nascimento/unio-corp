@@ -1,1 +1,32 @@
-�
+﻿{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'pos-op-paciente-ficha',
+    title: 'Ficha do paciente',
+    subtitle: org_brand_label|default('Unio Clínica'),
+    icon: 'fa-file-medical',
+    size: 'xl'
+} %}
+    {% block offcanvas_body %}
+        <div class="pos-op-ficha-offcanvas clinic-ficha-offcanvas"
+             id="posOpPacienteFichaHost"
+             data-pos-op-ficha-partial-url="{{ path('app_pos_operatorio_paciente_ficha_partial', { id: 0 }) }}">
+            <p class="text-muted small mb-0">Carregando ficha…</p>
+        </div>
+    {% endblock %}
+    {% block offcanvas_footer %}
+        <footer class="unio-offcanvas-footer clinic-ficha-offcanvas-footer">
+            <button type="button"
+                    class="btn-unio-ghost btn-sm"
+                    id="posOpPacienteFichaEditBtn"
+                    data-unio-offcanvas-open="pos-op-paciente-edit"
+                    hidden>
+                <i class="fas fa-pen mr-1" aria-hidden="true"></i> Editar
+            </button>
+            <a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">
+                <i class="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i> Alertas
+            </a>
+            <a href="{{ path('app_portal_patient_login') }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener">
+                <i class="fas fa-mobile-screen mr-1" aria-hidden="true"></i> Portal
+            </a>
+        </footer>
+    {% endblock %}
+{% endembed %}

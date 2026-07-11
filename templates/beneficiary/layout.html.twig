@@ -1,1 +1,52 @@
-¿
+{% set _tema = platform_config.tema|default('light') %}
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ _tema }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4b72be">
+    <title>{% block benef_title %}Beneficiário{% endblock %} · {{ organismo.copy.brand_name|default('Unio Saúde') }}</title>
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=19">
+    <link rel="stylesheet" href="{{ asset('css/beneficiary-portal.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=22">
+    {% block benef_head %}{% endblock %}
+</head>
+<body class="benef-portal{% block benef_body_class %}{% endblock %}">
+
+<header class="benef-topbar">
+    <div class="benef-topbar__inner">
+        <a href="{{ path('app_home') }}" class="benef-topbar__brand" title="Voltar ao início">
+            <span class="benef-topbar__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></span>
+            <div>
+                <strong>{% block benef_product %}Beneficiário{% endblock %}</strong>
+                <span>{{ organismo.copy.brand_name|default('Unio Saúde') }}</span>
+            </div>
+        </a>
+        <nav class="benef-topbar__nav" aria-label="Produtos">
+            {% include 'components/marketing/clinic_product_nav.html.twig' with {
+                mkt_nav_active: benef_nav_active|default(''),
+                mkt_nav_on_product_page: true
+            } only %}
+        </nav>
+        {% block benef_topbar_actions %}{% endblock %}
+    </div>
+</header>
+
+<main class="benef-main">
+    {% block benef_content %}{% endblock %}
+</main>
+
+<footer class="benef-foot">
+    <p>Em emergência: <strong>192 (SAMU)</strong></p>
+    <p class="benef-foot__note">Este acesso não substitui avaliação médica presencial.</p>
+</footer>
+
+<script src="{{ asset('js/beneficiary-flow.js') }}?v=1" defer></script>
+{% block benef_scripts %}{% endblock %}
+</body>
+</html>

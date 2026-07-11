@@ -1,1 +1,235 @@
-�
+﻿{% extends 'layout/hub.html.twig' %}
+
+{% block title %}{{ org_brand_label|default('Unio Clínica') }}{% endblock %}
+{% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
+
+{% set hub_page_title = org_brand_label|default('Unio Clínica') %}
+{% set hub_page_subtitle = 'Acompanhamento clínico pós-cirúrgico' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = true %}
+{% set hub_permissions_tab = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_pacientes') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-user-injured mr-1"></i> Pacientes
+</a>
+<a href="{{ path('app_pos_operatorio_protocolos') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-clipboard-list mr-1"></i> Protocolos
+</a>
+<a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-triangle-exclamation mr-1"></i> Fila de alertas
+</a>
+<a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-heart-pulse mr-1"></i> Sala Crítica
+</a>
+<a href="{{ path('app_pos_operatorio_questionarios') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-file-medical mr-1"></i> Questionários
+</a>
+<a href="{{ path('app_portal_patient_login') }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener">
+    <i class="fas fa-mobile-screen mr-1"></i> Portal
+</a>
+{% if pos_dev_mode %}
+<span class="badge-perfil default"><i class="fas fa-flask mr-1" aria-hidden="true"></i> Preview</span>
+{% else %}
+<span class="badge-perfil success"><i class="fas fa-circle-check mr-1"></i> MVP</span>
+{% endif %}
+{% endblock %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: kpis, mb: 'mb-0' } %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="pos-op-hub" data-rh-hub-dashboard>
+
+    {% include 'components/pos_operatorio/hub_hero.html.twig' with {
+        empresa: empresa,
+        pos_pulse: pos_pulse,
+        pos_ticker: pos_ticker
+    } %}
+
+    <div class="row pos-op-overview-grid">
+        <div class="col-xl-8 pos-op-main">
+
+            <section class="unio-card mb-4 pos-op-patients-card">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Pacientes recentes',
+                    subtitle: patients_pagination.total ~ ' em acompanhamento · ' ~ patients_pagination.per_page ~ ' por página'
+                } %}
+                <div class="pos-op-patients-table-wrap">
+                    <table class="admin-table pos-op-patients-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Paciente</th>
+                                <th>Procedimento</th>
+                                <th>Fase</th>
+                                <th>Médico</th>
+                                <th>Última resp.</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in recent_patients %}
+                            <tr class="admin-table-row{% if p.status == 'pendente' %} admin-table-row--inactive{% endif %}{% if p.id|default(null) %} admin-table-row--clickable{% endif %}"
+                                {% if p.id|default(null) %}onclick="window.location='{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id }) }}'" style="cursor:pointer"{% endif %}>
+                                <td><code class="admin-table-mono">{{ p.codigo }}</code></td>
+                                <td><strong class="pos-op-cell-name">{{ p.nome }}</strong></td>
+                                <td class="pos-op-cell-truncate" title="{{ p.procedimento }}">{{ p.procedimento }}</td>
+                                <td><span class="badge-perfil default">{{ p.dia }}</span></td>
+                                <td class="pos-op-cell-truncate" title="{{ p.medico }}">{{ p.medico }}</td>
+                                <td class="admin-table-date">{{ p.ultima_resposta }}</td>
+                                <td>
+                                    {% if p.status == 'alerta' %}
+                                    {% include 'components/status_badge.html.twig' with { label: 'Alerta ' ~ p.pri|default(''), variant: 'danger' } %}
+                                    {% elseif p.status == 'pendente' %}
+                                    {% include 'components/status_badge.html.twig' with { label: 'Pendente', variant: 'warning' } %}
+                                    {% else %}
+                                    {% include 'components/status_badge.html.twig' with { label: p.status|pos_op_status_label, variant: 'success' } %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include 'components/table_pagination.html.twig' with {
+                    pagination: patients_pagination,
+                    route: 'app_pos_operatorio',
+                    per_page_options: patients_per_page_options
+                } %}
+            </section>
+
+            {% set module_items = [] %}
+            {% for card in module_cards %}
+                {% set module_items = module_items|merge([{
+                    icon: card.icon,
+                    title: card.title,
+                    subtitle: card.subtitle ~ ' · ' ~ card.metric,
+                    href: card.href|default('#') is same as('#') ? '#' : path(card.href)
+                }]) %}
+            {% endfor %}
+            {% include 'components/module_grid.html.twig' with {
+                title: 'Atalhos clínicos',
+                subtitle: 'Pacientes, protocolos, alertas e portal',
+                items: module_items,
+                cols: 2
+            } %}
+        </div>
+
+        <div class="col-xl-4 pos-op-sidebar">
+            <div class="pos-op-sidebar-inner">
+
+                <section class="unio-card mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Alertas ativos',
+                        subtitle: active_alerts|length ~ ' requerem acompanhamento · SLA clínico'
+                    } %}
+                    <div class="pos-op-alerts-feed" role="list">
+                        {% for alert in active_alerts %}
+                        <div class="pos-op-alert-row pos-op-alert-row--{{ alert.tone }}{% if alert.paciente_id|default(null) %} pos-op-alert-row--clickable{% endif %}"
+                             role="listitem"
+                             {% if alert.paciente_id|default(null) %}onclick="window.location='{{ path('app_pos_operatorio_pacientes', { open_ficha: alert.paciente_id }) }}'" style="cursor:pointer"{% endif %}>
+                            <span class="pos-op-alert-icon" aria-hidden="true">
+                                <i class="fas fa-triangle-exclamation"></i>
+                            </span>
+                            <span class="pos-op-alert-body">
+                                <span class="pos-op-alert-head">
+                                    {% include 'components/status_badge.html.twig' with {
+                                        label: alert.pri,
+                                        variant: alert.pri == 'P1' ? 'danger' : (alert.pri == 'P2' ? 'warning' : 'info'),
+                                        extra_class: 'ti-badge-priority--' ~ alert.pri|lower
+                                    } %}
+                                    <small class="text-muted">{{ alert.tempo }}</small>
+                                </span>
+                                <strong class="pos-op-alert-title">{{ alert.titulo }}</strong>
+                                <span class="pos-op-alert-meta">{{ alert.paciente }}</span>
+                                {% if alert.detail|default('') %}
+                                <span class="pos-op-alert-detail">{{ alert.detail }}</span>
+                                {% endif %}
+                            </span>
+                            {% if alert.sla_pct is not null %}
+                            {% include 'components/progress_inline.html.twig' with {
+                                percent: alert.sla_pct,
+                                variant: alert.sla_pct <= 25 ? 'warning' : 'accent',
+                                show_label: true,
+                                compact: true,
+                                min_width: 48
+                            } %}
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="unio-card mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Fases do protocolo',
+                        subtitle: 'Distribuição por dia pós-operatório'
+                    } %}
+                    <div class="pos-op-phase-row">
+                        {% for phase in protocol_phases %}
+                        <div class="pos-op-phase-chip pos-op-phase-chip--{{ phase.tone }}">
+                            <span class="pos-op-phase-count">{{ phase.count }}</span>
+                            <span class="pos-op-phase-label">{{ phase.label }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="unio-card mb-4">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Linha do tempo',
+                        subtitle: 'Eventos recentes da clínica'
+                    } %}
+                    <ul class="pos-op-timeline">
+                        {% for ev in timeline_events %}
+                        <li class="pos-op-timeline-item">
+                            <span class="pos-op-timeline-time">{{ ev.time }}</span>
+                            <span class="pos-op-timeline-icon"><i class="fas {{ ev.icon }}" aria-hidden="true"></i></span>
+                            <div class="pos-op-timeline-body">
+                                <strong>{{ ev.label }}</strong>
+                                <span>{{ ev.detail }}</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+
+                {% if team_online|default([])|length > 0 %}
+                <section class="unio-card">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Equipe online',
+                        subtitle: 'Plantão clínico agora'
+                    } %}
+                    <ul class="pos-op-team-list">
+                        {% for member in team_online %}
+                        <li class="pos-op-team-item">
+                            <span class="avatar-circle pos-op-team-avatar">{{ member.initials }}</span>
+                            <div class="pos-op-team-meta">
+                                <strong>{{ member.nome }}</strong>
+                                <span>{{ member.role }}</span>
+                            </div>
+                            <span class="pos-op-team-status pos-op-team-status--{{ member.status }}">
+                                {{ member.status == 'online' ? 'Online' : 'Ausente' }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/pos-operatorio-hub.css') }}?v=5">
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/rh-hub-dashboard.js') }}?v=8"></script>
+{% endblock %}

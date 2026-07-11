@@ -1,1 +1,79 @@
-�
+﻿{% set _tema = platform_config.tema|default('light') %}
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ _tema }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4b72be">
+    <title>Portal do Cliente · {{ org_brand_label|default('Unio Clínica') }}</title>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=8">
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
+</head>
+<body class="pos-portal-login-page">
+
+<main class="pos-portal-login">
+    <header class="pos-portal-login__hero">
+        <div class="pos-portal-login__icon" aria-hidden="true">
+            <i class="fas fa-heart-pulse"></i>
+        </div>
+        <p class="pos-portal-login__eyebrow">{{ org_brand_label|default('Unio Clínica') }}</p>
+        <h1 class="pos-portal-login__title">Portal do cliente</h1>
+        <p class="pos-portal-login__sub">Acompanhe entregas, responda check-ins e fale com a equipe.</p>
+    </header>
+
+    <section class="pos-portal-login__card" aria-labelledby="portal-login-heading">
+        <h2 id="portal-login-heading" class="pos-portal-login__card-title">Entrar</h2>
+        <p class="pos-portal-login__card-sub">Use o e-mail e a senha fornecidos pela clínica.</p>
+
+        {% if error %}
+        <div class="pos-portal-login__alert pos-portal-login__alert--error" role="alert">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+        {% endif %}
+
+        {% if staff_logged_in|default(false) %}
+        <div class="pos-portal-login__alert pos-portal-login__alert--info" role="status">
+            Você está logado como equipe clínica. Saia para entrar com a conta do paciente
+            ou abra em aba anônima.
+        </div>
+        {% endif %}
+
+        {% for msg in app.flashes('error') %}
+        <div class="pos-portal-login__alert pos-portal-login__alert--error" role="alert">{{ msg }}</div>
+        {% endfor %}
+
+        <form method="post" action="{{ path('app_login') }}" class="pos-portal-login__form">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <input type="hidden" name="_target_path" value="{{ path('app_pos_operatorio_portal') }}">
+            <input type="hidden" name="_failure_path" value="{{ path('app_portal_patient_login') }}">
+
+            <label class="pos-portal-login__field">
+                <span>E-mail</span>
+                <input type="email" name="email" value="{{ last_username }}" autocomplete="username" required autofocus placeholder="seu@email.com">
+            </label>
+
+            <label class="pos-portal-login__field">
+                <span>Senha</span>
+                <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
+            </label>
+
+            <button type="submit" class="pos-portal-login__submit">Acessar meu acompanhamento</button>
+        </form>
+
+        <p class="pos-portal-login__help">
+            Problemas para entrar? Fale com a equipe da clínica — este portal é exclusivo para pacientes em acompanhamento.
+        </p>
+    </section>
+
+    <footer class="pos-portal-login__foot">
+        <p>Em emergência: <strong>192 (SAMU)</strong></p>
+        <a href="{{ path('app_login') }}">Sou da equipe clínica</a>
+    </footer>
+</main>
+
+</body>
+</html>

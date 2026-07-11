@@ -1,1 +1,219 @@
-�
+﻿{% extends 'base.html.twig' %}
+
+{% block title %}{{ org_clinic|default(false) ? 'Início' : 'Dashboard' }}{% endblock %}
+{% block page_show_title %}{% endblock %}
+
+{% block content %}
+{% if organismo.enabled|default(false) %}
+<div class="clinic-home{% if org_clinic|default(false) %} clinic-home--clinic{% endif %}">
+    {% if account_pending|default(false) %}
+        {% include 'components/account_pending_banner.html.twig' %}
+    {% endif %}
+
+    <header class="clinic-home-hero{% if org_clinic|default(false) %} clinic-home-hero--clinic{% endif %}">
+        <div class="clinic-home-hero__body">
+            <div class="clinic-home-hero__meta">
+                <span class="clinic-home-hero__date">
+                    {{ weekday|default('') }}{% if weekday is defined and weekday %}, {% endif %}{{ date_label|default('') }}
+                </span>
+                <span class="clinic-home-hero__sep" aria-hidden="true">·</span>
+                <span class="clinic-home-hero__clock" id="clinicDashClock">{{ time_label|default('') }}</span>
+            </div>
+
+            <p class="clinic-home-hero__slogan">{{ organismo.copy.brand_slogan|default('Cuidado que continua.') }}</p>
+            <h1 class="clinic-home-hero__title">
+                {{ organismo.copy.hero_title|default('Acompanhamento pós-cirúrgico') }}{% if organismo.copy.hero_title_accent|default('') %}<br><span>{{ organismo.copy.hero_title_accent }}</span>{% endif %}
+            </h1>
+            <p class="clinic-home-hero__desc">
+                {{ organismo.copy.hero_desc|default('Unio Clínica reúne cadastro de pacientes, protocolos de recuperação, alertas clínicos e questionários de acompanhamento.') }}
+            </p>
+            <ul class="clinic-home-hero__highlights" aria-label="Principais capacidades">
+                {% if org_clinic|default(false) %}
+                <li><i class="fas fa-user-nurse" aria-hidden="true"></i> Cadastro e acompanhamento de pacientes</li>
+                <li><i class="fas fa-bell" aria-hidden="true"></i> Alertas clínicos em tempo real</li>
+                <li><i class="fas fa-file-medical" aria-hidden="true"></i> Protocolos de recuperação integrados</li>
+                {% else %}
+                <li><i class="fas fa-code" aria-hidden="true"></i> Sites e sistemas sob medida</li>
+                <li><i class="fas fa-bell" aria-hidden="true"></i> Alertas e prioridades em tempo real</li>
+                <li><i class="fas fa-layer-group" aria-hidden="true"></i> Entregas digitais integradas</li>
+                {% endif %}
+            </ul>
+        </div>
+    </header>
+
+    {% set _badges = clinic_nav_badges|default({}) %}
+    {% set _copy = organismo.copy|default({}) %}
+    <section class="clinic-home-kpis" aria-label="Indicadores em tempo real">
+        {% include 'components/kpi_row.html.twig' with { items: [
+            {
+                value: _badges.pacientes_ativos|default(0),
+                label: _copy.nav_pacientes|default(org_clinic|default(false) ? 'Pacientes' : 'Clientes'),
+                icon: org_clinic|default(false) ? 'fa-user-injured' : 'fa-folder-open',
+                tone: 'sky',
+                route: 'app_pos_operatorio_pacientes',
+                sub: 'Em acompanhamento ativo'
+            },
+            {
+                value: _badges.sala_critica|default(0),
+                label: _copy.nav_sala_critica|default('Prioridade alta'),
+                icon: org_clinic|default(false) ? 'fa-bed-pulse' : 'fa-flag',
+                tone: 'rose',
+                variant: _badges.sala_critica|default(0) > 0 ? 'danger' : '',
+                pulse: _badges.sala_critica|default(0) > 0,
+                route: 'app_pos_operatorio_sala_critica',
+                sub: 'Alertas P1'
+            },
+            {
+                value: _badges.alertas|default(0),
+                label: _copy.nav_alertas|default('Alertas'),
+                icon: 'fa-triangle-exclamation',
+                tone: 'amber',
+                variant: _badges.alertas|default(0) > 0 ? 'warning' : '',
+                route: 'app_pos_operatorio_alertas',
+                sub: 'Na fila de triagem'
+            },
+            {
+                value: _badges.questionarios|default(0),
+                label: _copy.nav_questionarios|default('Check-ins'),
+                icon: 'fa-clipboard-list',
+                tone: 'lavender',
+                route: 'app_pos_operatorio_questionarios',
+                sub: 'Respostas pendentes hoje'
+            },
+        ], mb: 'mb-0' } %}
+    </section>
+
+    <section class="clinic-home-actions">
+        <h2 class="clinic-home-actions__label">Começar por</h2>
+        <div class="clinic-home-actions__grid">
+            <a href="{{ path('app_pos_operatorio_pacientes', { open_novo: 1 }) }}" class="clinic-action-card clinic-action-card--primary">
+                <span class="clinic-action-card__icon"><i class="fas {{ org_clinic|default(false) ? 'fa-user-plus' : 'fa-folder-plus' }}" aria-hidden="true"></i></span>
+                <div class="clinic-action-card__body">
+                    <span class="clinic-action-card__title">{{ org_clinic|default(false) ? 'Novo paciente' : 'Novo projeto' }}</span>
+                    <span class="clinic-action-card__desc">{{ org_clinic|default(false) ? 'Cadastrar e iniciar acompanhamento' : 'Cadastrar cliente e iniciar entrega' }}</span>
+                </div>
+                <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
+            </a>
+            <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="clinic-action-card">
+                <span class="clinic-action-card__icon clinic-action-card__icon--rose"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
+                <div class="clinic-action-card__body">
+                    <span class="clinic-action-card__title">{{ organismo.copy.nav_sala_critica|default('Prioridade alta') }}</span>
+                    <span class="clinic-action-card__desc">Itens que precisam de atenção imediata</span>
+                </div>
+                <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
+            </a>
+            <a href="{{ path('app_pos_operatorio_protocolos') }}" class="clinic-action-card">
+                <span class="clinic-action-card__icon clinic-action-card__icon--green"><i class="fas fa-clipboard-list" aria-hidden="true"></i></span>
+                <div class="clinic-action-card__body">
+                    <span class="clinic-action-card__title">{{ organismo.copy.nav_protocolos|default('Playbooks') }}</span>
+                    <span class="clinic-action-card__desc">{{ org_clinic|default(false) ? 'Guias de recuperação por procedimento' : 'Templates e fluxos de implementação' }}</span>
+                </div>
+                <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
+            </a>
+            <a href="{{ path('app_pos_operatorio_questionarios') }}" class="clinic-action-card">
+                <span class="clinic-action-card__icon clinic-action-card__icon--violet"><i class="fas fa-envelope-open-text" aria-hidden="true"></i></span>
+                <div class="clinic-action-card__body">
+                    <span class="clinic-action-card__title">{{ organismo.copy.nav_questionarios|default('Check-ins') }}</span>
+                    <span class="clinic-action-card__desc">{{ org_clinic|default(false) ? 'Respostas diárias dos pacientes' : 'Respostas pendentes de revisão' }}</span>
+                </div>
+                <i class="fas fa-arrow-right clinic-action-card__arrow" aria-hidden="true"></i>
+            </a>
+        </div>
+    </section>
+
+    <section class="clinic-home-activity">
+        <header class="clinic-home-activity__head">
+            <i class="fas fa-bell-exclamation" aria-hidden="true"></i>
+            <h2>Atividade recente</h2>
+        </header>
+        <div class="clinic-home-activity__body clinic-home-activity__body--empty">
+            <span class="clinic-activity-empty-icon" aria-hidden="true"><i class="fas fa-circle-check"></i></span>
+            <p class="clinic-activity-empty-text">Nenhum alerta no momento</p>
+            <p class="clinic-activity-empty-sub">{{ org_clinic|default(false) ? 'Todos os protocolos estão em dia.' : 'Todas as entregas estão em dia.' }}</p>
+        </div>
+    </section>
+</div>
+{% else %}
+{% embed 'components/inset_page_shell.html.twig' with {
+    shell_class: 'dashboard-page-shell',
+    content_class: 'dashboard-page',
+    content_id: 'dashboardPage',
+    geo_id: 'dashboard'
+} %}
+{% block inset_content %}
+{% if account_pending|default(false) %}
+    {% include 'components/account_pending_banner.html.twig' %}
+{% endif %}
+
+<div class="dashboard-page-toolbar">
+    <p class="dashboard-page-toolbar-label">Central do dashboard</p>
+</div>
+
+{% include 'components/dashboard_welcome.html.twig' %}
+
+{% include 'components/welcome/onboarding_checklist.html.twig' with {
+    onboarding: onboarding|default({ visible: false })
+} only %}
+
+{% if kpis|length > 0 %}
+<section class="dashboard-kpis-section mb-4" aria-label="Indicadores">
+    <header class="dashboard-section-head">
+        <div>
+            <h2 class="dashboard-section-title">Panorama em números</h2>
+            <p class="dashboard-section-sub">Indicadores da sua área de trabalho agora</p>
+        </div>
+    </header>
+    <div class="dashboard-kpis-grid">
+        {% for kpi in kpis %}
+            {% if kpi.route is defined and kpi.route %}
+            <a href="{{ path(kpi.route) }}" class="dashboard-kpi-card dashboard-kpi-card--link unio-shell-surface">
+                <div class="dashboard-kpi-icon" aria-hidden="true"><i class="fas {{ kpi.icon }}"></i></div>
+                <div class="dashboard-kpi-body">
+                    <span class="dashboard-kpi-value">{{ kpi.value }}</span>
+                    <span class="dashboard-kpi-label">{{ kpi.label }}</span>
+                </div>
+                <i class="fas fa-chevron-right dashboard-kpi-arrow" aria-hidden="true"></i>
+            </a>
+            {% else %}
+            <div class="dashboard-kpi-card unio-shell-surface">
+                <div class="dashboard-kpi-icon" aria-hidden="true"><i class="fas {{ kpi.icon }}"></i></div>
+                <div class="dashboard-kpi-body">
+                    <span class="dashboard-kpi-value">{{ kpi.value }}</span>
+                    <span class="dashboard-kpi-label">{{ kpi.label }}</span>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% include 'components/charts/panel.html.twig' with {
+    sections: chart_sections|default([]),
+    class: 'dashboard-analytics'
+} %}
+{% endblock %}
+{% endembed %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{% if organismo.enabled|default(false) %}
+<script>
+(function () {
+    var el = document.getElementById('clinicDashClock');
+    if (!el) return;
+    function tick() {
+        var d = new Date();
+        el.textContent = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+    tick();
+    setInterval(tick, 30000);
+})();
+</script>
+{% else %}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 6 } only %}
+<script src="{{ asset('js/dashboard-home.js') }}?v=1"></script>
+<script src="{{ asset('js/onboarding-checklist.js') }}?v=2"></script>
+{% endif %}
+{% endblock %}
