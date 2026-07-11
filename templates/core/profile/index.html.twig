@@ -1,1 +1,545 @@
-�
+﻿{% extends 'base.html.twig' %}
+
+
+
+{% block title %}{{ organismo.enabled|default(false) ? 'Minha conta' : 'Meu Perfil' }}{% endblock %}
+
+{% block page_show_title %}{% endblock %}
+
+{% block page_toolbar_layout %}1{% endblock %}
+
+
+
+{% block content_lead %}
+
+<div class="page-lead-zone">
+
+    {% embed 'components/list_toolbar.html.twig' with {
+
+        page_title: organismo.enabled|default(false) ? 'Minha conta' : 'Meu Perfil',
+
+        search_disabled: true,
+
+        actions_in_top: true
+
+    } %}
+
+        {% block toolbar_actions %}
+
+            {% if not organismo.enabled|default(false) and empresas is defined and empresas|length > 1 %}
+
+            <a href="{{ path('app_workspace_select', {force: 1}) }}" class="btn-unio-ghost btn-sm">
+
+                <i class="fas fa-building"></i> Trocar área
+
+            </a>
+
+            {% endif %}
+
+        {% endblock %}
+
+    {% endembed %}
+
+</div>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+
+
+<div class="page-body-inner page-body-shell page-body-scroll">
+
+
+
+<div class="unio-card ficha-hero mb-3">
+
+    <div class="ficha-hero-avatar">
+
+        {% include 'components/member_avatar.html.twig' with {
+
+            nome: app.user.nome,
+
+            foto: app.user.avatar,
+
+            size: 'xl'
+
+        } %}
+
+    </div>
+
+    <div class="ficha-hero-info">
+
+        <div class="ficha-hero-name">{{ app.user.nome }}</div>
+
+        <div class="ficha-hero-role">
+            {{ user_access_badge().label }}
+            {% if organismo.enabled|default(false) %}
+                <span class="ficha-hero-dept">· {{ org_brand_label|default('Unio Clínica') }}</span>
+            {% elseif empresa %}
+                <span class="ficha-hero-dept">· {{ empresa.nome }}</span>
+            {% endif %}
+        </div>
+
+        <div class="ficha-hero-meta">
+
+            <span><i class="fas fa-envelope"></i> {{ app.user.email }}</span>
+
+            <span><i class="fas fa-calendar-check"></i> Conta desde {{ member_since }}</span>
+
+        </div>
+
+    </div>
+
+    <div class="ficha-hero-actions">
+        {% if not organismo.enabled|default(false) %}
+        {% set access_badge = user_access_badge() %}
+        <span class="badge-perfil {{ access_badge.class }}"{% if access_badge.elevated %} title="Conta global: {{ access_badge.global_label }}"{% endif %}>{{ access_badge.label }}</span>
+        {% if access_badge.elevated %}
+            <span class="text-muted small d-block mt-1">Conta global: {{ access_badge.global_label }}</span>
+        {% endif %}
+        {% endif %}
+        <span class="member-status member-status--{{ app.user.ativo ? 'ativo' : 'inativo' }}">
+            {{ app.user.ativo ? 'Conta ativa' : 'Conta inativa' }}
+        </span>
+    </div>
+
+</div>
+
+
+
+<div class="row">
+
+    <div class="col-lg-8 mb-3">
+
+        <div class="unio-card mb-3 unio-form-panel">
+
+            <div class="section-title mb-1">Identidade</div>
+            <p class="section-subtitle mb-3">{{ organismo.enabled|default(false) ? 'Nome e foto usados no menu e no acompanhamento clínico' : 'Nome e foto exibidos no menu e na plataforma' }}</p>
+
+
+
+            {{ form_start(identityForm, {
+
+                action: path('app_profile_identity'),
+
+                attr: { class: 'unio-form profile-identity-form', enctype: 'multipart/form-data', novalidate: 'novalidate' }
+
+            }) }}
+
+                <div class="profile-identity-form__row">
+
+                    <div class="profile-identity-form__avatar">
+
+                        {% include 'components/member_avatar.html.twig' with {
+
+                            nome: app.user.nome,
+
+                            foto: app.user.avatar,
+
+                            size: 'lg'
+
+                        } %}
+
+                    </div>
+
+                    <div class="profile-identity-form__fields">
+
+                        <div class="unio-form-group">
+
+                            {{ form_label(identityForm.nome, 'Nome', { label_attr: { class: 'unio-form-label' } }) }}
+
+                            {{ form_widget(identityForm.nome) }}
+
+                            {{ form_errors(identityForm.nome) }}
+
+                        </div>
+
+                        <div class="unio-form-group">
+
+                            {{ form_label(identityForm.avatarFile, 'Foto de perfil', { label_attr: { class: 'unio-form-label' } }) }}
+
+                            {{ form_widget(identityForm.avatarFile) }}
+
+                            {{ form_errors(identityForm.avatarFile) }}
+
+                            <p class="profile-form-hint">JPG, PNG ou WebP · até 2 MB</p>
+
+                        </div>
+
+                        {% if app.user.avatar %}
+
+                        <div class="unio-form-group mb-0">
+
+                            <label class="profile-checkbox">
+
+                                {{ form_widget(identityForm.removeAvatar) }}
+
+                                <span>Remover foto atual</span>
+
+                            </label>
+
+                        </div>
+
+                        {% else %}
+
+                            {{ form_widget(identityForm.removeAvatar, { attr: { hidden: true } }) }}
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <div class="unio-form-actions">
+
+                    <button type="submit" class="btn-unio btn-unio--sm">
+
+                        <i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar identidade
+
+                    </button>
+
+                </div>
+
+            {{ form_end(identityForm) }}
+
+        </div>
+
+
+
+        {% if not organismo.enabled|default(false) %}
+        <div class="unio-card mb-3">
+
+            <div class="section-title mb-1">Dados da conta</div>
+
+            <p class="section-subtitle mb-3">Informações gerenciadas pela administração</p>
+
+            <div class="ficha-fields-grid">
+
+                <div>
+
+                    <div class="ficha-field-label">E-mail</div>
+
+                    <div class="ficha-field-value">{{ app.user.email }}</div>
+
+                </div>
+
+                <div>
+
+                    <div class="ficha-field-label">Perfil de acesso</div>
+
+                    <p class="ficha-field-value mb-0">{{ user_access_badge().label }}</p>
+
+                    {% if user_access_badge().elevated %}
+
+                        <p class="text-muted small mb-0">Conta global: {{ app.user.perfilLabel }}</p>
+
+                    {% endif %}
+
+                </div>
+
+                <div>
+
+                    <div class="ficha-field-label">Membro desde</div>
+
+                    <div class="ficha-field-value">{{ member_since }}</div>
+
+                </div>
+
+            </div>
+
+        </div>
+        {% endif %}
+
+
+
+        <div class="unio-card unio-form-panel">
+
+            <div class="section-title mb-1">Segurança</div>
+
+            <p class="section-subtitle mb-3">Altere sua senha de acesso</p>
+
+
+
+            {{ form_start(passwordForm, {
+
+                action: path('app_profile_password'),
+
+                attr: { class: 'unio-form profile-password-form', novalidate: 'novalidate' }
+
+            }) }}
+
+                <div class="unio-form-group">
+
+                    {{ form_label(passwordForm.currentPassword, 'Senha atual', { label_attr: { class: 'unio-form-label' } }) }}
+
+                    {{ form_widget(passwordForm.currentPassword) }}
+
+                    {{ form_errors(passwordForm.currentPassword) }}
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <div class="unio-form-group">
+
+                            {{ form_label(passwordForm.plainPassword.first, 'Nova senha', { label_attr: { class: 'unio-form-label' } }) }}
+
+                            {{ form_widget(passwordForm.plainPassword.first) }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="unio-form-group">
+
+                            {{ form_label(passwordForm.plainPassword.second, 'Confirmar nova senha', { label_attr: { class: 'unio-form-label' } }) }}
+
+                            {{ form_widget(passwordForm.plainPassword.second) }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% if passwordForm.plainPassword.vars.errors|length %}
+
+                    <div class="alert alert-danger unio-alert py-2 px-3 mb-3" role="alert">
+
+                        {{ passwordForm.plainPassword.vars.errors[0].message }}
+
+                    </div>
+
+                {% endif %}
+
+                <div class="unio-form-actions">
+
+                    <button type="submit" class="btn-unio btn-unio--sm">
+
+                        <i class="fas fa-key mr-1" aria-hidden="true"></i> Alterar senha
+
+                    </button>
+
+                </div>
+
+            {{ form_end(passwordForm) }}
+
+
+
+            <div class="profile-action-list mt-3 pt-3 border-top">
+
+                <button type="button" class="profile-action-item" disabled title="Em breve">
+
+                    <i class="fas fa-shield-halved" aria-hidden="true"></i>
+
+                    <span>
+
+                        <strong>Autenticação em dois fatores</strong>
+
+                        <small>Em breve</small>
+
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-lg-4 mb-3">
+
+        <div class="unio-card mb-3">
+
+            <div class="section-title mb-3">Preferências</div>
+
+            <div class="profile-action-list">
+
+                <a href="#" class="profile-action-item" onclick="toggleTheme(); return false;">
+
+                    <i class="fas fa-adjust" id="profileThemeIcon" aria-hidden="true"></i>
+
+                    <span>
+
+                        <strong id="profileThemeLabel">Tema claro</strong>
+
+                        <small>Alternar aparência do sistema</small>
+
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        {% if not organismo.enabled|default(false) %}
+        <div class="unio-card mb-3">
+
+            <div class="section-title mb-1">Área de trabalho</div>
+
+            <p class="section-subtitle mb-3">Empresa ativa nesta sessão</p>
+
+            {% if empresa %}
+
+                <div class="profile-workspace-card">
+
+                    <i class="fas fa-building" aria-hidden="true"></i>
+
+                    <div>
+
+                        <strong>{{ empresa.nome }}</strong>
+
+                        {% if empresas|length > 1 %}
+
+                            <small>{{ empresas|length }} áreas disponíveis</small>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                {% if empresas|length > 1 %}
+
+                <a href="{{ path('app_workspace_select', {force: 1}) }}" class="btn btn-outline-secondary btn-sm btn-block mt-3">
+
+                    <i class="fas fa-right-left mr-1"></i> Trocar área de trabalho
+
+                </a>
+
+                {% endif %}
+
+            {% else %}
+
+                {% include 'components/empty_state.html.twig' with {
+
+                    icon: 'fa-building',
+
+                    title: 'Nenhuma área selecionada',
+
+                    text: 'Escolha uma área de trabalho para continuar.',
+
+                    btn_label: 'Escolher área de trabalho',
+
+                    btn_href: path('app_workspace_select')
+
+                } %}
+
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+
+
+        {% if not organismo.enabled|default(false) %}
+        <div class="unio-card">
+
+            <div class="section-title mb-1">Ficha na empresa</div>
+
+            <p class="section-subtitle mb-3">Cadastro de RH (Gestão de Pessoas)</p>
+
+            <p class="ficha-bio mb-3">
+
+                A ficha técnica completa — cargo, equipes, skills e histórico — fica no módulo de Pessoas.
+
+            </p>
+
+            {% if nav_show_hub_operacoes|default(false) %}
+
+            <a href="{{ path('app_pessoas_membros') }}" class="btn btn-outline-secondary btn-sm btn-block">
+
+                <i class="fas fa-id-badge mr-1"></i> Ver membros da equipe
+
+            </a>
+
+            {% else %}
+
+            <span class="profile-soon-note"><i class="fas fa-circle-info"></i> Disponível conforme seu perfil de acesso.</span>
+
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+
+</div>
+
+
+
+{% endblock %}
+
+
+
+{% block javascripts %}
+
+{{ parent() }}
+
+<script>
+
+(function () {
+
+    function syncThemeLabel() {
+
+        var dark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+
+        var label = document.getElementById('profileThemeLabel');
+
+        var icon = document.getElementById('profileThemeIcon');
+
+        var menuLabel = document.getElementById('themeMenuLabel');
+
+        var menuIcon = document.getElementById('themeMenuIcon');
+
+        var text = dark ? 'Tema claro' : 'Tema escuro';
+
+        if (label) label.textContent = text;
+
+        if (menuLabel) menuLabel.textContent = text;
+
+        if (icon) icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+
+        if (menuIcon) menuIcon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+
+    }
+
+    syncThemeLabel();
+
+    var orig = window.toggleTheme;
+
+    if (typeof orig === 'function') {
+
+        window.toggleTheme = function () {
+
+            orig();
+
+            syncThemeLabel();
+
+        };
+
+    }
+
+})();
+
+</script>
+
+{% endblock %}
+
