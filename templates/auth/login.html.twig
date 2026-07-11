@@ -2,7 +2,7 @@
 {% set _brand = organismo.copy.brand_name|default(platform_config.plataforma_nome|default('Unio')) %}
 {% set _is_clinic = org_clinic|default(false) %}
 {% set _slogan = organismo.enabled|default(false)
-    ? organismo.copy.marketing_tagline|default(_is_clinic ? 'Saúde que acompanha.' : 'Plataforma que evolui com você.')
+    ? organismo.copy.marketing_tagline|default(_is_clinic ? 'Saúde que acompanha.' : 'Evolui com você.')
     : platform_config.plataforma_tagline|default('Pessoas. Processos. Resultados.') %}
 {% set _lead = organismo.enabled|default(false) ? organismo.copy.hero_desc|default('') : '' %}
 <!DOCTYPE html>
@@ -52,13 +52,15 @@
             {% include 'components/auth_logo_animated.html.twig' only %}
 
             {% if organismo.enabled|default(false) %}
-            <p class="auth-brand__eyebrow">{{ organismo.copy.marketing_eyebrow|default('Plataforma digital modular') }}</p>
+            <p class="auth-brand__eyebrow">{{ organismo.copy.marketing_eyebrow|default('Plataforma Unio') }}</p>
             {% endif %}
             <h1 class="auth-brand__title">{{ _slogan }}</h1>
             {% if _lead %}
             <p class="auth-brand__lead">{{ _lead }}</p>
             {% endif %}
+            {% if _is_clinic %}
             {% include 'components/auth_health_legends.html.twig' %}
+            {% endif %}
         </div>
 
         <footer class="auth-brand__footer">

@@ -41,10 +41,10 @@ organismo_env_sync_for_uri() {
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_ENABLED true
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_HOME true
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_NAME 'Unio'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_SLOGAN 'Plataforma que evolui com você.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_SLOGAN 'Evolui com você.'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE 'Sites, sistemas e produtos'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE_ACCENT 'em um só organismo.'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_DESC 'Unio reúne módulos para saúde, educação e operações corporativas — com identidade visual refinada, portal do cliente e entregas rastreáveis.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_DESC 'Módulos, portal do cliente e entregas rastreáveis em um só lugar.'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_LUMEN_SUBTITLE 'Assistente inteligente'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL 'Projeto'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL_ARTIGO 'do projeto'
@@ -64,8 +64,8 @@ organismo_env_sync_for_uri() {
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_KPIS_HEADING 'Sinais do organismo'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_PULSO_EMPTY 'Nenhuma entrega ativa — tudo em dia.'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HUB_HERO_TITLE 'Painel de projetos'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_EYEBROW 'Plataforma digital modular'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_TAGLINE 'Plataforma que evolui com você.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_EYEBROW 'Plataforma Unio'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_MARKETING_TAGLINE 'Evolui com você.'
       echo "Organismo: perfil Unio (central) sincronizado em $env_file"
       ;;
     https://uniosaude.uniowork.com.br|http://uniosaude.uniowork.com.br)
