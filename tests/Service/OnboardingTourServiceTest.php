@@ -327,10 +327,7 @@ final class OnboardingTourServiceTest extends TestCase
 
         $security = $this->createMock(Security::class);
 
-        $organismoFeature = $this->createMock(OrganismoFeature::class);
-        $organismoFeature->method('isEnabled')->willReturn(false);
-
-        $grants = new ProductGrantAccess($security, $grantRepo, $organismoFeature);
+        $grants = new ProductGrantAccess($security, $grantRepo, new OrganismoFeature(false, false));
 
 
 

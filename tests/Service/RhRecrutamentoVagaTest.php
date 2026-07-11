@@ -34,7 +34,7 @@ class RhRecrutamentoVagaTest extends TestCase
             new ProductGrantAccess(
                 $this->createMock(Security::class),
                 $this->createMock(UserProductGrantRepository::class),
-                $this->createMock(OrganismoFeature::class),
+                new OrganismoFeature(false, false),
             ),
         );
     }
