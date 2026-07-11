@@ -1,8 +1,10 @@
 {% set _tema = platform_config.tema|default('dark') %}
 {% set _brand = organismo.copy.brand_name|default(platform_config.plataforma_nome|default('Unio')) %}
+{% set _is_clinic = org_clinic|default(false) %}
 {% set _slogan = organismo.enabled|default(false)
-    ? 'Saúde que acompanha.'
+    ? organismo.copy.marketing_tagline|default(_is_clinic ? 'Saúde que acompanha.' : 'Plataforma que evolui com você.')
     : platform_config.plataforma_tagline|default('Pessoas. Processos. Resultados.') %}
+{% set _lead = organismo.enabled|default(false) ? organismo.copy.hero_desc|default('') : '' %}
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="{{ _tema }}">
 <head>
@@ -11,10 +13,10 @@
     <title>{% if active_tab == 'register' %}Criar Conta{% else %}Entrar{% endif %} | {{ _brand }}</title>
     <script>try{var _p=new URLSearchParams(location.search);var _t=_p.get('theme')||localStorage.getItem('unio-theme')||'{{ _tema }}';document.documentElement.setAttribute('data-theme',_t);if(_p.get('theme'))localStorage.setItem('unio-theme',_t);}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/auth-login.css') }}?v=7">
+    <link rel="stylesheet" href="{{ asset('css/auth-login.css') }}?v=8">
     {% include 'components/unio_theme_vars.html.twig' %}
 </head>
 <body class="auth-page">
@@ -46,10 +48,17 @@
 
 <main class="auth-main">
     <section class="auth-brand" aria-label="Sobre a plataforma">
-        <div class="auth-brand__content">
+        <div class="auth-brand__content{% if not _is_clinic %} auth-brand__content--studio{% endif %}">
             {% include 'components/auth_logo_animated.html.twig' only %}
 
+            {% if organismo.enabled|default(false) %}
+            <p class="auth-brand__eyebrow">{{ organismo.copy.marketing_eyebrow|default('Plataforma digital modular') }}</p>
+            {% endif %}
             <h1 class="auth-brand__title">{{ _slogan }}</h1>
+            {% if _lead %}
+            <p class="auth-brand__lead">{{ _lead }}</p>
+            {% endif %}
+            {% include 'components/auth_health_legends.html.twig' %}
         </div>
 
         <footer class="auth-brand__footer">

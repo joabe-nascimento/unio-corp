@@ -44,7 +44,7 @@ organismo_env_sync_for_uri() {
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_BRAND_SLOGAN 'Plataforma que evolui com você.'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE 'Sites, sistemas e produtos'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_TITLE_ACCENT 'em um só organismo.'
-      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_DESC 'Unio reúne hubs modulares para saúde, educação e operações corporativas — com a mesma identidade visual refinada, portal do cliente e assistente Lumen.'
+      organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_HERO_DESC 'Unio reúne módulos para saúde, educação e operações corporativas — com identidade visual refinada, portal do cliente e entregas rastreáveis.'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_LUMEN_SUBTITLE 'Assistente inteligente'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL 'Projeto'
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_UNIT_LABEL_ARTIGO 'do projeto'

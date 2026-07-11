@@ -16,7 +16,7 @@
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=17">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=37">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=38">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=27">
     {% if org_clinic|default(false) %}
     <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=24">
@@ -94,7 +94,7 @@
             {% include 'components/marketing/clinic_product_nav.html.twig' with { mkt_nav_active: 'home' } only %}
             {% else %}
             <a href="#verticais">Verticais</a>
-            <a href="#modulos-studio">Hubs</a>
+            <a href="#modulos-studio">Módulos</a>
             <a href="#recursos">Recursos</a>
             <a href="#funcionalidades">Funcionalidades</a>
             <a href="#como-funciona">Como funciona</a>
@@ -107,12 +107,7 @@
             <button type="button" class="mkt-theme-btn mkt-theme-btn--v2" id="guestThemeToggle" title="Alternar tema" aria-label="Alternar tema">
                 <i class="fas fa-sun" id="guestThemeIcon" aria-hidden="true"></i>
             </button>
-            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--ghost-v2">Entrar</a>
-            {% if platform_config.registro_publico ?? true %}
-            <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
-            {% else %}
             <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
-            {% endif %}
         </div>
     </div>
 </header>
@@ -159,8 +154,9 @@
                     <span class="mkt-hero-chip"><i class="fas fa-book-medical" aria-hidden="true"></i> Guia médico</span>
                     <span class="mkt-hero-chip"><i class="fas fa-user-nurse" aria-hidden="true"></i> Pós-operatório</span>
                     {% else %}
-                    <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
                     <span class="mkt-hero-chip"><i class="fas fa-code" aria-hidden="true"></i> Sites &amp; sistemas</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-graduation-cap" aria-hidden="true"></i> Educação</span>
+                    <span class="mkt-hero-chip"><i class="fas fa-users" aria-hidden="true"></i> Pessoas &amp; RH</span>
                     <span class="mkt-hero-chip"><i class="fas fa-bell" aria-hidden="true"></i> Alertas em tempo real</span>
                     {% endif %}
                 </div>
@@ -233,8 +229,8 @@
                                     <div><strong>Playbooks</strong><span>Fluxos de implementação</span></div>
                                 </div>
                                 <div class="mkt-preview-module mkt-preview-module--highlight">
-                                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
-                                    <div><strong>Lumen</strong><span>Assistente do studio</span></div>
+                                    <i class="fas fa-person-circle-check" aria-hidden="true"></i>
+                                    <div><strong>Portal</strong><span>Acesso do cliente online</span></div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -264,7 +260,7 @@
             {% else %}
             <div class="mkt-pro-badge">
                 <i class="fas fa-shield-halved" aria-hidden="true"></i>
-                <div><strong>LGPD conforme</strong><span>Dados protegidos por workspace</span></div>
+                <div><strong>LGPD conforme</strong><span>Dados protegidos por empresa</span></div>
             </div>
             <div class="mkt-pro-badge">
                 <i class="fas fa-heart-pulse" aria-hidden="true"></i>
@@ -1551,7 +1547,7 @@
                 {% else %}
                 <details class="mkt-faq-item">
                     <summary>O que é a plataforma Unio?</summary>
-                    <p>É o organismo digital central da Unio — hubs modulares para saúde, educação, RH, engenharia, TI e finanças, com portal do cliente, playbooks e assistente Lumen.</p>
+                    <p>É o organismo digital central da Unio — módulos para saúde, educação, RH, engenharia, TI e finanças, com portal do cliente, playbooks e entregas rastreáveis.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>Qual a relação com o Unio Saúde?</summary>
@@ -1559,7 +1555,7 @@
                 </details>
                 <details class="mkt-faq-item">
                     <summary>Posso usar só alguns módulos?</summary>
-                    <p>Sim. Cada workspace ativa os hubs que fazem sentido — RH, engenharia, saúde, financeiro e outros — sem precisar implantar tudo de uma vez.</p>
+                    <p>Sim. Cada conta ativa os módulos que fazem sentido — RH, engenharia, saúde, financeiro e outros — sem precisar implantar tudo de uma vez.</p>
                 </details>
                 <details class="mkt-faq-item">
                     <summary>Funciona para educação e corporativo?</summary>
@@ -1596,10 +1592,10 @@
                     <h2 id="mkt-cta-title">Um organismo para todos os seus projetos digitais.</h2>
                     <p>Acesse {{ organismo.copy.brand_name|default('Unio') }}, explore os hubs e conecte saúde, educação e operações com a mesma identidade visual.</p>
                     <ul class="mkt-cta-list">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Hubs modulares: RH, engenharia, saúde, TI e mais</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Módulos: RH, engenharia, saúde, TI e mais</li>
                         <li><i class="fas fa-check" aria-hidden="true"></i> Playbooks, check-ins e portal do cliente</li>
                         <li><i class="fas fa-check" aria-hidden="true"></i> Unio Saúde como produto vertical pronto</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> LGPD, auditoria e workspaces isolados</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> LGPD, auditoria e contas isoladas</li>
                     </ul>
                     {% endif %}
                 </div>
