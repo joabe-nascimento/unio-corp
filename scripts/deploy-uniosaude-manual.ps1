@@ -92,6 +92,14 @@ $sshBase = @(
     "-o", "AddressFamily=inet",
     "-o", "ConnectTimeout=20"
 )
+$scpBase = @(
+    "-P", $sshPort,
+    "-i", $keyFile,
+    "-o", "StrictHostKeyChecking=accept-new",
+    "-o", "BatchMode=yes",
+    "-o", "AddressFamily=inet",
+    "-o", "ConnectTimeout=20"
+)
 $sshTarget = "${sshUser}@${sshHost}"
 
 Write-Host "Alvo SSH: $sshTarget (porta $sshPort)" -ForegroundColor DarkGray
@@ -152,7 +160,7 @@ $archiveSizeMb = [math]::Round((Get-Item $archive).Length / 1MB, 1)
 Write-Host "      arquivo: $archive (${archiveSizeMb} MB)" -ForegroundColor DarkGray
 
 Invoke-Retry {
-    & scp @sshBase $archive "${sshTarget}:/tmp/$ArchiveName"
+    & scp @scpBase $archive "${sshTarget}:/tmp/$ArchiveName"
     if ($LASTEXITCODE -ne 0) { throw "scp archive falhou" }
 }
 
@@ -167,17 +175,18 @@ try {
 }
 
 $remoteEnvFile = Join-Path $env:TEMP "deploy-remote.env"
-@(
+$envLines = @(
     "DEPLOY_PATH=$deployPath"
     "PUBLIC_HTML=$publicHtml"
     "GITHUB_SHA=$gitSha"
     "GITHUB_REF_NAME=$gitRef"
-) | Set-Content -Encoding ASCII $remoteEnvFile
+)
+[System.IO.File]::WriteAllText($remoteEnvFile, ($envLines -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
 
 Invoke-Retry {
-    & scp @sshBase $remoteEnvFile "${sshTarget}:/tmp/deploy-remote.env"
+    & scp @scpBase $remoteEnvFile "${sshTarget}:/tmp/deploy-remote.env"
     if ($LASTEXITCODE -ne 0) { throw "scp deploy-remote.env falhou" }
-    & scp @sshBase "$root\scripts\ci-remote-extract.sh" "${sshTarget}:/tmp/ci-remote-extract.sh"
+    & scp @scpBase "$root\scripts\ci-remote-extract.sh" "${sshTarget}:/tmp/ci-remote-extract.sh"
     if ($LASTEXITCODE -ne 0) { throw "scp ci-remote-extract.sh falhou" }
 }
 
@@ -189,7 +198,7 @@ Invoke-Retry {
 
 $reportLocal = "$root\deploy-reports\deploy-report.txt"
 New-Item -ItemType Directory -Force -Path (Split-Path $reportLocal) | Out-Null
-& scp @sshBase "${sshTarget}:${deployPath}/var/log/deploy-report.txt" $reportLocal 2>$null
+& scp @scpBase "${sshTarget}:${deployPath}/var/log/deploy-report.txt" $reportLocal 2>$null
 if (Test-Path $reportLocal) {
     Write-Host ""
     Write-Host "========== DEPLOY REPORT ==========" -ForegroundColor Cyan
