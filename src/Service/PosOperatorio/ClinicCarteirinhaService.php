@@ -145,12 +145,28 @@ final class ClinicCarteirinhaService
             'telefone' => $paciente->getTelefoneContato() ?? '—',
             'emergencia' => $emergencia !== '' ? $emergencia : '—',
             'verificacao' => $paciente->getCarteirinhaVerificacao() ?? '--------',
-            'ribbon' => $plano === 'essencial' ? null : ucfirst($plano),
-            'suporte' => $plano === 'premium' ? 'Suporte clínico 24h' : null,
+            'ribbon' => self::ribbonFor($plano),
+            'suporte' => self::suporteFor($plano),
         ];
     }
 
-    private function roleLabel(string $plano): string
+    /** @return array<string, array{plano_label: string, role: string, ribbon: ?string, suporte: ?string}> */
+    public static function planPreviewMeta(): array
+    {
+        $meta = [];
+        foreach (array_keys(self::PLANOS) as $plano) {
+            $meta[$plano] = [
+                'plano_label' => self::planoLabelFor($plano),
+                'role' => self::roleLabelFor($plano),
+                'ribbon' => self::ribbonFor($plano),
+                'suporte' => self::suporteFor($plano),
+            ];
+        }
+
+        return $meta;
+    }
+
+    public static function roleLabelFor(string $plano): string
     {
         return match ($plano) {
             'premium' => 'Paciente VIP · acompanhamento',
@@ -159,13 +175,33 @@ final class ClinicCarteirinhaService
         };
     }
 
-    private function planoLabel(string $plano): string
+    public static function planoLabelFor(string $plano): string
     {
         return match ($plano) {
             'premium' => 'Plano Premium',
             'profissional' => 'Plano Profissional',
             default => 'Plano Essencial',
         };
+    }
+
+    public static function ribbonFor(string $plano): ?string
+    {
+        return $plano === 'essencial' ? null : ucfirst($plano);
+    }
+
+    public static function suporteFor(string $plano): ?string
+    {
+        return $plano === 'premium' ? 'Suporte clínico 24h' : null;
+    }
+
+    private function roleLabel(string $plano): string
+    {
+        return self::roleLabelFor($plano);
+    }
+
+    private function planoLabel(string $plano): string
+    {
+        return self::planoLabelFor($plano);
     }
 
     private function fotoPublicUrl(?string $path): ?string

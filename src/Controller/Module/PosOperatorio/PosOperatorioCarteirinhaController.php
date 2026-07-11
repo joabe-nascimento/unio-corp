@@ -63,6 +63,7 @@ final class PosOperatorioCarteirinhaController extends AbstractController
             'card' => $this->carteirinha->buildCardData($paciente, $empresa),
             'theme' => $paciente->getCarteirinhaPlano() ?? 'essencial',
             'planos' => ClinicCarteirinhaService::PLANOS,
+            'planos_preview' => ClinicCarteirinhaService::planPreviewMeta(),
             'tem_emissao' => $paciente->hasCarteirinhaAtiva(),
         ]);
     }

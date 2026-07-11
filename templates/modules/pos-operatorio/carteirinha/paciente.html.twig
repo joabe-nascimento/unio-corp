@@ -34,7 +34,7 @@
             <input type="hidden" name="_token" value="{{ csrf_token('carteirinha_emitir_' ~ paciente.id) }}">
             <div class="form-group">
                 <label class="unio-form-label" for="plano">Plano visual</label>
-                <select id="plano" name="plano" class="form-control">
+                <select id="plano" name="plano" class="form-control" data-clinic-plano-select>
                     {% for key, label in planos %}
                     <option value="{{ key }}"{{ theme == key ? ' selected' : '' }}>{{ label }}</option>
                     {% endfor %}
@@ -73,7 +73,9 @@
     </section>
 
     <section class="clinic-carteirinha-paciente__preview">
-        <div class="mkt-home-carteirinha-embed__card mkt-carteirinha-page">
+        <div class="mkt-home-carteirinha-embed__card mkt-carteirinha-page"
+             data-clinic-carteirinha-preview
+             data-planos="{{ planos_preview|json_encode|e('html_attr') }}">
             {% include 'components/marketing/digital_id_card.html.twig' with { card: card, theme: theme } %}
         </div>
     </section>
@@ -83,6 +85,7 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/marketing-carteirinha.js') }}?v=7" defer></script>
+<script src="{{ asset('js/clinic-carteirinha-preview.js') }}?v=1" defer></script>
 <script>
 (function () {
     document.querySelectorAll('[data-clinic-file-input]').forEach(function (input) {
