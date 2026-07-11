@@ -1,10 +1,10 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Lembretes · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+{% block title %}Lembretes Â· {{ org_brand_label|default('Unio SaÃºde') }}{% endblock %}
 
 {% set hub_page_title = 'Lembretes' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = 'Questionários pendentes e canais de notificação' %}
+{% set hub_page_subtitle = 'QuestionÃ¡rios pendentes e canais de notificaÃ§Ã£o' %}
 {% set hub_search_hidden = true %}
 
 {% block hub_kpis %}
@@ -29,10 +29,10 @@
     </section>
 
     <section class="unio-card clinic-ops-panel p-3">
-        <h3 class="clinic-ops-panel__title">Escalação</h3>
+        <h3 class="clinic-ops-panel__title">EscalaÃ§Ã£o</h3>
         <ul class="clinic-ops-list">
             {% for step in reminders.escalacao %}
-            <li>{{ step.horas }}h — {{ step.acao }} <span class="text-muted">({{ step.status }})</span></li>
+            <li>{{ step.horas }}h â€” {{ step.acao }} <span class="text-muted">({{ step.status }})</span></li>
             {% endfor %}
         </ul>
     </section>
@@ -41,7 +41,7 @@
 <section class="unio-card mt-3">
     <h3 class="clinic-ops-panel__title px-3 pt-3">Pacientes sem resposta hoje</h3>
     {% if reminders.pacientes is empty %}
-    <p class="text-muted px-3 pb-3 mb-0">Todos responderam o questionário de hoje.</p>
+    <p class="text-muted px-3 pb-3 mb-0">Todos responderam o questionÃ¡rio de hoje.</p>
     {% else %}
     <div class="table-responsive">
         <table class="admin-table">
@@ -50,7 +50,7 @@
                     <th>Paciente</th>
                     <th>D+</th>
                     <th>Contato</th>
-                    <th>Médico</th>
+                    <th>MÃ©dico</th>
                     <th></th>
                 </tr>
             </thead>
@@ -58,9 +58,9 @@
                 {% for p in reminders.pacientes %}
                 <tr>
                     <td><strong>{{ p.nome }}</strong> <span class="text-muted small">{{ p.codigo }}</span></td>
-                    <td>{{ p.dia_pos|default('—') }}</td>
-                    <td class="small">{{ p.telefone|default('—') }}<br>{{ p.email|default('') }}</td>
-                    <td>{{ p.medico|default('—') }}</td>
+                    <td>{{ p.dia_pos|default('â€”') }}</td>
+                    <td class="small">{{ p.telefone|default('â€”') }}<br>{{ p.email|default('') }}</td>
+                    <td>{{ p.medico|default('â€”') }}</td>
                     <td class="text-right">
                         <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
                     </td>

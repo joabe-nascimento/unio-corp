@@ -51,7 +51,7 @@ class PlatformConfigService
 
     private const DEFAULTS = [
         'plataforma_nome'     => 'Unio Saúde',
-        'plataforma_tagline'  => 'Cuidado que continua.',
+        'plataforma_tagline'  => 'Saúde que acompanha.',
         'logo_url'            => '',
         'logo_mark_url'       => '',
         'logo_full_url'       => '',

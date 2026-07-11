@@ -1,10 +1,10 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Carteirinha digital · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+{% block title %}Carteirinha digital Â· {{ org_brand_label|default('Unio SaÃºde') }}{% endblock %}
 
 {% set hub_page_title = 'Carteirinha digital' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = 'Emissão vinculada ao paciente com foto, validade e código de verificação' %}
+{% set hub_page_subtitle = 'EmissÃ£o vinculada ao paciente com foto, validade e cÃ³digo de verificaÃ§Ã£o' %}
 {% set hub_search_hidden = true %}
 
 {% block hub_content %}
@@ -32,7 +32,7 @@
                             <span class="d-block text-muted small">{{ p.codigo }}</span>
                         </td>
                         <td>{{ planos[p.carteirinhaPlano]|default(p.carteirinhaPlano) }}</td>
-                        <td>{{ p.carteirinhaValidaAte ? p.carteirinhaValidaAte|date('d/m/Y') : '—' }}</td>
+                        <td>{{ p.carteirinhaValidaAte ? p.carteirinhaValidaAte|date('d/m/Y') : 'â€”' }}</td>
                         <td class="text-right">
                             <a href="{{ path('app_pos_operatorio_carteirinha_paciente', { id: p.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
                         </td>
@@ -63,12 +63,12 @@
                     {% for p in pacientes %}
                     <tr>
                         <td><strong>{{ p.nome }}</strong></td>
-                        <td>{{ p.procedimento|default('—') }}</td>
+                        <td>{{ p.procedimento|default('â€”') }}</td>
                         <td>
                             {% if p.hasCarteirinhaAtiva %}
                             <span class="badge-perfil success">Ativa</span>
                             {% else %}
-                            <span class="badge-perfil default">Sem emissão</span>
+                            <span class="badge-perfil default">Sem emissÃ£o</span>
                             {% endif %}
                         </td>
                         <td class="text-right">
