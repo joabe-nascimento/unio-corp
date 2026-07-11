@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Command\Concern\ProdSeedGuardTrait;
 use App\Entity\Empresa;
+use App\Entity\User;
 use App\Entity\PosOperatorioEvento;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\PosOperatorioProtocolo;

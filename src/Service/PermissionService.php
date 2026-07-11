@@ -1399,6 +1399,25 @@ class PermissionService
     }
 
     /**
+     * Metadados ilustrativos (equipe/cargo) para contas demo ou legado do seed.
+     *
+     * @return array{equipe: string, cargo: string}|null
+     */
+    public static function memberMetaForEmail(string $email): ?array
+    {
+        if (isset(self::MEMBER_META[$email])) {
+            return self::MEMBER_META[$email];
+        }
+
+        $legacy = \App\Dev\DevSeedEmails::LEGACY[$email] ?? null;
+        if ($legacy !== null && isset(self::MEMBER_META[$legacy])) {
+            return self::MEMBER_META[$legacy];
+        }
+
+        return null;
+    }
+
+    /**
      * Membros da empresa para busca global e painel de permissões.
      *
      * @return list<array{id: string, nome: string, email: string, initials: string, equipe: string, cargo: string, perfil_global: string, perfil_label: string, perfil_class: string, ficha_id: int|null, user_id: int|null}>

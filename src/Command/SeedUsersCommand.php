@@ -73,11 +73,8 @@ class SeedUsersCommand extends Command
 
         foreach ($seedUsers as $data) {
             $user = $userRepo->findOneBy(['email' => $data['email']]);
-            if (!$user instanceof User) {
-                $legacy = DevSeedEmails::LEGACY[$data['email']] ?? null;
-                if ($legacy !== null) {
-                    $user = $userRepo->findOneBy(['email' => $legacy]);
-                }
+            if (!$user instanceof User && isset(DevSeedEmails::LEGACY[$data['email']])) {
+                $user = $userRepo->findOneBy(['email' => DevSeedEmails::LEGACY[$data['email']]]);
             }
             $user ??= new User();
             $isNew = $user->getId() === null;

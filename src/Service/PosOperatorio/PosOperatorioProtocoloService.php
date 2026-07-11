@@ -140,9 +140,8 @@ final class PosOperatorioProtocoloService
 
 
 
-    /** @return PosOperatorioProtocolo|null Protocolo existente ou recém-importado */
-
-    public function importFromTemplateIfMissing(Empresa $empresa, array $template): ?PosOperatorioProtocolo
+    /** Protocolo existente ou recém-importado. */
+    public function importFromTemplateIfMissing(Empresa $empresa, array $template): PosOperatorioProtocolo
 
     {
 

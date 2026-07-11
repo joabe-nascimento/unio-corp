@@ -10,7 +10,6 @@ use App\Entity\User;
 use App\Repository\PosOperatorioAlertaRepository;
 use App\Repository\PosOperatorioEventoRepository;
 use App\Repository\PosOperatorioPacienteRepository;
-use App\Repository\PosOperatorioQuestionarioRespostaRepository;
 
 /**
  * Centro de operações clínico — fila unificada, qualidade, retornos e compliance.
@@ -23,7 +22,6 @@ final class ClinicOperationsService
         private PosOperatorioPacienteRepository $pacientes,
         private PosOperatorioAlertaRepository $alertas,
         private PosOperatorioEventoRepository $eventos,
-        private PosOperatorioQuestionarioRespostaRepository $respostas,
     ) {}
 
     /**
