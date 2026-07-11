@@ -67,7 +67,9 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
         $key = $this->assetKey($variant);
 
         if ($this->usesSaudeBrandAsset($variant, $key)) {
-            return PlatformConfigService::SAUDE_LOGO_ASSET;
+            return $variant === 'favicon'
+                ? PlatformConfigService::SAUDE_FAVICON_ASSET
+                : PlatformConfigService::SAUDE_LOGO_ASSET;
         }
 
         return $this->config->resolveAssetUrl($key);

@@ -31,6 +31,9 @@ class PlatformConfigService
     /** Logotipo Unio Saúde (clínica / pós-operatório). */
     public const SAUDE_LOGO_ASSET = '/images/logos/unio-saude.png';
 
+    /** Favicon quadrado Unio Saúde (derivado de unio-saude.png). */
+    public const SAUDE_FAVICON_ASSET = '/images/logos/favicon-unio-saude.png';
+
     /** @var array<string,string> Placeholders exibidos quando nenhum asset foi configurado. */
     public const DEFAULT_ASSET_PATHS = [
         'logo_url'      => self::DEFAULT_LOGO_ASSET,
