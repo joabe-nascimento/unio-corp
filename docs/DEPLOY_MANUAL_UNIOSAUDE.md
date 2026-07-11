@@ -123,7 +123,8 @@ No servidor, o log completo fica em:
 
 **Recomendação atual:** `git push` para versionar + `deploy-uniosaude-manual.ps1` para publicar.
 
-**Guia completo (billing, X vermelho, troubleshooting):** [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md)
+**Acessos em produção:** [UNIOSAUDE_ACESSOS.md](UNIOSAUDE_ACESSOS.md)  
+**Último deploy manual:** [UNIOSAUDE_DEPLOY_RESULTADO_2026-07-11.md](UNIOSAUDE_DEPLOY_RESULTADO_2026-07-11.md)
 
 ---
 
