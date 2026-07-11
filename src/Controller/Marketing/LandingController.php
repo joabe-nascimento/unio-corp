@@ -2,6 +2,7 @@
 
 namespace App\Controller\Marketing;
 
+use App\Service\Marketing\ClinicLandingService;
 use App\Service\Marketing\ClinicPatientProductService;
 use App\Service\Organismo\OrganismoRedirectService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,7 @@ class LandingController extends AbstractController
     public function home(
         OrganismoRedirectService $redirects,
         ClinicPatientProductService $patientProduct,
+        ClinicLandingService $clinicLanding,
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute($redirects->afterLoginRoute());
@@ -27,6 +29,7 @@ class LandingController extends AbstractController
             'landing_plans' => $patientProduct->plans(),
             'landing_guia' => $patientProduct->demoGuia(),
             'landing_demo_access' => $patientProduct->demoAccess(),
+            'clinic_hubs' => $clinicLanding->hubs(),
         ]);
     }
 }

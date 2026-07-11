@@ -1,0 +1,118 @@
+{% set _tema = platform_config.tema|default('light') %}
+{% set _logo_custom = platform_asset_custom('full') %}
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ _tema }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ hub.label|default('Módulo') }} | {{ organismo.copy.brand_name|default('Unio') }}</title>
+    <meta name="description" content="{{ hub.desc|default('') }}">
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=17">
+    <link rel="stylesheet" href="{{ asset('css/marketing-modulo.css') }}?v=2">
+</head>
+<body class="mkt-modulo-page">
+<header class="mkt-modulo-page__header">
+    <a href="{{ path('app_home') }}#modulos" class="mkt-modulo-page__back">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar aos módulos
+    </a>
+    <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ organismo.copy.brand_name|default('Unio') }}">
+        {% include 'components/platform_logo.html.twig' with {
+            variant: 'full',
+            class: 'mkt-logo mkt-logo--v2' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
+        } only %}
+    </a>
+    <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--sm">Acessar plataforma</a>
+</header>
+
+<main class="mkt-modulo-page__main">
+    <article
+        class="mkt-studio-info mkt-studio-info--page"
+        id="mktModuloRoot"
+        data-module-id="{{ hub.id }}"
+        data-pulso-url="{{ pulso_api_url }}"
+        data-like-url="{{ like_api_url }}"
+        data-comment-url="{{ comment_api_url }}"
+    >
+        <header class="mkt-studio-info__head">
+            <div class="mkt-studio-info__brand">
+                {% if hub.image|default('') %}
+                <img class="mkt-studio-info__thumb" src="{{ asset(hub.image) }}" alt="" width="128" height="86" loading="eager" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/marketing/modules/fallback.jpg') }}'">
+                {% endif %}
+                <div>
+                    <p class="mkt-studio-info__eyebrow"><i class="fas {{ hub.icon|default('fa-cube') }}" aria-hidden="true"></i> Módulo ativo</p>
+                    <h1 class="mkt-studio-info__title">{{ hub.label|default('Módulo') }}</h1>
+                    <p class="mkt-studio-info__desc">{{ hub.desc|default('') }}</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="mkt-studio-info__grid">
+            <div class="mkt-studio-info__main">
+                <p class="mkt-studio-info__summary">{{ hub.summary|default('') }}</p>
+                {% if hub.highlights|default([]) %}
+                <ul class="mkt-studio-info__highlights">
+                    {% for item in hub.highlights %}
+                    <li><i class="fas fa-check" aria-hidden="true"></i> {{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if hub.kpis|default([]) %}
+                <div class="mkt-studio-info__kpis" data-modulo-kpis>
+                    {% for kpi in hub.kpis %}
+                    <div class="mkt-studio-info__kpi">
+                        <strong>{{ kpi.value|default('—') }}</strong>
+                        <span>{{ kpi.label|default('') }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <a href="{{ path(hub.route|default('app_login')) }}" class="mkt-btn mkt-btn--glow mkt-studio-info__cta">
+                    Acessar módulo <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+
+                <section class="mkt-modulo-engage" aria-labelledby="mkt-modulo-engage-title">
+                    <h2 id="mkt-modulo-engage-title" class="mkt-modulo-engage__title">Reações da comunidade</h2>
+                    <div class="mkt-modulo-engage__actions">
+                        <button type="button" class="mkt-modulo-like" data-modulo-like aria-pressed="false">
+                            <i class="far fa-heart" aria-hidden="true"></i>
+                            <span data-modulo-like-count>0</span>
+                            <span class="mkt-modulo-like__label">Curtir</span>
+                        </button>
+                    </div>
+                    <form class="mkt-modulo-comment-form" data-modulo-comment-form>
+                        <label class="sr-only" for="modulo-comment-author">Seu nome</label>
+                        <input type="text" id="modulo-comment-author" name="author" maxlength="60" placeholder="Seu nome (opcional)">
+                        <label class="sr-only" for="modulo-comment-text">Comentário</label>
+                        <textarea id="modulo-comment-text" name="text" rows="3" maxlength="500" required placeholder="Deixe um comentário sobre este módulo…"></textarea>
+                        <button type="submit" class="mkt-btn mkt-btn--glow mkt-btn--sm">Publicar comentário</button>
+                    </form>
+                    <ul class="mkt-modulo-comments" data-modulo-comments aria-live="polite">
+                        <li class="mkt-modulo-comments__empty">Carregando comentários…</li>
+                    </ul>
+                </section>
+            </div>
+
+            <aside class="mkt-studio-info__feed" aria-labelledby="modulo-feed-title">
+                <div class="mkt-studio-info__feed-head">
+                    <h2 id="modulo-feed-title">
+                        <span class="mkt-studio-info__live" aria-hidden="true"></span>
+                        Notícias do momento
+                    </h2>
+                    <span class="mkt-studio-info__feed-meta" data-modulo-updated>Atualizando…</span>
+                </div>
+                <ul class="mkt-studio-info__activities" data-modulo-news>
+                    <li class="mkt-modulo-news-empty">Carregando notícias…</li>
+                </ul>
+            </aside>
+        </div>
+    </article>
+</main>
+
+<script src="{{ asset('js/marketing-module-pulso.js') }}?v=2" defer></script>
+</body>
+</html>

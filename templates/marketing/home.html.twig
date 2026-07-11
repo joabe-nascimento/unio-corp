@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=18">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
     {% if org_clinic|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=41">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=42">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=28">
     <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=24">
     {% endif %}
@@ -370,51 +370,26 @@
             <h2 id="mkt-modules-title">Pós-operatório, carteirinha e guia no dia a dia</h2>
             <p class="mkt-section-sub">Módulos modulares: use tudo junto ou só o que sua clínica precisa.</p>
         </div>
-        <div class="mkt-rich-modules__grid mkt-rich-modules__grid--six">
-            <a href="{{ path('app_login') }}" class="mkt-rich-module-card mkt-reveal">
-                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
-                <div class="mkt-rich-module-card__body">
-                    <strong>Pacientes</strong>
-                    <span>Ficha, evolução e histórico completo</span>
+        <div class="mkt-rich-modules__grid mkt-rich-modules__grid--six" data-clinic-modules-grid>
+            {% set _hubs = clinic_hubs|default([]) %}
+            {% for hub in _hubs %}
+            <a
+                href="{{ path('app_marketing_modulo_show', { id: hub.id|default('') }) }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="mkt-rich-module-card mkt-studio-hub-card mkt-reveal{% if loop.index > 1 %} mkt-reveal--delay-{{ loop.index - 1 }}{% endif %}"
+            >
+                {% if hub.image|default('') %}
+                <img class="mkt-rich-module-card__bg" src="{{ asset(hub.image) }}" alt="" loading="lazy" width="800" height="600" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/marketing/modules/fallback.jpg') }}'">
+                {% endif %}
+                <div class="mkt-rich-module-card__body mkt-studio-hub-card__body">
+                    <span class="mkt-rich-module-card__icon"><i class="fas {{ hub.icon|default('fa-cube') }}" aria-hidden="true"></i></span>
+                    <h3>{{ hub.label|default('Módulo') }}</h3>
+                    <p>{{ hub.desc|default('') }}</p>
+                    <span class="mkt-studio-hub-card__hint">Ver o que acontece <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
                 </div>
             </a>
-            <a href="{{ path('app_login') }}" class="mkt-rich-module-card mkt-reveal mkt-reveal--delay-1">
-                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
-                <div class="mkt-rich-module-card__body">
-                    <strong>Sala Crítica</strong>
-                    <span>Monitoramento intensivo em tempo real</span>
-                </div>
-            </a>
-            <a href="{{ path('app_carteirinha_digital') }}" class="mkt-rich-module-card mkt-reveal mkt-reveal--delay-2">
-                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1584515935687-48fd4ac045fb?auto=format&fit=crop&w=800&h=600&q=80" alt="" loading="lazy" width="800" height="600">
-                <div class="mkt-rich-module-card__body">
-                    <span class="mkt-rich-module-card__icon"><i class="fas fa-id-card" aria-hidden="true"></i></span>
-                    <strong>Carteirinha digital</strong>
-                    <span>Identidade com foto e validação</span>
-                </div>
-            </a>
-            <a href="{{ path('app_guia_medico_beneficiario') }}" class="mkt-rich-module-card mkt-reveal mkt-reveal--delay-3">
-                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
-                <div class="mkt-rich-module-card__body">
-                    <span class="mkt-rich-module-card__icon"><i class="fas fa-book-medical" aria-hidden="true"></i></span>
-                    <strong>Guia médico</strong>
-                    <span>Orientações e sinais de alerta</span>
-                </div>
-            </a>
-            <a href="{{ path('app_login') }}" class="mkt-rich-module-card mkt-reveal">
-                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
-                <div class="mkt-rich-module-card__body">
-                    <strong>Alertas inteligentes</strong>
-                    <span>Fila P1–P4, SLA e triagem clínica</span>
-                </div>
-            </a>
-            <a href="{{ path('app_login') }}" class="mkt-rich-module-card mkt-reveal mkt-reveal--delay-1">
-                <img class="mkt-rich-module-card__bg" src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80" alt="" loading="lazy" width="800" height="600">
-                <div class="mkt-rich-module-card__body">
-                    <strong>Relatórios &amp; LGPD</strong>
-                    <span>Exportação CSV, auditoria e consentimento</span>
-                </div>
-            </a>
+            {% endfor %}
         </div>
     </section>
 
