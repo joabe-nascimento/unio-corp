@@ -1,0 +1,67 @@
+{# Painel informativo de um módulo (template clonado via JS) #}
+<template id="studio-module-tpl-{{ hub.id }}">
+    <article class="mkt-studio-info">
+        <header class="mkt-studio-info__head">
+            <div class="mkt-studio-info__brand">
+                {% if hub.image|default('') %}
+                <img class="mkt-studio-info__thumb" src="{{ hub.image }}" alt="" width="120" height="80" loading="lazy">
+                {% endif %}
+                <div>
+                    <p class="mkt-studio-info__eyebrow"><i class="fas {{ hub.icon|default('fa-cube') }}" aria-hidden="true"></i> Módulo ativo</p>
+                    <h3 class="mkt-studio-info__title">{{ hub.label|default('Módulo') }}</h3>
+                    <p class="mkt-studio-info__desc">{{ hub.desc|default('') }}</p>
+                </div>
+            </div>
+            <button type="button" class="mkt-studio-info__close" data-studio-module-close aria-label="Fechar painel">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+        </header>
+
+        <div class="mkt-studio-info__grid">
+            <div class="mkt-studio-info__main">
+                <p class="mkt-studio-info__summary">{{ hub.summary|default('') }}</p>
+                {% if hub.highlights|default([]) %}
+                <ul class="mkt-studio-info__highlights">
+                    {% for item in hub.highlights %}
+                    <li><i class="fas fa-check" aria-hidden="true"></i> {{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if hub.kpis|default([]) %}
+                <div class="mkt-studio-info__kpis">
+                    {% for kpi in hub.kpis %}
+                    <div class="mkt-studio-info__kpi">
+                        <strong>{{ kpi.value|default('—') }}</strong>
+                        <span>{{ kpi.label|default('') }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <a href="{{ path(hub.route|default('app_login')) }}" class="mkt-btn mkt-btn--glow mkt-studio-info__cta">
+                    Acessar módulo <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+
+            <aside class="mkt-studio-info__feed" aria-labelledby="studio-feed-{{ hub.id }}">
+                <div class="mkt-studio-info__feed-head">
+                    <h4 id="studio-feed-{{ hub.id }}">
+                        <span class="mkt-studio-info__live" aria-hidden="true"></span>
+                        Acontecendo agora
+                    </h4>
+                    <span class="mkt-studio-info__feed-meta">Atualizado em tempo real</span>
+                </div>
+                <ul class="mkt-studio-info__activities" data-studio-activities>
+                    {% for act in hub.activities|default([]) %}
+                    <li class="mkt-studio-info__activity" data-activity-type="{{ act.type|default('info') }}">
+                        <span class="mkt-studio-info__activity-icon"><i class="fas {{ act.icon|default('fa-circle-info') }}" aria-hidden="true"></i></span>
+                        <div>
+                            <p>{{ act.text|default('') }}</p>
+                            <time>{{ act.ago|default('agora') }}</time>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </aside>
+        </div>
+    </article>
+</template>

@@ -71,9 +71,15 @@
         <h2 id="mkt-studio-hubs-title">Módulos prontos para ativar na sua plataforma</h2>
         <p class="mkt-section-sub">RH, engenharia, saúde, TI, finanças e mais — mesma shell, mesma experiência.</p>
     </div>
-    <div class="mkt-rich-modules__grid mkt-rich-modules__grid--six">
+    <div class="mkt-rich-modules__grid mkt-rich-modules__grid--six" data-studio-modules-grid>
         {% for hub in _hubs %}
-        <a href="{{ path(hub.route|default('app_login')) }}" class="mkt-rich-module-card mkt-studio-hub-card mkt-reveal{% if loop.index > 1 %} mkt-reveal--delay-{{ loop.index - 1 }}{% endif %}">
+        <button
+            type="button"
+            class="mkt-rich-module-card mkt-studio-hub-card mkt-reveal{% if loop.index > 1 %} mkt-reveal--delay-{{ loop.index - 1 }}{% endif %}"
+            data-studio-module-trigger="{{ hub.id|default('') }}"
+            aria-expanded="false"
+            aria-controls="mkt-studio-module-detail"
+        >
             {% if hub.image|default('') %}
             <img class="mkt-rich-module-card__bg" src="{{ hub.image }}" alt="" loading="lazy" width="800" height="600">
             {% endif %}
@@ -81,10 +87,19 @@
                 <span class="mkt-rich-module-card__icon"><i class="fas {{ hub.icon|default('fa-cube') }}" aria-hidden="true"></i></span>
                 <h3>{{ hub.label|default('Módulo') }}</h3>
                 <p>{{ hub.desc|default('') }}</p>
+                <span class="mkt-studio-hub-card__hint">Ver o que acontece <i class="fas fa-chevron-right" aria-hidden="true"></i></span>
             </div>
-        </a>
+        </button>
         {% endfor %}
     </div>
+
+    <div class="mkt-studio-module-detail" id="mkt-studio-module-detail" hidden aria-live="polite">
+        <div class="mkt-studio-module-detail__inner" data-studio-module-slot></div>
+    </div>
+
+    {% for hub in _hubs %}
+        {% include 'components/marketing/_studio_module_panel.html.twig' with { hub: hub } only %}
+    {% endfor %}
 </section>
 
 <section class="mkt-rich-numbers mkt-reveal" id="cases-reais" aria-label="Cases e indicadores">
