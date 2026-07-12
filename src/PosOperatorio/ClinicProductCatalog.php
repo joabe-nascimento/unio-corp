@@ -27,7 +27,7 @@ final class ClinicProductCatalog
                 'route' => 'app_pos_operatorio_trabalho',
                 'route_prefix' => 'app_pos_operatorio_trabalho',
                 'route_label' => 'Abrir fila do dia',
-                'route_hint' => 'Entrada do pós-operatório — abre a fila do dia',
+                'route_hint' => 'Entrada do pós-operatório: abre a fila do dia',
                 'marketing_route' => 'app_home',
                 'marketing_anchor' => 'pos-operatorio',
                 'default_enabled' => true,

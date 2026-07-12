@@ -11,15 +11,15 @@
     <meta name="description" content="{{ organismo.copy.brand_name|default('Unio Saúde') }} | {{ organismo.copy.marketing_tagline|default('Saúde que acompanha.') }}">
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     {% include 'components/platform_favicon.html.twig' %}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=18">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
     {% if org_clinic|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=44">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=29">
-    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=24">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=32">
+<link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=29">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=62">
     {% endif %}
     <style>
     /* ── Clínica overrides ── */
@@ -28,12 +28,35 @@
         --mkt-accent-glow: rgba(75, 114, 190, 0.35);
         --mkt-accent-soft: #eaf0fb;
     }
-    .marketing-home { font-family: 'Nunito', 'Inter', system-ui, sans-serif; }
+    .marketing-home { font-family: 'Quicksand', 'Nunito', system-ui, sans-serif; }
+    .marketing-home.mkt-clinic,
+    .marketing-home.mkt-clinic button,
+    .marketing-home.mkt-clinic input,
+    .marketing-home.mkt-clinic select,
+    .marketing-home.mkt-clinic textarea {
+        font-family: 'Quicksand', 'Nunito', system-ui, sans-serif;
+    }
+    .marketing-home.mkt-clinic h1,
+    .marketing-home.mkt-clinic h2,
+    .marketing-home.mkt-clinic h3,
+    .marketing-home.mkt-clinic h4,
+    .marketing-home.mkt-clinic .mkt-hero-title--v2,
+    .marketing-home.mkt-clinic .mkt-section-title,
+    .marketing-home.mkt-clinic .mkt-btn {
+        font-family: 'Quicksand', 'Nunito', system-ui, sans-serif !important;
+        letter-spacing: -0.02em;
+        font-weight: 700;
+    }
+    .marketing-home.mkt-clinic .mkt-hero-title--v2 {
+        font-family: 'Nunito', 'Quicksand', system-ui, sans-serif !important;
+        font-weight: 800 !important;
+        -webkit-text-stroke: 0.2px currentColor;
+    }
     .mkt-hero-eyebrow-dot { background: #4b72be !important; }
-    .mkt-gradient-text { color: #7ba3e0; -webkit-text-fill-color: #7ba3e0; }
-    .mkt-heva-accent { color: #7ba3e0; -webkit-text-fill-color: #7ba3e0; }
+    .mkt-gradient-text { color: #4b72be; -webkit-text-fill-color: #4b72be; }
+    .mkt-heva-accent { color: #4b72be; -webkit-text-fill-color: #4b72be; }
     [data-theme="light"] .mkt-gradient-text,
-    [data-theme="light"] .mkt-heva-accent { color: #3d61a8; -webkit-text-fill-color: #3d61a8; }
+    [data-theme="light"] .mkt-heva-accent { color: #4b72be; -webkit-text-fill-color: #4b72be; }
     .mkt-btn--glow { background: #4b72be !important; box-shadow: 0 4px 20px rgba(75,114,190,.45) !important; }
     .mkt-hero-v2-orb--cyan { background: radial-gradient(circle at 40% 50%, rgba(75,114,190,.18) 0%, transparent 70%) !important; }
     .mkt-hero-v2-orb--indigo { background: radial-gradient(circle at 60% 50%, rgba(100,149,237,.14) 0%, transparent 70%) !important; }
@@ -49,6 +72,9 @@
     .mkt-feature-icon { display: none !important; }
     .mkt-pillar-icon { display: none !important; }
     .mkt-metric-icon { display: none !important; }
+    .mkt-rich-module-card__icon { display: none !important; }
+    .mkt-home-patient-products__icon { display: none !important; }
+    .mkt-preview-module > i { display: none !important; }
     .mkt-metric-card--accent { background: var(--surface-2) !important; border-color: var(--border) !important; }
     .mkt-metric-card--accent .mkt-metric-val { color: #4b72be !important; }
     .mkt-bar-fill { background: #4b72be !important; }
@@ -161,12 +187,12 @@
                     <a href="{{ path('app_register') }}" class="mkt-btn mkt-btn--surface mkt-btn--lg">Criar conta</a>
                     {% endif %}
                 </div>
-                <div class="mkt-hero-chips">
+                <div class="mkt-hero-chips mkt-hero-tokens">
                     {% if org_clinic|default(false) %}
-                    <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
-                    <span class="mkt-hero-chip"><i class="fas fa-id-card" aria-hidden="true"></i> Carteirinha digital</span>
-                    <span class="mkt-hero-chip"><i class="fas fa-book-medical" aria-hidden="true"></i> Guia médico</span>
-                    <span class="mkt-hero-chip"><i class="fas fa-user-nurse" aria-hidden="true"></i> Pós-operatório</span>
+                    <span class="mkt-hero-token"><span class="mkt-hero-token__icon" aria-hidden="true"><i class="fas fa-shield-halved"></i></span><span class="mkt-hero-token__label">LGPD</span></span>
+                    <span class="mkt-hero-token"><span class="mkt-hero-token__icon" aria-hidden="true"><i class="fas fa-id-card"></i></span><span class="mkt-hero-token__label">Carteirinha</span></span>
+                    <span class="mkt-hero-token"><span class="mkt-hero-token__icon" aria-hidden="true"><i class="fas fa-book-medical"></i></span><span class="mkt-hero-token__label">Guia médico</span></span>
+                    <span class="mkt-hero-token"><span class="mkt-hero-token__icon" aria-hidden="true"><i class="fas fa-user-nurse"></i></span><span class="mkt-hero-token__label">Pós-op</span></span>
                     {% else %}
                     <span class="mkt-hero-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD</span>
                     <span class="mkt-hero-chip"><i class="fas fa-code" aria-hidden="true"></i> Sites &amp; sistemas</span>
@@ -177,27 +203,23 @@
             <div class="mkt-hero-visual mkt-hero-visual--v2" aria-hidden="true">
                 {% if org_clinic|default(false) %}
                 <div class="mkt-hero-heva">
-                    <figure class="mkt-hero-heva__photo">
-                        <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=900&q=80" alt="" width="900" height="560" loading="eager" decoding="async">
-                    </figure>
-                    <div class="mkt-hero-heva__stage">
-                        <div class="mkt-hero-heva__card">
-                            <div class="mkt-hero-heva__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></div>
-                            <ul class="mkt-hero-heva__list">
-                                <li>Atendimento pós-operatório contínuo</li>
-                                <li>Equipe e protocolos organizados</li>
-                                <li>Carteirinha e guia na palma da mão</li>
-                                <li>Alertas clínicos com prioridade</li>
-                            </ul>
-                            <div class="mkt-hero-heva__foot">
-                                <span class="mkt-hero-heva__qr" aria-hidden="true"><i class="fas fa-qrcode"></i></span>
-                                <div>
-                                    <strong>Portal do paciente</strong>
-                                    <span>Acesse, valide e acompanhe a recuperação</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mkt-hero-heva__ghost" aria-hidden="true">
+                        <img src="https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=800&q=70" alt="" width="800" height="1000" loading="lazy" decoding="async">
                     </div>
+                    <div class="mkt-hero-heva__frame">
+                        <figure class="mkt-hero-heva__photo">
+                            <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1000&q=80" alt="" width="1000" height="1250" loading="eager" decoding="async">
+                        </figure>
+                    </div>
+                    <aside class="mkt-hero-heva__card">
+                        <div class="mkt-hero-heva__icon" aria-hidden="true"><i class="fas fa-hand-holding-heart"></i></div>
+                        <p class="mkt-hero-heva__slogan">Cuidar de você e da sua clínica é o que nos move.</p>
+                        <ul class="mkt-hero-heva__list">
+                            <li>Pós-operatório contínuo</li>
+                            <li>Carteirinha e guia digitais</li>
+                            <li>Alertas com prioridade</li>
+                        </ul>
+                    </aside>
                 </div>
                 {% else %}
                 <div class="mkt-preview">
@@ -263,6 +285,10 @@
                 <i class="fas fa-user-nurse" aria-hidden="true"></i>
                 <div><strong>Pós-operatório</strong><span>Protocolos e alertas</span></div>
             </div>
+            <div class="mkt-pro-badge">
+                <i class="fas fa-person-circle-check" aria-hidden="true"></i>
+                <div><strong>Portal do paciente</strong><span>Acesso e questionários online</span></div>
+            </div>
             {% else %}
             <div class="mkt-pro-badge">
                 <i class="fas fa-shield-halved" aria-hidden="true"></i>
@@ -272,19 +298,15 @@
                 <i class="fas fa-heart-pulse" aria-hidden="true"></i>
                 <div><strong>Pós-operatório</strong><span>Do procedimento à alta</span></div>
             </div>
-            {% endif %}
             <div class="mkt-pro-badge">
                 <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
                 <div><strong>Alertas em tempo real</strong><span>Notificações críticas imediatas</span></div>
             </div>
             <div class="mkt-pro-badge">
-                <i class="fas fa-person-circle-check" aria-hidden="true"></i>
-                <div><strong>Portal do paciente</strong><span>Acesso e questionários online</span></div>
-            </div>
-            <div class="mkt-pro-badge">
                 <i class="fas fa-mobile-screen" aria-hidden="true"></i>
                 <div><strong>Responsivo</strong><span>Desktop, tablet e celular</span></div>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -298,7 +320,7 @@
         <div class="mkt-rich-spotlight__grid">
             <div class="mkt-rich-spotlight__copy">
                 <p class="mkt-section-eyebrow">Acompanhamento contínuo</p>
-                <h2 id="mkt-spotlight-title">Cuidado que não termina na <span class="mkt-heva-accent">sala de cirurgia</span></h2>
+                <h2 id="mkt-spotlight-title">Cuidado que não termina na <span class="mkt-heva-accent">sala&nbsp;de&nbsp;cirurgia</span></h2>
                 <p>
                     Assim como clínicas de referência investem na jornada completa do paciente,
                     a {{ organismo.copy.brand_name|default('Unio Saúde') }} conecta equipe e paciente
@@ -375,8 +397,8 @@
     <section class="mkt-rich-modules" id="modulos" aria-labelledby="mkt-modules-title">
         <div class="mkt-rich-modules__head mkt-reveal">
             <p class="mkt-section-eyebrow">Centro clínico integrado</p>
-            <h2 id="mkt-modules-title">Pós-operatório, carteirinha e guia no dia a dia</h2>
-            <p class="mkt-section-sub">Módulos modulares: use tudo junto ou só o que sua clínica precisa.</p>
+            <h2 id="mkt-modules-title">Pós-operatório, carteirinha e guia no dia&nbsp;a&nbsp;dia</h2>
+            <p class="mkt-section-sub">Módulos modulares: use tudo junto ou&nbsp;só o que sua clínica precisa.</p>
         </div>
         <div class="mkt-rich-modules__grid mkt-rich-modules__grid--six" data-clinic-modules-grid>
             {% set _hubs = clinic_hubs|default([]) %}
@@ -391,7 +413,6 @@
                 <img class="mkt-rich-module-card__bg" src="{{ asset(hub.image) }}" alt="" loading="lazy" width="800" height="600" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/marketing/modules/fallback.jpg') }}'">
                 {% endif %}
                 <div class="mkt-rich-module-card__body mkt-studio-hub-card__body">
-                    <span class="mkt-rich-module-card__icon"><i class="fas {{ hub.icon|default('fa-cube') }}" aria-hidden="true"></i></span>
                     <h3>{{ hub.label|default('Módulo') }}</h3>
                     <p>{{ hub.desc|default('') }}</p>
                     <span class="mkt-studio-hub-card__hint">Ver o que acontece <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
@@ -405,7 +426,7 @@
     <section class="mkt-rich-journey" id="equipe-paciente" aria-labelledby="mkt-journey-title">
         <div class="mkt-rich-journey__head mkt-reveal">
             <p class="mkt-section-eyebrow">Dois lados, uma jornada</p>
-            <h2 id="mkt-journey-title">O que cada um enxerga na plataforma</h2>
+            <h2 id="mkt-journey-title">O que cada um enxerga na&nbsp;plataforma</h2>
             <p class="mkt-section-sub">Resumos do dia, linha do protocolo e informações clínicas, sem ruído visual.</p>
         </div>
         <div class="mkt-rich-journey__grid">
@@ -501,7 +522,7 @@
     <section class="mkt-rich-compare mkt-reveal" id="antes-depois" aria-labelledby="mkt-compare-title">
         <div class="mkt-rich-compare__head">
             <p class="mkt-section-eyebrow">Transformação operacional</p>
-            <h2 id="mkt-compare-title">Do improviso ao acompanhamento estruturado</h2>
+            <h2 id="mkt-compare-title">Do improviso ao acompanhamento&nbsp;estruturado</h2>
             <p class="mkt-section-sub">O que muda quando a clínica centraliza pós-operatório, alertas e portal do paciente.</p>
         </div>
         <div class="mkt-rich-compare__grid">
@@ -532,7 +553,7 @@
     <section class="mkt-rich-procedures" id="casos-procedimento" aria-labelledby="mkt-proc-title">
         <div class="mkt-rich-procedures__head mkt-reveal">
             <p class="mkt-section-eyebrow">Protocolos reais</p>
-            <h2 id="mkt-proc-title">Cada cirurgia com marcos, questionários e alertas próprios</h2>
+            <h2 id="mkt-proc-title">Cada cirurgia com marcos, questionários e alertas&nbsp;próprios</h2>
             <p class="mkt-section-sub">Não é um fluxo genérico: o sistema adapta etapas e regras por tipo de procedimento.</p>
         </div>
         <div class="mkt-rich-procedures__grid">
@@ -604,7 +625,7 @@
         <div class="mkt-rich-management__inner mkt-reveal">
             <div class="mkt-rich-management__copy">
                 <p class="mkt-section-eyebrow">Visão da diretoria</p>
-                <h2 id="mkt-mgmt-title">Gestão clínica com indicadores que importam</h2>
+                <h2 id="mkt-mgmt-title">Gestão clínica com indicadores que&nbsp;importam</h2>
                 <p>Taxa de aderência, SLA de alertas e reinternações evitadas em um painel único para reuniões e tomada de decisão.</p>
                 <ul class="mkt-rich-management__list">
                     <li>Exportação CSV de alertas, questionários e auditoria</li>
@@ -648,7 +669,7 @@
     <section class="mkt-rich-live" id="operacao-tempo-real" aria-labelledby="mkt-live-title">
         <div class="mkt-rich-live__head mkt-reveal">
             <p class="mkt-section-eyebrow">Operação ao vivo</p>
-            <h2 id="mkt-live-title">O que a clínica enxerga agora</h2>
+            <h2 id="mkt-live-title">O que a clínica enxerga&nbsp;agora</h2>
             <p class="mkt-section-sub">Indicadores ilustrativos de uma operação ativa, atualizados em tempo real no painel.</p>
         </div>
         <div class="mkt-rich-live__strip mkt-reveal">
@@ -774,7 +795,7 @@
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Plataforma em números</p>
-                <h2 class="mkt-section-title" id="mkt-metrics-title">Uma clínica mais segura, mais conectada</h2>
+                <h2 class="mkt-section-title" id="mkt-metrics-title">Uma clínica mais segura, mais&nbsp;conectada</h2>
             </div>
             <p class="mkt-section-sub mkt-section-sub--left">Acompanhamento contínuo, protocolos estruturados e alertas inteligentes, tudo em um só lugar.</p>
         </div>
@@ -850,7 +871,7 @@
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Recursos</p>
-                <h2 class="mkt-section-title" id="mkt-features-title">Tudo que sua clínica precisa, em um único lugar</h2>
+                <h2 class="mkt-section-title" id="mkt-features-title">Tudo que sua clínica precisa, em&nbsp;um único&nbsp;lugar</h2>
             </div>
             <p class="mkt-section-sub mkt-section-sub--left">Módulos pensados para o ciclo clínico completo, do procedimento ao acompanhamento pós-alta.</p>
         </div>
@@ -909,7 +930,7 @@
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Ciclo clínico completo</p>
-                <h2 class="mkt-section-title" id="mkt-funcs-title">Do centro cirúrgico ao retorno do paciente</h2>
+                <h2 class="mkt-section-title" id="mkt-funcs-title">Do centro cirúrgico ao retorno do&nbsp;paciente</h2>
             </div>
             <p class="mkt-section-sub mkt-section-sub--left">Cada módulo cobre uma etapa crítica do acompanhamento, todos integrados e sem lacunas no cuidado.</p>
         </div>
@@ -998,7 +1019,7 @@
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Visão da clínica em tempo real</p>
-                <h2 class="mkt-section-title" id="mkt-dash-title">Tudo que importa, visível de um só painel</h2>
+                <h2 class="mkt-section-title" id="mkt-dash-title">Tudo que importa, visível de um&nbsp;só&nbsp;painel</h2>
             </div>
             <p class="mkt-section-sub mkt-section-sub--left">Pacientes ativos, alertas críticos, protocolos em andamento, sem precisar abrir vários sistemas.</p>
         </div>
@@ -1232,7 +1253,7 @@
             <div class="mkt-section-head mkt-section-head--split">
                 <div class="mkt-section-head-main">
                     <p class="mkt-section-eyebrow">Como funciona</p>
-                    <h2 class="mkt-section-title" id="mkt-steps-title">Do procedimento ao acompanhamento, em quatro passos</h2>
+                    <h2 class="mkt-section-title" id="mkt-steps-title">Do procedimento ao acompanhamento, em quatro&nbsp;passos</h2>
                 </div>
                 <p class="mkt-section-sub mkt-section-sub--left">Um fluxo claro, do registro do paciente até a alta monitorada.</p>
             </div>
@@ -1297,7 +1318,7 @@
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Operação clínica</p>
-                <h2 class="mkt-section-title" id="mkt-flow-title">Do cadastro à alta, tudo conectado</h2>
+                <h2 class="mkt-section-title" id="mkt-flow-title">Do cadastro à alta, tudo&nbsp;conectado</h2>
             </div>
             <p class="mkt-section-sub mkt-section-sub--left">Cadastro, protocolo, questionário, alerta e relatório, sem planilhas paralelas nem ligações perdidas.</p>
         </div>
@@ -1413,7 +1434,7 @@
         <div class="mkt-section-head mkt-section-head--split">
             <div class="mkt-section-head-main">
                 <p class="mkt-section-eyebrow">Impacto clínico</p>
-                <h2 class="mkt-section-title" id="mkt-outcomes-title">O que muda quando o cuidado é contínuo</h2>
+                <h2 class="mkt-section-title" id="mkt-outcomes-title">O que muda quando o cuidado é&nbsp;contínuo</h2>
             </div>
             <p class="mkt-section-sub mkt-section-sub--left">Acompanhamento estruturado reduz complicações, reinternações e sobrecarga da equipe.</p>
         </div>
@@ -1555,7 +1576,7 @@
         <div class="mkt-cta-banner">
             <div class="mkt-cta-banner-inner">
                 <div class="mkt-cta-copy">
-                    <h2 id="mkt-cta-title">Cuidado que não para na <span class="mkt-heva-accent">sala de cirurgia</span>.</h2>
+                    <h2 id="mkt-cta-title">Cuidado que não para na <span class="mkt-heva-accent">sala&nbsp;de&nbsp;cirurgia</span>.</h2>
                     <p>Acesse {{ _pnome }}, registre seus pacientes e comece o acompanhamento estruturado, protocolos, alertas e portal do paciente em um só lugar.</p>
                     <ul class="mkt-cta-list">
                         <li><i class="fas fa-check" aria-hidden="true"></i> Gestão completa de pacientes pós-operatórios</li>

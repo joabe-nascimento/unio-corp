@@ -788,6 +788,11 @@
     border: 1px solid var(--mkt-v2-border, rgba(15, 23, 42, 0.08));
 }
 
+.mkt-pillar .mkt-protocol-rail,
+.mkt-rich-journey-panel__body .mkt-protocol-rail {
+    margin-top: 16px;
+}
+
 .mkt-protocol-rail--compact {
     padding: 12px 14px;
 }
@@ -821,9 +826,9 @@
 .mkt-protocol-rail__step {
     display: grid;
     grid-template-columns: 28px minmax(0, 1fr);
-    column-gap: 12px;
-    align-items: stretch;
-    padding: 0 0 14px;
+    column-gap: 14px;
+    align-items: start;
+    padding: 0 0 16px;
     margin: 0;
     position: relative;
     list-style: none;
@@ -840,15 +845,16 @@
     width: 28px;
     min-height: 100%;
     position: relative;
+    align-self: stretch;
 }
 
 .mkt-protocol-rail__marker {
     position: relative;
     z-index: 1;
     display: block;
-    width: 10px;
-    height: 10px;
-    margin-top: 6px;
+    width: 12px;
+    height: 12px;
+    margin-top: 4px;
     border-radius: 50%;
     background: #fff;
     border: 2px solid #cbd5e1;
@@ -860,8 +866,9 @@
     content: '';
     position: absolute;
     left: 50%;
-    top: 18px;
-    bottom: 0;
+    /* espaço acima/abaixo do círculo (halo + folga) */
+    top: 22px;
+    bottom: 4px;
     width: 2px;
     transform: translateX(-50%);
     background: #e2e8f0;
@@ -871,7 +878,7 @@
 
 .mkt-protocol-rail__content {
     min-width: 0;
-    padding: 8px 12px;
+    padding: 2px 0 2px 2px;
     border-radius: 10px;
     border: 1px solid transparent;
 }
@@ -938,11 +945,15 @@
 .mkt-protocol-rail__step.is-current .mkt-protocol-rail__content {
     background: rgba(75, 114, 190, 0.06);
     border-color: rgba(75, 114, 190, 0.14);
+    padding: 8px 12px;
+    margin: -2px 0 -2px -2px;
 }
 
 .mkt-protocol-rail--patient .mkt-protocol-rail__step.is-current .mkt-protocol-rail__content {
     background: rgba(90, 154, 154, 0.07);
     border-color: rgba(90, 154, 154, 0.16);
+    padding: 8px 12px;
+    margin: -2px 0 -2px -2px;
 }
 
 .mkt-protocol-rail__step.is-current .mkt-protocol-rail__day {
@@ -2120,6 +2131,14 @@
     background: linear-gradient(180deg, #f8fafd 0%, #eef3fa 100%);
     color: #1a2744;
     border: 1px solid rgba(75, 114, 190, 0.14);
+}
+
+/* Estático: não espelhar o verso */
+.mkt-idcard-static .mkt-idcard__face--front,
+.mkt-idcard-static .mkt-idcard__face--back {
+    transform: none;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
 }
 
 .mkt-idcard__header {

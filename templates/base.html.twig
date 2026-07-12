@@ -10,7 +10,11 @@
     {% include 'components/platform_favicon.html.twig' %}
 
     {# Tipografia — Google Fonts (fallback: system-ui via unio-app.css) #}
+    {% if org_clinic|default(false) %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+    {% else %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+    {% endif %}
     {% include 'components/vendor_styles.html.twig' %}
     <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
     <script>(function(){var m=window.matchMedia('(max-width:1199.98px)');function s(){document.documentElement.classList.toggle('shell-drawer',m.matches);}s();if(m.addEventListener){m.addEventListener('change',s);}else{m.addListener(s);}})();</script>
@@ -69,13 +73,12 @@
     }
     </style>
     {% if organismo.enabled|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=47">
-    <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=6">
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=50">
+    <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=8">
     {% if org_clinic|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish.css') }}?v=20">
+    <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish.css') }}?v=28">
     <link rel="stylesheet" href="{{ asset('css/pos-operatorio-ops.css') }}?v=2">
-    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=25">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=44">
+    <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=29">
     {% endif %}
     {% endif %}
 

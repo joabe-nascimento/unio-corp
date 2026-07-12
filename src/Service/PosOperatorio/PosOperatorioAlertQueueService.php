@@ -145,7 +145,7 @@ final class PosOperatorioAlertQueueService
     {
         if ($incidents === []) {
             return [
-                'headline' => 'Sala Crítica — nenhum alerta P1 ativo',
+                'headline' => 'Sala Crítica: nenhum alerta P1 ativo',
                 'summary' => 'Acompanhamento clínico dentro dos parâmetros. Fila P2/P3 disponível na aba Alertas.',
                 'tone' => 'ok',
             ];
@@ -155,7 +155,7 @@ final class PosOperatorioAlertQueueService
 
         return [
             'headline' => \count($incidents) === 1
-                ? 'P1 ativo — ' . ($worst['paciente_codigo'] ?? '')
+                ? 'P1 ativo: ' . ($worst['paciente_codigo'] ?? '')
                 : \count($incidents) . ' alertas P1 simultâneos',
             'summary' => sprintf(
                 'Priorize contato com %s (%s). Motivo: %s. SLA: %s.',

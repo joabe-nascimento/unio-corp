@@ -395,7 +395,7 @@ final class PosOperatorioService
     private function timelineEvents(): array
     {
         return [
-            ['time' => '17:04', 'label' => 'Alerta P1 aberto', 'detail' => 'Carlos M. — dor intensa', 'icon' => 'fa-triangle-exclamation'],
+            ['time' => '17:04', 'label' => 'Alerta P1 aberto', 'detail' => 'Carlos M.: dor intensa', 'icon' => 'fa-triangle-exclamation'],
             ['time' => '16:48', 'label' => 'Questionário respondido', 'detail' => 'Ana R. · PO-1039', 'icon' => 'fa-file-medical'],
             ['time' => '16:12', 'label' => 'Alta registrada', 'detail' => 'Maria S. · PO-1042', 'icon' => 'fa-user-check'],
         ];
@@ -414,7 +414,7 @@ final class PosOperatorioService
     /** @return array{score: int, label: string, tone: string, hint: string} */
     private function buildClinicalPulse(): array
     {
-        return ['score' => 88, 'label' => 'Acompanhamento estável', 'tone' => 'success', 'hint' => 'Preview ilustrativo — execute app:pos-operatorio:seed para dados reais.'];
+        return ['score' => 88, 'label' => 'Acompanhamento estável', 'tone' => 'success', 'hint' => 'Preview ilustrativo. Execute app:pos-operatorio:seed para dados reais.'];
     }
 
     /** @return list<array{tag: string, title: string, text: string, icon: string, tone: string, route_label?: string}> */
