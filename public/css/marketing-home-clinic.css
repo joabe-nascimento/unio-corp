@@ -6,6 +6,22 @@
     --mkt-clinic-radius: 16px;
     --mkt-clinic-shadow: 0 10px 40px rgba(30, 42, 58, 0.07);
     --mkt-clinic-shadow-hover: 0 16px 48px rgba(75, 114, 190, 0.14);
+    overflow-x: clip;
+    max-width: 100%;
+}
+
+.marketing-home.mkt-clinic *,
+.marketing-home.mkt-clinic *::before,
+.marketing-home.mkt-clinic *::after {
+    box-sizing: border-box;
+}
+
+.marketing-home.mkt-clinic .mkt-section-wrap,
+.marketing-home.mkt-clinic .mkt-product-spotlight,
+.marketing-home.mkt-clinic .mkt-hero-v2,
+.marketing-home.mkt-clinic .mkt-home-patient-products {
+    max-width: 100%;
+    overflow-x: clip;
 }
 
 /* Fundo calmo */
@@ -527,10 +543,11 @@
     border-radius: 20px;
     padding: 18px;
     box-shadow: 0 12px 40px rgba(30, 42, 58, 0.06);
-    overflow: visible;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-width: 0;
 }
 
 .mkt-home-patient-products__demo {
@@ -709,11 +726,13 @@
 /* Carteirinha — preview com destaque (igual card do dashboard) */
 .mkt-home-carteirinha-embed__card {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     height: auto;
     display: flex;
     flex-direction: column;
     padding: 16px 16px 18px;
-    overflow: visible;
+    overflow: hidden;
     border-radius: 20px;
     border: 1px solid rgba(75, 114, 190, 0.2);
     background:
@@ -1166,6 +1185,10 @@
         grid-template-columns: 1fr;
     }
 
+    .mkt-home-patient-products {
+        padding: 40px 16px 16px;
+    }
+
     .mkt-home-patient-products__panel-head {
         grid-template-columns: 1fr;
     }
@@ -1224,11 +1247,12 @@
 .mkt-product-spotlight__visual {
     position: relative;
     border-radius: 20px;
-    overflow: visible;
+    overflow: hidden;
     padding: 20px;
     background: var(--mkt-v2-bg-elevated, #fff);
     border: 1px solid var(--mkt-v2-border, rgba(15, 23, 42, 0.08));
     box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06);
+    max-width: 100%;
 }
 
 .mkt-product-spotlight__visual--bare {
@@ -1237,7 +1261,8 @@
     border: none;
     box-shadow: none;
     border-radius: 0;
-    overflow: visible;
+    overflow-x: clip;
+    overflow-y: visible;
 }
 
 .mkt-product-spotlight__visual--bare .mkt-idcard-deck-wrap {
@@ -1252,6 +1277,8 @@
     max-width: 480px;
     margin: 0 auto;
     padding-bottom: 4px;
+    overflow: hidden;
+    padding-inline: 8px;
 }
 
 .mkt-idcard-deck-wrap .mkt-idcard-deck {
@@ -1869,7 +1896,8 @@
     }
 
     .mkt-product-spotlight__visual--bare {
-        padding: 0;
+        padding: 8px 12px;
+        overflow: hidden;
     }
 
     .mkt-product-spotlight__visual--bare .mkt-idcard-deck-wrap {
@@ -1883,10 +1911,46 @@
 
     .mkt-idcard-deck-wrap {
         max-width: min(340px, 100%);
+        overflow: hidden;
     }
 
     .mkt-idcard-deck-wrap .mkt-idcard-deck {
         margin-bottom: 32px;
+        perspective: 1200px;
+    }
+
+    /* Fan mais fechado no mobile — evita scroll horizontal */
+    .mkt-idcard-deck__layer--1 {
+        transform: translateX(-54%) translateY(16px) translateZ(-70px) rotateY(-14deg) rotateZ(-3deg) scale(0.88);
+    }
+
+    .mkt-idcard-deck__layer--2 {
+        transform: translateX(-50%) translateY(8px) translateZ(-28px) rotateY(-7deg) rotateZ(-1deg) scale(0.94);
+    }
+
+    .mkt-idcard-deck__layer--3 {
+        transform: translateX(-48%) translateY(-6px) translateZ(28px) rotateY(5deg) rotateZ(1deg) scale(1);
+    }
+
+    .mkt-idcard-deck:hover .mkt-idcard-deck__layer--1,
+    .mkt-idcard-deck-wrap.is-layer-3:not(.is-layer-1):not(.is-layer-2) .mkt-idcard-deck__layer--1,
+    .mkt-idcard-deck-wrap.is-layer-1 .mkt-idcard-deck__layer--3,
+    .mkt-idcard-deck-wrap.is-layer-2 .mkt-idcard-deck__layer--1 {
+        transform: translateX(-58%) translateY(18px) translateZ(-80px) rotateY(-16deg) rotateZ(-4deg) scale(0.86);
+    }
+
+    .mkt-idcard-deck:hover .mkt-idcard-deck__layer--2,
+    .mkt-idcard-deck-wrap.is-layer-3:not(.is-layer-1):not(.is-layer-2) .mkt-idcard-deck__layer--2,
+    .mkt-idcard-deck-wrap.is-layer-1 .mkt-idcard-deck__layer--2,
+    .mkt-idcard-deck-wrap.is-layer-2 .mkt-idcard-deck__layer--3 {
+        transform: translateX(-51%) translateY(6px) translateZ(-16px) rotateY(-4deg) scale(0.94);
+    }
+
+    .mkt-idcard-deck:hover .mkt-idcard-deck__layer--3,
+    .mkt-idcard-deck-wrap.is-layer-3 .mkt-idcard-deck__layer--3,
+    .mkt-idcard-deck-wrap.is-layer-1 .mkt-idcard-deck__layer--1,
+    .mkt-idcard-deck-wrap.is-layer-2 .mkt-idcard-deck__layer--2 {
+        transform: translateX(-46%) translateY(-10px) translateZ(40px) rotateY(6deg) rotateZ(1deg) scale(1.01);
     }
 
     .mkt-idcard-deck__legend {
@@ -1905,11 +1969,17 @@
     .mkt-idcard-deck__legend-btn--3 .mkt-idcard-deck__legend-text {
         align-items: center;
     }
+
+    .mkt-home-carteirinha-embed__card,
+    .mkt-home-carteirinha-embed__card .mkt-idcard-widget,
+    .mkt-home-carteirinha-embed__card .mkt-idcard--landscape {
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 575.98px) {
     .mkt-product-spotlight {
-        padding: 48px 16px;
+        padding: 40px 16px;
     }
 
     .mkt-product-spotlight--alt {
@@ -1922,11 +1992,17 @@
     }
 
     .mkt-idcard-deck-wrap {
-        max-width: min(300px, calc(100vw - 48px));
+        max-width: min(300px, 100%);
+        padding-inline: 4px;
     }
 
     .mkt-idcard-deck {
-        padding-top: 24px;
+        padding-top: 20px;
+        padding-bottom: 4px;
+    }
+
+    .mkt-idcard-deck__layer {
+        width: 88%;
     }
 
     .mkt-idcard-deck__legend {
@@ -1937,6 +2013,15 @@
     .mkt-idcard-deck__legend-btn--3 {
         align-items: center;
         text-align: center;
+    }
+
+    .mkt-home-patient-embed__access-codes {
+        grid-template-columns: 1fr;
+    }
+
+    .mkt-home-carteirinha-embed__card .mkt-idcard-widget__tabs {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 
