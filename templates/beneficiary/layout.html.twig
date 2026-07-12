@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=21">
-    <link rel="stylesheet" href="{{ asset('css/beneficiary-portal.css') }}?v=13">
+    <link rel="stylesheet" href="{{ asset('css/beneficiary-portal.css') }}?v=14">
     <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=34">
     {% block benef_head %}{% endblock %}
 </head>
@@ -22,7 +22,7 @@
     <div class="benef-topbar__inner">
         <a href="{{ path('app_home') }}" class="benef-topbar__brand" title="Voltar ao início">
             <span class="benef-topbar__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></span>
-            <div>
+            <div class="benef-topbar__brand-text">
                 <strong>{% block benef_product %}Beneficiário{% endblock %}</strong>
                 <span>{{ organismo.copy.brand_name|default('Unio Saúde') }}</span>
             </div>
@@ -30,7 +30,8 @@
         <nav class="benef-topbar__nav" aria-label="Produtos">
             {% include 'components/marketing/clinic_product_nav.html.twig' with {
                 mkt_nav_active: benef_nav_active|default(''),
-                mkt_nav_on_product_page: true
+                mkt_nav_on_product_page: true,
+                org_clinic: org_clinic|default(false)
             } only %}
         </nav>
         {% block benef_topbar_actions %}{% endblock %}
@@ -48,6 +49,7 @@
 
 <script src="{{ asset('js/unio-input-masks.js') }}?v=1" defer></script>
 <script src="{{ asset('js/beneficiary-flow.js') }}?v=4" defer></script>
+<script src="{{ asset('js/marketing-nav-dropdown.js') }}?v=2" defer></script>
 {% block benef_scripts %}{% endblock %}
 </body>
 </html>
