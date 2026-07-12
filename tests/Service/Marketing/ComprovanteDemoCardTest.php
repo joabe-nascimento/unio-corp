@@ -19,5 +19,9 @@ final class ComprovanteDemoCardTest extends TestCase
         self::assertSame('PO-0042', $card['codigo']);
         self::assertNotEmpty($card['verificacao']);
         self::assertSame('Documento do procedimento', $card['role']);
+        self::assertArrayNotHasKey('cpf_masked', $card);
+        self::assertNull($card['plano_label']);
+        self::assertNotEmpty($card['cirurgia']);
+        self::assertNotEmpty($card['procedimento']);
     }
 }

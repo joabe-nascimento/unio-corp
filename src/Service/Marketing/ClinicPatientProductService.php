@@ -176,17 +176,19 @@ final class ClinicPatientProductService
     /** @return array<string, mixed> */
     public function comprovanteDemoCard(): array
     {
-        $base = $this->planById('premium') ?? $this->baseDemo();
+        $base = $this->baseDemo();
         $access = $this->demoAccess();
+        unset($base['cpf_masked']);
 
         return array_merge($base, [
             'theme' => 'profissional',
             'doc_type_label' => 'Comprovante',
             'ribbon' => 'Comprovante',
             'role' => 'Documento do procedimento',
-            'plano_label' => 'Comprovante',
+            'plano_label' => null,
             'verificacao' => $access['verificacao'],
             'suporte' => 'Apresente na recepção ou valide pelo QR',
+            'emitido_em' => $base['emitido_em'] ?? '08/07/2026',
         ]);
     }
 

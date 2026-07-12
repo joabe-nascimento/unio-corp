@@ -8,6 +8,7 @@ use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\PosOperatorio\PosOperatorioDisplay;
 use App\Repository\PosOperatorioPacienteRepository;
+use App\Service\Clinic\ClinicBrandingService;
 use App\Service\Clinic\ClinicDocumentoAuditService;
 use App\Service\Clinic\ClinicWebhookDispatcherBridge;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +21,7 @@ final class ClinicComprovanteService
         private ClinicVerificacaoCodigoGenerator $codigos,
         private ClinicDocumentoAuditService $audit,
         private ClinicWebhookDispatcherBridge $webhooks,
+        private ClinicBrandingService $branding,
     ) {}
 
     /** @return list<PosOperatorioPaciente> */
@@ -134,15 +136,18 @@ final class ClinicComprovanteService
         ])));
 
         $protocolo = $paciente->getProtocolo();
+        $brand = $this->branding->get($empresa);
 
         return [
-            'clinica' => mb_strtoupper($empresa->getNome()),
+            'clinica' => (string) ($brand['nome_exibicao'] ?? mb_strtoupper($empresa->getNome())),
+            'clinica_logo' => $brand['logo_url'] ?? null,
+            'cor_primaria' => $brand['cor_primaria'] ?? '#4b72be',
             'doc_type_label' => 'Comprovante',
             'iniciais' => $iniciais !== '' ? $iniciais : 'PC',
             'foto' => $this->fotoPublicUrl($paciente->getFotoPath()),
             'nome' => $nome,
             'role' => 'Documento do procedimento',
-            'plano_label' => 'Comprovante',
+            'plano_label' => null,
             'ribbon' => 'Comprovante',
             'codigo' => $paciente->getCodigo(),
             'procedimento' => $paciente->getProcedimento() ?? ($protocolo?->getNome() ?? 'Procedimento'),

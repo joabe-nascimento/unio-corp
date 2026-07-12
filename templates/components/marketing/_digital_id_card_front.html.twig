@@ -1,3 +1,5 @@
+{# Frente do documento digital (carteirinha ou comprovante) #}
+{% set is_proof = (card.doc_type_label|default('') == 'Comprovante') %}
 <span class="mkt-idcard__shine" aria-hidden="true"></span>
 <span class="mkt-idcard__pattern" aria-hidden="true"></span>
 <header class="mkt-idcard__header">
@@ -30,10 +32,10 @@
             <strong class="mkt-idcard__name">{{ card.nome|default('Paciente') }}</strong>
             <span class="mkt-idcard__role">{{ card.role|default('Paciente') }}</span>
             <span class="mkt-idcard__identity-meta">
-                {% if card.plano_label|default('') %}
+                {% if card.plano_label|default('') and not is_proof %}
                 <span class="mkt-idcard__plan-tag">{{ card.plano_label }}</span>
                 {% endif %}
-                {% if card.dia_pos is defined %}
+                {% if card.dia_pos is defined and card.dia_pos is not null %}
                 <span class="mkt-idcard__phase">Dia {{ card.dia_pos }} pós-op</span>
                 {% endif %}
             </span>
@@ -47,25 +49,15 @@
                 <dt>Válido até</dt>
                 <dd>{{ card.valido_ate|default('—') }}</dd>
             </div>
-            {% if card.cpf_masked|default(null) %}
-            <div class="mkt-idcard__field">
-                <dt>CPF</dt>
-                <dd>{{ card.cpf_masked }}</dd>
-            </div>
-            <div class="mkt-idcard__field">
-                <dt>Emitido em</dt>
-                <dd>{{ card.emitido_em|default('—') }}</dd>
-            </div>
-            {% else %}
+            {% if is_proof %}
             <div class="mkt-idcard__field">
                 <dt>Emitido em</dt>
                 <dd>{{ card.emitido_em|default('—') }}</dd>
             </div>
             <div class="mkt-idcard__field">
-                <dt>Protocolo</dt>
-                <dd>{{ card.protocolo|default('—') }}</dd>
+                <dt>Data cirurgia</dt>
+                <dd>{{ card.cirurgia|default('—') }}</dd>
             </div>
-            {% endif %}
             <div class="mkt-idcard__field mkt-idcard__field--wide">
                 <dt>Procedimento</dt>
                 <dd>{{ card.procedimento|default('Procedimento') }}</dd>
@@ -74,12 +66,48 @@
                 <dt>Médico</dt>
                 <dd>{{ card.medico|default('—') }}</dd>
             </div>
-            {% if card.cpf_masked|default(null) %}
+            <div class="mkt-idcard__field">
+                <dt>Protocolo</dt>
+                <dd>{{ card.protocolo|default('—') }}</dd>
+            </div>
+            {% elseif card.cpf_masked|default(null) %}
+            <div class="mkt-idcard__field">
+                <dt>CPF</dt>
+                <dd>{{ card.cpf_masked }}</dd>
+            </div>
+            <div class="mkt-idcard__field">
+                <dt>Emitido em</dt>
+                <dd>{{ card.emitido_em|default('—') }}</dd>
+            </div>
+            <div class="mkt-idcard__field mkt-idcard__field--wide">
+                <dt>Procedimento</dt>
+                <dd>{{ card.procedimento|default('Procedimento') }}</dd>
+            </div>
+            <div class="mkt-idcard__field">
+                <dt>Médico</dt>
+                <dd>{{ card.medico|default('—') }}</dd>
+            </div>
             <div class="mkt-idcard__field">
                 <dt>Protocolo</dt>
                 <dd>{{ card.protocolo|default('—') }}</dd>
             </div>
             {% else %}
+            <div class="mkt-idcard__field">
+                <dt>Emitido em</dt>
+                <dd>{{ card.emitido_em|default('—') }}</dd>
+            </div>
+            <div class="mkt-idcard__field">
+                <dt>Protocolo</dt>
+                <dd>{{ card.protocolo|default('—') }}</dd>
+            </div>
+            <div class="mkt-idcard__field mkt-idcard__field--wide">
+                <dt>Procedimento</dt>
+                <dd>{{ card.procedimento|default('Procedimento') }}</dd>
+            </div>
+            <div class="mkt-idcard__field">
+                <dt>Médico</dt>
+                <dd>{{ card.medico|default('—') }}</dd>
+            </div>
             <div class="mkt-idcard__field">
                 <dt>Cirurgia</dt>
                 <dd>{{ card.cirurgia|default('—') }}</dd>
