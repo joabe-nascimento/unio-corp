@@ -155,6 +155,71 @@ final class BeneficiaryContentService
         ];
     }
 
+    /**
+     * Portal pós-operatório do beneficiário — telas de acompanhamento após validação.
+     *
+     * @return array<string, mixed>
+     */
+    public function buildPosOperatorioView(): array
+    {
+        $guia = $this->buildGuiaView();
+        $screens = [
+            [
+                'id' => 'questionario',
+                'label' => 'Questionário do dia',
+                'desc' => 'Responda como está se sentindo — a equipe acompanha em tempo real.',
+                'icon' => 'fa-clipboard-check',
+                'route' => 'app_guia_medico_beneficiario',
+                'tone' => 'sky',
+            ],
+            [
+                'id' => 'guia',
+                'label' => 'Guia do dia',
+                'desc' => 'Orientações, checklist e sinais de alerta da sua fase.',
+                'icon' => 'fa-book-medical',
+                'route' => 'app_guia_medico_beneficiario',
+                'tone' => 'sage',
+            ],
+            [
+                'id' => 'carteirinha',
+                'label' => 'Carteirinha digital',
+                'desc' => 'Identidade clínica com validação na recepção.',
+                'icon' => 'fa-id-card',
+                'route' => 'app_carteirinha_digital',
+                'tone' => 'lavender',
+            ],
+            [
+                'id' => 'comprovante',
+                'label' => 'Comprovante',
+                'desc' => 'Documento do procedimento com QR.',
+                'icon' => 'fa-file-medical',
+                'route' => 'app_comprovante_procedimento',
+                'tone' => 'sky',
+            ],
+            [
+                'id' => 'hub',
+                'label' => 'Área do paciente',
+                'desc' => 'Timeline, documentos, retornos e contato com a clínica.',
+                'icon' => 'fa-house-medical',
+                'route' => 'app_paciente_hub',
+                'tone' => 'amber',
+            ],
+            [
+                'id' => 'ajuda',
+                'label' => 'Pedir ajuda',
+                'desc' => 'Fale com a equipe se algo não estiver bem.',
+                'icon' => 'fa-hand-holding-medical',
+                'route' => 'app_paciente_hub',
+                'tone' => 'rose',
+            ],
+        ];
+
+        return array_merge($guia, [
+            'screens' => $screens,
+            'proximo_retorno' => $guia['checklist_hoje'][0]['item'] ?? null,
+        ]);
+    }
+
     /** @return array<string, mixed> */
     private function emptyGuiaView(): array
     {

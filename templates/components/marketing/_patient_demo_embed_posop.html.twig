@@ -1,0 +1,48 @@
+{# Preview do portal pós-operatório (após validar) #}
+{% set _card = card|default({}) %}
+{% set _access = access|default({}) %}
+
+<div class="mkt-home-patient-products__demo mkt-home-guia-embed mkt-patient-demo-embed mkt-home-posop-embed">
+    <div class="mkt-home-patient-embed__top">
+        <ol class="mkt-home-patient-embed__steps" aria-label="Etapas de acesso">
+            <li class="{{ active_step|default(1) == 1 ? 'is-active' : '' }}"><span>1</span> Identificação</li>
+            <li class="{{ active_step|default(1) >= 2 ? 'is-active' : '' }}"><span>2</span> Confirmação</li>
+        </ol>
+
+        <div class="mkt-home-patient-embed__access" aria-label="Códigos de demonstração">
+            <p class="mkt-home-patient-embed__access-label">Acesso de demonstração</p>
+            <dl class="mkt-home-patient-embed__access-codes">
+                <div>
+                    <dt>CPF</dt>
+                    <dd><code>{{ _access.cpf_masked|default('529.982.247-25') }}</code></dd>
+                </div>
+                <div>
+                    <dt>Código</dt>
+                    <dd><code>{{ _access.codigo|default('PO-0042') }}</code></dd>
+                </div>
+                <div>
+                    <dt>Carteirinha</dt>
+                    <dd><code>{{ _access.verificacao|default('PM-24K9X7Q1') }}</code></dd>
+                </div>
+            </dl>
+            <p class="mkt-home-patient-embed__access-hint">Use dois dados diferentes — ex.: CPF + código.</p>
+        </div>
+    </div>
+
+    <div class="mkt-home-patient-embed__preview">
+        <div class="mkt-home-posop-mock" aria-hidden="true">
+            <p class="mkt-home-posop-mock__label">Após validar, você vê:</p>
+            <div class="mkt-home-posop-mock__hero">
+                <span class="mkt-home-posop-mock__phase">Recuperação ativa</span>
+                <strong class="mkt-home-posop-mock__name">{{ _card.nome|default('Ana Costa') }}</strong>
+                <span class="mkt-home-posop-mock__meta">{{ _card.procedimento|default('Herniorrafia inguinal') }} · D+{{ _card.dia_pos|default(3) }}</span>
+            </div>
+            <ul class="mkt-home-posop-mock__screens">
+                <li><i class="fas fa-clipboard-check" aria-hidden="true"></i> Questionário do dia</li>
+                <li><i class="fas fa-book-medical" aria-hidden="true"></i> Guia médico</li>
+                <li><i class="fas fa-id-card" aria-hidden="true"></i> Carteirinha</li>
+                <li><i class="fas fa-house-medical" aria-hidden="true"></i> Área do paciente</li>
+            </ul>
+        </div>
+    </div>
+</div>

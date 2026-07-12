@@ -122,12 +122,12 @@ final class PatientHubService
 
         $cards = [
             [
-                'id' => 'portal',
+                'id' => ClinicProductCatalog::POS_OPERATORIO,
                 'label' => 'Portal pós-operatório',
-                'desc' => 'Questionário diário e pedir ajuda.',
+                'desc' => 'Questionário, telas de recuperação e contato com a equipe.',
                 'icon' => 'fa-clipboard-list',
-                'route' => 'app_clinica_portal',
-                'enabled' => true,
+                'route' => 'app_portal_pos_operatorio',
+                'enabled' => $enabled[ClinicProductCatalog::POS_OPERATORIO] ?? true,
             ],
             [
                 'id' => ClinicProductCatalog::CARTEIRINHA,
@@ -248,9 +248,9 @@ final class PatientHubService
     private function quickActions(?Empresa $empresa, bool $demo): array
     {
         return [
-            ['label' => 'Responder questionário', 'icon' => 'fa-clipboard-check', 'route' => 'app_clinica_portal', 'params' => []],
+            ['label' => 'Responder questionário', 'icon' => 'fa-clipboard-check', 'route' => 'app_portal_pos_operatorio', 'params' => []],
             ['label' => 'Ver guia do dia', 'icon' => 'fa-book-medical', 'route' => 'app_guia_medico_beneficiario', 'params' => []],
-            ['label' => 'Pedir ajuda', 'icon' => 'fa-hand-holding-medical', 'route' => 'app_clinica_portal', 'params' => []],
+            ['label' => 'Pedir ajuda', 'icon' => 'fa-hand-holding-medical', 'route' => 'app_portal_pos_operatorio', 'params' => []],
             ['label' => 'Falar com a clínica', 'icon' => 'fa-phone', 'route' => 'app_paciente_hub', 'params' => ['secao' => 'contato']],
         ];
     }

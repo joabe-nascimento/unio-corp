@@ -1,0 +1,85 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}{{ paciente_nome }} · Pós-operatório{% endblock %}
+{% block benef_product %}Pós-operatório{% endblock %}
+{% set benef_nav_active = 'pos-operatorio' %}
+
+{% block benef_topbar_actions %}
+<a href="{{ path('app_portal_pos_operatorio_sair') }}" class="benef-topbar__logout">Sair</a>
+{% endblock %}
+
+{% block benef_content %}
+<div class="benef-guia-app benef-posop-app">
+    <section class="benef-guia-hero" aria-label="Resumo do beneficiário">
+        <div class="benef-guia-hero__badges">
+            <span class="benef-guia-hero__phase">{{ fase_label|default('Recuperação ativa') }}</span>
+            {% if dia_pos is not null %}
+            <span class="benef-guia-hero__chip">D+{{ dia_pos }}</span>
+            {% endif %}
+        </div>
+        <h1 class="benef-guia-hero__name">{{ paciente_nome }}</h1>
+        <p class="benef-guia-hero__meta">
+            <span class="benef-guia-hero__code">{{ paciente_codigo }}</span>
+            {{ procedimento_label }}
+        </p>
+        {% if clinica_nome %}
+        <p class="benef-guia-hero__clinic"><i class="fas fa-hospital" aria-hidden="true"></i> {{ clinica_nome }}</p>
+        {% endif %}
+        {% if proximo_retorno|default(null) %}
+        <p class="benef-posop-next"><i class="fas fa-calendar-check" aria-hidden="true"></i> Próximo passo: {{ proximo_retorno }}</p>
+        {% endif %}
+    </section>
+
+    {% if duracao_dias and dia_pos is not null %}
+    <section class="benef-guia-progress" aria-label="Progresso da recuperação">
+        <div class="benef-guia-progress__head">
+            <span>Recuperação</span>
+            <strong>{{ progress_pct }}%</strong>
+        </div>
+        <div class="benef-guia-progress__track" role="progressbar" aria-valuenow="{{ progress_pct }}" aria-valuemin="0" aria-valuemax="100">
+            <span class="benef-guia-progress__fill" style="width: {{ progress_pct }}%"></span>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="benef-posop-screens" aria-labelledby="benef-posop-screens-title">
+        <h2 id="benef-posop-screens-title">Suas telas Unio Saúde</h2>
+        <p class="benef-posop-screens__lede">O pós-operatório faz parte da plataforma — abra guia, carteirinha, comprovante e área do paciente no mesmo acesso.</p>
+        <div class="benef-posop-screens__grid">
+            {% for screen in screens|default([]) %}
+            <a href="{{ path(screen.route) }}" class="benef-posop-screens__card benef-posop-screens__card--{{ screen.tone|default('sky') }}">
+                <span class="benef-posop-screens__icon" aria-hidden="true"><i class="fas {{ screen.icon }}"></i></span>
+                <strong>{{ screen.label }}</strong>
+                <span>{{ screen.desc }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if telefone_clinica or contato_emergencia %}
+    <section class="benef-guia-actions" aria-labelledby="benef-posop-contact-title">
+        <h2 id="benef-posop-contact-title">Precisa de algo agora?</h2>
+        <div class="benef-guia-actions__grid">
+            {% if telefone_clinica %}
+            <a href="tel:{{ telefone_clinica|replace({' ': '', '-': '', '(': '', ')': ''}) }}" class="benef-guia-actions__item benef-guia-actions__item--call">
+                <i class="fas fa-phone" aria-hidden="true"></i>
+                <strong>Ligar</strong>
+                <span>{{ telefone_clinica }}</span>
+            </a>
+            {% endif %}
+            {% if contato_emergencia %}
+            <div class="benef-guia-actions__item">
+                <i class="fas fa-truck-medical" aria-hidden="true"></i>
+                <strong>Emergência</strong>
+                <span>{{ contato_emergencia }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if is_demo %}
+    <p class="benef-demo-badge"><i class="fas fa-flask" aria-hidden="true"></i> Demonstração · Ana Costa, herniorrafia D+3</p>
+    {% endif %}
+</div>
+{% endblock %}

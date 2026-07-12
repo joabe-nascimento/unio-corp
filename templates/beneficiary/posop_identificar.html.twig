@@ -1,0 +1,47 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Portal pós-operatório{% endblock %}
+{% block benef_product %}Pós-operatório{% endblock %}
+{% set benef_nav_active = 'pos-operatorio' %}
+{% set _preview = demo_preview|default({}) %}
+
+{% block benef_content %}
+<section class="benef-shell benef-shell--split">
+    <div class="benef-product-intro">
+        <div class="benef-product-intro__access">
+            <div class="benef-card">
+                <header class="benef-card__head">
+                    <div>
+                        <h1>Seu portal pós-operatório</h1>
+                        <p>Questionário diário, orientações e contato com a equipe — com o mesmo acesso seguro dos outros produtos Unio Saúde.</p>
+                    </div>
+                </header>
+
+                {% for msg in app.flashes('error') %}
+                <div class="benef-alert benef-alert--error" role="alert">{{ msg }}</div>
+                {% endfor %}
+
+                {% include 'beneficiary/_access_form_identify.html.twig' with { csrf_name: 'beneficiary_posop' } %}
+
+                <details class="benef-demo-hint">
+                    <summary>Ver dados de demonstração</summary>
+                    <ul>
+                        <li><strong>CPF:</strong> {{ demo_hints.cpf_masked }}</li>
+                        <li><strong>Código:</strong> {{ demo_hints.codigo }}</li>
+                        <li><strong>Carteirinha:</strong> {{ demo_hints.verificacao }}</li>
+                    </ul>
+                    <p class="benef-demo-hint__note">Use dois dados diferentes nos passos 1 e 2.</p>
+                </details>
+            </div>
+        </div>
+
+        <aside class="benef-product-intro__preview" aria-label="Prévia do que você verá após validar">
+            {% include 'components/marketing/_patient_demo_embed_posop.html.twig' with {
+                card: _preview.card|default({}),
+                access: _preview.access|default({}),
+                active_step: 1
+            } %}
+        </aside>
+    </div>
+</section>
+{% endblock %}
