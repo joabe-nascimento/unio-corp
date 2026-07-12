@@ -274,13 +274,13 @@
             </section>
             {% endif %}
 
-            {% if mensagens_equipe|default([])|length > 0 %}
-            <section class="pos-portal-panel" aria-label="Mensagens da equipe">
+            <section class="pos-portal-panel" aria-label="Mensagens com a equipe">
                 <header class="pos-portal-panel__head">
-                    <h2 class="pos-portal-panel__title">Mensagens da equipe</h2>
-                    <p class="pos-portal-panel__sub">Respostas e orientações clínicas</p>
+                    <h2 class="pos-portal-panel__title">Mensagens</h2>
+                    <p class="pos-portal-panel__sub">Thread curta com a clínica</p>
                 </header>
                 <div class="pos-portal-panel__content">
+                    {% if mensagens_equipe|default([])|length > 0 %}
                     <ul class="pos-portal-messages">
                         {% for msg in mensagens_equipe %}
                         <li class="pos-portal-messages__item{{ msg.origem == 'Você' ? ' is-self' : '' }}">
@@ -292,9 +292,21 @@
                         </li>
                         {% endfor %}
                     </ul>
+                    {% else %}
+                    <p class="pos-portal-muted small mb-3">Ainda sem mensagens — pode escrever à equipe abaixo.</p>
+                    {% endif %}
+                    <form method="post" action="{{ path('app_pos_operatorio_portal_mensagem') }}" class="pos-portal-form pos-portal-form--help">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_portal_mensagem') }}">
+                        <div class="pos-portal-field">
+                            <label class="pos-portal-field__label" for="chat_mensagem">Sua mensagem</label>
+                            <textarea class="pos-portal-textarea" id="chat_mensagem" name="mensagem" rows="2" placeholder="Dúvida rápida para a equipe"></textarea>
+                        </div>
+                        <button type="submit" class="pos-portal-btn pos-portal-btn--ghost">
+                            Enviar mensagem
+                        </button>
+                    </form>
                 </div>
             </section>
-            {% endif %}
 
             <section class="pos-portal-panel pos-portal-panel--questionario" id="questionario-hoje">
                 <header class="pos-portal-panel__head">

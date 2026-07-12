@@ -4,32 +4,71 @@
 
 {% set hub_page_title = 'Configurações clínicas' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = 'SLA, regras de alerta e perfis de acesso' %}
+{% set hub_page_subtitle = config.continuity_lead|default('SLA, regras e continuidade') %}
 {% set hub_search_hidden = true %}
 
 {% block hub_content %}
-<div class="clinic-ops-panels clinic-ops-panels--3">
-    <section class="unio-card clinic-ops-panel p-3">
-        <h3 class="clinic-ops-panel__title">SLA de alertas</h3>
-        <ul class="clinic-ops-list">
-            {% for sla in config.sla %}
-            <li><strong>{{ sla.prioridade }}</strong>: {{ sla.minutos }} min <span class="text-muted">({{ sla.desc }})</span></li>
-            {% endfor %}
-        </ul>
-    </section>
+<form method="post" action="{{ path('app_pos_operatorio_config_salvar') }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('clinic_config') }}">
 
+    <div class="clinic-ops-panels clinic-ops-panels--3 mb-3">
+        <section class="unio-card clinic-ops-panel p-3">
+            <h3 class="clinic-ops-panel__title">SLA de alertas (min)</h3>
+            <div class="d-flex flex-column gap-2">
+                {% for sla in config.sla %}
+                <label class="small">
+                    {{ sla.prioridade }} — {{ sla.desc }}
+                    <input class="form-control form-control-sm mt-1" type="number" name="sla_{{ sla.prioridade|lower }}" value="{{ sla.minutos }}" min="5">
+                </label>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="unio-card clinic-ops-panel p-3">
+            <h3 class="clinic-ops-panel__title">Triagem</h3>
+            <label class="small d-block mb-2">Dor P1 ≥
+                <input class="form-control form-control-sm mt-1" type="number" step="1" name="dor_p1_min" value="{{ config.policy.triagem.dor_p1_min }}">
+            </label>
+            <label class="small d-block mb-2">Dor P2 ≥
+                <input class="form-control form-control-sm mt-1" type="number" step="1" name="dor_p2_min" value="{{ config.policy.triagem.dor_p2_min }}">
+            </label>
+            <label class="small d-block">Febre P2 ≥
+                <input class="form-control form-control-sm mt-1" type="number" step="0.1" name="febre_p2_min" value="{{ config.policy.triagem.febre_p2_min }}">
+            </label>
+        </section>
+
+        <section class="unio-card clinic-ops-panel p-3">
+            <h3 class="clinic-ops-panel__title">Continuidade</h3>
+            <label class="small d-block mb-2">Frase da operação
+                <input class="form-control form-control-sm mt-1" type="text" name="continuity_lead" value="{{ config.policy.continuity_lead }}">
+            </label>
+            <label class="small d-block mb-2">Escalação (horas, vírgula)
+                <input class="form-control form-control-sm mt-1" type="text" name="escalacao_horas" value="{{ config.policy.escalacao_horas|join(',') }}">
+            </label>
+            <label class="small d-block mb-2">Retenção LGPD (dias)
+                <input class="form-control form-control-sm mt-1" type="number" name="retencao_dias" value="{{ config.policy.retencao_dias }}" min="30">
+            </label>
+            <div class="small mt-2">
+                <label class="d-block"><input type="checkbox" name="canal_in_app" {{ config.policy.canais.in_app ? 'checked' : '' }}> In-app</label>
+                <label class="d-block"><input type="checkbox" name="canal_email" {{ config.policy.canais.email ? 'checked' : '' }}> E-mail</label>
+                <label class="d-block"><input type="checkbox" name="canal_whatsapp" {{ config.policy.canais.whatsapp ? 'checked' : '' }}> WhatsApp</label>
+                <label class="d-block"><input type="checkbox" name="canal_sms" {{ config.policy.canais.sms ? 'checked' : '' }}> SMS</label>
+            </div>
+        </section>
+    </div>
+
+    <button type="submit" class="btn-unio">Salvar política</button>
+</form>
+
+<div class="clinic-ops-panels clinic-ops-panels--2 mt-4">
     <section class="unio-card clinic-ops-panel p-3">
-        <h3 class="clinic-ops-panel__title">Regras automáticas</h3>
+        <h3 class="clinic-ops-panel__title">Regras ativas</h3>
         <ul class="clinic-ops-list">
             {% for regra in config.regras %}
-            <li>
-                {{ regra.titulo }}
-                <span class="badge-perfil success">{{ regra.status }}</span>
-            </li>
+            <li>{{ regra.titulo }} <span class="badge-perfil success">{{ regra.status }}</span></li>
             {% endfor %}
         </ul>
     </section>
-
     <section class="unio-card clinic-ops-panel p-3">
         <h3 class="clinic-ops-panel__title">Perfis</h3>
         <ul class="clinic-ops-list">

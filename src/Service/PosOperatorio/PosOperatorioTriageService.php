@@ -6,7 +6,7 @@ use App\Entity\PosOperatorioPaciente;
 use App\Service\Vitoria\VitoriaClient;
 
 /**
- * Motor de triagem clínica — delega ao serviço Vitória com fallback local.
+ * Motor de triagem clínica — Vitória com fallback local.
  */
 final class PosOperatorioTriageService
 {
@@ -22,7 +22,7 @@ final class PosOperatorioTriageService
     public function evaluate(PosOperatorioPaciente $paciente, array $respostas): array
     {
         $protocolo = $paciente->getProtocolo();
-        $regras = $protocolo?->getRegrasAlerta() ?? [];
+        $regras = $protocolo?->getRegrasAlerta() ?? PosOperatorioProtocoloDefaults::regrasAlerta();
 
         $remote = $this->vitoria->evaluateTriage(
             $respostas,
@@ -43,83 +43,6 @@ final class PosOperatorioTriageService
             ];
         }
 
-        return $this->evaluateLocal($respostas, $paciente);
-    }
-
-    /**
-     * @param array<string, mixed> $respostas
-     *
-     * @return array{prioridade: string, score_risco: int, motivo: string, acoes_sugeridas: list<string>, requer_contato_imediato: bool, source: string}
-     */
-    private function evaluateLocal(array $respostas, PosOperatorioPaciente $paciente): array
-    {
-        $score = 0;
-        $motivos = [];
-        $prioridade = 'P4';
-        $imediato = false;
-
-        $dor = (float) ($respostas['dor'] ?? $respostas['nivel_dor'] ?? 0);
-        $febre = (float) ($respostas['febre'] ?? $respostas['temperatura'] ?? 0);
-
-        if ($dor >= 8) {
-            $score += 40;
-            $motivos[] = sprintf('Dor intensa (%d/10)', (int) $dor);
-            $prioridade = 'P1';
-            $imediato = true;
-        } elseif ($dor >= 6) {
-            $score += 25;
-            $motivos[] = sprintf('Dor moderada (%d/10)', (int) $dor);
-            $prioridade = 'P2';
-        }
-
-        if ($febre >= 38.5) {
-            $score += 30;
-            $motivos[] = sprintf('Febre alta (%.1f°C)', $febre);
-            if ($prioridade !== 'P1') {
-                $prioridade = 'P2';
-            }
-            $dia = $paciente->getDiaPosOperatorio();
-            if ($dia !== null && $dia <= 3) {
-                $prioridade = 'P1';
-                $imediato = true;
-            }
-        }
-
-        $nausea = (string) ($respostas['nausea'] ?? '');
-        if (\in_array($nausea, ['sim', 'Sim', '1', 'true'], true)) {
-            $score += 15;
-            $motivos[] = 'Náusea ou vômito reportado';
-            if ($prioridade === 'P4') {
-                $prioridade = 'P3';
-            }
-        }
-
-        $obs = mb_strtolower((string) ($paciente->getObservacoes() ?? ''));
-        if ($obs !== '') {
-            foreach (['anticoagul', 'idoso', 'diabetes', 'cardiopat', 'imunossup'] as $term) {
-                if (str_contains($obs, $term)) {
-                    $score += 10;
-                    $motivos[] = 'Perfil de risco clínico (observações)';
-                    if ($prioridade === 'P4') {
-                        $prioridade = 'P3';
-                    }
-                    break;
-                }
-            }
-        }
-
-        $score = min(100, max(0, $score));
-        if ($motivos === []) {
-            $motivos[] = 'Evolução dentro do esperado';
-        }
-
-        return [
-            'prioridade' => $prioridade,
-            'score_risco' => $score,
-            'motivo' => implode('; ', $motivos),
-            'acoes_sugeridas' => ['Monitorar evolução', 'Registrar na linha do tempo'],
-            'requer_contato_imediato' => $imediato,
-            'source' => 'local',
-        ];
+        return PosOperatorioLocalTriage::evaluate($respostas, $paciente, $regras);
     }
 }

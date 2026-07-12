@@ -4,13 +4,14 @@
 
 {% set hub_page_title = 'LGPD e compliance' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = 'Consentimento, trilha de acesso e políticas de retenção' %}
+{% set hub_page_subtitle = compliance.continuity_lead|default('Consentimento, trilha de acesso e retenção') %}
 {% set hub_search_hidden = true %}
 
 {% block hub_kpis %}
 {% include 'components/kpi_row.html.twig' with { items: [
     { value: compliance.sem_consentimento, label: 'Sem consentimento', icon: 'fa-user-shield', tone: 'amber', variant: compliance.sem_consentimento > 0 ? 'warning' : '' },
-    { value: compliance.auditoria|length, label: 'Eventos recentes', icon: 'fa-clipboard-list', tone: 'lavender' },
+    { value: compliance.retention.elegiveis|default(0), label: 'Elegíveis retenção', icon: 'fa-database', tone: 'lavender' },
+    { value: compliance.auditoria|length, label: 'Eventos recentes', icon: 'fa-clipboard-list', tone: 'sky' },
 ], mb: 'mb-0' } %}
 {% endblock %}
 
@@ -22,12 +23,13 @@
             {% for pol in compliance.politicas %}
             <li>
                 <strong>{{ pol.titulo }}</strong>
-                <span class="badge-perfil success">{{ pol.status }}</span>
+                <span class="badge-perfil {{ pol.status == 'active' ? 'success' : 'warning' }}">{{ pol.status == 'active' ? 'Ativo' : 'Preparado' }}</span>
                 <span class="d-block text-muted small">{{ pol.desc }}</span>
             </li>
             {% endfor %}
         </ul>
-        <a href="{{ path('app_pos_operatorio_relatorios_export_auditoria') }}" class="btn-unio-ghost btn-sm mt-3">Exportar trilha</a>
+        <p class="text-muted small mt-3 mb-2">Retenção configurada: {{ compliance.retencao_dias|default(365) }} dias · job <code>app:pos-operatorio:retention</code></p>
+        <a href="{{ path('app_pos_operatorio_relatorios_export_auditoria') }}" class="btn-unio-ghost btn-sm">Exportar trilha LGPD (CSV)</a>
     </section>
 
     <section class="unio-card clinic-ops-panel p-3">

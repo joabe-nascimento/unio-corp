@@ -4,7 +4,7 @@
 
 {% set hub_page_title = 'Lembretes' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = 'Questionários pendentes e canais de notificação' %}
+{% set hub_page_subtitle = reminders.continuity_lead|default('Questionários pendentes e canais de continuidade') %}
 {% set hub_search_hidden = true %}
 
 {% block hub_kpis %}
@@ -21,7 +21,9 @@
             {% for canal in reminders.canais %}
             <li>
                 <strong>{{ canal.nome }}</strong>
-                <span class="badge-perfil {{ canal.status == 'active' ? 'success' : 'default' }}">{{ canal.status }}</span>
+                <span class="badge-perfil {{ canal.status == 'active' ? 'success' : (canal.status == 'prepared' ? 'warning' : 'default') }}">
+                    {% if canal.status == 'active' %}Ativo{% elseif canal.status == 'prepared' %}Preparado{% elseif canal.status == 'waiting' %}Aguardando provedor{% elseif canal.status == 'off' %}Desligado{% else %}{{ canal.status }}{% endif %}
+                </span>
                 <span class="d-block text-muted small">{{ canal.desc }}</span>
             </li>
             {% endfor %}

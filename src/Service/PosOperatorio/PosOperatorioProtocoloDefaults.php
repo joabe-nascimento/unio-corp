@@ -40,7 +40,12 @@ final class PosOperatorioProtocoloDefaults
     /** @return array<string, mixed> */
     public static function regrasAlerta(): array
     {
-        return ['dor_p1_min' => 8, 'febre_p2_min' => 38.5];
+        return [
+            'dor_p1_min' => 8,
+            'dor_p2_min' => 6,
+            'febre_p2_min' => 38.5,
+            'sangramento_p1' => 'intenso',
+        ];
     }
 
     /** @return list<array<string, mixed>> */

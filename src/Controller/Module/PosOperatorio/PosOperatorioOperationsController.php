@@ -5,8 +5,11 @@ namespace App\Controller\Module\PosOperatorio;
 use App\Entity\User;
 use App\PosOperatorio\ClinicFeatureCatalog;
 use App\PosOperatorio\ClinicProtocolLibrary;
+use App\Service\PosOperatorio\ClinicAltaIntakeService;
+use App\Service\PosOperatorio\ClinicDutyRosterService;
 use App\Service\PosOperatorio\ClinicIntegrationConfigService;
 use App\Service\PosOperatorio\ClinicOperationsService;
+use App\Service\PosOperatorio\ClinicPolicyConfigService;
 use App\Service\PosOperatorio\ClinicReportExportService;
 use App\Service\PosOperatorio\PosOperatorioProtocoloService;
 use App\Service\WorkspaceService;
@@ -29,6 +32,9 @@ final class PosOperatorioOperationsController extends AbstractController
         private PosOperatorioProtocoloService $protocolos,
         private ClinicReportExportService $exports,
         private ClinicIntegrationConfigService $integrationConfig,
+        private ClinicPolicyConfigService $policy,
+        private ClinicDutyRosterService $duty,
+        private ClinicAltaIntakeService $alta,
     ) {}
 
     #[Route('/trabalho', name: 'app_pos_operatorio_trabalho')]
@@ -36,11 +42,13 @@ final class PosOperatorioOperationsController extends AbstractController
     {
         $empresa = $this->requireEmpresa();
         $queue = $this->operations->buildWorkQueue($empresa);
+        $policy = $this->policy->get($empresa);
 
         return $this->render(self::T . 'trabalho.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'trabalho',
             'queue' => $queue,
+            'continuity_lead' => $policy['continuity_lead'],
         ]);
     }
 
@@ -133,6 +141,26 @@ final class PosOperatorioOperationsController extends AbstractController
         ]);
     }
 
+    #[Route('/plantao/salvar', name: 'app_pos_operatorio_plantao_salvar', methods: ['POST'])]
+    public function plantaoSalvar(Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        if (!$this->isCsrfTokenValid('clinic_plantao', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_plantao');
+        }
+
+        $ids = $request->request->all('plantao_user_ids');
+        if (!\is_array($ids)) {
+            $ids = [];
+        }
+        $this->duty->setOnCall($empresa, array_map('intval', $ids));
+        $this->addFlash('success', 'Plantão atualizado. P1 segue essa escala.');
+
+        return $this->redirectToRoute('app_pos_operatorio_plantao');
+    }
+
     #[Route('/relatorios', name: 'app_pos_operatorio_relatorios')]
     public function relatorios(): Response
     {
@@ -179,11 +207,15 @@ final class PosOperatorioOperationsController extends AbstractController
         }
         unset($int);
 
+        $altaToken = $this->alta->ensureToken($empresa);
+
         return $this->render(self::T . 'integracoes.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'integracoes',
             'integrations' => $integrations,
             'integration_config' => $config,
+            'alta_token' => $altaToken,
+            'alta_endpoint' => $this->generateUrl('app_pos_operatorio_api_alta', [], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL),
         ]);
     }
 
@@ -234,8 +266,48 @@ final class PosOperatorioOperationsController extends AbstractController
         return $this->render(self::T . 'config.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'config',
-            'config' => $this->operations->buildConfig(),
+            'config' => $this->operations->buildConfig($empresa),
         ]);
+    }
+
+    #[Route('/config/salvar', name: 'app_pos_operatorio_config_salvar', methods: ['POST'])]
+    public function configSalvar(Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        if (!$this->isCsrfTokenValid('clinic_config', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_config');
+        }
+
+        $current = $this->policy->get($empresa);
+        $this->policy->save($empresa, [
+            'sla' => [
+                'P1' => (int) $request->request->get('sla_p1', $current['sla']['P1']),
+                'P2' => (int) $request->request->get('sla_p2', $current['sla']['P2']),
+                'P3' => (int) $request->request->get('sla_p3', $current['sla']['P3']),
+                'P4' => (int) $request->request->get('sla_p4', $current['sla']['P4']),
+            ],
+            'triagem' => [
+                'dor_p1_min' => (float) $request->request->get('dor_p1_min', $current['triagem']['dor_p1_min']),
+                'dor_p2_min' => (float) $request->request->get('dor_p2_min', $current['triagem']['dor_p2_min']),
+                'febre_p2_min' => (float) $request->request->get('febre_p2_min', $current['triagem']['febre_p2_min']),
+            ],
+            'escalacao_horas' => array_filter(array_map('intval', explode(',', (string) $request->request->get('escalacao_horas', '4,8,24')))),
+            'canais' => [
+                'in_app' => $request->request->has('canal_in_app'),
+                'email' => $request->request->has('canal_email'),
+                'whatsapp' => $request->request->has('canal_whatsapp'),
+                'sms' => $request->request->has('canal_sms'),
+            ],
+            'retencao_dias' => (int) $request->request->get('retencao_dias', $current['retencao_dias']),
+            'alta_token' => $current['alta_token'],
+            'continuity_lead' => trim((string) $request->request->get('continuity_lead', $current['continuity_lead'])),
+        ]);
+
+        $this->addFlash('success', 'Política de continuidade salva.');
+
+        return $this->redirectToRoute('app_pos_operatorio_config');
     }
 
     private function requireEmpresa(): \App\Entity\Empresa

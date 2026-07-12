@@ -4,11 +4,14 @@
 
 {% set hub_page_title = 'Retornos previstos' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = 'Marcos do protocolo e consultas nos próximos 7 dias' %}
+{% set hub_page_subtitle = retornos.continuity_lead|default('Marcos do protocolo — ninguém perde o retorno') %}
 {% set hub_search_hidden = true %}
 
 {% block hub_toolbar_actions %}
-<span class="badge-perfil default">{{ retornos.proximos_7_dias }} marco(s) na janela</span>
+<span class="badge-perfil default">{{ retornos.proximos_7_dias }} marco(s)</span>
+{% if retornos.atrasados|default(0) > 0 %}
+<span class="badge-perfil warning">{{ retornos.atrasados }} atrasado(s)</span>
+{% endif %}
 {% endblock %}
 
 {% block hub_content %}

@@ -11,10 +11,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:pos-operatorio:send-reminders',
-    description: 'Continuidade clínica — lembretes e escalação (cron diário)',
+    name: 'app:pos-operatorio:continuity',
+    description: 'Continuidade clínica — lembretes de questionário e escalação de alertas',
 )]
-final class SendPosOperatorioRemindersCommand extends Command
+final class RunPosOperatorioContinuityCommand extends Command
 {
     public function __construct(
         private ClinicContinuityService $continuity,
@@ -34,7 +34,7 @@ final class SendPosOperatorioRemindersCommand extends Command
         $result = $this->continuity->runAll($empresaId !== null ? (int) $empresaId : null);
 
         $io->success(sprintf(
-            'Continuidade — %d clínica(s), %d lembrete(s), %d escalação(ões).',
+            'Continuidade: %d clínica(s), %d lembrete(s), %d escalação(ões).',
             $result['empresas'],
             $result['lembretes'],
             $result['escalacoes'],

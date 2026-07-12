@@ -9,7 +9,6 @@ use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\Message\PosOperatorio\AlertaGerado;
 use App\Repository\PosOperatorioAlertaRepository;
-use App\Service\Vitoria\VitoriaClient;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class PosOperatorioAlertService
@@ -20,6 +19,9 @@ final class PosOperatorioAlertService
         private PosOperatorioEventRecorder $events,
         private DomainEventBus $domainEvents,
         private PosOperatorioMercurePublisher $mercure,
+        private ClinicPolicyConfigService $policy,
+        private ClinicDutyRosterService $duty,
+        private ClinicChannelDispatcher $channels,
     ) {}
 
     public function createFromTriage(
@@ -32,17 +34,19 @@ final class PosOperatorioAlertService
             return null;
         }
 
-        $slaMin = VitoriaClient::slaMinutesForPriority($prioridade);
+        $empresa = $paciente->getEmpresa();
+        $slaMin = $this->policy->slaMinutes($empresa, $prioridade);
         $alerta = (new PosOperatorioAlerta())
-            ->setEmpresa($paciente->getEmpresa())
+            ->setEmpresa($empresa)
             ->setPaciente($paciente)
             ->setPrioridade($prioridade)
             ->setMotivo($motivo)
             ->setStatus(PosOperatorioAlerta::STATUS_ABERTO)
             ->setSlaLimiteEm(new \DateTimeImmutable(sprintf('+%d minutes', $slaMin)));
 
-        if ($paciente->getMedicoResponsavel()) {
-            $alerta->setResponsavel($paciente->getMedicoResponsavel());
+        $responsavel = $this->duty->pickForAlert($empresa, $paciente, $prioridade);
+        if ($responsavel instanceof User) {
+            $alerta->setResponsavel($responsavel);
         }
 
         $paciente->setStatus(PosOperatorioPaciente::STATUS_ALERTA);
@@ -56,14 +60,33 @@ final class PosOperatorioAlertService
         );
         $this->em->flush();
 
+        if ($responsavel instanceof User && $prioridade === 'P1') {
+            $this->channels->notifyTeam(
+                $empresa,
+                $responsavel,
+                'alerta_clinico',
+                sprintf('P1 — %s', $paciente->getCodigo()),
+                $motivo,
+                'app_pos_operatorio_sala_critica',
+                'fa-triangle-exclamation',
+                'danger',
+            );
+            $this->channels->emitWebhook($empresa, 'alerta_p1', [
+                'alerta_id' => $alerta->getId(),
+                'paciente_codigo' => $paciente->getCodigo(),
+                'motivo' => $motivo,
+                'responsavel_id' => $responsavel->getId(),
+            ]);
+        }
+
         $this->domainEvents->publish(new AlertaGerado(
             (int) $alerta->getId(),
-            (int) $paciente->getEmpresa()->getId(),
+            (int) $empresa->getId(),
             $prioridade,
             $paciente->getCodigo(),
             $motivo,
         ));
-        $this->publishQueueRefresh($paciente->getEmpresa());
+        $this->publishQueueRefresh($empresa);
 
         return $alerta;
     }

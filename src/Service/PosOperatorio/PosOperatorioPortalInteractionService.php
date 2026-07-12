@@ -62,4 +62,20 @@ final class PosOperatorioPortalInteractionService
 
         return true;
     }
+
+    public function postMessage(PosOperatorioPaciente $paciente, User $autor, string $texto): void
+    {
+        $texto = trim($texto);
+        if ($texto === '') {
+            throw new \InvalidArgumentException('Mensagem vazia.');
+        }
+
+        $this->events->record(
+            $paciente,
+            PosOperatorioEvento::TIPO_CHAT,
+            mb_substr($texto, 0, 500),
+            $autor,
+        );
+        $this->em->flush();
+    }
 }

@@ -4,7 +4,7 @@
 
 {% set hub_page_title = 'Qualidade clínica' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = 'Taxa de resposta, SLA e distribuição por dia pós-operatório' %}
+{% set hub_page_subtitle = quality.continuity_lead|default('Taxa de resposta, SLA e distribuição por dia pós-operatório') %}
 {% set hub_search_hidden = true %}
 
 {% block hub_kpis %}
@@ -12,7 +12,7 @@
     { value: quality.taxa_resposta ~ '%', label: 'Taxa resposta hoje', icon: 'fa-percent', tone: 'sage' },
     { value: quality.pendentes_hoje, label: 'Pendentes hoje', icon: 'fa-clock', tone: 'amber' },
     { value: quality.sla_pct ~ '%', label: 'SLA em dia', icon: 'fa-stopwatch', tone: 'lavender' },
-    { value: quality.pacientes_ativos, label: 'Pacientes ativos', icon: 'fa-user-injured', tone: 'sky' },
+    { value: quality.claims_7d|default(0), label: 'Claims 7d', icon: 'fa-hand', tone: 'sky' },
 ], mb: 'mb-0' } %}
 {% endblock %}
 

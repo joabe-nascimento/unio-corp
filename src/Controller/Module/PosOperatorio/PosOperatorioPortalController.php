@@ -242,6 +242,34 @@ final class PosOperatorioPortalController extends AbstractController
         return $this->redirectToRoute('app_pos_operatorio_portal');
     }
 
+    #[Route('/portal/mensagem', name: 'app_pos_operatorio_portal_mensagem', methods: ['POST'])]
+    public function postMessage(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('pos_portal_mensagem', (string) $request->request->get('_csrf_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_portal');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+        $paciente = $this->resolvePortalPaciente($user);
+        if ($paciente === null || !$this->audit->hasConsent($paciente)) {
+            $this->addFlash('error', 'Acompanhamento indisponível.');
+
+            return $this->redirectToRoute('app_pos_operatorio_portal');
+        }
+
+        try {
+            $this->portalInteraction->postMessage($paciente, $user, (string) $request->request->get('mensagem', ''));
+            $this->addFlash('success', 'Mensagem enviada à equipe.');
+        } catch (\InvalidArgumentException) {
+            $this->addFlash('error', 'Escreva uma mensagem antes de enviar.');
+        }
+
+        return $this->redirectToRoute('app_pos_operatorio_portal');
+    }
+
     /** @param list<array<string, mixed>> $perguntas */
     private function collectRespostas(Request $request, array $perguntas): array
     {

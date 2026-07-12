@@ -53,6 +53,6 @@ final class ClinicController extends AbstractController
     #[Route('/retornos', name: 'app_clinic_retornos')]
     public function retornos(): Response
     {
-        return $this->redirectToRoute('app_maturidade');
+        return $this->redirectToRoute('app_pos_operatorio_retornos');
     }
 }

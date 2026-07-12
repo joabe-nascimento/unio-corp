@@ -207,6 +207,43 @@ final class ClinicProtocolLibrary
                     ['dia' => 56, 'item' => 'Alta do acompanhamento'],
                 ],
             ),
+            self::template(
+                'lipoaspiracao',
+                'Lipoaspiração',
+                'lipoaspiracao',
+                28,
+                'Controle de edema, drenagem e sinais de infecção pós-lipo.',
+                self::checklistPadrao(28),
+            ),
+            self::template(
+                'blefaroplastia',
+                'Blefaroplastia',
+                'blefaroplastia',
+                14,
+                'Edema periorbital, visão e cicatrização de pálpebras.',
+                self::checklistPadrao(14),
+            ),
+            self::template(
+                'abdominoplastia',
+                'Abdominoplastia',
+                'abdominoplastia',
+                42,
+                'Drenos, deambulação e vigilância de deiscência/seroma.',
+                [
+                    ['dia' => 1, 'item' => 'Repouso relativo e cuidados com dreno'],
+                    ['dia' => 7, 'item' => 'Retorno para avaliação de ferida'],
+                    ['dia' => 14, 'item' => 'Retorno cirúrgico'],
+                    ['dia' => 42, 'item' => 'Encerramento fase aguda'],
+                ],
+            ),
+            self::template(
+                'rinoplastia',
+                'Rinoplastia',
+                'rinoplastia',
+                21,
+                'Edema nasal, epistaxe e proteção do splint.',
+                self::checklistPadrao(21),
+            ),
         ];
     }
 
