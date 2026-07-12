@@ -59,7 +59,15 @@ html:has(body.marketing-home.mkt-clinic) {
 .marketing-home.mkt-clinic .mkt-product-spotlight,
 .marketing-home.mkt-clinic .mkt-home-patient-products {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
+}
+
+/* Spotlight do comprovante/carteirinha: nunca cortar cartão nem hint */
+.marketing-home.mkt-clinic .mkt-product-spotlight:has(.mkt-idcard-landing-preview),
+.marketing-home.mkt-clinic .mkt-product-spotlight:has(.mkt-idcard-widget),
+.marketing-home.mkt-clinic .mkt-product-spotlight:has(.mkt-idcard-deck-wrap) {
+    overflow: visible;
 }
 
 /* Fundo calmo + textura sutil */
@@ -2897,11 +2905,15 @@ a.mkt-studio-hub-card .mkt-studio-hub-card__hint {
 }
 
 .marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare {
-    padding: 12px 16px 24px;
+    padding: 12px 16px 28px;
     background: transparent;
     border: none;
     box-shadow: none;
     overflow: visible;
+}
+
+.marketing-home.mkt-clinic .mkt-product-spotlight:has(.mkt-idcard-landing-preview) .mkt-product-spotlight__grid {
+    align-items: start;
 }
 
 .marketing-home.mkt-clinic .mkt-btn--glow,
@@ -2951,11 +2963,12 @@ a.mkt-studio-hub-card .mkt-studio-hub-card__hint {
     width: 100%;
     max-width: 420px;
     margin: 0;
-    gap: 12px;
+    gap: 14px;
     background: transparent;
     border: none;
     box-shadow: none;
     padding: 0;
+    overflow: visible;
 }
 
 .marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard-widget__tabs {
@@ -2986,7 +2999,9 @@ a.mkt-studio-hub-card .mkt-studio-hub-card__hint {
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    aspect-ratio: 1.586 / 1;
+    /* Um pouco mais alto que cartão bancário para o verso caber sem cortar */
+    aspect-ratio: 1.42 / 1;
+    overflow: visible;
 }
 
 .marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard {
@@ -3000,11 +3015,54 @@ a.mkt-studio-hub-card .mkt-studio-hub-card__hint {
     color: #fff !important;
 }
 
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__face--back {
+    overflow: hidden;
+}
+
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__stripe {
+    height: 16px;
+}
+
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__back-body {
+    padding: 8px 12px 14px;
+    gap: 4px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__dl--clinical,
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__dl--contact {
+    gap: 3px 10px;
+}
+
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__dl dd {
+    font-size: 10px;
+    line-height: 1.25;
+}
+
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__dl dt {
+    font-size: 7px;
+}
+
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__back-section {
+    padding: 3px 0 0;
+    margin-top: 0;
+}
+
+.marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard__verify {
+    padding: 5px 0 2px;
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
 .marketing-home.mkt-clinic .mkt-product-spotlight__visual--bare .mkt-idcard-widget--showcase .mkt-idcard-widget__flip-hint {
-    margin: 0;
+    margin: 4px 0 0;
+    padding-bottom: 4px;
     text-align: center;
     font-size: 11px;
+    line-height: 1.4;
     color: #64748b;
+    overflow: visible;
 }
 
 .marketing-home.mkt-clinic .mkt-rich-spotlight__visual {
