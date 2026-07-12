@@ -33,6 +33,8 @@ class LandingController extends AbstractController
             'landing_guia' => $patientProduct->demoGuia(),
             'landing_demo_access' => $patientProduct->demoAccess(),
             'clinic_hubs' => $clinicScope->isActive() ? $clinicLanding->hubs() : [],
+            'clinic_plans' => $clinicScope->isActive() ? $clinicLanding->commercialPlans() : [],
+            'clinic_specialties' => $clinicScope->isActive() ? $clinicLanding->specialties() : [],
         ]);
     }
 }

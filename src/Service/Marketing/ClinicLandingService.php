@@ -2,6 +2,8 @@
 
 namespace App\Service\Marketing;
 
+use App\PosOperatorio\ClinicCommercialPlans;
+
 /**
  * Conteúdo dos módulos da landing Unio Saúde (uniosaude.uniowork.com.br).
  */
@@ -17,7 +19,7 @@ final class ClinicLandingService
                 'Ficha, evolução e histórico completo.',
                 'fa-user-injured',
                 'app_pos_operatorio_pacientes',
-                'images/marketing/modules/clinic-patient.jpg',
+                'images/marketing/modules/mod-pacientes.jpg',
                 'Centralize cadastro, evolução clínica e histórico do paciente em um só lugar. A equipe acompanha protocolos, anexos e linha do tempo sem planilhas paralelas.',
                 ['Ficha clínica com evolução versionada', 'Linha do tempo por procedimento', 'Anexos e consentimentos LGPD', 'Busca e filtros por fase do protocolo'],
                 [
@@ -26,11 +28,33 @@ final class ClinicLandingService
                     ['value' => '97%', 'label' => 'Fichas em dia'],
                 ],
                 [
-                    ['ago' => 'há 7 min', 'type' => 'paciente', 'icon' => 'fa-user-injured', 'text' => 'Nova evolução registrada — João Pereira, D+3, dor 3/10'],
+                    ['ago' => 'há 7 min', 'type' => 'paciente', 'icon' => 'fa-user-injured', 'text' => 'Nova evolução registrada. João Pereira, D+3, dor 3/10'],
                     ['ago' => 'há 22 min', 'type' => 'protocolo', 'icon' => 'fa-clipboard-list', 'text' => 'Protocolo «Herniorrafia» aplicado a novo cadastro'],
                     ['ago' => 'há 48 min', 'type' => 'portal', 'icon' => 'fa-mobile-screen', 'text' => 'Portal do paciente ativado para Maria Silva'],
                     ['ago' => 'há 1 h', 'type' => 'ok', 'icon' => 'fa-check', 'text' => '6 altas registradas com checklist de encerramento completo'],
                     ['ago' => 'há 2 h', 'type' => 'anexo', 'icon' => 'fa-paperclip', 'text' => 'Exame de imagem anexado à ficha de Ana Costa'],
+                ],
+            ),
+            $this->hub(
+                'agenda',
+                'Agenda',
+                'Horários, status e retornos do protocolo.',
+                'fa-calendar-alt',
+                'app_pos_operatorio_agenda',
+                'images/marketing/modules/mod-agenda.jpg',
+                'Marque paciente e médico na mesma clínica. Marcos do protocolo (D+n) viram sugestão de horário. Menos retorno perdido, mais continuidade.',
+                ['Lista semanal por médico', 'Status marcado → confirmado → atendido', 'Agendar a partir dos retornos', 'Mesmo organismo do pós-operatório'],
+                [
+                    ['value' => '18', 'label' => 'Horários na semana'],
+                    ['value' => '5', 'label' => 'Do protocolo'],
+                    ['value' => '3', 'label' => 'Médicos'],
+                ],
+                [
+                    ['ago' => 'há 5 min', 'type' => 'agenda', 'icon' => 'fa-calendar-check', 'text' => 'Retorno D+14 agendado a partir do marco do protocolo'],
+                    ['ago' => 'há 20 min', 'type' => 'ok', 'icon' => 'fa-check', 'text' => 'Consulta confirmada. Dra. Helena, 09:00'],
+                    ['ago' => 'há 1 h', 'type' => 'paciente', 'icon' => 'fa-user-injured', 'text' => 'Novo horário manual para João Pereira'],
+                    ['ago' => 'há 2 h', 'type' => 'agenda', 'icon' => 'fa-calendar-day', 'text' => 'Semana filtrada por médico responsável'],
+                    ['ago' => 'há 3 h', 'type' => 'ok', 'icon' => 'fa-check', 'text' => 'Atendimento finalizado. conta particular aberta para pagamento'],
                 ],
             ),
             $this->hub(
@@ -39,7 +63,7 @@ final class ClinicLandingService
                 'Monitoramento intensivo em tempo real.',
                 'fa-bed-pulse',
                 'app_pos_operatorio_sala_critica',
-                'images/marketing/modules/clinic-surgery.jpg',
+                'images/marketing/modules/mod-sala-critica.jpg',
                 'Painel de monitoramento para casos P1 e P2. A equipe de enfermagem enxerga quem precisa de atenção imediata, com SLA e histórico de conduta.',
                 ['Fila P1 com SLA em tempo real', 'Sinais vitais e questionários integrados', 'Atribuição rápida para enfermagem', 'Histórico de condutas por caso'],
                 [
@@ -48,11 +72,11 @@ final class ClinicLandingService
                     ['value' => '0', 'label' => 'Sem resposta > 1h'],
                 ],
                 [
-                    ['ago' => 'há 3 min', 'type' => 'alerta', 'icon' => 'fa-heart-pulse', 'text' => 'Caso P1 aberto — dor 8/10 no questionário matinal'],
+                    ['ago' => 'há 3 min', 'type' => 'alerta', 'icon' => 'fa-heart-pulse', 'text' => 'Caso P1 aberto. dor 8/10 no questionário matinal'],
                     ['ago' => 'há 15 min', 'type' => 'ok', 'icon' => 'fa-check', 'text' => 'Caso P2 encerrado após conduta de enfermagem'],
                     ['ago' => 'há 28 min', 'type' => 'sla', 'icon' => 'fa-stopwatch', 'text' => 'SLA médio P1 atualizado para 12 minutos'],
                     ['ago' => 'há 45 min', 'type' => 'triagem', 'icon' => 'fa-user-nurse', 'text' => 'Renata Oliveira assumiu triagem da fila crítica'],
-                    ['ago' => 'há 1 h', 'type' => 'monitor', 'icon' => 'fa-chart-line', 'text' => 'Painel atualizado via Mercure — 2 casos ativos'],
+                    ['ago' => 'há 1 h', 'type' => 'monitor', 'icon' => 'fa-chart-line', 'text' => 'Painel atualizado via Mercure. 2 casos ativos'],
                 ],
             ),
             $this->hub(
@@ -61,7 +85,7 @@ final class ClinicLandingService
                 'Identidade com foto e validação.',
                 'fa-id-card',
                 'app_carteirinha_digital',
-                'images/marketing/modules/clinic-team.jpg',
+                'images/marketing/modules/mod-carteirinha.jpg',
                 'Emita carteirinhas digitais com foto, QR e validação para beneficiários. Integração com portal do paciente e conformidade com LGPD.',
                 ['Foto e QR de validação', 'Emissão em lote pela equipe', 'Download e compartilhamento seguro', 'Histórico de emissões auditável'],
                 [
@@ -71,7 +95,7 @@ final class ClinicLandingService
                 ],
                 [
                     ['ago' => 'há 9 min', 'type' => 'carteirinha', 'icon' => 'fa-id-card', 'text' => 'Carteirinha Premium emitida para beneficiário João Pereira'],
-                    ['ago' => 'há 31 min', 'type' => 'validacao', 'icon' => 'fa-qrcode', 'text' => 'QR validado no portal do beneficiário — plano ativo'],
+                    ['ago' => 'há 31 min', 'type' => 'validacao', 'icon' => 'fa-qrcode', 'text' => 'QR validado no portal do beneficiário. plano ativo'],
                     ['ago' => 'há 55 min', 'type' => 'portal', 'icon' => 'fa-mobile-screen', 'text' => 'Beneficiário baixou carteirinha pelo celular'],
                     ['ago' => 'há 1 h', 'type' => 'ok', 'icon' => 'fa-check', 'text' => 'Lote de 8 carteirinhas processado sem pendências'],
                     ['ago' => 'há 3 h', 'type' => 'lgpd', 'icon' => 'fa-shield-halved', 'text' => 'Consentimento de imagem registrado para nova emissão'],
@@ -83,7 +107,7 @@ final class ClinicLandingService
                 'Orientações e sinais de alerta.',
                 'fa-book-medical',
                 'app_guia_medico_beneficiario',
-                'images/marketing/modules/journey-team.jpg',
+                'images/marketing/modules/mod-guia.jpg',
                 'Biblioteca de orientações pós-operatórias com sinais de alerta, medicamentos e retornos. Paciente e equipe consultam o mesmo conteúdo atualizado.',
                 ['Orientações por procedimento', 'Sinais de alerta destacados', 'Versão para equipe e beneficiário', 'Atualização centralizada'],
                 [
@@ -105,7 +129,7 @@ final class ClinicLandingService
                 'Fila P1–P4, SLA e triagem clínica.',
                 'fa-bell',
                 'app_pos_operatorio_alertas',
-                'images/marketing/modules/clinic-lab.jpg',
+                'images/marketing/modules/mod-alertas.jpg',
                 'Fila clínica com priorização P1–P4, SLA configurável e triagem inteligente a partir dos questionários do paciente.',
                 ['Priorização P1–P4 automática', 'SLA e escalonamento', 'Triagem por enfermagem e médico', 'Histórico auditável de condutas'],
                 [
@@ -114,11 +138,11 @@ final class ClinicLandingService
                     ['value' => '94%', 'label' => 'SLA cumprido'],
                 ],
                 [
-                    ['ago' => 'há 4 min', 'type' => 'alerta', 'icon' => 'fa-bell', 'text' => 'Novo alerta P3 — questionário com febre reportada'],
-                    ['ago' => 'há 19 min', 'type' => 'triagem', 'icon' => 'fa-user-nurse', 'text' => 'Alerta P2 atribuído à enfermagem — contato telefônico'],
+                    ['ago' => 'há 4 min', 'type' => 'alerta', 'icon' => 'fa-bell', 'text' => 'Novo alerta P3. questionário com febre reportada'],
+                    ['ago' => 'há 19 min', 'type' => 'triagem', 'icon' => 'fa-user-nurse', 'text' => 'Alerta P2 atribuído à enfermagem. contato telefônico'],
                     ['ago' => 'há 42 min', 'type' => 'ok', 'icon' => 'fa-check', 'text' => 'Alerta P4 encerrado após orientação no portal'],
                     ['ago' => 'há 1 h', 'type' => 'sla', 'icon' => 'fa-stopwatch', 'text' => 'SLA P1 cumprido em 11 minutos na última ocorrência'],
-                    ['ago' => 'há 2 h', 'type' => 'fila', 'icon' => 'fa-list', 'text' => 'Fila reorganizada — 2 casos elevados para P2'],
+                    ['ago' => 'há 2 h', 'type' => 'fila', 'icon' => 'fa-list', 'text' => 'Fila reorganizada. 2 casos elevados para P2'],
                 ],
             ),
             $this->hub(
@@ -127,8 +151,8 @@ final class ClinicLandingService
                 'Exportação CSV, auditoria e consentimento.',
                 'fa-file-shield',
                 'app_legal_lgpd',
-                'images/marketing/modules/financeiro.jpg',
-                'Exportações clínicas, trilhas de auditoria e gestão de consentimentos em conformidade com a LGPD — tudo rastreável para operadoras e clínicas.',
+                'images/marketing/modules/mod-lgpd.jpg',
+                'Exportações clínicas, trilhas de auditoria e gestão de consentimentos em conformidade com a LGPD. Tudo rastreável para operadoras e clínicas.',
                 ['Exportação CSV de indicadores', 'Trilha de auditoria por ação', 'Consentimentos e revogações', 'Relatórios para compliance'],
                 [
                     ['value' => '100%', 'label' => 'Trilha auditável'],
@@ -144,6 +168,18 @@ final class ClinicLandingService
                 ],
             ),
         ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function commercialPlans(): array
+    {
+        return ClinicCommercialPlans::all();
+    }
+
+    /** @return list<array{id: string, label: string, icon: string}> */
+    public function specialties(): array
+    {
+        return ClinicCommercialPlans::landingSpecialties();
     }
 
     /** @return array<string, mixed>|null */

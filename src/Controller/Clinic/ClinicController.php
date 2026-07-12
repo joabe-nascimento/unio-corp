@@ -55,4 +55,10 @@ final class ClinicController extends AbstractController
     {
         return $this->redirectToRoute('app_pos_operatorio_retornos');
     }
+
+    #[Route('/agenda', name: 'app_clinic_agenda')]
+    public function agenda(): Response
+    {
+        return $this->redirectToRoute('app_pos_operatorio_agenda');
+    }
 }

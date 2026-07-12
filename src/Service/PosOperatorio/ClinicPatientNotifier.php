@@ -82,20 +82,25 @@ final class ClinicPatientNotifier
 
     private function buildWhatsappUrl(PosOperatorioPaciente $paciente, string $portalUrl): ?string
     {
-        $phone = preg_replace('/\D+/', '', (string) $paciente->getTelefoneContato()) ?? '';
-        if ($phone === '') {
+        $text = sprintf(
+            'Olá, %s! Responda o questionário de hoje pelo portal: %s',
+            $paciente->getNome(),
+            $portalUrl,
+        );
+
+        return $this->buildWhatsappLink($paciente->getTelefoneContato(), $text);
+    }
+
+    public function buildWhatsappLink(?string $telefone, string $text): ?string
+    {
+        $phone = preg_replace('/\D+/', '', (string) $telefone) ?? '';
+        if (strlen($phone) < 10) {
             return null;
         }
 
         if (!str_starts_with($phone, '55')) {
             $phone = '55' . ltrim($phone, '0');
         }
-
-        $text = sprintf(
-            'Olá, %s! Responda o questionário de hoje pelo portal: %s',
-            $paciente->getNome(),
-            $portalUrl,
-        );
 
         return 'https://wa.me/' . $phone . '?text=' . rawurlencode($text);
     }

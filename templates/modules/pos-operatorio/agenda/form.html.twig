@@ -1,0 +1,84 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}{{ agendamento ? 'Editar' : 'Novo' }} horário · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = agendamento ? 'Editar agendamento' : 'Novo agendamento' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = agendamento ? 'Atualizar horário e status' : 'Marcar paciente com médico' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio-ghost btn-sm">Voltar à agenda</a>
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-3">
+    <form method="post" action="{{ agendamento ? path('app_pos_operatorio_agenda_editar', { id: agendamento.id }) : path('app_pos_operatorio_agenda_novo') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token(agendamento ? 'clinic_agenda_' ~ agendamento.id : 'clinic_agenda') }}">
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="small text-muted d-block" for="paciente_id">Paciente</label>
+                <select id="paciente_id" name="paciente_id" class="form-control" required>
+                    <option value="">Selecione…</option>
+                    {% for p in pacientes %}
+                    <option value="{{ p.id }}" {{ prefill.paciente_id|default(null) == p.id ? 'selected' : '' }}>
+                        {{ p.nome }} · {{ p.codigo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="small text-muted d-block" for="medico_id">Médico</label>
+                <select id="medico_id" name="medico_id" class="form-control">
+                    <option value="">— (opcional / responsável do paciente)</option>
+                    {% for m in medicos %}
+                    <option value="{{ m.id }}" {{ prefill.medico_id|default(null) == m.id ? 'selected' : '' }}>{{ m.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="small text-muted d-block" for="inicio">Início</label>
+                <input id="inicio" type="datetime-local" name="inicio" class="form-control" required value="{{ prefill.inicio|default('') }}">
+            </div>
+            <div class="col-md-4">
+                <label class="small text-muted d-block" for="fim">Fim</label>
+                <input id="fim" type="datetime-local" name="fim" class="form-control" required value="{{ prefill.fim|default('') }}">
+            </div>
+            <div class="col-md-4">
+                <label class="small text-muted d-block" for="status">Status</label>
+                <select id="status" name="status" class="form-control">
+                    {% for s in statuses %}
+                    <option value="{{ s }}" {{ (prefill.status|default('marcado')) == s ? 'selected' : '' }}>{{ status_labels[s]|default(s|capitalize) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="small text-muted d-block" for="titulo">Título</label>
+                <input id="titulo" type="text" name="titulo" class="form-control" maxlength="180" value="{{ prefill.titulo|default('') }}" placeholder="Ex.: Retorno D+14">
+            </div>
+            <div class="col-md-3">
+                <label class="small text-muted d-block" for="origem">Origem</label>
+                <select id="origem" name="origem" class="form-control">
+                    {% for o in origens %}
+                    <option value="{{ o }}" {{ (prefill.origem|default('manual')) == o ? 'selected' : '' }}>{{ o|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="small text-muted d-block" for="protocolo_dia">Dia do protocolo (D+n)</label>
+                <input id="protocolo_dia" type="number" name="protocolo_dia" class="form-control" min="1" value="{{ prefill.protocolo_dia|default('') }}">
+            </div>
+            <div class="col-12">
+                <label class="small text-muted d-block" for="observacao">Observação</label>
+                <textarea id="observacao" name="observacao" class="form-control" rows="3" maxlength="500">{{ prefill.observacao|default('') }}</textarea>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-unio">{{ agendamento ? 'Salvar' : 'Criar horário' }}</button>
+            <a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio-ghost">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

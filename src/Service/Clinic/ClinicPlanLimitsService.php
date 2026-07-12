@@ -3,6 +3,7 @@
 namespace App\Service\Clinic;
 
 use App\Entity\Empresa;
+use App\PosOperatorio\ClinicCommercialPlans;
 use App\PosOperatorio\ClinicProductCatalog;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\PosOperatorio\ClinicConfigStore;
@@ -14,6 +15,12 @@ use App\Service\Wallet\ClinicWalletConfig;
  */
 final class ClinicPlanLimitsService
 {
+    /** IDs legados → planos públicos atuais. */
+    private const LEGACY_PLAN_MAP = [
+        'profissional' => ClinicCommercialPlans::CLINICA,
+        'premium' => ClinicCommercialPlans::REDE,
+    ];
+
     public function __construct(
         private ClinicConfigStore $configStore,
         private ClinicProductConfigService $productConfig,
@@ -25,13 +32,23 @@ final class ClinicPlanLimitsService
     public function get(Empresa $empresa): array
     {
         $stored = $this->configStore->read($empresa, 'planos_limites');
+        $merged = array_merge($this->defaults(), $stored);
+        $merged['plano_comercial'] = $this->normalizePlanId((string) ($merged['plano_comercial'] ?? ClinicCommercialPlans::defaultPlanId()));
 
-        return array_merge($this->defaults(), $stored);
+        return $merged;
     }
 
     /** @param array<string, mixed> $data */
     public function save(Empresa $empresa, array $data): void
     {
+        if (isset($data['plano_comercial'])) {
+            $data['plano_comercial'] = $this->normalizePlanId((string) $data['plano_comercial']);
+            $plan = ClinicCommercialPlans::find($data['plano_comercial']);
+            if ($plan !== null && !isset($data['max_beneficiarios'])) {
+                $data['max_beneficiarios'] = (int) $plan['max_beneficiarios'];
+            }
+        }
+
         $merged = array_merge($this->get($empresa), $data);
         $this->configStore->write($empresa, 'planos_limites', $merged);
     }
@@ -68,13 +85,25 @@ final class ClinicPlanLimitsService
         $limits = $this->get($empresa);
 
         return [
-            'plano_comercial' => (string) ($limits['plano_comercial'] ?? 'profissional'),
+            'plano_comercial' => (string) ($limits['plano_comercial'] ?? ClinicCommercialPlans::defaultPlanId()),
             'max_beneficiarios' => (int) ($limits['max_beneficiarios'] ?? 500),
             'beneficiarios_ativos' => $this->pacientes->countActiveByEmpresa($empresa),
             'wallet_incluso' => (bool) ($limits['wallet_incluso'] ?? false),
             'wallet_ativo' => $this->walletEnabledForEmpresa($empresa),
             'produtos' => $this->productConfig->enabledMap($empresa),
         ];
+    }
+
+    public function normalizePlanId(string $id): string
+    {
+        $id = strtolower(trim($id));
+        if (isset(self::LEGACY_PLAN_MAP[$id])) {
+            return self::LEGACY_PLAN_MAP[$id];
+        }
+
+        return ClinicCommercialPlans::find($id) !== null
+            ? $id
+            : ClinicCommercialPlans::defaultPlanId();
     }
 
     /** @return array<string, mixed> */
@@ -85,9 +114,11 @@ final class ClinicPlanLimitsService
             $products[(string) $product['id']] = (bool) ($product['default_enabled'] ?? true);
         }
 
+        $defaultPlan = ClinicCommercialPlans::find(ClinicCommercialPlans::defaultPlanId());
+
         return [
-            'plano_comercial' => 'profissional',
-            'max_beneficiarios' => 500,
+            'plano_comercial' => ClinicCommercialPlans::defaultPlanId(),
+            'max_beneficiarios' => (int) ($defaultPlan['max_beneficiarios'] ?? 500),
             'wallet_incluso' => false,
             'produtos_override' => $products,
         ];

@@ -1,0 +1,78 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Guias TISS · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Guias TISS' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Fundação de faturamento convênio (sem XML ANS ainda)' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_convenios') }}" class="btn-unio-ghost btn-sm">Convênios</a>
+<a href="{{ path('app_pos_operatorio_contas') }}" class="btn-unio-ghost btn-sm">Contas</a>
+{% endblock %}
+
+{% block hub_content %}
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="alert alert-danger">{{ msg }}</div>
+{% endfor %}
+
+<p class="pos-op-back mb-3">
+    <a href="{{ path('app_pos_operatorio_guias', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'fw-bold' : '' }}">Todas</a>
+    ·
+    {% for key, label in status_labels %}
+    <a href="{{ path('app_pos_operatorio_guias', { status: key }) }}" class="{{ filtro_status == key ? 'fw-bold' : '' }}">{{ label }}</a>
+    {% if not loop.last %} · {% endif %}
+    {% endfor %}
+</p>
+
+<section class="unio-card p-0 overflow-hidden">
+    {% if guias is empty %}
+    <div class="p-4 text-muted">Nenhuma guia neste filtro. Em Contas abertas, use <strong>Gerar guia convênio</strong>.</div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Criada</th>
+                    <th>Nº guia</th>
+                    <th>Paciente</th>
+                    <th>Convênio</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in guias %}
+                <tr>
+                    <td>{{ g.criadoEm|date('d/m/Y H:i') }}</td>
+                    <td>{{ g.numeroGuia }}</td>
+                    <td>
+                        <strong>{{ g.paciente.nome }}</strong>
+                        <div class="small text-muted">{{ g.paciente.codigo }}</div>
+                    </td>
+                    <td>{{ g.convenio.nome }}</td>
+                    <td>{{ status_labels[g.status]|default(g.status) }}</td>
+                    <td>
+                        {% set total = g.totalCentavos() %}
+                        {% if total > 0 %}
+                            R$ {{ (total / 100)|number_format(2, ',', '.') }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pos_operatorio_guias_show', { id: g.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

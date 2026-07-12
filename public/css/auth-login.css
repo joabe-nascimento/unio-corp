@@ -1,7 +1,9 @@
-/* Unio — tela de login (redesign) */
+﻿/* Unio — tela de login (redesign) */
 
 html:has(.auth-page) {
     height: 100%;
+    margin: 0;
+    padding: 0;
     overflow: hidden;
 }
 
@@ -17,6 +19,8 @@ html:has(.auth-page) {
     --auth-text-soft: rgba(255, 255, 255, 0.62);
     --auth-chip-bg: rgba(255, 255, 255, 0.05);
     --auth-chip-border: rgba(255, 255, 255, 0.08);
+    margin: 0;
+    padding: 0;
     min-height: 100vh;
     min-height: 100dvh;
     max-height: 100dvh;
@@ -394,6 +398,241 @@ html:has(.auth-page) {
     color: var(--auth-text-soft);
 }
 
+/* ── Painel editorial (clínica) ──────────────────────── */
+.auth-page--clinic .auth-main {
+    padding: 0 !important;
+    gap: 0 !important;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.auth-page--clinic .auth-brand--story {
+    position: relative;
+    overflow: hidden;
+    margin: 0;
+    padding: 88px 44px 24px 48px;
+    justify-content: space-between;
+    align-self: stretch;
+    height: 100%;
+    min-height: 100%;
+    border-radius: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.auth-page--clinic .auth-brand--story::before {
+    display: none;
+}
+
+.auth-page--clinic .auth-brand__media,
+.auth-page--clinic .auth-brand__photo,
+.auth-page--clinic .auth-brand__media-veil {
+    border-radius: 0 !important;
+}
+
+.auth-brand__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.auth-brand__photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 28%;
+}
+
+.auth-brand__media-veil {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(100deg, rgba(6, 11, 20, 0.78) 0%, rgba(6, 11, 20, 0.45) 48%, rgba(6, 11, 20, 0.12) 100%),
+        linear-gradient(180deg, rgba(6, 11, 20, 0.5) 0%, transparent 22%, transparent 48%, rgba(6, 11, 20, 0.82) 100%);
+}
+
+[data-theme="light"] .auth-brand__media-veil {
+    background:
+        linear-gradient(100deg, rgba(8, 18, 32, 0.76) 0%, rgba(8, 18, 32, 0.42) 50%, rgba(8, 18, 32, 0.1) 100%),
+        linear-gradient(180deg, rgba(8, 18, 32, 0.45) 0%, transparent 24%, transparent 48%, rgba(8, 18, 32, 0.8) 100%);
+}
+
+.auth-page--clinic .auth-form-zone {
+    padding: 24px 28px 24px 20px;
+    background: var(--auth-bg-deep);
+}
+
+.auth-page--clinic .auth-brand--story .auth-brand__content,
+.auth-page--clinic .auth-brand--story .auth-brand__footer {
+    position: relative;
+    z-index: 1;
+}
+
+.auth-page--clinic .auth-brand--story .auth-brand__content {
+    flex: 1;
+    max-width: 440px;
+    justify-content: space-between;
+    gap: 28px;
+    min-height: 0;
+    padding: 8px 0 12px;
+}
+
+.auth-brand__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.auth-brand__top {
+    flex-shrink: 0;
+}
+
+.auth-page--clinic .auth-brand--story .auth-brand__logo {
+    margin: 0 0 14px;
+    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.3));
+}
+
+.auth-page--clinic .auth-brand--story .auth-brand__logo .auth-logo__img,
+.auth-page--clinic .auth-brand--story .auth-brand__logo img,
+.auth-page--clinic .auth-brand--story .auth-brand__logo object,
+.auth-page--clinic .auth-brand--story .auth-brand__logo .platform-asset-svg {
+    width: min(220px, 42vw) !important;
+    max-width: 220px;
+}
+
+.auth-page--clinic .auth-brand--story .auth-brand__eyebrow {
+    margin: 0;
+    color: rgba(248, 250, 252, 0.72);
+    letter-spacing: 0.14em;
+}
+
+.auth-brand__story-wrap {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.auth-page--clinic .auth-brand--story .auth-story__title {
+    color: #f8fafc;
+}
+
+.auth-page--clinic .auth-brand--story .auth-story__text {
+    color: rgba(241, 245, 249, 0.8);
+}
+
+.auth-page--clinic .auth-brand--story .auth-brand__footer .platform-legal__item,
+.auth-page--clinic .auth-brand--story .auth-brand__footer .platform-support__item {
+    color: rgba(241, 245, 249, 0.58);
+}
+
+.auth-story {
+    position: relative;
+    min-height: 132px;
+}
+
+.auth-story__stage {
+    position: relative;
+    min-height: 112px;
+}
+
+.auth-story__slide {
+    margin: 0;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+}
+
+.auth-story__slide.is-active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.auth-story__slide[hidden] {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+}
+
+.auth-story__kicker {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #5eead4;
+}
+
+.auth-story__slide[data-tone="critical"] .auth-story__kicker,
+.auth-story__slide[data-tone="agenda"] .auth-story__kicker,
+.auth-story__slide[data-tone="docs"] .auth-story__kicker {
+    color: #5eead4;
+}
+
+.auth-story__title {
+    margin: 0 0 10px;
+    font-family: 'Nunito', 'Quicksand', system-ui, sans-serif;
+    font-size: clamp(1.28rem, 2.2vw, 1.55rem);
+    font-weight: 700;
+    line-height: 1.28;
+    letter-spacing: -0.02em;
+    color: #f1f5f9;
+    max-width: 20ch;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+.auth-story__text {
+    margin: 0;
+    max-width: 36ch;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--auth-text-soft);
+}
+
+.auth-story__nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.auth-story__dot {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.3);
+    transition: width 0.25s ease, background 0.2s ease;
+}
+
+.auth-story__dot.is-active {
+    width: 20px;
+    background: #5eead4;
+}
+
+.auth-story__dot:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-story__slide {
+        transition: none;
+    }
+}
 /* ── Zona do formulário ──────────────────────────────── */
 .auth-form-zone {
     display: flex;
@@ -776,6 +1015,22 @@ html:has(.auth-page) {
         overflow: hidden;
     }
 
+    .auth-page--clinic .auth-main {
+        padding: 0;
+        gap: 0;
+        overflow: auto;
+    }
+
+    .auth-page--clinic .auth-brand--story {
+        border-radius: 0 !important;
+        min-height: 300px;
+        padding: 72px 28px 20px;
+    }
+
+    .auth-page--clinic .auth-form-zone {
+        padding: 16px 18px 20px;
+    }
+
     .auth-brand {
         padding: 72px 28px 16px;
     }
@@ -795,6 +1050,14 @@ html:has(.auth-page) {
         display: none;
     }
 
+    .auth-page--clinic .auth-brand--story {
+        display: none;
+    }
+
+    .auth-page--clinic .auth-main {
+        padding: 12px !important;
+    }
+
     .auth-topbar {
         padding: 14px 16px;
     }
@@ -807,6 +1070,10 @@ html:has(.auth-page) {
     .auth-form-zone {
         padding: 64px 16px 20px;
         align-items: center;
+    }
+
+    .auth-page--clinic .auth-form-zone {
+        padding: 64px 4px 12px;
     }
 
     .auth-card {

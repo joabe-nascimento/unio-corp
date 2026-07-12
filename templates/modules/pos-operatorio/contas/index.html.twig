@@ -1,0 +1,106 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Contas · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Contas' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Particular, cortesia e convênio após o atendimento' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_atendimento') }}" class="btn-unio-ghost btn-sm">Atendimentos</a>
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias</a>
+<a href="{{ path('app_pos_operatorio_convenios') }}" class="btn-unio-ghost btn-sm">Convênios</a>
+{% endblock %}
+
+{% block hub_content %}
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="alert alert-danger">{{ msg }}</div>
+{% endfor %}
+
+<p class="pos-op-back mb-3">
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="{{ filtro_status == 'aberto' ? 'fw-bold' : '' }}">Abertas</a>
+    ·
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'pago' }) }}" class="{{ filtro_status == 'pago' ? 'fw-bold' : '' }}">Pagas</a>
+    ·
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'glosado' }) }}" class="{{ filtro_status == 'glosado' ? 'fw-bold' : '' }}">Glosadas</a>
+    ·
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'cancelado' }) }}" class="{{ filtro_status == 'cancelado' ? 'fw-bold' : '' }}">Canceladas</a>
+    ·
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'fw-bold' : '' }}">Todas</a>
+</p>
+
+<section class="unio-card p-0 overflow-hidden">
+    {% if contas is empty %}
+    <div class="p-4 text-muted">Nenhuma conta neste filtro. Contas nascem ao finalizar um atendimento.</div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Criada</th>
+                    <th>Paciente</th>
+                    <th>Descrição</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th>Valor</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in contas %}
+                {% set guia = guia_por_conta[c.id]|default(null) %}
+                <tr>
+                    <td>{{ c.criadoEm|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <strong>{{ c.paciente.nome }}</strong>
+                        <div class="small text-muted">{{ c.paciente.codigo }}</div>
+                    </td>
+                    <td>{{ c.descricao|default('—') }}</td>
+                    <td>{{ tipo_labels[c.tipo]|default(c.tipo) }}</td>
+                    <td>{{ status_labels[c.status]|default(c.status) }}</td>
+                    <td>
+                        {% if c.valorCentavos is not null %}
+                            R$ {{ (c.valorCentavos / 100)|number_format(2, ',', '.') }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        {% if guia %}
+                        <a href="{{ path('app_pos_operatorio_guias_show', { id: guia.id }) }}" class="btn-unio btn-sm">Abrir guia</a>
+                        {% elseif c.status == 'aberto' and c.tipo != 'convenio' %}
+                        <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}" class="d-inline-flex flex-wrap gap-1 align-items-center justify-content-end mb-1">
+                            <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_' ~ c.id) }}">
+                            <input type="text" name="valor" class="form-control form-control-sm" style="width:100px" placeholder="0,00" inputmode="decimal">
+                            <button type="submit" name="action" value="pago" class="btn-unio btn-sm">Pago</button>
+                            <button type="submit" name="action" value="cortesia" class="btn-unio-ghost btn-sm">Cortesia</button>
+                            <button type="submit" name="action" value="cancelar" class="btn-unio-ghost btn-sm">Cancelar</button>
+                        </form>
+                        {% if convenios is not empty %}
+                        <form method="post" action="{{ path('app_pos_operatorio_guias_from_conta', { contaId: c.id }) }}" class="d-inline-flex flex-wrap gap-1 align-items-center justify-content-end">
+                            <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_guia_' ~ c.id) }}">
+                            <select name="convenio_id" class="form-select form-select-sm" style="width:auto" required>
+                                <option value="">Convênio…</option>
+                                {% for conv in convenios %}
+                                <option value="{{ conv.id }}">{{ conv.nome }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-unio-ghost btn-sm">Gerar guia convênio</button>
+                        </form>
+                        {% endif %}
+                        {% elseif c.atendimento %}
+                        <a href="{{ path('app_pos_operatorio_atendimento_show', { id: c.atendimento.id }) }}" class="btn-unio-ghost btn-sm">Atendimento</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

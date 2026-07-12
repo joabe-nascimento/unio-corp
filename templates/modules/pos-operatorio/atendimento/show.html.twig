@@ -1,0 +1,69 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Atendimento · {{ atendimento.paciente.nome }} · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = atendimento.paciente.nome %}
+{% set hub_page_eyebrow = 'Atendimento' %}
+{% set hub_page_subtitle = (agendamento.titulo|default('Consulta')) ~ ' · ' ~ agendamento.inicio|date('d/m/Y H:i') %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: agendamento.inicio|date('Y-m-d') }) }}" class="btn-unio-ghost btn-sm">Voltar à agenda</a>
+<a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: atendimento.paciente.id }) }}" class="btn-unio-ghost btn-sm">Ficha do paciente</a>
+{% endblock %}
+
+{% block hub_content %}
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="alert alert-danger">{{ msg }}</div>
+{% endfor %}
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <section class="unio-card p-3">
+            <p class="small text-muted mb-1">Status</p>
+            <p class="mb-3"><strong>{{ status_labels[atendimento.status]|default(atendimento.status) }}</strong></p>
+            <p class="small text-muted mb-1">Paciente</p>
+            <p class="mb-2"><strong>{{ atendimento.paciente.nome }}</strong><br><span class="text-muted">{{ atendimento.paciente.codigo }}</span></p>
+            <p class="small text-muted mb-1">Médico</p>
+            <p class="mb-2">{{ atendimento.medico ? atendimento.medico.nome : '—' }}</p>
+            <p class="small text-muted mb-1">Horário</p>
+            <p class="mb-0">{{ agendamento.inicio|date('d/m/Y H:i') }} – {{ agendamento.fim|date('H:i') }}</p>
+        </section>
+    </div>
+    <div class="col-lg-8">
+        <section class="unio-card p-3">
+            <form method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_' ~ atendimento.id) }}">
+                <div class="mb-3">
+                    <label class="small text-muted d-block" for="queixa">Queixa / motivo</label>
+                    <textarea id="queixa" name="queixa" class="form-control" rows="3" {{ atendimento.status != 'em_andamento' ? 'readonly' : '' }}>{{ atendimento.queixa }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="small text-muted d-block" for="exame">Exame / achados</label>
+                    <textarea id="exame" name="exame" class="form-control" rows="3" {{ atendimento.status != 'em_andamento' ? 'readonly' : '' }}>{{ atendimento.exame }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="small text-muted d-block" for="conduta">Conduta</label>
+                    <textarea id="conduta" name="conduta" class="form-control" rows="3" {{ atendimento.status != 'em_andamento' ? 'readonly' : '' }}>{{ atendimento.conduta }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="small text-muted d-block" for="observacao">Observação</label>
+                    <textarea id="observacao" name="observacao" class="form-control" rows="2" {{ atendimento.status != 'em_andamento' ? 'readonly' : '' }}>{{ atendimento.observacao }}</textarea>
+                </div>
+                {% if atendimento.status == 'em_andamento' %}
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" name="action" value="salvar" class="btn-unio-ghost">Salvar rascunho</button>
+                    <button type="submit" name="action" value="finalizar" class="btn-unio">Finalizar atendimento</button>
+                </div>
+                {% else %}
+                <p class="text-muted small mb-0">Finalizado em {{ atendimento.finalizadoEm ? atendimento.finalizadoEm|date('d/m/Y H:i') : '—' }}.</p>
+                <a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="btn-unio-ghost btn-sm mt-2">Ver contas</a>
+                {% endif %}
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

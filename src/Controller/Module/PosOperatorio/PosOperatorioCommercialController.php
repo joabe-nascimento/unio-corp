@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Repository\ClinicDocumentoEmissaoRepository;
 use App\Repository\ClinicVerificacaoLogRepository;
 use App\Repository\PosOperatorioPacienteRepository;
+use App\PosOperatorio\ClinicCommercialPlans;
 use App\Service\Clinic\ClinicBrandingService;
 use App\Service\Clinic\ClinicOnboardingService;
 use App\Service\Clinic\ClinicPlanLimitsService;
@@ -79,9 +80,13 @@ final class PosOperatorioCommercialController extends AbstractController
         $empresa = $this->requireEmpresa();
 
         if ($request->isMethod('POST')) {
+            $planId = $this->planLimits->normalizePlanId($request->request->getString('plano_comercial'));
+            $plan = ClinicCommercialPlans::find($planId);
+            $defaultMax = (int) ($plan['max_beneficiarios'] ?? 500);
+
             $this->planLimits->save($empresa, [
-                'plano_comercial' => $request->request->getString('plano_comercial'),
-                'max_beneficiarios' => (int) $request->request->get('max_beneficiarios', 500),
+                'plano_comercial' => $planId,
+                'max_beneficiarios' => (int) $request->request->get('max_beneficiarios', $defaultMax),
                 'wallet_incluso' => $request->request->getBoolean('wallet_incluso'),
             ]);
             $this->addFlash('success', 'Limites do plano salvos.');
@@ -93,6 +98,7 @@ final class PosOperatorioCommercialController extends AbstractController
             'empresa' => $empresa,
             'pos_section' => 'comercial',
             'limits' => $this->planLimits->usageSummary($empresa),
+            'commercial_plans' => ClinicCommercialPlans::all(),
         ]);
     }
 

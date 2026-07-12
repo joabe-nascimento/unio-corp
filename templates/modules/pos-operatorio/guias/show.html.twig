@@ -1,0 +1,164 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Guia {{ guia.numeroGuia }} · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Guia ' ~ guia.numeroGuia %}
+{% set hub_page_eyebrow = 'TISS · ' ~ guia.convenio.nome %}
+{% set hub_page_subtitle = guia.paciente.nome ~ ' · ' ~ (status_labels[guia.status]|default(guia.status)) %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Lista de guias</a>
+<a href="{{ path('app_pos_operatorio_contas', { status: guia.conta.status }) }}" class="btn-unio-ghost btn-sm">Conta</a>
+{% endblock %}
+
+{% block hub_content %}
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="alert alert-danger">{{ msg }}</div>
+{% endfor %}
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <section class="unio-card p-3">
+            <p class="small text-muted mb-1">Paciente</p>
+            <p class="mb-2"><strong>{{ guia.paciente.nome }}</strong><br><span class="text-muted">{{ guia.paciente.codigo }}</span></p>
+            <p class="small text-muted mb-1">Convênio</p>
+            <p class="mb-2">{{ guia.convenio.nome }}{% if guia.convenio.registroAns %} <span class="text-muted">(ANS {{ guia.convenio.registroAns }})</span>{% endif %}</p>
+            <p class="small text-muted mb-1">Status</p>
+            <p class="mb-2"><strong>{{ status_labels[guia.status]|default(guia.status) }}</strong></p>
+            {% if guia.motivoGlosa %}
+            <p class="small text-muted mb-1">Motivo da glosa</p>
+            <p class="mb-2">{{ guia.motivoGlosa }}</p>
+            {% endif %}
+            {% if guia.atendimento %}
+            <a href="{{ path('app_pos_operatorio_atendimento_show', { id: guia.atendimento.id }) }}" class="btn-unio-ghost btn-sm">Ver atendimento</a>
+            {% endif %}
+        </section>
+
+        {% if guia.editable %}
+        <section class="unio-card p-3 mt-3">
+            <h2 class="h6 mb-3">Avançar status</h2>
+            <form method="post" class="d-flex flex-column gap-2">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                <input type="hidden" name="action" value="status">
+                {% if guia.status == 'rascunho' %}
+                <button type="submit" name="status" value="enviado" class="btn-unio-ghost btn-sm">Marcar enviado</button>
+                {% endif %}
+                {% if guia.status in ['rascunho', 'enviado'] %}
+                <button type="submit" name="status" value="autorizado" class="btn-unio-ghost btn-sm">Marcar autorizado</button>
+                {% endif %}
+                {% if guia.status in ['rascunho', 'enviado', 'autorizado'] %}
+                <button type="submit" name="status" value="pago" class="btn-unio btn-sm">Marcar pago</button>
+                <textarea name="motivo_glosa" class="form-control form-control-sm" rows="2" placeholder="Motivo (obrigatório para glosa)"></textarea>
+                <button type="submit" name="status" value="glosado" class="btn-unio-ghost btn-sm">Marcar glosado</button>
+                <button type="submit" name="status" value="cancelado" class="btn-unio-ghost btn-sm">Cancelar guia</button>
+                {% endif %}
+            </form>
+        </section>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-8">
+        <section class="unio-card p-3 mb-3">
+            <h2 class="h6 mb-3">Cabeçalho</h2>
+            <form method="post" class="row g-2 align-items-end">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                <input type="hidden" name="action" value="salvar">
+                <div class="col-md-5">
+                    <label class="small text-muted d-block" for="numero_guia">Nº da guia</label>
+                    <input id="numero_guia" name="numero_guia" class="form-control" value="{{ guia.numeroGuia }}" {{ guia.editable ? '' : 'readonly' }} required>
+                </div>
+                <div class="col-md-5">
+                    <label class="small text-muted d-block" for="senha_autorizacao">Senha / autorização</label>
+                    <input id="senha_autorizacao" name="senha_autorizacao" class="form-control" value="{{ guia.senhaAutorizacao }}" {{ guia.editable ? '' : 'readonly' }}>
+                </div>
+                {% if guia.editable %}
+                <div class="col-md-2">
+                    <button type="submit" class="btn-unio-ghost">Salvar</button>
+                </div>
+                {% endif %}
+            </form>
+        </section>
+
+        <section class="unio-card p-3">
+            <h2 class="h6 mb-3">Itens TUSS (manual)</h2>
+            {% if guia.itens is empty %}
+            <p class="text-muted small">Nenhum item ainda.</p>
+            {% else %}
+            <div class="table-responsive mb-3">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descrição</th>
+                            <th>Qtd</th>
+                            <th>Valor unit.</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in guia.itens %}
+                        <tr>
+                            <td>{{ item.codigoTuss|default('—') }}</td>
+                            <td>{{ item.descricao }}</td>
+                            <td>{{ item.quantidade }}</td>
+                            <td>
+                                {% if item.valorCentavos is not null %}
+                                    R$ {{ (item.valorCentavos / 100)|number_format(2, ',', '.') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                {% if guia.editable %}
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                                    <input type="hidden" name="action" value="remove_item">
+                                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                                    <button type="submit" class="btn-unio-ghost btn-sm">Remover</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="mb-3"><strong>Total:</strong>
+                {% set total = guia.totalCentavos() %}
+                {% if total > 0 %}R$ {{ (total / 100)|number_format(2, ',', '.') }}{% else %}—{% endif %}
+            </p>
+            {% endif %}
+
+            {% if guia.editable %}
+            <form method="post" class="row g-2 align-items-end">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                <input type="hidden" name="action" value="add_item">
+                <div class="col-md-2">
+                    <label class="small text-muted d-block" for="codigo_tuss">TUSS</label>
+                    <input id="codigo_tuss" name="codigo_tuss" class="form-control" maxlength="20">
+                </div>
+                <div class="col-md-4">
+                    <label class="small text-muted d-block" for="descricao">Descrição</label>
+                    <input id="descricao" name="descricao" class="form-control" required maxlength="255">
+                </div>
+                <div class="col-md-2">
+                    <label class="small text-muted d-block" for="quantidade">Qtd</label>
+                    <input id="quantidade" name="quantidade" type="number" min="1" value="1" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="small text-muted d-block" for="valor">Valor</label>
+                    <input id="valor" name="valor" class="form-control" placeholder="0,00" inputmode="decimal">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn-unio">Adicionar</button>
+                </div>
+            </form>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Atendimentos · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Atendimentos' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Consultas leves ligadas à agenda' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio-ghost btn-sm">Abrir agenda</a>
+{% endblock %}
+
+{% block hub_content %}
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="alert alert-danger">{{ msg }}</div>
+{% endfor %}
+
+<section class="unio-card p-0 overflow-hidden">
+    {% if atendimentos is empty %}
+    <div class="p-4 text-muted">
+        Nenhum atendimento ainda. Na agenda, use <strong>Atender</strong> quando o paciente chegar.
+    </div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Início</th>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in atendimentos %}
+                <tr>
+                    <td>{{ a.iniciadoEm|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <strong>{{ a.paciente.nome }}</strong>
+                        <div class="small text-muted">{{ a.paciente.codigo }}</div>
+                    </td>
+                    <td>{{ a.medico ? a.medico.nome : '—' }}</td>
+                    <td>{{ status_labels[a.status]|default(a.status) }}</td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pos_operatorio_atendimento_show', { id: a.id }) }}" class="btn-unio-ghost btn-sm">
+                            {{ a.status == 'em_andamento' ? 'Continuar' : 'Ver' }}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

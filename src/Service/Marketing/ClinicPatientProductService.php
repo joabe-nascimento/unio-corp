@@ -136,7 +136,7 @@ final class ClinicPatientProductService
     {
         return [
             'titulo' => 'Guia médico',
-            'subtitulo' => 'Você está no D+3 — retirada de curativo e mobilização leve',
+            'subtitulo' => 'Você está no D+3: retirada de curativo e mobilização leve',
             'fase_label' => 'Fase intermediária',
             'fase_descricao' => 'Recuperação funcional gradual. Mantenha o curativo limpo, movimente-se conforme orientação e observe sinais de infecção no sítio cirúrgico.',
             'procedimento' => 'Herniorrafia inguinal',
@@ -166,7 +166,7 @@ final class ClinicPatientProductService
             ],
             'contato_rapido' => 'Apresente sua carteirinha digital na recepção ou ligue para a clínica em horário comercial.',
             'lembretes' => [
-                ['icon' => 'fa-pills', 'titulo' => 'Medicação', 'texto' => 'Analgésicos conforme prescrição — não interrompa sem orientação.'],
+                ['icon' => 'fa-pills', 'titulo' => 'Medicação', 'texto' => 'Analgésicos conforme prescrição. Não interrompa sem orientação.'],
                 ['icon' => 'fa-calendar-check', 'titulo' => 'Retorno D+7', 'texto' => 'Agende ou confirme consulta ambulatorial com a equipe.'],
                 ['icon' => 'fa-id-card', 'titulo' => 'Carteirinha', 'texto' => 'Tenha a carteirinha digital pronta para validação na recepção.'],
             ],

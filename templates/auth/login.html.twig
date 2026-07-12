@@ -7,11 +7,11 @@
 {# Lead curto no login (mesma ideia do Work: uma frase sob o slogan) #}
 {% set _lead = organismo.enabled|default(false)
     ? (_is_clinic
-        ? 'Pós-operatório, carteirinha digital e guia médico em um só lugar.'
+        ? 'Agenda, continuidade pós-operatória e documentos do paciente em um só lugar.'
         : organismo.copy.hero_desc|default(''))
     : '' %}
 {% set _eyebrow = organismo.enabled|default(false)
-    ? organismo.copy.marketing_eyebrow|default(_is_clinic ? 'Plataforma clínica modular' : 'Plataforma digital')
+    ? organismo.copy.marketing_eyebrow|default(_is_clinic ? 'Gestão clínica unificada' : 'Plataforma digital')
     : '' %}
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="{{ _tema }}">
@@ -24,10 +24,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/auth-login.css') }}?v=11">
+    <link rel="stylesheet" href="{{ asset('css/auth-login.css') }}?v=17">
     {% include 'components/unio_theme_vars.html.twig' %}
 </head>
-<body class="auth-page">
+<body class="auth-page{% if _is_clinic %} auth-page--clinic{% endif %}">
 
 <div class="auth-scene" aria-hidden="true">
     <div class="auth-scene__gradient"></div>
@@ -55,16 +55,39 @@
 </header>
 
 <main class="auth-main">
-    <section class="auth-brand" aria-label="Sobre a plataforma">
+    <section class="auth-brand{% if _is_clinic %} auth-brand--story{% endif %}" aria-label="Sobre a plataforma">
+        {% if _is_clinic %}
+        <div class="auth-brand__media" aria-hidden="true">
+            <img
+                class="auth-brand__photo"
+                src="{{ asset('images/auth/login-clinic-editorial.jpg') }}?v=3"
+                alt=""
+                width="1200"
+                height="1600"
+                decoding="async"
+            >
+            <div class="auth-brand__media-veil"></div>
+        </div>
+        {% endif %}
         <div class="auth-brand__content{% if _is_clinic %} auth-brand__content--clinic{% else %} auth-brand__content--studio{% endif %}">
+            {% if _is_clinic %}
+            <div class="auth-brand__top">
+                {% include 'components/auth_logo_animated.html.twig' only %}
+                <p class="auth-brand__eyebrow">{{ _eyebrow|default('Plataforma clínica') }}</p>
+                <h1 class="auth-brand__sr-only">{{ _brand }}</h1>
+            </div>
+            <div class="auth-brand__story-wrap">
+                {% include 'components/auth_brand_story.html.twig' %}
+            </div>
+            {% else %}
             {% include 'components/auth_logo_animated.html.twig' only %}
-
             {% if _eyebrow %}
             <p class="auth-brand__eyebrow">{{ _eyebrow }}</p>
             {% endif %}
             <h1 class="auth-brand__title">{{ _slogan }}</h1>
             {% if _lead %}
             <p class="auth-brand__lead">{{ _lead }}</p>
+            {% endif %}
             {% endif %}
         </div>
 
@@ -232,5 +255,8 @@
 
 {% include 'components/cookie_consent_banner.html.twig' %}
 <script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
+{% if _is_clinic %}
+<script src="{{ asset('js/auth-login-story.js') }}?v=1" defer></script>
+{% endif %}
 </body>
 </html>

@@ -22,10 +22,18 @@
         <div class="form-group">
             <label for="plano_comercial">Plano comercial</label>
             <select id="plano_comercial" name="plano_comercial" class="form-control">
+                {% for plan in commercial_plans|default([]) %}
+                <option value="{{ plan.id }}" {% if limits.plano_comercial == plan.id %}selected{% endif %}>
+                    {{ plan.nome }} · {{ plan.preco }}{% if plan.preco_sufixo %} {{ plan.preco_sufixo }}{% endif %}
+                    (até {{ plan.max_beneficiarios }} pacientes)
+                </option>
+                {% else %}
                 <option value="essencial" {% if limits.plano_comercial == 'essencial' %}selected{% endif %}>Essencial</option>
-                <option value="profissional" {% if limits.plano_comercial == 'profissional' %}selected{% endif %}>Profissional</option>
-                <option value="premium" {% if limits.plano_comercial == 'premium' %}selected{% endif %}>Premium</option>
+                <option value="clinica" {% if limits.plano_comercial == 'clinica' %}selected{% endif %}>Clínica</option>
+                <option value="rede" {% if limits.plano_comercial == 'rede' %}selected{% endif %}>Rede</option>
+                {% endfor %}
             </select>
+            <p class="text-muted small mt-1 mb-0">Essencial R$ 189 · Clínica R$ 279 · Rede sob consulta (por clínica / mês).</p>
         </div>
         <div class="form-group">
             <label for="max_beneficiarios">Máx. beneficiários</label>

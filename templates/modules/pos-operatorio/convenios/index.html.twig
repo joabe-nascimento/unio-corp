@@ -1,0 +1,85 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Convênios · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Convênios' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Operadoras para guias TISS' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias</a>
+<a href="{{ path('app_pos_operatorio_contas') }}" class="btn-unio-ghost btn-sm">Contas</a>
+{% endblock %}
+
+{% block hub_content %}
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="alert alert-danger">{{ msg }}</div>
+{% endfor %}
+
+<section class="unio-card p-3 mb-3">
+    <h2 class="h6 mb-3">Novo convênio</h2>
+    <form method="post" class="row g-2 align-items-end">
+        <input type="hidden" name="_token" value="{{ csrf_token('clinic_convenio_new') }}">
+        <div class="col-md-5">
+            <label class="small text-muted d-block" for="nome">Nome</label>
+            <input id="nome" name="nome" class="form-control" required maxlength="180" placeholder="Ex.: Unimed">
+        </div>
+        <div class="col-md-4">
+            <label class="small text-muted d-block" for="registro_ans">Registro ANS</label>
+            <input id="registro_ans" name="registro_ans" class="form-control" maxlength="20" placeholder="Opcional">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn-unio">Cadastrar</button>
+        </div>
+    </form>
+</section>
+
+<section class="unio-card p-0 overflow-hidden">
+    {% if convenios is empty %}
+    <div class="p-4 text-muted">Nenhum convênio ainda. Cadastre para gerar guias a partir das contas.</div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Registro ANS</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in convenios %}
+                <tr>
+                    <td colspan="4" class="p-3">
+                        <form method="post" action="{{ path('app_pos_operatorio_convenios_editar', { id: c.id }) }}" class="row g-2 align-items-end">
+                            <input type="hidden" name="_token" value="{{ csrf_token('clinic_convenio_' ~ c.id) }}">
+                            <div class="col-md-4">
+                                <input name="nome" class="form-control" value="{{ c.nome }}" required maxlength="180">
+                            </div>
+                            <div class="col-md-3">
+                                <input name="registro_ans" class="form-control" value="{{ c.registroAns }}" maxlength="20" placeholder="ANS">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small d-flex align-items-center gap-2 mb-0">
+                                    <input type="checkbox" name="ativo" value="1" {{ c.ativo ? 'checked' : '' }}>
+                                    Ativo
+                                </label>
+                            </div>
+                            <div class="col-md-3 text-md-end">
+                                <button type="submit" class="btn-unio-ghost btn-sm">Salvar</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -5,6 +5,7 @@ namespace App\Controller\Module\PosOperatorio;
 use App\Entity\User;
 use App\PosOperatorio\ClinicFeatureCatalog;
 use App\PosOperatorio\ClinicProtocolLibrary;
+use App\Service\PosOperatorio\ClinicAgendaService;
 use App\Service\PosOperatorio\ClinicAltaIntakeService;
 use App\Service\PosOperatorio\ClinicDutyRosterService;
 use App\Service\PosOperatorio\ClinicIntegrationConfigService;
@@ -29,6 +30,7 @@ final class PosOperatorioOperationsController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private ClinicOperationsService $operations,
+        private ClinicAgendaService $agenda,
         private PosOperatorioProtocoloService $protocolos,
         private ClinicReportExportService $exports,
         private ClinicIntegrationConfigService $integrationConfig,
@@ -72,7 +74,7 @@ final class PosOperatorioOperationsController extends AbstractController
         return $this->render(self::T . 'retornos.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'retornos',
-            'retornos' => $this->operations->buildReturns($empresa),
+            'retornos' => $this->agenda->buildReturnSuggestions($empresa),
         ]);
     }
 
