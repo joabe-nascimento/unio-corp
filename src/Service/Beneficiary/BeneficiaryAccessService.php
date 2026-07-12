@@ -54,6 +54,26 @@ final class BeneficiaryAccessService
         $this->write($data);
     }
 
+    public function isComprovanteUnlocked(): bool
+    {
+        $data = $this->read();
+
+        return $data !== null
+            && $this->isFresh($data)
+            && !empty($data['comprovante_unlocked']);
+    }
+
+    public function unlockComprovante(): void
+    {
+        $data = $this->read();
+        if ($data === null) {
+            return;
+        }
+
+        $data['comprovante_unlocked'] = true;
+        $this->write($data);
+    }
+
     public function revoke(): void
     {
         $this->session()?->remove(self::SESSION_KEY);
@@ -212,14 +232,26 @@ final class BeneficiaryAccessService
     /** @return array<string, mixed> */
     public function demoComprovantePreview(): array
     {
-        $base = $this->demoProduct->demoPatient();
+        $card = $this->demoProduct->comprovanteDemoCard();
 
         return [
-            'proof' => array_merge($base, [
+            'card' => $card,
+            'theme' => (string) ($card['theme'] ?? 'profissional'),
+            'proof' => [
+                'clinica' => $card['clinica'] ?? 'UNIO SAÚDE',
                 'titulo' => 'Comprovante de procedimento',
-                'verificacao' => $this->demoProduct->demoAccess()['verificacao'],
+                'nome' => $card['nome'] ?? 'Ana Costa',
+                'codigo_paciente' => $card['codigo'] ?? 'PO-0042',
+                'procedimento' => $card['procedimento'] ?? '—',
+                'cirurgia' => $card['cirurgia'] ?? '—',
+                'dia_pos' => $card['dia_pos'] ?? null,
+                'medico' => $card['medico'] ?? '—',
+                'protocolo' => $card['protocolo'] ?? '—',
+                'valido_ate' => $card['valido_ate'] ?? '—',
+                'emitido_em' => $card['emitido_em'] ?? '—',
+                'verificacao' => $card['verificacao'] ?? '--------',
                 'status_label' => 'Documento válido (demonstração)',
-            ]),
+            ],
             'access' => $this->demoProduct->demoAccess(),
         ];
     }

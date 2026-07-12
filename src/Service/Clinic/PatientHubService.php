@@ -239,7 +239,7 @@ final class PatientHubService
     {
         return [
             ['tipo' => 'carteirinha', 'label' => 'Carteirinha digital', 'valido_ate' => '22/07/2026', 'route' => 'app_carteirinha_digital', 'params' => []],
-            ['tipo' => 'comprovante', 'label' => 'Comprovante de procedimento', 'valido_ate' => '22/08/2026', 'route' => 'app_comprovante_procedimento', 'params' => []],
+            ['tipo' => 'comprovante', 'label' => 'Comprovante de procedimento', 'valido_ate' => '22/08/2026', 'route' => 'app_comprovante_procedimento', 'params' => ['passo' => 3]],
             ['tipo' => 'guia', 'label' => 'Guia médico', 'valido_ate' => null, 'route' => 'app_guia_medico_beneficiario', 'params' => []],
         ];
     }

@@ -48,22 +48,31 @@ final class BeneficiaryContentService
         ];
     }
 
-    /** @return array{proof: array<string, mixed>, verificacao_url: ?string}|null */
+    /** @return array{proof: array<string, mixed>, card: array<string, mixed>, theme: string, verificacao_url: ?string}|null */
     public function buildComprovanteProof(): ?array
     {
         if ($this->access->isDemoSession()) {
-            $base = $this->demoProduct->demoPatient();
-            $verificacao = $this->demoProduct->demoAccess()['verificacao'];
+            $card = $this->demoProduct->comprovanteDemoCard();
+            $verificacao = (string) ($card['verificacao'] ?? $this->demoProduct->demoAccess()['verificacao']);
 
             return [
-                'proof' => array_merge($base, [
+                'card' => $card,
+                'theme' => (string) ($card['theme'] ?? 'profissional'),
+                'proof' => [
+                    'clinica' => $card['clinica'] ?? 'UNIO SAÚDE',
                     'titulo' => 'Comprovante de procedimento',
-                    'codigo_paciente' => $base['codigo'] ?? 'PO-0042',
+                    'nome' => $card['nome'] ?? 'Beneficiário',
+                    'codigo_paciente' => $card['codigo'] ?? 'PO-0042',
+                    'procedimento' => $card['procedimento'] ?? '—',
+                    'cirurgia' => $card['cirurgia'] ?? '—',
+                    'dia_pos' => $card['dia_pos'] ?? null,
+                    'medico' => $card['medico'] ?? '—',
+                    'protocolo' => $card['protocolo'] ?? '—',
+                    'valido_ate' => $card['valido_ate'] ?? '—',
+                    'emitido_em' => $card['emitido_em'] ?? '—',
                     'verificacao' => $verificacao,
                     'status_label' => 'Documento válido (demonstração)',
-                    'valido_ate' => $base['valido_ate'] ?? '—',
-                    'emitido_em' => $base['emitido_em'] ?? '—',
-                ]),
+                ],
                 'verificacao_url' => $this->urlGenerator->generate(
                     'app_verificar_documento',
                     ['codigo' => $verificacao],
@@ -80,6 +89,8 @@ final class BeneficiaryContentService
         $codigo = $patient->getComprovanteVerificacao();
 
         return [
+            'card' => $this->comprovanteService->buildCardData($patient, $patient->getEmpresa()),
+            'theme' => 'profissional',
             'proof' => $this->comprovanteService->buildProofData($patient, $patient->getEmpresa()),
             'verificacao_url' => $codigo !== null
                 ? $this->urlGenerator->generate('app_verificar_documento', ['codigo' => $codigo], UrlGeneratorInterface::ABSOLUTE_URL)

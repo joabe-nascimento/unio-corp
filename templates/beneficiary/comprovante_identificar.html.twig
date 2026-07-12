@@ -34,18 +34,21 @@
                         <li><strong>Código:</strong> {{ demo_hints.codigo }}</li>
                         <li><strong>Comprovante:</strong> {{ demo_hints.verificacao }}</li>
                     </ul>
+                    <p class="benef-demo-hint__note">Use dois dados diferentes nos passos 1 e 2.</p>
                 </details>
             </div>
         </div>
 
         <aside class="benef-product-intro__preview" aria-label="Prévia do comprovante">
-            <div class="benef-proof-preview">
-                {% include 'components/marketing/procedure_proof_card.html.twig' with {
-                    proof: _preview.proof|default({}),
-                    verificacao_url: null
-                } %}
-            </div>
+            {% include 'components/marketing/_patient_demo_embed_comprovante.html.twig' with {
+                card: _preview.card|default({}),
+                theme: _preview.theme|default('profissional'),
+                access: _preview.access|default({}),
+                active_step: 1
+            } %}
         </aside>
     </div>
 </section>
+
+<script src="{{ asset('js/marketing-carteirinha.js') }}?v=6" defer></script>
 {% endblock %}

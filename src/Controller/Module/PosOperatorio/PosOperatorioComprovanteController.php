@@ -69,6 +69,8 @@ final class PosOperatorioComprovanteController extends AbstractController
             'pos_section' => 'comprovante',
             'paciente' => $paciente,
             'proof' => $this->comprovante->buildProofData($paciente, $empresa),
+            'card' => $this->comprovante->buildCardData($paciente, $empresa),
+            'theme' => 'profissional',
             'tem_emissao' => $paciente->hasComprovanteAtivo(),
             'verificacao_url' => $verificacaoUrl,
             'portal_url' => $this->generateUrl('app_comprovante_procedimento', [], UrlGeneratorInterface::ABSOLUTE_URL),

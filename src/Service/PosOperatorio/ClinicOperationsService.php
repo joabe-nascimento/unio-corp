@@ -223,15 +223,28 @@ final class ClinicOperationsService
 
         return [
             'pendentes_hoje' => \count($pendentes),
-            'pacientes' => array_map(static fn (PosOperatorioPaciente $p) => [
-                'id' => $p->getId(),
-                'codigo' => $p->getCodigo(),
-                'nome' => $p->getNome(),
-                'dia_pos' => $p->getDiaPosOperatorio(),
-                'telefone' => $p->getTelefoneContato(),
-                'email' => $p->getEmailContato(),
-                'medico' => $p->getMedicoResponsavel()?->getNome(),
-            ], array_slice($pendentes, 0, 20)),
+            'pacientes' => array_map(static function (PosOperatorioPaciente $p): array {
+                $phone = preg_replace('/\D+/', '', (string) ($p->getTelefoneContato() ?? '')) ?? '';
+                $msg = rawurlencode(sprintf(
+                    "Olá %s! Lembrete: responda o questionário de hoje no portal do paciente. Código: %s",
+                    explode(' ', $p->getNome())[0] ?? 'paciente',
+                    $p->getCodigo(),
+                ));
+                $wa = strlen($phone) >= 10
+                    ? sprintf('https://wa.me/55%s?text=%s', $phone, $msg)
+                    : null;
+
+                return [
+                    'id' => $p->getId(),
+                    'codigo' => $p->getCodigo(),
+                    'nome' => $p->getNome(),
+                    'dia_pos' => $p->getDiaPosOperatorio(),
+                    'telefone' => $p->getTelefoneContato(),
+                    'email' => $p->getEmailContato(),
+                    'medico' => $p->getMedicoResponsavel()?->getNome(),
+                    'whatsapp_url' => $wa,
+                ];
+            }, array_slice($pendentes, 0, 20)),
             'canais' => $canais,
             'escalacao' => [
                 ['horas' => 4, 'acao' => 'Notificar médico responsável', 'status' => 'active'],

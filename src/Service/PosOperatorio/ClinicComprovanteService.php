@@ -87,27 +87,76 @@ final class ClinicComprovanteService
     /** @return array<string, mixed> */
     public function buildProofData(PosOperatorioPaciente $paciente, Empresa $empresa): array
     {
-        $nome = PosOperatorioDisplay::pacienteNome($paciente);
-        $diaPos = $paciente->getDiaPosOperatorio();
+        $card = $this->buildCardData($paciente, $empresa);
 
         return [
-            'clinica' => mb_strtoupper($empresa->getNome()),
+            'clinica' => $card['clinica'],
             'titulo' => 'Comprovante de procedimento',
-            'nome' => $nome,
-            'codigo_paciente' => $paciente->getCodigo(),
-            'procedimento' => $paciente->getProcedimento() ?? ($paciente->getProtocolo()?->getNome() ?? 'Procedimento'),
-            'cirurgia' => $paciente->getDataCirurgia()?->format('d/m/Y') ?? '—',
-            'dia_pos' => $diaPos,
-            'medico' => $paciente->getMedicoResponsavel()?->getNome() ?? '—',
-            'protocolo' => $paciente->getProtocolo()?->getNome() ?? '—',
-            'valido_ate' => $paciente->getComprovanteValidoAte()?->format('d/m/Y') ?? '—',
-            'emitido_em' => $paciente->getComprovanteEmitidaEm()?->format('d/m/Y') ?? '—',
-            'verificacao' => $paciente->getComprovanteVerificacao() ?? '--------',
+            'nome' => $card['nome'],
+            'codigo_paciente' => $card['codigo'],
+            'procedimento' => $card['procedimento'],
+            'cirurgia' => $card['cirurgia'],
+            'dia_pos' => $card['dia_pos'],
+            'medico' => $card['medico'],
+            'protocolo' => $card['protocolo'],
+            'valido_ate' => $card['valido_ate'],
+            'emitido_em' => $card['emitido_em'],
+            'verificacao' => $card['verificacao'],
             'hash' => $paciente->getComprovanteHash(),
             'hash_curto' => $paciente->getComprovanteHash() !== null
                 ? strtoupper(substr($paciente->getComprovanteHash(), 0, 12))
                 : null,
             'status_label' => $paciente->hasComprovanteAtivo() ? 'Documento válido' : 'Documento expirado ou revogado',
+        ];
+    }
+
+    /**
+     * Payload no formato do card flip (mesmo visual da carteirinha).
+     *
+     * @return array<string, mixed>
+     */
+    public function buildCardData(PosOperatorioPaciente $paciente, Empresa $empresa): array
+    {
+        $nome = PosOperatorioDisplay::pacienteNome($paciente);
+        $partes = preg_split('/\s+/', trim($nome)) ?: [];
+        $iniciais = '';
+        foreach (array_slice($partes, 0, 2) as $p) {
+            $iniciais .= mb_strtoupper(mb_substr($p, 0, 1));
+        }
+
+        $emergencia = trim(implode(' · ', array_filter([
+            $paciente->getContatoEmergencia(),
+            $paciente->getTelefoneEmergencia(),
+        ])));
+
+        $protocolo = $paciente->getProtocolo();
+
+        return [
+            'clinica' => mb_strtoupper($empresa->getNome()),
+            'doc_type_label' => 'Comprovante',
+            'iniciais' => $iniciais !== '' ? $iniciais : 'PC',
+            'foto' => null,
+            'nome' => $nome,
+            'role' => 'Documento do procedimento',
+            'plano_label' => 'Comprovante',
+            'ribbon' => 'Comprovante',
+            'codigo' => $paciente->getCodigo(),
+            'procedimento' => $paciente->getProcedimento() ?? ($protocolo?->getNome() ?? 'Procedimento'),
+            'dia_pos' => $paciente->getDiaPosOperatorio(),
+            'medico' => $paciente->getMedicoResponsavel()?->getNome() ?? '—',
+            'cirurgia' => $paciente->getDataCirurgia()?->format('d/m/Y') ?? '—',
+            'protocolo' => $protocolo
+                ? sprintf('%s · %d dias', $protocolo->getNome(), $protocolo->getDuracaoDias())
+                : '—',
+            'valido_ate' => $paciente->getComprovanteValidoAte()?->format('d/m/Y') ?? '—',
+            'emitido_em' => $paciente->getComprovanteEmitidaEm()?->format('d/m/Y') ?? '—',
+            'telefone' => $paciente->getTelefoneContato() ?? '—',
+            'emergencia' => $emergencia !== '' ? $emergencia : '—',
+            'verificacao' => $paciente->getComprovanteVerificacao() ?? '--------',
+            'suporte' => 'Apresente na recepção ou valide pelo QR',
+            'hash_curto' => $paciente->getComprovanteHash() !== null
+                ? strtoupper(substr($paciente->getComprovanteHash(), 0, 12))
+                : null,
         ];
     }
 }

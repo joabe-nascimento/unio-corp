@@ -1,7 +1,15 @@
-<section class="unio-card clinic-carteirinha-paciente__preview px-3 pb-3">
-    <h3 class="clinic-ops-panel__title">Prévia do documento</h3>
-    {% include 'components/marketing/procedure_proof_card.html.twig' with {
-        proof: proof,
-        verificacao_url: verificacao_url|default(null)
-    } %}
+<section class="clinic-carteirinha-paciente__preview">
+    {% if tem_emissao|default(false) and card is defined %}
+    <div class="mkt-home-carteirinha-embed__card mkt-home-carteirinha-embed__card--full mkt-carteirinha-page">
+        {% include 'components/marketing/digital_id_card.html.twig' with {
+            card: card,
+            theme: theme|default('profissional')
+        } %}
+    </div>
+    {% else %}
+    <div class="unio-card clinic-carteirinha-paciente__preview px-3 pb-3">
+        <h3 class="clinic-ops-panel__title">Prévia do documento</h3>
+        <p class="text-muted small mb-0">Emita o comprovante para ver o cartão digital com frente e verso.</p>
+    </div>
+    {% endif %}
 </section>

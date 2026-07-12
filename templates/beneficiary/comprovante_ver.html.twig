@@ -10,26 +10,32 @@
 
 {% block benef_content %}
 <section class="benef-shell">
+    {% include 'beneficiary/_wizard_steps.html.twig' %}
+
     <div class="benef-card benef-card--wide">
         <header class="benef-card__head">
             <div>
-                <h1>Comprovante de procedimento</h1>
-                <p>Apresente na recepção ou valide pelo QR.{% if is_demo %} <em>Demonstração.</em>{% endif %}</p>
+                <h1>Seu comprovante está pronto</h1>
+                <p>Confira frente e verso antes de baixar.{% if is_demo %} <em>Modo demonstração.</em>{% endif %}</p>
             </div>
         </header>
 
-        <div class="benef-proof-stage">
-            {% include 'components/marketing/procedure_proof_card.html.twig' with {
-                proof: proof,
-                verificacao_url: verificacao_url
-            } %}
-        </div>
+        <div class="benef-carteirinha-col">
+            <div class="benef-carteirinha-stage">
+                <div class="benef-carteirinha-preview mkt-carteirinha-page">
+                    {% include 'components/marketing/digital_id_card.html.twig' with { card: card, theme: theme } %}
+                </div>
+            </div>
 
-        {% if org_clinic|default(false) and not is_demo %}
-        {% include 'components/clinic/_wallet_pass_actions.html.twig' with {
-            wallet: clinic_wallet_beneficiary('comprovante')
-        } %}
-        {% endif %}
+            <form method="post" action="{{ path('app_comprovante_procedimento', { passo: '3' }) }}" class="benef-form benef-form--inline">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('beneficiary_comprovante') }}">
+                <button type="submit" class="benef-btn benef-btn--primary benef-btn--block">
+                    Continuar para download <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </form>
+        </div>
     </div>
 </section>
+
+<script src="{{ asset('js/marketing-carteirinha.js') }}?v=6" defer></script>
 {% endblock %}

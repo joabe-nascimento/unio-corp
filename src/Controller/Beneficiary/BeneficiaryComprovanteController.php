@@ -29,6 +29,7 @@ final class BeneficiaryComprovanteController extends AbstractController
         return match ($step) {
             '2' => $this->stepConfirm(),
             '3' => $this->stepView(),
+            '4' => $this->stepDownload(),
             default => $this->stepIdentify(),
         };
     }
@@ -74,6 +75,15 @@ final class BeneficiaryComprovanteController extends AbstractController
             return $this->redirectToRoute('app_comprovante_procedimento', ['passo' => '3']);
         }
 
+        if ($step === '3') {
+            if (!$this->access->isGranted()) {
+                return $this->redirectToRoute('app_comprovante_procedimento');
+            }
+            $this->access->unlockComprovante();
+
+            return $this->redirectToRoute('app_comprovante_procedimento', ['passo' => '4']);
+        }
+
         return $this->redirectToRoute('app_comprovante_procedimento');
     }
 
@@ -84,6 +94,8 @@ final class BeneficiaryComprovanteController extends AbstractController
         }
 
         return $this->render('beneficiary/comprovante_identificar.html.twig', [
+            'step' => 1,
+            'total_steps' => 4,
             'demo_hints' => $this->access->demoAccessHints(),
             'demo_preview' => $this->access->demoComprovantePreview(),
         ]);
@@ -97,6 +109,8 @@ final class BeneficiaryComprovanteController extends AbstractController
         }
 
         return $this->render('beneficiary/comprovante_confirmar.html.twig', [
+            'step' => 2,
+            'total_steps' => 4,
             'pending' => $pending,
             'demo_hints' => $this->access->demoAccessHints(),
         ]);
@@ -116,6 +130,32 @@ final class BeneficiaryComprovanteController extends AbstractController
         }
 
         return $this->render('beneficiary/comprovante_ver.html.twig', [
+            'step' => 3,
+            'total_steps' => 4,
+            'card' => $proof['card'],
+            'theme' => $proof['theme'],
+            'proof' => $proof['proof'],
+            'is_demo' => $this->access->isDemoSession(),
+            'verificacao_url' => $proof['verificacao_url'] ?? null,
+        ]);
+    }
+
+    private function stepDownload(): Response
+    {
+        if (!$this->access->isComprovanteUnlocked()) {
+            return $this->redirectToRoute('app_comprovante_procedimento', ['passo' => '3']);
+        }
+
+        $proof = $this->content->buildComprovanteProof();
+        if ($proof === null) {
+            return $this->redirectToRoute('app_comprovante_procedimento');
+        }
+
+        return $this->render('beneficiary/comprovante_baixar.html.twig', [
+            'step' => 4,
+            'total_steps' => 4,
+            'card' => $proof['card'],
+            'theme' => $proof['theme'],
             'proof' => $proof['proof'],
             'is_demo' => $this->access->isDemoSession(),
             'verificacao_url' => $proof['verificacao_url'] ?? null,

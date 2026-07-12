@@ -28,6 +28,7 @@ class LandingController extends AbstractController
         return $this->render('marketing/home.html.twig', [
             'landing_card' => $demoCard,
             'landing_card_theme' => $demoCard['theme'] ?? 'premium',
+            'landing_comprovante_card' => $patientProduct->comprovanteDemoCard(),
             'landing_plans' => $patientProduct->plans(),
             'landing_guia' => $patientProduct->demoGuia(),
             'landing_demo_access' => $patientProduct->demoAccess(),

@@ -173,11 +173,29 @@ final class ClinicPatientProductService
         ];
     }
 
+    /** @return array<string, mixed> */
+    public function comprovanteDemoCard(): array
+    {
+        $base = $this->planById('premium') ?? $this->baseDemo();
+        $access = $this->demoAccess();
+
+        return array_merge($base, [
+            'theme' => 'profissional',
+            'doc_type_label' => 'Comprovante',
+            'ribbon' => 'Comprovante',
+            'role' => 'Documento do procedimento',
+            'plano_label' => 'Comprovante',
+            'verificacao' => $access['verificacao'],
+            'suporte' => 'Apresente na recepção ou valide pelo QR',
+        ]);
+    }
+
     /** @return array<string, string> */
     public function secoes(): array
     {
         return [
             'carterinha' => 'Carteirinha digital',
+            'comprovante' => 'Comprovante de procedimento',
             'guia' => 'Guia médico',
         ];
     }
