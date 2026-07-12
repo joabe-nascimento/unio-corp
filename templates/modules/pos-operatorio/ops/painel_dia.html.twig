@@ -9,22 +9,48 @@
         <p>Retornos, questionários pendentes e carteirinhas a vencer.</p>
     </header>
 
-    <div class="pos-op-kpi-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem">
-        <div><strong>{{ painel.totais.pacientes_ativos }}</strong><br>Pacientes ativos</div>
-        <div><strong>{{ painel.totais.checkins }}</strong><br>Check-ins hoje</div>
-        <div><strong>{{ painel.sem_questionario|length }}</strong><br>Sem questionário</div>
-        <div><strong>{{ painel.carteirinhas_vencendo|length }}</strong><br>Carteirinhas vencendo</div>
+    <div class="pos-op-kpi-strip">
+        <div class="pos-op-kpi"><strong>{{ painel.totais.pacientes_ativos }}</strong><span>Pacientes ativos</span></div>
+        <div class="pos-op-kpi"><strong>{{ painel.totais.checkins }}</strong><span>Check-ins hoje</span></div>
+        <div class="pos-op-kpi"><strong>{{ painel.sem_questionario|length }}</strong><span>Sem questionário</span></div>
+        <div class="pos-op-kpi"><strong>{{ painel.carteirinhas_vencendo|length }}</strong><span>Carteirinhas vencendo</span></div>
     </div>
 
-    <h2>Retornos hoje</h2>
-    <ul>{% for p in painel.retornos_hoje %}<li>{{ p.nome }} ({{ p.codigo }}) — D+{{ p.dia_pos }}</li>{% else %}<li>Nenhum retorno previsto.</li>{% endfor %}</ul>
+    <div class="pos-op-panel">
+        <h2>Retornos hoje</h2>
+        <ul class="pos-op-list">
+            {% for p in painel.retornos_hoje %}
+            <li>{{ p.nome }} ({{ p.codigo }}) — D+{{ p.dia_pos }}</li>
+            {% else %}
+            <li class="is-empty">Nenhum retorno previsto.</li>
+            {% endfor %}
+        </ul>
+    </div>
 
-    <h2>Questionário pendente</h2>
-    <ul>{% for p in painel.sem_questionario %}<li>{{ p.nome }} ({{ p.codigo }})</li>{% else %}<li>Todos responderam hoje.</li>{% endfor %}</ul>
+    <div class="pos-op-panel">
+        <h2>Questionário pendente</h2>
+        <ul class="pos-op-list">
+            {% for p in painel.sem_questionario %}
+            <li>{{ p.nome }} ({{ p.codigo }})</li>
+            {% else %}
+            <li class="is-empty">Todos responderam hoje.</li>
+            {% endfor %}
+        </ul>
+    </div>
 
-    <h2>Carteirinhas vencendo (7 dias)</h2>
-    <ul>{% for p in painel.carteirinhas_vencendo %}<li>{{ p.nome }} ({{ p.codigo }})</li>{% else %}<li>Nenhuma carteirinha próxima do vencimento.</li>{% endfor %}</ul>
+    <div class="pos-op-panel">
+        <h2>Carteirinhas vencendo (7 dias)</h2>
+        <ul class="pos-op-list">
+            {% for p in painel.carteirinhas_vencendo %}
+            <li>{{ p.nome }} ({{ p.codigo }})</li>
+            {% else %}
+            <li class="is-empty">Nenhuma carteirinha próxima do vencimento.</li>
+            {% endfor %}
+        </ul>
+    </div>
 
-    <p><a href="{{ path('app_pos_operatorio_recepcao') }}">Abrir scanner da recepção</a></p>
+    <div class="pos-op-page__actions">
+        <a href="{{ path('app_pos_operatorio_recepcao') }}" class="btn btn-primary">Abrir scanner da recepção</a>
+    </div>
 </section>
 {% endblock %}

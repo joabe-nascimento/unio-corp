@@ -9,38 +9,42 @@
         <p>Leia QR, CPF ou código do paciente. O check-in abre a ficha e registra presença.</p>
     </header>
 
-    <form method="post" class="pos-op-form" style="max-width:480px">
-        <label>Modo
-            <select name="metodo">
-                <option value="qr">QR / código verificação</option>
-                <option value="cpf">CPF</option>
-                <option value="codigo">Código PO-</option>
-            </select>
-        </label>
-        <label>Código ou documento
-            <input type="text" name="valor" required placeholder="PM-24K9X7Q1 ou CPF">
-        </label>
-        <button type="submit" class="btn btn-primary">Validar e check-in</button>
-    </form>
+    <div class="pos-op-panel">
+        <form method="post" class="pos-op-form">
+            <label>Modo
+                <select name="metodo">
+                    <option value="qr">QR / código verificação</option>
+                    <option value="cpf">CPF</option>
+                    <option value="codigo">Código PO-</option>
+                </select>
+            </label>
+            <label>Código ou documento
+                <input type="text" name="valor" required placeholder="PM-24K9X7Q1 ou CPF">
+            </label>
+            <button type="submit" class="btn btn-primary">Validar e check-in</button>
+        </form>
 
-    {% if result %}
-        {% if result.ok %}
-        <div class="alert alert-success" style="margin-top:1rem">
-            Check-in OK — <strong>{{ result.paciente.nome }}</strong> ({{ result.paciente.codigo }})
-            {% if result.paciente.statusClinicoLabel %} · {{ result.paciente.statusClinicoLabel }}{% endif %}
-        </div>
-        {% else %}
-        <div class="alert alert-danger" style="margin-top:1rem">{{ result.error }}</div>
+        {% if result %}
+            {% if result.ok %}
+            <div class="alert alert-success mt-3 mb-0">
+                Check-in OK — <strong>{{ result.paciente.nome }}</strong> ({{ result.paciente.codigo }})
+                {% if result.paciente.statusClinicoLabel %} · {{ result.paciente.statusClinicoLabel }}{% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-danger mt-3 mb-0">{{ result.error }}</div>
+            {% endif %}
         {% endif %}
-    {% endif %}
+    </div>
 
-    <h2 style="margin-top:2rem">Check-ins hoje ({{ painel.totais.checkins }})</h2>
-    <ul>
-        {% for c in painel.checkins_hoje %}
-        <li>{{ c.hora }} — {{ c.paciente }} ({{ c.metodo }})</li>
-        {% else %}
-        <li>Nenhum check-in ainda hoje.</li>
-        {% endfor %}
-    </ul>
+    <div class="pos-op-panel">
+        <h2>Check-ins hoje ({{ painel.totais.checkins }})</h2>
+        <ul class="pos-op-list">
+            {% for c in painel.checkins_hoje %}
+            <li>{{ c.hora }} — {{ c.paciente }} ({{ c.metodo }})</li>
+            {% else %}
+            <li class="is-empty">Nenhum check-in ainda hoje.</li>
+            {% endfor %}
+        </ul>
+    </div>
 </section>
 {% endblock %}
