@@ -33,6 +33,12 @@ final class ClinicProductConfigService
         return $enabled;
     }
 
+    /** @return array<string, bool> */
+    public function enabledMap(Empresa $empresa): array
+    {
+        return $this->get($empresa);
+    }
+
     /** @param array<string, mixed> $data */
     public function save(Empresa $empresa, array $data): void
     {
