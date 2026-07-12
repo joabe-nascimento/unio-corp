@@ -1,24 +1,42 @@
 {% extends 'layout/hub.html.twig' %}
-{% block title %}Planos e limites{% endblock %}
+
+{% block title %}Planos e limites · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Planos e limites' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Capacidade de beneficiários e add-ons do plano comercial' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
 {% block hub_content %}
-<section class="pos-op-page">
-    <header class="pos-op-page__head">
-        <h1>Planos e limites</h1>
-    </header>
-    <div class="pos-op-panel">
-    <form method="post" class="pos-op-form">
-        <label>Plano comercial
-            <select name="plano_comercial">
+<p class="pos-op-back">
+    <a href="{{ path('app_pos_operatorio_comercial') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar para Comercial</a>
+</p>
+
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+
+<section class="unio-card p-4" style="max-width:560px">
+    <form method="post">
+        <div class="form-group">
+            <label for="plano_comercial">Plano comercial</label>
+            <select id="plano_comercial" name="plano_comercial" class="form-control">
                 <option value="essencial" {% if limits.plano_comercial == 'essencial' %}selected{% endif %}>Essencial</option>
                 <option value="profissional" {% if limits.plano_comercial == 'profissional' %}selected{% endif %}>Profissional</option>
                 <option value="premium" {% if limits.plano_comercial == 'premium' %}selected{% endif %}>Premium</option>
             </select>
+        </div>
+        <div class="form-group">
+            <label for="max_beneficiarios">Máx. beneficiários</label>
+            <input id="max_beneficiarios" name="max_beneficiarios" type="number" class="form-control" value="{{ limits.max_beneficiarios }}" min="10">
+        </div>
+        <label class="pos-op-check">
+            <input type="checkbox" name="wallet_incluso" value="1" {% if limits.wallet_incluso %}checked{% endif %}>
+            <span>Wallet (Apple/Google) incluso no plano</span>
         </label>
-        <label>Máx. beneficiários <input type="number" name="max_beneficiarios" value="{{ limits.max_beneficiarios }}" min="10"></label>
-        <label><input type="checkbox" name="wallet_incluso" value="1" {% if limits.wallet_incluso %}checked{% endif %}> Wallet (Apple/Google) incluso no plano</label>
-        <button type="submit" class="btn btn-primary">Salvar</button>
+        <p class="text-muted small mt-3 mb-3">Uso atual: <strong>{{ limits.beneficiarios_ativos }}</strong> beneficiários ativos.</p>
+        <button type="submit" class="btn-unio">Salvar limites</button>
     </form>
-    <p class="mt-3 mb-0">Uso atual: <strong>{{ limits.beneficiarios_ativos }}</strong> beneficiários ativos.</p>
-    </div>
 </section>
 {% endblock %}

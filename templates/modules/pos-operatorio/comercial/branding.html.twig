@@ -1,18 +1,44 @@
 {% extends 'layout/hub.html.twig' %}
-{% block title %}Branding{% endblock %}
+
+{% block title %}Branding · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'White-label da clínica' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Logo, cores e slogan exibidos na área do paciente' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
 {% block hub_content %}
-<section class="pos-op-page">
-    <header class="pos-op-page__head">
-        <h1>White-label da clínica</h1>
-    </header>
-    <div class="pos-op-panel">
-    <form method="post" class="pos-op-form">
-        <label>Nome exibido <input name="nome_exibicao" value="{{ branding.nome_exibicao }}"></label>
-        <label>Slogan <input name="slogan" value="{{ branding.slogan }}"></label>
-        <label>Logo URL <input name="logo_url" value="{{ branding.logo_url }}"></label>
-        <label>Cor primária <input name="cor_primaria" value="{{ branding.cor_primaria }}"></label>
-        <button type="submit" class="btn btn-primary">Salvar</button>
+<p class="pos-op-back">
+    <a href="{{ path('app_pos_operatorio_comercial') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar para Comercial</a>
+</p>
+
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+
+<section class="unio-card p-4" style="max-width:560px">
+    <form method="post">
+        <div class="form-group">
+            <label for="nome_exibicao">Nome exibido</label>
+            <input id="nome_exibicao" name="nome_exibicao" type="text" class="form-control" value="{{ branding.nome_exibicao }}" required>
+        </div>
+        <div class="form-group">
+            <label for="slogan">Slogan</label>
+            <input id="slogan" name="slogan" type="text" class="form-control" value="{{ branding.slogan }}">
+        </div>
+        <div class="form-group">
+            <label for="logo_url">Logo URL</label>
+            <input id="logo_url" name="logo_url" type="url" class="form-control" value="{{ branding.logo_url }}" placeholder="https://…">
+        </div>
+        <div class="form-group">
+            <label for="cor_primaria">Cor primária</label>
+            <div class="pos-op-color-row">
+                <input id="cor_primaria" name="cor_primaria" type="text" class="form-control" value="{{ branding.cor_primaria }}" pattern="^#[0-9A-Fa-f]{6}$" placeholder="#4F7FFF">
+                <span class="pos-op-color-swatch" style="--swatch: {{ branding.cor_primaria|default('#4F7FFF') }}" aria-hidden="true"></span>
+            </div>
+        </div>
+        <button type="submit" class="btn-unio">Salvar branding</button>
     </form>
-    </div>
 </section>
 {% endblock %}

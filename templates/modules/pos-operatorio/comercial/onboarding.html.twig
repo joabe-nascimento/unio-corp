@@ -1,30 +1,92 @@
 {% extends 'layout/hub.html.twig' %}
-{% block title %}Onboarding{% endblock %}
+
+{% block title %}Onboarding · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Onboarding self-service' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Ative produtos, importe pacientes e emita a primeira carteirinha' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
 {% block hub_content %}
-<section class="pos-op-page">
-    <h1>Onboarding self-service</h1>
-    <ol>
-        <li>Produtos ativos — {{ onboarding.produtos_ativados ? '✓' : 'pendente' }}</li>
-        <li>CSV importado — {{ onboarding.csv_importado ? '✓' : 'pendente' }} ({{ onboarding.importados|default(0) }} registros)</li>
-        <li>Primeira carteirinha — {{ onboarding.primeira_carteirinha ? '✓' : 'pendente' }}</li>
-        <li>Branding — {{ onboarding.branding_configurado|default(false) ? '✓' : 'opcional' }}</li>
-    </ol>
+<p class="pos-op-back">
+    <a href="{{ path('app_pos_operatorio_comercial') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Voltar para Comercial</a>
+</p>
 
-    <form method="post" style="margin:1rem 0"><input type="hidden" name="action" value="produtos"><button class="btn btn-secondary">Marcar produtos ativos</button></form>
-    <form method="post" style="margin:1rem 0"><input type="hidden" name="action" value="sandbox"><button class="btn btn-secondary">Atualizar sandbox Ana / João / Maria</button></form>
-    <form method="post" style="margin:1rem 0"><input type="hidden" name="action" value="primeira_carteirinha"><button class="btn btn-secondary">Emitir 1ª carteirinha (último paciente)</button></form>
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success">{{ msg }}</div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="alert alert-danger">{{ msg }}</div>
+{% endfor %}
 
-    <h2>Importar CSV</h2>
-    <p>Colunas: <code>nome</code>, <code>cpf</code>, <code>codigo</code>, <code>procedimento</code></p>
+<div class="clinic-ops-panels mb-4">
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Checklist</h3>
+        <ol class="pos-op-checklist">
+            <li class="{{ onboarding.produtos_ativados ? 'is-done' : '' }}">
+                <span>Produtos ativos</span>
+                <em>{{ onboarding.produtos_ativados ? 'Concluído' : 'Pendente' }}</em>
+            </li>
+            <li class="{{ onboarding.csv_importado ? 'is-done' : '' }}">
+                <span>CSV importado</span>
+                <em>{{ onboarding.csv_importado ? 'Concluído' : 'Pendente' }} · {{ onboarding.importados|default(0) }} registro(s)</em>
+            </li>
+            <li class="{{ onboarding.primeira_carteirinha ? 'is-done' : '' }}">
+                <span>Primeira carteirinha</span>
+                <em>{{ onboarding.primeira_carteirinha ? 'Concluído' : 'Pendente' }}</em>
+            </li>
+            <li class="{{ onboarding.branding_configurado|default(false) ? 'is-done' : '' }}">
+                <span>Branding</span>
+                <em>{{ onboarding.branding_configurado|default(false) ? 'Concluído' : 'Opcional' }}</em>
+            </li>
+        </ol>
+    </section>
+
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Ações rápidas</h3>
+        <div class="pos-op-actions-stack">
+            <form method="post">
+                <input type="hidden" name="action" value="produtos">
+                <button type="submit" class="btn-unio-ghost btn-block">Marcar produtos ativos</button>
+            </form>
+            <form method="post">
+                <input type="hidden" name="action" value="sandbox">
+                <button type="submit" class="btn-unio-ghost btn-block">Atualizar sandbox Ana / João / Maria</button>
+            </form>
+            <form method="post">
+                <input type="hidden" name="action" value="primeira_carteirinha">
+                <button type="submit" class="btn-unio-ghost btn-block">Emitir 1ª carteirinha (último paciente)</button>
+            </form>
+            <a href="{{ path('app_pos_operatorio_comercial_branding') }}" class="btn-unio-ghost btn-block">Configurar branding</a>
+        </div>
+    </section>
+</div>
+
+<section class="unio-card p-4 mb-4">
+    <h3 class="clinic-ops-panel__title">Importar CSV</h3>
+    <p class="text-muted small mb-3">Colunas: <code>nome</code>, <code>cpf</code>, <code>codigo</code>, <code>procedimento</code></p>
     <form method="post">
         <input type="hidden" name="action" value="csv">
-        <textarea name="csv" rows="8" style="width:100%;font-family:monospace" placeholder="nome,cpf,codigo,procedimento&#10;Ana Costa,52998224725,PO-0100,Herniorrafia"></textarea>
-        <button type="submit" class="btn btn-primary" style="margin-top:.5rem">Importar</button>
+        <div class="form-group mb-3">
+            <label for="csv" class="sr-only">Conteúdo CSV</label>
+            <textarea id="csv" name="csv" rows="8" class="form-control pos-op-csv" placeholder="nome,cpf,codigo,procedimento&#10;Ana Costa,52998224725,PO-0100,Herniorrafia"></textarea>
+        </div>
+        <button type="submit" class="btn-unio">Importar pacientes</button>
     </form>
-
-    {% if sandbox|length %}
-    <h2>Sandbox</h2>
-    <ul>{% for p in sandbox %}<li>{{ p.nome }} — {{ p.codigo }} {% if p.carteirinhaVerificacao %}· {{ p.carteirinhaVerificacao }}{% endif %}</li>{% endfor %}</ul>
-    {% endif %}
 </section>
+
+{% if sandbox|length %}
+<section class="unio-card p-4">
+    <h3 class="clinic-ops-panel__title">Sandbox</h3>
+    <ul class="clinic-ops-list">
+        {% for p in sandbox %}
+        <li>
+            <strong>{{ p.nome }}</strong> — {{ p.codigo }}
+            {% if p.carteirinhaVerificacao %} · <code>{{ p.carteirinhaVerificacao }}</code>{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
 {% endblock %}

@@ -63,7 +63,7 @@ final class PosOperatorioCommercialController extends AbstractController
             $this->onboarding->patch($empresa, ['branding_configurado' => true]);
             $this->addFlash('success', 'Branding atualizado.');
 
-            return $this->redirectToRoute('app_pos_operatorio_comercial');
+            return $this->redirectToRoute('app_pos_operatorio_comercial_branding');
         }
 
         return $this->render('modules/pos-operatorio/comercial/branding.html.twig', [
@@ -86,7 +86,7 @@ final class PosOperatorioCommercialController extends AbstractController
             ]);
             $this->addFlash('success', 'Limites do plano salvos.');
 
-            return $this->redirectToRoute('app_pos_operatorio_comercial');
+            return $this->redirectToRoute('app_pos_operatorio_comercial_limites');
         }
 
         return $this->render('modules/pos-operatorio/comercial/limites.html.twig', [

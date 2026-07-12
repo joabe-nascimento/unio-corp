@@ -1,27 +1,37 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Recepção — scanner{% endblock %}
+{% block title %}Recepção · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Recepção — validação rápida' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Leia QR, CPF ou código do paciente para check-in' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
 
 {% block hub_content %}
-<section class="pos-op-page">
-    <header class="pos-op-page__head">
-        <h1>Recepção — validação rápida</h1>
-        <p>Leia QR, CPF ou código do paciente. O check-in abre a ficha e registra presença.</p>
-    </header>
+<p class="pos-op-back">
+    <a href="{{ path('app_pos_operatorio_painel_dia') }}"><i class="fas fa-calendar-day" aria-hidden="true"></i> Painel do dia</a>
+    <span class="pos-op-back__sep" aria-hidden="true">·</span>
+    <a href="{{ path('app_pos_operatorio_comercial') }}">Comercial</a>
+</p>
 
-    <div class="pos-op-panel">
-        <form method="post" class="pos-op-form">
-            <label>Modo
-                <select name="metodo">
+<div class="clinic-ops-panels">
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Check-in</h3>
+        <form method="post">
+            <div class="form-group">
+                <label for="metodo">Modo</label>
+                <select id="metodo" name="metodo" class="form-control">
                     <option value="qr">QR / código verificação</option>
                     <option value="cpf">CPF</option>
                     <option value="codigo">Código PO-</option>
                 </select>
-            </label>
-            <label>Código ou documento
-                <input type="text" name="valor" required placeholder="PM-24K9X7Q1 ou CPF">
-            </label>
-            <button type="submit" class="btn btn-primary">Validar e check-in</button>
+            </div>
+            <div class="form-group">
+                <label for="valor">Código ou documento</label>
+                <input id="valor" type="text" name="valor" class="form-control" required placeholder="PM-24K9X7Q1 ou CPF" autocomplete="off">
+            </div>
+            <button type="submit" class="btn-unio">Validar e check-in</button>
         </form>
 
         {% if result %}
@@ -34,17 +44,17 @@
             <div class="alert alert-danger mt-3 mb-0">{{ result.error }}</div>
             {% endif %}
         {% endif %}
-    </div>
+    </section>
 
-    <div class="pos-op-panel">
-        <h2>Check-ins hoje ({{ painel.totais.checkins }})</h2>
-        <ul class="pos-op-list">
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Check-ins hoje ({{ painel.totais.checkins }})</h3>
+        <ul class="clinic-ops-list">
             {% for c in painel.checkins_hoje %}
             <li>{{ c.hora }} — {{ c.paciente }} ({{ c.metodo }})</li>
             {% else %}
-            <li class="is-empty">Nenhum check-in ainda hoje.</li>
+            <li class="text-muted">Nenhum check-in ainda hoje.</li>
             {% endfor %}
         </ul>
-    </div>
-</section>
+    </section>
+</div>
 {% endblock %}

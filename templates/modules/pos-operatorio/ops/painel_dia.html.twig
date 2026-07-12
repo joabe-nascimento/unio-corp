@@ -1,56 +1,71 @@
 {% extends 'layout/hub.html.twig' %}
 
-{% block title %}Painel do dia{% endblock %}
+{% block title %}Painel do dia · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Painel do dia' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Retornos, questionários pendentes e carteirinhas a vencer' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
 
 {% block hub_content %}
-<section class="pos-op-page">
-    <header class="pos-op-page__head">
-        <h1>Painel do dia</h1>
-        <p>Retornos, questionários pendentes e carteirinhas a vencer.</p>
-    </header>
+<p class="pos-op-back">
+    <a href="{{ path('app_pos_operatorio_recepcao') }}"><i class="fas fa-qrcode" aria-hidden="true"></i> Abrir scanner da recepção</a>
+    <span class="pos-op-back__sep" aria-hidden="true">·</span>
+    <a href="{{ path('app_pos_operatorio_comercial') }}">Comercial</a>
+</p>
 
-    <div class="pos-op-kpi-strip">
-        <div class="pos-op-kpi"><strong>{{ painel.totais.pacientes_ativos }}</strong><span>Pacientes ativos</span></div>
-        <div class="pos-op-kpi"><strong>{{ painel.totais.checkins }}</strong><span>Check-ins hoje</span></div>
-        <div class="pos-op-kpi"><strong>{{ painel.sem_questionario|length }}</strong><span>Sem questionário</span></div>
-        <div class="pos-op-kpi"><strong>{{ painel.carteirinhas_vencendo|length }}</strong><span>Carteirinhas vencendo</span></div>
+<div class="clinic-ops-stats clinic-ops-stats--4 mb-4">
+    <div>
+        <dt>Pacientes ativos</dt>
+        <dd>{{ painel.totais.pacientes_ativos }}</dd>
     </div>
+    <div>
+        <dt>Check-ins hoje</dt>
+        <dd>{{ painel.totais.checkins }}</dd>
+    </div>
+    <div>
+        <dt>Sem questionário</dt>
+        <dd>{{ painel.sem_questionario|length }}</dd>
+    </div>
+    <div>
+        <dt>Carteirinhas vencendo</dt>
+        <dd>{{ painel.carteirinhas_vencendo|length }}</dd>
+    </div>
+</div>
 
-    <div class="pos-op-panel">
-        <h2>Retornos hoje</h2>
-        <ul class="pos-op-list">
+<div class="clinic-ops-panels clinic-ops-panels--3">
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Retornos hoje</h3>
+        <ul class="clinic-ops-list">
             {% for p in painel.retornos_hoje %}
             <li>{{ p.nome }} ({{ p.codigo }}) — D+{{ p.dia_pos }}</li>
             {% else %}
-            <li class="is-empty">Nenhum retorno previsto.</li>
+            <li class="text-muted">Nenhum retorno previsto.</li>
             {% endfor %}
         </ul>
-    </div>
+    </section>
 
-    <div class="pos-op-panel">
-        <h2>Questionário pendente</h2>
-        <ul class="pos-op-list">
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Questionário pendente</h3>
+        <ul class="clinic-ops-list">
             {% for p in painel.sem_questionario %}
             <li>{{ p.nome }} ({{ p.codigo }})</li>
             {% else %}
-            <li class="is-empty">Todos responderam hoje.</li>
+            <li class="text-muted">Todos responderam hoje.</li>
             {% endfor %}
         </ul>
-    </div>
+    </section>
 
-    <div class="pos-op-panel">
-        <h2>Carteirinhas vencendo (7 dias)</h2>
-        <ul class="pos-op-list">
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Carteirinhas vencendo (7 dias)</h3>
+        <ul class="clinic-ops-list">
             {% for p in painel.carteirinhas_vencendo %}
             <li>{{ p.nome }} ({{ p.codigo }})</li>
             {% else %}
-            <li class="is-empty">Nenhuma carteirinha próxima do vencimento.</li>
+            <li class="text-muted">Nenhuma carteirinha próxima do vencimento.</li>
             {% endfor %}
         </ul>
-    </div>
-
-    <div class="pos-op-page__actions">
-        <a href="{{ path('app_pos_operatorio_recepcao') }}" class="btn btn-primary">Abrir scanner da recepção</a>
-    </div>
-</section>
+    </section>
+</div>
 {% endblock %}
