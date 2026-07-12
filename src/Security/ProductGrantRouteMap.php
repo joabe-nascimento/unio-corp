@@ -342,6 +342,7 @@ final class ProductGrantRouteMap
         'app_pos_operatorio_comprovante' => ['scope' => 'hub_pos_operatorio', 'product' => '_hub'],
         'app_pos_operatorio_comprovante_paciente' => ['scope' => 'hub_pos_operatorio', 'product' => '_hub'],
         'app_pos_operatorio_comprovante_emitir' => ['scope' => 'hub_pos_operatorio', 'product' => '_hub'],
+        'app_pos_operatorio_comprovante_foto' => ['scope' => 'hub_pos_operatorio', 'product' => '_hub'],
         'app_pos_operatorio_comprovante_revogar' => ['scope' => 'hub_pos_operatorio', 'product' => '_hub'],
         'app_pos_operatorio_guia_medico' => ['scope' => 'hub_pos_operatorio', 'product' => '_hub'],
         'app_pos_operatorio_guia_medico_novo' => ['scope' => 'hub_pos_operatorio', 'product' => '_hub'],

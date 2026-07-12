@@ -34,6 +34,10 @@ final class ClinicComprovanteService
             throw new \InvalidArgumentException('Informe a data da cirurgia antes de emitir o comprovante.');
         }
 
+        if ($paciente->getFotoPath() === null || trim((string) $paciente->getFotoPath()) === '') {
+            throw new \InvalidArgumentException('Envie a foto do paciente antes de emitir o comprovante.');
+        }
+
         $codigo = $this->codigos->gerar();
         $paciente
             ->setComprovanteVerificacao($codigo)
@@ -135,7 +139,7 @@ final class ClinicComprovanteService
             'clinica' => mb_strtoupper($empresa->getNome()),
             'doc_type_label' => 'Comprovante',
             'iniciais' => $iniciais !== '' ? $iniciais : 'PC',
-            'foto' => null,
+            'foto' => $this->fotoPublicUrl($paciente->getFotoPath()),
             'nome' => $nome,
             'role' => 'Documento do procedimento',
             'plano_label' => 'Comprovante',
@@ -158,5 +162,19 @@ final class ClinicComprovanteService
                 ? strtoupper(substr($paciente->getComprovanteHash(), 0, 12))
                 : null,
         ];
+    }
+
+    private function fotoPublicUrl(?string $path): ?string
+    {
+        if ($path === null || $path === '') {
+            return null;
+        }
+
+        $path = str_replace('\\', '/', $path);
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, strlen('public'));
+        }
+
+        return str_starts_with($path, '/') ? $path : '/' . $path;
     }
 }

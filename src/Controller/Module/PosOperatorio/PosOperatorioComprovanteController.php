@@ -6,11 +6,13 @@ use App\Entity\Empresa;
 use App\Entity\User;
 use App\PosOperatorio\ClinicProductCatalog;
 use App\Repository\PosOperatorioPacienteRepository;
+use App\Service\PosOperatorio\ClinicCarteirinhaService;
 use App\Service\PosOperatorio\ClinicComprovanteService;
 use App\Service\PosOperatorio\ClinicProductConfigService;
 use App\Service\PosOperatorio\PosOperatorioPacienteService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -26,6 +28,7 @@ final class PosOperatorioComprovanteController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private ClinicComprovanteService $comprovante,
+        private ClinicCarteirinhaService $carteirinha,
         private PosOperatorioPacienteService $pacientes,
         private PosOperatorioPacienteRepository $pacienteRepo,
         private ClinicProductConfigService $productConfig,
@@ -105,6 +108,39 @@ final class PosOperatorioComprovanteController extends AbstractController
         }
 
         return $this->redirectToRoute('app_pos_operatorio_comprovante_paciente', ['id' => $id, '_fragment' => 'enviar']);
+    }
+
+    #[Route('/paciente/{id}/foto', name: 'app_pos_operatorio_comprovante_foto', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function foto(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $this->assertProductEnabled($empresa, ClinicProductCatalog::COMPROVANTE);
+        $paciente = $this->pacientes->findForEmpresa($empresa, $id);
+        if ($paciente === null) {
+            throw $this->createNotFoundException();
+        }
+
+        if (!$this->isCsrfTokenValid('comprovante_foto_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Sessão expirada.');
+
+            return $this->redirectToRoute('app_pos_operatorio_comprovante_paciente', ['id' => $id]);
+        }
+
+        $file = $request->files->get('foto');
+        if (!$file instanceof UploadedFile) {
+            $this->addFlash('error', 'Selecione uma foto.');
+
+            return $this->redirectToRoute('app_pos_operatorio_comprovante_paciente', ['id' => $id]);
+        }
+
+        try {
+            $this->carteirinha->storeFoto($paciente, $file);
+            $this->addFlash('success', 'Foto atualizada. Reemitir o comprovante para atualizar o documento.');
+        } catch (\Throwable $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_pos_operatorio_comprovante_paciente', ['id' => $id]);
     }
 
     #[Route('/paciente/{id}/revogar', name: 'app_pos_operatorio_comprovante_revogar', requirements: ['id' => '\d+'], methods: ['POST'])]

@@ -7,8 +7,30 @@
         · válido até {{ paciente.comprovanteValidoAte|date('d/m/Y') }}
     </p>
     {% else %}
-    <p class="text-muted small mb-3">Nenhum comprovante ativo. É necessário data da cirurgia no cadastro.</p>
+    <p class="text-muted small mb-3">Nenhum comprovante ativo. É necessário data da cirurgia e foto do paciente.</p>
     {% endif %}
+
+    {% if not paciente.fotoPath %}
+    <p class="clinic-carteirinha-share__warn mb-3" role="status">
+        <i class="fas fa-camera" aria-hidden="true"></i>
+        Sem foto — envie abaixo antes de emitir.
+    </p>
+    {% endif %}
+
+    <form method="post" action="{{ path('app_pos_operatorio_comprovante_foto', { id: paciente.id }) }}" enctype="multipart/form-data" class="clinic-carteirinha-form mb-3">
+        <input type="hidden" name="_token" value="{{ csrf_token('comprovante_foto_' ~ paciente.id) }}">
+        <div class="form-group clinic-file-input">
+            <label class="unio-form-label" for="foto">Foto do paciente</label>
+            <div class="clinic-file-input__control">
+                <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" data-clinic-file-input required>
+                <label for="foto" class="clinic-file-input__btn">
+                    <i class="fas fa-image" aria-hidden="true"></i> Escolher arquivo
+                </label>
+                <span class="clinic-file-input__name" data-clinic-file-name>Nenhum arquivo escolhido</span>
+            </div>
+        </div>
+        <button type="submit" class="btn-unio-ghost btn-sm">{{ paciente.fotoPath ? 'Atualizar foto' : 'Enviar foto' }}</button>
+    </form>
 
     <form method="post" action="{{ path('app_pos_operatorio_comprovante_emitir', { id: paciente.id }) }}" class="clinic-carteirinha-form">
         <input type="hidden" name="_token" value="{{ csrf_token('comprovante_emitir_' ~ paciente.id) }}">
@@ -16,7 +38,7 @@
             <label class="unio-form-label" for="validade_dias">Validade (dias)</label>
             <input id="validade_dias" name="validade_dias" type="number" min="7" max="180" class="form-control" value="30">
         </div>
-        <button type="submit" class="btn-unio btn-block" {{ paciente.dataCirurgia ? '' : 'disabled' }}>
+        <button type="submit" class="btn-unio btn-block" {{ paciente.dataCirurgia and paciente.fotoPath ? '' : 'disabled' }}>
             {{ tem_emissao ? 'Reemitir comprovante' : 'Emitir comprovante' }}
         </button>
     </form>
