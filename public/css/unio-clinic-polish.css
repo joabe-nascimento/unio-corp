@@ -1098,51 +1098,60 @@ body.org-clinic .unio-offcanvas-header {
     width: 100%;
 }
 
-/* Botão ícone — visível só com sidebar recolhida */
+/* Ícone — visível só com sidebar recolhida (mesmo visual dos nav-links) */
 .clinic-sidebar-pulse__fab {
     display: none;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    margin: 0 auto;
-    border-radius: 12px;
-    background: var(--org-blue, #4b72be);
-    color: #fff;
+    margin: 3px auto;
+    border-radius: 11px;
+    background: transparent;
+    color: var(--org-sidebar-muted, #64748b);
     text-decoration: none;
     position: relative;
-    box-shadow: 0 4px 14px rgba(75, 114, 190, 0.35);
-    transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+    box-shadow: none;
+    transition: background 0.14s ease, color 0.14s ease;
 }
 
 .clinic-sidebar-pulse__fab:hover {
-    background: var(--org-blue-text, #3d61a8);
-    color: #fff;
+    background: var(--org-blue-soft, rgba(75, 114, 190, 0.12));
+    color: var(--org-blue-text, #3d61a8);
     text-decoration: none;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(75, 114, 190, 0.4);
+    transform: none;
+    box-shadow: none;
 }
 
 .clinic-sidebar-pulse__fab i {
     font-size: 15px;
+    line-height: 1;
 }
 
 .clinic-sidebar-pulse__fab-badge {
     position: absolute;
-    top: -4px;
-    right: -4px;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 4px;
-    border-radius: 999px;
-    background: #dc2626;
+    top: -3px;
+    right: -5px;
+    min-width: 14px;
+    height: 14px;
+    padding: 0 3px;
+    border-radius: 7px;
+    background: var(--org-blue, #4b72be);
     color: #fff;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
-    line-height: 16px;
+    line-height: 14px;
     text-align: center;
-    border: 2px solid #fff;
+    border: none;
+    box-shadow: 0 0 0 1.5px var(--org-sidebar-bg, #fff);
     box-sizing: border-box;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+.clinic-sidebar-pulse__fab-badge--danger {
+    background: #b91c1c;
+    animation: clinic-badge-pulse 2.4s ease-in-out infinite;
 }
 
 /* Sidebar aberta: painel completo, sem FAB */
@@ -1277,14 +1286,16 @@ body.org-clinic:not(.sidebar-collapse) .clinic-sidebar-pulse__full {
         border-right: none;
     }
 
-    /* Recolhida: só o FAB centralizado */
+    /* Recolhida: só o ícone, alinhado aos nav-links */
     body.org-clinic.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .sidebar-bottom--clinic {
         display: flex !important;
         align-items: center;
         justify-content: center;
-        padding: 8px 0 calc(10px + env(safe-area-inset-bottom, 0px));
-        min-height: 56px;
+        padding: 4px 0 calc(10px + env(safe-area-inset-bottom, 0px));
+        min-height: 48px;
         overflow: visible;
+        background: transparent;
+        border-top: 1px solid var(--org-sidebar-border, #e4eaf4);
     }
 
     body.org-clinic.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .clinic-sidebar-pulse__full {
