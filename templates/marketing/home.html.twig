@@ -19,7 +19,7 @@
     {% if org_clinic|default(false) %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=32">
     <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=34">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=67">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=69">
     {% endif %}
     <style>
     /* ── Clínica overrides ── */
@@ -118,7 +118,7 @@
                 class: 'mkt-logo mkt-logo--v2' ~ (_logo_custom ? ' mkt-logo--custom' : ' mkt-logo--default')
             } only %}
         </a>
-        <nav class="mkt-nav mkt-nav--v2 mkt-nav--clinic-products" aria-label="Navegação principal">
+        <nav class="mkt-nav mkt-nav--v2 mkt-nav--clinic-products" id="mktMainNav" aria-label="Navegação principal">
             {% if org_clinic|default(false) %}
             {% include 'components/marketing/clinic_product_nav.html.twig' with { mkt_nav_active: 'home' } only %}
             {% else %}
@@ -132,10 +132,16 @@
             {% endif %}
         </nav>
         <div class="mkt-header-actions mkt-header-actions--v2">
+            <button type="button" class="mkt-nav-toggle" id="mktNavToggle" aria-controls="mktMainNav" aria-expanded="false" aria-label="Abrir menu">
+                <i class="fas fa-bars" aria-hidden="true" data-mkt-nav-icon></i>
+            </button>
             <button type="button" class="mkt-theme-btn mkt-theme-btn--v2" id="guestThemeToggle" title="Alternar tema" aria-label="Alternar tema">
                 <i class="fas fa-sun" id="guestThemeIcon" aria-hidden="true"></i>
             </button>
-            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-header-login">
+                <span class="mkt-header-login__full">Acessar plataforma</span>
+                <span class="mkt-header-login__short">Entrar</span>
+            </a>
         </div>
     </div>
 </header>
@@ -1744,6 +1750,31 @@
     }
     bindThemeToggle('guestThemeToggle');
     bindThemeToggle('footerThemeToggle');
+
+    var nav = document.getElementById('mktMainNav');
+    var navToggle = document.getElementById('mktNavToggle');
+    if (nav && navToggle) {
+        var navIcon = navToggle.querySelector('[data-mkt-nav-icon]');
+        function setNavOpen(open) {
+            nav.classList.toggle('is-open', open);
+            navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            navToggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+            if (navIcon) navIcon.className = open ? 'fas fa-xmark' : 'fas fa-bars';
+            document.body.classList.toggle('mkt-nav-open', open);
+        }
+        navToggle.addEventListener('click', function () {
+            setNavOpen(!nav.classList.contains('is-open'));
+        });
+        nav.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () { setNavOpen(false); });
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') setNavOpen(false);
+        });
+        window.addEventListener('resize', function () {
+            if (window.matchMedia('(min-width: 1100px)').matches) setNavOpen(false);
+        });
+    }
 })();
 </script>
 
