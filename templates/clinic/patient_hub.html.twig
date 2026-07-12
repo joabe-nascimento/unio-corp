@@ -2,26 +2,30 @@
 
 {% block benef_title %}Área do paciente{% endblock %}
 {% block benef_product %}{{ hub.branding.nome_exibicao|default('Área do paciente') }}{% endblock %}
+{% set benef_nav_active = 'home' %}
 
 {% block benef_head %}
-<link rel="stylesheet" href="{{ asset('css/clinic-patient-hub.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/clinic-patient-hub.css') }}?v=2">
 {% endblock %}
 
 {% block benef_content %}
-<main class="clinic-patient-hub benef-shell" style="--clinic-primary: {{ hub.branding.cor_primaria|default('#4b72be') }}">
-    <header class="clinic-patient-hub__head">
-        {% if hub.branding.logo_url|default('') %}
-        <img src="{{ hub.branding.logo_url }}" alt="" class="clinic-patient-hub__logo" width="120" height="40">
-        {% endif %}
-        <div>
-            <h1>Área do paciente</h1>
-            <p>{{ hub.branding.slogan|default('Um só lugar para recuperação, documentos e contato com a clínica.') }}</p>
-        </div>
-    </header>
+<div class="benef-shell clinic-patient-hub" style="--clinic-primary: {{ hub.branding.cor_primaria|default('#4b72be') }}">
+    <div class="benef-card clinic-patient-hub__hero">
+        <header class="benef-card__head clinic-patient-hub__head">
+            {% if hub.branding.logo_url|default('') %}
+            <img src="{{ hub.branding.logo_url }}" alt="" class="clinic-patient-hub__logo" width="120" height="40">
+            {% endif %}
+            <div>
+                <p class="clinic-patient-hub__eyebrow">Área do paciente</p>
+                <h1>{{ hub.branding.nome_exibicao|default('Área do paciente') }}</h1>
+                <p>{{ hub.branding.slogan|default('Um só lugar para recuperação, documentos e contato com a clínica.') }}</p>
+            </div>
+        </header>
+    </div>
 
     {% if not authenticated %}
-    <section class="clinic-patient-hub__intro">
-        <p>Identifique-se em qualquer produto abaixo (CPF + código em dois passos) para ver seu painel personalizado.</p>
+    <div class="benef-card clinic-patient-hub__intro-card">
+        <p class="clinic-patient-hub__lede">Identifique-se em qualquer produto abaixo (CPF + código em dois passos) para ver seu painel personalizado.</p>
         <div class="clinic-patient-hub__demo">
             <h2>Demonstração sandbox</h2>
             <p>Ana Costa, João Pereira e Maria Silva — use na carteirinha digital:</p>
@@ -29,35 +33,37 @@
                 <li>CPF <code>{{ hub.demo_access.cpf_masked|default('529.982.247-25') }}</code> + código <code>{{ hub.demo_access.codigo|default('PO-0042') }}</code></li>
             </ul>
         </div>
-    </section>
+    </div>
     {% else %}
-    <section class="clinic-patient-hub__welcome">
-        <div>
-            <h2>Olá, {{ hub.patient.nome|default('Beneficiário') }}</h2>
-            {% if hub.patient.status_clinico|default('') %}
-            <p class="clinic-patient-hub__status">{{ hub.patient.status_clinico }}</p>
+    <div class="benef-card clinic-patient-hub__welcome-card">
+        <div class="clinic-patient-hub__welcome">
+            <div>
+                <h2>Olá, {{ hub.patient.nome|default('Beneficiário') }}</h2>
+                {% if hub.patient.status_clinico|default('') %}
+                <p class="clinic-patient-hub__status">{{ hub.patient.status_clinico }}</p>
+                {% endif %}
+            </div>
+            {% if hub.dependents|default([])|length > 1 %}
+            <div class="clinic-patient-hub__dependents">
+                <span>Trocar beneficiário:</span>
+                {% for dep in hub.dependents %}
+                <a href="{{ path('app_paciente_trocar', {patientId: dep.id}) }}" class="clinic-patient-hub__dep{% if dep.codigo == hub.patient.codigo %} is-active{% endif %}">{{ dep.nome }}</a>
+                {% endfor %}
+            </div>
             {% endif %}
         </div>
-        {% if hub.dependents|default([])|length > 1 %}
-        <div class="clinic-patient-hub__dependents">
-            <span>Trocar beneficiário:</span>
-            {% for dep in hub.dependents %}
-            <a href="{{ path('app_paciente_trocar', {patientId: dep.id}) }}" class="clinic-patient-hub__dep{% if dep.codigo == hub.patient.codigo %} is-active{% endif %}">{{ dep.nome }}</a>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </section>
+    </div>
 
     {% if hub.notifications|default([])|length %}
-    <section class="clinic-patient-hub__alerts">
+    <section class="clinic-patient-hub__alerts" aria-label="Avisos">
         {% for n in hub.notifications %}
         <div class="clinic-patient-hub__alert clinic-patient-hub__alert--{{ n.tipo }}">{{ n.texto }}</div>
         {% endfor %}
     </section>
     {% endif %}
 
-    <section class="clinic-patient-hub__timeline">
-        <h3>Minha recuperação</h3>
+    <div class="benef-card clinic-patient-hub__panel">
+        <h3 class="clinic-patient-hub__section-title">Minha recuperação</h3>
         <ol class="clinic-patient-hub__milestones">
             {% for item in hub.timeline|default([]) %}
             <li class="is-{{ item.status }}">
@@ -66,10 +72,10 @@
             </li>
             {% endfor %}
         </ol>
-    </section>
+    </div>
 
-    <section class="clinic-patient-hub__documents">
-        <h3>Documentos</h3>
+    <div class="benef-card clinic-patient-hub__panel">
+        <h3 class="clinic-patient-hub__section-title">Documentos</h3>
         <div class="clinic-patient-hub__doc-grid">
             {% for doc in hub.documents|default([]) %}
             <a href="{{ path(doc.route, doc.params|default({})) }}" class="clinic-patient-hub__doc">
@@ -80,10 +86,10 @@
             </a>
             {% endfor %}
         </div>
-    </section>
+    </div>
 
-    <section class="clinic-patient-hub__actions">
-        <h3>Ações rápidas</h3>
+    <div class="benef-card clinic-patient-hub__panel">
+        <h3 class="clinic-patient-hub__section-title">Ações rápidas</h3>
         <div class="clinic-patient-hub__action-grid">
             {% for action in hub.actions|default([]) %}
             <a href="{{ path(action.route, action.params|default({})) }}" class="clinic-patient-hub__action">
@@ -92,28 +98,31 @@
             </a>
             {% endfor %}
         </div>
-    </section>
+    </div>
 
     {% if hub.retornos|default([])|length %}
-    <section class="clinic-patient-hub__retornos">
-        <h3>Retornos</h3>
-        <ul>
+    <div class="benef-card clinic-patient-hub__panel">
+        <h3 class="clinic-patient-hub__section-title">Retornos</h3>
+        <ul class="clinic-patient-hub__retornos">
             {% for r in hub.retornos %}
             <li><strong>{{ r.marco }}</strong> — {{ r.data }} · {{ r.local }} ({{ r.status }})</li>
             {% endfor %}
         </ul>
-    </section>
+    </div>
     {% endif %}
     {% endif %}
 
-    <section class="clinic-patient-hub__grid">
-        {% for card in hub.products|default([]) %}
-        <a href="{{ path(card.route) }}" class="clinic-patient-hub__card">
-            <i class="fas {{ card.icon }}" aria-hidden="true"></i>
-            <h2>{{ card.label }}</h2>
-            <p>{{ card.desc }}</p>
-        </a>
-        {% endfor %}
+    <section class="clinic-patient-hub__products" aria-labelledby="clinic-patient-hub-products-title">
+        <h2 id="clinic-patient-hub-products-title" class="clinic-patient-hub__section-title clinic-patient-hub__section-title--lg">Produtos para você</h2>
+        <div class="clinic-patient-hub__grid">
+            {% for card in hub.products|default([]) %}
+            <a href="{{ path(card.route) }}" class="clinic-patient-hub__card">
+                <span class="clinic-patient-hub__card-icon" aria-hidden="true"><i class="fas {{ card.icon }}"></i></span>
+                <h3>{{ card.label }}</h3>
+                <p>{{ card.desc }}</p>
+            </a>
+            {% endfor %}
+        </div>
     </section>
-</main>
+</div>
 {% endblock %}
