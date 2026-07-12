@@ -1,3 +1,5 @@
+{# Verso do documento digital (carteirinha ou comprovante) #}
+{% set is_proof = (card.doc_type_label|default('') == 'Comprovante') %}
 <span class="mkt-idcard__stripe" aria-hidden="true"></span>
 <span class="mkt-idcard__back-body">
     <span class="mkt-idcard__back-head">
@@ -9,8 +11,13 @@
     <dl class="mkt-idcard__dl mkt-idcard__dl--clinical">
         <div><dt>Paciente</dt><dd>{{ card.nome|default('—') }}</dd></div>
         <div><dt>Médico</dt><dd>{{ card.medico|default('—') }}</dd></div>
+        {% if is_proof %}
+        <div><dt>Procedimento</dt><dd>{{ card.procedimento|default(card.protocolo|default('—')) }}</dd></div>
+        <div><dt>Data cirurgia</dt><dd>{{ card.cirurgia|default('—') }}</dd></div>
+        {% else %}
         <div><dt>Cirurgia</dt><dd>{{ card.cirurgia|default('—') }}</dd></div>
         <div><dt>Protocolo</dt><dd>{{ card.protocolo|default('—') }}</dd></div>
+        {% endif %}
         {% if card.cpf_masked|default(null) %}
         <div><dt>CPF</dt><dd>{{ card.cpf_masked }}</dd></div>
         <div><dt>Válido até</dt><dd>{{ card.valido_ate|default('—') }}</dd></div>
