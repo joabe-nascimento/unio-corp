@@ -8,11 +8,13 @@ Referência do MySQL/MariaDB da instância **uniosaude** (UnioClínica): conexã
 
 | Ambiente | Banco (exemplo) | Config |
 |----------|-----------------|--------|
-| **Produção** | `joabef36_unio_clinicaunio` | `~/unio-uniosaude/.env.local` → `DATABASE_URL` |
+| **Produção** | `joabef36_unio_uniosaude` | `~/unio-uniosaude/.env.local` → `DATABASE_URL` |
 | **Dev local** | `unio` (ou conforme `.env`) | `.env` + `.env.local` |
 | **Testes** | conforme `.env.test` | PHPUnit |
 
-A URL segue o padrão Symfony:
+> **Histórico (jul/2026):** o banco de produção era `joabef36_unio_clinicaunio` (legado Clinica Unio) e foi renomeado para `joabef36_unio_uniosaude`. O usuário MySQL pode continuar com o nome antigo; o importante é o nome do **schema** na `DATABASE_URL`.
+>
+> **Não apague** tabelas vazias de módulos Work (RH, TI, chat, inov…) só porque têm 0 linhas — o código Doctrine ainda as mapeia. Só remova tabela órfã (sem entity).
 
 ```env
 DATABASE_URL="mysql://USUARIO:SENHA@localhost:3306/NOME_DO_BANCO?serverVersion=5.7.44&charset=utf8mb4"
