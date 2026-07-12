@@ -183,7 +183,11 @@ final class PosOperatorioPacienteController extends AbstractController
 
         return $this->render(self::T . '_ficha_partial.html.twig', array_merge(
 
-            ['empresa' => $empresa, 'pos_section' => 'pacientes'],
+            [
+                'empresa' => $empresa,
+                'pos_section' => 'pacientes',
+                'portal_invite_url' => $request->getSession()->get('pos_op_last_invite_url'),
+            ],
 
             $this->service->buildFicha($paciente),
 
@@ -403,7 +407,10 @@ final class PosOperatorioPacienteController extends AbstractController
 
         $url = $this->portalInvite->generateInvite($paciente);
 
-        $this->addFlash('success', 'Link de convite gerado. Copie e envie ao paciente.');
+        $this->addFlash(
+            'success',
+            'Link de convite gerado. Envie ao paciente (válido por 30 dias): ' . $url,
+        );
 
         $request->getSession()->set('pos_op_last_invite_url', $url);
 

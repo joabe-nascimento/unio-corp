@@ -101,6 +101,13 @@
                                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_op_convite_' ~ paciente.id) }}">
                                     <button type="submit" class="btn btn-link btn-sm p-0 ml-1 align-baseline">Gerar convite</button>
                                 </form>
+                                {% set _invite_url = portal_invite_url|default(app.session.get('pos_op_last_invite_url')) %}
+                                {% if _invite_url %}
+                                <div class="mt-2 p-2 rounded border bg-light">
+                                    <div class="small text-muted mb-1">Link do convite (copie e envie):</div>
+                                    <code class="d-block small text-break" style="user-select: all;">{{ _invite_url }}</code>
+                                </div>
+                                {% endif %}
                                 <button type="button"
                                         class="btn btn-link btn-sm p-0 ml-1 align-baseline"
                                         data-unio-offcanvas-open="pos-op-paciente-edit"
