@@ -18,7 +18,7 @@ final class BeneficiaryVerificacaoController extends AbstractController
         private ClinicVerificacaoAuditService $audit,
     ) {}
 
-    #[Route('/{codigo}', name: 'app_verificar_documento', requirements: ['codigo' => '[A-Za-z0-9]{6,12}'])]
+    #[Route('/{codigo}', name: 'app_verificar_documento', requirements: ['codigo' => '[A-Za-z0-9-]{6,14}'])]
     public function verificar(Request $request, string $codigo): Response
     {
         $resultado = $this->verificacao->verificar($codigo);

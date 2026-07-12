@@ -20,7 +20,7 @@ final class ClinicPublicApiController extends AbstractController
         private EntityManagerInterface $em,
     ) {}
 
-    #[Route('/verificar/{codigo}', name: 'api_clinica_verificar', methods: ['GET'])]
+    #[Route('/verificar/{codigo}', name: 'api_clinica_verificar', methods: ['GET'], requirements: ['codigo' => '[A-Za-z0-9-]{6,14}'])]
     public function verificar(Request $request, string $codigo): JsonResponse
     {
         $token = $this->resolveToken($request);
