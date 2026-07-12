@@ -17,8 +17,8 @@
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=18">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=2">
     {% if org_clinic|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=43">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=28">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-clinic.css') }}?v=44">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-rich.css') }}?v=29">
     <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=24">
     {% endif %}
     <style>
@@ -30,7 +30,10 @@
     }
     .marketing-home { font-family: 'Nunito', 'Inter', system-ui, sans-serif; }
     .mkt-hero-eyebrow-dot { background: #4b72be !important; }
-    .mkt-gradient-text { color: #4b72be; -webkit-text-fill-color: #4b72be; }
+    .mkt-gradient-text { color: #7ba3e0; -webkit-text-fill-color: #7ba3e0; }
+    .mkt-heva-accent { color: #7ba3e0; -webkit-text-fill-color: #7ba3e0; }
+    [data-theme="light"] .mkt-gradient-text,
+    [data-theme="light"] .mkt-heva-accent { color: #3d61a8; -webkit-text-fill-color: #3d61a8; }
     .mkt-btn--glow { background: #4b72be !important; box-shadow: 0 4px 20px rgba(75,114,190,.45) !important; }
     .mkt-hero-v2-orb--cyan { background: radial-gradient(circle at 40% 50%, rgba(75,114,190,.18) 0%, transparent 70%) !important; }
     .mkt-hero-v2-orb--indigo { background: radial-gradient(circle at 60% 50%, rgba(100,149,237,.14) 0%, transparent 70%) !important; }
@@ -122,15 +125,27 @@
         <div class="mkt-hero-inner mkt-hero-inner--v2">
             <div class="mkt-hero-copy mkt-hero-copy--v2">
                 <span class="clinic-hero-slogan">
-                    <i class="fas {{ org_clinic|default(false) ? 'fa-heart-pulse' : 'fa-code' }}" aria-hidden="true"></i>
-                    {{ organismo.copy.marketing_eyebrow|default(org_clinic|default(false) ? 'Plataforma clínica pós-operatória' : 'Studio digital') }}
+                    {% if org_clinic|default(false) %}
+                    {{ organismo.copy.marketing_eyebrow|default('Atendimento clínico') }}
+                    {% else %}
+                    <i class="fas fa-code" aria-hidden="true"></i>
+                    {{ organismo.copy.marketing_eyebrow|default('Studio digital') }}
+                    {% endif %}
                 </span>
                 <p class="mkt-hero-eyebrow mkt-hero-eyebrow--v2">
                     <span class="mkt-hero-eyebrow-dot"></span>
                     {{ organismo.copy.marketing_tagline|default('Saúde que acompanha.') }}
                 </p>
                 <h1 class="mkt-hero-title mkt-hero-title--v2" id="mkt-hero-title">
-                    {{ organismo.copy.hero_title|default('Acompanhamento pós-cirúrgico') }}{% if organismo.copy.hero_title_accent|default('') %}, <span class="mkt-gradient-text">{{ organismo.copy.hero_title_accent }}</span>{% endif %}
+                    {% if org_clinic|default(false) %}
+                        {% if organismo.copy.hero_title|default('') %}
+                            {{ organismo.copy.hero_title }}{% if organismo.copy.hero_title_accent|default('') %}, <span class="mkt-heva-accent">{{ organismo.copy.hero_title_accent }}</span>{% endif %}
+                        {% else %}
+                            Estamos prontos para <span class="mkt-heva-accent">acompanhar você</span>
+                        {% endif %}
+                    {% else %}
+                        {{ organismo.copy.hero_title|default('Acompanhamento pós-cirúrgico') }}{% if organismo.copy.hero_title_accent|default('') %}, <span class="mkt-gradient-text">{{ organismo.copy.hero_title_accent }}</span>{% endif %}
+                    {% endif %}
                 </h1>
                 <p class="mkt-hero-lead mkt-hero-lead--v2">
                     {{ organismo.copy.hero_desc|default('Unio Saúde reúne cadastro de pacientes, protocolos de recuperação, alertas clínicos e questionários de acompanhamento.') }}
@@ -160,60 +175,53 @@
                 </div>
             </div>
             <div class="mkt-hero-visual mkt-hero-visual--v2" aria-hidden="true">
+                {% if org_clinic|default(false) %}
+                <div class="mkt-hero-heva">
+                    <figure class="mkt-hero-heva__photo">
+                        <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=900&q=80" alt="" width="900" height="560" loading="eager" decoding="async">
+                    </figure>
+                    <div class="mkt-hero-heva__stage">
+                        <div class="mkt-hero-heva__card">
+                            <div class="mkt-hero-heva__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></div>
+                            <ul class="mkt-hero-heva__list">
+                                <li>Atendimento pós-operatório contínuo</li>
+                                <li>Equipe e protocolos organizados</li>
+                                <li>Carteirinha e guia na palma da mão</li>
+                                <li>Alertas clínicos com prioridade</li>
+                            </ul>
+                            <div class="mkt-hero-heva__foot">
+                                <span class="mkt-hero-heva__qr" aria-hidden="true"><i class="fas fa-qrcode"></i></span>
+                                <div>
+                                    <strong>Portal do paciente</strong>
+                                    <span>Acesse, valide e acompanhe a recuperação</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
                 <div class="mkt-preview">
                     <div class="mkt-preview-chrome">
                         <span class="mkt-preview-dot mkt-preview-dot--r"></span>
                         <span class="mkt-preview-dot mkt-preview-dot--y"></span>
                         <span class="mkt-preview-dot mkt-preview-dot--g"></span>
-                        <span class="mkt-preview-url">uniowork.com.br{% if org_clinic|default(false) %}, clínica{% else %}, studio{% endif %}</span>
+                        <span class="mkt-preview-url">uniowork.com.br, studio</span>
                     </div>
                     <div class="mkt-preview-layout">
                         <div class="mkt-preview-sidebar">
-                            {% if org_clinic|default(false) %}
-                            <span class="mkt-preview-nav-item mkt-preview-nav-item--active"><i class="fas fa-house-medical"></i></span>
-                            <span class="mkt-preview-nav-item"><i class="fas fa-user-injured"></i></span>
-                            <span class="mkt-preview-nav-item"><i class="fas fa-bed-pulse"></i></span>
-                            <span class="mkt-preview-nav-item"><i class="fas fa-file-medical"></i></span>
-                            <span class="mkt-preview-nav-item"><i class="fas fa-bell"></i></span>
-                            {% else %}
                             <span class="mkt-preview-nav-item mkt-preview-nav-item--active"><i class="fas fa-house"></i></span>
                             <span class="mkt-preview-nav-item"><i class="fas fa-folder-open"></i></span>
                             <span class="mkt-preview-nav-item"><i class="fas fa-flag"></i></span>
                             <span class="mkt-preview-nav-item"><i class="fas fa-book"></i></span>
                             <span class="mkt-preview-nav-item"><i class="fas fa-bell"></i></span>
-                            {% endif %}
                         </div>
                         <div class="mkt-preview-main">
                             <div class="mkt-preview-kpis">
-                                {% if org_clinic|default(false) %}
-                                <div class="mkt-preview-kpi"><strong>42</strong><span>Pacientes ativos</span></div>
-                                <div class="mkt-preview-kpi"><strong>3</strong><span>Alertas críticos</span></div>
-                                <div class="mkt-preview-kpi mkt-preview-kpi--accent"><strong>97%</strong><span>Protocolos OK</span></div>
-                                {% else %}
                                 <div class="mkt-preview-kpi"><strong>12</strong><span>Projetos ativos</span></div>
                                 <div class="mkt-preview-kpi"><strong>3</strong><span>Prioridade alta</span></div>
                                 <div class="mkt-preview-kpi mkt-preview-kpi--accent"><strong>97%</strong><span>Entregas OK</span></div>
-                                {% endif %}
                             </div>
                             <div class="mkt-preview-modules">
-                                {% if org_clinic|default(false) %}
-                                <div class="mkt-preview-module">
-                                    <i class="fas fa-user-injured" aria-hidden="true"></i>
-                                    <div><strong>Pacientes</strong><span>Recuperação e acompanhamento</span></div>
-                                </div>
-                                <div class="mkt-preview-module mkt-preview-module--highlight">
-                                    <i class="fas fa-id-card" aria-hidden="true"></i>
-                                    <div><strong>Carteirinha</strong><span>Identidade digital com foto</span></div>
-                                </div>
-                                <div class="mkt-preview-module">
-                                    <i class="fas fa-book-medical" aria-hidden="true"></i>
-                                    <div><strong>Guia médico</strong><span>Orientações por fase D+n</span></div>
-                                </div>
-                                <div class="mkt-preview-module">
-                                    <i class="fas fa-bell" aria-hidden="true"></i>
-                                    <div><strong>Alertas</strong><span>Fila P1–P4 com SLA</span></div>
-                                </div>
-                                {% else %}
                                 <div class="mkt-preview-module">
                                     <i class="fas fa-folder-open" aria-hidden="true"></i>
                                     <div><strong>Clientes</strong><span>Projetos e entregas</span></div>
@@ -230,11 +238,11 @@
                                     <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
                                     <div><strong>Lumen</strong><span>Assistente do studio</span></div>
                                 </div>
-                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -290,7 +298,7 @@
         <div class="mkt-rich-spotlight__grid">
             <div class="mkt-rich-spotlight__copy">
                 <p class="mkt-section-eyebrow">Acompanhamento contínuo</p>
-                <h2 id="mkt-spotlight-title">Cuidado que não termina na sala de cirurgia</h2>
+                <h2 id="mkt-spotlight-title">Cuidado que não termina na <span class="mkt-heva-accent">sala de cirurgia</span></h2>
                 <p>
                     Assim como clínicas de referência investem na jornada completa do paciente,
                     a {{ organismo.copy.brand_name|default('Unio Saúde') }} conecta equipe e paciente
@@ -1547,7 +1555,7 @@
         <div class="mkt-cta-banner">
             <div class="mkt-cta-banner-inner">
                 <div class="mkt-cta-copy">
-                    <h2 id="mkt-cta-title">Cuidado que não para na sala de cirurgia.</h2>
+                    <h2 id="mkt-cta-title">Cuidado que não para na <span class="mkt-heva-accent">sala de cirurgia</span>.</h2>
                     <p>Acesse {{ _pnome }}, registre seus pacientes e comece o acompanhamento estruturado, protocolos, alertas e portal do paciente em um só lugar.</p>
                     <ul class="mkt-cta-list">
                         <li><i class="fas fa-check" aria-hidden="true"></i> Gestão completa de pacientes pós-operatórios</li>
