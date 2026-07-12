@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=10">
+<link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=11">
 <link rel="manifest" href="{{ asset('pos-operatorio/manifest.webmanifest') }}">
 {% endblock %}
 
@@ -18,17 +18,20 @@
 
 {% block content %}
 <header class="pos-portal-topbar">
-    <div class="pos-portal-topbar__brand">
-        <span class="pos-portal-topbar__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></span>
-        <div class="pos-portal-topbar__text">
-            <strong class="pos-portal-topbar__title">{% block portal_topbar_title %}{{ portal_page_title|default('Acompanhamento') }}{% endblock %}</strong>
-            <span class="pos-portal-topbar__sub">{{ portal_page_subtitle|default(org_brand_label|default('Unio Clínica')) }}</span>
+    <div class="pos-portal-topbar__inner">
+        <div class="pos-portal-topbar__brand">
+            <span class="pos-portal-topbar__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></span>
+            <div class="pos-portal-topbar__text">
+                <strong class="pos-portal-topbar__title">{% block portal_topbar_title %}{{ portal_page_title|default('Acompanhamento') }}{% endblock %}</strong>
+                <span class="pos-portal-topbar__sub">{{ portal_page_subtitle|default(org_brand_label|default('Unio Clínica')) }}</span>
+            </div>
         </div>
+        {% block portal_topbar_meta %}{% endblock %}
+        <a href="{{ path('app_portal_patient_logout') }}" class="pos-portal-topbar__logout" title="Sair">
+            <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+            <span class="pos-portal-topbar__logout-label">Sair</span>
+        </a>
     </div>
-    <a href="{{ path('app_portal_patient_logout') }}" class="pos-portal-topbar__logout" title="Sair">
-        <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
-        <span>Sair</span>
-    </a>
 </header>
 
 <div class="page-body-inner pos-portal-body">
