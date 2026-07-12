@@ -42,6 +42,12 @@ class PosOperatorioPaciente
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $portalUser = null;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $portalInviteToken = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $portalInviteExpiresAt = null;
+
     #[ORM\Column(length: 16)]
     private string $codigo = '';
 
@@ -50,6 +56,9 @@ class PosOperatorioPaciente
 
     #[ORM\Column(length: 11, nullable: true)]
     private ?string $cpf = null;
+
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dataNascimento = null;
 
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $procedimento = null;
@@ -95,6 +104,31 @@ class PosOperatorioPaciente
 
     #[ORM\Column(type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $carteirinhaValidaAte = null;
+
+    #[ORM\Column(length: 8, nullable: true)]
+    private ?string $comprovanteVerificacao = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $comprovanteEmitidaEm = null;
+
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $comprovanteValidoAte = null;
+
+    #[ORM\Column(length: 11, nullable: true)]
+    private ?string $titularCpf = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isSandbox = false;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $consentimentoCarteirinhaEm = null;
+
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $comprovanteHash = null;
+
+    #[ORM\ManyToOne(targetEntity: ClinicUnidade::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicUnidade $unidade = null;
 
     /** @var Collection<int, PosOperatorioQuestionarioResposta> */
     #[ORM\OneToMany(mappedBy: 'paciente', targetEntity: PosOperatorioQuestionarioResposta::class, cascade: ['persist'])]
@@ -172,6 +206,30 @@ class PosOperatorioPaciente
         return $this;
     }
 
+    public function getPortalInviteToken(): ?string
+    {
+        return $this->portalInviteToken;
+    }
+
+    public function setPortalInviteToken(?string $portalInviteToken): static
+    {
+        $this->portalInviteToken = $portalInviteToken;
+
+        return $this;
+    }
+
+    public function getPortalInviteExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->portalInviteExpiresAt;
+    }
+
+    public function setPortalInviteExpiresAt(?\DateTimeImmutable $portalInviteExpiresAt): static
+    {
+        $this->portalInviteExpiresAt = $portalInviteExpiresAt;
+
+        return $this;
+    }
+
     public function getCodigo(): string
     {
         return $this->codigo;
@@ -204,6 +262,18 @@ class PosOperatorioPaciente
     public function setCpf(?string $cpf): static
     {
         $this->cpf = $cpf;
+
+        return $this;
+    }
+
+    public function getDataNascimento(): ?\DateTimeImmutable
+    {
+        return $this->dataNascimento;
+    }
+
+    public function setDataNascimento(?\DateTimeImmutable $dataNascimento): static
+    {
+        $this->dataNascimento = $dataNascimento;
 
         return $this;
     }
@@ -392,6 +462,134 @@ class PosOperatorioPaciente
         }
 
         return $this->carteirinhaValidaAte >= new \DateTimeImmutable('today');
+    }
+
+    public function getComprovanteVerificacao(): ?string
+    {
+        return $this->comprovanteVerificacao;
+    }
+
+    public function setComprovanteVerificacao(?string $comprovanteVerificacao): static
+    {
+        $this->comprovanteVerificacao = $comprovanteVerificacao !== null ? strtoupper(trim($comprovanteVerificacao)) : null;
+
+        return $this;
+    }
+
+    public function getComprovanteEmitidaEm(): ?\DateTimeImmutable
+    {
+        return $this->comprovanteEmitidaEm;
+    }
+
+    public function setComprovanteEmitidaEm(?\DateTimeImmutable $comprovanteEmitidaEm): static
+    {
+        $this->comprovanteEmitidaEm = $comprovanteEmitidaEm;
+
+        return $this;
+    }
+
+    public function getComprovanteValidoAte(): ?\DateTimeImmutable
+    {
+        return $this->comprovanteValidoAte;
+    }
+
+    public function setComprovanteValidoAte(?\DateTimeImmutable $comprovanteValidoAte): static
+    {
+        $this->comprovanteValidoAte = $comprovanteValidoAte;
+
+        return $this;
+    }
+
+    public function hasComprovanteAtivo(): bool
+    {
+        if ($this->comprovanteVerificacao === null || $this->comprovanteEmitidaEm === null) {
+            return false;
+        }
+
+        if ($this->comprovanteValidoAte === null) {
+            return true;
+        }
+
+        return $this->comprovanteValidoAte >= new \DateTimeImmutable('today');
+    }
+
+    public function getTitularCpf(): ?string
+    {
+        return $this->titularCpf;
+    }
+
+    public function setTitularCpf(?string $titularCpf): static
+    {
+        $this->titularCpf = $titularCpf;
+
+        return $this;
+    }
+
+    public function getCpfTitularEfetivo(): ?string
+    {
+        return $this->titularCpf ?? $this->cpf;
+    }
+
+    public function isSandbox(): bool
+    {
+        return $this->isSandbox;
+    }
+
+    public function setIsSandbox(bool $isSandbox): static
+    {
+        $this->isSandbox = $isSandbox;
+
+        return $this;
+    }
+
+    public function getConsentimentoCarteirinhaEm(): ?\DateTimeImmutable
+    {
+        return $this->consentimentoCarteirinhaEm;
+    }
+
+    public function setConsentimentoCarteirinhaEm(?\DateTimeImmutable $consentimentoCarteirinhaEm): static
+    {
+        $this->consentimentoCarteirinhaEm = $consentimentoCarteirinhaEm;
+
+        return $this;
+    }
+
+    public function getComprovanteHash(): ?string
+    {
+        return $this->comprovanteHash;
+    }
+
+    public function setComprovanteHash(?string $comprovanteHash): static
+    {
+        $this->comprovanteHash = $comprovanteHash;
+
+        return $this;
+    }
+
+    public function getUnidade(): ?ClinicUnidade
+    {
+        return $this->unidade;
+    }
+
+    public function setUnidade(?ClinicUnidade $unidade): static
+    {
+        $this->unidade = $unidade;
+
+        return $this;
+    }
+
+    public function getStatusClinicoLabel(): ?string
+    {
+        $dia = $this->getDiaPosOperatorio();
+        if ($dia === null) {
+            return null;
+        }
+
+        if ($this->status === self::STATUS_ALERTA) {
+            return sprintf('Dia %d pós-op · alerta em acompanhamento', $dia);
+        }
+
+        return sprintf('Dia %d pós-op', $dia);
     }
 
     /** @return Collection<int, PosOperatorioQuestionarioResposta> */

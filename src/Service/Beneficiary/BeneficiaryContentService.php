@@ -5,7 +5,9 @@ namespace App\Service\Beneficiary;
 use App\Entity\PosOperatorioPaciente;
 use App\Service\Marketing\ClinicPatientProductService;
 use App\Service\PosOperatorio\ClinicCarteirinhaService;
+use App\Service\PosOperatorio\ClinicComprovanteService;
 use App\Service\PosOperatorio\PosOperatorioPortalService;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Monta conteúdo do beneficiário após validação (demo ou paciente real).
@@ -16,7 +18,9 @@ final class BeneficiaryContentService
         private BeneficiaryAccessService $access,
         private ClinicPatientProductService $demoProduct,
         private ClinicCarteirinhaService $carteirinhaService,
+        private ClinicComprovanteService $comprovanteService,
         private PosOperatorioPortalService $portalService,
+        private UrlGeneratorInterface $urlGenerator,
     ) {}
 
     /** @return array{card: array<string, mixed>, theme: string}|null */
@@ -41,6 +45,45 @@ final class BeneficiaryContentService
         return [
             'card' => $this->carteirinhaService->buildCardData($patient, $patient->getEmpresa()),
             'theme' => $plano,
+        ];
+    }
+
+    /** @return array{proof: array<string, mixed>, verificacao_url: ?string}|null */
+    public function buildComprovanteProof(): ?array
+    {
+        if ($this->access->isDemoSession()) {
+            $base = $this->demoProduct->demoPatient();
+            $verificacao = $this->demoProduct->demoAccess()['verificacao'];
+
+            return [
+                'proof' => array_merge($base, [
+                    'titulo' => 'Comprovante de procedimento',
+                    'codigo_paciente' => $base['codigo'] ?? 'PO-0042',
+                    'verificacao' => $verificacao,
+                    'status_label' => 'Documento válido (demonstração)',
+                    'valido_ate' => $base['valido_ate'] ?? '—',
+                    'emitido_em' => $base['emitido_em'] ?? '—',
+                ]),
+                'verificacao_url' => $this->urlGenerator->generate(
+                    'app_verificar_documento',
+                    ['codigo' => $verificacao],
+                    UrlGeneratorInterface::ABSOLUTE_URL,
+                ),
+            ];
+        }
+
+        $patient = $this->access->findGrantedPatient();
+        if ($patient === null || !$patient->hasComprovanteAtivo()) {
+            return null;
+        }
+
+        $codigo = $patient->getComprovanteVerificacao();
+
+        return [
+            'proof' => $this->comprovanteService->buildProofData($patient, $patient->getEmpresa()),
+            'verificacao_url' => $codigo !== null
+                ? $this->urlGenerator->generate('app_verificar_documento', ['codigo' => $codigo], UrlGeneratorInterface::ABSOLUTE_URL)
+                : null,
         ];
     }
 

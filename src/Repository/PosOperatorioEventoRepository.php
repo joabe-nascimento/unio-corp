@@ -57,6 +57,22 @@ class PosOperatorioEventoRepository extends ServiceEntityRepository
             ->getSingleScalarResult() > 0;
     }
 
+    public function hasEscalacaoForAlerta(\App\Entity\PosOperatorioAlerta $alerta, int $hours): bool
+    {
+        $needle = sprintf('Escalacao automática %dh do alerta #%d', $hours, $alerta->getId());
+
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->andWhere('e.paciente = :paciente')
+            ->andWhere('e.tipo = :tipo')
+            ->andWhere('e.descricao = :descricao')
+            ->setParameter('paciente', $alerta->getPaciente())
+            ->setParameter('tipo', PosOperatorioEvento::TIPO_ESCALACAO)
+            ->setParameter('descricao', $needle)
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
+    }
+
     /** @return list<PosOperatorioEvento> */
     public function findVisibleToPatient(\App\Entity\PosOperatorioPaciente $paciente, int $limit = 15): array
     {

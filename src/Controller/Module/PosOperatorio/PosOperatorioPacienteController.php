@@ -18,6 +18,7 @@ use App\Service\PosOperatorio\PosOperatorioPacienteService;
 
 use App\Service\PosOperatorio\PosOperatorioProtocoloService;
 
+use App\Service\PosOperatorio\PosOperatorioPortalInviteService;
 use App\Service\PosOperatorio\PosOperatorioReminderService;
 
 use App\Service\WorkspaceService;
@@ -59,6 +60,8 @@ final class PosOperatorioPacienteController extends AbstractController
         private PosOperatorioAuditService $audit,
 
         private PosOperatorioReminderService $reminderService,
+
+        private PosOperatorioPortalInviteService $portalInvite,
 
     ) {}
 
@@ -355,6 +358,58 @@ final class PosOperatorioPacienteController extends AbstractController
 
 
         return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $id]);
+
+    }
+
+
+
+    #[Route('/{id}/convite-portal', name: 'app_pos_operatorio_paciente_convite_portal', requirements: ['id' => '\d+'], methods: ['POST'])]
+
+    public function convitePortal(int $id, Request $request): Response
+
+    {
+
+        $empresa = $this->requireEmpresa();
+
+        $paciente = $this->service->findForEmpresa($empresa, $id);
+
+        if (!$paciente) {
+
+            throw $this->createNotFoundException();
+
+        }
+
+
+
+        if (!$this->isCsrfTokenValid('pos_op_convite_' . $id, (string) $request->request->get('_csrf_token'))) {
+
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $id]);
+
+        }
+
+
+
+        if ($paciente->getPortalUser() !== null) {
+
+            $this->addFlash('info', 'Paciente já possui login vinculado ao portal.');
+
+            return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $id]);
+
+        }
+
+
+
+        $url = $this->portalInvite->generateInvite($paciente);
+
+        $this->addFlash('success', 'Link de convite gerado. Copie e envie ao paciente.');
+
+        $request->getSession()->set('pos_op_last_invite_url', $url);
+
+
+
+        return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $id, 'invite' => 1]);
 
     }
 

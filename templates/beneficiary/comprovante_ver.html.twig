@@ -1,0 +1,51 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Seu comprovante{% endblock %}
+{% block benef_product %}Comprovante{% endblock %}
+{% set benef_nav_active = 'comprovante' %}
+
+{% block benef_topbar_actions %}
+<a href="{{ path('app_comprovante_procedimento_sair') }}" class="benef-topbar__logout">Sair</a>
+{% endblock %}
+
+{% block benef_content %}
+<section class="benef-shell">
+    <div class="benef-card benef-card--wide">
+        <header class="benef-card__head">
+            <div>
+                <h1>Comprovante de procedimento</h1>
+                <p>Apresente na recepção ou valide pelo QR.{% if is_demo %} <em>Demonstração.</em>{% endif %}</p>
+            </div>
+        </header>
+
+        <div class="benef-proof-stage">
+            {% include 'components/marketing/procedure_proof_card.html.twig' with {
+                proof: proof,
+                verificacao_url: verificacao_url
+            } %}
+        </div>
+
+        {% if org_clinic|default(false) and not is_demo %}
+        {% include 'components/clinic/_wallet_pass_actions.html.twig' with {
+            wallet: clinic_wallet_beneficiary('comprovante')
+        } %}
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block benef_head %}
+<style>
+.mkt-proof-doc { border:1px solid rgba(15,23,42,.08); border-radius:16px; padding:1.25rem; background:linear-gradient(180deg,#fff,#f8fafc); }
+.mkt-proof-doc__head { margin-bottom:1rem; }
+.mkt-proof-doc__clinica { font-size:.7rem; letter-spacing:.08em; color:#64748b; font-weight:700; }
+.mkt-proof-doc__title { margin:.25rem 0; font-size:1.25rem; }
+.mkt-proof-doc__status { margin:0; color:#0f766e; font-weight:600; font-size:.9rem; }
+.mkt-proof-doc__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:.75rem 1rem; margin:0; }
+.mkt-proof-doc__grid dt { font-size:.72rem; color:#64748b; margin-bottom:.15rem; }
+.mkt-proof-doc__grid dd { margin:0; font-weight:600; }
+.mkt-proof-doc__code dd code { font-size:1.05rem; letter-spacing:.08em; }
+.mkt-proof-doc__qr { margin-top:1rem; text-align:center; }
+.mkt-proof-doc__qr p { font-size:.85rem; color:#64748b; margin-top:.5rem; }
+</style>
+{% endblock %}

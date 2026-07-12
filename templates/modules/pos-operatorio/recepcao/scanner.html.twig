@@ -1,0 +1,46 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Recepção — scanner{% endblock %}
+
+{% block hub_content %}
+<section class="pos-op-page">
+    <header class="pos-op-page__head">
+        <h1>Recepção — validação rápida</h1>
+        <p>Leia QR, CPF ou código do paciente. O check-in abre a ficha e registra presença.</p>
+    </header>
+
+    <form method="post" class="pos-op-form" style="max-width:480px">
+        <label>Modo
+            <select name="metodo">
+                <option value="qr">QR / código verificação</option>
+                <option value="cpf">CPF</option>
+                <option value="codigo">Código PO-</option>
+            </select>
+        </label>
+        <label>Código ou documento
+            <input type="text" name="valor" required placeholder="PM-24K9X7Q1 ou CPF">
+        </label>
+        <button type="submit" class="btn btn-primary">Validar e check-in</button>
+    </form>
+
+    {% if result %}
+        {% if result.ok %}
+        <div class="alert alert-success" style="margin-top:1rem">
+            Check-in OK — <strong>{{ result.paciente.nome }}</strong> ({{ result.paciente.codigo }})
+            {% if result.paciente.statusClinicoLabel %} · {{ result.paciente.statusClinicoLabel }}{% endif %}
+        </div>
+        {% else %}
+        <div class="alert alert-danger" style="margin-top:1rem">{{ result.error }}</div>
+        {% endif %}
+    {% endif %}
+
+    <h2 style="margin-top:2rem">Check-ins hoje ({{ painel.totais.checkins }})</h2>
+    <ul>
+        {% for c in painel.checkins_hoje %}
+        <li>{{ c.hora }} — {{ c.paciente }} ({{ c.metodo }})</li>
+        {% else %}
+        <li>Nenhum check-in ainda hoje.</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}

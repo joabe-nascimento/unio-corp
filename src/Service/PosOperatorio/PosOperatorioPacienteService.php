@@ -160,6 +160,7 @@ final class PosOperatorioPacienteService
         $this->applyCpf($paciente, $empresa, $data);
 
         $this->applyDataCirurgia($paciente, (string) ($data['data_cirurgia'] ?? ''));
+        $this->applyDataNascimento($paciente, $data);
 
 
 
@@ -217,6 +218,7 @@ final class PosOperatorioPacienteService
         $this->applyCpf($paciente, $paciente->getEmpresa(), $data);
 
         $this->applyDataCirurgia($paciente, (string) ($data['data_cirurgia'] ?? ''));
+        $this->applyDataNascimento($paciente, $data);
 
 
 
@@ -457,7 +459,7 @@ final class PosOperatorioPacienteService
                 PosOperatorioEvento::TIPO_RETORNO => 'Retorno confirmado',
                 PosOperatorioEvento::TIPO_VITORIA => 'Vitória AI',
                 PosOperatorioEvento::TIPO_ACESSO_FICHA => 'Acesso à ficha',
-                PosOperatorioEvento::TIPO_CHAT => 'Chat clínico',
+                PosOperatorioEvento::TIPO_CHAT => 'Pedir ajuda',
                 default => 'Registro',
             },
             'detail' => $this->eventDetail($ev),
@@ -472,7 +474,7 @@ final class PosOperatorioPacienteService
                 PosOperatorioEvento::TIPO_RETORNO => 'fa-calendar-check',
                 PosOperatorioEvento::TIPO_VITORIA => 'fa-sparkles',
                 PosOperatorioEvento::TIPO_ACESSO_FICHA => 'fa-eye',
-                PosOperatorioEvento::TIPO_CHAT => 'fa-comments',
+                PosOperatorioEvento::TIPO_CHAT => 'fa-hand-holding-medical',
                 default => 'fa-circle-dot',
             },
             'tone' => match ($tipo) {
@@ -617,6 +619,25 @@ final class PosOperatorioPacienteService
 
         }
 
+    }
+
+    private function applyDataNascimento(PosOperatorioPaciente $paciente, array $data): void
+    {
+        if (!array_key_exists('data_nascimento', $data)) {
+            return;
+        }
+
+        $raw = trim((string) ($data['data_nascimento'] ?? ''));
+        if ($raw === '') {
+            $paciente->setDataNascimento(null);
+
+            return;
+        }
+
+        $dt = \DateTimeImmutable::createFromFormat('Y-m-d', $raw);
+        if ($dt) {
+            $paciente->setDataNascimento($dt);
+        }
     }
 
 

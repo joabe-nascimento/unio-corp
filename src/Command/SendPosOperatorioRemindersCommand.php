@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Repository\EmpresaRepository;
+use App\Service\PosOperatorio\PosOperatorioEscalationService;
 use App\Service\PosOperatorio\PosOperatorioReminderService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -13,13 +14,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:pos-operatorio:send-reminders',
-    description: 'Envia lembretes de questionários pendentes (cron diário)',
+    description: 'Envia lembretes de questionários pendentes e processa escalação de alertas (cron diário)',
 )]
 final class SendPosOperatorioRemindersCommand extends Command
 {
     public function __construct(
         private EmpresaRepository $empresaRepo,
         private PosOperatorioReminderService $reminders,
+        private PosOperatorioEscalationService $escalation,
     ) {
         parent::__construct();
     }
@@ -40,29 +42,38 @@ final class SendPosOperatorioRemindersCommand extends Command
         $totalEnviados = 0;
         $totalIgnorados = 0;
         $totalSemMedico = 0;
+        $totalPacientes = 0;
+        $totalEscalados = 0;
 
         foreach ($empresas as $empresa) {
             if (!$empresa) {
                 continue;
             }
             $result = $this->reminders->sendPendingQuestionnaireReminders($empresa);
+            $escalation = $this->escalation->processOpenAlerts($empresa);
             $totalEnviados += $result['enviados'];
             $totalIgnorados += $result['ignorados'];
             $totalSemMedico += $result['sem_medico'];
+            $totalPacientes += $result['pacientes'];
+            $totalEscalados += $escalation['escalados'];
             $io->writeln(sprintf(
-                'Empresa %s: %d lembrete(s), %d ignorado(s), %d sem médico',
+                'Empresa %s: %d lembrete(s), %d paciente(s) notificado(s), %d ignorado(s), %d sem médico, %d escalação(ões)',
                 $empresa->getNome(),
                 $result['enviados'],
+                $result['pacientes'],
                 $result['ignorados'],
                 $result['sem_medico'],
+                $escalation['escalados'],
             ));
         }
 
         $io->success(sprintf(
-            'Concluído — %d enviados, %d ignorados, %d sem médico responsável.',
+            'Concluído — %d lembretes, %d pacientes, %d ignorados, %d sem médico, %d escalações.',
             $totalEnviados,
+            $totalPacientes,
             $totalIgnorados,
             $totalSemMedico,
+            $totalEscalados,
         ));
 
         return Command::SUCCESS;

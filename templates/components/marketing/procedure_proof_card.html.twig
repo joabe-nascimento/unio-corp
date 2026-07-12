@@ -1,0 +1,28 @@
+{# Comprovante de procedimento — documento do beneficiário #}
+{% set proof = proof|default({}) %}
+<article class="mkt-proof-doc">
+    <header class="mkt-proof-doc__head">
+        <span class="mkt-proof-doc__clinica">{{ proof.clinica|default('CLÍNICA') }}</span>
+        <h2 class="mkt-proof-doc__title">{{ proof.titulo|default('Comprovante de procedimento') }}</h2>
+        <p class="mkt-proof-doc__status">{{ proof.status_label|default('Documento válido') }}</p>
+    </header>
+    <dl class="mkt-proof-doc__grid">
+        <div><dt>Paciente</dt><dd>{{ proof.nome|default('—') }}</dd></div>
+        <div><dt>Código</dt><dd><code>{{ proof.codigo_paciente|default('—') }}</code></dd></div>
+        <div><dt>Procedimento</dt><dd>{{ proof.procedimento|default('—') }}</dd></div>
+        <div><dt>Data da cirurgia</dt><dd>{{ proof.cirurgia|default('—') }}</dd></div>
+        {% if proof.dia_pos is not null %}
+        <div><dt>Fase pós-operatória</dt><dd>D+{{ proof.dia_pos }}</dd></div>
+        {% endif %}
+        <div><dt>Médico responsável</dt><dd>{{ proof.medico|default('—') }}</dd></div>
+        <div><dt>Emitido em</dt><dd>{{ proof.emitido_em|default('—') }}</dd></div>
+        <div><dt>Válido até</dt><dd>{{ proof.valido_ate|default('—') }}</dd></div>
+        <div class="mkt-proof-doc__code"><dt>Verificação</dt><dd><code>{{ proof.verificacao|default('—') }}</code></dd></div>
+    </dl>
+    {% if verificacao_url|default(null) %}
+    <footer class="mkt-proof-doc__qr">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data={{ verificacao_url|url_encode }}" width="140" height="140" alt="QR de validação" loading="lazy">
+        <p>Escaneie para validar na recepção</p>
+    </footer>
+    {% endif %}
+</article>

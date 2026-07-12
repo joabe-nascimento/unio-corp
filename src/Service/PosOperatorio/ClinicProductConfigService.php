@@ -11,7 +11,7 @@ use App\PosOperatorio\ClinicProductCatalog;
 final class ClinicProductConfigService
 {
     public function __construct(
-        private string $projectDir,
+        private ClinicConfigStore $store,
     ) {}
 
     /** @return array<string, bool> */
@@ -75,34 +75,12 @@ final class ClinicProductConfigService
     /** @return array<string, mixed> */
     private function read(Empresa $empresa): array
     {
-        $path = $this->path($empresa);
-        if (!is_file($path)) {
-            return [];
-        }
-        $raw = file_get_contents($path);
-        if ($raw === false || $raw === '') {
-            return [];
-        }
-        $decoded = json_decode($raw, true);
-
-        return \is_array($decoded) ? $decoded : [];
+        return $this->store->read($empresa, 'produtos');
     }
 
     /** @param array<string, mixed> $data */
     private function write(Empresa $empresa, array $data): void
     {
-        $dir = dirname($this->path($empresa));
-        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
-            throw new \RuntimeException('Não foi possível criar diretório de produtos clínicos.');
-        }
-        file_put_contents(
-            $this->path($empresa),
-            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-        );
-    }
-
-    private function path(Empresa $empresa): string
-    {
-        return sprintf('%s/var/clinic/produtos-%d.json', rtrim($this->projectDir, '/\\'), $empresa->getId());
+        $this->store->write($empresa, 'produtos', $data);
     }
 }

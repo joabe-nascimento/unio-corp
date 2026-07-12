@@ -32,4 +32,16 @@ final class PosOperatorioTimelineFormatterTest extends TestCase
 
         self::assertSame('Paciente cadastrado', PosOperatorioTimelineFormatter::format($event)['detail']);
     }
+
+    public function testHelpRequestUsesPedirAjudaLabel(): void
+    {
+        $event = (new PosOperatorioEvento())
+            ->setTipo(PosOperatorioEvento::TIPO_CHAT)
+            ->setDescricao('Você pediu ajuda à equipe clínica.');
+
+        $formatted = PosOperatorioTimelineFormatter::format($event);
+
+        self::assertSame('Pedir ajuda', $formatted['label']);
+        self::assertSame('fa-hand-holding-medical', $formatted['icon']);
+    }
 }

@@ -30,6 +30,10 @@
                         </dd>
                     </div>
                     <div class="pos-op-detail-grid__row">
+                        <dt>Data de nascimento</dt>
+                        <dd>{{ paciente.dataNascimento ? paciente.dataNascimento|date('d/m/Y') : '—' }}</dd>
+                    </div>
+                    <div class="pos-op-detail-grid__row">
                         <dt>Data da cirurgia</dt>
                         <dd>{{ paciente.dataCirurgia ? paciente.dataCirurgia|date('d/m/Y') : '—' }}</dd>
                     </div>
@@ -93,13 +97,17 @@
                                 {% endif %}
                             {% else %}
                                 <span class="text-muted">Não vinculado</span>
+                                <form method="post" action="{{ path('app_pos_operatorio_paciente_convite_portal', { id: paciente.id }) }}" class="d-inline">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_op_convite_' ~ paciente.id) }}">
+                                    <button type="submit" class="btn btn-link btn-sm p-0 ml-1 align-baseline">Gerar convite</button>
+                                </form>
                                 <button type="button"
                                         class="btn btn-link btn-sm p-0 ml-1 align-baseline"
                                         data-unio-offcanvas-open="pos-op-paciente-edit"
                                         data-pos-op-paciente-edit="{{ paciente.id }}"
                                         data-pos-op-paciente-nome="{{ paciente|pos_op_paciente_nome|e('html_attr') }}"
                                         data-pos-op-paciente-codigo="{{ paciente.codigo|e('html_attr') }}">
-                                    Vincular
+                                    Vincular manualmente
                                 </button>
                             {% endif %}
                         </dd>
@@ -127,6 +135,26 @@
                     {% endif %}
                     <a href="{{ path('app_pos_operatorio_carteirinha_paciente', { id: paciente.id }) }}" class="btn-unio-ghost btn-sm mt-2">
                         <i class="fas fa-id-card" aria-hidden="true"></i> Gerenciar carteirinha
+                    </a>
+                </p>
+            </section>
+            {% endif %}
+
+            {% if clinic_products_enabled.comprovante_procedimento|default(true) %}
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Comprovante de procedimento',
+                    subtitle: 'Documento do episódio cirúrgico'
+                } %}
+                <p class="px-3 pb-3 mb-0">
+                    {% if paciente.hasComprovanteAtivo() %}
+                    <span class="clinic-status clinic-status--success">Emissão ativa</span>
+                    <span class="text-muted small d-block mt-1">Código {{ paciente.comprovanteVerificacao }} · válido até {{ paciente.comprovanteValidaAte|date('d/m/Y') }}</span>
+                    {% else %}
+                    <span class="text-muted">Nenhum comprovante emitido.</span>
+                    {% endif %}
+                    <a href="{{ path('app_pos_operatorio_comprovante_paciente', { id: paciente.id }) }}" class="btn-unio-ghost btn-sm mt-2">
+                        <i class="fas fa-file-medical" aria-hidden="true"></i> Gerenciar comprovante
                     </a>
                 </p>
             </section>

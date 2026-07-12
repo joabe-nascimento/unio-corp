@@ -45,7 +45,12 @@ port=${DB_MYSQL_PORT}
 EOF
   chmod 600 "$cnf"
 
-  if mysqldump --defaults-extra-file="$cnf" --single-transaction --quick "$DB_MYSQL_NAME" | gzip -c > "$outfile"; then
+  local dump_args=(--single-transaction --quick)
+  if mysqldump --help 2>/dev/null | grep -q -- '--no-tablespaces'; then
+    dump_args+=(--no-tablespaces)
+  fi
+
+  if mysqldump --defaults-extra-file="$cnf" "${dump_args[@]}" "$DB_MYSQL_NAME" | gzip -c > "$outfile"; then
     local size
     size="$(wc -c < "$outfile" | tr -d ' ')"
     echo "Backup DB OK: $outfile ($size bytes)"

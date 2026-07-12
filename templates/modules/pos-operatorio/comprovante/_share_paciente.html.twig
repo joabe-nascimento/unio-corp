@@ -1,0 +1,67 @@
+{% set portal_url = portal_url|default(absolute_url(path('app_comprovante_procedimento'))) %}
+{% set whatsapp_lines = [
+    'Olá ' ~ paciente.nome|split(' ')|first ~ '! Seu comprovante de procedimento está pronto.',
+    '',
+    'Acesse: ' ~ portal_url,
+    '',
+    'Na validação, use:',
+    '• Código do paciente: ' ~ paciente.codigo,
+    '• Código do comprovante: ' ~ paciente.comprovanteVerificacao,
+    '',
+    'Validação pública (QR): ' ~ (verificacao_url|default('')),
+] %}
+{% set whatsapp_message = whatsapp_lines|join("\n") %}
+{% set whatsapp_phone = paciente.telefoneContato|default('')|replace({' ': '', '(': '', ')': '', '-': ''}) %}
+{% set whatsapp_url = whatsapp_phone|length >= 10 ? ('https://wa.me/55' ~ whatsapp_phone ~ '?text=' ~ whatsapp_message|url_encode) : null %}
+
+<section class="clinic-carteirinha-share" data-clinic-carteirinha-share>
+    <p class="clinic-carteirinha-share__lead text-muted small">
+        Compartilhe o link, os códigos e o QR de validação pública para recepção ou hospital.
+    </p>
+
+    <dl class="clinic-carteirinha-share__codes">
+        <div>
+            <dt>Código do paciente</dt>
+            <dd><code>{{ paciente.codigo }}</code>
+                <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ paciente.codigo }}"><i class="fas fa-copy"></i></button>
+            </dd>
+        </div>
+        <div>
+            <dt>Código do comprovante</dt>
+            <dd><code>{{ paciente.comprovanteVerificacao }}</code>
+                <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ paciente.comprovanteVerificacao }}"><i class="fas fa-copy"></i></button>
+            </dd>
+        </div>
+    </dl>
+
+    {% if verificacao_url %}
+    <div class="clinic-carteirinha-share__portal">
+        <span class="clinic-carteirinha-share__portal-label">Validação pública (QR)</span>
+        <div class="clinic-carteirinha-share__portal-row">
+            <code class="clinic-carteirinha-share__portal-url">{{ verificacao_url }}</code>
+            <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ verificacao_url }}"><i class="fas fa-copy"></i></button>
+            <a href="{{ verificacao_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener">Abrir</a>
+        </div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ verificacao_url|url_encode }}" width="160" height="160" alt="QR validação" class="mt-2" loading="lazy">
+    </div>
+    {% endif %}
+
+    <div class="clinic-carteirinha-share__portal mt-3">
+        <span class="clinic-carteirinha-share__portal-label">Portal do comprovante</span>
+        <div class="clinic-carteirinha-share__portal-row">
+            <code class="clinic-carteirinha-share__portal-url">{{ portal_url }}</code>
+            <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ portal_url }}"><i class="fas fa-copy"></i></button>
+        </div>
+    </div>
+
+    {% include 'components/clinic/_wallet_pass_actions.html.twig' with {
+        wallet: clinic_wallet_share(paciente, 'comprovante')
+    } %}
+
+    <div class="clinic-carteirinha-share__actions mt-3">
+        <button type="button" class="btn-unio-ghost btn-sm btn-block" data-copy-text="{{ whatsapp_message }}"><i class="fas fa-copy mr-1"></i> Copiar mensagem</button>
+        {% if whatsapp_url %}
+        <a href="{{ whatsapp_url }}" class="btn-unio btn-sm btn-block" target="_blank" rel="noopener"><i class="fab fa-whatsapp mr-1"></i> Enviar no WhatsApp</a>
+        {% endif %}
+    </div>
+</section>

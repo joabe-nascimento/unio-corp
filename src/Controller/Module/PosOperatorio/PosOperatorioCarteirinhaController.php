@@ -6,6 +6,7 @@ use App\Entity\Empresa;
 use App\Entity\User;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\PosOperatorio\ClinicCarteirinhaService;
+use App\Service\PosOperatorio\ClinicComprovanteService;
 use App\Service\PosOperatorio\ClinicProductConfigService;
 use App\Service\PosOperatorio\PosOperatorioPacienteService;
 use App\Service\WorkspaceService;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/pos-operatorio/carteirinha')]
@@ -29,6 +31,7 @@ final class PosOperatorioCarteirinhaController extends AbstractController
         private PosOperatorioPacienteService $pacientes,
         private PosOperatorioPacienteRepository $pacienteRepo,
         private ClinicProductConfigService $productConfig,
+        private ClinicComprovanteService $comprovante,
     ) {}
 
     #[Route('', name: 'app_pos_operatorio_carteirinha')]
@@ -65,6 +68,9 @@ final class PosOperatorioCarteirinhaController extends AbstractController
             'planos' => ClinicCarteirinhaService::PLANOS,
             'planos_preview' => ClinicCarteirinhaService::planPreviewMeta(),
             'tem_emissao' => $paciente->hasCarteirinhaAtiva(),
+            'verificacao_url' => $paciente->getCarteirinhaVerificacao()
+                ? $this->generateUrl('app_verificar_documento', ['codigo' => $paciente->getCarteirinhaVerificacao()], UrlGeneratorInterface::ABSOLUTE_URL)
+                : null,
         ]);
     }
 
@@ -91,6 +97,12 @@ final class PosOperatorioCarteirinhaController extends AbstractController
 
         try {
             $this->carteirinha->emitir($paciente, $user, $plano, $validade);
+            if ($this->productConfig->isEnabled($empresa, ClinicProductCatalog::COMPROVANTE) && !$paciente->hasComprovanteAtivo()) {
+                try {
+                    $this->comprovante->emitir($paciente, $user, max(30, $validade));
+                } catch (\Throwable) {
+                }
+            }
             $this->addFlash('success', 'Carteirinha emitida para ' . $paciente->getNome() . '.');
         } catch (\Throwable $e) {
             $this->addFlash('error', $e->getMessage());

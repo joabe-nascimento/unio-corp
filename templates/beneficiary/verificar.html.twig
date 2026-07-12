@@ -1,0 +1,67 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Validação de documento{% endblock %}
+{% block benef_product %}Validação{% endblock %}
+{% set benef_nav_active = '' %}
+
+{% block benef_content %}
+<section class="benef-shell benef-verificar">
+    <article class="benef-card benef-card--wide benef-verificar__card benef-verificar__card--{{ resultado.status }}">
+        <header class="benef-card__head">
+            <div>
+                <h1>Validação de documento</h1>
+                <p>Consulta pública para recepção, hospital ou convênio.</p>
+            </div>
+            <span class="benef-verificar__badge benef-verificar__badge--{{ resultado.status }}">
+                {% if resultado.status == 'valida' %}Válido{% elseif resultado.status == 'expirada' %}Expirado{% elseif resultado.status == 'revogada' %}Revogado{% else %}Não encontrado{% endif %}
+            </span>
+        </header>
+
+        {% if resultado.status == 'inexistente' %}
+        <p class="benef-verificar__lead">O código <code>{{ resultado.codigo }}</code> não corresponde a nenhum documento ativo no sistema.</p>
+        {% else %}
+        <dl class="benef-verificar__grid">
+            <div><dt>Tipo</dt><dd>{{ resultado.tipo_label }}</dd></div>
+            <div><dt>Clínica</dt><dd>{{ resultado.clinica }}</dd></div>
+            <div><dt>Beneficiário</dt><dd>{{ resultado.paciente_resumido }}</dd></div>
+            <div><dt>Procedimento</dt><dd>{{ resultado.procedimento }}</dd></div>
+            <div><dt>Cirurgia</dt><dd>{{ resultado.cirurgia }}</dd></div>
+            <div><dt>Médico</dt><dd>{{ resultado.medico }}</dd></div>
+            <div><dt>Emitido em</dt><dd>{{ resultado.emitido_em|default('—') }}</dd></div>
+            {% if resultado.hash_curto|default('') %}
+            <div><dt>Assinatura</dt><dd><code>{{ resultado.hash_curto }}</code></dd></div>
+            {% endif %}
+            <div><dt>Válido até</dt><dd>{{ resultado.valido_ate }}</dd></div>
+            <div><dt>Código</dt><dd><code>{{ resultado.codigo }}</code></dd></div>
+            <div><dt>Verificado em</dt><dd>{{ resultado.verificado_em }}</dd></div>
+        </dl>
+        {% if resultado.status == 'valida' %}
+        <p class="benef-verificar__ok"><i class="fas fa-circle-check" aria-hidden="true"></i> Documento autêntico e dentro da validade.</p>
+        {% if resultado.selo_unio|default(false) %}
+        <p class="benef-verificar__seal"><i class="fas fa-shield-halved" aria-hidden="true"></i> Validado pela plataforma Unio Saúde</p>
+        {% endif %}
+        {% if resultado.acompanhamento_ativo|default(false) %}
+        <p class="benef-verificar__follow">Acompanhamento pós-operatório ativo nesta clínica.</p>
+        {% endif %}
+        {% endif %}
+        {% endif %}
+
+        <footer class="benef-verificar__foot">
+            <a href="{{ path('app_paciente_hub') }}" class="benef-btn benef-btn--surface">Área do paciente</a>
+        </footer>
+    </article>
+</section>
+{% endblock %}
+
+{% block benef_head %}
+<style>
+.benef-verificar__badge { padding:.35rem .75rem; border-radius:999px; font-weight:700; font-size:.8rem; }
+.benef-verificar__badge--valida { background:#dcfce7; color:#166534; }
+.benef-verificar__badge--expirada, .benef-verificar__badge--revogada { background:#fee2e2; color:#991b1b; }
+.benef-verificar__badge--inexistente { background:#f1f5f9; color:#475569; }
+.benef-verificar__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin:1.25rem 0; }
+.benef-verificar__grid dt { font-size:.75rem; color:var(--muted,#64748b); margin-bottom:.2rem; }
+.benef-verificar__grid dd { margin:0; font-weight:600; }
+.benef-verificar__ok { color:#166534; font-weight:600; }
+</style>
+{% endblock %}

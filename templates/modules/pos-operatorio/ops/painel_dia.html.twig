@@ -1,0 +1,30 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Painel do dia{% endblock %}
+
+{% block hub_content %}
+<section class="pos-op-page">
+    <header class="pos-op-page__head">
+        <h1>Painel do dia</h1>
+        <p>Retornos, questionários pendentes e carteirinhas a vencer.</p>
+    </header>
+
+    <div class="pos-op-kpi-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem">
+        <div><strong>{{ painel.totais.pacientes_ativos }}</strong><br>Pacientes ativos</div>
+        <div><strong>{{ painel.totais.checkins }}</strong><br>Check-ins hoje</div>
+        <div><strong>{{ painel.sem_questionario|length }}</strong><br>Sem questionário</div>
+        <div><strong>{{ painel.carteirinhas_vencendo|length }}</strong><br>Carteirinhas vencendo</div>
+    </div>
+
+    <h2>Retornos hoje</h2>
+    <ul>{% for p in painel.retornos_hoje %}<li>{{ p.nome }} ({{ p.codigo }}) — D+{{ p.dia_pos }}</li>{% else %}<li>Nenhum retorno previsto.</li>{% endfor %}</ul>
+
+    <h2>Questionário pendente</h2>
+    <ul>{% for p in painel.sem_questionario %}<li>{{ p.nome }} ({{ p.codigo }})</li>{% else %}<li>Todos responderam hoje.</li>{% endfor %}</ul>
+
+    <h2>Carteirinhas vencendo (7 dias)</h2>
+    <ul>{% for p in painel.carteirinhas_vencendo %}<li>{{ p.nome }} ({{ p.codigo }})</li>{% else %}<li>Nenhuma carteirinha próxima do vencimento.</li>{% endfor %}</ul>
+
+    <p><a href="{{ path('app_pos_operatorio_recepcao') }}">Abrir scanner da recepção</a></p>
+</section>
+{% endblock %}

@@ -10,7 +10,7 @@ use App\Entity\Empresa;
 final class ClinicIntegrationConfigService
 {
     public function __construct(
-        private string $projectDir,
+        private ClinicConfigStore $store,
     ) {}
 
     /** @return array{webhook_url: string, webhook_events: list<string>, lembretes_sms: bool} */
@@ -22,7 +22,7 @@ final class ClinicIntegrationConfigService
             'webhook_url' => (string) ($stored['webhook_url'] ?? ''),
             'webhook_events' => \is_array($stored['webhook_events'] ?? null)
                 ? array_values(array_filter($stored['webhook_events'], 'is_string'))
-                : ['alerta_p1', 'questionario_pendente'],
+                : ['alerta_p1', 'questionario_pendente', 'alerta_escalado', 'carteirinha.emitida', 'comprovante.emitido', 'verificacao.sucesso', 'checkin.realizado'],
             'lembretes_sms' => (bool) ($stored['lembretes_sms'] ?? true),
         ];
     }
@@ -47,37 +47,36 @@ final class ClinicIntegrationConfigService
         return $url !== '' && filter_var($url, FILTER_VALIDATE_URL) !== false;
     }
 
+    /** @return list<int> */
+    public function getPlantaoUserIds(Empresa $empresa): array
+    {
+        $stored = $this->read($empresa);
+        $ids = $stored['plantao_user_ids'] ?? [];
+
+        if (!\is_array($ids)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('intval', $ids), static fn (int $id): bool => $id > 0));
+    }
+
+    /** @param list<int> $ids */
+    public function setPlantaoUserIds(Empresa $empresa, array $ids): void
+    {
+        $current = $this->read($empresa);
+        $current['plantao_user_ids'] = array_values(array_unique(array_filter(array_map('intval', $ids), static fn (int $id): bool => $id > 0)));
+        $this->write($empresa, $current);
+    }
+
     /** @return array<string, mixed> */
     private function read(Empresa $empresa): array
     {
-        $path = $this->path($empresa);
-        if (!is_file($path)) {
-            return [];
-        }
-        $raw = file_get_contents($path);
-        if ($raw === false || $raw === '') {
-            return [];
-        }
-        $decoded = json_decode($raw, true);
-
-        return \is_array($decoded) ? $decoded : [];
+        return $this->store->read($empresa, 'integracoes');
     }
 
     /** @param array<string, mixed> $data */
     private function write(Empresa $empresa, array $data): void
     {
-        $dir = dirname($this->path($empresa));
-        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
-            throw new \RuntimeException('Não foi possível criar diretório de configuração clínica.');
-        }
-        file_put_contents(
-            $this->path($empresa),
-            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-        );
-    }
-
-    private function path(Empresa $empresa): string
-    {
-        return sprintf('%s/var/clinic/integracoes-%d.json', rtrim($this->projectDir, '/\\'), $empresa->getId());
+        $this->store->write($empresa, 'integracoes', $data);
     }
 }

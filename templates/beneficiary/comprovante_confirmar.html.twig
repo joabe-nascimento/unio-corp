@@ -1,0 +1,26 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Confirmar identidade{% endblock %}
+{% block benef_product %}Comprovante{% endblock %}
+{% set benef_nav_active = 'comprovante' %}
+
+{% block benef_content %}
+<section class="benef-shell">
+    <div class="benef-card benef-card--wide">
+        <header class="benef-card__head">
+            <h1>Confirme com um segundo dado</h1>
+            <p>Use um identificador diferente do passo anterior.</p>
+        </header>
+
+        {% for msg in app.flashes('error') %}
+        <div class="benef-alert benef-alert--error" role="alert">{{ msg }}</div>
+        {% endfor %}
+
+        {% include 'beneficiary/_access_form_confirm.html.twig' with {
+            csrf_name: 'beneficiary_comprovante',
+            back_url: path('app_comprovante_procedimento'),
+            verificacao_label: 'código do comprovante'
+        } %}
+    </div>
+</section>
+{% endblock %}

@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\PosOperatorio\PosOperatorioAuditService;
 use App\Service\PosOperatorio\PosOperatorioPacienteService;
+use App\Service\PosOperatorio\PosOperatorioPortalInviteService;
 use App\Service\PosOperatorio\PosOperatorioPortalInteractionService;
 use App\Service\PosOperatorio\PosOperatorioPortalService;
 use App\Service\PosOperatorio\PosOperatorioQuestionarioService;
@@ -31,6 +32,7 @@ final class PosOperatorioPortalController extends AbstractController
         private PosOperatorioQuestionarioService $questionarioService,
         private PosOperatorioPortalService $portalService,
         private PosOperatorioPortalInteractionService $portalInteraction,
+        private PosOperatorioPortalInviteService $portalInvite,
         private PosOperatorioAuditService $audit,
         private EntityManagerInterface $em,
     ) {}
@@ -40,6 +42,15 @@ final class PosOperatorioPortalController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        $token = (string) $request->getSession()->get($this->portalInvite->sessionKey(), '');
+        if ($token !== '') {
+            $invitePaciente = $this->portalInvite->findValidPaciente($token);
+            if ($invitePaciente !== null && $this->portalInvite->acceptInvite($invitePaciente, $user)) {
+                $request->getSession()->remove($this->portalInvite->sessionKey());
+                $this->addFlash('success', sprintf('Portal vinculado a %s.', $invitePaciente->getNome()));
+            }
+        }
+
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
         $paciente = $this->pacienteRepo->findOneBy(['portalUser' => $user]);
 

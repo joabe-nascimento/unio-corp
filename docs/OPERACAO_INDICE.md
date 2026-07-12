@@ -13,6 +13,7 @@ Documentação da instância **uniosaude** (Unio Saúde, deploy dedicado).
 | [DEPLOY_MANUAL_UNIOSAUDE.md](DEPLOY_MANUAL_UNIOSAUDE.md) | **Deploy manual PC → HostGator (sem Actions)** |
 | [UNIOSAUDE_DEPLOY_OPERACAO.md](UNIOSAUDE_DEPLOY_OPERACAO.md) | **Operação atual: push vs manual, X vermelho, billing** |
 | [UNIOSAUDE_ACESSOS.md](UNIOSAUDE_ACESSOS.md) | **Login, senhas e portal do beneficiário (produção)** |
+| [UNIOSAUDE_BANCO.md](UNIOSAUDE_BANCO.md) | **MySQL: migrations, backup, tabelas carteirinha/comprovante** |
 | [UNIOSAUDE_DEPLOY_RESULTADO_2026-07-11.md](UNIOSAUDE_DEPLOY_RESULTADO_2026-07-11.md) | Relatório do deploy manual 11/07 |
 | [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md) | Pipeline SSH HostGator |
 | [DEPLOY_AGORA.md](DEPLOY_AGORA.md) | Checklist rápido de deploy |

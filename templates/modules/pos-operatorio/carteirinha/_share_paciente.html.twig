@@ -74,6 +74,22 @@
         </div>
     </div>
 
+    {% if verificacao_url|default(null) %}
+    <div class="clinic-carteirinha-share__portal mt-3">
+        <span class="clinic-carteirinha-share__portal-label">Validação pública (QR)</span>
+        <div class="clinic-carteirinha-share__portal-row">
+            <code class="clinic-carteirinha-share__portal-url">{{ verificacao_url }}</code>
+            <button type="button" class="btn-unio-ghost btn-sm" data-copy-text="{{ verificacao_url }}"><i class="fas fa-copy"></i></button>
+            <a href="{{ verificacao_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener">Abrir</a>
+        </div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ verificacao_url|url_encode }}" width="160" height="160" alt="QR validação" class="mt-2" loading="lazy">
+    </div>
+    {% endif %}
+
+    {% include 'components/clinic/_wallet_pass_actions.html.twig' with {
+        wallet: clinic_wallet_share(paciente, 'carteirinha')
+    } %}
+
     <div class="clinic-carteirinha-share__actions">
         <button type="button" class="btn-unio-ghost btn-sm btn-block" data-copy-text="{{ whatsapp_message }}">
             <i class="fas fa-copy mr-1" aria-hidden="true"></i> Copiar mensagem

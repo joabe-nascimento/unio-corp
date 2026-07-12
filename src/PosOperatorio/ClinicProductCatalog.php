@@ -9,6 +9,7 @@ final class ClinicProductCatalog
 {
     public const POS_OPERATORIO = 'pos_operatorio';
     public const CARTEIRINHA = 'carteirinha_digital';
+    public const COMPROVANTE = 'comprovante_procedimento';
     public const GUIA_MEDICO = 'guia_medico';
 
     /** @return list<array<string, mixed>> */
@@ -55,6 +56,28 @@ final class ClinicProductCatalog
                     'Foto do beneficiário',
                     'Modelos por plano',
                     'Código de verificação',
+                    'QR de validação pública',
+                    'Compartilhamento com o paciente',
+                ],
+            ],
+            [
+                'id' => self::COMPROVANTE,
+                'label' => 'Comprovante de procedimento',
+                'short' => 'Comprovante',
+                'desc' => 'Documento do episódio cirúrgico com QR de validação pública na recepção.',
+                'icon' => 'fa-file-medical',
+                'tone' => 'sky',
+                'maturity' => 'active',
+                'route' => 'app_pos_operatorio_comprovante',
+                'route_prefix' => 'app_pos_operatorio_comprovante',
+                'route_label' => 'Emitir comprovantes',
+                'marketing_route' => 'app_comprovante_procedimento',
+                'marketing_params' => [],
+                'default_enabled' => true,
+                'capabilities' => [
+                    'Resumo do procedimento e cirurgia',
+                    'Código de verificação global',
+                    'QR para validação na recepção',
                     'Compartilhamento com o paciente',
                 ],
             ],

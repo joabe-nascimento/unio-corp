@@ -1,0 +1,49 @@
+{% extends 'beneficiary/layout.html.twig' %}
+
+{% block benef_title %}Comprovante de procedimento{% endblock %}
+{% block benef_product %}Comprovante{% endblock %}
+{% set benef_nav_active = 'comprovante' %}
+{% set _preview = demo_preview|default({}) %}
+
+{% block benef_content %}
+<section class="benef-shell benef-shell--split">
+    <div class="benef-product-intro">
+        <div class="benef-product-intro__access">
+            <div class="benef-card">
+                <header class="benef-card__head">
+                    <div>
+                        <h1>Acessar comprovante</h1>
+                        <p>Documento do seu procedimento com validação em duas etapas.</p>
+                    </div>
+                </header>
+
+                {% for msg in app.flashes('error') %}
+                <div class="benef-alert benef-alert--error" role="alert">{{ msg }}</div>
+                {% endfor %}
+
+                {% include 'beneficiary/_access_form_identify.html.twig' with {
+                    csrf_name: 'beneficiary_comprovante',
+                    form_action: path('app_comprovante_procedimento'),
+                    verificacao_label: 'Código do comprovante'
+                } %}
+
+                <details class="benef-demo-hint">
+                    <summary>Ver dados de demonstração</summary>
+                    <ul>
+                        <li><strong>CPF:</strong> {{ demo_hints.cpf_masked }}</li>
+                        <li><strong>Código:</strong> {{ demo_hints.codigo }}</li>
+                        <li><strong>Comprovante:</strong> {{ demo_hints.verificacao }}</li>
+                    </ul>
+                </details>
+            </div>
+        </div>
+
+        <aside class="benef-product-intro__preview">
+            {% include 'components/marketing/procedure_proof_card.html.twig' with {
+                proof: _preview.proof|default({}),
+                verificacao_url: null
+            } %}
+        </aside>
+    </div>
+</section>
+{% endblock %}

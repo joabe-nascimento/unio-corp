@@ -35,6 +35,12 @@
                     <i class="fas fa-book-medical" aria-hidden="true"></i> Abrir guia médico
                 </a>
             </div>
+
+            {% if org_clinic|default(false) and not is_demo %}
+            {% include 'components/clinic/_wallet_pass_actions.html.twig' with {
+                wallet: clinic_wallet_beneficiary('carteirinha')
+            } %}
+            {% endif %}
         </div>
 
         <ul class="benef-download-tips">

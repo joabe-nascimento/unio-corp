@@ -1,12 +1,13 @@
 {# Segunda validação — confirma identidade #}
+{% set verificacao_label_text = verificacao_label|default('código da carteirinha') %}
 {% set method_labels = {
     'cpf': 'CPF',
     'codigo': 'código do paciente',
-    'verificacao': 'código da carteirinha'
+    'verificacao': verificacao_label_text
 } %}
 {% set confirm_hints = {
-    'cpf': 'Informe o código do paciente (PO-…) ou o código da carteirinha.',
-    'codigo': 'Informe o código da carteirinha ou o CPF cadastrado.',
+    'cpf': 'Informe o código do paciente (PO-…) ou o ' ~ verificacao_label_text ~ '.',
+    'codigo': 'Informe o ' ~ verificacao_label_text ~ ' ou o CPF cadastrado.',
     'verificacao': 'Informe o código do paciente (PO-…). Se tiver CPF cadastrado, também funciona.'
 } %}
 

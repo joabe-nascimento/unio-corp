@@ -2,11 +2,15 @@
 
 namespace App\Service\PosOperatorio;
 
+use App\Entity\ClinicDocumentoEmissao;
 use App\Entity\Empresa;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\PosOperatorio\PosOperatorioDisplay;
 use App\Repository\PosOperatorioPacienteRepository;
+use App\Service\Clinic\ClinicBrandingService;
+use App\Service\Clinic\ClinicDocumentoAuditService;
+use App\Service\Clinic\ClinicWebhookDispatcherBridge;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -26,6 +30,10 @@ final class ClinicCarteirinhaService
     public function __construct(
         private EntityManagerInterface $em,
         private PosOperatorioPacienteRepository $pacientes,
+        private ClinicVerificacaoCodigoGenerator $codigos,
+        private ClinicDocumentoAuditService $audit,
+        private ClinicWebhookDispatcherBridge $webhooks,
+        private ClinicBrandingService $branding,
         private string $projectDir,
     ) {}
 
@@ -45,17 +53,43 @@ final class ClinicCarteirinhaService
             throw new \InvalidArgumentException('Plano de carteirinha inválido.');
         }
 
+        $reemitir = $paciente->hasCarteirinhaAtiva();
+        $codigoAnterior = $paciente->getCarteirinhaVerificacao();
+        $novoCodigo = $this->codigos->gerar();
+
         $paciente
             ->setCarteirinhaPlano($plano)
-            ->setCarteirinhaVerificacao($this->gerarCodigoVerificacao($paciente->getEmpresa()))
+            ->setCarteirinhaVerificacao($novoCodigo)
             ->setCarteirinhaEmitidaEm(new \DateTimeImmutable())
             ->setCarteirinhaValidaAte(new \DateTimeImmutable(sprintf('+%d days', max(1, $validadeDias))));
 
+        if ($paciente->getConsentimentoCarteirinhaEm() === null) {
+            $paciente->setConsentimentoCarteirinhaEm(new \DateTimeImmutable());
+        }
+
         $this->em->flush();
+
+        $this->audit->registrar(
+            $paciente,
+            ClinicDocumentoEmissao::TIPO_CARTEIRINHA,
+            $reemitir ? ClinicDocumentoEmissao::ACAO_REEMITIR : ClinicDocumentoEmissao::ACAO_EMITIR,
+            $novoCodigo,
+            $autor,
+            $plano,
+            null,
+            $codigoAnterior !== null ? ['codigo_anterior' => $codigoAnterior] : [],
+        );
+
+        $this->webhooks->documentoEmitido($paciente->getEmpresa(), 'carteirinha', $paciente, [
+            'plano' => $plano,
+            'codigo_verificacao' => $novoCodigo,
+        ]);
     }
 
-    public function revogar(PosOperatorioPaciente $paciente): void
+    public function revogar(PosOperatorioPaciente $paciente, ?User $autor = null): void
     {
+        $codigo = $paciente->getCarteirinhaVerificacao();
+
         $paciente
             ->setCarteirinhaPlano(null)
             ->setCarteirinhaVerificacao(null)
@@ -63,6 +97,16 @@ final class ClinicCarteirinhaService
             ->setCarteirinhaValidaAte(null);
 
         $this->em->flush();
+
+        if ($codigo !== null) {
+            $this->audit->registrar(
+                $paciente,
+                ClinicDocumentoEmissao::TIPO_CARTEIRINHA,
+                ClinicDocumentoEmissao::ACAO_REVOGAR,
+                $codigo,
+                $autor,
+            );
+        }
     }
 
     public function storeFoto(PosOperatorioPaciente $paciente, UploadedFile $file): void
@@ -126,8 +170,20 @@ final class ClinicCarteirinhaService
             $paciente->getTelefoneEmergencia(),
         ])));
 
+        $brand = $this->branding->get($empresa);
+
         return [
-            'clinica' => mb_strtoupper($empresa->getNome()),
+            'clinica' => (string) ($brand['nome_exibicao'] ?? mb_strtoupper($empresa->getNome())),
+            'clinica_logo' => $brand['logo_url'] ?? null,
+            'cor_primaria' => $brand['cor_primaria'] ?? '#4b72be',
+            'status_clinico' => $paciente->getStatusClinicoLabel(),
+            'unidade' => $paciente->getUnidade()?->getNome(),
+            'verso_acoes' => [
+                ['label' => 'Portal do paciente', 'route' => 'app_clinica_portal'],
+                ['label' => 'Guia médico', 'route' => 'app_guia_medico_beneficiario'],
+                ['label' => 'Área do paciente', 'route' => 'app_paciente_hub'],
+                ['label' => 'Pedir ajuda', 'route' => 'app_clinica_portal'],
+            ],
             'iniciais' => $iniciais !== '' ? $iniciais : 'PC',
             'foto' => $this->fotoPublicUrl($paciente->getFotoPath()),
             'nome' => $nome,
@@ -217,18 +273,6 @@ final class ClinicCarteirinhaService
         }
 
         return str_starts_with($path, '/') ? $path : '/' . $path;
-    }
-
-    private function gerarCodigoVerificacao(Empresa $empresa): string
-    {
-        for ($i = 0; $i < 8; ++$i) {
-            $code = strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
-            if ($this->pacientes->findByCarteirinhaVerificacao($empresa, $code) === null) {
-                return $code;
-            }
-        }
-
-        throw new \RuntimeException('Não foi possível gerar código de verificação.');
     }
 
     private function deleteFotoFile(?string $path): void

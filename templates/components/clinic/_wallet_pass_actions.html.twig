@@ -1,0 +1,37 @@
+{# Botões Apple / Google Wallet — staff (token) ou beneficiário (sessão) #}
+{% set _wallet = wallet|default(null) %}
+{% if org_clinic|default(false) and _wallet and _wallet.enabled %}
+<style>
+.clinic-wallet-share__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem}
+.benef-shell .clinic-wallet-share{margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(15,23,42,.08)}
+.clinic-wallet-share__btn i{margin-right:.35rem}
+</style>
+<div class="clinic-wallet-share mt-3">
+    <span class="clinic-carteirinha-share__portal-label">Carteira digital (celular)</span>
+    <p class="text-muted small mb-2">Salve na Apple Wallet ou Google Wallet para apresentar na recepção com QR embutido.</p>
+    <div class="clinic-wallet-share__actions">
+        {% if _wallet.apple.ready %}
+            {% if _wallet.apple.url %}
+            <a href="{{ _wallet.apple.url }}" class="btn-unio-ghost btn-sm btn-block clinic-wallet-share__btn" target="_blank" rel="noopener">
+                <i class="fab fa-apple" aria-hidden="true"></i> Adicionar à Apple Wallet
+            </a>
+            {% elseif _wallet.apple.route is defined %}
+            <a href="{{ path(_wallet.apple.route) }}" class="btn-unio-ghost btn-sm btn-block clinic-wallet-share__btn">
+                <i class="fab fa-apple" aria-hidden="true"></i> Adicionar à Apple Wallet
+            </a>
+            {% endif %}
+        {% endif %}
+        {% if _wallet.google.ready %}
+            {% if _wallet.google.url %}
+            <a href="{{ _wallet.google.url }}" class="btn-unio btn-sm btn-block clinic-wallet-share__btn" target="_blank" rel="noopener">
+                <i class="fab fa-google" aria-hidden="true"></i> Salvar no Google Wallet
+            </a>
+            {% elseif _wallet.google.route is defined %}
+            <a href="{{ path(_wallet.google.route) }}" class="btn-unio btn-sm btn-block clinic-wallet-share__btn" target="_blank" rel="noopener">
+                <i class="fab fa-google" aria-hidden="true"></i> Salvar no Google Wallet
+            </a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endif %}

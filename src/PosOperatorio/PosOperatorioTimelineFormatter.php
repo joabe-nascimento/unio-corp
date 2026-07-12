@@ -34,7 +34,7 @@ final class PosOperatorioTimelineFormatter
             PosOperatorioEvento::TIPO_RETORNO => 'Retorno confirmado',
             PosOperatorioEvento::TIPO_VITORIA => 'Assistente',
             PosOperatorioEvento::TIPO_ACESSO_FICHA => 'Acesso à ficha',
-            PosOperatorioEvento::TIPO_CHAT => 'Chat clínico',
+            PosOperatorioEvento::TIPO_CHAT => 'Pedir ajuda',
             default => 'Registro',
         };
     }
@@ -51,7 +51,7 @@ final class PosOperatorioTimelineFormatter
             PosOperatorioEvento::TIPO_RETORNO => 'fa-calendar-check',
             PosOperatorioEvento::TIPO_VITORIA => 'fa-sparkles',
             PosOperatorioEvento::TIPO_ACESSO_FICHA => 'fa-eye',
-            PosOperatorioEvento::TIPO_CHAT => 'fa-comments',
+            PosOperatorioEvento::TIPO_CHAT => 'fa-hand-holding-medical',
             default => 'fa-circle-dot',
         };
     }

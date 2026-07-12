@@ -17,6 +17,15 @@ parameters:
     app.chat_mercure_topic_base_default: 'https://localhost/chat'
     app.pos_op_mercure_topic_base_default: 'https://localhost/pos-operatorio'
 
+    wallet_apple_pass_type_id_default: ''
+    wallet_apple_team_id_default: ''
+    wallet_apple_cert_path_default: ''
+    wallet_apple_cert_password_default: ''
+    wallet_apple_wwdr_path_default: 'config/wallet/AppleWWDRCAG4.pem'
+    wallet_google_issuer_id_default: ''
+    wallet_google_service_account_path_default: ''
+    wallet_google_origins_default: ''
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -62,21 +71,42 @@ services:
         arguments:
             $topicBase: '%env(default:app.pos_op_mercure_topic_base_default:POS_OP_MERCURE_TOPIC_BASE)%'
 
-    App\Service\PosOperatorio\ClinicIntegrationConfigService:
+    App\Service\PosOperatorio\ClinicConfigStore:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
-    App\Service\PosOperatorio\ClinicProductConfigService:
+    App\Service\PosOperatorio\ClinicPatientNotifier:
         arguments:
-            $projectDir: '%kernel.project_dir%'
+            $mailerFrom: '%app.mailer_from%'
+
+    App\Service\PosOperatorio\ClinicIntegrationConfigService:
+        arguments: {}
+
+    App\Service\PosOperatorio\ClinicProductConfigService:
+        arguments: {}
+
+    App\Service\PosOperatorio\ClinicGuiaMedicoService:
+        arguments: {}
 
     App\Service\PosOperatorio\ClinicCarteirinhaService:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
-    App\Service\PosOperatorio\ClinicGuiaMedicoService:
+    App\Service\Wallet\ClinicWalletConfig:
         arguments:
             $projectDir: '%kernel.project_dir%'
+            $applePassTypeId: '%env(default:wallet_apple_pass_type_id_default:WALLET_APPLE_PASS_TYPE_ID)%'
+            $appleTeamId: '%env(default:wallet_apple_team_id_default:WALLET_APPLE_TEAM_ID)%'
+            $appleCertPath: '%env(default:wallet_apple_cert_path_default:WALLET_APPLE_CERT_PATH)%'
+            $appleCertPassword: '%env(default:wallet_apple_cert_password_default:WALLET_APPLE_CERT_PASSWORD)%'
+            $appleWwdrPath: '%env(default:wallet_apple_wwdr_path_default:WALLET_APPLE_WWDR_PATH)%'
+            $googleIssuerId: '%env(default:wallet_google_issuer_id_default:WALLET_GOOGLE_ISSUER_ID)%'
+            $googleServiceAccountPath: '%env(default:wallet_google_service_account_path_default:WALLET_GOOGLE_SERVICE_ACCOUNT_PATH)%'
+            $googleOrigins: '%env(default:wallet_google_origins_default:WALLET_GOOGLE_ORIGINS)%'
+
+    App\Service\Wallet\ClinicWalletTokenService:
+        arguments:
+            $kernelSecret: '%kernel.secret%'
 
     App\Service\Ti\TiChamadoAttachmentService:
         arguments:

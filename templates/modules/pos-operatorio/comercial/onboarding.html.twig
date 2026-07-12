@@ -1,0 +1,30 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Onboarding{% endblock %}
+{% block hub_content %}
+<section class="pos-op-page">
+    <h1>Onboarding self-service</h1>
+    <ol>
+        <li>Produtos ativos — {{ onboarding.produtos_ativados ? '✓' : 'pendente' }}</li>
+        <li>CSV importado — {{ onboarding.csv_importado ? '✓' : 'pendente' }} ({{ onboarding.importados|default(0) }} registros)</li>
+        <li>Primeira carteirinha — {{ onboarding.primeira_carteirinha ? '✓' : 'pendente' }}</li>
+        <li>Branding — {{ onboarding.branding_configurado|default(false) ? '✓' : 'opcional' }}</li>
+    </ol>
+
+    <form method="post" style="margin:1rem 0"><input type="hidden" name="action" value="produtos"><button class="btn btn-secondary">Marcar produtos ativos</button></form>
+    <form method="post" style="margin:1rem 0"><input type="hidden" name="action" value="sandbox"><button class="btn btn-secondary">Atualizar sandbox Ana / João / Maria</button></form>
+    <form method="post" style="margin:1rem 0"><input type="hidden" name="action" value="primeira_carteirinha"><button class="btn btn-secondary">Emitir 1ª carteirinha (último paciente)</button></form>
+
+    <h2>Importar CSV</h2>
+    <p>Colunas: <code>nome</code>, <code>cpf</code>, <code>codigo</code>, <code>procedimento</code></p>
+    <form method="post">
+        <input type="hidden" name="action" value="csv">
+        <textarea name="csv" rows="8" style="width:100%;font-family:monospace" placeholder="nome,cpf,codigo,procedimento&#10;Ana Costa,52998224725,PO-0100,Herniorrafia"></textarea>
+        <button type="submit" class="btn btn-primary" style="margin-top:.5rem">Importar</button>
+    </form>
+
+    {% if sandbox|length %}
+    <h2>Sandbox</h2>
+    <ul>{% for p in sandbox %}<li>{{ p.nome }} — {{ p.codigo }} {% if p.carteirinhaVerificacao %}· {{ p.carteirinhaVerificacao }}{% endif %}</li>{% endfor %}</ul>
+    {% endif %}
+</section>
+{% endblock %}

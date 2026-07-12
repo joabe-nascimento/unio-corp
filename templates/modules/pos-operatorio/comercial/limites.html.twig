@@ -1,0 +1,20 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Planos e limites{% endblock %}
+{% block hub_content %}
+<section class="pos-op-page">
+    <h1>Planos e limites</h1>
+    <form method="post" class="pos-op-form" style="max-width:520px">
+        <label>Plano comercial
+            <select name="plano_comercial">
+                <option value="essencial" {% if limits.plano_comercial == 'essencial' %}selected{% endif %}>Essencial</option>
+                <option value="profissional" {% if limits.plano_comercial == 'profissional' %}selected{% endif %}>Profissional</option>
+                <option value="premium" {% if limits.plano_comercial == 'premium' %}selected{% endif %}>Premium</option>
+            </select>
+        </label>
+        <label>Máx. beneficiários <input type="number" name="max_beneficiarios" value="{{ limits.max_beneficiarios }}" min="10"></label>
+        <label><input type="checkbox" name="wallet_incluso" value="1" {% if limits.wallet_incluso %}checked{% endif %}> Wallet (Apple/Google) incluso no plano</label>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </form>
+    <p>Uso atual: <strong>{{ limits.beneficiarios_ativos }}</strong> beneficiários ativos.</p>
+</section>
+{% endblock %}

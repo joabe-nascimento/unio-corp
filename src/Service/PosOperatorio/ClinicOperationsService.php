@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Repository\PosOperatorioAlertaRepository;
 use App\Repository\PosOperatorioEventoRepository;
 use App\Repository\PosOperatorioPacienteRepository;
+use App\Repository\UserRepository;
 
 /**
  * Centro de operações clínico — fila unificada, qualidade, retornos e compliance.
@@ -22,6 +23,9 @@ final class ClinicOperationsService
         private PosOperatorioPacienteRepository $pacientes,
         private PosOperatorioAlertaRepository $alertas,
         private PosOperatorioEventoRepository $eventos,
+        private ClinicIntegrationConfigService $integrationConfig,
+        private ClinicPatientNotifier $patientNotifier,
+        private UserRepository $users,
     ) {}
 
     /**
@@ -212,9 +216,9 @@ final class ClinicOperationsService
         $pendentes = $this->pacientes->findActiveWithoutQuestionarioToday($empresa, $today);
         $canais = [
             ['id' => 'in_app', 'nome' => 'Notificação in-app (médico)', 'status' => 'active', 'desc' => 'Ativo via cron diário'],
-            ['id' => 'email', 'nome' => 'E-mail ao paciente', 'status' => 'planned', 'desc' => 'Lembrete automático às 18h'],
-            ['id' => 'whatsapp', 'nome' => 'WhatsApp', 'status' => 'planned', 'desc' => 'Requer integração WhatsApp Business'],
-            ['id' => 'sms', 'nome' => 'SMS', 'status' => 'planned', 'desc' => 'Canal alternativo para pacientes sem app'],
+            ['id' => 'email', 'nome' => 'E-mail ao paciente', 'status' => $this->patientNotifier->isEmailChannelReady() ? 'active' : 'planned', 'desc' => 'Lembrete automático no cron diário'],
+            ['id' => 'whatsapp', 'nome' => 'WhatsApp', 'status' => 'active', 'desc' => 'Link wa.me no webhook e lembrete automático'],
+            ['id' => 'sms', 'nome' => 'SMS', 'status' => $this->integrationConfig->webhookConfigured($empresa) && $this->integrationConfig->get($empresa)['lembretes_sms'] ? 'active' : 'planned', 'desc' => 'Disparo via webhook (n8n, operadora)'],
         ];
 
         return [
@@ -231,8 +235,8 @@ final class ClinicOperationsService
             'canais' => $canais,
             'escalacao' => [
                 ['horas' => 4, 'acao' => 'Notificar médico responsável', 'status' => 'active'],
-                ['horas' => 8, 'acao' => 'Notificar coordenação', 'status' => 'planned'],
-                ['horas' => 24, 'acao' => 'Ligar para paciente / familiar', 'status' => 'planned'],
+                ['horas' => 8, 'acao' => 'Notificar coordenação', 'status' => 'active'],
+                ['horas' => 24, 'acao' => 'Ligar para paciente / familiar', 'status' => 'active'],
             ],
         ];
     }
@@ -240,20 +244,42 @@ final class ClinicOperationsService
     /** @return array<string, mixed> */
     public function buildPlantao(Empresa $empresa): array
     {
+        $plantaoIds = $this->integrationConfig->getPlantaoUserIds($empresa);
         $usuarios = [];
+
+        if ($plantaoIds !== []) {
+            foreach ($plantaoIds as $userId) {
+                $m = $this->users->find($userId);
+                if ($m instanceof User) {
+                    $usuarios[$m->getId()] = [
+                        'id' => $m->getId(),
+                        'nome' => $m->getNome(),
+                        'email' => $m->getEmail(),
+                        'pacientes' => 0,
+                        'definido' => true,
+                    ];
+                }
+            }
+        }
+
         foreach ($this->pacientes->findRecentByEmpresa($empresa, 50, 0) as $p) {
             $m = $p->getMedicoResponsavel();
-            if ($m instanceof User && !isset($usuarios[$m->getId()])) {
+            if (!$m instanceof User) {
+                continue;
+            }
+            if ($plantaoIds !== [] && !isset($usuarios[$m->getId()])) {
+                continue;
+            }
+            if (!isset($usuarios[$m->getId()])) {
                 $usuarios[$m->getId()] = [
                     'id' => $m->getId(),
                     'nome' => $m->getNome(),
                     'email' => $m->getEmail(),
                     'pacientes' => 0,
+                    'definido' => false,
                 ];
             }
-            if ($m instanceof User) {
-                ++$usuarios[$m->getId()]['pacientes'];
-            }
+            ++$usuarios[$m->getId()]['pacientes'];
         }
 
         return [
@@ -262,7 +288,10 @@ final class ClinicOperationsService
             'sla_p2_min' => 60,
             'sla_p3_min' => 240,
             'sla_p4_min' => 1440,
-            'roteamento' => 'P1 → plantonista do dia · demais → médico responsável',
+            'roteamento' => $plantaoIds !== []
+                ? 'P1 → plantonistas definidos · demais → médico responsável'
+                : 'P1 → plantonista do dia · demais → médico responsável',
+            'escalacao_ativa' => true,
         ];
     }
 

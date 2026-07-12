@@ -159,6 +159,37 @@ final class BeneficiaryAccessService
         return $data !== null && $this->isFresh($data) && !empty($data['demo']);
     }
 
+    public function switchToPatient(int $patientId): bool
+    {
+        $data = $this->read();
+        if ($data === null || !$this->isFresh($data) || !empty($data['demo'])) {
+            return false;
+        }
+
+        $current = $this->findGrantedPatient();
+        if ($current === null) {
+            return false;
+        }
+
+        $titularCpf = $current->getCpfTitularEfetivo();
+        if ($titularCpf === null) {
+            return false;
+        }
+
+        $dependents = $this->pacientes->findDependentesByTitularCpf($current->getEmpresa(), $titularCpf);
+        foreach ($dependents as $dep) {
+            if ((int) $dep->getId() === $patientId) {
+                $data['patient_id'] = $patientId;
+                $data['carteirinha_unlocked'] = false;
+                $this->write($data);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @return array<string, string> */
     public function demoAccessHints(): array
     {
@@ -175,6 +206,21 @@ final class BeneficiaryAccessService
             'theme' => $card['theme'] ?? 'premium',
             'access' => $this->demoProduct->demoAccess(),
             'guia' => $this->demoProduct->demoGuia(),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function demoComprovantePreview(): array
+    {
+        $base = $this->demoProduct->demoPatient();
+
+        return [
+            'proof' => array_merge($base, [
+                'titulo' => 'Comprovante de procedimento',
+                'verificacao' => $this->demoProduct->demoAccess()['verificacao'],
+                'status_label' => 'Documento válido (demonstração)',
+            ]),
+            'access' => $this->demoProduct->demoAccess(),
         ];
     }
 
@@ -286,7 +332,7 @@ final class BeneficiaryAccessService
     {
         return match ($method) {
             self::METHOD_CODIGO => array_filter([$this->pacientes->findByCodigoGlobal(strtoupper(trim($value)))]),
-            self::METHOD_VERIFICACAO => array_filter([$this->pacientes->findByVerificacaoGlobal(strtoupper(trim($value)))]),
+            self::METHOD_VERIFICACAO => array_filter([$this->pacientes->findByAnyVerificacaoGlobal(strtoupper(trim($value)))]),
             self::METHOD_CPF => array_filter([$this->pacientes->findByCpfGlobal($value)]),
             default => [],
         };
@@ -300,14 +346,18 @@ final class BeneficiaryAccessService
     ): bool {
         $secondary = $this->detectSecondaryMethod($secondaryValue);
         $codigo = strtoupper(trim($patient->getCodigo()));
-        $verificacao = strtoupper(trim((string) $patient->getCarteirinhaVerificacao()));
+        $verificacaoCarteirinha = strtoupper(trim((string) $patient->getCarteirinhaVerificacao()));
+        $verificacaoComprovante = strtoupper(trim((string) $patient->getComprovanteVerificacao()));
         $cpf = (string) ($patient->getCpf() ?? '');
 
         return match ($secondary) {
             self::METHOD_CODIGO => $this->valuesMatch(self::METHOD_CODIGO, $secondaryValue, $codigo)
                 && $this->primaryMatchesPatient($patient, $primaryMethod, $primaryValue),
-            self::METHOD_VERIFICACAO => $verificacao !== ''
-                && $this->valuesMatch(self::METHOD_VERIFICACAO, $secondaryValue, $verificacao)
+            self::METHOD_VERIFICACAO => ($verificacaoCarteirinha !== '' || $verificacaoComprovante !== '')
+                && (
+                    ($verificacaoCarteirinha !== '' && $this->valuesMatch(self::METHOD_VERIFICACAO, $secondaryValue, $verificacaoCarteirinha))
+                    || ($verificacaoComprovante !== '' && $this->valuesMatch(self::METHOD_VERIFICACAO, $secondaryValue, $verificacaoComprovante))
+                )
                 && $this->primaryMatchesPatient($patient, $primaryMethod, $primaryValue),
             self::METHOD_CPF => $cpf !== ''
                 && $this->valuesMatch(self::METHOD_CPF, $secondaryValue, $cpf)

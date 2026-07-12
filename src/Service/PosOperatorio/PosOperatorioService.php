@@ -44,7 +44,7 @@ final class PosOperatorioService
         }
 
         $perPage = $this->normalizePerPage($perPage);
-        $totalPatients = $this->pacienteRepo->countRecentByEmpresa($empresa);
+        $totalPatients = $this->pacienteRepo->countOperacionalByEmpresa($empresa);
         $useRealData = $totalPatients > 0;
 
         if ($useRealData) {

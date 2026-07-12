@@ -37,7 +37,7 @@ final class PosOperatorioPortalInteractionService
         $this->events->record(
             $paciente,
             PosOperatorioEvento::TIPO_CHAT,
-            'Você solicitou ajuda à equipe clínica.',
+            'Você pediu ajuda à equipe clínica.',
             $pacienteUser,
         );
         $this->em->flush();

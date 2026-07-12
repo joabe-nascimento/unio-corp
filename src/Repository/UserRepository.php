@@ -57,6 +57,15 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getSingleScalarResult();
     }
 
+    /** @return list<User> */
+    public function findCoordenadoresByEmpresa(Empresa $empresa): array
+    {
+        return array_values(array_filter(
+            $this->findActiveByEmpresa($empresa),
+            static fn (User $user): bool => $user->isGestor() || $user->isGestorEquipe() || $user->isSupervisor() || $user->isSupervisorEquipe(),
+        ));
+    }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */

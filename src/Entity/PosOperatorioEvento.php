@@ -20,6 +20,7 @@ class PosOperatorioEvento
     public const TIPO_LEMBRETE = 'lembrete';
     public const TIPO_EVOLUCAO = 'evolucao';
     public const TIPO_RETORNO = 'retorno';
+    public const TIPO_ESCALACAO = 'escalacao';
 
     /** @var list<string> */
     public const TIPOS_VISIVEIS_PACIENTE = [

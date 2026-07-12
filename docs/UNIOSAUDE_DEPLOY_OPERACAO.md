@@ -140,8 +140,10 @@ DEFAULT_URI=https://uniosaude.uniowork.com.br
 3. Cria `deploy-uniosaude.tar.gz` (mesmos excludes do Actions)
 4. `scp` → `/tmp/` no servidor
 5. `ci-remote-extract.sh` → extrai em `unio-uniosaude`
-6. `deploy-server.sh` → migrations, cache, symlinks `public_html`
+6. `deploy-server.sh` → backup DB, migrations, cache, symlinks `public_html`
 7. Smoke em `/login`
+
+Banco (migrations, backup, restore): [UNIOSAUDE_BANCO.md](UNIOSAUDE_BANCO.md)
 
 Relatório local: `deploy-reports/deploy-report.txt`  
 Relatório no servidor: `/home2/joabef36/unio-uniosaude/var/log/deploy-report.txt`
@@ -190,6 +192,44 @@ cd "C:\projetos\Nova pasta\unio-corp\unio-corp"
 
 A pasta pai `unio-corp` **não** é o repositório Git.
 
+### 5. Aviso `PROCESS privilege` no mysqldump
+
+**Sintoma:** no log do deploy aparece `Access denied ... PROCESS privilege ... tablespaces`, mas o backup conclui.
+
+**Causa:** contas HostGator sem privilégio `PROCESS` para exportar tablespaces.
+
+**Status:** corrigido em `scripts/lib/backup-database.sh` com `--no-tablespaces` (quando suportado pelo cliente).
+
+### 6. Log estranho em `migrate-legacy-branding`
+
+**Sintoma:** linha cortada no log ou aviso `ea_php_cli.pm` com newline.
+
+**Causa:** script PHP inline (`php -r`) no cPanel; caracteres especiais no echo.
+
+**Status:** corrigido — lógica em `scripts/lib/migrate-legacy-branding.php`. Log esperado:
+
+```text
+migrate-legacy-branding: atualizado plataforma_tagline -> Saúde que acompanha.
+```
+
+---
+
+## Validação pós-deploy (produção)
+
+Base: https://uniosaude.uniowork.com.br
+
+| Check | URL / ação |
+|-------|------------|
+| Login staff | `/login` → HTTP 200 |
+| Hub paciente | `/paciente` |
+| Carteirinha | `/carteirinha-digital` |
+| Comprovante | `/comprovante-procedimento` |
+| QR público | `/verificar/{codigo}` (código emitido na clínica) |
+| Guia médico | `/guia-medico` |
+| Migrations | SSH: `php bin/console doctrine:migrations:status` → `New: 0` |
+
+Demo carteirinha: [UNIOSAUDE_ACESSOS.md](UNIOSAUDE_ACESSOS.md) (CPF + códigos em dois passos).
+
 ---
 
 ## Reativar deploy automático no push (futuro)
@@ -222,11 +262,14 @@ on:
 | 11/07 | Primeiro deploy manual bem-sucedido; `/login` → HTTP 200 |
 | 11/07 | Corrigido `scp -P` e line endings no script Windows |
 | 11/07 | Desativado deploy Actions no **push** (commit `5745149`) |
+| 11/07 | Backup mysqldump: `--no-tablespaces`; branding legado em `.php` dedicado |
+| 11/07 | Doc banco: [UNIOSAUDE_BANCO.md](UNIOSAUDE_BANCO.md) |
 
 ---
 
 ## Documentos relacionados
 
+- [UNIOSAUDE_BANCO.md](UNIOSAUDE_BANCO.md) — MySQL, migrations, backup, tabelas
 - [DEPLOY_MANUAL_UNIOSAUDE.md](DEPLOY_MANUAL_UNIOSAUDE.md) — passo a passo do script
 - [UNIOSAUDE_DEPLOY_REPAIR.md](UNIOSAUDE_DEPLOY_REPAIR.md) — vhost HTTPS e 404
 - [DNS_UNIOWORK_UNIOSAUDE.md](DNS_UNIOWORK_UNIOSAUDE.md) — DNS do subdomínio

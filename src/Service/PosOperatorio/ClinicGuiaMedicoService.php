@@ -11,7 +11,7 @@ use App\Entity\PosOperatorioPaciente;
 final class ClinicGuiaMedicoService
 {
     public function __construct(
-        private string $projectDir,
+        private ClinicConfigStore $store,
     ) {}
 
     /** @return list<array<string, mixed>> */
@@ -162,17 +162,12 @@ final class ClinicGuiaMedicoService
     /** @return array<string, mixed> */
     private function read(Empresa $empresa): array
     {
-        $path = $this->path($empresa);
-        if (!is_file($path)) {
+        $stored = $this->store->read($empresa, 'guias');
+        if ($stored === []) {
             return ['guias' => $this->seedGuias()];
         }
-        $raw = file_get_contents($path);
-        if ($raw === false || $raw === '') {
-            return ['guias' => $this->seedGuias()];
-        }
-        $decoded = json_decode($raw, true);
 
-        return \is_array($decoded) ? $decoded : ['guias' => $this->seedGuias()];
+        return $stored;
     }
 
     /** @return list<array<string, mixed>> */
@@ -216,18 +211,6 @@ final class ClinicGuiaMedicoService
     /** @param array<string, mixed> $data */
     private function write(Empresa $empresa, array $data): void
     {
-        $dir = dirname($this->path($empresa));
-        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
-            throw new \RuntimeException('Não foi possível criar diretório de guias médicos.');
-        }
-        file_put_contents(
-            $this->path($empresa),
-            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-        );
-    }
-
-    private function path(Empresa $empresa): string
-    {
-        return sprintf('%s/var/clinic/guias-%d.json', rtrim($this->projectDir, '/\\'), $empresa->getId());
+        $this->store->write($empresa, 'guias', $data);
     }
 }
