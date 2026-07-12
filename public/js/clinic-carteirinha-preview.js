@@ -28,6 +28,63 @@
         return w ? w.querySelector('[data-idcard-flip]') : null;
     }
 
+    function contactDl(card) {
+        return card.querySelector('.mkt-idcard__dl--contact');
+    }
+
+    function findSuporteRows(card) {
+        var dl = contactDl(card);
+        if (!dl) {
+            return [];
+        }
+        return Array.prototype.slice.call(dl.children).filter(function (row) {
+            if (row.hasAttribute('data-idcard-suporte-row')) {
+                return true;
+            }
+            var dt = row.querySelector('dt');
+            return !!(dt && /suporte/i.test((dt.textContent || '').trim()));
+        });
+    }
+
+    function ensureSingleSuporteRow(card, text) {
+        var dl = contactDl(card);
+        if (!dl) {
+            return;
+        }
+
+        var rows = findSuporteRows(card);
+        var row = rows[0] || null;
+
+        rows.slice(1).forEach(function (extra) {
+            extra.remove();
+        });
+
+        if (!row) {
+            row = document.createElement('div');
+            row.className = 'mkt-idcard__dl-item--wide';
+            row.setAttribute('data-idcard-suporte-row', '');
+            row.innerHTML = '<dt>Suporte</dt><dd data-idcard-suporte-text></dd>';
+            dl.insertBefore(row, dl.firstChild);
+        } else {
+            row.setAttribute('data-idcard-suporte-row', '');
+            var dd = row.querySelector('dd');
+            if (dd && !dd.hasAttribute('data-idcard-suporte-text')) {
+                dd.setAttribute('data-idcard-suporte-text', '');
+            }
+        }
+
+        var suporteText = row.querySelector('[data-idcard-suporte-text]') || row.querySelector('dd');
+        if (suporteText) {
+            suporteText.textContent = text;
+        }
+    }
+
+    function removeSuporteRows(card) {
+        findSuporteRows(card).forEach(function (row) {
+            row.remove();
+        });
+    }
+
     function applyPlano(plano) {
         var meta = planos[plano];
         var card = cardEl();
@@ -70,22 +127,10 @@
             qr.classList.toggle('mkt-idcard__qr--premium', plano === 'premium');
         }
 
-        var contactDl = card.querySelector('.mkt-idcard__dl--contact');
-        var suporteRow = card.querySelector('[data-idcard-suporte-row]');
-        if (meta.suporte && contactDl) {
-            if (!suporteRow) {
-                suporteRow = document.createElement('div');
-                suporteRow.className = 'mkt-idcard__dl-item--wide';
-                suporteRow.setAttribute('data-idcard-suporte-row', '');
-                suporteRow.innerHTML = '<dt>Suporte</dt><dd data-idcard-suporte-text></dd>';
-                contactDl.insertBefore(suporteRow, contactDl.firstChild);
-            }
-            var suporteText = suporteRow.querySelector('[data-idcard-suporte-text]');
-            if (suporteText) {
-                suporteText.textContent = meta.suporte;
-            }
-        } else if (suporteRow) {
-            suporteRow.remove();
+        if (meta.suporte) {
+            ensureSingleSuporteRow(card, meta.suporte);
+        } else {
+            removeSuporteRows(card);
         }
     }
 
