@@ -34,13 +34,19 @@ final class PosOperatorioAtendimentoController extends AbstractController
         ]);
     }
 
-    #[Route('/agenda/{agendamentoId}', name: 'app_pos_operatorio_atendimento_abrir', requirements: ['agendamentoId' => '\d+'], methods: ['GET'])]
-    public function abrir(int $agendamentoId): Response
+    #[Route('/agenda/{agendamentoId}', name: 'app_pos_operatorio_atendimento_abrir', requirements: ['agendamentoId' => '\d+'], methods: ['POST'])]
+    public function abrir(int $agendamentoId, Request $request): Response
     {
         $empresa = $this->requireEmpresa();
         $user = $this->getUser();
         if (!$user instanceof User) {
             throw $this->createAccessDeniedException();
+        }
+
+        if (!$this->isCsrfTokenValid('clinic_atendimento_abrir_'.$agendamentoId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_agenda');
         }
 
         try {

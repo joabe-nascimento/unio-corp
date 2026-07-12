@@ -93,6 +93,9 @@ final class ClinicContaService
     public function markPagoFromGuia(ClinicConta $conta, Empresa $empresa, ?int $valorCentavos = null): ClinicConta
     {
         $this->assertScope($conta, $empresa);
+        if (!$conta->isAberto()) {
+            throw new \InvalidArgumentException('Conta não está aberta.');
+        }
         if ($valorCentavos !== null && $valorCentavos >= 0) {
             $conta->setValorCentavos($valorCentavos);
         }
@@ -107,7 +110,11 @@ final class ClinicContaService
     public function markGlosado(ClinicConta $conta, Empresa $empresa): ClinicConta
     {
         $this->assertScope($conta, $empresa);
+        if (!$conta->isAberto()) {
+            throw new \InvalidArgumentException('Conta não está aberta.');
+        }
         $conta->setStatus(ClinicConta::STATUS_GLOSADO);
+        $conta->setPagoEm(null);
         $conta->touch();
 
         return $conta;
@@ -116,7 +123,11 @@ final class ClinicContaService
     public function cancelFromGuia(ClinicConta $conta, Empresa $empresa): ClinicConta
     {
         $this->assertScope($conta, $empresa);
+        if (!$conta->isAberto()) {
+            throw new \InvalidArgumentException('Conta não está aberta.');
+        }
         $conta->setStatus(ClinicConta::STATUS_CANCELADO);
+        $conta->setPagoEm(null);
         $conta->touch();
 
         return $conta;
@@ -147,6 +158,9 @@ final class ClinicContaService
         $this->assertScope($conta, $empresa);
         if (!$conta->isAberto()) {
             throw new \InvalidArgumentException('Conta não está aberta.');
+        }
+        if ($conta->getTipo() === ClinicConta::TIPO_CONVENIO) {
+            throw new \InvalidArgumentException('Conta de convênio: use a guia TISS.');
         }
 
         $conta->setStatus(ClinicConta::STATUS_CANCELADO);

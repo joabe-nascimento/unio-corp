@@ -7,6 +7,7 @@ use App\Entity\Empresa;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\Repository\ClinicAgendamentoRepository;
+use App\Repository\ClinicAtendimentoRepository;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,6 +16,7 @@ final class ClinicAgendaService
 {
     public function __construct(
         private ClinicAgendamentoRepository $agendamentos,
+        private ClinicAtendimentoRepository $atendimentos,
         private PosOperatorioPacienteRepository $pacientes,
         private UserRepository $users,
         private ClinicOperationsService $operations,
@@ -292,6 +294,21 @@ final class ClinicAgendaService
         }
         if (!\in_array($status, ClinicAgendamento::STATUSES, true)) {
             throw new \InvalidArgumentException('Status inválido.');
+        }
+
+        $openAtendimento = $this->atendimentos->findOneByAgendamento($empresa, $agendamento);
+
+        if ($status === ClinicAgendamento::STATUS_ATENDIDO) {
+            if ($openAtendimento === null || !$openAtendimento->isFinalizado()) {
+                throw new \InvalidArgumentException('Finalize o atendimento para marcar como atendido.');
+            }
+        }
+
+        if (\in_array($status, [ClinicAgendamento::STATUS_FALTOU, ClinicAgendamento::STATUS_CANCELADO], true)
+            && $openAtendimento !== null
+            && $openAtendimento->isEmAndamento()
+        ) {
+            throw new \InvalidArgumentException('Há atendimento em andamento. Finalize ou continue o SOAP antes de marcar falta/cancelar.');
         }
 
         $agendamento->setStatus($status);

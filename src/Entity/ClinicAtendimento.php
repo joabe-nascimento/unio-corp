@@ -232,4 +232,9 @@ class ClinicAtendimento
     {
         return $this->status === self::STATUS_EM_ANDAMENTO;
     }
+
+    public function isFinalizado(): bool
+    {
+        return $this->status === self::STATUS_FINALIZADO;
+    }
 }

@@ -45,8 +45,9 @@ final class ClinicAtendimentoService
         if (\in_array($agendamento->getStatus(), [
             ClinicAgendamento::STATUS_CANCELADO,
             ClinicAgendamento::STATUS_FALTOU,
+            ClinicAgendamento::STATUS_ATENDIDO,
         ], true)) {
-            throw new \InvalidArgumentException('Não é possível atender um horário cancelado ou com falta.');
+            throw new \InvalidArgumentException('Não é possível atender um horário cancelado, com falta ou já atendido.');
         }
 
         $atendimento = new ClinicAtendimento();

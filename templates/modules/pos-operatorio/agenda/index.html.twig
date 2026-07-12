@@ -167,23 +167,20 @@
                             {% endif %}
 
                             {% if a.status == 'chegou' %}
-                            <a href="{{ path('app_pos_operatorio_atendimento_abrir', { agendamentoId: a.id }) }}" class="btn-unio btn-sm">Atender</a>
-                            {% endif %}
-
-                            {% if a.status == 'em_atendimento' %}
-                            <a href="{{ path('app_pos_operatorio_atendimento_abrir', { agendamentoId: a.id }) }}" class="btn-unio btn-sm">Abrir atendimento</a>
-                            {% endif %}
-
-                            {% if a.status in ['chegou', 'em_atendimento', 'confirmado'] %}
-                            <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}" class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
-                                <input type="hidden" name="status" value="atendido">
-                                <input type="hidden" name="vista" value="{{ vista }}">
-                                <button type="submit" class="btn-unio-ghost btn-sm">Atendido</button>
+                            <form method="post" action="{{ path('app_pos_operatorio_atendimento_abrir', { agendamentoId: a.id }) }}" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_abrir_' ~ a.id) }}">
+                                <button type="submit" class="btn-unio btn-sm">Atender</button>
                             </form>
                             {% endif %}
 
-                            {% if a.status not in ['cancelado', 'atendido', 'faltou'] %}
+                            {% if a.status == 'em_atendimento' %}
+                            <form method="post" action="{{ path('app_pos_operatorio_atendimento_abrir', { agendamentoId: a.id }) }}" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_abrir_' ~ a.id) }}">
+                                <button type="submit" class="btn-unio btn-sm">Abrir atendimento</button>
+                            </form>
+                            {% endif %}
+
+                            {% if a.status not in ['cancelado', 'atendido', 'faltou', 'em_atendimento'] %}
                             <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}" class="d-inline">
                                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
                                 <input type="hidden" name="status" value="faltou">

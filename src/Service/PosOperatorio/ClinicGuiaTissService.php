@@ -123,12 +123,17 @@ final class ClinicGuiaTissService
             throw new \InvalidArgumentException('Quantidade inválida.');
         }
 
+        $valor = $data['valor_centavos'] ?? null;
+        if ($valor !== null && $valor < 0) {
+            throw new \InvalidArgumentException('Valor inválido.');
+        }
+
         $item = new ClinicGuiaItem();
         $item->setDescricao(mb_substr($descricao, 0, 255));
         $item->setQuantidade($qtd);
         $codigo = trim((string) ($data['codigo_tuss'] ?? ''));
         $item->setCodigoTuss($codigo === '' ? null : mb_substr($codigo, 0, 20));
-        $item->setValorCentavos($data['valor_centavos'] ?? null);
+        $item->setValorCentavos($valor);
 
         $guia->addItem($item);
         $this->syncContaValor($guia);
@@ -169,8 +174,16 @@ final class ClinicGuiaTissService
         }
 
         $current = $guia->getStatus();
-        if ($current === ClinicGuiaTiss::STATUS_CANCELADO || $current === ClinicGuiaTiss::STATUS_PAGO) {
+        if (\in_array($current, [
+            ClinicGuiaTiss::STATUS_CANCELADO,
+            ClinicGuiaTiss::STATUS_PAGO,
+            ClinicGuiaTiss::STATUS_GLOSADO,
+        ], true)) {
             throw new \InvalidArgumentException('Guia já encerrada.');
+        }
+
+        if ($status === ClinicGuiaTiss::STATUS_PAGO && $guia->getItens()->isEmpty()) {
+            throw new \InvalidArgumentException('Adicione ao menos um item antes de marcar a guia como paga.');
         }
 
         if ($status === ClinicGuiaTiss::STATUS_GLOSADO) {
@@ -186,7 +199,7 @@ final class ClinicGuiaTissService
 
         $conta = $guia->getConta();
         match ($status) {
-            ClinicGuiaTiss::STATUS_PAGO => $this->contas->markPagoFromGuia($conta, $empresa, $guia->totalCentavos() ?: null),
+            ClinicGuiaTiss::STATUS_PAGO => $this->contas->markPagoFromGuia($conta, $empresa, $guia->totalCentavos()),
             ClinicGuiaTiss::STATUS_GLOSADO => $this->contas->markGlosado($conta, $empresa),
             ClinicGuiaTiss::STATUS_CANCELADO => $this->contas->cancelFromGuia($conta, $empresa),
             default => null,
