@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=14">
+    <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=15">
 {% endblock %}
 
 {% block page_toolbar_layout %}yes{% endblock %}
@@ -22,11 +22,30 @@
             <div class="pulso-hero__actions">
                 <div class="pulso-vital pulso-vital--{{ snapshot.pulso.nivel|default('saudavel') }}" id="pulsoVitalBadge">
                     <span class="pulso-vital__wave" aria-hidden="true"></span>
+                    {% if snapshot.pulso.score is not null %}
+                    <span class="pulso-vital__score">{{ snapshot.pulso.score }}</span>
+                    {% endif %}
                     <span class="pulso-vital__label">{{ snapshot.pulso.nivel|default('saudavel')|capitalize }}</span>
                 </div>
+                {% if org_clinic|default(false) %}
+                <form method="post" action="{{ path('app_organismo_tick') }}" class="d-inline">
+                    <button type="submit" class="btn-unio-ghost btn-sm">Tick</button>
+                </form>
+                {% endif %}
                 <button type="button" class="btn-unio-ghost btn-sm" id="pulsoRefreshBtn">Atualizar</button>
             </div>
         </div>
+        {% if snapshot.organismo.vitalidade.orgaos|default([])|length > 0 %}
+        <div class="pulso-organs" aria-label="Órgãos do organismo">
+            {% for org in snapshot.organismo.vitalidade.orgaos %}
+            <div class="pulso-organ pulso-organ--{{ org.score >= 78 ? 'ok' : (org.score >= 55 ? 'warn' : 'crit') }}">
+                <i class="fas {{ org.icon }}" aria-hidden="true"></i>
+                <span class="pulso-organ__label">{{ org.label }}</span>
+                <strong class="pulso-organ__score">{{ org.score }}</strong>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </section>
 
     {% set _sinais_sublist = [] %}
@@ -61,6 +80,65 @@
         ]
     } %}
     </div>
+
+    {% set _org = snapshot.organismo|default({}) %}
+    {% if org_clinic|default(false) and (_org.gemeo|default([])|length > 0 or _org.memoria.recent|default([])|length > 0 or _org.reflexos|default([])|length > 0) %}
+    <div class="pulso-runtime-grid">
+        {% if _org.gemeo|default([])|length > 0 %}
+        <section class="unio-card pulso-runtime-card">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Gêmeo do dia',
+                subtitle: 'Cascata prevista — top riscos'
+            } %}
+            <ul class="pulso-gemeo list-unstyled mb-0">
+                {% for s in _org.gemeo %}
+                <li class="pulso-gemeo__item pulso-gemeo__item--{{ s.impacto|default('medio') }}">
+                    <div class="pulso-gemeo__prob">{{ s.probabilidade }}%</div>
+                    <div class="pulso-gemeo__body">
+                        <strong>{{ s.titulo }}</strong>
+                        <span class="text-muted small">{{ s.acao_sugerida }} · confiança {{ s.confianca }}%</span>
+                    </div>
+                    {% if s.route|default('') %}
+                    <a href="{{ path(s.route) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if _org.memoria.recent|default([])|length > 0 or _org.reflexos|default([])|length > 0 %}
+        <section class="unio-card pulso-runtime-card">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Memória e reflexos',
+                subtitle: 'O organismo aprende e reage'
+            } %}
+            {% if _org.reflexos|default([])|length > 0 %}
+            <h3 class="pulso-runtime-card__mini">Reflexos recentes</h3>
+            <ul class="list-unstyled pulso-reflex-list mb-3">
+                {% for r in _org.reflexos %}
+                <li>
+                    <strong>{{ r.motivo }}</strong>
+                    <span class="text-muted small">{{ r.em }} · {{ r.code }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% if _org.memoria.patterns|default([])|length > 0 %}
+            <h3 class="pulso-runtime-card__mini">Padrões (30 dias)</h3>
+            <ul class="list-unstyled pulso-pattern-list mb-0">
+                {% for p in _org.memoria.patterns %}
+                <li>{{ p.label }} <strong>{{ p.total }}</strong></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <p class="px-3 pb-3 mb-0 mt-2">
+                <a href="{{ path('app_organismo_contratos') }}" class="btn-unio-ghost btn-sm">Contratos de cuidado</a>
+            </p>
+        </section>
+        {% endif %}
+    </div>
+    {% endif %}
 
     {% if org_clinic|default(false) %}
     <section class="unio-card pulso-shortcuts-card" aria-label="Atalhos de faturamento">

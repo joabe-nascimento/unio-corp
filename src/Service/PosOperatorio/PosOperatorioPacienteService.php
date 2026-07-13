@@ -28,6 +28,12 @@ use App\Repository\PosOperatorioProtocoloRepository;
 
 use App\Repository\UserRepository;
 
+use App\Service\Organismo\Contract\CareContractService;
+
+use App\Service\Organismo\Contract\ContractAttestationService;
+
+use App\Service\Organismo\Memory\OrganismMemoryQuery;
+
 use Doctrine\ORM\EntityManagerInterface;
 
 
@@ -47,6 +53,12 @@ final class PosOperatorioPacienteService
         private UserRepository $userRepo,
 
         private PosOperatorioEventRecorder $events,
+
+        private CareContractService $careContracts,
+
+        private ContractAttestationService $attestations,
+
+        private OrganismMemoryQuery $organismMemory,
 
     ) {}
 
@@ -170,7 +182,7 @@ final class PosOperatorioPacienteService
 
         $this->em->flush();
 
-
+        $this->careContracts->ensureForPaciente($paciente);
 
         return $paciente;
 
@@ -225,6 +237,8 @@ final class PosOperatorioPacienteService
         $this->events->record($paciente, PosOperatorioEvento::TIPO_CADASTRO, 'Ficha atualizada', $autor);
 
         $this->em->flush();
+
+        $this->careContracts->ensureForPaciente($paciente);
 
     }
 
@@ -404,9 +418,35 @@ final class PosOperatorioPacienteService
 
             'cadastrado_em' => $paciente->getCriadoEm()->format('d/m/Y H:i'),
 
+            'care_contract' => $this->buildCareContractView($paciente),
+
+            'organism_memory' => $this->organismMemory->forPaciente($paciente, 5),
+
         ];
 
     }
+
+    /** @return array<string, mixed>|null */
+    private function buildCareContractView(PosOperatorioPaciente $paciente): ?array
+    {
+        $contract = $this->careContracts->findActive($paciente);
+        if ($contract === null && $paciente->getProtocolo() !== null) {
+            $contract = $this->careContracts->ensureForPaciente($paciente);
+        }
+        if ($contract === null) {
+            return null;
+        }
+
+        return [
+            'id' => $contract->getId(),
+            'versao' => $contract->getVersao(),
+            'status' => $contract->getStatus(),
+            'hash' => $contract->getContentHash(),
+            'protocolo' => $contract->getProtocolo()?->getNome(),
+            'marcos' => $this->attestations->milestonesView($contract),
+        ];
+    }
+
 
 
 

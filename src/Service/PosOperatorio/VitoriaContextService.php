@@ -6,6 +6,7 @@ use App\Entity\Empresa;
 use App\Entity\PosOperatorioPaciente;
 use App\Repository\PosOperatorioAlertaRepository;
 use App\Repository\PosOperatorioPacienteRepository;
+use App\Service\Organismo\Memory\OrganismMemoryQuery;
 
 /**
  * Monta contexto clínico para a Vitória (chat com paciente em foco).
@@ -15,6 +16,7 @@ final class VitoriaContextService
     public function __construct(
         private PosOperatorioPacienteRepository $pacienteRepo,
         private PosOperatorioAlertaRepository $alertaRepo,
+        private OrganismMemoryQuery $memory,
     ) {}
 
     public function findPaciente(Empresa $empresa, ?string $codigo): ?PosOperatorioPaciente
@@ -51,6 +53,10 @@ final class VitoriaContextService
             'alertas_abertos' => $alertasAbertos,
             'ultimo_score_risco' => $ultima?->getScoreRisco(),
             'ultima_resposta_em' => $ultima?->getRespondidoEm()->format(\DateTimeInterface::ATOM),
+            'organismo_memoria' => array_map(
+                static fn (array $f): string => $f['sujeito'],
+                $this->memory->forPaciente($paciente, 4),
+            ),
             'clinical_summary' => sprintf(
                 'Paciente %s (%s), %s, D+%s, status %s, %d alerta(s) aberto(s), último score %s.',
                 $paciente->getNome(),

@@ -9,6 +9,7 @@ use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\RhFeriasRepository;
 use App\Repository\RhOnboardingProcessRepository;
 use App\Service\DashboardStatsService;
+use App\Service\Organismo\Runtime\OrganRuntime;
 
 /**
  * Agrega sinais vitais e cenas da colônia para o Pulso.
@@ -22,6 +23,7 @@ final class PulsoService
         private RhOnboardingProcessRepository $onboardingRepo,
         private RhFeriasRepository $feriasRepo,
         private PosOperatorioPacienteRepository $pacienteRepo,
+        private OrganRuntime $runtime,
     ) {
     }
 
@@ -42,6 +44,19 @@ final class PulsoService
             }
         }
 
+        $organismoRuntime = [];
+        $nivel = $this->resolveNivel($ativas, $aguardando);
+        if ($empresa !== null && $this->runtime->isClinicRuntime()) {
+            try {
+                $organismoRuntime = $this->runtime->pulsoPayload($empresa);
+                if (isset($organismoRuntime['vitalidade']['pulso_nivel'])) {
+                    $nivel = (string) $organismoRuntime['vitalidade']['pulso_nivel'];
+                }
+            } catch (\Throwable) {
+                $organismoRuntime = [];
+            }
+        }
+
         return [
             'colonia' => $empresa !== null ? [
                 'id' => $empresa->getId(),
@@ -49,16 +64,18 @@ final class PulsoService
                 'slug' => $empresa->getSlug(),
             ] : null,
             'pulso' => [
-                'nivel' => $this->resolveNivel($ativas, $aguardando),
+                'nivel' => $nivel,
                 'cenas_ativas' => $ativas,
                 'cenas_aguardando' => $aguardando,
                 'headline' => $empresa !== null
                     ? $this->dashboardStats->getLayoutHeadline($layout, $empresa)
                     : 'Selecione uma colônia para ver o pulso',
+                'score' => $organismoRuntime['vitalidade']['score'] ?? null,
             ],
             'cenas' => $cenas,
             'sinais' => $this->buildSinais($user, $empresa),
             'kpis' => $this->dashboardStats->getKpis($user, $empresa, $layout, $empresasCount),
+            'organismo' => $organismoRuntime,
         ];
     }
 

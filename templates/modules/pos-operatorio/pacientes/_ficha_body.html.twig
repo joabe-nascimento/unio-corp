@@ -126,6 +126,52 @@
                 </dl>
             </section>
 
+            {% if care_contract|default(null) %}
+            <section class="unio-card pos-op-ficha-card mb-4 organismo-care-card">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Contrato de cuidado',
+                    subtitle: 'Protocolo executável · v' ~ care_contract.versao ~ ' · ' ~ (care_contract.hash|slice(0, 12)) ~ '…'
+                } %}
+                <ul class="organismo-care-milestones list-unstyled mb-0 px-3 pb-3">
+                    {% for m in care_contract.marcos %}
+                    <li class="organismo-care-milestones__item{{ m.attested ? ' is-done' : '' }}">
+                        <div class="organismo-care-milestones__main">
+                            <i class="fas {{ m.attested ? 'fa-check-circle' : 'fa-circle' }}" aria-hidden="true"></i>
+                            <span>{{ m.label }}</span>
+                            {% if m.attested %}
+                            <span class="text-muted small">{{ m.em }} · {{ m.hash|slice(0, 8) }}…</span>
+                            {% endif %}
+                        </div>
+                        {% if not m.attested %}
+                        <form method="post" action="{{ path('app_organismo_contrato_atestar', { id: care_contract.id }) }}" class="organismo-care-milestones__form">
+                            <input type="hidden" name="marco_key" value="{{ m.key }}">
+                            <input type="hidden" name="evidencia" value="Atestação clínica na ficha">
+                            <button type="submit" class="btn-unio-ghost btn-sm">Atestar</button>
+                        </form>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+
+            {% if organism_memory|default([])|length > 0 %}
+            <section class="unio-card pos-op-ficha-card mb-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Memória do organismo',
+                    subtitle: 'O que o sistema lembra deste paciente'
+                } %}
+                <ul class="list-unstyled px-3 pb-3 mb-0 organismo-memory-list">
+                    {% for fact in organism_memory %}
+                    <li class="organismo-memory-list__item">
+                        <strong>{{ fact.sujeito }}</strong>
+                        <span class="text-muted small d-block">{{ fact.criado_em }} · {{ fact.tipo }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+
             {% if clinic_products_enabled.carteirinha_digital|default(true) %}
             <section class="unio-card pos-op-ficha-card mb-4">
                 {% include 'components/section_header.html.twig' with {

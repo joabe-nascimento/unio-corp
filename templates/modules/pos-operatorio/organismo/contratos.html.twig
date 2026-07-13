@@ -1,0 +1,65 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Contratos de cuidado{% endblock %}
+
+{% set hub_page_title = 'Contratos de cuidado' %}
+{% set hub_page_subtitle = 'Protocolos executáveis com hash de atestação' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
+{% block hub_toolbar_actions %}
+<form method="post" action="{{ path('app_organismo_bootstrap_contratos') }}" class="d-inline">
+    <button type="submit" class="btn-unio-ghost btn-sm">
+        <i class="fas fa-sync mr-1"></i> Sincronizar contratos
+    </button>
+</form>
+<form method="post" action="{{ path('app_organismo_tick') }}" class="d-inline">
+    <button type="submit" class="btn-unio-primary btn-sm">
+        <i class="fas fa-heart-pulse mr-1"></i> Tick do organismo
+    </button>
+</form>
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Contratos ativos',
+        subtitle: 'Cada protocolo vira um contrato versionado com prova encadeada'
+    } %}
+    {% if contratos|default([]) is empty %}
+        <p class="text-muted px-3 pb-3">Nenhum contrato ativo. Vincule um protocolo ao paciente ou sincronize.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table admin-table mb-0">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Protocolo</th>
+                    <th>Versão</th>
+                    <th>Hash</th>
+                    <th>Marcos</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in contratos %}
+                <tr>
+                    <td>
+                        <strong>{{ c.paciente }}</strong>
+                        <div class="text-muted small">{{ c.codigo }}</div>
+                    </td>
+                    <td>{{ c.protocolo }}</td>
+                    <td>v{{ c.versao }}</td>
+                    <td><code class="admin-table-mono">{{ c.hash }}…</code></td>
+                    <td>{{ c.marcos_ok }}</td>
+                    <td>
+                        <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: c.paciente_id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
