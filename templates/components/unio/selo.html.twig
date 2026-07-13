@@ -1,0 +1,19 @@
+{# Selo Unio — assinatura de cuidado (inline / compact / stamp) #}
+{% set _variant = variant|default('inline') %}
+{% set _brand = brand|default(organismo.copy.brand_name|default(org_brand_label|default('Unio Saúde'))) %}
+{% set _slogan = slogan|default(organismo.copy.brand_slogan|default('Saúde que acompanha.')) %}
+{% set _label = label|default('Cuidado acompanhado') %}
+<span class="unio-selo unio-selo--{{ _variant }}{% if class|default('') %} {{ class }}{% endif %}"{% if title|default(null) %} title="{{ title }}"{% endif %}>
+    <span class="unio-selo__mark" aria-hidden="true">
+        <i class="fas fa-heart-pulse"></i>
+    </span>
+    <span class="unio-selo__text">
+        <strong class="unio-selo__brand">{{ _brand }}</strong>
+        {% if _variant != 'mark' %}
+        <span class="unio-selo__label">{{ _label }}</span>
+        {% if _variant == 'stamp' or show_slogan|default(false) %}
+        <span class="unio-selo__slogan">{{ _slogan }}</span>
+        {% endif %}
+        {% endif %}
+    </span>
+</span>

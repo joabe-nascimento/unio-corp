@@ -13,9 +13,31 @@
 {% block content %}
 <div class="pulso-root" id="pulsoRoot" data-api-url="{{ pulso_api_url }}">
 
+    {% if org_clinic|default(false) %}
+    <aside class="unio-ritual" data-unio-ritual aria-label="Ativação Unio">
+        <div class="unio-ritual__row">
+            <div>
+                {% include 'components/unio/selo.html.twig' with { variant: 'stamp', label: 'Ativação da clínica', show_slogan: true } %}
+                <h2 class="unio-ritual__title">Bem-vindo à Unio Saúde</h2>
+                <p class="unio-ritual__desc">O Pulso é o coração da clínica. Comece colocando o primeiro paciente na Trilha Unio.</p>
+            </div>
+            <button type="button" class="unio-ritual__dismiss" data-unio-ritual-dismiss>Agora não</button>
+        </div>
+        <div class="unio-ritual__actions">
+            <a href="{{ path('app_pos_operatorio_pacientes', { open_novo: 1 }) }}" class="btn-unio btn-sm" data-unio-ritual-action>Primeiro paciente na Trilha</a>
+            <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm" data-unio-ritual-action>Abrir Sala Crítica</a>
+        </div>
+    </aside>
+    {% endif %}
+
     <section class="unio-card pulso-hero-card">
         <div class="pulso-hero">
             <div class="pulso-hero__text">
+                {% if org_clinic|default(false) %}
+                <div class="unio-brand-lockup">
+                    {% include 'components/unio/selo.html.twig' with { variant: 'compact', label: 'Pulso da clínica' } %}
+                </div>
+                {% endif %}
                 <h1 class="pulso-hero__title">{{ org_brand_label|default('Unio Saúde') }}</h1>
                 <p class="pulso-hero__sub">{{ organismo.copy.brand_slogan|default('Saúde que acompanha.') }}</p>
             </div>

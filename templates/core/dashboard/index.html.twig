@@ -10,6 +10,23 @@
         {% include 'components/account_pending_banner.html.twig' %}
     {% endif %}
 
+    {% if org_clinic|default(false) %}
+    <aside class="unio-ritual" data-unio-ritual aria-label="Ativação Unio">
+        <div class="unio-ritual__row">
+            <div>
+                {% include 'components/unio/selo.html.twig' with { variant: 'stamp', label: 'Ativação da clínica', show_slogan: true } %}
+                <h2 class="unio-ritual__title">Bem-vindo à Unio Saúde</h2>
+                <p class="unio-ritual__desc">Comece pela Trilha: cadastre o primeiro paciente e acompanhe o cuidado depois da alta.</p>
+            </div>
+            <button type="button" class="unio-ritual__dismiss" data-unio-ritual-dismiss>Agora não</button>
+        </div>
+        <div class="unio-ritual__actions">
+            <a href="{{ path('app_pos_operatorio_pacientes', { open_novo: 1 }) }}" class="btn-unio btn-sm" data-unio-ritual-action>Primeiro paciente na Trilha</a>
+            <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm" data-unio-ritual-action>Ver Sala Crítica</a>
+        </div>
+    </aside>
+    {% endif %}
+
     <header class="clinic-home-hero{% if org_clinic|default(false) %} clinic-home-hero--clinic{% endif %}">
         <div class="clinic-home-hero__body">
             <div class="clinic-home-hero__meta">
@@ -20,6 +37,11 @@
                 <span class="clinic-home-hero__clock" id="clinicDashClock">{{ time_label|default('') }}</span>
             </div>
 
+            {% if org_clinic|default(false) %}
+            <div class="unio-brand-lockup">
+                {% include 'components/unio/selo.html.twig' with { variant: 'stamp', label: 'Pulso da clínica', show_slogan: true } %}
+            </div>
+            {% endif %}
             <p class="clinic-home-hero__slogan">{{ organismo.copy.brand_slogan|default('Saúde que acompanha.') }}</p>
             <h1 class="clinic-home-hero__title">
                 {{ organismo.copy.hero_title|default('Acompanhamento pós-cirúrgico') }}{% if organismo.copy.hero_title_accent|default('') %}<br><span>{{ organismo.copy.hero_title_accent }}</span>{% endif %}

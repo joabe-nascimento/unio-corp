@@ -1,9 +1,11 @@
 {# Lumen — assistente Organismo (legado: Vitória) #}
 {% import 'macros/helix.html.twig' as helix %}
 {% set _org = organismo.enabled|default(false) %}
+{% set _clinic = org_clinic|default(false) %}
 {% set _copy = organismo.copy|default({}) %}
 {% set _assistant = _org ? _copy.lumen|default('Lumen') : 'Vitória' %}
-{% set _subtitle = _org ? _copy.lumen_subtitle|default('Consciência da colônia') : 'Assistente virtual' %}
+{% set _subtitle = _org ? (_clinic ? (_copy.lumen_subtitle|default('Assistente clínico')) : (_copy.lumen_subtitle|default('Consciência da colônia'))) : 'Assistente virtual' %}
+{% set _slogan = _copy.brand_slogan|default('Saúde que acompanha.') %}
 
 <div id="helixPanel"
      class="helix-panel{% if _org %} helix-panel--lumen{% endif %}"
@@ -12,7 +14,9 @@
      data-vitoria-chat-url="{{ path('api_vitoria_chat') }}"
      data-vitoria-tools-url="{{ path('api_vitoria_tools') }}"
      data-assistant-name="{{ _assistant|e('html_attr') }}"
-     data-organismo="{{ _org ? '1' : '0' }}">
+     data-organismo="{{ _org ? '1' : '0' }}"
+     data-clinic="{{ _clinic ? '1' : '0' }}"
+     data-brand-slogan="{{ _slogan|e('html_attr') }}">
     <div class="helix-backdrop" data-helix-close tabindex="-1" aria-hidden="true"></div>
 
     <aside class="helix-drawer" role="dialog" aria-modal="true" aria-labelledby="helixTitle">
@@ -61,15 +65,26 @@
                     <div class="helix-msg helix-msg--assistant">
                         {{ helix.face('sm') }}
                         <div class="helix-msg-bubble">
+                            {% if _clinic %}
+                            <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou {{ _assistant }} — assistente clínico da {{ _copy.brand_name|default('Unio Saúde') }}.</p>
+                            <p class="mb-0 helix-msg-muted">Posso ajudar com Pulso, Sala Crítica, pacientes na Trilha e contratos de cuidado.</p>
+                            <span class="helix-msg__signature">{{ _slogan }}</span>
+                            {% else %}
                             <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou {{ _assistant }} — {{ _org ? 'a consciência da sua colônia.' : 'sua assistente na Unio.' }}</p>
                             <p class="mb-0 helix-msg-muted">{{ _org ? 'Posso buscar membros, listar férias pendentes ou abrir uma admissão.' : 'A IA chega em breve. Suas mensagens já ficam salvas no histórico.' }}</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
 
                 <div class="helix-suggestions" id="helixSuggestions">
                     <div class="helix-chips">
-                        {% if _org %}
+                        {% if _clinic %}
+                        <button type="button" class="helix-chip" data-helix-prompt="O que precisa de atenção no Pulso hoje?">Pulso de hoje</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Quais alertas estão na Sala Crítica?">Sala Crítica</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Como atestar um marco na Trilha Unio?">Trilha Unio</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="O que a Unio lembra deste paciente?">Memória Unio</button>
+                        {% elseif _org %}
                         <button type="button" class="helix-chip" data-helix-tool="buscar_membro" data-helix-tool-query="Ana">Buscar membro</button>
                         <button type="button" class="helix-chip" data-helix-tool="ferias_pendentes">Férias pendentes</button>
                         <button type="button" class="helix-chip" data-helix-tool="abrir_admissao">Nova admissão</button>
@@ -89,7 +104,7 @@
                             id="helixInput"
                             class="helix-input"
                             rows="1"
-                            placeholder="{{ _org ? 'Digite uma intenção…' : 'Mensagem…' }}"
+                            placeholder="{{ _clinic ? 'Pergunte sobre Pulso, pacientes ou a Trilha…' : (_org ? 'Digite uma intenção…' : 'Mensagem…') }}"
                             maxlength="2000"
                             aria-label="Mensagem"
                         ></textarea>
@@ -102,7 +117,3 @@
         </div>
     </aside>
 </div>
-
-<template id="helixFaceSmTemplate" hidden>
-    {{ helix.face('sm') }}
-</template>

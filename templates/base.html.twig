@@ -69,11 +69,12 @@
     }
     </style>
     {% if organismo.enabled|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=57">
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=58">
     <link rel="stylesheet" href="{{ asset('css/unio-brand-polish.css') }}?v=4">
     <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=9">
     {% if org_clinic|default(false) %}
     <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish.css') }}?v=38">
+    <link rel="stylesheet" href="{{ asset('css/unio-signature.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset('css/pos-operatorio-ops.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/pos-operatorio-hub.css') }}?v=15">
     <link rel="stylesheet" href="{{ asset('css/marketing-carteirinha.css') }}?v=34">
@@ -296,7 +297,7 @@
 {% if app.user %}
 {% include 'components/shell_mobile_nav.html.twig' %}
 {% endif %}
-{% if not organismo.enabled|default(false) %}
+{% if app.user and (not organismo.enabled|default(false) or org_clinic|default(false)) %}
 {% include 'components/helix_assistant.html.twig' %}
 {% endif %}
 {% if app.user and not organismo.enabled|default(false) %}
@@ -305,6 +306,9 @@
 
 {% include 'components/cookie_consent_banner.html.twig' %}
 <script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
+{% if org_clinic|default(false) %}
+<script src="{{ asset('js/unio-signature.js') }}?v=1" defer></script>
+{% endif %}
 
 {% include 'components/vendor_scripts_core.html.twig' %}
 <script>
@@ -679,15 +683,27 @@ window.addEventListener('load', runShellSidebarControls);
         var first = panel.dataset.userFirst || '';
         var assistant = panel.dataset.assistantName || 'Vitória';
         var isOrganismo = panel.dataset.organismo === '1';
+        var isClinic = panel.dataset.clinic === '1';
+        var slogan = panel.dataset.brandSlogan || 'Saúde que acompanha.';
         var greeting = first ? 'Olá, ' + escapeHtml(first) + '.' : 'Olá.';
-        var sub = isOrganismo
-            ? 'Posso buscar membros, listar férias pendentes ou abrir uma admissão.'
-            : 'Posso ajudar com operação, alertas clínicos e fluxos dos núcleos.';
+        var lead;
+        var sub;
+        if (isClinic) {
+            lead = greeting + ' Sou ' + escapeHtml(assistant) + ' — assistente clínico da Unio Saúde.';
+            sub = 'Posso ajudar com Pulso, Sala Crítica, pacientes na Trilha e contratos de cuidado.';
+        } else if (isOrganismo) {
+            lead = greeting + ' Sou ' + escapeHtml(assistant) + ' — a consciência da sua colônia.';
+            sub = 'Posso buscar membros, listar férias pendentes ou abrir uma admissão.';
+        } else {
+            lead = greeting + ' Sou ' + escapeHtml(assistant) + ' — sua assistente na Unio.';
+            sub = 'Posso ajudar com operação, alertas clínicos e fluxos dos núcleos.';
+        }
         messagesEl.innerHTML =
             '<div class="helix-msg helix-msg--assistant">' + FACE_SM +
             '<div class="helix-msg-bubble">' +
-            '<p>' + greeting + ' Sou ' + escapeHtml(assistant) + (isOrganismo ? ' — a consciência da sua colônia.' : ' — sua assistente na Unio.') + '</p>' +
+            '<p>' + lead + '</p>' +
             '<p class="mb-0 helix-msg-muted">' + sub + '</p>' +
+            (isClinic ? '<span class="helix-msg__signature">' + escapeHtml(slogan) + '</span>' : '') +
             '</div></div>';
         if (suggestions) suggestions.style.display = '';
     }
@@ -710,10 +726,16 @@ window.addEventListener('load', runShellSidebarControls);
     function messageHtml(role, text, actionsHtml) {
         var isUser = role === 'user';
         var esc = escapeHtml(text);
+        var isClinic = panel.dataset.clinic === '1';
+        var slogan = panel.dataset.brandSlogan || 'Saúde que acompanha.';
+        var signature = (!isUser && isClinic)
+            ? '<span class="helix-msg__signature">' + escapeHtml(slogan) + '</span>'
+            : '';
         return '<div class="helix-msg helix-msg--' + (isUser ? 'user' : 'assistant') + '">' +
             (isUser ? '' : FACE_SM) +
             '<div class="helix-msg-bubble"><p class="mb-0">' + esc.replace(/\n/g, '<br>') + '</p>' +
             (actionsHtml || '') +
+            signature +
             '</div></div>';
     }
 

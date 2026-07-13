@@ -38,7 +38,10 @@
         {% if resultado.status == 'valida' %}
         <p class="benef-verificar__ok"><i class="fas fa-circle-check" aria-hidden="true"></i> Documento autêntico e dentro da validade.</p>
         {% if resultado.selo_unio|default(false) %}
-        <p class="benef-verificar__seal"><i class="fas fa-shield-halved" aria-hidden="true"></i> Validado pela plataforma Unio Saúde</p>
+        <div class="benef-verificar__seal">
+            {% include 'components/unio/selo.html.twig' with { variant: 'compact', brand: 'Unio Saúde', label: 'Documento validado' } %}
+            <span>Validado pela plataforma Unio Saúde · Saúde que acompanha.</span>
+        </div>
         {% endif %}
         {% if resultado.acompanhamento_ativo|default(false) %}
         <p class="benef-verificar__follow">Acompanhamento pós-operatório ativo nesta clínica.</p>

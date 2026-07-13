@@ -37,7 +37,16 @@
      data-pos-op-poll-url="{{ path('app_pos_operatorio_api_alertas_poll') }}"
      data-pos-op-stats="{{ stats|json_encode|e('html_attr') }}"
      hidden aria-hidden="true"></div>
-<div class="pos-op-war-room">
+<div class="pos-op-war-room{{ p1_count > 0 ? ' is-critical' : '' }}">
+    {% if org_clinic|default(false) %}
+    <div class="pos-op-war-room__brand">
+        {% include 'components/unio/selo.html.twig' with { variant: 'stamp', label: 'Atenção imediata', show_slogan: true } %}
+        <span class="pos-op-war-room__tag">
+            <i class="fas fa-heart-pulse" aria-hidden="true"></i>
+            {{ p1_count > 0 ? 'Pulso elevado' : 'Operação estável' }}
+        </span>
+    </div>
+    {% endif %}
     {% include 'components/page_banner.html.twig' with {
         icon: 'fa-heart-pulse',
         title: command_brief.headline,

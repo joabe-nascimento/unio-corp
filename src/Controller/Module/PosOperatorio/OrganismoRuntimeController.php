@@ -82,7 +82,7 @@ final class OrganismoRuntimeController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $this->attestations->attest($contract, $marco, $evidencia !== '' ? $evidencia : 'Atestação manual', $user);
-        $this->addFlash('success', 'Marco atestado com hash encadeado.');
+        $this->addFlash('success', 'Marco atestado na Trilha Unio. Saúde que acompanha.');
 
         return $this->redirectToFicha($contract);
     }

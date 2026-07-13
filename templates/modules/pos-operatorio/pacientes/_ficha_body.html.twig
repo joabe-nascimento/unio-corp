@@ -127,11 +127,37 @@
             </section>
 
             {% if care_contract|default(null) %}
-            <section class="unio-card pos-op-ficha-card mb-4 organismo-care-card">
-                {% include 'components/section_header.html.twig' with {
-                    title: 'Contrato de cuidado',
-                    subtitle: 'Protocolo executável · v' ~ care_contract.versao ~ ' · ' ~ (care_contract.hash|slice(0, 12)) ~ '…'
-                } %}
+            <section class="unio-card pos-op-ficha-card mb-4 organismo-care-card organismo-care-card--trilha">
+                <div class="organismo-trilha-head">
+                    <div>
+                        {% include 'components/section_header.html.twig' with {
+                            title: 'Trilha Unio',
+                            subtitle: 'Rota de cuidado · v' ~ care_contract.versao ~ ' · ' ~ (care_contract.hash|slice(0, 12)) ~ '…'
+                        } %}
+                    </div>
+                    {% include 'components/unio/selo.html.twig' with { variant: 'compact', label: 'Protocolo ativo' } %}
+                </div>
+                {% set _rail_ns = namespace(next_found: false, items: []) %}
+                {% for m in care_contract.marcos %}
+                    {% set _p = m.label|split(' — ', 2) %}
+                    {% set _is_next = false %}
+                    {% if not m.attested and not _rail_ns.next_found %}
+                        {% set _is_next = true %}
+                        {% set _rail_ns.next_found = true %}
+                    {% endif %}
+                    {% set _rail_ns.items = _rail_ns.items|merge([{ key: m.key, when: _p|length == 2 ? _p[0] : m.label, done: m.attested, next: _is_next }]) %}
+                {% endfor %}
+                {% if _rail_ns.items|length > 0 %}
+                <ul class="organismo-trilha-rail" aria-label="Marcos da Trilha Unio">
+                    {% for step in _rail_ns.items %}
+                    {% if not loop.first %}<li class="organismo-trilha-rail__sep" aria-hidden="true"></li>{% endif %}
+                    <li class="organismo-trilha-rail__step{{ step.done ? ' is-done' : (step.next ? ' is-next' : '') }}">
+                        <span class="organismo-trilha-rail__dot" aria-hidden="true"></span>
+                        <span>{{ step.when }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
                 <ul class="organismo-care-milestones list-unstyled mb-0 px-3 pb-3">
                     {% for m in care_contract.marcos %}
                     {% set _parts = m.label|split(' — ', 2) %}
@@ -147,13 +173,14 @@
                             </span>
                             {% if m.attested %}
                             <span class="text-muted small">{{ m.em }} · {{ m.hash|slice(0, 8) }}…</span>
+                            {% include 'components/unio/selo.html.twig' with { variant: 'compact', class: 'organismo-care-milestones__selo', label: 'Atestado' } %}
                             {% endif %}
                         </div>
                         {% if not m.attested %}
-                        <form method="post" action="{{ path('app_organismo_contrato_atestar', { id: care_contract.id }) }}" class="organismo-care-milestones__form">
+                        <form method="post" action="{{ path('app_organismo_contrato_atestar', { id: care_contract.id }) }}" class="organismo-care-milestones__form" data-unio-attest>
                             <input type="hidden" name="marco_key" value="{{ m.key }}">
                             <input type="hidden" name="evidencia" value="Atestação clínica na ficha">
-                            <button type="submit" class="btn-unio-ghost btn-sm">Atestar</button>
+                            <button type="submit" class="btn-unio-ghost btn-sm">Atestar na Trilha</button>
                         </form>
                         {% endif %}
                     </li>
@@ -163,11 +190,14 @@
             {% endif %}
 
             {% if organism_memory|default([])|length > 0 %}
-            <section class="unio-card pos-op-ficha-card mb-4">
-                {% include 'components/section_header.html.twig' with {
-                    title: 'Memória do organismo',
-                    subtitle: 'O que o sistema lembra deste paciente'
-                } %}
+            <section class="unio-card pos-op-ficha-card mb-4 organismo-memory-card">
+                <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 px-3 pt-1">
+                    {% include 'components/section_header.html.twig' with {
+                        title: 'Memória Unio',
+                        subtitle: 'O que a Unio lembra deste cuidado'
+                    } %}
+                    {% include 'components/unio/selo.html.twig' with { variant: 'compact', label: 'Memória viva' } %}
+                </div>
                 <ul class="list-unstyled px-3 pb-3 mb-0 organismo-memory-list">
                     {% for fact in organism_memory %}
                     <li class="organismo-memory-list__item">
