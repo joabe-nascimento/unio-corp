@@ -54,7 +54,11 @@ final class ClinicStaffRoleTest extends TestCase
 
         self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_pos_operatorio_relatorios'));
         self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_pos_operatorio_config'));
+        self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_comercial'));
+        self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_comercial_pipeline'));
         self::assertFalse(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_pos_operatorio_pacientes'));
+        self::assertFalse(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::RECEPCAO, 'app_comercial'));
+        self::assertFalse(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::MEDICO, 'app_comercial'));
 
         self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::RECEPCAO, 'app_pulso'));
         self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::RECEPCAO, 'app_pos_operatorio'));

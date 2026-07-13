@@ -100,6 +100,7 @@ final class ClinicStaffRole
             'config',
             'produtos',
             'comercial',
+            'crm',
         ],
     ];
 
@@ -151,6 +152,7 @@ final class ClinicStaffRole
         'recepcao' => 'operacao',
         'painel_dia' => 'painel',
         'comercial' => 'configuracoes',
+        'crm' => 'configuracoes',
     ];
 
     /** @return list<array{id: string, label: string, acesso: string, products: list<string>}> */
@@ -178,7 +180,7 @@ final class ClinicStaffRole
             [
                 'id' => self::COORDENACAO,
                 'label' => 'Coordenação',
-                'acesso' => 'Relatórios e configurações',
+                'acesso' => 'Relatórios, CRM comercial e configurações',
                 'products' => self::PRODUCTS_BY_ROLE[self::COORDENACAO],
             ],
         ];
@@ -221,7 +223,7 @@ final class ClinicStaffRole
                 'label' => 'Coordenação',
                 'class' => 'gestor',
                 'nivel' => 5,
-                'description' => 'Relatórios, configurações e política clínica.',
+                'description' => 'Relatórios, CRM comercial, configurações e política clínica.',
             ],
         ];
     }

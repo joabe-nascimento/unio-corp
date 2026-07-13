@@ -64,6 +64,7 @@ final class ClinicLandingService
                 'fa-file-invoice-dollar',
                 'app_pos_operatorio_contas',
                 'images/marketing/modules/mod-faturamento-tiss.jpg',
+                'Contas particulares e convênio no mesmo fluxo: guia TISS, itens TUSS, lote/remessa e XML para a operadora — da consulta à glosa.',
                 ['Contas e convênios na mesma ficha', 'Guias TISS com catálogo TUSS', 'Lote/remessa e exportação XML', 'Status até glosa e pagamento'],
                 [
                     ['value' => '24', 'label' => 'Guias abertas'],
@@ -195,8 +196,8 @@ final class ClinicLandingService
                 'fa-user-shield',
                 'app_pos_operatorio',
                 'images/marketing/modules/mod-equipe.jpg',
-                'Perfis clínicos reais: cada papel vê só o que precisa. Recepção cuida de cadastro e TISS; Enfermagem de triagem; Médico de alertas e protocolos; Coordenação de relatórios e config.',
-                ['RECEPCAO · ENFERMAGEM · MEDICO · COORDENACAO', 'Home e menu filtrados por perfil', 'Rotas bloqueadas sem grant clínico', 'Sem misturar GESTOR legado no fluxo da clínica'],
+                'Perfis clínicos reais: cada papel vê só o que precisa. Recepção cuida de cadastro e TISS; Enfermagem de triagem; Médico de alertas e protocolos; Coordenação de relatórios, CRM e config.',
+                ['RECEPCAO · ENFERMAGEM · MEDICO · COORDENACAO', 'Home e menu filtrados por perfil', 'CRM liberado para Coordenação', 'Sem misturar GESTOR legado no fluxo da clínica'],
                 [
                     ['value' => '4', 'label' => 'Perfis clínicos'],
                     ['value' => '100%', 'label' => 'Menu filtrado'],

@@ -105,7 +105,14 @@ final class ClinicStaffAccess
         }
 
         $mapped = ProductGrantRouteMap::MAP[$routeName];
-        if (($mapped['scope'] ?? '') !== ClinicStaffRole::SCOPE) {
+        $scope = (string) ($mapped['scope'] ?? '');
+
+        // Coordenação opera o CRM (Núcleo Comercial) além do hub clínico.
+        if ($scope === 'hub_comercial' && $perfil === ClinicStaffRole::COORDENACAO) {
+            return true;
+        }
+
+        if ($scope !== ClinicStaffRole::SCOPE) {
             return false;
         }
 
