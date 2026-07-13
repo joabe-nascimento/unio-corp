@@ -764,8 +764,12 @@ class NavigationService
         int $notificationsUnread = 0,
         int $clinicAlertBadge = 0,
     ): array {
-        if ($this->organismoFeature->isEnabled() && $this->organismoCopy->isClinicProfile()) {
-            return $this->getClinicMobileShellNav($route, $clinicAlertBadge);
+        if ($this->organismoFeature->isEnabled()) {
+            if ($this->organismoCopy->isClinicProfile()) {
+                return $this->getClinicMobileShellNav($route, $clinicAlertBadge);
+            }
+
+            return $this->getStudioMobileShellNav($route, $clinicAlertBadge);
         }
 
         $items = [
@@ -801,6 +805,73 @@ class NavigationService
         $items[] = $this->mobileShellMenuAction();
 
         return $items;
+    }
+
+    /**
+     * Barra inferior do Unio Studio (uniowork) — sem Chat/Operações/RH legado.
+     *
+     * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
+     */
+    private function getStudioMobileShellNav(?string $route, int $alertBadge = 0): array
+    {
+        $copy = $this->organismoCopy->getGlobals();
+        $homeRoute = $this->organismoFeature->isPulsoHome() ? 'app_pulso' : 'app_dashboard';
+        $clientesLabel = $this->shortMobileLabel((string) ($copy['nav_pacientes'] ?? 'Clientes'));
+        $alertasLabel = $this->shortMobileLabel((string) ($copy['nav_alertas'] ?? 'Alertas'));
+        $playbooksLabel = $this->shortMobileLabel((string) ($copy['nav_protocolos'] ?? 'Playbooks'));
+
+        return [
+            $this->buildMobileShellLink(
+                'dashboard',
+                'fa-house',
+                'Início',
+                $homeRoute,
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_dashboard')
+                    || $r === 'app_pulso'
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'clientes',
+                'fa-folder-open',
+                $clientesLabel,
+                'app_pos_operatorio_pacientes',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_pos_operatorio_paciente'),
+            ),
+            $this->buildMobileShellLink(
+                'alertas',
+                'fa-triangle-exclamation',
+                $alertasLabel,
+                'app_pos_operatorio_alertas',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_pos_operatorio_alerta')
+                    || str_starts_with($r, 'app_pos_operatorio_sala_critica')
+                ),
+                $alertBadge,
+            ),
+            $this->buildMobileShellLink(
+                'playbooks',
+                'fa-book',
+                $playbooksLabel,
+                'app_pos_operatorio_protocolos',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_pos_operatorio_protocolo'),
+            ),
+            $this->mobileShellMenuAction(),
+        ];
+    }
+
+    private function shortMobileLabel(string $label, int $max = 11): string
+    {
+        $label = trim($label);
+        if ($label === '') {
+            return 'Atalho';
+        }
+
+        return mb_strlen($label) > $max ? mb_substr($label, 0, $max - 1).'…' : $label;
     }
 
     /**
