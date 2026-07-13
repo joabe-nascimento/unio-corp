@@ -146,8 +146,25 @@ final class ProductGrantRouteMap
         'app_admin_empresas' => ['scope' => 'hub_admin', 'product' => 'empresas'],
         'app_admin_configuracoes' => ['scope' => 'hub_admin', 'product' => 'configuracoes'],
 
-        // Hubs em desenvolvimento (sem produtos)
+        // Núcleo Comercial (CRM)
         'app_comercial' => ['scope' => 'hub_comercial', 'product' => '_hub'],
+        'app_comercial_leads' => ['scope' => 'hub_comercial', 'product' => 'leads'],
+        'app_comercial_lead_show' => ['scope' => 'hub_comercial', 'product' => 'leads'],
+        'app_comercial_lead_converter' => ['scope' => 'hub_comercial', 'product' => 'leads'],
+        'app_comercial_lead_excluir' => ['scope' => 'hub_comercial', 'product' => 'leads'],
+        'app_comercial_pipeline' => ['scope' => 'hub_comercial', 'product' => 'pipeline'],
+        'app_comercial_oportunidade_show' => ['scope' => 'hub_comercial', 'product' => 'pipeline'],
+        'app_comercial_oportunidade_mover' => ['scope' => 'hub_comercial', 'product' => 'pipeline'],
+        'app_comercial_oportunidade_excluir' => ['scope' => 'hub_comercial', 'product' => 'pipeline'],
+        'app_comercial_clientes' => ['scope' => 'hub_comercial', 'product' => 'clientes'],
+        'app_comercial_cliente_show' => ['scope' => 'hub_comercial', 'product' => 'clientes'],
+        'app_comercial_cliente_excluir' => ['scope' => 'hub_comercial', 'product' => 'clientes'],
+        'app_comercial_atividades' => ['scope' => 'hub_comercial', 'product' => 'atividades'],
+        'app_comercial_atividade_concluir' => ['scope' => 'hub_comercial', 'product' => 'atividades'],
+        'app_comercial_atividade_excluir' => ['scope' => 'hub_comercial', 'product' => 'atividades'],
+        'app_comercial_analytics' => ['scope' => 'hub_comercial', 'product' => 'analytics'],
+
+        // Hubs em desenvolvimento (sem produtos)
         'app_beneficios' => ['scope' => 'hub_beneficios', 'product' => '_hub'],
         'app_academy' => ['scope' => 'hub_academy', 'product' => '_hub'],
         'app_parceiros' => ['scope' => 'hub_parceiros', 'product' => '_hub'],

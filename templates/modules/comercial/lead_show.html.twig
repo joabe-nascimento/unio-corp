@@ -1,0 +1,84 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}{{ lead.nome }} · Lead{% endblock %}
+{% block permissions_scope %}hub_comercial{% endblock %}
+{% set hub_page_title = lead.nome %}
+{% set hub_page_subtitle = 'Lead · ' ~ lead.status %}
+
+{% block hub_toolbar_actions %}
+{% if lead.status != 'convertido' %}
+<form method="post" action="{{ path('app_comercial_lead_converter', { id: lead.id }) }}" class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('crm_lead_convert_' ~ lead.id) }}">
+    <button type="submit" class="btn-unio btn-sm">Converter em cliente</button>
+</form>
+{% endif %}
+<a href="{{ path('app_comercial_leads') }}" class="btn-unio-ghost btn-sm">Voltar</a>
+{% endblock %}
+
+{% block hub_content %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Editar lead', subtitle: 'Atualizado em ' ~ lead.atualizadoEm|date('d/m/Y H:i') } %}
+            <form method="post" class="px-3 pb-3">
+                <input type="hidden" name="_token" value="{{ csrf_token('crm_lead_edit_' ~ lead.id) }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="nome">Nome *</label>
+                        <input class="form-control" id="nome" name="nome" value="{{ lead.nome }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="empresa_nome">Empresa</label>
+                        <input class="form-control" id="empresa_nome" name="empresa_nome" value="{{ lead.empresaNome }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="email">E-mail</label>
+                        <input class="form-control" id="email" type="email" name="email" value="{{ lead.email }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="telefone">Telefone</label>
+                        <input class="form-control" id="telefone" name="telefone" value="{{ lead.telefone }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="cargo">Cargo</label>
+                        <input class="form-control" id="cargo" name="cargo" value="{{ lead.cargo }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="origem">Origem</label>
+                        <select class="form-control" id="origem" name="origem">
+                            {% for o in origem_options %}
+                            <option value="{{ o }}" {% if lead.origem == o %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="status">Status</label>
+                        <select class="form-control" id="status" name="status">
+                            {% for s in status_options %}
+                            <option value="{{ s }}" {% if lead.status == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="notas">Notas</label>
+                        <textarea class="form-control" id="notas" name="notas" rows="3">{{ lead.notas }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn-unio btn-sm">Salvar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Ações', subtitle: 'Gerenciar lead' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_comercial_lead_excluir', { id: lead.id }) }}" onsubmit="return confirm('Excluir este lead?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('crm_lead_delete_' ~ lead.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir lead</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

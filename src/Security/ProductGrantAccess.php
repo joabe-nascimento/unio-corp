@@ -25,6 +25,7 @@ final class ProductGrantAccess
         'app_publicidade' => ['hub_publicidade', 'product_publicidade'],
         'app_ti' => ['hub_ti'],
         'app_integracoes' => ['hub_integracoes'],
+        'app_comercial' => ['hub_comercial'],
         'app_recrutamento' => ['hub_recrutamento', 'product_rh'],
         'app_recrutamento_analytics' => ['hub_recrutamento', 'product_rh'],
     ];
@@ -104,6 +105,14 @@ final class ProductGrantAccess
         'app_recrutamento_candidato_curriculo' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
         'app_recrutamento_candidato_banco_talentos' => ['scope' => 'hub_recrutamento', 'product' => 'vagas', 'min' => 'GESTOR_EQUIPE'],
         'app_recrutamento_aprovacao_decidir' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
+        // Comercial CRM
+        'app_comercial_lead_converter' => ['scope' => 'hub_comercial', 'product' => 'leads', 'min' => 'GESTOR_EQUIPE'],
+        'app_comercial_lead_excluir' => ['scope' => 'hub_comercial', 'product' => 'leads', 'min' => 'GESTOR'],
+        'app_comercial_oportunidade_mover' => ['scope' => 'hub_comercial', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
+        'app_comercial_oportunidade_excluir' => ['scope' => 'hub_comercial', 'product' => 'pipeline', 'min' => 'GESTOR'],
+        'app_comercial_cliente_excluir' => ['scope' => 'hub_comercial', 'product' => 'clientes', 'min' => 'GESTOR'],
+        'app_comercial_atividade_concluir' => ['scope' => 'hub_comercial', 'product' => 'atividades', 'min' => 'MEMBRO'],
+        'app_comercial_atividade_excluir' => ['scope' => 'hub_comercial', 'product' => 'atividades', 'min' => 'GESTOR_EQUIPE'],
         // Núcleo TI — chamados
         'app_ti_chamado_novo_submit' => ['scope' => 'hub_ti', 'product' => 'meus_chamados', 'min' => 'MEMBRO'],
         'app_ti_chamado_status' => ['scope' => 'hub_ti', 'product' => 'chamados', 'min' => 'SUPERVISOR_EQUIPE'],
