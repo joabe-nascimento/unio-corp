@@ -14,6 +14,9 @@ final class ClinicWhatsappSenderFactory
         private string $metaToken = '',
         private string $metaPhoneNumberId = '',
         private string $metaGraphVersion = 'v21.0',
+        private string $templateAgenda = '',
+        private string $templateQuestionario = '',
+        private string $templateLang = 'pt_BR',
     ) {}
 
     public function create(): ClinicWhatsappSenderInterface
@@ -30,6 +33,9 @@ final class ClinicWhatsappSenderFactory
                 $phoneId,
                 $version,
                 $this->logger,
+                trim($this->templateAgenda),
+                trim($this->templateQuestionario),
+                trim($this->templateLang) !== '' ? trim($this->templateLang) : 'pt_BR',
             );
         }
 

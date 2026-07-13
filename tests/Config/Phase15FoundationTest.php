@@ -11,8 +11,8 @@ final class Phase15FoundationTest extends TestCase
     public function testHubMaturityEnrichesHub(): void
     {
         $hub = HubMaturity::enrichHub(['id' => 'pos_operatorio', 'label' => 'Pós-Op']);
-        self::assertSame('mvp', $hub['maturity_level']);
-        self::assertSame('MVP', $hub['maturity_label']);
+        self::assertSame('operational', $hub['maturity_level']);
+        self::assertSame('Operacional', $hub['maturity_label']);
     }
 
     public function testNotificationPolicyResolvesAlerta(): void

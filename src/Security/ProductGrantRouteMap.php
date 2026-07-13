@@ -356,6 +356,7 @@ final class ProductGrantRouteMap
         'app_pos_operatorio_atendimento_abrir' => ['scope' => 'hub_pos_operatorio', 'product' => 'pacientes'],
         'app_pos_operatorio_atendimento_show' => ['scope' => 'hub_pos_operatorio', 'product' => 'pacientes'],
         'app_pos_operatorio_contas' => ['scope' => 'hub_pos_operatorio', 'product' => 'operacao'],
+        'app_pos_operatorio_contas_relatorio' => ['scope' => 'hub_pos_operatorio', 'product' => 'operacao'],
         'app_pos_operatorio_contas_acao' => ['scope' => 'hub_pos_operatorio', 'product' => 'operacao'],
         'app_pos_operatorio_convenios' => ['scope' => 'hub_pos_operatorio', 'product' => 'operacao'],
         'app_pos_operatorio_convenios_editar' => ['scope' => 'hub_pos_operatorio', 'product' => 'operacao'],

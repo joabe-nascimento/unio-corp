@@ -262,9 +262,20 @@ WHATSAPP_PROVIDER=meta
 WHATSAPP_META_TOKEN=...
 WHATSAPP_META_PHONE_NUMBER_ID=...
 WHATSAPP_META_GRAPH_VERSION=v21.0
+# Templates HSM aprovados na Meta (fora da janela 24h). Sem nome → envia texto.
+WHATSAPP_META_TEMPLATE_AGENDA=confirmacao_agenda
+WHATSAPP_META_TEMPLATE_QUESTIONARIO=questionario_pendente
+WHATSAPP_META_TEMPLATE_LANG=pt_BR
 ```
 
-Sem isso, o sistema permanece em **wa.me + webhook** (canal “Preparado”).
+Parâmetros esperados no body do template (ordem):
+
+- **Agenda:** nome, título, data/hora, médico  
+- **Questionário:** nome, dia pós, URL do portal  
+
+Se o template falhar, o sistema faz fallback para mensagem de texto (janela 24h / sessão aberta).
+
+Sem credenciais Meta, o sistema permanece em **wa.me + webhook** (canal “Preparado”).
 
 Cron sugerido (cPanel → Cron Jobs), a partir de `~/unio-uniosaude`:
 

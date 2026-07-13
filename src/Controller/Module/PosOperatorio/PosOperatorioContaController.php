@@ -6,6 +6,7 @@ use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicContaService;
 use App\Service\PosOperatorio\ClinicConvenioService;
+use App\Service\PosOperatorio\ClinicFinanceReportService;
 use App\Service\PosOperatorio\ClinicGuiaTissService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,7 +24,22 @@ final class PosOperatorioContaController extends AbstractController
         private ClinicContaService $contas,
         private ClinicConvenioService $convenios,
         private ClinicGuiaTissService $guias,
+        private ClinicFinanceReportService $financeReport,
     ) {}
+
+    #[Route('/relatorio', name: 'app_pos_operatorio_contas_relatorio', methods: ['GET'])]
+    public function relatorio(): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $report = $this->financeReport->build($empresa);
+
+        return $this->render('modules/pos-operatorio/contas/relatorio.html.twig', [
+            'empresa' => $empresa,
+            'pos_section' => 'contas',
+            'dre' => $report['dre'],
+            'repasse' => $report['repasse'],
+        ]);
+    }
 
     #[Route('', name: 'app_pos_operatorio_contas', methods: ['GET'])]
     public function index(Request $request): Response

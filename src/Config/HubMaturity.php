@@ -26,7 +26,7 @@ final class HubMaturity
         'cortex' => self::OPERATIONAL,
         'admin' => self::MATURE,
         // Pós-Operatório Fase 1.5
-        'pos_operatorio' => self::MVP,
+        'pos_operatorio' => self::OPERATIONAL,
         // Demais planejados
         'comercial' => self::MVP,
         'beneficios' => self::PREVIEW,

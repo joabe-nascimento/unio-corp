@@ -202,7 +202,7 @@ Referências públicas: **Feegow**, **iClinic**, **Clinicorp**, **Operatório**,
 | Prontuário eletrônico (PEP) | Sim (às vezes IA) | Não (só evolução pós-op / guia) | Alto |
 | Faturamento particular | Sim | Não | Alto |
 | Convênio + **TISS** / TUSS / glosa | Sim (Feegow forte) | Sim (guia, lote, XML, catálogo TUSS) | Evoluir XSD/operadora |
-| Financeiro (caixa, DRE, repasse) | Sim | Não | Médio–alto |
+| Financeiro (caixa, DRE, repasse) | Sim | DRE leve + repasse por médico (`/pos-operatorio/contas/relatorio`) | Médio |
 | Estoque / materiais | Sim | Não | Médio |
 | Teleconsulta | Sim | Não | Depois |
 | CRM / leads / marketing | Sim (iClinic, Triagefy, Clinicorp) | Não | Médio (Fernando #1–2) |

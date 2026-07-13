@@ -56,4 +56,81 @@ final class MetaCloudWhatsappSenderTest extends TestCase
         self::assertSame('failed', $result->status);
         self::assertStringContainsString('Invalid OAuth', (string) $result->error);
     }
+
+    public function testSendUsesTemplateWhenConfiguredThenSucceeds(): void
+    {
+        $seenTypes = [];
+        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$seenTypes): MockResponse {
+            $body = json_decode((string) ($options['body'] ?? ''), true, 512, JSON_THROW_ON_ERROR);
+            $seenTypes[] = $body['type'] ?? null;
+            self::assertSame('template', $body['type']);
+            self::assertSame('confirmacao_agenda', $body['template']['name']);
+            self::assertSame('pt_BR', $body['template']['language']['code']);
+            self::assertCount(2, $body['template']['components'][0]['parameters']);
+
+            return new MockResponse(json_encode([
+                'messages' => [['id' => 'wamid.TPL']],
+            ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
+        });
+
+        $sender = new MetaCloudWhatsappSender(
+            $client,
+            'test-token',
+            '123456',
+            'v21.0',
+            new NullLogger(),
+            'confirmacao_agenda',
+            'questionario_pendente',
+            'pt_BR',
+        );
+        $empresa = (new Empresa())->setNome('Clinica')->setCnpj('00.000.000/0001-00');
+
+        $result = $sender->send($empresa, '5511999990000', 'texto fallback', [
+            'event' => 'agenda_confirmacao',
+            'template_params' => ['João', 'Consulta'],
+        ]);
+
+        self::assertTrue($result->sent);
+        self::assertSame(['template'], $seenTypes);
+        self::assertSame('wamid.TPL', $result->providerMessageId);
+    }
+
+    public function testTemplateFailureFallsBackToText(): void
+    {
+        $seenTypes = [];
+        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$seenTypes): MockResponse {
+            $body = json_decode((string) ($options['body'] ?? ''), true, 512, JSON_THROW_ON_ERROR);
+            $seenTypes[] = $body['type'] ?? null;
+            if (($body['type'] ?? '') === 'template') {
+                return new MockResponse(json_encode([
+                    'error' => ['message' => 'Template name does not exist'],
+                ], JSON_THROW_ON_ERROR), ['http_code' => 400]);
+            }
+
+            return new MockResponse(json_encode([
+                'messages' => [['id' => 'wamid.TXT']],
+            ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
+        });
+
+        $sender = new MetaCloudWhatsappSender(
+            $client,
+            'test-token',
+            '123456',
+            'v21.0',
+            new NullLogger(),
+            'confirmacao_agenda',
+            '',
+            'pt_BR',
+        );
+        $empresa = (new Empresa())->setNome('Clinica')->setCnpj('00.000.000/0001-00');
+
+        $result = $sender->send($empresa, '5511999990000', 'texto fallback', [
+            'event' => 'agenda_confirmacao',
+            'template_params' => ['João'],
+        ]);
+
+        self::assertTrue($result->sent);
+        self::assertSame(['template', 'text'], $seenTypes);
+        self::assertSame('wamid.TXT', $result->providerMessageId);
+    }
 }

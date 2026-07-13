@@ -13,6 +13,7 @@ use App\Repository\Crm\CrmAtividadeRepository;
 use App\Repository\Crm\CrmContaRepository;
 use App\Repository\Crm\CrmLeadRepository;
 use App\Repository\Crm\CrmOportunidadeRepository;
+use App\Repository\PosOperatorioProtocoloRepository;
 use App\Service\PosOperatorio\PosOperatorioPacienteService;
 use App\Service\WorkspaceService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +31,7 @@ final class CrmService
         private CrmOportunidadeRepository $oportunidades,
         private CrmAtividadeRepository $atividades,
         private PosOperatorioPacienteService $pacientes,
+        private PosOperatorioProtocoloRepository $protocolos,
     ) {}
 
     public function requireEmpresa(User $user): Empresa
@@ -253,12 +255,19 @@ final class CrmService
             $bridgeNote .= "\n".$obs;
         }
 
-        return $this->pacientes->create($lead->getEmpresa(), [
+        $payload = [
             'nome' => $lead->getNome(),
             'telefone' => (string) ($lead->getTelefone() ?? ''),
             'email_contato' => (string) ($lead->getEmail() ?? ''),
             'observacoes' => $bridgeNote,
-        ], $user);
+        ];
+
+        $ativos = $this->protocolos->findAtivosByEmpresa($lead->getEmpresa());
+        if ($ativos !== [] && $ativos[0]->getId() !== null) {
+            $payload['protocolo_id'] = $ativos[0]->getId();
+        }
+
+        return $this->pacientes->create($lead->getEmpresa(), $payload, $user);
     }
 
     /** @param array<string, mixed> $data */

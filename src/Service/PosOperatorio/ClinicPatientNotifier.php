@@ -57,6 +57,11 @@ final class ClinicPatientNotifier
         $waResult = $this->whatsapp->send($empresa, $paciente->getTelefoneContato(), $waText, [
             'event' => 'questionario_pendente',
             'paciente_id' => $paciente->getId(),
+            'template_params' => [
+                $paciente->getNome(),
+                (string) $dia,
+                $portalUrl,
+            ],
         ]);
 
         $integration = $this->integrationConfig->get($empresa);
@@ -120,6 +125,12 @@ final class ClinicPatientNotifier
             'event' => 'agenda_confirmacao',
             'paciente_id' => $paciente->getId(),
             'agendamento_id' => $agendamento->getId(),
+            'template_params' => [
+                $primeiro,
+                $titulo,
+                $quando,
+                $medico ?: 'equipe clínica',
+            ],
         ]);
 
         $webhookSent = $this->webhooks->dispatch($empresa, 'agenda_confirmacao', [

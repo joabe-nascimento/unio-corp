@@ -1,0 +1,91 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Repasse e DRE · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Repasse e DRE' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Receita por status e produção por médico (contas pagas)' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="btn-unio-ghost btn-sm">Contas</a>
+<a href="{{ path('app_financeiro') }}" class="btn-unio-ghost btn-sm">Financeiro</a>
+{% endblock %}
+
+{% block hub_kpis %}
+{% set receber = (dre.a_receber_centavos|default(0) / 100)|number_format(2, ',', '.') %}
+{% set recebido = (dre.recebido_centavos|default(0) / 100)|number_format(2, ',', '.') %}
+{% set glosado = (dre.glosado_centavos|default(0) / 100)|number_format(2, ',', '.') %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: 'R$ ' ~ receber, label: 'A receber', icon: 'fa-hand-holding-dollar', tone: 'rose' },
+    { value: 'R$ ' ~ recebido, label: 'Recebido', icon: 'fa-check', tone: 'teal' },
+    { value: 'R$ ' ~ glosado, label: 'Glosado', icon: 'fa-ban', tone: 'amber' },
+], mb: 'mb-0' } %}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-4 mb-4">
+    <h2 class="h5 mb-3">DRE leve</h2>
+    <div class="table-responsive">
+        <table class="table admin-table mb-0">
+            <tbody>
+                <tr>
+                    <td>Particular pago</td>
+                    <td class="text-end">R$ {{ (dre.particular_pago_centavos / 100)|number_format(2, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>Convênio pago</td>
+                    <td class="text-end">R$ {{ (dre.convenio_pago_centavos / 100)|number_format(2, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>Cortesia</td>
+                    <td class="text-end">R$ {{ (dre.cortesia_centavos / 100)|number_format(2, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>Cancelado</td>
+                    <td class="text-end">R$ {{ (dre.cancelado_centavos / 100)|number_format(2, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>Contas abertas / pagas</td>
+                    <td class="text-end">{{ dre.qtd_abertas }} / {{ dre.qtd_pagas }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="unio-card p-0">
+    <div class="p-4 pb-2">
+        <h2 class="h5 mb-1">Repasse por médico</h2>
+        <p class="text-muted small mb-0">Soma das contas pagas (particular + convênio) vinculadas ao médico do atendimento ou agendamento. Cortesia não entra.</p>
+    </div>
+    {% if repasse is empty %}
+    <div class="p-4 text-muted">Nenhuma conta paga com valor para agrupar.</div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table admin-table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Médico</th>
+                    <th>Qtd</th>
+                    <th>Particular</th>
+                    <th>Convênio</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in repasse %}
+                <tr>
+                    <td>{{ row.medico_nome }}</td>
+                    <td>{{ row.qtd }}</td>
+                    <td>R$ {{ (row.particular_centavos / 100)|number_format(2, ',', '.') }}</td>
+                    <td>R$ {{ (row.convenio_centavos / 100)|number_format(2, ',', '.') }}</td>
+                    <td><strong>R$ {{ (row.total_centavos / 100)|number_format(2, ',', '.') }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
