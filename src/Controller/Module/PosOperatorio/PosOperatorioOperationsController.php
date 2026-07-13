@@ -5,6 +5,7 @@ namespace App\Controller\Module\PosOperatorio;
 use App\Entity\User;
 use App\PosOperatorio\ClinicFeatureCatalog;
 use App\PosOperatorio\ClinicProtocolLibrary;
+use App\Service\PosOperatorio\ClinicAgendaReminderService;
 use App\Service\PosOperatorio\ClinicAgendaService;
 use App\Service\PosOperatorio\ClinicAltaIntakeService;
 use App\Service\PosOperatorio\ClinicDutyRosterService;
@@ -37,6 +38,7 @@ final class PosOperatorioOperationsController extends AbstractController
         private ClinicPolicyConfigService $policy,
         private ClinicDutyRosterService $duty,
         private ClinicAltaIntakeService $alta,
+        private ClinicAgendaReminderService $agendaReminders,
     ) {}
 
     #[Route('/trabalho', name: 'app_pos_operatorio_trabalho')]
@@ -119,10 +121,33 @@ final class PosOperatorioOperationsController extends AbstractController
         return $this->redirectToRoute('app_pos_operatorio_protocolo_editar', ['id' => $protocolo->getId()]);
     }
 
-    #[Route('/lembretes', name: 'app_pos_operatorio_lembretes')]
-    public function lembretes(): Response
+    #[Route('/lembretes', name: 'app_pos_operatorio_lembretes', methods: ['GET', 'POST'])]
+    public function lembretes(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
+
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('clinic_agenda_reminders', (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token inválido.');
+
+                return $this->redirectToRoute('app_pos_operatorio_lembretes');
+            }
+
+            $result = $this->agendaReminders->prepareForTomorrow($empresa);
+            if ($result['enviados'] > 0) {
+                $this->addFlash(
+                    'success',
+                    sprintf(
+                        '%d lembrete(s) de confirmação preparados para amanhã (WhatsApp/e-mail/webhook).',
+                        $result['enviados'],
+                    ),
+                );
+            } else {
+                $this->addFlash('info', 'Nenhum horário pendente de lembrete para amanhã.');
+            }
+
+            return $this->redirectToRoute('app_pos_operatorio_lembretes');
+        }
 
         return $this->render(self::T . 'lembretes.html.twig', [
             'empresa' => $empresa,

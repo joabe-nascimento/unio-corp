@@ -68,7 +68,7 @@ final class ClinicAtendimentoService
     }
 
     /**
-     * @param array{queixa?: string, exame?: string, conduta?: string, observacao?: string} $data
+     * @param array{queixa?: string, exame?: string, conduta?: string, observacao?: string, hipotese?: string, cid10?: string} $data
      */
     public function saveDraft(ClinicAtendimento $atendimento, Empresa $empresa, array $data): ClinicAtendimento
     {
@@ -85,7 +85,7 @@ final class ClinicAtendimentoService
     }
 
     /**
-     * @param array{queixa?: string, exame?: string, conduta?: string, observacao?: string} $data
+     * @param array{queixa?: string, exame?: string, conduta?: string, observacao?: string, hipotese?: string, cid10?: string} $data
      */
     public function finalize(ClinicAtendimento $atendimento, Empresa $empresa, User $autor, array $data = []): ClinicAtendimento
     {
@@ -157,7 +157,7 @@ final class ClinicAtendimentoService
     }
 
     /**
-     * @param array{queixa?: string, exame?: string, conduta?: string, observacao?: string} $data
+     * @param array{queixa?: string, exame?: string, conduta?: string, observacao?: string, hipotese?: string, cid10?: string} $data
      */
     private function applySoap(ClinicAtendimento $atendimento, array $data): void
     {
@@ -173,6 +173,14 @@ final class ClinicAtendimentoService
         if (\array_key_exists('observacao', $data)) {
             $atendimento->setObservacao($this->nullableText($data['observacao'] ?? null));
         }
+        if (\array_key_exists('hipotese', $data)) {
+            $hip = trim((string) ($data['hipotese'] ?? ''));
+            $atendimento->setHipotese($hip !== '' ? mb_substr($hip, 0, 500) : null);
+        }
+        if (\array_key_exists('cid10', $data)) {
+            $cid = strtoupper(trim((string) ($data['cid10'] ?? '')));
+            $atendimento->setCid10($cid !== '' ? mb_substr($cid, 0, 16) : null);
+        }
     }
 
     private function buildEvolucaoText(ClinicAtendimento $atendimento): string
@@ -183,6 +191,12 @@ final class ClinicAtendimentoService
         }
         if ($atendimento->getExame()) {
             $parts[] = 'Exame: '.$atendimento->getExame();
+        }
+        if ($atendimento->getHipotese()) {
+            $parts[] = 'Hipótese: '.$atendimento->getHipotese();
+        }
+        if ($atendimento->getCid10()) {
+            $parts[] = 'CID-10: '.$atendimento->getCid10();
         }
         if ($atendimento->getConduta()) {
             $parts[] = 'Conduta: '.$atendimento->getConduta();

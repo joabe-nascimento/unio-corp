@@ -82,6 +82,9 @@ class ClinicAgendamento
     #[ORM\Column(nullable: true)]
     private ?int $protocoloDia = null;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $lembreteConfirmacaoEm = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $criadoEm;
 
@@ -223,6 +226,18 @@ class ClinicAgendamento
     public function setProtocoloDia(?int $protocoloDia): static
     {
         $this->protocoloDia = $protocoloDia;
+
+        return $this;
+    }
+
+    public function getLembreteConfirmacaoEm(): ?\DateTimeImmutable
+    {
+        return $this->lembreteConfirmacaoEm;
+    }
+
+    public function setLembreteConfirmacaoEm(?\DateTimeImmutable $lembreteConfirmacaoEm): static
+    {
+        $this->lembreteConfirmacaoEm = $lembreteConfirmacaoEm;
 
         return $this;
     }

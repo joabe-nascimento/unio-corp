@@ -34,9 +34,10 @@ final class RunPosOperatorioContinuityCommand extends Command
         $result = $this->continuity->runAll($empresaId !== null ? (int) $empresaId : null);
 
         $io->success(sprintf(
-            'Continuidade: %d clínica(s), %d lembrete(s), %d escalação(ões).',
+            'Continuidade: %d clínica(s), %d questionário(s), %d agenda D-1, %d escalação(ões).',
             $result['empresas'],
             $result['lembretes'],
+            $result['agenda_lembretes'],
             $result['escalacoes'],
         ));
 

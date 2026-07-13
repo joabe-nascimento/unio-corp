@@ -46,4 +46,58 @@ class ClinicAgendamentoRepository extends ServiceEntityRepository
     {
         return $this->findOneBy(['id' => $id, 'empresa' => $empresa]);
     }
+
+    /**
+     * Horários de amanhã ainda marcados/confirmados sem lembrete de confirmação no dia.
+     *
+     * @return list<ClinicAgendamento>
+     */
+    public function findPendingConfirmacaoReminders(
+        Empresa $empresa,
+        \DateTimeImmutable $dayStart,
+        \DateTimeImmutable $dayEnd,
+    ): array {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.empresa = :empresa')
+            ->andWhere('a.inicio >= :inicio')
+            ->andWhere('a.inicio < :fim')
+            ->andWhere('a.status IN (:statuses)')
+            ->andWhere('a.lembreteConfirmacaoEm IS NULL')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('inicio', $dayStart)
+            ->setParameter('fim', $dayEnd)
+            ->setParameter('statuses', [
+                ClinicAgendamento::STATUS_MARCADO,
+                ClinicAgendamento::STATUS_CONFIRMADO,
+            ])
+            ->orderBy('a.inicio', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<ClinicAgendamento>
+     */
+    public function findForConfirmacaoPanel(
+        Empresa $empresa,
+        \DateTimeImmutable $dayStart,
+        \DateTimeImmutable $dayEnd,
+    ): array {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.empresa = :empresa')
+            ->andWhere('a.inicio >= :inicio')
+            ->andWhere('a.inicio < :fim')
+            ->andWhere('a.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('inicio', $dayStart)
+            ->setParameter('fim', $dayEnd)
+            ->setParameter('statuses', [
+                ClinicAgendamento::STATUS_MARCADO,
+                ClinicAgendamento::STATUS_CONFIRMADO,
+            ])
+            ->orderBy('a.inicio', 'ASC')
+            ->setMaxResults(40)
+            ->getQuery()
+            ->getResult();
+    }
 }

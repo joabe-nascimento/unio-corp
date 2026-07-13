@@ -30,6 +30,7 @@ final class ClinicOperationsService
         private ClinicChannelDispatcher $channels,
         private ClinicRetentionService $retention,
         private UserRepository $users,
+        private ClinicAgendaReminderService $agendaReminders,
     ) {}
 
     /**
@@ -285,6 +286,7 @@ final class ClinicOperationsService
                     'whatsapp_url' => $wa,
                 ];
             }, array_slice($pendentes, 0, 20)),
+            'agenda_amanha' => $this->agendaReminders->panelForTomorrow($empresa),
             'canais' => $canais,
             'escalacao' => $escalacao,
         ];

@@ -87,6 +87,8 @@ final class PosOperatorioAtendimentoController extends AbstractController
                 'exame' => $request->request->getString('exame'),
                 'conduta' => $request->request->getString('conduta'),
                 'observacao' => $request->request->getString('observacao'),
+                'hipotese' => $request->request->getString('hipotese'),
+                'cid10' => $request->request->getString('cid10'),
             ];
             $action = $request->request->getString('action', 'salvar');
 

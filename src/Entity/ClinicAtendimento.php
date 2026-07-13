@@ -56,6 +56,12 @@ class ClinicAtendimento
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $observacao = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $hipotese = null;
+
+    #[ORM\Column(length: 16, nullable: true)]
+    private ?string $cid10 = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $iniciadoEm;
 
@@ -190,6 +196,30 @@ class ClinicAtendimento
     public function setObservacao(?string $observacao): static
     {
         $this->observacao = $observacao;
+
+        return $this;
+    }
+
+    public function getHipotese(): ?string
+    {
+        return $this->hipotese;
+    }
+
+    public function setHipotese(?string $hipotese): static
+    {
+        $this->hipotese = $hipotese;
+
+        return $this;
+    }
+
+    public function getCid10(): ?string
+    {
+        return $this->cid10;
+    }
+
+    public function setCid10(?string $cid10): static
+    {
+        $this->cid10 = $cid10;
 
         return $this;
     }

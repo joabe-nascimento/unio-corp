@@ -560,10 +560,10 @@ final class ClinicFeatureCatalog
     public static function integrations(): array
     {
         return [
-            ['id' => 'whatsapp', 'nome' => 'Lembretes por telefone', 'status' => 'active', 'desc' => 'Questionário diário e retorno via SMS/WhatsApp manual.', 'route' => 'app_pos_operatorio_lembretes', 'route_label' => 'Ver lembretes'],
-            ['id' => 'pep', 'nome' => 'Prontuário / PEP', 'status' => 'configurable', 'desc' => 'Importação automática via webhook ou cadastro manual na ficha.', 'route' => 'app_pos_operatorio_pacientes', 'route_label' => 'Cadastrar paciente'],
+            ['id' => 'whatsapp', 'nome' => 'Lembretes por telefone', 'status' => 'active', 'desc' => 'Questionário diário e confirmação de agenda D-1 (wa.me + webhook).', 'route' => 'app_pos_operatorio_lembretes', 'route_label' => 'Ver lembretes'],
+            ['id' => 'pep', 'nome' => 'Prontuário / PEP', 'status' => 'active', 'desc' => 'SOAP + hipótese/CID no atendimento; evolução na ficha ao finalizar.', 'route' => 'app_pos_operatorio_atendimento', 'route_label' => 'Abrir atendimentos'],
             ['id' => 'calendar', 'nome' => 'Agenda de retornos', 'status' => 'active', 'desc' => 'Horários na clínica e sugestões a partir dos marcos do protocolo.', 'route' => 'app_pos_operatorio_agenda', 'route_label' => 'Abrir agenda'],
-            ['id' => 'atendimento', 'nome' => 'Atendimento leve', 'status' => 'active', 'desc' => 'SOAP na consulta e evolução na ficha ao finalizar.', 'route' => 'app_pos_operatorio_atendimento', 'route_label' => 'Abrir atendimentos'],
+            ['id' => 'atendimento', 'nome' => 'Atendimento leve', 'status' => 'active', 'desc' => 'SOAP, hipótese, CID-10 e evolução na ficha ao finalizar.', 'route' => 'app_pos_operatorio_atendimento', 'route_label' => 'Abrir atendimentos'],
             ['id' => 'contas', 'nome' => 'Contas particulares', 'status' => 'active', 'desc' => 'Conta aberta no atendimento finalizado; marcar pago ou cortesia.', 'route' => 'app_pos_operatorio_contas', 'route_label' => 'Abrir contas'],
             ['id' => 'convenios', 'nome' => 'Convênios', 'status' => 'active', 'desc' => 'Operadoras cadastradas para gerar guias TISS.', 'route' => 'app_pos_operatorio_convenios', 'route_label' => 'Abrir convênios'],
             ['id' => 'guias', 'nome' => 'Guias TISS', 'status' => 'active', 'desc' => 'Guia com catálogo TUSS, status até glosa/pago e XML.', 'route' => 'app_pos_operatorio_guias', 'route_label' => 'Abrir guias'],

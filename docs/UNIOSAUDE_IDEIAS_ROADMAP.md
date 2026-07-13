@@ -63,10 +63,10 @@ Uma só trilha — pós-op continua como diferencial; gestão completa se constr
 | Etapa | Nome | Status | O que entrega | Landing / plataforma |
 |-------|------|--------|---------------|----------------------|
 | **E0** | Continuidade (já) | **Entregue** | Pós-op, alertas, sala crítica, portal, carteirinha, guia, comprovante, ops | Pitch diferencial |
-| **E1** | Agenda | **Quase fechada** (dia + recepção + WA manual) | WhatsApp automático 1 dia antes (Meta) | Módulo Agenda na landing + nav |
-| **E2** | Atendimento | **MVP entregue** | SOAP leve ligado à agenda; finaliza → `atendido` + evolução | Nav Atendimento |
+| **E1** | Agenda | **Fechada (MVP+)** | Dia/semana + recepção + WA manual + **confirmação D-1** (comando/cron) | Módulo Agenda na landing + nav |
+| **E2** | Atendimento | **MVP+ PEP leve** | SOAP + hipótese/CID; finaliza → `atendido` + evolução | Nav Atendimento |
 | **E3** | Faturamento leve | **MVP entregue** (particular) | Conta `aberto` ao finalizar; pago / cortesia / cancelar | Nav Contas |
-| **E4** | TISS | **Fundação MVP** | Convênios + guia manual (itens/status/glosa); sem XML ANS | Nav Convênios / Guias |
+| **E4** | TISS | **MVP+** | Convênios + guia + lote + XML ANS + TUSS | Nav Convênios / Guias / Lotes |
 | **E5** | Escala | Depois / integrar | Financeiro, CRM/captação | Integrar > reinventar |
 
 **Regra:** não pular E1→E4. Confirmação WhatsApp entra no fim de E1. Login editorial e copy de venda já falam **gestão + cuidado depois da alta**.
@@ -112,16 +112,16 @@ Combinado com Fernando: isso são peças da **gestão completa**; pós-op é fer
 
 ### 1. Agendamento
 
-**Status MVP / E1:** lista semanal + visão do dia, status de recepção, **confirmação WhatsApp (wa.me)** + KPIs do dia. Próximo: Meta/Twilio live ou lembrete automático 1 dia antes.
+**Status MVP / E1:** lista semanal + visão do dia, status de recepção, **confirmação WhatsApp (wa.me)** + KPIs do dia + **lembrete D-1** (`app:clinic:agenda-reminders` / continuidade). Próximo: Meta/Twilio live no mesmo webhook `agenda_confirmacao`.
 
 - Calendário por médico / sala *(sala e overlap avançado: depois)*
 - Status: `marcado` → `confirmado` → `faltou` / `cancelado` → `atendido`
 - Retorno do protocolo = **sugestão** de horário *(já no MVP)*
 - Confirmação WhatsApp depois
 
-### 2. Atendimento (E2 MVP)
+### 2. Atendimento (E2 MVP+)
 
-**Status:** tela SOAP (queixa / exame / conduta / observação) a partir do **Atender** na agenda; finalizar fecha o horário como `atendido` e grava evolução na ficha.
+**Status:** tela SOAP (queixa / exame / conduta / observação) + **hipótese diagnóstica e CID-10**; finalizar fecha o horário como `atendido` e grava evolução na ficha.
 
 ### 3. Faturamento leve (E3 MVP)
 

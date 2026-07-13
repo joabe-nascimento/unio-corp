@@ -2,6 +2,7 @@
 
 namespace App\Service\PosOperatorio;
 
+use App\Entity\ClinicAgendamento;
 use App\Entity\PosOperatorioPaciente;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -59,6 +60,68 @@ final class ClinicPatientNotifier
             'webhook' => $webhookSent,
             'sms_hint' => $integration['lembretes_sms'] && $webhookSent,
         ];
+    }
+
+    /**
+     * Confirmação de horário (D-1): e-mail + wa.me + webhook agenda_confirmacao.
+     *
+     * @return array{email: bool, whatsapp_url: ?string, webhook: bool}
+     */
+    public function notifyAgendaConfirmacao(ClinicAgendamento $agendamento): array
+    {
+        $paciente = $agendamento->getPaciente();
+        $empresa = $agendamento->getEmpresa();
+        $whatsappUrl = $this->confirmWhatsappUrlForAgendamento($agendamento);
+        $quando = $agendamento->getInicio()->format('d/m/Y \à\s H:i');
+        $titulo = $agendamento->getTitulo() ?: 'consulta';
+        $medico = $agendamento->getMedico()?->getNome();
+
+        $subject = sprintf('Confirme seu horário — %s', $paciente->getCodigo());
+        $body = sprintf(
+            "Olá, %s!\n\nConfirmando seu horário:\n%s\n%s%s\n\nResponda CONFIRMO ou REMARCAR.\n\nEquipe clínica",
+            explode(' ', trim($paciente->getNome()))[0] ?: 'paciente',
+            $titulo,
+            $quando,
+            $medico ? "\nCom: ".$medico : '',
+        );
+
+        $emailSent = $this->sendEmail($paciente->getEmailContato(), $subject, $body);
+        $webhookSent = $this->webhooks->dispatch($empresa, 'agenda_confirmacao', [
+            'agendamento_id' => $agendamento->getId(),
+            'paciente_id' => $paciente->getId(),
+            'codigo' => $paciente->getCodigo(),
+            'nome' => $paciente->getNome(),
+            'telefone' => $paciente->getTelefoneContato(),
+            'email' => $paciente->getEmailContato(),
+            'inicio' => $agendamento->getInicio()->format(\DateTimeInterface::ATOM),
+            'titulo' => $titulo,
+            'whatsapp_url' => $whatsappUrl,
+        ]);
+
+        return [
+            'email' => $emailSent,
+            'whatsapp_url' => $whatsappUrl,
+            'webhook' => $webhookSent,
+        ];
+    }
+
+    public function confirmWhatsappUrlForAgendamento(ClinicAgendamento $agendamento): ?string
+    {
+        $paciente = $agendamento->getPaciente();
+        $primeiro = explode(' ', trim($paciente->getNome()))[0] ?: 'paciente';
+        $medico = $agendamento->getMedico()?->getNome();
+        $titulo = $agendamento->getTitulo() ?: 'consulta';
+        $quando = $agendamento->getInicio()->format('d/m/Y \à\s H:i');
+
+        $text = sprintf(
+            "Olá, %s! Confirmando seu horário na clínica:\n\n%s\n%s%s\n\nResponda *CONFIRMO* ou *REMARCAR* por favor.",
+            $primeiro,
+            $titulo,
+            $quando,
+            $medico ? "\nCom: ".$medico : '',
+        );
+
+        return $this->buildWhatsappLink($paciente->getTelefoneContato(), $text);
     }
 
     private function sendEmail(?string $to, string $subject, string $body): bool

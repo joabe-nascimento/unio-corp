@@ -14,10 +14,11 @@ final class ClinicContinuityService
         private EmpresaRepository $empresas,
         private PosOperatorioReminderService $reminders,
         private PosOperatorioEscalationService $escalation,
+        private ClinicAgendaReminderService $agendaReminders,
     ) {}
 
     /**
-     * @return array{empresas: int, lembretes: int, escalacoes: int}
+     * @return array{empresas: int, lembretes: int, agenda_lembretes: int, escalacoes: int}
      */
     public function runAll(?int $empresaId = null): array
     {
@@ -26,6 +27,7 @@ final class ClinicContinuityService
             : $this->empresas->findBy(['ativo' => true]);
 
         $lembretes = 0;
+        $agendaLembretes = 0;
         $escalacoes = 0;
         $count = 0;
 
@@ -35,9 +37,15 @@ final class ClinicContinuityService
             }
             ++$count;
             $lembretes += $this->reminders->sendPendingQuestionnaireReminders($empresa)['enviados'];
+            $agendaLembretes += $this->agendaReminders->prepareForTomorrow($empresa)['enviados'];
             $escalacoes += $this->escalation->processOpenAlerts($empresa)['escalados'];
         }
 
-        return ['empresas' => $count, 'lembretes' => $lembretes, 'escalacoes' => $escalacoes];
+        return [
+            'empresas' => $count,
+            'lembretes' => $lembretes,
+            'agenda_lembretes' => $agendaLembretes,
+            'escalacoes' => $escalacoes,
+        ];
     }
 }
