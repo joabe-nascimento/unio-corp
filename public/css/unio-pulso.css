@@ -1,75 +1,121 @@
 ﻿/**
- * UNIO SAÚDE — Pulso / Home da clínica
+ * UNIO SAÚDE — Pulso (início da clínica)
+ * Alinhado ao organismo: unio-card, org-kpi-strip, section-header
  */
 
 .pulso-root {
     max-width: 1180px;
     margin: 0 auto;
-    padding: 24px 0 40px;
+    padding: 8px 0 24px;
+    display: flex !important;
+    flex-direction: column !important;
+    /* Espaçamento via margin nos filhos — mais robusto que gap neste layout */
+    gap: 0;
 }
 
-/* ── Hero ── */
+/* Espaçamento à prova de overrides (cards unio sem margin própria) */
+.pulso-root > * + * {
+    margin-top: 20px !important;
+}
+
+/* ── Hero (dentro de unio-card) ── */
+.pulso-hero-card {
+    padding: 0;
+    overflow: hidden;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.pulso-root > .page-lead-kpis--organismo,
+.pulso-root > .pulso-kpis-wrap {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    background: transparent;
+}
+
+.pulso-cenas-card,
+.pulso-kpis-card,
+.pulso-shortcuts-card {
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 0 !important;
+}
+
+.pulso-shortcuts-card .section-header,
+.pulso-shortcuts-card > .section-head,
+.pulso-shortcuts-card > header {
+    padding: 16px 18px 0;
+}
+
+.pulso-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    padding: 14px 18px 18px;
+}
+
+.pulso-shortcut {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 84px;
+    padding: 12px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--org-border-soft, rgba(100, 116, 139, 0.16));
+    background: color-mix(in srgb, var(--org-page, #f8fafc) 70%, #fff);
+    color: var(--org-ink, #1e293b);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.pulso-shortcut i {
+    font-size: 18px;
+    color: var(--org-blue, #4b72be);
+}
+
+.pulso-shortcut:hover {
+    background: #fff;
+    border-color: color-mix(in srgb, var(--org-blue, #4b72be) 35%, transparent);
+    color: var(--org-ink, #1e293b);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
 .pulso-hero {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
-    margin-bottom: 20px;
     padding: 20px 24px;
-    background: var(--org-surface, #fff);
-    border: 1px solid var(--org-border-soft, #e4eaf4);
-    border-radius: 16px;
-    box-shadow: 0 1px 4px rgba(30, 42, 58, 0.05);
-}
-
-.pulso-hero--clinica .pulso-hero__slogan {
-    font-style: italic;
-    color: var(--org-blue, #4b72be) !important;
-    opacity: 0.8;
-    font-weight: 700;
-}
-
-.pulso-hero__identity {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-    flex: 1 1 240px;
 }
 
 .pulso-hero__text {
     min-width: 0;
+    flex: 1 1 240px;
 }
 
 .pulso-hero__title {
     margin: 0;
     font-family: 'Nunito', 'Sora', sans-serif;
-    font-size: 1.35rem;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
     font-weight: 800;
-    line-height: 1.25;
-    color: var(--org-ink, #3d3630);
+    line-height: 1.2;
+    color: var(--org-ink, #1e2a3a);
     letter-spacing: -0.02em;
 }
 
-.pulso-hero__colony {
-    display: inline;
-    margin-left: 4px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--org-ink-muted, #9a9188);
-}
-
-.pulso-hero__colony::before {
-    content: '· ';
-    opacity: 0.45;
-}
-
 .pulso-hero__sub {
-    margin: 2px 0 0;
-    font-size: 0.8125rem;
+    margin: 4px 0 0;
+    font-size: 0.875rem;
     font-weight: 600;
-    color: var(--org-ink-soft, #6b635a);
+    color: var(--org-blue, #4b72be);
     line-height: 1.4;
 }
 
@@ -84,7 +130,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    height: 36px;
+    height: 34px;
     padding: 0 14px;
     border-radius: 999px;
     font-size: 12px;
@@ -134,168 +180,69 @@
     50% { transform: scale(1.25); opacity: 0.65; }
 }
 
-.pulso-icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border-radius: 999px;
-    border: 1px solid var(--org-border-soft, #e8ecf2);
-    background: var(--org-surface, #fff);
-    color: var(--org-ink-soft, #6b635a);
-    font-size: 13px;
-    line-height: 1;
-    cursor: pointer;
-    transition: background 0.18s ease, border-color 0.18s ease;
+/* ── Seções em unio-card ── */
+.pulso-cenas-card__body,
+.pulso-kpis-card__body {
+    padding: 0 20px 20px;
 }
 
-.pulso-icon-btn:hover {
-    background: var(--org-sage-bg, rgba(127, 173, 136, 0.14));
-    border-color: rgba(127, 173, 136, 0.35);
-    color: var(--org-sage, #7fad88);
+.pulso-cenas-card .section-header--in-card,
+.pulso-kpis-card .section-header--in-card {
+    padding: 18px 20px 12px;
 }
 
-/* ── Métricas ── */
-.pulso-metrics {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+.pulso-kpis-card .org-kpi-strip--tiles {
+    border: none;
+    border-radius: 0;
     gap: 10px;
-    margin-bottom: 24px;
+    background: transparent;
 }
 
-.pulso-metric {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    background: var(--org-surface, #fff);
+.pulso-kpis-card .org-kpi-strip--tiles .org-kpi-strip__item {
+    background: var(--org-surface-muted, #f6f8fc);
     border: 1px solid var(--org-border-soft, #e8ecf2);
-    border-radius: 12px;
-    min-height: 64px;
+    border-radius: 10px;
 }
 
-.pulso-metric .org-icon {
-    flex-shrink: 0;
+.pulso-kpis-card .org-kpi-strip--tiles .org-kpi-strip__item + .org-kpi-strip__item {
+    border-left: 1px solid var(--org-border-soft, #e8ecf2);
 }
 
-.pulso-metric__body {
-    min-width: 0;
-    flex: 1;
-}
-
-.pulso-metric__value {
-    display: block;
-    font-family: 'Nunito', 'Sora', sans-serif;
-    font-size: 1.35rem;
-    font-weight: 800;
-    line-height: 1.1;
-    color: var(--org-ink, #3d3630);
-}
-
-.pulso-metric__label {
-    display: block;
-    margin-top: 1px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--org-ink-muted, #9a9188);
-}
-
-.pulso-metric--wide .pulso-metric__body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.pulso-metric--wide .pulso-metric__label {
-    margin-top: 0;
-    margin-bottom: 3px;
-}
-
-.pulso-sinais-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 14px;
-}
-
-.pulso-sinal-item {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--org-ink-soft, #6b635a);
-    line-height: 1.3;
-}
-
-.pulso-sinal-item__valor {
-    font-weight: 800;
-    color: var(--org-rose, #c47a88);
-}
-
-.pulso-sinal-item--empty .pulso-sinal-item__rotulo {
-    font-style: italic;
-    opacity: 0.65;
-}
-
-/* ── Seções ── */
-.pulso-section-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'Nunito', 'Sora', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 800;
-    margin: 0 0 12px;
-    color: var(--org-ink, #1e2a3a);
-    letter-spacing: 0.01em;
-}
-
-.pulso-section-title > i {
-    font-size: 14px;
-    color: var(--org-blue, #4b72be);
-    opacity: 0.85;
-}
-
-.pulso-cenas-section {
-    margin-bottom: 24px;
-}
-
+/* ── Grid de casos ── */
 .pulso-cenas-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
 }
 
 .pulso-cena-card {
-    background: var(--org-surface, #fff);
+    background: var(--org-surface-muted, #f8fafc);
     border: 1px solid var(--org-border-soft, #e8ecf2);
     border-radius: 12px;
-    padding: 14px;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-height: 168px;
-    transition: box-shadow 0.18s ease, transform 0.18s ease;
+    min-height: 148px;
+    transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+    text-decoration: none;
+    color: inherit;
 }
 
-.pulso-cena-card:hover {
+.pulso-cena-card--link:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(61, 54, 48, 0.07);
+    box-shadow: 0 4px 14px rgba(30, 42, 58, 0.08);
+    border-color: rgba(75, 114, 190, 0.28);
+    text-decoration: none;
+    color: inherit;
 }
 
 .pulso-cena-card--ativa {
-    border-color: rgba(212, 132, 111, 0.24);
+    border-color: rgba(127, 173, 136, 0.35);
 }
 
 .pulso-cena-card--aguardando {
-    border-color: rgba(221, 176, 106, 0.3);
+    border-color: rgba(221, 176, 106, 0.35);
 }
 
 .pulso-cena-card__head {
@@ -305,19 +252,12 @@
     gap: 8px;
 }
 
-.pulso-cena-card__head-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-}
-
 .pulso-cena-card__tipo {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--org-ink-muted, #9a9188);
+    color: var(--org-ink-muted, #7a8494);
 }
 
 .pulso-cena-card__badge {
@@ -325,30 +265,32 @@
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 999px;
-    background: var(--org-neutral-bg);
-    color: var(--org-neutral);
+    background: var(--org-neutral-bg, #eef1f6);
+    color: var(--org-neutral, #6b7280);
 }
 
 .pulso-cena-card__title {
-    font-size: 13.5px;
+    font-size: 0.9375rem;
     font-weight: 700;
     margin: 0;
-    line-height: 1.4;
-    color: var(--org-ink, #3d3630);
+    line-height: 1.35;
+    color: var(--org-ink, #1e2a3a);
 }
 
 .pulso-cena-card__meta {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px 12px;
     font-size: 11px;
     font-weight: 600;
-    color: var(--org-ink-muted, #9a9188);
+    color: var(--org-ink-muted, #7a8494);
 }
 
 .pulso-cena-card__praticas {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
+    margin-top: auto;
 }
 
 .pulso-pratica-tag {
@@ -356,84 +298,31 @@
     font-weight: 700;
     padding: 3px 8px;
     border-radius: 999px;
-    background: var(--org-sage-bg);
-    color: var(--org-sage);
+    background: var(--org-sage-bg, rgba(127, 173, 136, 0.14));
+    color: var(--org-sage, #5a8563);
     text-transform: capitalize;
-}
-
-.pulso-cena-card__action {
-    margin-top: auto;
-    padding-top: 2px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--org-terra, #d4846f);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.pulso-cena-card__action:hover {
-    color: #b86a54;
-    text-decoration: none;
 }
 
 .pulso-empty {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 40px 24px;
-    color: var(--org-ink-muted);
-    background: var(--org-surface, #fff);
-    border-radius: 12px;
+    padding: 32px 20px;
+    color: var(--org-ink-muted, #7a8494);
+    background: var(--org-surface-muted, #f8fafc);
+    border-radius: 10px;
     border: 1px dashed var(--org-border-soft, #e8ecf2);
 }
 
-.pulso-empty .org-icon {
-    margin: 0 auto 10px;
-}
-
-/* KPIs */
-.pulso-kpis-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 10px;
-}
-
-.pulso-kpi-tile {
-    background: var(--org-surface, #fff);
-    border: 1px solid var(--org-border-soft, #e8ecf2);
-    border-radius: 12px;
-    padding: 14px 10px;
-    text-align: center;
-}
-
-.pulso-kpi-tile .org-icon {
-    margin: 0 auto 6px;
-}
-
-.pulso-kpi-tile:nth-child(6n+1) .org-icon { background: var(--org-terra-bg); color: var(--org-terra); }
-.pulso-kpi-tile:nth-child(6n+2) .org-icon { background: var(--org-sage-bg); color: var(--org-sage); }
-.pulso-kpi-tile:nth-child(6n+3) .org-icon { background: var(--org-amber-bg); color: var(--org-amber); }
-.pulso-kpi-tile:nth-child(6n+4) .org-icon { background: var(--org-teal-bg); color: var(--org-teal); }
-.pulso-kpi-tile:nth-child(6n+5) .org-icon { background: var(--org-lavender-bg); color: var(--org-lavender); }
-.pulso-kpi-tile:nth-child(6n+6) .org-icon { background: var(--org-rose-bg); color: var(--org-rose); }
-
-.pulso-kpi-tile__value {
-    display: block;
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--org-ink);
-}
-
-.pulso-kpi-tile__label {
-    font-size: 10px;
+.pulso-empty p {
+    margin: 0;
+    font-size: 0.875rem;
     font-weight: 600;
-    color: var(--org-ink-muted);
-    line-height: 1.3;
 }
 
-.pulso-kpis-section {
-    margin-bottom: 12px;
+/* KPI strip — alertas (sublist) */
+.pulso-root .org-kpi-strip__sublist-val {
+    font-weight: 800;
+    color: var(--org-rose, #c47a88);
 }
 
 /* Responsivo */
@@ -444,22 +333,25 @@
 }
 
 @media (max-width: 767.98px) {
-    .pulso-root {
-        padding: 16px 0 28px;
-    }
-
     .pulso-hero {
         flex-direction: column;
         align-items: flex-start;
+        padding: 16px 18px;
     }
 
-    .pulso-metrics {
-        grid-template-columns: 1fr;
+    .pulso-hero__actions {
+        width: 100%;
+        justify-content: space-between;
     }
 
-    .pulso-sinais-list {
-        flex-direction: column;
-        gap: 2px;
+    .pulso-cenas-card__body,
+    .pulso-kpis-card__body {
+        padding: 0 14px 14px;
+    }
+
+    .pulso-cenas-card .section-header--in-card,
+    .pulso-kpis-card .section-header--in-card {
+        padding: 14px 14px 10px;
     }
 
     .pulso-cenas-grid {
@@ -467,23 +359,15 @@
     }
 }
 
-/* Dark — mesma superfície do hero (pulso-hero), sem tom marrom */
-html[data-theme="dark"] .unio-organismo .pulso-metric,
+/* Dark */
 html[data-theme="dark"] .unio-organismo .pulso-cena-card,
-html[data-theme="dark"] .unio-organismo .pulso-kpi-tile,
 html[data-theme="dark"] .unio-organismo .pulso-empty,
-html[data-theme="dark"] .unio-organismo .pulso-icon-btn {
+html[data-theme="dark"] .unio-organismo .pulso-kpis-card .org-kpi-strip--tiles .org-kpi-strip__item {
     background: var(--org-surface);
     border-color: var(--org-border);
 }
 
-html[data-theme="dark"] .unio-organismo .pulso-icon-btn:hover {
-    background: var(--org-blue-soft);
-    border-color: var(--org-border-soft);
-    color: var(--org-blue-text);
-}
-
-html[data-theme="dark"] .unio-organismo .pulso-cena-card:hover {
+html[data-theme="dark"] .unio-organismo .pulso-cena-card--link:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
 }
 

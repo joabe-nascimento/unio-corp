@@ -201,7 +201,7 @@ Referências públicas: **Feegow**, **iClinic**, **Clinicorp**, **Operatório**,
 | Confirmação / anti no-show (WhatsApp) | Sim | Preparado | Alto |
 | Prontuário eletrônico (PEP) | Sim (às vezes IA) | Não (só evolução pós-op / guia) | Alto |
 | Faturamento particular | Sim | Não | Alto |
-| Convênio + **TISS** / TUSS / glosa | Sim (Feegow forte) | Não | Alto (depois da fatura) |
+| Convênio + **TISS** / TUSS / glosa | Sim (Feegow forte) | Sim (guia, lote, XML, catálogo TUSS) | Evoluir XSD/operadora |
 | Financeiro (caixa, DRE, repasse) | Sim | Não | Médio–alto |
 | Estoque / materiais | Sim | Não | Médio |
 | Teleconsulta | Sim | Não | Depois |
@@ -292,7 +292,8 @@ Catálogo em código: `src/PosOperatorio/ClinicCommercialPlans.php` · landing `
 | **Clínica** (recomendado) | R$ 279 / clínica / mês | ≤ 500 | Stack atual + agenda (dia/semana, status, WA manual) + docs |
 | **Rede** | Sob consulta (~a partir de R$ 499) | ≤ 2000 / cotação | White-label, multi-unidade, prioridade no roadmap |
 
-**Comparativo de mercado (referência):** OnDoctor ~R$ 79,90/usuário · Feegow ~R$ 129+/profissional · Clinicorp ~R$ 127/clínica. Unio **não compete no piso de R$ 79** — cobra por clínica com o diferencial de continuidade pós-alta.
+**Comparativo de mercado (referência interna jul/2026):** ver [UNIOSAUDE_PRECOS_MERCADO.md](UNIOSAUDE_PRECOS_MERCADO.md).  
+OnDoctor ~R$ 79,90/usuário · Feegow ~R$ 129+/profissional · Clinicorp ~R$ 127/clínica. Unio **não compete no piso de R$ 79** — cobra por clínica com o diferencial de continuidade pós-alta. **Não publicar esse comparativo na landing.**
 
 **Especialidades na landing (ICP, não produto por especialidade ainda):** plástica/estética, ortopedia, bariátrica, day clinic, rede multidisciplinar, outras cirúrgicas.
 
@@ -302,6 +303,8 @@ IDs legados no Comercial: `profissional` → `clinica`, `premium` → `rede`.
 
 ## Referências internas
 
+- [UNIOSAUDE_TISS_XML.md](UNIOSAUDE_TISS_XML.md)
+- [UNIOSAUDE_PRECOS_MERCADO.md](UNIOSAUDE_PRECOS_MERCADO.md)
 - [OPERACAO_INDICE.md](OPERACAO_INDICE.md)
 - [UNIOSAUDE_ACESSOS.md](UNIOSAUDE_ACESSOS.md)
 - [HUB_POS_OPERATORIO.md](HUB_POS_OPERATORIO.md)

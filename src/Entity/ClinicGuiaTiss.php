@@ -54,6 +54,10 @@ class ClinicGuiaTiss
     #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
     private ClinicConvenio $convenio;
 
+    #[ORM\ManyToOne(targetEntity: ClinicLoteTiss::class, inversedBy: 'guias')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicLoteTiss $lote = null;
+
     #[ORM\Column(length: 40)]
     private string $numeroGuia = '';
 
@@ -65,6 +69,10 @@ class ClinicGuiaTiss
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $motivoGlosa = null;
+
+    /** @var list<array{tentativa: int, em: string, motivo: string}>|null */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $historicoGlosas = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $criadoEm;
@@ -154,6 +162,18 @@ class ClinicGuiaTiss
         return $this;
     }
 
+    public function getLote(): ?ClinicLoteTiss
+    {
+        return $this->lote;
+    }
+
+    public function setLote(?ClinicLoteTiss $lote): static
+    {
+        $this->lote = $lote;
+
+        return $this;
+    }
+
     public function getNumeroGuia(): string
     {
         return $this->numeroGuia;
@@ -202,6 +222,62 @@ class ClinicGuiaTiss
         return $this;
     }
 
+    /**
+     * @return list<array{tentativa: int, em: string, motivo: string}>
+     */
+    public function getHistoricoGlosas(): array
+    {
+        if ($this->historicoGlosas !== null && $this->historicoGlosas !== []) {
+            return $this->historicoGlosas;
+        }
+
+        // Fallback de exibição para guias glosadas antes da coluna de histórico
+        if ($this->motivoGlosa !== null && trim($this->motivoGlosa) !== '') {
+            return [[
+                'tentativa' => 1,
+                'em' => $this->atualizadoEm->format(\DateTimeInterface::ATOM),
+                'motivo' => $this->motivoGlosa,
+            ]];
+        }
+
+        return [];
+    }
+
+    /**
+     * @param list<array{tentativa: int, em: string, motivo: string}>|null $historicoGlosas
+     */
+    public function setHistoricoGlosas(?array $historicoGlosas): static
+    {
+        $this->historicoGlosas = $historicoGlosas;
+
+        return $this;
+    }
+
+    public function appendGlosaHistorico(string $motivo): static
+    {
+        $motivo = trim($motivo);
+        $historico = $this->historicoGlosas ?? [];
+
+        // Migra motivo legado (pré-histórico) na primeira glosa estruturada
+        if ($historico === [] && $this->motivoGlosa !== null && trim($this->motivoGlosa) !== '' && trim($this->motivoGlosa) !== $motivo) {
+            $historico[] = [
+                'tentativa' => 1,
+                'em' => $this->atualizadoEm->format(\DateTimeInterface::ATOM),
+                'motivo' => mb_substr(trim($this->motivoGlosa), 0, 8000),
+            ];
+        }
+
+        $historico[] = [
+            'tentativa' => \count($historico) + 1,
+            'em' => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
+            'motivo' => mb_substr($motivo, 0, 8000),
+        ];
+        $this->historicoGlosas = $historico;
+        $this->motivoGlosa = mb_substr($motivo, 0, 8000);
+
+        return $this;
+    }
+
     public function getCriadoEm(): \DateTimeImmutable
     {
         return $this->criadoEm;
@@ -237,7 +313,24 @@ class ClinicGuiaTiss
 
     public function isEditable(): bool
     {
-        return \in_array($this->status, [self::STATUS_RASCUNHO, self::STATUS_ENVIADO, self::STATUS_AUTORIZADO], true);
+        // Após enviar, cabeçalho/itens ficam travados; glosa reabre para rascunho
+        return $this->status === self::STATUS_RASCUNHO;
+    }
+
+    /** @return list<string> */
+    public static function allowedTransitionsFrom(string $status): array
+    {
+        return match ($status) {
+            self::STATUS_RASCUNHO => [self::STATUS_ENVIADO, self::STATUS_CANCELADO],
+            self::STATUS_ENVIADO => [self::STATUS_AUTORIZADO, self::STATUS_GLOSADO, self::STATUS_CANCELADO],
+            self::STATUS_AUTORIZADO => [self::STATUS_PAGO, self::STATUS_GLOSADO, self::STATUS_CANCELADO],
+            default => [],
+        };
+    }
+
+    public function canReabrirAposGlosa(): bool
+    {
+        return $this->status === self::STATUS_GLOSADO;
     }
 
     public function totalCentavos(): int

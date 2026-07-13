@@ -7,8 +7,11 @@ use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicContaService;
 use App\Service\PosOperatorio\ClinicGuiaTissService;
+use App\Service\PosOperatorio\ClinicTissXmlExporter;
+use App\Service\PosOperatorio\ClinicTussCatalogService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,6 +25,8 @@ final class PosOperatorioGuiaTissController extends AbstractController
         private WorkspaceService $workspace,
         private ClinicGuiaTissService $guias,
         private ClinicContaService $contas,
+        private ClinicTussCatalogService $tuss,
+        private ClinicTissXmlExporter $xml,
     ) {}
 
     #[Route('', name: 'app_pos_operatorio_guias', methods: ['GET'])]
@@ -33,12 +38,31 @@ final class PosOperatorioGuiaTissController extends AbstractController
             $status = 'todos';
         }
 
+        $filtro = $status === 'todos' ? null : $status;
+        $guias = $this->guias->list($empresa, $filtro);
+        $listLimit = $this->guias->listLimit();
+        $listTotal = $this->guias->countList($empresa, $filtro);
+
         return $this->render('modules/pos-operatorio/guias/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'guias',
             'filtro_status' => $status,
-            'guias' => $this->guias->list($empresa, $status === 'todos' ? null : $status),
+            'guias' => $guias,
             'status_labels' => ClinicGuiaTissService::statusLabels(),
+            'list_total' => $listTotal,
+            'list_limit' => $listLimit,
+            'list_truncated' => $listTotal > $listLimit,
+        ]);
+    }
+
+    #[Route('/tuss/search', name: 'app_pos_operatorio_guias_tuss_search', methods: ['GET'])]
+    public function tussSearch(Request $request): JsonResponse
+    {
+        $this->requireEmpresa();
+        $q = $request->query->getString('q');
+
+        return $this->json([
+            'items' => $this->tuss->search($q, 20),
         ]);
     }
 
@@ -68,11 +92,42 @@ final class PosOperatorioGuiaTissController extends AbstractController
             $this->addFlash('success', 'Guia de convênio criada.');
 
             return $this->redirectToRoute('app_pos_operatorio_guias_show', ['id' => $guia->getId()]);
-        } catch (\InvalidArgumentException $e) {
+        } catch (\Throwable $e) {
+            $existing = $this->guias->findByConta($empresa, $conta);
+            if ($existing !== null) {
+                $this->addFlash('info', $e->getMessage());
+
+                return $this->redirectToRoute('app_pos_operatorio_guias_show', ['id' => $existing->getId()]);
+            }
             $this->addFlash('error', $e->getMessage());
 
             return $this->redirectToRoute('app_pos_operatorio_contas', ['status' => 'aberto']);
         }
+    }
+
+    #[Route('/{id}/xml', name: 'app_pos_operatorio_guias_xml', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function xml(int $id): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $guia = $this->guias->findForEmpresa($empresa, $id);
+        if ($guia === null) {
+            throw $this->createNotFoundException();
+        }
+
+        try {
+            $content = $this->xml->exportGuia($guia);
+        } catch (\Throwable $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToRoute('app_pos_operatorio_guias_show', ['id' => $id]);
+        }
+
+        $filename = sprintf('tiss-guia-%s.xml', preg_replace('/[^a-zA-Z0-9_-]+/', '-', $guia->getNumeroGuia()) ?: $id);
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/xml; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 
     #[Route('/{id}', name: 'app_pos_operatorio_guias_show', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
@@ -111,10 +166,13 @@ final class PosOperatorioGuiaTissController extends AbstractController
                         $request->request->getString('status'),
                         $request->request->getString('motivo_glosa') ?: null,
                     ),
+                    'reabrir_glosa' => $this->guias->reabrirAposGlosa($guia, $empresa),
                     default => throw new \InvalidArgumentException('Ação inválida.'),
                 };
-                $this->addFlash('success', 'Guia atualizada.');
-            } catch (\InvalidArgumentException $e) {
+                $this->addFlash('success', $action === 'reabrir_glosa'
+                    ? 'Guia reaberta para reapresentação.'
+                    : 'Guia atualizada.');
+            } catch (\Throwable $e) {
                 $this->addFlash('error', $e->getMessage());
             }
 
@@ -126,6 +184,8 @@ final class PosOperatorioGuiaTissController extends AbstractController
             'pos_section' => 'guias',
             'guia' => $guia,
             'status_labels' => ClinicGuiaTissService::statusLabels(),
+            'next_statuses' => ClinicGuiaTiss::allowedTransitionsFrom($guia->getStatus()),
+            'tuss_search_url' => $this->generateUrl('app_pos_operatorio_guias_tuss_search'),
         ]);
     }
 

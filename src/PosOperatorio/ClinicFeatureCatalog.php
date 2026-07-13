@@ -14,16 +14,46 @@ final class ClinicFeatureCatalog
     public const GROUP_EXPERIENCIA = 'experiencia';
     public const GROUP_SISTEMA = 'sistema';
 
-    /** @return list<array{key: string, label: string}> */
+    /** @return list<array{key: string, label: string, icon: string, storage_key: string}> */
     public static function sidebarSections(): array
     {
         return [
-            ['key' => self::GROUP_OPERACAO, 'label' => 'Pós-operatório'],
-            ['key' => self::GROUP_CLINICA, 'label' => 'Clínica'],
-            ['key' => self::GROUP_MONITORAMENTO, 'label' => 'Monitoramento'],
-            ['key' => self::GROUP_INTELIGENCIA, 'label' => 'Inteligência'],
-            ['key' => self::GROUP_EXPERIENCIA, 'label' => 'Experiência do paciente'],
-            ['key' => self::GROUP_SISTEMA, 'label' => 'Sistema'],
+            [
+                'key' => self::GROUP_OPERACAO,
+                'label' => 'Pós-operatório',
+                'icon' => 'fa-briefcase-medical',
+                'storage_key' => 'clinic-operacao-sidebar-collapsed',
+            ],
+            [
+                'key' => self::GROUP_CLINICA,
+                'label' => 'Clínica',
+                'icon' => 'fa-user-doctor',
+                'storage_key' => 'clinic-clinica-sidebar-collapsed',
+            ],
+            [
+                'key' => self::GROUP_MONITORAMENTO,
+                'label' => 'Monitoramento',
+                'icon' => 'fa-heart-pulse',
+                'storage_key' => 'clinic-monitoramento-sidebar-collapsed',
+            ],
+            [
+                'key' => self::GROUP_INTELIGENCIA,
+                'label' => 'Inteligência',
+                'icon' => 'fa-chart-line',
+                'storage_key' => 'clinic-inteligencia-sidebar-collapsed',
+            ],
+            [
+                'key' => self::GROUP_EXPERIENCIA,
+                'label' => 'Experiência do paciente',
+                'icon' => 'fa-hand-holding-medical',
+                'storage_key' => 'clinic-experiencia-sidebar-collapsed',
+            ],
+            [
+                'key' => self::GROUP_SISTEMA,
+                'label' => 'Sistema',
+                'icon' => 'fa-gear',
+                'storage_key' => 'clinic-sistema-sidebar-collapsed',
+            ],
         ];
     }
 
@@ -156,12 +186,25 @@ final class ClinicFeatureCatalog
                 'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_guias',
                 'route_prefix' => 'app_pos_operatorio_guias',
-                'icon' => 'fa-file-medical',
+                'icon' => 'fa-file-invoice-dollar',
                 'title' => 'Guias TISS',
-                'short' => 'Guias',
-                'desc' => 'Guias de convênio com itens e status (fundação).',
+                'short' => 'Guias TISS',
+                'desc' => 'Guias de convênio com itens TUSS, lote e XML.',
                 'status' => 'active',
                 'tone' => 'indigo',
+            ],
+            [
+                'id' => 'lotes',
+                'product' => ClinicProductCatalog::POS_OPERATORIO,
+                'group' => self::GROUP_CLINICA,
+                'route' => 'app_pos_operatorio_lotes',
+                'route_prefix' => 'app_pos_operatorio_lotes',
+                'icon' => 'fa-boxes-stacked',
+                'title' => 'Lotes TISS',
+                'short' => 'Lotes TISS',
+                'desc' => 'Remessa por convênio e exportação XML ANS.',
+                'status' => 'active',
+                'tone' => 'slate',
             ],
             [
                 'id' => 'questionarios',
@@ -361,6 +404,7 @@ final class ClinicFeatureCatalog
                 'desc' => 'Ativar módulos da gestão clínica (pós-op, carteirinha, guia).',
                 'status' => 'active',
                 'tone' => 'lavender',
+                'sidebar_skip' => true,
             ],
             [
                 'id' => 'recepcao',
@@ -428,12 +472,15 @@ final class ClinicFeatureCatalog
     /**
      * @param list<array<string, mixed>> $features
      *
-     * @return list<array{key: string, label: string}>
+     * @return list<array{key: string, label: string, icon: string, storage_key: string}>
      */
     public static function sectionsForFeatures(array $features): array
     {
         $groups = [];
         foreach ($features as $feature) {
+            if ($feature['sidebar_skip'] ?? false) {
+                continue;
+            }
             $groups[(string) ($feature['group'] ?? '')] = true;
         }
 
@@ -441,6 +488,57 @@ final class ClinicFeatureCatalog
             self::sidebarSections(),
             static fn (array $section): bool => isset($groups[$section['key']]),
         ));
+    }
+
+    /**
+     * @param list<array<string, mixed>> $features
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function featuresForGroup(array $features, string $group): array
+    {
+        return array_values(array_filter(
+            $features,
+            static fn (array $feature): bool => ($feature['group'] ?? '') === $group
+                && !($feature['sidebar_skip'] ?? false),
+        ));
+    }
+
+    /**
+     * @param list<array<string, mixed>> $features
+     */
+    public static function isGroupActive(string $group, ?string $route, array $features): bool
+    {
+        foreach (self::featuresForGroup($features, $group) as $feature) {
+            if (self::isRouteActive($route, $feature)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param list<array<string, mixed>> $products
+     */
+    public static function isProductsNavActive(?string $route, array $products): bool
+    {
+        if ($route === 'app_pos_operatorio_produtos') {
+            return true;
+        }
+
+        foreach ($products as $product) {
+            if (!($product['enabled'] ?? true)) {
+                continue;
+            }
+            $featureRoute = (string) ($product['route'] ?? '');
+            $prefix = (string) ($product['route_prefix'] ?? $featureRoute);
+            if ($route === $featureRoute || ($prefix !== '' && str_starts_with((string) $route, $prefix))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** @return array<string, bool> */
@@ -468,7 +566,8 @@ final class ClinicFeatureCatalog
             ['id' => 'atendimento', 'nome' => 'Atendimento leve', 'status' => 'active', 'desc' => 'SOAP na consulta e evolução na ficha ao finalizar.', 'route' => 'app_pos_operatorio_atendimento', 'route_label' => 'Abrir atendimentos'],
             ['id' => 'contas', 'nome' => 'Contas particulares', 'status' => 'active', 'desc' => 'Conta aberta no atendimento finalizado; marcar pago ou cortesia.', 'route' => 'app_pos_operatorio_contas', 'route_label' => 'Abrir contas'],
             ['id' => 'convenios', 'nome' => 'Convênios', 'status' => 'active', 'desc' => 'Operadoras cadastradas para gerar guias TISS.', 'route' => 'app_pos_operatorio_convenios', 'route_label' => 'Abrir convênios'],
-            ['id' => 'guias', 'nome' => 'Guias TISS', 'status' => 'active', 'desc' => 'Guia manual com itens TUSS e status até glosa/pago.', 'route' => 'app_pos_operatorio_guias', 'route_label' => 'Abrir guias'],
+            ['id' => 'guias', 'nome' => 'Guias TISS', 'status' => 'active', 'desc' => 'Guia com catálogo TUSS, status até glosa/pago e XML.', 'route' => 'app_pos_operatorio_guias', 'route_label' => 'Abrir guias'],
+            ['id' => 'lotes', 'nome' => 'Lotes TISS', 'status' => 'active', 'desc' => 'Remessa por convênio e download do XML ANS.', 'route' => 'app_pos_operatorio_lotes', 'route_label' => 'Abrir lotes'],
             ['id' => 'vitoria', 'nome' => 'Vitória AI', 'status' => 'active', 'desc' => 'Triagem, resumo de ficha e sugestão de conduta.', 'route' => null, 'route_label' => null],
             ['id' => 'mercure', 'nome' => 'Tempo real (Mercure)', 'status' => 'active', 'desc' => 'Atualização live da fila de alertas.', 'route' => 'app_pos_operatorio_alertas', 'route_label' => 'Fila de alertas'],
             ['id' => 'webhook', 'nome' => 'Webhooks', 'status' => 'configurable', 'desc' => 'Notificações de alerta P1 e questionário pendente para sistemas externos.', 'route' => null, 'route_label' => null],

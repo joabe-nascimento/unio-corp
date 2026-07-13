@@ -1,4 +1,5 @@
 {# Navegação Organismo — Studio (prod) vs Clínica (uniosaude) #}
+{% import 'macros/sidebar_nav.html.twig' as nav %}
 {% set route = app.request.attributes.get('_route') %}
 {% set badges = clinic_nav_badges|default({}) %}
 {% set copy = organismo.copy|default({}) %}
@@ -14,64 +15,69 @@
 </li>
 
 {% if _clinic and clinic_nav_sections is defined and clinic_nav_features is defined %}
-{# ── Produtos modulares da plataforma ── #}
-<li class="sidebar-hub-separator" aria-hidden="true"></li>
-<li class="nav-item sidebar-hub-heading-item">
-    <div class="sidebar-hub-heading">
-        <span class="sidebar-hub-heading-label">Produtos</span>
-    </div>
-</li>
-<li class="nav-item">
-    <a href="{{ path('app_pos_operatorio_produtos') }}" class="nav-link {{ route == 'app_pos_operatorio_produtos' ? 'active' : '' }}">
+{# ── Produtos modulares (grupo expansível) ── #}
+{% set _products_open = clinic_products_nav_open(route, clinic_products|default([])) %}
+<li class="nav-item has-treeview clinic-nav-group"
+    data-module-tree
+    data-auto-open="{{ _products_open ? '1' : '0' }}"
+    data-storage-key="clinic-produtos-sidebar-collapsed">
+    <a href="#" class="nav-link clinic-nav-group__trigger{{ _products_open ? ' active' : '' }}">
         <span class="nav-icon-slot">
             <i class="fas fa-layer-group nav-icon" aria-hidden="true"></i>
         </span>
-        <p>Todos os produtos</p>
+        <p>Produtos <i class="fas fa-angle-left right" aria-hidden="true"></i></p>
     </a>
+    <ul class="nav nav-treeview nav-product-children clinic-nav-group__children">
+        <li class="nav-item">
+            <a href="{{ path('app_pos_operatorio_produtos') }}"
+               class="nav-link nav-submenu-link clinic-nav-submenu-link{{ route == 'app_pos_operatorio_produtos' ? ' active' : '' }}"
+               {{ route == 'app_pos_operatorio_produtos' ? ' aria-current="page"' : '' }}>
+                <p>Todos os produtos</p>
+            </a>
+        </li>
+        {% for product in clinic_products|default([]) %}
+        {% if product.enabled|default(true) %}
+        {% set _prod_route = product.route|default('') %}
+        {% set _prod_prefix = product.route_prefix|default(_prod_route) %}
+        {% set _prod_active = route == _prod_route or (_prod_prefix != '' and route starts with _prod_prefix) %}
+        <li class="nav-item">
+            <a href="{{ path(product.route, product.route_params|default({})) }}"
+               class="nav-link nav-submenu-link clinic-nav-submenu-link{{ _prod_active ? ' active' : '' }}"
+               {{ _prod_active ? ' aria-current="page"' : '' }}>
+                <p>{{ product.short|default(product.label) }}</p>
+            </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
 </li>
-{% for product in clinic_products|default([]) %}
-{% if product.enabled|default(true) %}
-{% set _prod_route = product.route|default('') %}
-{% set _prod_prefix = product.route_prefix|default(_prod_route) %}
-<li class="nav-item">
-    <a href="{{ path(product.route, product.route_params|default({})) }}"
-       class="nav-link{{ route == _prod_route or (_prod_prefix != '' and route starts with _prod_prefix) ? ' active' : '' }}{{ not product.enabled|default(true) ? ' nav-link--muted' : '' }}"
-       {% if not product.enabled|default(true) %}title="Produto desativado. Ative em Produtos"{% elseif product.route_hint|default('') %}title="{{ product.route_hint }}"{% endif %}>
-        <span class="nav-icon-slot">
-            <i class="fas {{ product.icon }} nav-icon" aria-hidden="true"></i>
-        </span>
-        <p>{{ product.short|default(product.label) }}</p>
-    </a>
-</li>
-{% endif %}
-{% endfor %}
 
-{# ── Capacidades por área ── #}
+{# ── Capacidades por área (grupos expansíveis) ── #}
 {% for section in clinic_nav_sections %}
-<li class="sidebar-hub-separator" aria-hidden="true"></li>
-<li class="nav-item sidebar-hub-heading-item">
-    <div class="sidebar-hub-heading">
-        <span class="sidebar-hub-heading-label">{{ section.label }}</span>
-    </div>
-</li>
-{% for feature in clinic_nav_features %}
-{% if feature.group == section.key %}
-<li class="nav-item">
-    <a href="{{ path(feature.route) }}"
-       class="nav-link {{ route == feature.route or (feature.route_prefix|default('') != '' and route starts with feature.route_prefix) ? 'active' : '' }}"
-       {% if feature.external|default(false) %}target="_blank" rel="noopener"{% endif %}>
+{% set _section_features = clinic_features_for_group(clinic_nav_features, section.key) %}
+{% if _section_features|length > 0 %}
+{% set _group_open = clinic_group_open(section.key, route, clinic_nav_features) %}
+<li class="nav-item has-treeview clinic-nav-group"
+    data-module-tree
+    data-auto-open="{{ _group_open ? '1' : '0' }}"
+    data-storage-key="{{ section.storage_key }}">
+    <a href="#" class="nav-link clinic-nav-group__trigger{{ _group_open ? ' active' : '' }}">
         <span class="nav-icon-slot">
-            <i class="fas {{ feature.icon }} nav-icon" aria-hidden="true"></i>
-            {% set _bk = feature.badge_key|default('') %}
-            {% if _bk and badges[_bk]|default(0) > 0 %}
-            <span class="nav-clinic-badge{% if _bk == 'sala_critica' %} nav-clinic-badge--danger{% elseif _bk in ['alertas', 'questionarios'] %} nav-clinic-badge--warning{% endif %}" aria-label="{{ badges[_bk] }}">{{ badges[_bk] }}</span>
-            {% endif %}
+            <i class="fas {{ section.icon }} nav-icon" aria-hidden="true"></i>
         </span>
-        <p>{{ feature.short|default(feature.title) }}</p>
+        <p>{{ section.label }} <i class="fas fa-angle-left right" aria-hidden="true"></i></p>
     </a>
+    <ul class="nav nav-treeview nav-product-children clinic-nav-group__children">
+        {% for feature in _section_features %}
+        {% include 'components/clinic_sidebar_submenu_item.html.twig' with {
+            feature: feature,
+            route: route,
+            badges: badges
+        } %}
+        {% endfor %}
+    </ul>
 </li>
 {% endif %}
-{% endfor %}
 {% endfor %}
 
 {% else %}

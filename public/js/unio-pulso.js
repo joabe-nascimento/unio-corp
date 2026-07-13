@@ -22,39 +22,40 @@
     function renderCenaCard(cena) {
         var estado = cena.estado || 'ativa';
         var mockClass = cena.mock ? ' pulso-cena-card--mock' : '';
+        var linkClass = cena.url ? ' pulso-cena-card--link' : '';
+        var tag = cena.url ? 'a' : 'article';
+        var href = cena.url ? ' href="' + escapeHtml(cena.url) + '"' : '';
+
         var praticas = (cena.praticas || []).map(function (p) {
             return '<span class="pulso-pratica-tag">' + escapeHtml(String(p).replace(/_/g, ' ')) + '</span>';
         }).join('');
 
         var meta = '';
         if (cena.dias_aberta > 0) {
-            meta += '<span><i class="fas fa-clock" aria-hidden="true"></i> ' + cena.dias_aberta + 'd</span>';
+            meta += '<span>' + cena.dias_aberta + 'd</span>';
         }
         if (cena.condutor) {
-            meta += '<span><i class="fas fa-user" aria-hidden="true"></i> ' + escapeHtml(cena.condutor) + '</span>';
+            meta += '<span>' + escapeHtml(cena.condutor) + '</span>';
         }
 
-        var action = cena.url
-            ? '<a href="' + escapeHtml(cena.url) + '" class="pulso-cena-card__action">Abrir cena <i class="fas fa-arrow-right" aria-hidden="true"></i></a>'
-            : '';
+        var tipo = escapeHtml(String(cena.tipo || 'paciente').replace(/_/g, ' '));
 
-        return '<article class="pulso-cena-card pulso-cena-card--' + escapeHtml(estado) + mockClass + '">' +
+        return '<' + tag + ' class="pulso-cena-card pulso-cena-card--' + escapeHtml(estado) + mockClass + linkClass + '"' + href + '>' +
             '<div class="pulso-cena-card__head">' +
-            '<span class="pulso-cena-card__tipo">' + escapeHtml(cena.tipo || 'cena') + '</span>' +
-            (cena.mock ? '<span class="pulso-cena-card__badge">PoC</span>' : '') +
+            '<span class="pulso-cena-card__tipo">' + tipo + '</span>' +
+            (cena.mock ? '<span class="pulso-cena-card__badge">Demo</span>' : '') +
             '</div>' +
             '<h3 class="pulso-cena-card__title">' + escapeHtml(cena.titulo || '') + '</h3>' +
             (meta ? '<div class="pulso-cena-card__meta">' + meta + '</div>' : '') +
             (praticas ? '<div class="pulso-cena-card__praticas">' + praticas + '</div>' : '') +
-            action +
-            '</article>';
+            '</' + tag + '>';
     }
 
     function applySnapshot(data) {
         if (!data || !data.pulso) return;
 
-        var ativasEl = document.querySelector('[data-pulso-stat="ativas"]');
-        var aguardEl = document.querySelector('[data-pulso-stat="aguardando"]');
+        var ativasEl = document.querySelector('[data-recrutamento-pipeline-kpi="pulso_ativas"]');
+        var aguardEl = document.querySelector('[data-recrutamento-pipeline-kpi="pulso_aguardando"]');
         if (ativasEl) ativasEl.textContent = String(data.pulso.cenas_ativas || 0);
         if (aguardEl) aguardEl.textContent = String(data.pulso.cenas_aguardando || 0);
 
@@ -65,17 +66,21 @@
         }
 
         if (sinaisList && Array.isArray(data.sinais)) {
-            sinaisList.innerHTML = data.sinais.map(function (s) {
-                return '<li class="pulso-sinal-item">' +
-                    '<span class="pulso-sinal-item__valor">' + escapeHtml(String(s.valor)) + '</span>' +
-                    '<span class="pulso-sinal-item__rotulo">' + escapeHtml(s.rotulo || '') + '</span>' +
-                    '</li>';
-            }).join('');
+            if (!data.sinais.length) {
+                sinaisList.innerHTML = '<li class="org-kpi-strip__sublist-item"><span class="org-kpi-strip__sublist-lbl">Nenhum alerta no momento</span></li>';
+            } else {
+                sinaisList.innerHTML = data.sinais.map(function (s) {
+                    return '<li class="org-kpi-strip__sublist-item">' +
+                        '<span class="org-kpi-strip__sublist-val">' + escapeHtml(String(s.valor)) + '</span>' +
+                        '<span class="org-kpi-strip__sublist-lbl">' + escapeHtml(s.rotulo || '') + '</span>' +
+                        '</li>';
+                }).join('');
+            }
         }
 
         if (grid && Array.isArray(data.cenas)) {
             if (!data.cenas.length) {
-                grid.innerHTML = '<div class="pulso-empty"><i class="fas fa-heart-pulse" aria-hidden="true"></i><p>Nenhuma cena ativa — o pulso está calmo.</p></div>';
+                grid.innerHTML = '<div class="pulso-empty"><p>Nenhum paciente em acompanhamento ativo.</p></div>';
             } else {
                 grid.innerHTML = data.cenas.map(renderCenaCard).join('');
             }

@@ -1639,13 +1639,16 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
     width: auto !important;
 }
 
-/* Logo no topo — logotipo original; reduz só com sidebar fechada */
-.unio-organismo .sidebar-top {
+/* Logo no topo — logotipo original; reduz e centra só com sidebar fechada */
+body.unio-organismo .sidebar-top {
     overflow: hidden;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-.unio-organismo .sidebar-top .org-sidebar-brand {
+body.unio-organismo .sidebar-top .org-sidebar-brand {
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -1658,10 +1661,10 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
     box-sizing: border-box;
 }
 
-.unio-organismo .sidebar-top .org-sidebar-brand .org-sidebar-logo,
-.unio-organismo .sidebar-top .org-sidebar-brand object.org-sidebar-logo,
-.unio-organismo .sidebar-top .org-sidebar-brand img.org-sidebar-logo,
-.unio-organismo .sidebar-top .org-sidebar-brand .platform-logo-placeholder-wrap.org-sidebar-logo {
+body.unio-organismo .sidebar-top .org-sidebar-brand .org-sidebar-logo,
+body.unio-organismo .sidebar-top .org-sidebar-brand object.org-sidebar-logo,
+body.unio-organismo .sidebar-top .org-sidebar-brand img.org-sidebar-logo,
+body.unio-organismo .sidebar-top .org-sidebar-brand .platform-logo-placeholder-wrap.org-sidebar-logo {
     display: block;
     max-height: 32px;
     max-width: calc(100% - 8px);
@@ -1672,29 +1675,52 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
     pointer-events: none;
 }
 
-.sidebar-mini.sidebar-collapse:not(.sidebar-open) .unio-organismo .sidebar-top .org-sidebar-brand {
-    justify-content: center;
-    padding: 10px 6px 8px;
+/* body.unio-organismo + sidebar-mini no mesmo elemento — não usar .sidebar-mini .unio-organismo */
+body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top {
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand {
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 10px 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
     min-height: 44px;
 }
 
-.sidebar-mini.sidebar-collapse:not(.sidebar-open) .unio-organismo .sidebar-top .org-sidebar-brand .org-sidebar-logo,
-.sidebar-mini.sidebar-collapse:not(.sidebar-open) .unio-organismo .sidebar-top .org-sidebar-brand object.org-sidebar-logo,
-.sidebar-mini.sidebar-collapse:not(.sidebar-open) .unio-organismo .sidebar-top .org-sidebar-brand img.org-sidebar-logo,
-.sidebar-mini.sidebar-collapse:not(.sidebar-open) .unio-organismo .sidebar-top .org-sidebar-brand .platform-logo-placeholder-wrap.org-sidebar-logo {
-    max-height: 22px;
-    max-width: 46px;
-    margin: 0 auto;
-    object-fit: contain;
-    object-position: center;
+body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand .org-sidebar-logo,
+body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand object.org-sidebar-logo,
+body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand img.org-sidebar-logo,
+body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand .platform-logo-placeholder-wrap.org-sidebar-logo {
+    display: block !important;
+    width: 36px !important;
+    max-width: 36px !important;
+    height: 22px !important;
+    max-height: 22px !important;
+    margin: 0 auto !important;
+    object-fit: contain !important;
+    object-position: center center !important;
 }
 
-.sidebar-mini.sidebar-collapse .main-sidebar:hover .unio-organismo .sidebar-top .org-sidebar-brand .org-sidebar-logo,
-.sidebar-mini.sidebar-open .unio-organismo .sidebar-top .org-sidebar-brand .org-sidebar-logo {
-    max-height: 32px;
-    max-width: calc(100% - 8px);
-    margin: 0;
-    object-position: left center;
+body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover > .sidebar-top .org-sidebar-brand {
+    justify-content: flex-start !important;
+    padding: 14px 16px 12px !important;
+}
+
+body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover > .sidebar-top .org-sidebar-brand .org-sidebar-logo,
+body.unio-organismo.sidebar-mini.sidebar-open .sidebar-top .org-sidebar-brand .org-sidebar-logo,
+body.unio-organismo.sidebar-mini:not(.sidebar-collapse) .sidebar-top .org-sidebar-brand .org-sidebar-logo {
+    width: auto !important;
+    height: auto !important;
+    max-height: 32px !important;
+    max-width: calc(100% - 8px) !important;
+    margin: 0 !important;
+    object-position: left center !important;
 }
 
 /* ══════════════════════════════════════════
@@ -3201,6 +3227,30 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
         border-bottom: 1px solid var(--org-sidebar-border);
     }
 
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 10px 0 !important;
+    }
+
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand .org-sidebar-logo,
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand object.org-sidebar-logo,
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) > .sidebar-top .org-sidebar-brand img.org-sidebar-logo {
+        width: 36px !important;
+        max-width: 36px !important;
+        height: 22px !important;
+        max-height: 22px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
     /* ── Hover: expande com labels legíveis ── */
     body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .nav-sidebar > .nav-item {
         display: block !important;
@@ -3246,6 +3296,11 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
         display: none !important;
     }
 
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .nav-sidebar > .nav-item.has-treeview > .nav-treeview,
+    body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:not(:hover) .nav-sidebar > .nav-item.clinic-nav-group > .clinic-nav-group__children {
+        display: none !important;
+    }
+
     body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover .sidebar-hub-heading-item {
         display: list-item !important;
     }
@@ -3267,7 +3322,7 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 
     body.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar:hover > .sidebar-top .org-sidebar-brand {
         justify-content: flex-start !important;
-        padding-left: 14px !important;
+        padding: 14px 16px 12px !important;
     }
 }
 
@@ -3556,9 +3611,9 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    padding: 0 0 16px;
-    margin-bottom: 0;
-    border-bottom: 1px solid var(--org-border-soft);
+    padding: 0 0 4px;
+    margin: 0 0 16px;
+    border-bottom: none;
 }
 
 .unio-organismo .clinic-ficha-offcanvas-hero__name {
@@ -3578,7 +3633,7 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 .unio-organismo .clinic-ficha-offcanvas-kpis {
     display: block;
     width: 100%;
-    margin-bottom: 0;
+    margin: 0 0 16px;
     border: none;
 }
 
@@ -3594,8 +3649,7 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
     color: var(--org-ink-muted);
     background: var(--org-surface);
     border: 1px solid var(--org-border-soft);
-    border-top: none;
-    border-radius: 0 0 12px 12px;
+    border-radius: 12px;
 }
 
 .unio-organismo .clinic-ficha-offcanvas-meta__procedure {
@@ -3677,4 +3731,161 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 .unio-organismo .unio-offcanvas--xl .unio-offcanvas-drawer {
     max-width: min(920px, 96vw);
 }
+
+/* ── Sidebar clínica: grupos expansíveis + submenus ── */
+.unio-organismo .nav-sidebar {
+    padding-top: 8px;
+}
+
+.unio-organismo .nav-sidebar > .nav-item.clinic-nav-group.has-treeview {
+    margin-bottom: 2px;
+}
+
+.unio-organismo .nav-sidebar > .nav-item.clinic-nav-group.has-treeview > .nav-link {
+    border-radius: 10px;
+    margin: 2px 8px;
+}
+
+.unio-organismo .nav-sidebar > .nav-item.clinic-nav-group.has-treeview > .nav-link > p {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    overflow: visible;
+}
+
+.unio-organismo .nav-sidebar > .nav-item.clinic-nav-group.has-treeview > .nav-link > p .right {
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.unio-organismo .nav-sidebar > .nav-item.clinic-nav-group.has-treeview.menu-open > .nav-link > p .right {
+    transform: rotate(-90deg);
+}
+
+/* Fechado por padrão — display:flex fixo abria todos os grupos sem .menu-open */
+.unio-organismo .nav-sidebar .clinic-nav-group__children.nav-product-children {
+    display: none !important;
+    flex-direction: column;
+    gap: 2px;
+    margin: 4px 8px 10px !important;
+    padding: 4px 0 4px 10px !important;
+    border-left: 2px solid var(--org-border-soft) !important;
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    position: relative;
+}
+
+.unio-organismo .nav-sidebar > .nav-item.clinic-nav-group.menu-open > .clinic-nav-group__children.nav-product-children,
+.unio-organismo .nav-sidebar > .nav-item.clinic-nav-group.menu-is-opening > .clinic-nav-group__children.nav-product-children {
+    display: flex !important;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-group__children > .nav-item {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    float: none;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-link,
+.unio-organismo .nav-sidebar .clinic-nav-group__children .nav-submenu-link {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 36px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 8px 12px 8px 1.65rem !important;
+    border-radius: 8px !important;
+    box-sizing: border-box;
+    line-height: 1.25;
+    overflow: visible;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-link::before {
+    content: '';
+    position: absolute;
+    left: 0.55rem;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin-top: -3px;
+    border-radius: 50%;
+    background: var(--org-sidebar-blue);
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-group__children > .nav-item:nth-child(6n+1) .clinic-nav-submenu-link::before { background: var(--org-terra); }
+.unio-organismo .nav-sidebar .clinic-nav-group__children > .nav-item:nth-child(6n+2) .clinic-nav-submenu-link::before { background: var(--org-sage); }
+.unio-organismo .nav-sidebar .clinic-nav-group__children > .nav-item:nth-child(6n+3) .clinic-nav-submenu-link::before { background: var(--org-amber); }
+.unio-organismo .nav-sidebar .clinic-nav-group__children > .nav-item:nth-child(6n+4) .clinic-nav-submenu-link::before { background: var(--org-teal); }
+.unio-organismo .nav-sidebar .clinic-nav-group__children > .nav-item:nth-child(6n+5) .clinic-nav-submenu-link::before { background: var(--org-lavender); }
+.unio-organismo .nav-sidebar .clinic-nav-group__children > .nav-item:nth-child(6n+6) .clinic-nav-submenu-link::before { background: var(--org-rose); }
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-link:hover,
+.unio-organismo .nav-sidebar .clinic-nav-submenu-link:focus {
+    background: var(--org-blue-soft) !important;
+    color: var(--org-blue-text) !important;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-link:hover::before,
+.unio-organismo .nav-sidebar .clinic-nav-submenu-link.active::before {
+    opacity: 1;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-link.active {
+    background: color-mix(in srgb, var(--org-blue) 12%, transparent) !important;
+    color: var(--org-blue-text) !important;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-link > p {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25 !important;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    background: color-mix(in srgb, var(--org-sidebar-blue) 14%, transparent);
+    color: var(--org-sidebar-blue);
+    flex-shrink: 0;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-badge--warning {
+    background: color-mix(in srgb, var(--org-amber) 18%, transparent);
+    color: #9a6700;
+}
+
+.unio-organismo .nav-sidebar .clinic-nav-submenu-badge--danger {
+    background: color-mix(in srgb, var(--org-rose) 18%, transparent);
+    color: #b42318;
+}
+
 

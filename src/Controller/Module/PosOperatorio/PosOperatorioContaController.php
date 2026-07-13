@@ -34,7 +34,10 @@ final class PosOperatorioContaController extends AbstractController
             $status = 'aberto';
         }
 
-        $contas = $this->contas->list($empresa, $status === 'todos' ? null : $status);
+        $filtro = $status === 'todos' ? null : $status;
+        $contas = $this->contas->list($empresa, $filtro);
+        $totalContas = $this->contas->countList($empresa, $filtro);
+        $listLimit = $this->contas->listLimit();
         $guiaPorConta = [];
         foreach ($contas as $conta) {
             if ($conta->getTipo() === 'convenio' || $conta->getConvenio() !== null) {
@@ -54,6 +57,9 @@ final class PosOperatorioContaController extends AbstractController
             'guia_por_conta' => $guiaPorConta,
             'status_labels' => ClinicContaService::statusLabels(),
             'tipo_labels' => ClinicContaService::tipoLabels(),
+            'list_total' => $totalContas,
+            'list_limit' => $listLimit,
+            'list_truncated' => $totalContas > $listLimit,
         ]);
     }
 
@@ -94,13 +100,15 @@ final class PosOperatorioContaController extends AbstractController
                 default => throw new \InvalidArgumentException('Ação inválida.'),
             };
             $this->addFlash('success', 'Conta atualizada.');
-        } catch (\InvalidArgumentException $e) {
-            $this->addFlash('error', $e->getMessage());
-        }
 
-        return $this->redirectToRoute('app_pos_operatorio_contas', [
-            'status' => $action === 'cancelar' ? 'cancelado' : ($action === 'pago' || $action === 'cortesia' ? 'pago' : 'aberto'),
-        ]);
+            return $this->redirectToRoute('app_pos_operatorio_contas', [
+                'status' => $action === 'cancelar' ? 'cancelado' : 'pago',
+            ]);
+        } catch (\Throwable $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToRoute('app_pos_operatorio_contas', ['status' => 'aberto']);
+        }
     }
 
     private function requireEmpresa(): Empresa

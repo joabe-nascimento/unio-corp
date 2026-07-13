@@ -1,0 +1,24 @@
+{#
+  Subitem da sidebar clínica (dentro de grupo expansível)
+
+  Props:
+    feature   (array)  item do ClinicFeatureCatalog
+    route     (string) rota atual
+    badges    (array)  clinic_nav_badges
+#}
+{% set _active = clinic_feature_route_active(route, feature) %}
+{% set _bk = feature.badge_key|default('') %}
+{% set _badge = _bk ? badges[_bk]|default(0) : 0 %}
+<li class="nav-item">
+    <a href="{{ path(feature.route) }}"
+       class="nav-link nav-submenu-link clinic-nav-submenu-link{{ _active ? ' active' : '' }}"
+       {% if feature.external|default(false) %}target="_blank" rel="noopener"{% endif %}
+       {{ _active ? ' aria-current="page"' : '' }}>
+        <p>
+            {{ feature.short|default(feature.title) }}
+            {% if _badge > 0 %}
+            <span class="clinic-nav-submenu-badge{% if _bk == 'sala_critica' %} clinic-nav-submenu-badge--danger{% elseif _bk in ['alertas', 'questionarios'] %} clinic-nav-submenu-badge--warning{% endif %}">{{ _badge }}</span>
+            {% endif %}
+        </p>
+    </a>
+</li>

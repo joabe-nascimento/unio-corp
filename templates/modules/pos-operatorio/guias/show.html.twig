@@ -8,20 +8,17 @@
 {% set hub_search_hidden = true %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Lista de guias</a>
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias TISS</a>
+<a href="{{ path('app_pos_operatorio_lotes') }}" class="btn-unio-ghost btn-sm">Lotes</a>
 <a href="{{ path('app_pos_operatorio_contas', { status: guia.conta.status }) }}" class="btn-unio-ghost btn-sm">Conta</a>
+{% if guia.itens is not empty %}
+<a href="{{ path('app_pos_operatorio_guias_xml', { id: guia.id }) }}" class="btn-unio-ghost btn-sm" title="Requer CNPJ da clínica, ANS do convênio e código TUSS nos itens">XML TISS</a>
+{% endif %}
 {% endblock %}
 
 {% block hub_content %}
-{% for msg in app.flashes('success') %}
-<div class="alert alert-success">{{ msg }}</div>
-{% endfor %}
-{% for msg in app.flashes('error') %}
-<div class="alert alert-danger">{{ msg }}</div>
-{% endfor %}
-
-<div class="row g-3">
-    <div class="col-lg-4">
+<div class="row">
+    <div class="col-lg-4 mb-3">
         <section class="unio-card p-3">
             <p class="small text-muted mb-1">Paciente</p>
             <p class="mb-2"><strong>{{ guia.paciente.nome }}</strong><br><span class="text-muted">{{ guia.paciente.codigo }}</span></p>
@@ -29,34 +26,87 @@
             <p class="mb-2">{{ guia.convenio.nome }}{% if guia.convenio.registroAns %} <span class="text-muted">(ANS {{ guia.convenio.registroAns }})</span>{% endif %}</p>
             <p class="small text-muted mb-1">Status</p>
             <p class="mb-2"><strong>{{ status_labels[guia.status]|default(guia.status) }}</strong></p>
+            {% if guia.lote %}
+            <p class="small text-muted mb-1">Lote</p>
+            <p class="mb-2"><a href="{{ path('app_pos_operatorio_lotes_show', { id: guia.lote.id }) }}">{{ guia.lote.numero }}</a></p>
+            {% endif %}
             {% if guia.motivoGlosa %}
-            <p class="small text-muted mb-1">Motivo da glosa</p>
+            <p class="small text-muted mb-1">Última glosa</p>
             <p class="mb-2">{{ guia.motivoGlosa }}</p>
+            {% endif %}
+            {% if guia.historicoGlosas|length > 0 %}
+            <p class="small text-muted mb-1">Histórico de glosas ({{ guia.historicoGlosas|length }})</p>
+            <ul class="list-unstyled small mb-2 clinic-guia-glosa-history">
+                {% for entry in guia.historicoGlosas|reverse %}
+                <li class="mb-2">
+                    <strong>#{{ entry.tentativa }}</strong>
+                    <span class="text-muted">· {{ entry.em|date('d/m/Y H:i') }}</span>
+                    <div>{{ entry.motivo }}</div>
+                </li>
+                {% endfor %}
+            </ul>
             {% endif %}
             {% if guia.atendimento %}
             <a href="{{ path('app_pos_operatorio_atendimento_show', { id: guia.atendimento.id }) }}" class="btn-unio-ghost btn-sm">Ver atendimento</a>
             {% endif %}
         </section>
 
-        {% if guia.editable %}
+        {% set next = next_statuses|default([]) %}
+        {% if next is not empty or guia.canReabrirAposGlosa %}
         <section class="unio-card p-3 mt-3">
-            <h2 class="h6 mb-3">Avançar status</h2>
-            <form method="post" class="d-flex flex-column gap-2">
+            <h2 class="h6 mb-3">Status da guia</h2>
+            <p class="small text-muted mb-3">
+                Fluxo: rascunho → enviado → autorizado → pago.
+                Glosa ou cancelamento encerram; glosa pode reabrir para correção.
+            </p>
+            {% if 'enviado' in next %}
+            <form method="post" class="mb-2">
                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
                 <input type="hidden" name="action" value="status">
-                {% if guia.status == 'rascunho' %}
-                <button type="submit" name="status" value="enviado" class="btn-unio-ghost btn-sm">Marcar enviado</button>
-                {% endif %}
-                {% if guia.status in ['rascunho', 'enviado'] %}
-                <button type="submit" name="status" value="autorizado" class="btn-unio-ghost btn-sm">Marcar autorizado</button>
-                {% endif %}
-                {% if guia.status in ['rascunho', 'enviado', 'autorizado'] %}
-                <button type="submit" name="status" value="pago" class="btn-unio btn-sm">Marcar pago</button>
-                <textarea name="motivo_glosa" class="form-control form-control-sm" rows="2" placeholder="Motivo (obrigatório para glosa)"></textarea>
-                <button type="submit" name="status" value="glosado" class="btn-unio-ghost btn-sm">Marcar glosado</button>
-                <button type="submit" name="status" value="cancelado" class="btn-unio-ghost btn-sm">Cancelar guia</button>
-                {% endif %}
+                <input type="hidden" name="status" value="enviado">
+                <button type="submit" class="btn-unio-ghost btn-sm btn-block">Marcar enviado</button>
             </form>
+            {% endif %}
+            {% if 'autorizado' in next %}
+            <form method="post" class="mb-2">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                <input type="hidden" name="action" value="status">
+                <input type="hidden" name="status" value="autorizado">
+                <button type="submit" class="btn-unio-ghost btn-sm btn-block">Marcar autorizado</button>
+            </form>
+            {% endif %}
+            {% if 'pago' in next %}
+            <form method="post" class="mb-2">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                <input type="hidden" name="action" value="status">
+                <input type="hidden" name="status" value="pago">
+                <button type="submit" class="btn-unio btn-sm btn-block">Marcar pago</button>
+            </form>
+            {% endif %}
+            {% if 'glosado' in next %}
+            <form method="post" class="mb-2">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                <input type="hidden" name="action" value="status">
+                <input type="hidden" name="status" value="glosado">
+                <textarea name="motivo_glosa" class="form-control form-control-sm mb-2" rows="2" placeholder="Motivo da glosa (obrigatório)" required></textarea>
+                <button type="submit" class="btn-unio-ghost btn-sm btn-block">Marcar glosado</button>
+            </form>
+            {% endif %}
+            {% if 'cancelado' in next %}
+            <form method="post" class="mb-2">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                <input type="hidden" name="action" value="status">
+                <input type="hidden" name="status" value="cancelado">
+                <button type="submit" class="btn-unio-ghost btn-sm btn-block text-danger">Cancelar guia</button>
+            </form>
+            {% endif %}
+            {% if guia.canReabrirAposGlosa %}
+            <form method="post" class="mb-0" onsubmit="return confirm('Reabrir guia glosada para correção e nova apresentação?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
+                <input type="hidden" name="action" value="reabrir_glosa">
+                <button type="submit" class="btn-unio btn-sm btn-block">Reabrir após glosa</button>
+            </form>
+            {% endif %}
         </section>
         {% endif %}
     </div>
@@ -64,19 +114,19 @@
     <div class="col-lg-8">
         <section class="unio-card p-3 mb-3">
             <h2 class="h6 mb-3">Cabeçalho</h2>
-            <form method="post" class="row g-2 align-items-end">
+            <form method="post" class="row align-items-end">
                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
                 <input type="hidden" name="action" value="salvar">
-                <div class="col-md-5">
+                <div class="col-md-5 mb-2">
                     <label class="small text-muted d-block" for="numero_guia">Nº da guia</label>
                     <input id="numero_guia" name="numero_guia" class="form-control" value="{{ guia.numeroGuia }}" {{ guia.editable ? '' : 'readonly' }} required>
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-5 mb-2">
                     <label class="small text-muted d-block" for="senha_autorizacao">Senha / autorização</label>
                     <input id="senha_autorizacao" name="senha_autorizacao" class="form-control" value="{{ guia.senhaAutorizacao }}" {{ guia.editable ? '' : 'readonly' }}>
                 </div>
                 {% if guia.editable %}
-                <div class="col-md-2">
+                <div class="col-md-2 mb-2">
                     <button type="submit" class="btn-unio-ghost">Salvar</button>
                 </div>
                 {% endif %}
@@ -84,9 +134,9 @@
         </section>
 
         <section class="unio-card p-3">
-            <h2 class="h6 mb-3">Itens TUSS (manual)</h2>
+            <h2 class="h6 mb-3">Itens TUSS</h2>
             {% if guia.itens is empty %}
-            <p class="text-muted small">Nenhum item ainda.</p>
+            <p class="text-muted small">Nenhum item ainda. Busque no catálogo ou digite o código manualmente.</p>
             {% else %}
             <div class="table-responsive mb-3">
                 <table class="table table-sm align-middle">
@@ -134,29 +184,100 @@
             {% endif %}
 
             {% if guia.editable %}
-            <form method="post" class="row g-2 align-items-end">
+            <form method="post" class="row align-items-end" id="clinicGuiaAddItemForm" data-tuss-search="{{ tuss_search_url|default(path('app_pos_operatorio_guias_tuss_search')) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
                 <input type="hidden" name="action" value="add_item">
-                <div class="col-12 col-lg-2">
+                <div class="col-12 mb-2">
+                    <label class="small text-muted d-block" for="tuss_busca">Buscar no catálogo TUSS</label>
+                    <input id="tuss_busca" type="search" class="form-control" placeholder="Código ou descrição (ex.: herniorrafia, 10101012)" autocomplete="off">
+                    <div id="tuss_results" class="list-group mt-1 d-none" style="max-height: 220px; overflow: auto;"></div>
+                </div>
+                <div class="col-12 col-lg-2 mb-2">
                     <label class="small text-muted d-block" for="codigo_tuss">TUSS</label>
                     <input id="codigo_tuss" name="codigo_tuss" class="form-control" maxlength="20">
                 </div>
-                <div class="col-12 col-lg-4">
+                <div class="col-12 col-lg-4 mb-2">
                     <label class="small text-muted d-block" for="descricao">Descrição</label>
                     <input id="descricao" name="descricao" class="form-control" required maxlength="255">
                 </div>
-                <div class="col-6 col-lg-2">
+                <div class="col-6 col-lg-2 mb-2">
                     <label class="small text-muted d-block" for="quantidade">Qtd</label>
                     <input id="quantidade" name="quantidade" type="number" min="1" value="1" class="form-control">
                 </div>
-                <div class="col-6 col-lg-2">
+                <div class="col-6 col-lg-2 mb-2">
                     <label class="small text-muted d-block" for="valor">Valor</label>
-                    <input id="valor" name="valor" class="form-control" placeholder="0,00" inputmode="decimal">
+                    <input id="valor" name="valor" class="form-control" placeholder="0,00" inputmode="decimal" required>
                 </div>
-                <div class="col-12 col-lg-2">
-                    <button type="submit" class="btn-unio w-100 w-lg-auto">Adicionar</button>
+                <div class="col-12 col-lg-2 mb-2">
+                    <button type="submit" class="btn-unio">Adicionar</button>
                 </div>
             </form>
+            <script>
+            (function () {
+                var form = document.getElementById('clinicGuiaAddItemForm');
+                if (!form) return;
+                var url = form.getAttribute('data-tuss-search');
+                var busca = document.getElementById('tuss_busca');
+                var results = document.getElementById('tuss_results');
+                var codigo = document.getElementById('codigo_tuss');
+                var descricao = document.getElementById('descricao');
+                var valor = document.getElementById('valor');
+                var timer = null;
+
+                function hideResults() {
+                    results.classList.add('d-none');
+                    results.innerHTML = '';
+                }
+
+                function pick(item) {
+                    codigo.value = item.codigo || '';
+                    descricao.value = item.descricao || '';
+                    if (item.valor_sugerido != null) {
+                        valor.value = Number(item.valor_sugerido).toFixed(2).replace('.', ',');
+                    }
+                    busca.value = item.codigo + ' — ' + item.descricao;
+                    hideResults();
+                }
+
+                busca.addEventListener('input', function () {
+                    clearTimeout(timer);
+                    var q = busca.value.trim();
+                    if (q.length < 2) {
+                        hideResults();
+                        return;
+                    }
+                    timer = setTimeout(function () {
+                        fetch(url + '?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
+                            .then(function (r) { return r.json(); })
+                            .then(function (data) {
+                                var items = (data && data.items) || [];
+                                if (!items.length) {
+                                    results.innerHTML = '<div class="list-group-item small text-muted">Nenhum código encontrado — preencha manualmente.</div>';
+                                    results.classList.remove('d-none');
+                                    return;
+                                }
+                                results.innerHTML = items.map(function (item, idx) {
+                                    var sug = item.valor_sugerido != null
+                                        ? ' · R$ ' + Number(item.valor_sugerido).toFixed(2).replace('.', ',')
+                                        : '';
+                                    return '<button type="button" class="list-group-item list-group-item-action small" data-idx="' + idx + '"><strong>' + item.codigo + '</strong> — ' + item.descricao + sug + '</button>';
+                                }).join('');
+                                results.classList.remove('d-none');
+                                Array.prototype.forEach.call(results.querySelectorAll('[data-idx]'), function (btn) {
+                                    btn.addEventListener('click', function () {
+                                        pick(items[parseInt(btn.getAttribute('data-idx'), 10)]);
+                                    });
+                                });
+                            })
+                            .catch(function () { hideResults(); });
+                    }, 220);
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!results.contains(e.target) && e.target !== busca) hideResults();
+                });
+            })();
+            </script>
             {% endif %}
         </section>
     </div>

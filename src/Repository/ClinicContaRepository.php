@@ -32,10 +32,12 @@ class ClinicContaRepository extends ServiceEntityRepository
         return $this->findOneBy(['empresa' => $empresa, 'atendimento' => $atendimento]);
     }
 
+    public const LIST_LIMIT = 80;
+
     /**
      * @return list<ClinicConta>
      */
-    public function findByEmpresaAndStatus(Empresa $empresa, ?string $status = null, int $limit = 80): array
+    public function findByEmpresaAndStatus(Empresa $empresa, ?string $status = null, int $limit = self::LIST_LIMIT): array
     {
         $qb = $this->createQueryBuilder('c')
             ->andWhere('c.empresa = :empresa')
@@ -49,5 +51,20 @@ class ClinicContaRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function countByEmpresaAndStatus(Empresa $empresa, ?string $status = null): int
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->andWhere('c.empresa = :empresa')
+            ->setParameter('empresa', $empresa);
+
+        if ($status !== null && $status !== '' && $status !== 'todos') {
+            $qb->andWhere('c.status = :status')
+                ->setParameter('status', $status);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 }

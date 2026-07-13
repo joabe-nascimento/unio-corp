@@ -1,35 +1,27 @@
-{% import 'macros/organismo_icon.html.twig' as orgicon %}
+{% set _tipo = cena.tipo|default('paciente') %}
+{% set _tag = cena.url|default(null) ? 'a' : 'article' %}
 
-{% set _cena_tones = {
-    'admissao': { tone: 'terra', icon: 'fa-user-plus' },
-    'paciente': { tone: 'sky', icon: 'fa-user-injured' },
-    'sustentacao': { tone: 'sky', icon: 'fa-server' },
-    'ferias': { tone: 'amber', icon: 'fa-umbrella-beach' },
-    'documentos': { tone: 'plum', icon: 'fa-file-lines' },
-    'remuneracao': { tone: 'amber', icon: 'fa-coins' }
-} %}
-{% set _tipo = cena.tipo|default('cena') %}
-{% set _meta = _cena_tones[_tipo]|default({ tone: 'neutral', icon: 'fa-circle-dot' }) %}
-
-<article class="pulso-cena-card pulso-cena-card--{{ cena.estado|default('ativa') }}{% if cena.mock|default(false) %} pulso-cena-card--mock{% endif %}">
+<{{ _tag }}
+    class="pulso-cena-card pulso-cena-card--{{ cena.estado|default('ativa') }}{% if cena.mock|default(false) %} pulso-cena-card--mock{% endif %}{% if cena.url|default(null) %} pulso-cena-card--link{% endif %}"
+    {% if cena.url|default(null) %}href="{{ cena.url }}"{% endif %}
+>
     <div class="pulso-cena-card__head">
-        <div class="pulso-cena-card__head-left">
-            {{ orgicon.nav(_meta.icon, _meta.tone, 'sm') }}
-            <span class="pulso-cena-card__tipo">{{ _tipo|replace({'_': ' '}) }}</span>
-        </div>
+        <span class="pulso-cena-card__tipo">{{ _tipo|replace({'_': ' '}) }}</span>
         {% if cena.mock|default(false) %}
-        <span class="pulso-cena-card__badge">PoC</span>
+        <span class="pulso-cena-card__badge">Demo</span>
         {% endif %}
     </div>
     <h3 class="pulso-cena-card__title">{{ cena.titulo }}</h3>
+    {% if cena.dias_aberta is defined and cena.dias_aberta > 0 or cena.condutor|default(null) %}
     <div class="pulso-cena-card__meta">
         {% if cena.dias_aberta is defined and cena.dias_aberta > 0 %}
-        <span><i class="fas fa-clock" aria-hidden="true"></i> {{ cena.dias_aberta }}d</span>
+        <span>{{ cena.dias_aberta }}d</span>
         {% endif %}
         {% if cena.condutor|default(null) %}
-        <span><i class="fas fa-user" aria-hidden="true"></i> {{ cena.condutor }}</span>
+        <span>{{ cena.condutor }}</span>
         {% endif %}
     </div>
+    {% endif %}
     {% if cena.praticas|default([])|length > 0 %}
     <div class="pulso-cena-card__praticas">
         {% for p in cena.praticas %}
@@ -37,9 +29,4 @@
         {% endfor %}
     </div>
     {% endif %}
-    {% if cena.url|default(null) %}
-    <a href="{{ cena.url }}" class="pulso-cena-card__action">
-        Abrir cena <i class="fas fa-arrow-right" aria-hidden="true"></i>
-    </a>
-    {% endif %}
-</article>
+</{{ _tag }}>

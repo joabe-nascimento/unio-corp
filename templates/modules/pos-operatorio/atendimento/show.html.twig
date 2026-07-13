@@ -13,15 +13,8 @@
 {% endblock %}
 
 {% block hub_content %}
-{% for msg in app.flashes('success') %}
-<div class="alert alert-success">{{ msg }}</div>
-{% endfor %}
-{% for msg in app.flashes('error') %}
-<div class="alert alert-danger">{{ msg }}</div>
-{% endfor %}
-
-<div class="row g-3">
-    <div class="col-lg-4">
+<div class="row">
+    <div class="col-lg-4 mb-3">
         <section class="unio-card p-3">
             <p class="small text-muted mb-1">Status</p>
             <p class="mb-3"><strong>{{ status_labels[atendimento.status]|default(atendimento.status) }}</strong></p>
@@ -33,7 +26,7 @@
             <p class="mb-0">{{ agendamento.inicio|date('d/m/Y H:i') }} – {{ agendamento.fim|date('H:i') }}</p>
         </section>
     </div>
-    <div class="col-lg-8">
+    <div class="col-lg-8 mb-3">
         <section class="unio-card p-3">
             <form method="post">
                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_' ~ atendimento.id) }}">

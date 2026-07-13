@@ -238,6 +238,10 @@ final class ClinicAgendaService
         $agendamento->setPaciente($paciente);
         $agendamento->setMedico($medico);
         $this->applyFields($agendamento, $data);
+        if (isset($data['status']) && \is_string($data['status']) && $data['status'] !== '') {
+            $this->assertStatusChange($agendamento, $empresa, $data['status']);
+            $agendamento->setStatus($data['status']);
+        }
         $agendamento->touch();
 
         $this->em->persist($agendamento);
@@ -281,6 +285,10 @@ final class ClinicAgendaService
         }
 
         $this->applyFields($agendamento, $data);
+        if (isset($data['status']) && \is_string($data['status']) && $data['status'] !== '') {
+            $this->assertStatusChange($agendamento, $empresa, $data['status']);
+            $agendamento->setStatus($data['status']);
+        }
         $agendamento->touch();
         $this->em->flush();
 
@@ -292,25 +300,8 @@ final class ClinicAgendaService
         if ($agendamento->getEmpresa()->getId() !== $empresa->getId()) {
             throw new \InvalidArgumentException('Agendamento fora do escopo.');
         }
-        if (!\in_array($status, ClinicAgendamento::STATUSES, true)) {
-            throw new \InvalidArgumentException('Status inválido.');
-        }
 
-        $openAtendimento = $this->atendimentos->findOneByAgendamento($empresa, $agendamento);
-
-        if ($status === ClinicAgendamento::STATUS_ATENDIDO) {
-            if ($openAtendimento === null || !$openAtendimento->isFinalizado()) {
-                throw new \InvalidArgumentException('Finalize o atendimento para marcar como atendido.');
-            }
-        }
-
-        if (\in_array($status, [ClinicAgendamento::STATUS_FALTOU, ClinicAgendamento::STATUS_CANCELADO], true)
-            && $openAtendimento !== null
-            && $openAtendimento->isEmAndamento()
-        ) {
-            throw new \InvalidArgumentException('Há atendimento em andamento. Finalize ou continue o SOAP antes de marcar falta/cancelar.');
-        }
-
+        $this->assertStatusChange($agendamento, $empresa, $status);
         $agendamento->setStatus($status);
         $agendamento->touch();
         $this->em->flush();
@@ -421,8 +412,39 @@ final class ClinicAgendaService
             $dia = $data['protocolo_dia'];
             $agendamento->setProtocoloDia($dia !== null && $dia !== '' ? (int) $dia : null);
         }
-        if (isset($data['status']) && \in_array($data['status'], ClinicAgendamento::STATUSES, true)) {
-            $agendamento->setStatus($data['status']);
+        // Status: sempre via assertStatusChange em create/update/changeStatus
+    }
+
+    private function assertStatusChange(ClinicAgendamento $agendamento, Empresa $empresa, string $status): void
+    {
+        if (!\in_array($status, ClinicAgendamento::STATUSES, true)) {
+            throw new \InvalidArgumentException('Status inválido.');
+        }
+
+        // Regravar o mesmo status (edição de outros campos) não revalida regras de transição
+        if ($agendamento->getId() !== null && $agendamento->getStatus() === $status) {
+            return;
+        }
+
+        $openAtendimento = $this->atendimentos->findOneByAgendamento($empresa, $agendamento);
+
+        if ($status === ClinicAgendamento::STATUS_ATENDIDO) {
+            if ($openAtendimento === null || !$openAtendimento->isFinalizado()) {
+                throw new \InvalidArgumentException('Finalize o atendimento para marcar como atendido.');
+            }
+        }
+
+        if ($status === ClinicAgendamento::STATUS_EM_ATENDIMENTO) {
+            if ($openAtendimento === null || !$openAtendimento->isEmAndamento()) {
+                throw new \InvalidArgumentException('Abra o atendimento pela agenda (Chegou → Atender) para marcar em atendimento.');
+            }
+        }
+
+        if (\in_array($status, [ClinicAgendamento::STATUS_FALTOU, ClinicAgendamento::STATUS_CANCELADO], true)
+            && $openAtendimento !== null
+            && $openAtendimento->isEmAndamento()
+        ) {
+            throw new \InvalidArgumentException('Há atendimento em andamento. Finalize ou continue o SOAP antes de marcar falta/cancelar.');
         }
     }
 }

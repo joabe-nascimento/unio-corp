@@ -8,77 +8,80 @@
 {% set hub_search_hidden = true %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias</a>
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias TISS</a>
 <a href="{{ path('app_pos_operatorio_contas') }}" class="btn-unio-ghost btn-sm">Contas</a>
 {% endblock %}
 
 {% block hub_content %}
-{% for msg in app.flashes('success') %}
-<div class="alert alert-success">{{ msg }}</div>
-{% endfor %}
-{% for msg in app.flashes('error') %}
-<div class="alert alert-danger">{{ msg }}</div>
-{% endfor %}
-
-<section class="unio-card p-3 mb-3">
-    <h2 class="h6 mb-3">Novo convênio</h2>
-    <form method="post" class="row g-2 align-items-end">
+<section class="unio-card clinic-convenio-create p-3 mb-3">
+    <h2 class="clinic-convenio-create__title">Novo convênio</h2>
+    <form method="post" class="clinic-convenio-form clinic-convenio-form--create">
         <input type="hidden" name="_token" value="{{ csrf_token('clinic_convenio_new') }}">
-        <div class="col-md-5">
-            <label class="small text-muted d-block" for="nome">Nome</label>
+        <div class="clinic-convenio-form__field clinic-convenio-form__field--nome">
+            <label class="clinic-convenio-form__label" for="nome">Nome</label>
             <input id="nome" name="nome" class="form-control" required maxlength="180" placeholder="Ex.: Unimed">
         </div>
-        <div class="col-md-4">
-            <label class="small text-muted d-block" for="registro_ans">Registro ANS</label>
+        <div class="clinic-convenio-form__field clinic-convenio-form__field--ans">
+            <label class="clinic-convenio-form__label" for="registro_ans">Registro ANS</label>
             <input id="registro_ans" name="registro_ans" class="form-control" maxlength="20" placeholder="Opcional">
         </div>
-        <div class="col-md-3">
+        <div class="clinic-convenio-form__actions">
             <button type="submit" class="btn-unio">Cadastrar</button>
         </div>
     </form>
 </section>
 
-<section class="unio-card p-0 overflow-hidden">
+<section class="unio-card clinic-convenio-list p-0">
     {% if convenios is empty %}
     <div class="p-4 text-muted">Nenhum convênio ainda. Cadastre para gerar guias a partir das contas.</div>
     {% else %}
-    <div class="table-responsive">
-        <table class="table mb-0 align-middle">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Registro ANS</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in convenios %}
-                <tr>
-                    <td colspan="4" class="p-3">
-                        <form method="post" action="{{ path('app_pos_operatorio_convenios_editar', { id: c.id }) }}" class="row g-2 align-items-end">
-                            <input type="hidden" name="_token" value="{{ csrf_token('clinic_convenio_' ~ c.id) }}">
-                            <div class="col-md-4">
-                                <input name="nome" class="form-control" value="{{ c.nome }}" required maxlength="180">
-                            </div>
-                            <div class="col-md-3">
-                                <input name="registro_ans" class="form-control" value="{{ c.registroAns }}" maxlength="20" placeholder="ANS">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small d-flex align-items-center gap-2 mb-0">
-                                    <input type="checkbox" name="ativo" value="1" {{ c.ativo ? 'checked' : '' }}>
-                                    Ativo
-                                </label>
-                            </div>
-                            <div class="col-md-3 text-md-end">
-                                <button type="submit" class="btn-unio-ghost btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="clinic-convenio-grid" role="table" aria-label="Convênios cadastrados">
+        <div class="clinic-convenio-grid__head" role="row">
+            <div role="columnheader">Nome</div>
+            <div role="columnheader">Registro ANS</div>
+            <div role="columnheader">Status</div>
+            <div role="columnheader"><span class="sr-only">Ações</span></div>
+        </div>
+        {% for c in convenios %}
+        <form method="post"
+              action="{{ path('app_pos_operatorio_convenios_editar', { id: c.id }) }}"
+              class="clinic-convenio-grid__row"
+              role="row">
+            <input type="hidden" name="_token" value="{{ csrf_token('clinic_convenio_' ~ c.id) }}">
+            <div class="clinic-convenio-grid__cell" role="cell" data-label="Nome">
+                <input name="nome"
+                       class="form-control"
+                       value="{{ c.nome }}"
+                       required
+                       maxlength="180"
+                       aria-label="Nome do convênio">
+            </div>
+            <div class="clinic-convenio-grid__cell" role="cell" data-label="Registro ANS">
+                <input name="registro_ans"
+                       class="form-control"
+                       value="{{ c.registroAns|default('') }}"
+                       maxlength="20"
+                       placeholder="ANS"
+                       aria-label="Registro ANS">
+            </div>
+            <div class="clinic-convenio-grid__cell clinic-convenio-grid__cell--status" role="cell" data-label="Status">
+                <label class="clinic-status-toggle" for="convenio-ativo-{{ c.id }}">
+                    <input type="checkbox"
+                           class="clinic-status-toggle__input"
+                           id="convenio-ativo-{{ c.id }}"
+                           name="ativo"
+                           value="1"
+                           {{ c.ativo ? 'checked' : '' }}>
+                    <span class="clinic-status-toggle__track" aria-hidden="true"></span>
+                    <span class="clinic-status-toggle__text clinic-status-toggle__text--on">Ativo</span>
+                    <span class="clinic-status-toggle__text clinic-status-toggle__text--off">Inativo</span>
+                </label>
+            </div>
+            <div class="clinic-convenio-grid__cell clinic-convenio-grid__cell--actions" role="cell">
+                <button type="submit" class="btn-unio btn-sm">Salvar</button>
+            </div>
+        </form>
+        {% endfor %}
     </div>
     {% endif %}
 </section>

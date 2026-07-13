@@ -9,18 +9,16 @@
 
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_pos_operatorio_atendimento') }}" class="btn-unio-ghost btn-sm">Atendimentos</a>
-<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias</a>
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias TISS</a>
 <a href="{{ path('app_pos_operatorio_convenios') }}" class="btn-unio-ghost btn-sm">Convênios</a>
 {% endblock %}
 
 {% block hub_content %}
-{% for msg in app.flashes('success') %}
-<div class="alert alert-success">{{ msg }}</div>
-{% endfor %}
-{% for msg in app.flashes('error') %}
-<div class="alert alert-danger">{{ msg }}</div>
-{% endfor %}
-
+{% if list_truncated|default(false) %}
+<div class="alert alert-warning">
+    Exibindo as {{ list_limit }} contas mais recentes de {{ list_total }}. Refine o filtro de status para ver o restante.
+</div>
+{% endif %}
 <p class="pos-op-back mb-3">
     <a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="{{ filtro_status == 'aberto' ? 'fw-bold' : '' }}">Abertas</a>
     <a href="{{ path('app_pos_operatorio_contas', { status: 'pago' }) }}" class="{{ filtro_status == 'pago' ? 'fw-bold' : '' }}">Pagas</a>
@@ -29,11 +27,11 @@
     <a href="{{ path('app_pos_operatorio_contas', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'fw-bold' : '' }}">Todas</a>
 </p>
 
-<section class="unio-card p-0 overflow-hidden">
+<section class="unio-card p-0 clinic-conta-card">
     {% if contas is empty %}
     <div class="p-4 text-muted">Nenhuma conta neste filtro. Contas nascem ao finalizar um atendimento.</div>
     {% else %}
-    <div class="table-responsive">
+    <div class="table-responsive clinic-conta-table-wrap">
         <table class="table admin-table mb-0 align-middle">
             <thead>
                 <tr>
@@ -43,7 +41,7 @@
                     <th>Tipo</th>
                     <th>Status</th>
                     <th>Valor</th>
-                    <th></th>
+                    <th class="clinic-conta-col-actions">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -65,22 +63,22 @@
                             —
                         {% endif %}
                     </td>
-                    <td data-label="Ações" class="text-md-right">
+                    <td data-label="Ações" class="clinic-conta-col-actions">
                         {% if guia %}
                         <a href="{{ path('app_pos_operatorio_guias_show', { id: guia.id }) }}" class="btn-unio btn-sm">Abrir guia</a>
                         {% elseif c.status == 'aberto' and c.tipo != 'convenio' %}
-                        <div class="d-flex flex-column flex-md-row flex-wrap gap-2 align-items-stretch align-items-md-center justify-content-md-end">
-                            <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}" class="d-flex flex-wrap gap-1 align-items-center">
+                        <div class="clinic-conta-row-actions">
+                            <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}" class="clinic-conta-row-actions__row">
                                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_' ~ c.id) }}">
-                                <input type="text" name="valor" class="form-control form-control-sm" style="max-width:120px;min-width:88px" placeholder="0,00" inputmode="decimal">
+                                <input type="text" name="valor" class="form-control form-control-sm clinic-conta-row-actions__valor" placeholder="0,00" inputmode="decimal" required aria-label="Valor pago">
                                 <button type="submit" name="action" value="pago" class="btn-unio btn-sm">Pago</button>
                                 <button type="submit" name="action" value="cortesia" class="btn-unio-ghost btn-sm">Cortesia</button>
                                 <button type="submit" name="action" value="cancelar" class="btn-unio-ghost btn-sm">Cancelar</button>
                             </form>
                             {% if convenios is not empty %}
-                            <form method="post" action="{{ path('app_pos_operatorio_guias_from_conta', { contaId: c.id }) }}" class="d-flex flex-wrap gap-1 align-items-center">
+                            <form method="post" action="{{ path('app_pos_operatorio_guias_from_conta', { contaId: c.id }) }}" class="clinic-conta-row-actions__row">
                                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_guia_' ~ c.id) }}">
-                                <select name="convenio_id" class="form-select form-select-sm" style="max-width:180px;min-width:140px" required>
+                                <select name="convenio_id" class="form-control form-control-sm clinic-conta-row-actions__convenio" required aria-label="Convênio">
                                     <option value="">Convênio…</option>
                                     {% for conv in convenios %}
                                     <option value="{{ conv.id }}">{{ conv.nome }}</option>

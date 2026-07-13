@@ -3,8 +3,11 @@
 namespace App\PosOperatorio;
 
 /**
- * Planos comerciais públicos Unio Saúde — alinhados ao escopo entregue (não ERP completo).
- * Comparativo de mercado (jul/2026): OnDoctor ~R$79,90/user · Feegow ~R$129/prof · Clinicorp ~R$127/clínica.
+ * Planos comerciais públicos Unio Saúde — alinhados ao escopo entregue.
+ *
+ * Comparativo de mercado (interno, jul/2026) — NÃO exibir na landing:
+ * OnDoctor ~R$79,90/user · Feegow ~R$129/prof · Clinicorp ~R$127/clínica.
+ * Documentação: docs/UNIOSAUDE_PRECOS_MERCADO.md
  */
 final class ClinicCommercialPlans
 {
@@ -37,13 +40,14 @@ final class ClinicCommercialPlans
                 'nome' => 'Clínica',
                 'preco' => 'R$ 279',
                 'preco_sufixo' => '/ clínica / mês',
-                'preco_nota' => 'Recomendado: stack Unio completa de hoje',
+                'preco_nota' => 'Recomendado: operação + faturamento TISS',
                 'destaque' => true,
                 'cta' => 'Escolher Clínica',
                 'max_beneficiarios' => 500,
                 'inclui' => [
                     'Tudo do Essencial',
-                    'Agenda (dia/semana + status + WhatsApp manual)',
+                    'Agenda, atendimento e contas',
+                    'Convênios, guias TISS, lote e XML',
                     'Carteirinha, comprovante e guia médico',
                     'Sala crítica, plantão e recepção',
                     'Até 500 pacientes ativos',
@@ -62,7 +66,7 @@ final class ClinicCommercialPlans
                     'Tudo do Clínica',
                     'White-label, branding e onboarding',
                     'Limites altos / multi-unidade',
-                    'Prioridade no roadmap (fatura, TISS, WA live)',
+                    'Prioridade em integrações e suporte',
                 ],
             ],
         ];

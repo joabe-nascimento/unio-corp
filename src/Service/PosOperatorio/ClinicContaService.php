@@ -59,6 +59,16 @@ final class ClinicContaService
         return $this->contas->findByEmpresaAndStatus($empresa, $status);
     }
 
+    public function countList(Empresa $empresa, ?string $status = null): int
+    {
+        return $this->contas->countByEmpresaAndStatus($empresa, $status);
+    }
+
+    public function listLimit(): int
+    {
+        return ClinicContaRepository::LIST_LIMIT;
+    }
+
     public function findForEmpresa(Empresa $empresa, int $id): ?ClinicConta
     {
         return $this->contas->findOneByEmpresa($empresa, $id);
@@ -75,10 +85,12 @@ final class ClinicContaService
         }
 
         if ($valorCentavos !== null) {
-            if ($valorCentavos < 0) {
-                throw new \InvalidArgumentException('Valor inválido.');
+            if ($valorCentavos <= 0) {
+                throw new \InvalidArgumentException('Informe um valor pago maior que zero.');
             }
             $conta->setValorCentavos($valorCentavos);
+        } elseif ($conta->getValorCentavos() === null || $conta->getValorCentavos() <= 0) {
+            throw new \InvalidArgumentException('Informe o valor pago.');
         }
 
         $conta->setTipo(ClinicConta::TIPO_PARTICULAR);
@@ -96,9 +108,10 @@ final class ClinicContaService
         if (!$conta->isAberto()) {
             throw new \InvalidArgumentException('Conta não está aberta.');
         }
-        if ($valorCentavos !== null && $valorCentavos >= 0) {
-            $conta->setValorCentavos($valorCentavos);
+        if ($valorCentavos === null || $valorCentavos <= 0) {
+            throw new \InvalidArgumentException('Guia sem valor: informe valores nos itens.');
         }
+        $conta->setValorCentavos($valorCentavos);
         $conta->setTipo(ClinicConta::TIPO_CONVENIO);
         $conta->setStatus(ClinicConta::STATUS_PAGO);
         $conta->setPagoEm(new \DateTimeImmutable());
@@ -114,6 +127,20 @@ final class ClinicContaService
             throw new \InvalidArgumentException('Conta não está aberta.');
         }
         $conta->setStatus(ClinicConta::STATUS_GLOSADO);
+        $conta->setPagoEm(null);
+        $conta->touch();
+
+        return $conta;
+    }
+
+    public function reabrirAposGlosa(ClinicConta $conta, Empresa $empresa): ClinicConta
+    {
+        $this->assertScope($conta, $empresa);
+        if ($conta->getStatus() !== ClinicConta::STATUS_GLOSADO) {
+            throw new \InvalidArgumentException('Só contas glosadas podem ser reabertas.');
+        }
+
+        $conta->setStatus(ClinicConta::STATUS_ABERTO);
         $conta->setPagoEm(null);
         $conta->touch();
 

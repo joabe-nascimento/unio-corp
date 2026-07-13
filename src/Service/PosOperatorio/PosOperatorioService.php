@@ -316,8 +316,11 @@ final class PosOperatorioService
     {
         return [
             ['icon' => 'fa-user-injured', 'title' => 'Pacientes', 'subtitle' => 'Cadastro pós-cirúrgico', 'metric' => $ativos . ' ativos', 'href' => 'app_pos_operatorio_pacientes'],
+            ['icon' => 'fa-calendar-alt', 'title' => 'Agenda', 'subtitle' => 'Recepção e atendimento', 'metric' => 'Dia / semana', 'href' => 'app_pos_operatorio_agenda'],
+            ['icon' => 'fa-file-invoice', 'title' => 'Contas', 'subtitle' => 'Particular, cortesia e convênio', 'metric' => 'Faturamento', 'href' => 'app_pos_operatorio_contas'],
+            ['icon' => 'fa-file-invoice-dollar', 'title' => 'Guias TISS', 'subtitle' => 'Convênio, glosa e XML', 'metric' => 'TUSS', 'href' => 'app_pos_operatorio_guias'],
+            ['icon' => 'fa-boxes-stacked', 'title' => 'Lotes TISS', 'subtitle' => 'Remessa e XML ANS', 'metric' => 'Lote', 'href' => 'app_pos_operatorio_lotes'],
             ['icon' => 'fa-clipboard-list', 'title' => 'Protocolos', 'subtitle' => 'Checklists por procedimento', 'metric' => $protocolos . ' modelos', 'href' => 'app_pos_operatorio_protocolos'],
-            ['icon' => 'fa-file-medical', 'title' => 'Questionários', 'subtitle' => 'Respostas diárias', 'metric' => 'Portal paciente', 'href' => 'app_pos_operatorio_questionarios'],
             ['icon' => 'fa-triangle-exclamation', 'title' => 'Alertas clínicos', 'subtitle' => 'Prioridade P1–P4', 'metric' => $alertas . ' abertos', 'href' => 'app_pos_operatorio_alertas'],
             ['icon' => 'fa-chart-line', 'title' => 'Painel de recuperação', 'subtitle' => 'KPIs e linha do tempo', 'metric' => 'Ao vivo', 'href' => 'app_maturidade'],
             ['icon' => 'fa-mobile-screen', 'title' => 'Portal do paciente', 'subtitle' => 'Acesso mobile', 'metric' => 'Questionários', 'href' => 'app_pos_operatorio_portal'],
@@ -347,8 +350,11 @@ final class PosOperatorioService
     {
         return [
             ['icon' => 'fa-user-injured', 'title' => 'Pacientes', 'subtitle' => 'Cadastro pós-cirúrgico e evolução', 'metric' => '20 ativos', 'href' => 'app_pos_operatorio_pacientes'],
+            ['icon' => 'fa-calendar-alt', 'title' => 'Agenda', 'subtitle' => 'Recepção e atendimento', 'metric' => 'Dia / semana', 'href' => 'app_pos_operatorio_agenda'],
+            ['icon' => 'fa-file-invoice', 'title' => 'Contas', 'subtitle' => 'Particular, cortesia e convênio', 'metric' => 'Faturamento', 'href' => 'app_pos_operatorio_contas'],
+            ['icon' => 'fa-file-invoice-dollar', 'title' => 'Guias TISS', 'subtitle' => 'Convênio, glosa e XML', 'metric' => 'TUSS', 'href' => 'app_pos_operatorio_guias'],
+            ['icon' => 'fa-boxes-stacked', 'title' => 'Lotes TISS', 'subtitle' => 'Remessa e XML ANS', 'metric' => 'Lote', 'href' => 'app_pos_operatorio_lotes'],
             ['icon' => 'fa-clipboard-list', 'title' => 'Protocolos', 'subtitle' => 'Checklists por tipo de procedimento', 'metric' => '8 modelos', 'href' => 'app_pos_operatorio_protocolos'],
-            ['icon' => 'fa-file-medical', 'title' => 'Questionários', 'subtitle' => 'Respostas diárias do paciente', 'metric' => '94% hoje', 'href' => 'app_pos_operatorio_questionarios'],
             ['icon' => 'fa-triangle-exclamation', 'title' => 'Alertas clínicos', 'subtitle' => 'Prioridade P1–P4 e SLA de resposta', 'metric' => '3 abertos', 'href' => 'app_pos_operatorio_alertas'],
             ['icon' => 'fa-chart-line', 'title' => 'Painel médico', 'subtitle' => 'KPIs, CSAT e linha do tempo', 'metric' => 'CSAT 4,8', 'href' => 'app_pos_operatorio'],
             ['icon' => 'fa-mobile-screen', 'title' => 'Portal do paciente', 'subtitle' => 'Acesso mobile ao acompanhamento', 'metric' => '18 acessos hoje', 'href' => 'app_pos_operatorio_portal'],

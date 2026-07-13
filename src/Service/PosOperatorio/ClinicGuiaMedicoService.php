@@ -17,7 +17,7 @@ final class ClinicGuiaMedicoService
     /** @return list<array<string, mixed>> */
     public function list(Empresa $empresa): array
     {
-        return $this->read($empresa)['guias'] ?? [];
+        return $this->readGuias($empresa);
     }
 
     public function find(Empresa $empresa, string $id): ?array
@@ -34,12 +34,7 @@ final class ClinicGuiaMedicoService
     /** @param array<string, mixed> $data */
     public function save(Empresa $empresa, array $data, ?string $id = null): array
     {
-        $store = $this->read($empresa);
-        $guias = $store['guias'] ?? [];
-        if (!\is_array($guias)) {
-            $guias = [];
-        }
-
+        $guias = $this->readGuias($empresa);
         $record = $this->normalizeGuia($data, $id);
         $found = false;
         foreach ($guias as $i => $guia) {
@@ -53,21 +48,18 @@ final class ClinicGuiaMedicoService
             $guias[] = $record;
         }
 
-        $store['guias'] = array_values($guias);
-        $this->write($empresa, $store);
+        $this->writeGuias($empresa, array_values($guias));
 
         return $record;
     }
 
     public function delete(Empresa $empresa, string $id): void
     {
-        $store = $this->read($empresa);
         $guias = array_values(array_filter(
-            $store['guias'] ?? [],
+            $this->readGuias($empresa),
             static fn (array $g): bool => ($g['id'] ?? '') !== $id,
         ));
-        $store['guias'] = $guias;
-        $this->write($empresa, $store);
+        $this->writeGuias($empresa, $guias);
     }
 
     public function resolveForPaciente(PosOperatorioPaciente $paciente): ?array
@@ -134,10 +126,26 @@ final class ClinicGuiaMedicoService
             'orientacoes_retorno' => $this->lines($data['orientacoes_retorno'] ?? ''),
             'orientacoes_alta' => $this->lines($data['orientacoes_alta'] ?? ''),
             'sinais_alerta' => $this->lines($data['sinais_alerta'] ?? "Dor intensa que não melhora com medicação prescrita\nFebre acima de 38 °C\nSangramento intenso ou secreção com odor\nFalta de ar ou confusão"),
-            'ativo' => (bool) ($data['ativo'] ?? true),
-            'padrao' => (bool) ($data['padrao'] ?? false),
+            // Checkbox ausente no POST = desmarcado
+            'ativo' => $this->checkboxOn($data, 'ativo', $id === null),
+            'padrao' => $this->checkboxOn($data, 'padrao', false),
             'atualizado_em' => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
         ];
+    }
+
+    /** @param array<string, mixed> $data */
+    private function checkboxOn(array $data, string $key, bool $defaultWhenMissing): bool
+    {
+        if (!\array_key_exists($key, $data)) {
+            return $defaultWhenMissing;
+        }
+
+        $value = $data[$key];
+        if (\is_bool($value)) {
+            return $value;
+        }
+
+        return \in_array((string) $value, ['1', 'true', 'on', 'yes'], true);
     }
 
     /** @return list<string> */
@@ -157,17 +165,6 @@ final class ClinicGuiaMedicoService
         $slug = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($nome)) ?? 'guia';
 
         return trim($slug, '-') ?: 'guia-' . bin2hex(random_bytes(3));
-    }
-
-    /** @return array<string, mixed> */
-    private function read(Empresa $empresa): array
-    {
-        $stored = $this->store->read($empresa, 'guias');
-        if ($stored === []) {
-            return ['guias' => $this->seedGuias()];
-        }
-
-        return $stored;
     }
 
     /** @return list<array<string, mixed>> */
@@ -208,9 +205,43 @@ final class ClinicGuiaMedicoService
         ]];
     }
 
-    /** @param array<string, mixed> $data */
-    private function write(Empresa $empresa, array $data): void
+    /**
+     * Lê a lista de guias da coluna JSON, aceitando formato legado aninhado.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function readGuias(Empresa $empresa): array
     {
-        $this->store->write($empresa, 'guias', $data);
+        $stored = $this->store->read($empresa, 'guias');
+        if ($stored === []) {
+            $seed = $this->seedGuias();
+            $this->writeGuias($empresa, $seed);
+
+            return $seed;
+        }
+
+        // Formato correto: lista de guias no root da coluna
+        if (array_is_list($stored)) {
+            /** @var list<array<string, mixed>> $stored */
+            return $stored;
+        }
+
+        // Legado: {"guias":[...]}
+        $nested = $stored['guias'] ?? null;
+        if (\is_array($nested)) {
+            /** @var list<array<string, mixed>> $list */
+            $list = array_values(array_filter($nested, static fn ($g): bool => \is_array($g)));
+            $this->writeGuias($empresa, $list);
+
+            return $list;
+        }
+
+        return $this->seedGuias();
+    }
+
+    /** @param list<array<string, mixed>> $guias */
+    private function writeGuias(Empresa $empresa, array $guias): void
+    {
+        $this->store->write($empresa, 'guias', array_values($guias));
     }
 }

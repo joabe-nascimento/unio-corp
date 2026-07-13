@@ -40,7 +40,7 @@ final class PosOperatorioConvenioController extends AbstractController
                     'ativo' => true,
                 ]);
                 $this->addFlash('success', 'Convênio cadastrado.');
-            } catch (\InvalidArgumentException $e) {
+            } catch (\Throwable $e) {
                 $this->addFlash('error', $e->getMessage());
             }
 
@@ -76,7 +76,7 @@ final class PosOperatorioConvenioController extends AbstractController
                 'ativo' => $request->request->getBoolean('ativo'),
             ]);
             $this->addFlash('success', 'Convênio atualizado.');
-        } catch (\InvalidArgumentException $e) {
+        } catch (\Throwable $e) {
             $this->addFlash('error', $e->getMessage());
         }
 

@@ -55,14 +55,18 @@ final class PosOperatorioCommercialController extends AbstractController
         $empresa = $this->requireEmpresa();
 
         if ($request->isMethod('POST')) {
-            $this->branding->save($empresa, [
-                'logo_url' => $request->request->getString('logo_url'),
-                'cor_primaria' => $request->request->getString('cor_primaria'),
-                'slogan' => $request->request->getString('slogan'),
-                'nome_exibicao' => $request->request->getString('nome_exibicao'),
-            ]);
-            $this->onboarding->patch($empresa, ['branding_configurado' => true]);
-            $this->addFlash('success', 'Branding atualizado.');
+            try {
+                $this->branding->save($empresa, [
+                    'logo_url' => $request->request->getString('logo_url'),
+                    'cor_primaria' => $request->request->getString('cor_primaria'),
+                    'slogan' => $request->request->getString('slogan'),
+                    'nome_exibicao' => $request->request->getString('nome_exibicao'),
+                ]);
+                $this->onboarding->patch($empresa, ['branding_configurado' => true]);
+                $this->addFlash('success', 'Branding atualizado.');
+            } catch (\Throwable $e) {
+                $this->addFlash('error', $e->getMessage());
+            }
 
             return $this->redirectToRoute('app_pos_operatorio_comercial_branding');
         }

@@ -1,0 +1,134 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Lote {{ lote.numero }} · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Lote ' ~ lote.numero %}
+{% set hub_page_eyebrow = 'Remessa · ' ~ lote.convenio.nome %}
+{% set hub_page_subtitle = (status_labels[lote.status]|default(lote.status)) ~ ' · competência ' ~ lote.competencia %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_lotes') }}" class="btn-unio-ghost btn-sm">Lotes</a>
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias TISS</a>
+{% endblock %}
+
+{% block hub_content %}
+<div class="row">
+    <div class="col-lg-4 mb-3">
+        <section class="unio-card p-3">
+            <p class="small text-muted mb-1">Convênio</p>
+            <p class="mb-2">
+                <strong>{{ lote.convenio.nome }}</strong>
+                {% if lote.convenio.registroAns %}<br><span class="text-muted">ANS {{ lote.convenio.registroAns }}</span>{% endif %}
+            </p>
+            <p class="small text-muted mb-1">Competência</p>
+            <p class="mb-2">{{ lote.competencia }}</p>
+            <p class="small text-muted mb-1">Status</p>
+            <p class="mb-2"><strong>{{ status_labels[lote.status]|default(lote.status) }}</strong></p>
+            <p class="small text-muted mb-1">Total</p>
+            <p class="mb-0">
+                {% set total = lote.totalCentavos() %}
+                {% if total > 0 %}R$ {{ (total / 100)|number_format(2, ',', '.') }}{% else %}—{% endif %}
+            </p>
+        </section>
+
+        <section class="unio-card p-3 mt-3">
+            <h2 class="h6 mb-3">Ações</h2>
+            {% if lote.aberto %}
+            <form method="post" class="mb-2" onsubmit="return confirm('Fechar lote? Guias em rascunho serão marcadas como enviadas.');">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_lote_' ~ lote.id) }}">
+                <input type="hidden" name="action" value="fechar">
+                <button type="submit" class="btn-unio btn-sm btn-block">Fechar lote</button>
+            </form>
+            <p class="small text-muted mb-0">Após fechar, o XML fica disponível para download.</p>
+            {% elseif lote.status == 'fechado' %}
+            <a href="{{ path('app_pos_operatorio_lotes_xml', { id: lote.id }) }}" class="btn-unio btn-sm btn-block mb-2">Baixar XML TISS 3.05</a>
+            <p class="small text-muted mb-2">Mensagem ANS com hash MD5. Exige CNPJ, registro ANS e códigos TUSS.</p>
+            <form method="post" class="mb-0">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_lote_' ~ lote.id) }}">
+                <input type="hidden" name="action" value="marcar_enviado">
+                <button type="submit" class="btn-unio-ghost btn-sm btn-block">Marcar enviado à operadora</button>
+            </form>
+            {% else %}
+            <a href="{{ path('app_pos_operatorio_lotes_xml', { id: lote.id }) }}" class="btn-unio-ghost btn-sm btn-block">Baixar XML novamente</a>
+            {% endif %}
+        </section>
+    </div>
+
+    <div class="col-lg-8">
+        <section class="unio-card p-3 mb-3">
+            <h2 class="h6 mb-3">Guias no lote ({{ lote.guias|length }})</h2>
+            {% if lote.guias is empty %}
+            <p class="text-muted small mb-0">Nenhuma guia incluída ainda.</p>
+            {% else %}
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nº guia</th>
+                            <th>Paciente</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for g in lote.guias %}
+                        <tr>
+                            <td><a href="{{ path('app_pos_operatorio_guias_show', { id: g.id }) }}">{{ g.numeroGuia }}</a></td>
+                            <td>{{ g.paciente.nome }}</td>
+                            <td>{{ guia_status_labels[g.status]|default(g.status) }}</td>
+                            <td>
+                                {% set gt = g.totalCentavos() %}
+                                {% if gt > 0 %}R$ {{ (gt / 100)|number_format(2, ',', '.') }}{% else %}—{% endif %}
+                            </td>
+                            <td class="text-right">
+                                {% if lote.aberto %}
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('clinic_lote_' ~ lote.id) }}">
+                                    <input type="hidden" name="action" value="remove_guia">
+                                    <input type="hidden" name="guia_id" value="{{ g.id }}">
+                                    <button type="submit" class="btn-unio-ghost btn-sm">Remover</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </section>
+
+        {% if lote.aberto %}
+        <section class="unio-card p-3">
+            <h2 class="h6 mb-3">Incluir guia elegível</h2>
+            {% if elegiveis is empty %}
+            <p class="text-muted small mb-0">
+                Nenhuma guia elegível (mesmo convênio, com itens, em rascunho/enviado e fora de outro lote).
+            </p>
+            {% else %}
+            <form method="post" class="row align-items-end">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_lote_' ~ lote.id) }}">
+                <input type="hidden" name="action" value="add_guia">
+                <div class="col-md-9 mb-2">
+                    <label class="small text-muted d-block" for="guia_id">Guia</label>
+                    <select id="guia_id" name="guia_id" class="form-control" required>
+                        {% for g in elegiveis %}
+                        <option value="{{ g.id }}">
+                            {{ g.numeroGuia }} · {{ g.paciente.nome }} · {{ guia_status_labels[g.status]|default(g.status) }}
+                            · R$ {{ (g.totalCentavos() / 100)|number_format(2, ',', '.') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <button type="submit" class="btn-unio">Incluir</button>
+                </div>
+            </form>
+            {% endif %}
+        </section>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -16,8 +16,8 @@
     <form method="post" action="{{ agendamento ? path('app_pos_operatorio_agenda_editar', { id: agendamento.id }) : path('app_pos_operatorio_agenda_novo') }}">
         <input type="hidden" name="_token" value="{{ csrf_token(agendamento ? 'clinic_agenda_' ~ agendamento.id : 'clinic_agenda') }}">
 
-        <div class="row g-3">
-            <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-6 mb-3">
                 <label class="small text-muted d-block" for="paciente_id">Paciente</label>
                 <select id="paciente_id" name="paciente_id" class="form-control" required>
                     <option value="">Selecione…</option>
@@ -28,7 +28,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 mb-3">
                 <label class="small text-muted d-block" for="medico_id">Médico</label>
                 <select id="medico_id" name="medico_id" class="form-control">
                     <option value="">— (opcional / responsável do paciente)</option>
@@ -37,27 +37,33 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 mb-3">
                 <label class="small text-muted d-block" for="inicio">Início</label>
                 <input id="inicio" type="datetime-local" name="inicio" class="form-control" required value="{{ prefill.inicio|default('') }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 mb-3">
                 <label class="small text-muted d-block" for="fim">Fim</label>
                 <input id="fim" type="datetime-local" name="fim" class="form-control" required value="{{ prefill.fim|default('') }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 mb-3">
                 <label class="small text-muted d-block" for="status">Status</label>
+                {% set status_options = agendamento
+                    ? statuses
+                    : ['marcado', 'confirmado', 'chegou'] %}
                 <select id="status" name="status" class="form-control">
-                    {% for s in statuses %}
+                    {% for s in status_options %}
                     <option value="{{ s }}" {{ (prefill.status|default('marcado')) == s ? 'selected' : '' }}>{{ status_labels[s]|default(s|capitalize) }}</option>
                     {% endfor %}
                 </select>
+                {% if agendamento %}
+                <p class="small text-muted mb-0 mt-1">Atendido e em atendimento vêm do fluxo da agenda (Atender / finalizar SOAP).</p>
+                {% endif %}
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 mb-3">
                 <label class="small text-muted d-block" for="titulo">Título</label>
                 <input id="titulo" type="text" name="titulo" class="form-control" maxlength="180" value="{{ prefill.titulo|default('') }}" placeholder="Ex.: Retorno D+14">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <label class="small text-muted d-block" for="origem">Origem</label>
                 <select id="origem" name="origem" class="form-control">
                     {% for o in origens %}
@@ -65,11 +71,11 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <label class="small text-muted d-block" for="protocolo_dia">Dia do protocolo (D+n)</label>
                 <input id="protocolo_dia" type="number" name="protocolo_dia" class="form-control" min="1" value="{{ prefill.protocolo_dia|default('') }}">
             </div>
-            <div class="col-12">
+            <div class="col-12 mb-3">
                 <label class="small text-muted d-block" for="observacao">Observação</label>
                 <textarea id="observacao" name="observacao" class="form-control" rows="3" maxlength="500">{{ prefill.observacao|default('') }}</textarea>
             </div>

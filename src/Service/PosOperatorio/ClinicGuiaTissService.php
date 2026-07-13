@@ -26,6 +26,16 @@ final class ClinicGuiaTissService
         return $this->guias->findByEmpresaAndStatus($empresa, $status);
     }
 
+    public function countList(Empresa $empresa, ?string $status = null): int
+    {
+        return $this->guias->countByEmpresaAndStatus($empresa, $status);
+    }
+
+    public function listLimit(): int
+    {
+        return ClinicGuiaTissRepository::LIST_LIMIT;
+    }
+
     public function findForEmpresa(Empresa $empresa, int $id): ?ClinicGuiaTiss
     {
         return $this->guias->findOneByEmpresa($empresa, $id);
@@ -48,7 +58,7 @@ final class ClinicGuiaTissService
 
         $existing = $this->guias->findOneByConta($empresa, $conta);
         if ($existing !== null) {
-            return $existing;
+            throw new \InvalidArgumentException('Esta conta já possui guia TISS.');
         }
 
         $conta->setTipo(ClinicConta::TIPO_CONVENIO);
@@ -82,7 +92,7 @@ final class ClinicGuiaTissService
     {
         $this->assertScope($guia, $empresa);
         if (!$guia->isEditable()) {
-            throw new \InvalidArgumentException('Guia não pode ser editada neste status.');
+            throw new \InvalidArgumentException('Guia não pode ser editada neste status. Reabra após glosa ou volte ao rascunho.');
         }
 
         if (\array_key_exists('numero_guia', $data)) {
@@ -123,8 +133,11 @@ final class ClinicGuiaTissService
             throw new \InvalidArgumentException('Quantidade inválida.');
         }
 
-        $valor = $data['valor_centavos'] ?? null;
-        if ($valor !== null && $valor < 0) {
+        if (!\array_key_exists('valor_centavos', $data) || $data['valor_centavos'] === null) {
+            throw new \InvalidArgumentException('Informe o valor do item.');
+        }
+        $valor = (int) $data['valor_centavos'];
+        if ($valor < 0) {
             throw new \InvalidArgumentException('Valor inválido.');
         }
 
@@ -174,16 +187,26 @@ final class ClinicGuiaTissService
         }
 
         $current = $guia->getStatus();
-        if (\in_array($current, [
-            ClinicGuiaTiss::STATUS_CANCELADO,
-            ClinicGuiaTiss::STATUS_PAGO,
-            ClinicGuiaTiss::STATUS_GLOSADO,
-        ], true)) {
-            throw new \InvalidArgumentException('Guia já encerrada.');
+        $allowed = ClinicGuiaTiss::allowedTransitionsFrom($current);
+        if (!\in_array($status, $allowed, true)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Não é possível ir de “%s” para “%s”.',
+                self::statusLabels()[$current] ?? $current,
+                self::statusLabels()[$status] ?? $status,
+            ));
         }
 
-        if ($status === ClinicGuiaTiss::STATUS_PAGO && $guia->getItens()->isEmpty()) {
-            throw new \InvalidArgumentException('Adicione ao menos um item antes de marcar a guia como paga.');
+        if ($status === ClinicGuiaTiss::STATUS_ENVIADO && $guia->getItens()->isEmpty()) {
+            throw new \InvalidArgumentException('Adicione ao menos um item antes de marcar como enviada.');
+        }
+
+        if ($status === ClinicGuiaTiss::STATUS_PAGO) {
+            if ($guia->getItens()->isEmpty()) {
+                throw new \InvalidArgumentException('Adicione ao menos um item antes de marcar a guia como paga.');
+            }
+            if ($guia->totalCentavos() <= 0) {
+                throw new \InvalidArgumentException('Informe valor nos itens antes de marcar como paga.');
+            }
         }
 
         if ($status === ClinicGuiaTiss::STATUS_GLOSADO) {
@@ -191,7 +214,7 @@ final class ClinicGuiaTissService
             if ($motivo === '') {
                 throw new \InvalidArgumentException('Informe o motivo da glosa.');
             }
-            $guia->setMotivoGlosa(mb_substr($motivo, 0, 8000));
+            $guia->appendGlosaHistorico($motivo);
         }
 
         $guia->setStatus($status);
@@ -205,6 +228,26 @@ final class ClinicGuiaTissService
             default => null,
         };
 
+        $this->em->flush();
+
+        return $guia;
+    }
+
+    /**
+     * Reabre guia glosada para correção e reapresentação (volta a rascunho + conta aberta).
+     */
+    public function reabrirAposGlosa(ClinicGuiaTiss $guia, Empresa $empresa): ClinicGuiaTiss
+    {
+        $this->assertScope($guia, $empresa);
+        if (!$guia->canReabrirAposGlosa()) {
+            throw new \InvalidArgumentException('Só guias glosadas podem ser reabertas.');
+        }
+
+        // Mantém histórico; limpa o motivo “atual” para a próxima tentativa
+        $guia->setMotivoGlosa(null);
+        $guia->setStatus(ClinicGuiaTiss::STATUS_RASCUNHO);
+        $guia->touch();
+        $this->contas->reabrirAposGlosa($guia->getConta(), $empresa);
         $this->em->flush();
 
         return $guia;

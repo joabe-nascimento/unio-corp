@@ -100,7 +100,7 @@ final class PosOperatorioAtendimentoController extends AbstractController
 
                 $this->atendimentos->saveDraft($atendimento, $empresa, $data);
                 $this->addFlash('success', 'Atendimento salvo.');
-            } catch (\InvalidArgumentException $e) {
+            } catch (\Throwable $e) {
                 $this->addFlash('error', $e->getMessage());
             }
 

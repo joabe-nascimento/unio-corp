@@ -42,8 +42,9 @@
 {% endblock %}
 
 {% block hub_content %}
+{% set filtro_medico_id = medico_filtro ? medico_filtro.id : '' %}
 <section class="unio-card mb-3 p-3">
-    <form method="get" action="{{ path('app_pos_operatorio_agenda') }}" class="d-flex flex-wrap gap-3 align-items-end">
+    <form method="get" action="{{ path('app_pos_operatorio_agenda') }}" class="d-flex flex-wrap gap-2 align-items-end">
         <div class="d-flex gap-1 align-items-center">
             <span class="small text-muted mr-1">Vista</span>
             <div class="btn-group btn-group-sm" role="group" aria-label="Vista da agenda">
@@ -92,14 +93,14 @@
     </form>
 </section>
 
-<section class="unio-card">
+<section class="unio-card clinic-agenda-card">
     {% if agendamentos is empty %}
     <p class="text-muted p-4 mb-0">
         Nenhum agendamento {{ vista == 'dia' ? 'neste dia' : 'nesta semana' }}.
         <a href="{{ path('app_pos_operatorio_agenda_novo') }}">Criar horário</a>
     </p>
     {% else %}
-    <div class="table-responsive">
+    <div class="table-responsive clinic-agenda-table-wrap">
         <table class="admin-table">
             <thead>
                 <tr>
@@ -138,61 +139,89 @@
                     <td>
                         <span class="badge-perfil {{ status_tones[a.status]|default('default') }}">{{ status_labels[a.status]|default(a.status) }}</span>
                     </td>
-                    <td class="text-right">
-                        <div class="d-flex flex-wrap gap-1 justify-content-end">
-                            {% set wa = whatsapp_map[a.id]|default(null) %}
-                            {% if wa and a.status in ['marcado', 'confirmado'] %}
-                            <a href="{{ wa }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener" title="Confirmar no WhatsApp">
-                                <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
-                            </a>
-                            {% endif %}
-                            <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                    <td class="text-right clinic-agenda-col-actions">
+                        {% set wa = whatsapp_map[a.id]|default(null) %}
+                        {% set can_faltou_cancelar = a.status not in ['cancelado', 'atendido', 'faltou', 'em_atendimento'] %}
+                        {% set show_whatsapp = wa and a.status in ['marcado', 'confirmado'] %}
+                        {# CTA = próximo passo do fluxo; Editar no ⋮. Sem próximo passo: Editar no botão (sem duplicar no menu). #}
+                        {% set edit_as_primary = a.status not in ['marcado', 'confirmado', 'chegou', 'em_atendimento'] %}
+                        {% set show_overflow = (not edit_as_primary) or show_whatsapp or can_faltou_cancelar %}
+                        <div class="clinic-agenda-row-actions">
+                            <div class="clinic-agenda-row-actions__primary">
+                                {% if a.status == 'marcado' %}
+                                <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
+                                    <input type="hidden" name="status" value="confirmado">
+                                    <input type="hidden" name="vista" value="{{ vista }}">
+                                    <input type="hidden" name="medico_id" value="{{ filtro_medico_id }}">
+                                    <button type="submit" class="btn-unio btn-sm">Confirmar</button>
+                                </form>
+                                {% elseif a.status == 'confirmado' %}
+                                <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
+                                    <input type="hidden" name="status" value="chegou">
+                                    <input type="hidden" name="vista" value="{{ vista }}">
+                                    <input type="hidden" name="medico_id" value="{{ filtro_medico_id }}">
+                                    <button type="submit" class="btn-unio btn-sm">Chegou</button>
+                                </form>
+                                {% elseif a.status == 'chegou' %}
+                                <form method="post" action="{{ path('app_pos_operatorio_atendimento_abrir', { agendamentoId: a.id }) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_abrir_' ~ a.id) }}">
+                                    <button type="submit" class="btn-unio btn-sm">Atender</button>
+                                </form>
+                                {% elseif a.status == 'em_atendimento' %}
+                                <form method="post" action="{{ path('app_pos_operatorio_atendimento_abrir', { agendamentoId: a.id }) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_abrir_' ~ a.id) }}">
+                                    <button type="submit" class="btn-unio btn-sm">Abrir atendimento</button>
+                                </form>
+                                {% elseif edit_as_primary %}
+                                <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                                {% endif %}
+                            </div>
 
-                            {% if a.status == 'marcado' %}
-                            <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}" class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
-                                <input type="hidden" name="status" value="confirmado">
-                                <input type="hidden" name="vista" value="{{ vista }}">
-                                <button type="submit" class="btn-unio-ghost btn-sm">Confirmar</button>
-                            </form>
-                            {% endif %}
-
-                            {% if a.status in ['marcado', 'confirmado'] %}
-                            <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}" class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
-                                <input type="hidden" name="status" value="chegou">
-                                <input type="hidden" name="vista" value="{{ vista }}">
-                                <button type="submit" class="btn-unio btn-sm">Chegou</button>
-                            </form>
-                            {% endif %}
-
-                            {% if a.status == 'chegou' %}
-                            <form method="post" action="{{ path('app_pos_operatorio_atendimento_abrir', { agendamentoId: a.id }) }}" class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_abrir_' ~ a.id) }}">
-                                <button type="submit" class="btn-unio btn-sm">Atender</button>
-                            </form>
-                            {% endif %}
-
-                            {% if a.status == 'em_atendimento' %}
-                            <form method="post" action="{{ path('app_pos_operatorio_atendimento_abrir', { agendamentoId: a.id }) }}" class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_abrir_' ~ a.id) }}">
-                                <button type="submit" class="btn-unio btn-sm">Abrir atendimento</button>
-                            </form>
-                            {% endif %}
-
-                            {% if a.status not in ['cancelado', 'atendido', 'faltou', 'em_atendimento'] %}
-                            <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}" class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
-                                <input type="hidden" name="status" value="faltou">
-                                <input type="hidden" name="vista" value="{{ vista }}">
-                                <button type="submit" class="btn-unio-ghost btn-sm">Faltou</button>
-                            </form>
-                            <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}" class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
-                                <input type="hidden" name="status" value="cancelado">
-                                <input type="hidden" name="vista" value="{{ vista }}">
-                                <button type="submit" class="btn-unio-ghost btn-sm">Cancelar</button>
-                            </form>
+                            {% if show_overflow %}
+                            <div class="dropdown clinic-agenda-row-actions__menu">
+                                <button type="button"
+                                        class="clinic-agenda-menu-btn"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                        aria-label="Mais ações para {{ a.paciente.nome|e('html_attr') }}"
+                                        title="Mais ações">
+                                    <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right unio-dropdown clinic-agenda-row-dropdown">
+                                    {% if not edit_as_primary %}
+                                    <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="dropdown-item">
+                                        <i class="fas fa-pen" aria-hidden="true"></i> Editar
+                                    </a>
+                                    {% endif %}
+                                    {% if show_whatsapp %}
+                                    <a href="{{ wa }}" class="dropdown-item" target="_blank" rel="noopener">
+                                        <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
+                                    </a>
+                                    {% endif %}
+                                    {% if can_faltou_cancelar %}
+                                    {% if not edit_as_primary or show_whatsapp %}
+                                    <div class="dropdown-divider"></div>
+                                    {% endif %}
+                                    <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
+                                        <input type="hidden" name="status" value="faltou">
+                                        <input type="hidden" name="vista" value="{{ vista }}">
+                                        <input type="hidden" name="medico_id" value="{{ filtro_medico_id }}">
+                                        <button type="submit" class="dropdown-item">Faltou</button>
+                                    </form>
+                                    <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
+                                        <input type="hidden" name="status" value="cancelado">
+                                        <input type="hidden" name="vista" value="{{ vista }}">
+                                        <input type="hidden" name="medico_id" value="{{ filtro_medico_id }}">
+                                        <button type="submit" class="dropdown-item text-danger">Cancelar</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
                             {% endif %}
                         </div>
                     </td>

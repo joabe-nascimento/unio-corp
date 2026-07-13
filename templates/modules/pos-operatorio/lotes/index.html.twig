@@ -1,0 +1,102 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Lotes TISS · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Lotes / remessa TISS' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Agrupa guias por convênio, fecha o lote e exporta XML ANS' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias TISS</a>
+<a href="{{ path('app_pos_operatorio_convenios') }}" class="btn-unio-ghost btn-sm">Convênios</a>
+{% endblock %}
+
+{% block hub_content %}
+{% if list_truncated|default(false) %}
+<div class="alert alert-warning">
+    Exibindo os {{ list_limit }} lotes mais recentes de {{ list_total }}.
+</div>
+{% endif %}
+
+<section class="unio-card p-3 mb-3">
+    <h2 class="h6 mb-3">Novo lote</h2>
+    {% if convenios is empty %}
+    <p class="text-muted small mb-0">Cadastre um convênio ativo antes de criar lotes.</p>
+    {% else %}
+    <form method="post" class="row align-items-end">
+        <input type="hidden" name="_token" value="{{ csrf_token('clinic_lote_create') }}">
+        <div class="col-md-4 mb-2">
+            <label class="small text-muted d-block" for="convenio_id">Convênio</label>
+            <select id="convenio_id" name="convenio_id" class="form-control" required>
+                {% for c in convenios %}
+                <option value="{{ c.id }}">{{ c.nome }}{% if c.registroAns %} (ANS {{ c.registroAns }}){% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 mb-2">
+            <label class="small text-muted d-block" for="competencia">Competência</label>
+            <input id="competencia" name="competencia" type="month" class="form-control" value="{{ competencia_default }}" required>
+        </div>
+        <div class="col-md-3 mb-2">
+            <label class="small text-muted d-block" for="numero">Nº lote (opcional)</label>
+            <input id="numero" name="numero" class="form-control" maxlength="40" placeholder="Automático">
+        </div>
+        <div class="col-md-2 mb-2">
+            <button type="submit" class="btn-unio">Criar</button>
+        </div>
+    </form>
+    {% endif %}
+</section>
+
+<p class="pos-op-back mb-3">
+    <a href="{{ path('app_pos_operatorio_lotes', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'fw-bold' : '' }}">Todos</a>
+    ·
+    {% for key, label in status_labels %}
+    <a href="{{ path('app_pos_operatorio_lotes', { status: key }) }}" class="{{ filtro_status == key ? 'fw-bold' : '' }}">{{ label }}</a>
+    {% if not loop.last %} · {% endif %}
+    {% endfor %}
+</p>
+
+<section class="unio-card p-0">
+    {% if lotes is empty %}
+    <div class="p-4 text-muted">Nenhum lote neste filtro.</div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table admin-table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Criado</th>
+                    <th>Nº lote</th>
+                    <th>Convênio</th>
+                    <th>Competência</th>
+                    <th>Guias</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lote in lotes %}
+                <tr>
+                    <td>{{ lote.criadoEm|date('d/m/Y H:i') }}</td>
+                    <td>{{ lote.numero }}</td>
+                    <td>{{ lote.convenio.nome }}</td>
+                    <td>{{ lote.competencia }}</td>
+                    <td>{{ lote.guias|length }}</td>
+                    <td>{{ status_labels[lote.status]|default(lote.status) }}</td>
+                    <td>
+                        {% set total = lote.totalCentavos() %}
+                        {% if total > 0 %}R$ {{ (total / 100)|number_format(2, ',', '.') }}{% else %}—{% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pos_operatorio_lotes_show', { id: lote.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
