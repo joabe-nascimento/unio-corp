@@ -1,0 +1,97 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}{{ oportunidade.titulo }} · Oportunidade{% endblock %}
+{% block permissions_scope %}hub_comercial{% endblock %}
+{% set hub_page_title = oportunidade.titulo %}
+{% set hub_page_subtitle = 'Pipeline · ' ~ (stage_meta[oportunidade.estagio].label|default(oportunidade.estagio)) %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_comercial_pipeline') }}" class="btn-unio-ghost btn-sm">Voltar ao pipeline</a>
+{% endblock %}
+
+{% block hub_content %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Editar oportunidade' } %}
+            <form method="post" class="px-3 pb-3">
+                <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_edit_' ~ oportunidade.id) }}">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label" for="titulo">Título *</label>
+                        <input class="form-control" id="titulo" name="titulo" value="{{ oportunidade.titulo }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="estagio">Estágio</label>
+                        <select class="form-control" id="estagio" name="estagio">
+                            {% for s in stages %}
+                            <option value="{{ s }}" {% if oportunidade.estagio == s %}selected{% endif %}>{{ stage_meta[s].label|default(s) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="valor">Valor (R$)</label>
+                        <input class="form-control" id="valor" name="valor" value="{{ oportunidade.valor }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="probabilidade">Probabilidade %</label>
+                        <input class="form-control" id="probabilidade" type="number" min="0" max="100" name="probabilidade" value="{{ oportunidade.probabilidade }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="fecha_prevista">Fecha prevista</label>
+                        <input class="form-control" id="fecha_prevista" type="date" name="fecha_prevista" value="{{ oportunidade.fechaPrevista ? oportunidade.fechaPrevista|date('Y-m-d') : '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="conta_id">Cliente</label>
+                        <select class="form-control" id="conta_id" name="conta_id">
+                            <option value="">—</option>
+                            {% for c in contas %}
+                            <option value="{{ c.id }}" {% if oportunidade.conta and oportunidade.conta.id == c.id %}selected{% endif %}>{{ c.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="lead_id">Lead</label>
+                        <select class="form-control" id="lead_id" name="lead_id">
+                            <option value="">—</option>
+                            {% for l in leads %}
+                            <option value="{{ l.id }}" {% if oportunidade.lead and oportunidade.lead.id == l.id %}selected{% endif %}>{{ l.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="notas">Notas</label>
+                        <textarea class="form-control" id="notas" name="notas" rows="3">{{ oportunidade.notas }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn-unio btn-sm">Salvar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="unio-card mb-3">
+            {% include 'components/section_header.html.twig' with { title: 'Mover estágio' } %}
+            <form method="post" action="{{ path('app_comercial_oportunidade_mover', { id: oportunidade.id }) }}" class="px-3 pb-3">
+                <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_move_' ~ oportunidade.id) }}">
+                <input type="hidden" name="back" value="show">
+                <select name="estagio" class="form-control mb-2">
+                    {% for s in stages %}
+                    <option value="{{ s }}" {% if oportunidade.estagio == s %}selected{% endif %}>{{ stage_meta[s].label|default(s) }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-unio btn-sm w-100">Atualizar estágio</button>
+            </form>
+        </div>
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Ações' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_comercial_oportunidade_excluir', { id: oportunidade.id }) }}" onsubmit="return confirm('Excluir oportunidade?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_delete_' ~ oportunidade.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Leads · Comercial{% endblock %}
+{% block permissions_scope %}hub_comercial{% endblock %}
+{% set hub_page_title = 'Leads' %}
+{% set hub_page_subtitle = 'Núcleo Comercial · Captação' %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_comercial_leads', { novo: 1 }) }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo lead
+</a>
+{% endblock %}
+
+{% block hub_content %}
+{% if open_novo|default(false) %}
+<div class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Novo lead', subtitle: 'Cadastro rápido' } %}
+    <form method="post" class="px-3 pb-3" action="{{ path('app_comercial_leads') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('crm_lead_novo') }}">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="lead-nome">Nome *</label>
+                <input class="form-control" id="lead-nome" name="nome" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="lead-empresa">Empresa</label>
+                <input class="form-control" id="lead-empresa" name="empresa_nome">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="lead-email">E-mail</label>
+                <input class="form-control" id="lead-email" type="email" name="email">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="lead-tel">Telefone</label>
+                <input class="form-control" id="lead-tel" name="telefone">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="lead-cargo">Cargo</label>
+                <input class="form-control" id="lead-cargo" name="cargo">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="lead-origem">Origem</label>
+                <select class="form-control" id="lead-origem" name="origem">
+                    {% for o in origem_options %}
+                    <option value="{{ o }}">{{ o }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="lead-status">Status</label>
+                <select class="form-control" id="lead-status" name="status">
+                    {% for s in status_options %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="lead-notas">Notas</label>
+                <textarea class="form-control" id="lead-notas" name="notas" rows="2"></textarea>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn-unio btn-sm">Salvar lead</button>
+                <a href="{{ path('app_comercial_leads') }}" class="btn-unio-ghost btn-sm">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Lista de leads',
+        subtitle: filter_status ? 'Filtro: ' ~ filter_status : (leads|length) ~ ' registro(s)'
+    } %}
+    <div class="px-3 pb-2 d-flex flex-wrap gap-2">
+        <a href="{{ path('app_comercial_leads') }}" class="btn-unio-ghost btn-sm{{ filter_status == '' ? ' is-active' : '' }}">Todos</a>
+        {% for s in status_options %}
+        <a href="{{ path('app_comercial_leads', { status: s }) }}" class="btn-unio-ghost btn-sm{{ filter_status == s ? ' is-active' : '' }}">{{ s }}</a>
+        {% endfor %}
+    </div>
+    {% if leads|length == 0 %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-user-plus',
+            title: 'Sem leads',
+            text: 'Crie o primeiro lead para alimentar o pipeline.',
+            btn_label: 'Novo lead',
+            btn_href: path('app_comercial_leads', { novo: 1 })
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table unio-table mb-0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Empresa</th>
+                    <th>Contato</th>
+                    <th>Status</th>
+                    <th>Origem</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                <tr>
+                    <td><a href="{{ path('app_comercial_lead_show', { id: lead.id }) }}">{{ lead.nome }}</a></td>
+                    <td>{{ lead.empresaNome|default('—') }}</td>
+                    <td class="small">{{ lead.email|default('—') }}{% if lead.telefone %}<br>{{ lead.telefone }}{% endif %}</td>
+                    <td><span class="badge badge-soft">{{ lead.status }}</span></td>
+                    <td>{{ lead.origem }}</td>
+                    <td class="text-end">
+                        <a href="{{ path('app_comercial_lead_show', { id: lead.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

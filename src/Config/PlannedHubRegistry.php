@@ -93,10 +93,10 @@ final class PlannedHubRegistry
             'path' => '/comercial',
             'label' => 'Núcleo Comercial',
             'icon' => 'fa-handshake',
-            'subtitle' => 'CRM e pipeline de vendas',
+            'subtitle' => 'CRM completo — leads, pipeline e clientes',
             'empty_icon' => 'fa-handshake',
-            'empty_title' => 'Núcleo Comercial em desenvolvimento',
-            'empty_text' => 'CRM, pipeline de vendas, propostas e contratos comerciais estarão disponíveis em breve.',
+            'empty_title' => 'Núcleo Comercial',
+            'empty_text' => 'Leads, pipeline de vendas, clientes e atividades comerciais.',
         ],
         [
             'id' => 'beneficios',

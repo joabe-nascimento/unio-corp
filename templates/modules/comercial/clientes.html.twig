@@ -1,0 +1,107 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Clientes · Comercial{% endblock %}
+{% block permissions_scope %}hub_comercial{% endblock %}
+{% set hub_page_title = 'Clientes' %}
+{% set hub_page_subtitle = 'Núcleo Comercial · Contas' %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_comercial_clientes', { novo: 1 }) }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo cliente
+</a>
+{% endblock %}
+
+{% block hub_content %}
+{% if open_novo|default(false) %}
+<div class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Novo cliente', subtitle: 'Conta comercial' } %}
+    <form method="post" class="px-3 pb-3" action="{{ path('app_comercial_clientes') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('crm_conta_nova') }}">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="nome">Nome *</label>
+                <input class="form-control" id="nome" name="nome" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="documento">CNPJ/CPF</label>
+                <input class="form-control" id="documento" name="documento">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="email">E-mail</label>
+                <input class="form-control" id="email" type="email" name="email">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="telefone">Telefone</label>
+                <input class="form-control" id="telefone" name="telefone">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="segmento">Segmento</label>
+                <input class="form-control" id="segmento" name="segmento">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="site">Site</label>
+                <input class="form-control" id="site" name="site">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="status">Status</label>
+                <select class="form-control" id="status" name="status">
+                    {% for s in status_options %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="notas">Notas</label>
+                <textarea class="form-control" id="notas" name="notas" rows="2"></textarea>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn-unio btn-sm">Salvar</button>
+                <a href="{{ path('app_comercial_clientes') }}" class="btn-unio-ghost btn-sm">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Contas',
+        subtitle: (contas|length) ~ ' cliente(s)'
+    } %}
+    {% if contas|length == 0 %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-building',
+            title: 'Nenhum cliente',
+            text: 'Cadastre contas ou converta leads qualificados.',
+            btn_label: 'Novo cliente',
+            btn_href: path('app_comercial_clientes', { novo: 1 })
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table unio-table mb-0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Documento</th>
+                    <th>Contato</th>
+                    <th>Segmento</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in contas %}
+                <tr>
+                    <td><a href="{{ path('app_comercial_cliente_show', { id: c.id }) }}">{{ c.nome }}</a></td>
+                    <td>{{ c.documento|default('—') }}</td>
+                    <td class="small">{{ c.email|default('—') }}</td>
+                    <td>{{ c.segmento|default('—') }}</td>
+                    <td><span class="badge badge-soft">{{ c.status }}</span></td>
+                    <td class="text-end"><a href="{{ path('app_comercial_cliente_show', { id: c.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

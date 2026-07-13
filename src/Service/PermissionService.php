@@ -243,7 +243,13 @@ class PermissionService
         'hub_comercial' => [
             'label' => 'N?cleo Comercial',
             'subtitle' => 'CRM e pipeline comercial',
-            'products' => [],
+            'products' => [
+                ['id' => 'leads', 'label' => 'Leads'],
+                ['id' => 'pipeline', 'label' => 'Pipeline'],
+                ['id' => 'clientes', 'label' => 'Clientes'],
+                ['id' => 'atividades', 'label' => 'Atividades'],
+                ['id' => 'analytics', 'label' => 'Analytics'],
+            ],
         ],
         'hub_beneficios' => [
             'label' => 'N?cleo Benef?cios',
@@ -601,7 +607,13 @@ class PermissionService
             'id' => 'hub_comercial',
             'label' => 'N?cleo Comercial',
             'scope' => 'hub_comercial',
-            'products' => [],
+            'products' => [
+                ['id' => 'leads', 'label' => 'Leads'],
+                ['id' => 'pipeline', 'label' => 'Pipeline'],
+                ['id' => 'clientes', 'label' => 'Clientes'],
+                ['id' => 'atividades', 'label' => 'Atividades'],
+                ['id' => 'analytics', 'label' => 'Analytics'],
+            ],
         ],
         [
             'id' => 'hub_beneficios',
@@ -968,6 +980,20 @@ class PermissionService
             'renata-oliveira' => ['vagas' => 'GESTOR', 'pipeline' => 'GESTOR'],
             'ricardo-costa' => ['vagas' => 'GESTOR_EQUIPE', 'pipeline' => 'SUPERVISOR'],
             'ana-ribeiro' => ['vagas' => 'SUPERVISOR', 'pipeline' => 'SUPERVISOR_EQUIPE'],
+        ],
+        'hub_comercial' => [
+            'renata-oliveira' => [
+                'leads' => 'GESTOR', 'pipeline' => 'GESTOR', 'clientes' => 'GESTOR',
+                'atividades' => 'GESTOR', 'analytics' => 'GESTOR',
+            ],
+            'ricardo-costa' => [
+                'leads' => 'GESTOR_EQUIPE', 'pipeline' => 'GESTOR_EQUIPE', 'clientes' => 'SUPERVISOR',
+                'atividades' => 'GESTOR_EQUIPE', 'analytics' => 'SUPERVISOR',
+            ],
+            'ana-ribeiro' => [
+                'leads' => 'SUPERVISOR', 'pipeline' => 'SUPERVISOR_EQUIPE', 'clientes' => 'SUPERVISOR',
+                'atividades' => 'SUPERVISOR', 'analytics' => 'MEMBRO',
+            ],
         ],
         'hub_admin' => [
             'renata-oliveira' => ['usuarios' => 'GESTOR', 'empresas' => 'GESTOR', 'configuracoes' => 'GESTOR_EQUIPE'],

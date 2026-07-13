@@ -28,7 +28,7 @@ final class HubMaturity
         // Pós-Operatório Fase 1.5
         'pos_operatorio' => self::MVP,
         // Demais planejados
-        'comercial' => self::PREVIEW,
+        'comercial' => self::MVP,
         'beneficios' => self::PREVIEW,
         'saude_ocupacional' => self::PREVIEW,
         'sst' => self::PREVIEW,

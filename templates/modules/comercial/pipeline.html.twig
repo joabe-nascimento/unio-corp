@@ -1,0 +1,108 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Pipeline · Comercial{% endblock %}
+{% block permissions_scope %}hub_comercial{% endblock %}
+{% set hub_page_title = 'Pipeline' %}
+{% set hub_page_subtitle = 'Núcleo Comercial · Oportunidades' %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_comercial_pipeline', { novo: 1 }) }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova oportunidade
+</a>
+{% endblock %}
+
+{% block hub_content %}
+{% if open_novo|default(false) %}
+<div class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Nova oportunidade', subtitle: 'Entrada no funil' } %}
+    <form method="post" class="px-3 pb-3" action="{{ path('app_comercial_pipeline') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_nova') }}">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label" for="titulo">Título *</label>
+                <input class="form-control" id="titulo" name="titulo" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="estagio">Estágio</label>
+                <select class="form-control" id="estagio" name="estagio">
+                    {% for s in stages %}
+                    <option value="{{ s }}">{{ stage_meta[s].label|default(s) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="valor">Valor (R$)</label>
+                <input class="form-control" id="valor" name="valor" placeholder="0,00">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="probabilidade">Probabilidade %</label>
+                <input class="form-control" id="probabilidade" type="number" min="0" max="100" name="probabilidade" value="20">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="fecha_prevista">Fecha prevista</label>
+                <input class="form-control" id="fecha_prevista" type="date" name="fecha_prevista">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="conta_id">Cliente</label>
+                <select class="form-control" id="conta_id" name="conta_id">
+                    <option value="">—</option>
+                    {% for c in contas %}
+                    <option value="{{ c.id }}">{{ c.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="lead_id">Lead</label>
+                <select class="form-control" id="lead_id" name="lead_id">
+                    <option value="">—</option>
+                    {% for l in leads %}
+                    <option value="{{ l.id }}">{{ l.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="notas">Notas</label>
+                <textarea class="form-control" id="notas" name="notas" rows="2"></textarea>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn-unio btn-sm">Salvar</button>
+                <a href="{{ path('app_comercial_pipeline') }}" class="btn-unio-ghost btn-sm">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<div class="crm-pipeline-board" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;align-items:start">
+    {% for stage in stages %}
+    {% set items = pipeline_board[stage]|default([]) %}
+    <div class="unio-card" style="min-height:220px">
+        {% include 'components/section_header.html.twig' with {
+            title: stage_meta[stage].label|default(stage),
+            subtitle: items|length ~ ' oportunidade(s)'
+        } %}
+        <div class="px-2 pb-2">
+            {% if items|length == 0 %}
+            <p class="text-muted small px-2">Vazio</p>
+            {% else %}
+                {% for op in items %}
+                <div class="unio-card mb-2 p-2" style="box-shadow:none;border:1px solid var(--unio-border, #e5e7eb)">
+                    <a href="{{ path('app_comercial_oportunidade_show', { id: op.id }) }}" class="fw-medium d-block mb-1">{{ op.titulo }}</a>
+                    <div class="small text-muted mb-2">
+                        {% if op.valor %}R$ {{ op.valor|number_format(2, ',', '.') }} · {% endif %}{{ op.probabilidade }}%
+                    </div>
+                    <form method="post" action="{{ path('app_comercial_oportunidade_mover', { id: op.id }) }}" class="d-flex gap-1">
+                        <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_move_' ~ op.id) }}">
+                        <select name="estagio" class="form-control form-control-sm" onchange="this.form.submit()">
+                            {% for s in stages %}
+                            <option value="{{ s }}" {% if op.estagio == s %}selected{% endif %}>{{ stage_meta[s].label|default(s) }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

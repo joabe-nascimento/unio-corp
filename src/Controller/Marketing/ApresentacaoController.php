@@ -88,7 +88,7 @@ class ApresentacaoController extends AbstractController
     {
         return [
             ['title' => 'Pessoas & RH', 'hubs' => ['Operações', 'Talentos', 'Maturidade', 'Clima', 'Portal do Colaborador', 'Recrutamento']],
-            ['title' => 'Negócios & Growth', 'hubs' => ['Comercial', 'Benefícios', 'Academy', 'Customer Success', 'Marketing']],
+            ['title' => 'Negócios & Growth', 'hubs' => ['Comercial (CRM)', 'Benefícios', 'Academy', 'Customer Success', 'Marketing']],
             ['title' => 'Tecnologia', 'hubs' => ['Núcleo TI', 'Integrações', 'Inovação', 'Segurança da Informação']],
             ['title' => 'Finanças & Compliance', 'hubs' => ['Financeiro', 'Jurídico', 'Compliance', 'Licitações']],
             ['title' => 'Operações & Ativos', 'hubs' => ['Obras', 'Suprimentos', 'Facilities', 'Qualidade', 'PMO']],
@@ -122,7 +122,7 @@ class ApresentacaoController extends AbstractController
                 'desc' => 'Grid de núcleos liberados para o perfil do colaborador na área escolhida.',
                 'url' => 'unio.app / bem-vindo',
                 'image' => 'hub-dock.png',
-                'caption' => 'Ponto de partida personalizado, com RH, Operações, TI, Integrações e demais módulos.',
+                'caption' => 'Ponto de partida personalizado, com RH, Comercial (CRM), Operações, TI e demais módulos.',
             ],
             [
                 'step' => '04',
@@ -130,7 +130,7 @@ class ApresentacaoController extends AbstractController
                 'desc' => 'Sidebar com 30+ centros de excelência agrupados por categoria de negócio.',
                 'url' => 'unio.app · Núcleo selecionado',
                 'image' => 'hubs-sidebar.png',
-                'caption' => 'Picker modular, com Operação, Negócios, Tecnologia, Finanças, Inteligência e Plataforma.',
+                'caption' => 'Picker modular, com Operação, Negócios (CRM), Tecnologia, Finanças, Inteligência e Plataforma.',
             ],
         ];
     }
@@ -151,6 +151,7 @@ class ApresentacaoController extends AbstractController
         return [
             ['id' => 'operacoes', 'title' => 'Operações', 'icon' => 'fa-building', 'subtitle' => 'Núcleo de Operações'],
             ['id' => 'rh', 'title' => 'RH', 'icon' => 'fa-id-card', 'subtitle' => 'Módulo RH'],
+            ['id' => 'comercial', 'title' => 'Comercial', 'icon' => 'fa-handshake', 'subtitle' => 'CRM · leads & pipeline'],
             ['id' => 'ti', 'title' => 'Núcleo TI', 'icon' => 'fa-tower-broadcast', 'subtitle' => 'Service desk & NOC'],
             ['id' => 'integracoes', 'title' => 'Integrações', 'icon' => 'fa-plug', 'subtitle' => 'Conectores & APIs'],
             ['id' => 'analytics', 'title' => 'Analytics', 'icon' => 'fa-chart-line', 'subtitle' => 'Indicadores'],
