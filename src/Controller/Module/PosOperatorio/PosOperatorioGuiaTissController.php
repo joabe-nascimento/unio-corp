@@ -5,6 +5,7 @@ namespace App\Controller\Module\PosOperatorio;
 use App\Entity\ClinicGuiaTiss;
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Http\RequestInts;
 use App\Service\PosOperatorio\ClinicContaService;
 use App\Service\PosOperatorio\ClinicGuiaTissService;
 use App\Service\PosOperatorio\ClinicTissXmlExporter;
@@ -82,7 +83,11 @@ final class PosOperatorioGuiaTissController extends AbstractController
         }
 
         try {
-            $convenio = $this->guias->requireConvenio($empresa, $request->request->getInt('convenio_id'));
+            $convenioId = RequestInts::positiveOrNull($request->request->get('convenio_id'));
+            if ($convenioId === null) {
+                throw new \InvalidArgumentException('Selecione o convênio.');
+            }
+            $convenio = $this->guias->requireConvenio($empresa, $convenioId);
             $guia = $this->guias->convertContaToConvenio(
                 $conta,
                 $empresa,
@@ -156,10 +161,10 @@ final class PosOperatorioGuiaTissController extends AbstractController
                     'add_item' => $this->guias->addItem($guia, $empresa, [
                         'codigo_tuss' => $request->request->getString('codigo_tuss'),
                         'descricao' => $request->request->getString('descricao'),
-                        'quantidade' => $request->request->getInt('quantidade', 1),
+                        'quantidade' => max(1, RequestInts::withDefault($request->request->get('quantidade'), 1)),
                         'valor_centavos' => $this->parseCentavos($request->request->getString('valor')),
                     ]),
-                    'remove_item' => $this->guias->removeItem($guia, $empresa, $request->request->getInt('item_id')),
+                    'remove_item' => $this->removeGuiaItem($guia, $empresa, $request),
                     'status' => $this->guias->changeStatus(
                         $guia,
                         $empresa,
@@ -187,6 +192,15 @@ final class PosOperatorioGuiaTissController extends AbstractController
             'next_statuses' => ClinicGuiaTiss::allowedTransitionsFrom($guia->getStatus()),
             'tuss_search_url' => $this->generateUrl('app_pos_operatorio_guias_tuss_search'),
         ]);
+    }
+
+    private function removeGuiaItem(ClinicGuiaTiss $guia, Empresa $empresa, Request $request): void
+    {
+        $itemId = RequestInts::positiveOrNull($request->request->get('item_id'));
+        if ($itemId === null) {
+            throw new \InvalidArgumentException('Item inválido.');
+        }
+        $this->guias->removeItem($guia, $empresa, $itemId);
     }
 
     private function parseCentavos(string $raw): ?int

@@ -5,6 +5,7 @@ namespace App\Controller\Module\PosOperatorio;
 use App\Entity\ClinicAgendamento;
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Http\RequestInts;
 use App\Service\PosOperatorio\ClinicAgendaService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,8 +32,8 @@ final class PosOperatorioAgendaController extends AbstractController
             $vista = 'dia';
         }
 
-        $medicoId = $request->query->getInt('medico_id');
-        $medico = $medicoId > 0 ? $this->agenda->findMedico($empresa, $medicoId) : null;
+        $medicoId = RequestInts::positiveOrNull($request->query->get('medico_id'));
+        $medico = $medicoId !== null ? $this->agenda->findMedico($empresa, $medicoId) : null;
 
         $day = null;
         $dayParam = trim($request->query->getString('dia'));
@@ -192,8 +193,13 @@ final class PosOperatorioAgendaController extends AbstractController
         $vista = $request->request->getString('vista', $request->query->getString('vista', 'dia'));
         $params = [
             'vista' => \in_array($vista, ['dia', 'semana'], true) ? $vista : 'dia',
-            'medico_id' => $request->request->getInt('medico_id') ?: ($request->query->getInt('medico_id') ?: null),
         ];
+        $medicoFiltro = RequestInts::positiveOrNull(
+            $request->request->get('medico_id', $request->query->get('medico_id'))
+        );
+        if ($medicoFiltro !== null) {
+            $params['medico_id'] = $medicoFiltro;
+        }
         if ($params['vista'] === 'semana') {
             $params['semana'] = $agendamento->getInicio()->format('Y-m-d');
         } else {
@@ -219,18 +225,20 @@ final class PosOperatorioAgendaController extends AbstractController
             throw new \InvalidArgumentException('Datas inválidas.');
         }
 
-        $protocoloDia = $request->request->get('protocolo_dia');
-        $medicoId = $request->request->get('medico_id');
+        $pacienteId = RequestInts::positiveOrNull($request->request->get('paciente_id'));
+        if ($pacienteId === null) {
+            throw new \InvalidArgumentException('Selecione o paciente.');
+        }
 
         return [
-            'paciente_id' => $request->request->getInt('paciente_id'),
-            'medico_id' => $medicoId !== null && $medicoId !== '' ? (int) $medicoId : null,
+            'paciente_id' => $pacienteId,
+            'medico_id' => RequestInts::positiveOrNull($request->request->get('medico_id')),
             'inicio' => $inicio,
             'fim' => $fim,
             'titulo' => $request->request->getString('titulo'),
             'observacao' => $request->request->getString('observacao'),
             'origem' => $request->request->getString('origem', ClinicAgendamento::ORIGEM_MANUAL),
-            'protocolo_dia' => $protocoloDia !== null && $protocoloDia !== '' ? (int) $protocoloDia : null,
+            'protocolo_dia' => RequestInts::positiveOrNull($request->request->get('protocolo_dia')),
             'status' => $request->request->getString('status', ClinicAgendamento::STATUS_MARCADO),
         ];
     }
@@ -239,18 +247,14 @@ final class PosOperatorioAgendaController extends AbstractController
     private function formToPrefill(Request $request): array
     {
         return [
-            'paciente_id' => $request->request->getInt('paciente_id') ?: null,
-            'medico_id' => $request->request->get('medico_id') !== null && $request->request->get('medico_id') !== ''
-                ? (int) $request->request->get('medico_id')
-                : null,
+            'paciente_id' => RequestInts::positiveOrNull($request->request->get('paciente_id')),
+            'medico_id' => RequestInts::positiveOrNull($request->request->get('medico_id')),
             'inicio' => $request->request->getString('inicio'),
             'fim' => $request->request->getString('fim'),
             'titulo' => $request->request->getString('titulo'),
             'observacao' => $request->request->getString('observacao'),
             'origem' => $request->request->getString('origem', ClinicAgendamento::ORIGEM_MANUAL),
-            'protocolo_dia' => $request->request->get('protocolo_dia') !== null && $request->request->get('protocolo_dia') !== ''
-                ? (int) $request->request->get('protocolo_dia')
-                : null,
+            'protocolo_dia' => RequestInts::positiveOrNull($request->request->get('protocolo_dia')),
             'status' => $request->request->getString('status', ClinicAgendamento::STATUS_MARCADO),
         ];
     }

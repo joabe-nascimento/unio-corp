@@ -42,15 +42,15 @@
 {% endblock %}
 
 {% block hub_content %}
-{% set filtro_medico_id = medico_filtro ? medico_filtro.id : '' %}
+{% set filtro_medico_id = medico_filtro ? medico_filtro.id : null %}
 <section class="unio-card mb-3 p-3">
     <form method="get" action="{{ path('app_pos_operatorio_agenda') }}" class="d-flex flex-wrap gap-2 align-items-end">
         <div class="d-flex gap-1 align-items-center">
             <span class="small text-muted mr-1">Vista</span>
             <div class="btn-group btn-group-sm" role="group" aria-label="Vista da agenda">
-                <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: day|date('Y-m-d'), medico_id: medico_filtro ? medico_filtro.id : null }) }}"
+                <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: day|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
                    class="btn-unio-ghost btn-sm {{ vista == 'dia' ? 'is-active' : '' }}">Dia</a>
-                <a href="{{ path('app_pos_operatorio_agenda', { vista: 'semana', semana: week_start|date('Y-m-d'), medico_id: medico_filtro ? medico_filtro.id : null }) }}"
+                <a href="{{ path('app_pos_operatorio_agenda', { vista: 'semana', semana: week_start|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
                    class="btn-unio-ghost btn-sm {{ vista == 'semana' ? 'is-active' : '' }}">Semana</a>
             </div>
         </div>
@@ -153,7 +153,9 @@
                                     <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
                                     <input type="hidden" name="status" value="confirmado">
                                     <input type="hidden" name="vista" value="{{ vista }}">
+                                    {% if filtro_medico_id %}
                                     <input type="hidden" name="medico_id" value="{{ filtro_medico_id }}">
+                                    {% endif %}
                                     <button type="submit" class="btn-unio btn-sm">Confirmar</button>
                                 </form>
                                 {% elseif a.status == 'confirmado' %}
@@ -161,7 +163,9 @@
                                     <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
                                     <input type="hidden" name="status" value="chegou">
                                     <input type="hidden" name="vista" value="{{ vista }}">
+                                    {% if filtro_medico_id %}
                                     <input type="hidden" name="medico_id" value="{{ filtro_medico_id }}">
+                                    {% endif %}
                                     <button type="submit" class="btn-unio btn-sm">Chegou</button>
                                 </form>
                                 {% elseif a.status == 'chegou' %}
@@ -209,14 +213,18 @@
                                         <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
                                         <input type="hidden" name="status" value="faltou">
                                         <input type="hidden" name="vista" value="{{ vista }}">
+                                        {% if filtro_medico_id %}
                                         <input type="hidden" name="medico_id" value="{{ filtro_medico_id }}">
+                                        {% endif %}
                                         <button type="submit" class="dropdown-item">Faltou</button>
                                     </form>
                                     <form method="post" action="{{ path('app_pos_operatorio_agenda_status', { id: a.id }) }}">
                                         <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_status_' ~ a.id) }}">
                                         <input type="hidden" name="status" value="cancelado">
                                         <input type="hidden" name="vista" value="{{ vista }}">
+                                        {% if filtro_medico_id %}
                                         <input type="hidden" name="medico_id" value="{{ filtro_medico_id }}">
+                                        {% endif %}
                                         <button type="submit" class="dropdown-item text-danger">Cancelar</button>
                                     </form>
                                     {% endif %}

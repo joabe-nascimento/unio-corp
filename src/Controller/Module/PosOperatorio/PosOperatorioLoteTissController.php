@@ -5,6 +5,7 @@ namespace App\Controller\Module\PosOperatorio;
 use App\Entity\ClinicLoteTiss;
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Http\RequestInts;
 use App\Repository\ClinicConvenioRepository;
 use App\Service\PosOperatorio\ClinicLoteTissService;
 use App\Service\PosOperatorio\ClinicTissXmlExporter;
@@ -38,7 +39,11 @@ final class PosOperatorioLoteTissController extends AbstractController
                 return $this->redirectToRoute('app_pos_operatorio_lotes');
             }
             try {
-                $convenio = $this->lotes->requireConvenio($empresa, $request->request->getInt('convenio_id'));
+                $convenioId = RequestInts::positiveOrNull($request->request->get('convenio_id'));
+                if ($convenioId === null) {
+                    throw new \InvalidArgumentException('Selecione o convênio.');
+                }
+                $convenio = $this->lotes->requireConvenio($empresa, $convenioId);
                 $lote = $this->lotes->create(
                     $empresa,
                     $convenio,
@@ -97,8 +102,18 @@ final class PosOperatorioLoteTissController extends AbstractController
             $action = $request->request->getString('action');
             try {
                 match ($action) {
-                    'add_guia' => $this->lotes->addGuia($lote, $empresa, $request->request->getInt('guia_id')),
-                    'remove_guia' => $this->lotes->removeGuia($lote, $empresa, $request->request->getInt('guia_id')),
+                    'add_guia' => $this->lotes->addGuia(
+                        $lote,
+                        $empresa,
+                        RequestInts::positiveOrNull($request->request->get('guia_id'))
+                            ?? throw new \InvalidArgumentException('Selecione a guia.'),
+                    ),
+                    'remove_guia' => $this->lotes->removeGuia(
+                        $lote,
+                        $empresa,
+                        RequestInts::positiveOrNull($request->request->get('guia_id'))
+                            ?? throw new \InvalidArgumentException('Guia inválida.'),
+                    ),
                     'fechar' => $this->lotes->fechar($lote, $empresa),
                     'marcar_enviado' => $this->lotes->marcarEnviado($lote, $empresa),
                     default => throw new \InvalidArgumentException('Ação inválida.'),
