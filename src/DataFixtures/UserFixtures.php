@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Clinic\ClinicStaffRole;
 use App\Dev\DevSeedEmails;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -15,12 +16,11 @@ class UserFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $users = [
-            ['nome' => 'Joabe Nascimento',    'email' => DevSeedEmails::JOABE,     'perfil' => 'TENANT'],
-            ['nome' => 'Renata Oliveira',     'email' => DevSeedEmails::RENATA,    'perfil' => 'GESTOR'],
-            ['nome' => 'Ricardo Costa',       'email' => DevSeedEmails::RICARDO,   'perfil' => 'GESTOR_EQUIPE'],
-            ['nome' => 'Ana Paula Ribeiro',   'email' => DevSeedEmails::ANA_PAULA, 'perfil' => 'SUPERVISOR'],
-            ['nome' => 'Felipe Martins',      'email' => DevSeedEmails::FELIPE,    'perfil' => 'SUPERVISOR_EQUIPE'],
-            ['nome' => 'Lucas Santos',        'email' => DevSeedEmails::LUCAS,     'perfil' => 'MEMBRO'],
+            ['nome' => 'Joabe Nascimento', 'email' => DevSeedEmails::JOABE, 'perfil' => 'TENANT'],
+            ['nome' => 'Camila Souza', 'email' => DevSeedEmails::CAMILA_RECEPCAO, 'perfil' => ClinicStaffRole::RECEPCAO],
+            ['nome' => 'Beatriz Nunes', 'email' => DevSeedEmails::BEATRIZ_ENFERMAGEM, 'perfil' => ClinicStaffRole::ENFERMAGEM],
+            ['nome' => 'André Melo', 'email' => DevSeedEmails::ANDRE_MEDICO, 'perfil' => ClinicStaffRole::MEDICO],
+            ['nome' => 'Helena Castro', 'email' => DevSeedEmails::HELENA_COORDENACAO, 'perfil' => ClinicStaffRole::COORDENACAO],
         ];
 
         foreach ($users as $data) {

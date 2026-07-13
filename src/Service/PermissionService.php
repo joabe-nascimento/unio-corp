@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Clinic\ClinicStaffRole;
 use App\Dev\DevSeedEmails;
 use App\Entity\Empresa;
 use App\Entity\User;
@@ -29,10 +30,10 @@ class PermissionService
         ['id' => 'GESTOR', 'label' => 'Gestor', 'class' => 'gestor', 'nivel' => 5, 'description' => 'Controle amplo do produto ou m?dulo: configura??es, acessos e opera??o completa da ?rea.'],
     ];
 
-    /** N?vel num?rico do perfil assign?vel (para comparar grants). */
+    /** Nível numérico do perfil assignável (para comparar grants). */
     public static function profileNivel(string $profileId): int
     {
-        foreach (self::ASSIGNABLE_PROFILES as $profile) {
+        foreach (self::assignableProfilesForScope(null) as $profile) {
             if ($profile['id'] === $profileId) {
                 return $profile['nivel'];
             }
@@ -43,7 +44,7 @@ class PermissionService
 
     public static function profileLabel(string $profileId): string
     {
-        foreach (self::ASSIGNABLE_PROFILES as $profile) {
+        foreach (self::assignableProfilesForScope(null) as $profile) {
             if ($profile['id'] === $profileId) {
                 return $profile['label'];
             }
@@ -54,7 +55,7 @@ class PermissionService
 
     public static function profileClass(string $profileId): string
     {
-        foreach (self::ASSIGNABLE_PROFILES as $profile) {
+        foreach (self::assignableProfilesForScope(null) as $profile) {
             if ($profile['id'] === $profileId) {
                 return $profile['class'];
             }
@@ -63,14 +64,30 @@ class PermissionService
         return 'default';
     }
 
-    /** Painel/aba Permiss?es ? perfil global ou grant ? Gestor de Equipe no escopo. */
+    /**
+     * @return list<array{id: string, label: string, class: string, nivel: int, description: string}>
+     */
+    public static function assignableProfilesForScope(?string $scope): array
+    {
+        if ($scope === ClinicStaffRole::SCOPE) {
+            return ClinicStaffRole::assignableProfiles();
+        }
+
+        if ($scope === null) {
+            return array_merge(self::ASSIGNABLE_PROFILES, ClinicStaffRole::assignableProfiles());
+        }
+
+        return self::ASSIGNABLE_PROFILES;
+    }
+
+    /** Painel/aba Permissões — perfil global ou grant ≥ Gestor de Equipe no escopo. */
     public function canManagePermissions(User $user, ?string $scope = null): bool
     {
         if ($user->hasPlatformAccess()) {
             return true;
         }
 
-        if (\in_array($user->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE'], true)) {
+        if (\in_array($user->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE', ClinicStaffRole::COORDENACAO], true)) {
             return true;
         }
 
@@ -95,7 +112,8 @@ class PermissionService
     public function canEditorSaveGrants(User $editor, array $grantsMap): bool
     {
         if ($this->canManagePermissions($editor)) {
-            if ($editor->hasPlatformAccess() || \in_array($editor->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE'], true)) {
+            if ($editor->hasPlatformAccess()
+                || \in_array($editor->getPerfil(), ['GESTOR', 'GESTOR_EQUIPE', ClinicStaffRole::COORDENACAO], true)) {
                 return true;
             }
         } else {
@@ -146,8 +164,12 @@ class PermissionService
         DevSeedEmails::ANA_PAULA => ['equipe' => 'Cirurgia geral', 'cargo' => 'Supervisor Geral'],
         DevSeedEmails::FELIPE => ['equipe' => 'Obras e Projetos', 'cargo' => 'Supervisor de Campo'],
         DevSeedEmails::LUCAS => ['equipe' => 'Design & Marca', 'cargo' => 'Analista'],
-        DevSeedEmails::MARCELA => ['equipe' => 'Nexus Sa?de', 'cargo' => 'Gestora'],
+        DevSeedEmails::MARCELA => ['equipe' => 'Nexus Saúde', 'cargo' => 'Gestora'],
         DevSeedEmails::PATRICIA => ['equipe' => 'Edu360', 'cargo' => 'Gestora'],
+        DevSeedEmails::CAMILA_RECEPCAO => ['equipe' => 'Recepção', 'cargo' => 'Recepcionista'],
+        DevSeedEmails::BEATRIZ_ENFERMAGEM => ['equipe' => 'Enfermagem', 'cargo' => 'Enfermeira'],
+        DevSeedEmails::ANDRE_MEDICO => ['equipe' => 'Clínica', 'cargo' => 'Médico'],
+        DevSeedEmails::HELENA_COORDENACAO => ['equipe' => 'Coordenação', 'cargo' => 'Coordenadora clínica'],
     ];
 
     /**
@@ -158,44 +180,36 @@ class PermissionService
     private const SCOPE_MOCK_MEMBERS = [
         'hub_pos_operatorio' => [
             [
-                'id' => 'renata-oliveira',
-                'nome' => 'Renata Oliveira',
-                'email' => DevSeedEmails::RENATA,
-                'perfil' => 'GESTOR',
-                'equipe' => 'Coordena??o P?s-Op',
-                'cargo' => 'Coordenador cl?nico',
+                'id' => 'helena-castro',
+                'nome' => 'Helena Castro',
+                'email' => DevSeedEmails::HELENA_COORDENACAO,
+                'perfil' => 'COORDENACAO',
+                'equipe' => 'Coordenação',
+                'cargo' => 'Coordenadora clínica',
             ],
             [
-                'id' => 'ricardo-costa',
-                'nome' => 'Ricardo Costa',
-                'email' => DevSeedEmails::RICARDO,
-                'perfil' => 'GESTOR_EQUIPE',
-                'equipe' => 'Enfermagem cl?nica',
-                'cargo' => 'Enfermeira respons?vel',
+                'id' => 'andre-melo',
+                'nome' => 'André Melo',
+                'email' => DevSeedEmails::ANDRE_MEDICO,
+                'perfil' => 'MEDICO',
+                'equipe' => 'Clínica',
+                'cargo' => 'Médico',
             ],
             [
-                'id' => 'ana-ribeiro',
-                'nome' => 'Ana Paula Ribeiro',
-                'email' => DevSeedEmails::ANA_PAULA,
-                'perfil' => 'SUPERVISOR',
-                'equipe' => 'Cirurgia geral',
-                'cargo' => 'M?dico supervisor',
+                'id' => 'beatriz-nunes',
+                'nome' => 'Beatriz Nunes',
+                'email' => DevSeedEmails::BEATRIZ_ENFERMAGEM,
+                'perfil' => 'ENFERMAGEM',
+                'equipe' => 'Enfermagem',
+                'cargo' => 'Enfermeira',
             ],
             [
-                'id' => 'felipe-martins',
-                'nome' => 'Felipe Martins',
-                'email' => DevSeedEmails::FELIPE,
-                'perfil' => 'SUPERVISOR_EQUIPE',
-                'equipe' => 'Plant?o noturno',
-                'cargo' => 'Supervisor de plant?o',
-            ],
-            [
-                'id' => 'lucas-santos',
-                'nome' => 'Lucas Santos',
-                'email' => DevSeedEmails::LUCAS,
-                'perfil' => 'MEMBRO',
-                'equipe' => 'Acompanhamento',
-                'cargo' => 'Assistente de p?s-operat?rio',
+                'id' => 'camila-souza',
+                'nome' => 'Camila Souza',
+                'email' => DevSeedEmails::CAMILA_RECEPCAO,
+                'perfil' => 'RECEPCAO',
+                'equipe' => 'Recepção',
+                'cargo' => 'Recepcionista',
             ],
         ],
     ];
@@ -440,15 +454,17 @@ class PermissionService
             ],
         ],
         'hub_pos_operatorio' => [
-            'label' => 'Unio Sa?de',
-            'subtitle' => 'Acompanhamento cl?nico p?s-cir?rgico',
+            'label' => 'Unio Saúde',
+            'subtitle' => 'Acompanhamento clínico pós-cirúrgico',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
                 ['id' => 'protocolos', 'label' => 'Protocolos'],
-                ['id' => 'questionarios', 'label' => 'Question?rios'],
-                ['id' => 'alertas', 'label' => 'Alertas cl?nicos'],
-                ['id' => 'painel', 'label' => 'Painel de recupera??o'],
+                ['id' => 'questionarios', 'label' => 'Questionários'],
+                ['id' => 'alertas', 'label' => 'Alertas clínicos'],
+                ['id' => 'painel', 'label' => 'Painel de recuperação'],
                 ['id' => 'portal_paciente', 'label' => 'Portal do paciente'],
+                ['id' => 'relatorios', 'label' => 'Relatórios'],
+                ['id' => 'configuracoes', 'label' => 'Configurações'],
             ],
         ],
         'hub_licitacoes' => [
@@ -827,15 +843,17 @@ class PermissionService
         ],
         [
             'id' => 'hub_pos_operatorio',
-            'label' => 'Unio Sa?de',
+            'label' => 'Unio Saúde',
             'scope' => 'hub_pos_operatorio',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
                 ['id' => 'protocolos', 'label' => 'Protocolos'],
-                ['id' => 'questionarios', 'label' => 'Question?rios'],
-                ['id' => 'alertas', 'label' => 'Alertas cl?nicos'],
-                ['id' => 'painel', 'label' => 'Painel de recupera??o'],
+                ['id' => 'questionarios', 'label' => 'Questionários'],
+                ['id' => 'alertas', 'label' => 'Alertas clínicos'],
+                ['id' => 'painel', 'label' => 'Painel de recuperação'],
                 ['id' => 'portal_paciente', 'label' => 'Portal do paciente'],
+                ['id' => 'relatorios', 'label' => 'Relatórios'],
+                ['id' => 'configuracoes', 'label' => 'Configurações'],
             ],
         ],
         [
@@ -1044,23 +1062,23 @@ class PermissionService
             ],
         ],
         'hub_pos_operatorio' => [
-            'renata-oliveira' => [
-                'pacientes' => 'GESTOR', 'protocolos' => 'GESTOR', 'questionarios' => 'GESTOR',
-                'alertas' => 'GESTOR', 'painel' => 'GESTOR', 'portal_paciente' => 'GESTOR',
+            'camila-souza' => [
+                'pacientes' => ClinicStaffRole::RECEPCAO,
             ],
-            'ricardo-costa' => [
-                'pacientes' => 'GESTOR_EQUIPE', 'protocolos' => 'GESTOR_EQUIPE', 'questionarios' => 'GESTOR_EQUIPE',
-                'alertas' => 'GESTOR_EQUIPE', 'painel' => 'GESTOR_EQUIPE',
+            'beatriz-nunes' => [
+                'questionarios' => ClinicStaffRole::ENFERMAGEM,
+                'painel' => ClinicStaffRole::ENFERMAGEM,
+                'portal_paciente' => ClinicStaffRole::ENFERMAGEM,
             ],
-            'ana-ribeiro' => [
-                'pacientes' => 'SUPERVISOR', 'alertas' => 'SUPERVISOR', 'painel' => 'SUPERVISOR',
-                'questionarios' => 'SUPERVISOR_EQUIPE',
+            'andre-melo' => [
+                'alertas' => ClinicStaffRole::MEDICO,
+                'pacientes' => ClinicStaffRole::MEDICO,
+                'protocolos' => ClinicStaffRole::MEDICO,
+                'painel' => ClinicStaffRole::MEDICO,
             ],
-            'felipe-martins' => [
-                'pacientes' => 'SUPERVISOR_EQUIPE', 'alertas' => 'SUPERVISOR_EQUIPE', 'painel' => 'SUPERVISOR_EQUIPE',
-            ],
-            'lucas-santos' => [
-                'portal_paciente' => 'MEMBRO', 'questionarios' => 'MEMBRO',
+            'helena-castro' => [
+                'relatorios' => ClinicStaffRole::COORDENACAO,
+                'configuracoes' => ClinicStaffRole::COORDENACAO,
             ],
         ],
         'hub_saude_ocupacional' => [
@@ -1127,7 +1145,7 @@ class PermissionService
         }
 
         $def = self::SCOPES[$scope];
-        $profiles = self::ASSIGNABLE_PROFILES;
+        $profiles = self::assignableProfilesForScope($scope);
         $profileMap = [];
         foreach ($profiles as $p) {
             $profileMap[$p['id']] = $p;
@@ -1257,7 +1275,8 @@ class PermissionService
                 continue;
             }
 
-            if (!\in_array($perfilGrant, array_column(self::ASSIGNABLE_PROFILES, 'id'), true)) {
+            $allowedProfiles = array_column(self::assignableProfilesForScope($scope), 'id');
+            if (!\in_array($perfilGrant, $allowedProfiles, true)) {
                 continue;
             }
 
@@ -1361,7 +1380,7 @@ class PermissionService
 
         $unique = array_values(array_unique($values));
         if (\count($unique) === 1) {
-            foreach (self::ASSIGNABLE_PROFILES as $profile) {
+            foreach (self::assignableProfilesForScope($scope) as $profile) {
                 if ($profile['id'] === $unique[0]) {
                     return [
                         'label' => $profile['label'],
@@ -1552,6 +1571,10 @@ class PermissionService
                 'SUPERVISOR' => 'Supervisor Geral',
                 'GESTOR_EQUIPE' => 'Gestor de Equipe',
                 'GESTOR' => 'Gestor',
+                ClinicStaffRole::RECEPCAO,
+                ClinicStaffRole::ENFERMAGEM,
+                ClinicStaffRole::MEDICO,
+                ClinicStaffRole::COORDENACAO => ClinicStaffRole::label($perfil),
                 default => $perfil,
             },
             'perfil_class' => match ($perfil) {
@@ -1560,6 +1583,10 @@ class PermissionService
                 'SUPERVISOR' => 'supervisor',
                 'GESTOR_EQUIPE' => 'gestor-equipe',
                 'GESTOR' => 'gestor',
+                ClinicStaffRole::RECEPCAO => 'membro',
+                ClinicStaffRole::ENFERMAGEM => 'supervisor-equipe',
+                ClinicStaffRole::MEDICO => 'supervisor',
+                ClinicStaffRole::COORDENACAO => 'gestor',
                 default => 'default',
             },
             'ficha_id' => $fichaId,

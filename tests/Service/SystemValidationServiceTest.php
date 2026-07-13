@@ -2,6 +2,7 @@
 
 namespace App\Tests\Service;
 
+use App\Clinic\ClinicStaffRole;
 use App\Dev\DevSeedEmails;
 use App\Repository\UserRepository;
 use App\Security\ProductGrantAccess;
@@ -28,8 +29,8 @@ class SystemValidationServiceTest extends KernelTestCase
             self::markTestSkipped('Banco indisponível para testes de integração — configure .env.test.local ou .env.local.');
         }
 
-        if (!$this->users->findOneBy(['email' => DevSeedEmails::RENATA])) {
-            self::markTestSkipped('Seed ausente — execute app:seed-users antes dos testes de integração.');
+        if (!$this->users->findOneBy(['email' => DevSeedEmails::CAMILA_RECEPCAO])) {
+            self::markTestSkipped('Seed clínico ausente — execute app:seed-users antes dos testes de integração.');
         }
     }
 
@@ -46,22 +47,26 @@ class SystemValidationServiceTest extends KernelTestCase
         self::assertTrue($result->ok);
     }
 
-    public function testMembroCannotCreateMemberRoute(): void
+    public function testRecepcaoCannotOpenAlertas(): void
     {
-        $user = $this->users->findOneBy(['email' => DevSeedEmails::LUCAS]);
+        $user = $this->users->findOneBy(['email' => DevSeedEmails::CAMILA_RECEPCAO]);
         self::assertNotNull($user);
+        self::assertSame(ClinicStaffRole::RECEPCAO, $user->getPerfil());
 
         $grants = static::getContainer()->get(ProductGrantAccess::class);
-        self::assertFalse($grants->isRouteAllowed($user, 'app_pessoas_membro_novo'));
+        self::assertFalse($grants->isRouteAllowed($user, 'app_pos_operatorio_alertas'));
+        self::assertTrue($grants->isRouteAllowed($user, 'app_pos_operatorio_pacientes'));
     }
 
-    public function testGestorCanManagePessoasPermissions(): void
+    public function testCoordenacaoCanOpenConfig(): void
     {
-        $user = $this->users->findOneBy(['email' => DevSeedEmails::RENATA]);
+        $user = $this->users->findOneBy(['email' => DevSeedEmails::HELENA_COORDENACAO]);
         self::assertNotNull($user);
+        self::assertSame(ClinicStaffRole::COORDENACAO, $user->getPerfil());
 
-        $permissions = static::getContainer()->get(\App\Service\PermissionService::class);
-        self::assertTrue($permissions->canManagePermissions($user, 'product_pessoas'));
+        $grants = static::getContainer()->get(ProductGrantAccess::class);
+        self::assertTrue($grants->isRouteAllowed($user, 'app_pos_operatorio_config'));
+        self::assertFalse($grants->isRouteAllowed($user, 'app_pos_operatorio_pacientes'));
     }
 
     public function testTenantHasActiveClinic(): void

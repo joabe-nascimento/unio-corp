@@ -25,10 +25,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /** Ordem de hierarquia (maior = mais permissão) */
     private const PERFIL_NIVEL = [
         'MEMBRO'            => 1,
+        'RECEPCAO'          => 1,
         'SUPERVISOR_EQUIPE' => 2,
+        'ENFERMAGEM'        => 2,
         'SUPERVISOR'        => 3,
+        'MEDICO'            => 3,
         'GESTOR_EQUIPE'     => 4,
         'GESTOR'            => 5,
+        'COORDENACAO'       => 5,
         'TENANT'            => 7,
         'PLATFORM_OWNER'    => 9,
     ];
@@ -237,6 +241,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'SUPERVISOR'        => 'Supervisor Geral',
             'SUPERVISOR_EQUIPE' => 'Supervisor de Equipe',
             'MEMBRO'            => 'Membro',
+            'RECEPCAO'          => 'Recepção',
+            'ENFERMAGEM'        => 'Enfermagem',
+            'MEDICO'            => 'Médico',
+            'COORDENACAO'       => 'Coordenação',
             default             => $this->perfil,
         };
     }
@@ -253,6 +261,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'SUPERVISOR'        => 'supervisor',
             'SUPERVISOR_EQUIPE' => 'supervisor-equipe',
             'MEMBRO'            => 'membro',
+            'RECEPCAO'          => 'membro',
+            'ENFERMAGEM'        => 'supervisor-equipe',
+            'MEDICO'            => 'supervisor',
+            'COORDENACAO'       => 'gestor',
             default             => 'default',
         };
     }
@@ -269,6 +281,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'SUPERVISOR'        => self::ROLE_SUPERVISOR,
             'SUPERVISOR_EQUIPE' => self::ROLE_SUPERVISOR_EQUIPE,
             'MEMBRO'            => self::ROLE_MEMBRO,
+            'RECEPCAO'          => self::ROLE_MEMBRO,
+            'ENFERMAGEM'        => self::ROLE_SUPERVISOR_EQUIPE,
+            'MEDICO'            => self::ROLE_SUPERVISOR,
+            'COORDENACAO'       => self::ROLE_GESTOR,
             default             => 'ROLE_USER',
         };
     }

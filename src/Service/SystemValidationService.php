@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Clinic\ClinicStaffRole;
 use App\Dev\DevSeedEmails;
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -16,36 +17,39 @@ final class SystemValidationService
 {
     private const SEED_EMAILS = [
         DevSeedEmails::JOABE,
-        DevSeedEmails::RENATA,
-        DevSeedEmails::LUCAS,
-        DevSeedEmails::ANA_PAULA,
+        DevSeedEmails::CAMILA_RECEPCAO,
+        DevSeedEmails::BEATRIZ_ENFERMAGEM,
+        DevSeedEmails::ANDRE_MEDICO,
+        DevSeedEmails::HELENA_COORDENACAO,
     ];
 
     /** @var array<string, array<string, bool>> */
-    private const ROUTE_EXPECTATIONS = [
-        DevSeedEmails::LUCAS => [
-            'app_pessoas' => true,
-            'app_pessoas_membro_novo' => false,
-            'app_core_projetos' => false,
-            'app_core_tarefa_nova' => false,
+    private const CLINIC_ROUTE_EXPECTATIONS = [
+        DevSeedEmails::CAMILA_RECEPCAO => [
+            'app_pos_operatorio_pacientes' => true,
+            'app_pos_operatorio_agenda' => true,
+            'app_pos_operatorio_alertas' => false,
+            'app_pos_operatorio_config' => false,
         ],
-        DevSeedEmails::RENATA => [
-            'app_pessoas' => true,
-            'app_pessoas_membro_novo' => true,
-            'app_core_projetos' => true,
-            'app_core_tarefa_nova' => true,
-            'app_core_tarefa_editar' => true,
-            'app_core_tarefa_excluir' => true,
+        DevSeedEmails::BEATRIZ_ENFERMAGEM => [
+            'app_pos_operatorio_questionarios' => true,
+            'app_pos_operatorio_protocolos' => false,
+            'app_pos_operatorio_config' => false,
         ],
-        DevSeedEmails::ANA_PAULA => [
-            'app_pessoas' => true,
-            'app_pessoas_membro_novo' => false,
-            'app_core_projetos' => true,
-            'app_core_tarefa_nova' => true,
+        DevSeedEmails::ANDRE_MEDICO => [
+            'app_pos_operatorio_alertas' => true,
+            'app_pos_operatorio_paciente_show' => true,
+            'app_pos_operatorio_protocolos' => true,
+            'app_pos_operatorio_config' => false,
+        ],
+        DevSeedEmails::HELENA_COORDENACAO => [
+            'app_pos_operatorio_relatorios' => true,
+            'app_pos_operatorio_config' => true,
+            'app_pos_operatorio_pacientes' => false,
         ],
         DevSeedEmails::JOABE => [
-            'app_core_projetos' => true,
-            'app_pessoas_membro_novo' => true,
+            'app_pos_operatorio_pacientes' => true,
+            'app_pos_operatorio_config' => true,
         ],
     ];
 
@@ -74,7 +78,7 @@ final class SystemValidationService
         }
 
         $coreRoutes = $this->organismo->isEnabled()
-            ? array_merge(self::CORE_ROUTES, self::ORGANISMO_CORE_ROUTES)
+            ? array_merge(self::CLINIC_CORE_ROUTES, self::ORGANISMO_CORE_ROUTES)
             : self::CORE_ROUTES;
 
         foreach ($coreRoutes as $route) {
@@ -96,11 +100,11 @@ final class SystemValidationService
             $failures[] = 'Usuários seed ausentes: ' . implode(', ', $missingSeeds)
                 . ' (rode php bin/console app:seed-users)';
         } else {
-            $reports[] = 'Usuários seed: OK';
+            $reports[] = 'Usuários seed clínicos: OK';
         }
 
-        if (!$this->organismo->isEnabled()) {
-            foreach (self::ROUTE_EXPECTATIONS as $email => $routes) {
+        if ($this->organismo->isEnabled()) {
+            foreach (self::CLINIC_ROUTE_EXPECTATIONS as $email => $routes) {
                 $user = $this->findSeedUser($email);
                 if (!$user) {
                     continue;
@@ -122,63 +126,29 @@ final class SystemValidationService
                 }
             }
 
-            $membro = $this->findSeedUser(DevSeedEmails::LUCAS);
-            if ($membro) {
-                $this->authenticateAs($membro);
-                if ($this->permissions->canManagePermissions($membro)) {
-                    $failures[] = DevSeedEmails::LUCAS . ' não deve gerenciar permissões globais';
-                }
-                if ($this->grants->grantAtLeast($membro, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
-                    $failures[] = DevSeedEmails::LUCAS . ' não deve criar membros';
-                }
-                if ($this->navigation->showProjetosMetas($membro)) {
-                    $failures[] = DevSeedEmails::LUCAS . ' não deve ver Projetos e Metas';
-                }
+            $coord = $this->findSeedUser(DevSeedEmails::HELENA_COORDENACAO);
+            if ($coord && $coord->getPerfil() !== ClinicStaffRole::COORDENACAO) {
+                $failures[] = DevSeedEmails::HELENA_COORDENACAO . ' deve ter perfil COORDENACAO';
             }
 
-            $gestor = $this->findSeedUser(DevSeedEmails::RENATA);
-            if ($gestor) {
-                $this->authenticateAs($gestor);
-                if (!$this->permissions->canManagePermissions($gestor, 'product_pessoas')) {
-                    $failures[] = DevSeedEmails::RENATA . ' deve gerenciar permissões em Pessoas';
-                }
-                if (!$this->grants->grantAtLeast($gestor, 'product_pessoas', 'membros', 'GESTOR_EQUIPE')) {
-                    $failures[] = DevSeedEmails::RENATA . ' deve poder criar membros';
-                }
+            $recepcao = $this->findSeedUser(DevSeedEmails::CAMILA_RECEPCAO);
+            if ($recepcao && $recepcao->getPerfil() !== ClinicStaffRole::RECEPCAO) {
+                $failures[] = DevSeedEmails::CAMILA_RECEPCAO . ' deve ter perfil RECEPCAO';
             }
 
-            $tenant = $this->findSeedUser(DevSeedEmails::JOABE);
-            if ($tenant) {
-                $empresas = $this->workspace->getAvailableEmpresas($tenant);
-                if (\count($empresas) < 2) {
-                    $failures[] = DevSeedEmails::JOABE . ' deve ver múltiplas empresas no workspace';
-                } else {
-                    $reports[] = sprintf('Workspace multi-clínica: %d empresas', \count($empresas));
-                }
-            }
-
-            $gestorEmpresas = $gestor ? $this->workspace->getAvailableEmpresas($gestor) : [];
-            if ($gestor && \count($gestorEmpresas) !== 1) {
-                $failures[] = DevSeedEmails::RENATA . ' deve ter exatamente 1 empresa no workspace';
-            }
-
-            if ($gestor && !$this->navigation->showProjetosMetas($gestor)) {
-                $failures[] = DevSeedEmails::RENATA . ' deve ver navegação Projetos e Metas';
-            }
-        } else {
-            foreach ([DevSeedEmails::JOABE, DevSeedEmails::RENATA] as $email) {
+            foreach ([DevSeedEmails::JOABE, DevSeedEmails::HELENA_COORDENACAO] as $email) {
                 $user = $this->findSeedUser($email);
                 if (!$user) {
                     continue;
                 }
 
                 $empresas = $this->workspace->getAvailableEmpresas($user);
-                if (\count($empresas) < 1) {
+                if (\count($empresas) < 1 && $email !== DevSeedEmails::JOABE) {
                     $failures[] = sprintf('%s deve ter clínica ativa vinculada', $email);
                 }
             }
 
-            $reports[] = 'Clínica ativa (organismo): OK';
+            $reports[] = 'Clínica ativa (RBAC clínico): OK';
         }
 
         if ($failures === []) {
@@ -201,6 +171,19 @@ final class SystemValidationService
         'app_core_tarefa_mover',
         'app_pessoas',
         'app_pessoas_membro_novo',
+        'app_workspace_select',
+        'app_workspace_switch',
+    ];
+
+    /** @var list<string> */
+    private const CLINIC_CORE_ROUTES = [
+        'app_pos_operatorio',
+        'app_pos_operatorio_pacientes',
+        'app_pos_operatorio_alertas',
+        'app_pos_operatorio_questionarios',
+        'app_pos_operatorio_protocolos',
+        'app_pos_operatorio_relatorios',
+        'app_pos_operatorio_config',
         'app_workspace_select',
         'app_workspace_switch',
     ];

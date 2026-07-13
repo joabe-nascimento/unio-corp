@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Repository\UserProductGrantRepository;
 use App\Security\Voter\ProductGrantVoter;
+use App\Service\Clinic\ClinicStaffAccess;
 use App\Service\Organismo\OrganismoFeature;
 use App\Service\PermissionService;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -170,6 +171,7 @@ final class ProductGrantAccess
         private Security $security,
         private UserProductGrantRepository $grantRepo,
         private OrganismoFeature $organismoFeature,
+        private ClinicStaffAccess $clinicStaffAccess,
     ) {
     }
 
@@ -199,6 +201,10 @@ final class ProductGrantAccess
             return true;
         }
 
+        if ($this->clinicStaffAccess->mustEnforce($user) && $scope === \App\Clinic\ClinicStaffRole::SCOPE) {
+            return $this->clinicStaffAccess->allowsProduct($user, $product);
+        }
+
         return $this->security->isGranted(ProductGrantVoter::VIEW, [
             'scope' => $scope,
             'product' => $product,
@@ -210,6 +216,10 @@ final class ProductGrantAccess
     {
         if ($user->hasPlatformAccess()) {
             return true;
+        }
+
+        if ($this->clinicStaffAccess->mustEnforce($user) && $scope === \App\Clinic\ClinicStaffRole::SCOPE) {
+            return $this->clinicStaffAccess->allowsProduct($user, $product);
         }
 
         if ($this->usesGranularGrants($user)) {
@@ -414,6 +424,10 @@ final class ProductGrantAccess
             return true;
         }
 
+        if ($this->clinicStaffAccess->mustEnforce($user)) {
+            return $this->clinicStaffAccess->allowsRoute($user, $routeName);
+        }
+
         if (!$this->canManageRoute($user, $routeName)) {
             return false;
         }
@@ -462,6 +476,19 @@ final class ProductGrantAccess
         ];
 
         if ($this->organismoFeature->isEnabled()) {
+            if (\App\Clinic\ClinicStaffRole::isClinicStaffPerfil($user->getPerfil())) {
+                $result['label'] = \App\Clinic\ClinicStaffRole::label($user->getPerfil());
+                $result['class'] = match ($user->getPerfil()) {
+                    \App\Clinic\ClinicStaffRole::COORDENACAO => 'gestor',
+                    \App\Clinic\ClinicStaffRole::MEDICO => 'supervisor',
+                    \App\Clinic\ClinicStaffRole::ENFERMAGEM => 'supervisor-equipe',
+                    default => 'membro',
+                };
+                $result['global_label'] = $result['label'];
+
+                return $result;
+            }
+
             $meta = PermissionService::memberMetaForEmail($user->getEmail());
             if ($meta !== null) {
                 $result['label'] = $meta['cargo'];

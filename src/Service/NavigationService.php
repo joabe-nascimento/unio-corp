@@ -766,7 +766,7 @@ class NavigationService
     ): array {
         if ($this->organismoFeature->isEnabled()) {
             if ($this->organismoCopy->isClinicProfile()) {
-                return $this->getClinicMobileShellNav($route, $clinicAlertBadge);
+                return $this->getClinicMobileShellNav($user, $route, $clinicAlertBadge);
             }
 
             return $this->getStudioMobileShellNav($route, $clinicAlertBadge);
@@ -882,11 +882,11 @@ class NavigationService
      *
      * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
      */
-    private function getClinicMobileShellNav(?string $route, int $alertBadge = 0): array
+    private function getClinicMobileShellNav(User $user, ?string $route, int $alertBadge = 0): array
     {
         $homeRoute = $this->organismoFeature->isPulsoHome() ? 'app_pulso' : 'app_dashboard';
 
-        return [
+        $candidates = [
             $this->buildMobileShellLink(
                 'dashboard',
                 'fa-house-medical',
@@ -918,6 +918,17 @@ class NavigationService
                 ),
             ),
             $this->buildMobileShellLink(
+                'questionarios',
+                'fa-clipboard-list',
+                'Triagem',
+                'app_pos_operatorio_questionarios',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_pos_operatorio_questionario')
+                    || str_starts_with($r, 'app_pos_operatorio_lembrete')
+                ),
+            ),
+            $this->buildMobileShellLink(
                 'alertas',
                 'fa-bell',
                 'Alertas',
@@ -929,8 +940,38 @@ class NavigationService
                 ),
                 $alertBadge,
             ),
-            $this->mobileShellMenuAction(),
+            $this->buildMobileShellLink(
+                'relatorios',
+                'fa-file-export',
+                'Relatórios',
+                'app_pos_operatorio_relatorios',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_pos_operatorio_relatorios'),
+            ),
+            $this->buildMobileShellLink(
+                'config',
+                'fa-gear',
+                'Config',
+                'app_pos_operatorio_config',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_pos_operatorio_config'),
+            ),
         ];
+
+        $items = [];
+        foreach ($candidates as $item) {
+            $itemRoute = $item['route'] ?? null;
+            if (!\is_string($itemRoute) || $itemRoute === $homeRoute || $this->grants->isRouteAllowed($user, $itemRoute)) {
+                $items[] = $item;
+            }
+            if (\count($items) >= 4) {
+                break;
+            }
+        }
+
+        $items[] = $this->mobileShellMenuAction();
+
+        return $items;
     }
 
     /** @return array{id: string, icon: string, label: string, type: string, action: string, active: bool} */

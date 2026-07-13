@@ -5,6 +5,7 @@ namespace App\Twig;
 use App\Entity\User;
 use App\PosOperatorio\ClinicFeatureCatalog;
 use App\PosOperatorio\ClinicProductCatalog;
+use App\Service\Clinic\ClinicStaffAccess;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\Organismo\OrganismoFeature;
 use App\Service\PosOperatorio\ClinicProductConfigService;
@@ -22,6 +23,7 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
         private Security $security,
         private WorkspaceService $workspace,
         private ClinicProductConfigService $productConfig,
+        private ClinicStaffAccess $clinicStaffAccess,
     ) {
     }
 
@@ -51,6 +53,11 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
         $navFeatures = $isClinic
             ? ClinicFeatureCatalog::filterByProducts(ClinicFeatureCatalog::all(), $enabledProducts)
             : [];
+
+        $user = $this->security->getUser();
+        if ($isClinic && $user instanceof User) {
+            $navFeatures = $this->clinicStaffAccess->filterFeatures($user, $navFeatures);
+        }
 
         return [
             'organismo' => [

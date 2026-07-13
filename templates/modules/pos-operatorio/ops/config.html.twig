@@ -70,12 +70,18 @@
         </ul>
     </section>
     <section class="unio-card clinic-ops-panel p-3">
-        <h3 class="clinic-ops-panel__title">Perfis</h3>
+        <h3 class="clinic-ops-panel__title">Perfis clínicos (RBAC)</h3>
         <ul class="clinic-ops-list">
             {% for perfil in config.perfis %}
-            <li><strong>{{ perfil.perfil }}</strong>: {{ perfil.acesso }}</li>
+            <li>
+                <strong>{{ perfil.perfil }}</strong>: {{ perfil.acesso }}
+                {% if perfil.products is defined and perfil.products|length > 0 %}
+                    <span class="text-muted small d-block">Produtos: {{ perfil.products|join(', ') }}</span>
+                {% endif %}
+            </li>
             {% endfor %}
         </ul>
+        <p class="small text-muted mb-0 mt-2">Contas demo: camila.souza / beatriz.nunes / andre.melo / helena.castro @uniosaude.dev — senha unio123</p>
     </section>
 </div>
 {% endblock %}

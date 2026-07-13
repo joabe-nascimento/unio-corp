@@ -463,12 +463,7 @@ final class ClinicOperationsService
                 ['titulo' => 'Sangramento intenso → P1', 'status' => 'active'],
                 ['titulo' => 'Perfil de risco (observações clínicas)', 'status' => 'active'],
             ],
-            'perfis' => [
-                ['perfil' => 'Recepção', 'acesso' => 'Cadastro de pacientes'],
-                ['perfil' => 'Enfermagem', 'acesso' => 'Triagem e questionários'],
-                ['perfil' => 'Médico', 'acesso' => 'Alertas, ficha e protocolos'],
-                ['perfil' => 'Coordenação', 'acesso' => 'Relatórios e configurações'],
-            ],
+            'perfis' => \App\Clinic\ClinicStaffRole::configList(),
         ];
     }
 }

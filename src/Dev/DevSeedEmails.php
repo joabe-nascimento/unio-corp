@@ -16,6 +16,12 @@ final class DevSeedEmails
     public const MARCELA = 'marcela.ferreira@nexus.dev';
     public const PATRICIA = 'patricia.almeida@edu360.dev';
 
+    /** Staff clínico Unio Saúde (demo). */
+    public const CAMILA_RECEPCAO = 'camila.souza@uniosaude.dev';
+    public const BEATRIZ_ENFERMAGEM = 'beatriz.nunes@uniosaude.dev';
+    public const ANDRE_MEDICO = 'andre.melo@uniosaude.dev';
+    public const HELENA_COORDENACAO = 'helena.castro@uniosaude.dev';
+
     /** @var array<string, string> e-mail atual => legado (migração idempotente do seed) */
     public const LEGACY = [
         self::JOABE => 'tenant@unio.dev',
@@ -33,9 +39,20 @@ final class DevSeedEmails
     {
         return [
             self::JOABE,
-            self::RENATA,
-            self::LUCAS,
-            self::ANA_PAULA,
+            self::HELENA_COORDENACAO,
+            self::ANDRE_MEDICO,
+            self::CAMILA_RECEPCAO,
+        ];
+    }
+
+    /** @return list<string> */
+    public static function clinicStaffAccounts(): array
+    {
+        return [
+            self::CAMILA_RECEPCAO,
+            self::BEATRIZ_ENFERMAGEM,
+            self::ANDRE_MEDICO,
+            self::HELENA_COORDENACAO,
         ];
     }
 
