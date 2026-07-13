@@ -16,6 +16,14 @@ parameters:
     mercure_jwt_default: '!ChangeMe!UnioMercureJwtDevSecret32!'
     app.chat_mercure_topic_base_default: 'https://localhost/chat'
     app.pos_op_mercure_topic_base_default: 'https://localhost/pos-operatorio'
+    env(WHATSAPP_PROVIDER): ''
+    env(WHATSAPP_META_TOKEN): ''
+    env(WHATSAPP_META_PHONE_NUMBER_ID): ''
+    env(WHATSAPP_META_GRAPH_VERSION): 'v21.0'
+    whatsapp_provider_default: ''
+    whatsapp_meta_token_default: ''
+    whatsapp_meta_phone_number_id_default: ''
+    whatsapp_meta_graph_version_default: 'v21.0'
 
     wallet_apple_pass_type_id_default: ''
     wallet_apple_team_id_default: ''
@@ -36,6 +44,9 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+        exclude:
+            - '../src/Service/PosOperatorio/Whatsapp/MetaCloudWhatsappSender.php'
+            - '../src/Service/PosOperatorio/Whatsapp/NoopWhatsappSender.php'
 
     App\Service\PasswordResetService:
         arguments:
@@ -78,6 +89,16 @@ services:
     App\Service\PosOperatorio\ClinicPatientNotifier:
         arguments:
             $mailerFrom: '%app.mailer_from%'
+
+    App\Service\PosOperatorio\Whatsapp\ClinicWhatsappSenderFactory:
+        arguments:
+            $provider: '%env(default:whatsapp_provider_default:WHATSAPP_PROVIDER)%'
+            $metaToken: '%env(default:whatsapp_meta_token_default:WHATSAPP_META_TOKEN)%'
+            $metaPhoneNumberId: '%env(default:whatsapp_meta_phone_number_id_default:WHATSAPP_META_PHONE_NUMBER_ID)%'
+            $metaGraphVersion: '%env(default:whatsapp_meta_graph_version_default:WHATSAPP_META_GRAPH_VERSION)%'
+
+    App\Service\PosOperatorio\Whatsapp\ClinicWhatsappSenderInterface:
+        factory: ['@App\Service\PosOperatorio\Whatsapp\ClinicWhatsappSenderFactory', 'create']
 
     App\Service\PosOperatorio\ClinicIntegrationConfigService:
         arguments: {}

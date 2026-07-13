@@ -6,9 +6,10 @@ use App\Entity\Empresa;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\Service\PlatformNotificationService;
+use App\Service\PosOperatorio\Whatsapp\ClinicWhatsappService;
 
 /**
- * Canais plugáveis de continuidade: in-app, e-mail, WhatsApp (wa.me + webhook), SMS (via webhook).
+ * Canais plugáveis de continuidade: in-app, e-mail, WhatsApp (Meta live ou wa.me), SMS (via webhook).
  */
 final class ClinicChannelDispatcher
 {
@@ -18,6 +19,7 @@ final class ClinicChannelDispatcher
         private ClinicPatientNotifier $patientNotifier,
         private ClinicWebhookDispatcher $webhooks,
         private PlatformNotificationService $notifications,
+        private ClinicWhatsappService $whatsapp,
     ) {}
 
     /**
@@ -27,6 +29,7 @@ final class ClinicChannelDispatcher
     {
         $policy = $this->policy->get($empresa);
         $webhookOk = $this->integrationConfig->webhookConfigured($empresa);
+        $waLive = $this->whatsapp->isLive();
 
         return [
             [
@@ -48,8 +51,12 @@ final class ClinicChannelDispatcher
             [
                 'id' => 'whatsapp',
                 'nome' => 'WhatsApp',
-                'status' => !$policy['canais']['whatsapp'] ? 'off' : 'prepared',
-                'desc' => 'Link wa.me + webhook (provedor opcional)',
+                'status' => !$policy['canais']['whatsapp']
+                    ? 'off'
+                    : ($waLive ? 'active' : 'prepared'),
+                'desc' => $waLive
+                    ? 'Meta Cloud API (envio automático)'
+                    : 'Link wa.me + webhook (configure WHATSAPP_META_* para live)',
             ],
             [
                 'id' => 'sms',
@@ -95,13 +102,20 @@ final class ClinicChannelDispatcher
     }
 
     /**
-     * @return array{email: bool, whatsapp_url: ?string, webhook: bool, sms_hint: bool}
+     * @return array{email: bool, whatsapp_url: ?string, whatsapp_sent: bool, whatsapp_message_id: ?string, webhook: bool, sms_hint: bool}
      */
     public function notifyPatientQuestionnaire(PosOperatorioPaciente $paciente): array
     {
         $canais = $this->policy->get($paciente->getEmpresa())['canais'];
         if (!$canais['email'] && !$canais['whatsapp'] && !$canais['sms']) {
-            return ['email' => false, 'whatsapp_url' => null, 'webhook' => false, 'sms_hint' => false];
+            return [
+                'email' => false,
+                'whatsapp_url' => null,
+                'whatsapp_sent' => false,
+                'whatsapp_message_id' => null,
+                'webhook' => false,
+                'sms_hint' => false,
+            ];
         }
 
         return $this->patientNotifier->notifyQuestionnairePending($paciente);

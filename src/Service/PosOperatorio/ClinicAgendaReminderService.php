@@ -9,8 +9,7 @@ use App\Repository\EmpresaRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Confirmação de agenda D-1: prepara WhatsApp (wa.me), e-mail e webhook.
- * Meta/Twilio live entram depois sobre o mesmo evento agenda_confirmacao.
+ * Confirmação de agenda D-1: WhatsApp Meta (se live), wa.me, e-mail e webhook agenda_confirmacao.
  */
 final class ClinicAgendaReminderService
 {

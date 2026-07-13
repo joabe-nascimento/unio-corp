@@ -586,7 +586,7 @@ final class ClinicFeatureCatalog
     public static function integrations(): array
     {
         return [
-            ['id' => 'whatsapp', 'nome' => 'Lembretes por telefone', 'status' => 'active', 'desc' => 'Questionário diário e confirmação de agenda D-1 (wa.me + webhook).', 'route' => 'app_pos_operatorio_lembretes', 'route_label' => 'Ver lembretes'],
+            ['id' => 'whatsapp', 'nome' => 'Lembretes por telefone', 'status' => 'prepared', 'desc' => 'Questionário diário e confirmação D-1 via Meta Cloud API (ou wa.me sem credenciais).', 'route' => 'app_pos_operatorio_lembretes', 'route_label' => 'Ver lembretes'],
             ['id' => 'pep', 'nome' => 'Prontuário / PEP', 'status' => 'active', 'desc' => 'SOAP + hipótese/CID no atendimento; evolução na ficha ao finalizar.', 'route' => 'app_pos_operatorio_atendimento', 'route_label' => 'Abrir atendimentos'],
             ['id' => 'calendar', 'nome' => 'Agenda de retornos', 'status' => 'active', 'desc' => 'Horários na clínica e sugestões a partir dos marcos do protocolo.', 'route' => 'app_pos_operatorio_agenda', 'route_label' => 'Abrir agenda'],
             ['id' => 'atendimento', 'nome' => 'Atendimento leve', 'status' => 'active', 'desc' => 'SOAP, hipótese, CID-10 e evolução na ficha ao finalizar.', 'route' => 'app_pos_operatorio_atendimento', 'route_label' => 'Abrir atendimentos'],

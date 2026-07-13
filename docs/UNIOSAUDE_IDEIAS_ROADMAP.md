@@ -44,7 +44,7 @@ Ordem lógica do início ao fim:
 | 1 | Captação de cliente | — | Depois / integrar |
 | 2 | Leads / funil de vendas | — | Depois / integrar (CRM) |
 | 3 | Cadastro de clientes | Parcial (paciente clínico) | Expandir cadastro único |
-| 4 | Agendas | **MVP entregue** (`/pos-operatorio/agenda`) | E1: Meta WhatsApp automático |
+| 4 | Agendas | **MVP+** (`/pos-operatorio/agenda`) | WhatsApp Meta live (quando `WHATSAPP_META_*`) |
 | 5 | Atendimentos | **MVP E2** (`/pos-operatorio/atendimento`) | SOAP leve + evolução na ficha |
 | 6 | Acompanhamento do histórico do paciente | **Forte (pós-op, eventos, guia)** | Continuar aprofundando |
 | 7 | Faturamento de planos | **MVP E3 + E4 fundação** | Contas + convênios + guias; XML ANS depois |
@@ -88,7 +88,7 @@ Uma só trilha — pós-op continua como diferencial; gestão completa se constr
 ### Clínica / ops (já no ar, pouco citado no pitch curto)
 
 Fila do dia, sala crítica, qualidade/SLA, retornos, **agenda MVP**, biblioteca de protocolos, plantão, configurações, webhook/alta, compliance/retenção, demo sandbox.  
-Canais WhatsApp/SMS: **preparados** (webhook / wa.me), ainda sem Meta/Twilio live.
+Canais WhatsApp/SMS: **WhatsApp live via Meta Cloud API** quando `WHATSAPP_PROVIDER=meta` + token/phone id no `.env`; senão wa.me + webhook (prepared). Log em `clinic_outbound_message`.
 
 Tudo no **mesmo organismo clínico** (Unio Saúde).
 
@@ -112,7 +112,7 @@ Combinado com Fernando: isso são peças da **gestão completa**; pós-op é fer
 
 ### 1. Agendamento
 
-**Status MVP / E1:** lista semanal + visão do dia, status de recepção, **confirmação WhatsApp (wa.me)** + KPIs do dia + **lembrete D-1** (`app:clinic:agenda-reminders` / continuidade). Próximo: Meta/Twilio live no mesmo webhook `agenda_confirmacao`.
+**Status MVP / E1:** lista semanal + visão do dia, status de recepção, **confirmação WhatsApp (Meta live ou wa.me)** + KPIs do dia + **lembrete D-1** (`app:clinic:agenda-reminders` / continuidade). Evento webhook `agenda_confirmacao` + log de outbound.
 
 - Calendário por médico / sala *(sala e overlap avançado: depois)*
 - Status: `marcado` → `confirmado` → `faltou` / `cancelado` → `atendido`
@@ -198,7 +198,7 @@ Referências públicas: **Feegow**, **iClinic**, **Clinicorp**, **Operatório**,
 | Módulo | Feegow / iClinic / similares | Unio hoje | Gap |
 |--------|------------------------------|-----------|-----|
 | Agenda multi-profissional | Sim | MVP parcial (`/pos-operatorio/agenda`) | Evoluir visão dia + status recepção |
-| Confirmação / anti no-show (WhatsApp) | Sim | Preparado | Alto |
+| Confirmação / anti no-show (WhatsApp) | Sim | **Live (Meta)** ou wa.me | Configurar `WHATSAPP_META_*` |
 | Prontuário eletrônico (PEP) | Sim (às vezes IA) | Não (só evolução pós-op / guia) | Alto |
 | Faturamento particular | Sim | Não | Alto |
 | Convênio + **TISS** / TUSS / glosa | Sim (Feegow forte) | Sim (guia, lote, XML, catálogo TUSS) | Evoluir XSD/operadora |
@@ -242,7 +242,7 @@ Referência: [ondoctor.app](https://www.ondoctor.app/) — ERP clínico com agen
 | Ideia OnDoctor | Como Unio supera depois |
 |----------------|-------------------------|
 | Agenda com status coloridos (chegou / em atendimento) | Evoluir MVP agenda: visão dia + status de recepção ligados à fila/check-in |
-| Lembrete WhatsApp 1 dia antes | Confirmação no fluxo pós-op + agenda (já “preparado”) |
+| Lembrete WhatsApp 1 dia antes | Confirmação no fluxo pós-op + agenda (Meta Cloud API + cron `app:clinic:agenda-reminders`) |
 | “Um sistema no lugar de vários” | Pitch Unio: gestão + **cuidado depois da alta** (diferencial que eles não têm) |
 | PEP / tele / financeiro / Power BI | Manter ordem atual: agenda → atendimento → fatura → TISS |
 

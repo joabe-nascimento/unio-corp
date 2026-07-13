@@ -14,6 +14,7 @@ use App\Service\PosOperatorio\ClinicOperationsService;
 use App\Service\PosOperatorio\ClinicPolicyConfigService;
 use App\Service\PosOperatorio\ClinicReportExportService;
 use App\Service\PosOperatorio\PosOperatorioProtocoloService;
+use App\Service\PosOperatorio\Whatsapp\ClinicWhatsappService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,6 +40,7 @@ final class PosOperatorioOperationsController extends AbstractController
         private ClinicDutyRosterService $duty,
         private ClinicAltaIntakeService $alta,
         private ClinicAgendaReminderService $agendaReminders,
+        private ClinicWhatsappService $whatsapp,
     ) {}
 
     #[Route('/trabalho', name: 'app_pos_operatorio_trabalho')]
@@ -135,11 +137,15 @@ final class PosOperatorioOperationsController extends AbstractController
 
             $result = $this->agendaReminders->prepareForTomorrow($empresa);
             if ($result['enviados'] > 0) {
+                $hint = $this->whatsapp->isLive()
+                    ? 'WhatsApp Meta + e-mail/webhook'
+                    : 'wa.me + e-mail/webhook (Meta ainda não configurado)';
                 $this->addFlash(
                     'success',
                     sprintf(
-                        '%d lembrete(s) de confirmação preparados para amanhã (WhatsApp/e-mail/webhook).',
+                        '%d lembrete(s) de confirmação processados para amanhã (%s).',
                         $result['enviados'],
+                        $hint,
                     ),
                 );
             } else {
@@ -231,6 +237,12 @@ final class PosOperatorioOperationsController extends AbstractController
             if (($int['id'] ?? '') === 'webhook') {
                 $int['status'] = $this->integrationConfig->webhookConfigured($empresa) ? 'active' : 'configurable';
             }
+            if (($int['id'] ?? '') === 'whatsapp') {
+                $int['status'] = $this->whatsapp->isLive() ? 'active' : 'prepared';
+                $int['desc'] = $this->whatsapp->isLive()
+                    ? 'Meta Cloud API ativa: confirmação D-1 e questionário com log de entrega.'
+                    : 'wa.me + webhook. Configure WHATSAPP_PROVIDER=meta e WHATSAPP_META_* no servidor para envio live.';
+            }
         }
         unset($int);
 
@@ -243,7 +255,42 @@ final class PosOperatorioOperationsController extends AbstractController
             'integration_config' => $config,
             'alta_token' => $altaToken,
             'alta_endpoint' => $this->generateUrl('app_pos_operatorio_api_alta', [], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL),
+            'whatsapp_live' => $this->whatsapp->isLive(),
+            'whatsapp_provider' => $this->whatsapp->providerName(),
         ]);
+    }
+
+    #[Route('/integracoes/whatsapp-teste', name: 'app_pos_operatorio_integracoes_whatsapp_teste', methods: ['POST'])]
+    public function integracoesWhatsappTeste(Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        if (!$this->isCsrfTokenValid('clinic_whatsapp_teste', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_integracoes');
+        }
+
+        if (!$this->whatsapp->isLive()) {
+            $this->addFlash('error', 'WhatsApp Meta não está configurado no servidor (WHATSAPP_META_*).');
+
+            return $this->redirectToRoute('app_pos_operatorio_integracoes');
+        }
+
+        $telefone = trim((string) $request->request->get('telefone', ''));
+        $result = $this->whatsapp->send(
+            $empresa,
+            $telefone,
+            'Unio Saúde — mensagem de teste. Se você recebeu isto, a API Meta está ativa.',
+            ['event' => 'whatsapp_teste'],
+        );
+
+        if ($result->sent) {
+            $this->addFlash('success', 'Mensagem de teste enviada via Meta Cloud API.');
+        } else {
+            $this->addFlash('error', 'Falha no teste WhatsApp: '.($result->error ?? $result->status));
+        }
+
+        return $this->redirectToRoute('app_pos_operatorio_integracoes');
     }
 
     #[Route('/integracoes/webhook', name: 'app_pos_operatorio_integracoes_webhook', methods: ['POST'])]

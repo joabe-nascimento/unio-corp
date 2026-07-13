@@ -253,6 +253,30 @@ on:
 
 ---
 
+## WhatsApp Meta + cron (Unio Saúde)
+
+Envio automático de confirmação D-1 e questionário exige no `.env.local` do servidor:
+
+```env
+WHATSAPP_PROVIDER=meta
+WHATSAPP_META_TOKEN=...
+WHATSAPP_META_PHONE_NUMBER_ID=...
+WHATSAPP_META_GRAPH_VERSION=v21.0
+```
+
+Sem isso, o sistema permanece em **wa.me + webhook** (canal “Preparado”).
+
+Cron sugerido (cPanel → Cron Jobs), a partir de `~/unio-uniosaude`:
+
+```cron
+15 8 * * * cd /home2/joabef36/unio-uniosaude && php bin/console app:clinic:agenda-reminders --env=prod
+30 8 * * * cd /home2/joabef36/unio-uniosaude && php bin/console app:pos-operatorio:send-reminders --env=prod
+```
+
+Ops: `/pos-operatorio/lembretes` (status + log) e `/pos-operatorio/integracoes` (teste Meta).
+
+---
+
 ## Histórico (jul/2026)
 
 | Data | Evento |

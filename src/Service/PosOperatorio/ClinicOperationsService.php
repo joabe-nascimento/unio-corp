@@ -31,6 +31,8 @@ final class ClinicOperationsService
         private ClinicRetentionService $retention,
         private UserRepository $users,
         private ClinicAgendaReminderService $agendaReminders,
+        private \App\Repository\ClinicOutboundMessageRepository $outboundMessages,
+        private \App\Service\PosOperatorio\Whatsapp\ClinicWhatsappService $whatsapp,
     ) {}
 
     /**
@@ -264,6 +266,19 @@ final class ClinicOperationsService
         return [
             'pendentes_hoje' => \count($pendentes),
             'continuity_lead' => $policy['continuity_lead'],
+            'whatsapp_live' => $this->whatsapp->isLive(),
+            'whatsapp_provider' => $this->whatsapp->providerName(),
+            'outbound_recent' => array_map(static function ($m): array {
+                return [
+                    'id' => $m->getId(),
+                    'evento' => $m->getEvento(),
+                    'destino' => $m->getDestino(),
+                    'status' => $m->getStatus(),
+                    'provider' => $m->getProvider(),
+                    'erro' => $m->getErro(),
+                    'quando' => $m->getCriadoEm()->format('d/m H:i'),
+                ];
+            }, $this->outboundMessages->findRecentByEmpresa($empresa, 20)),
             'pacientes' => array_map(static function (PosOperatorioPaciente $p): array {
                 $phone = preg_replace('/\D+/', '', (string) ($p->getTelefoneContato() ?? '')) ?? '';
                 $msg = rawurlencode(sprintf(

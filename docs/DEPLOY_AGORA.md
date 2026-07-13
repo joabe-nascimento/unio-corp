@@ -114,7 +114,7 @@ chmod -R ug+rwx public/uploads/
 
 Login seed (altere depois): `renata.oliveira@unio.dev` / `unio123`
 
-**Cron em produção:** não agende `app:seed-users`, `app:seed-product-grants` nem outros comandos `app:seed-*` — eles são bloqueados em prod e só servem para dev/staging. Mantenha no cron apenas filas e lembretes (ex.: `app:pos-operatorio:send-reminders`, `app:rh:email-process-queue`).
+**Cron em produção:** não agende `app:seed-users`, `app:seed-product-grants` nem outros comandos `app:seed-*` — eles são bloqueados em prod e só servem para dev/staging. Mantenha no cron apenas filas e lembretes (ex.: `app:clinic:agenda-reminders`, `app:pos-operatorio:send-reminders`, `app:rh:email-process-queue`).
 
 Se der erro 500:
 

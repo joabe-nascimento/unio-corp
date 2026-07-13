@@ -11,7 +11,7 @@
 {% block hub_toolbar_actions %}
 <form method="post" class="d-inline">
     <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_reminders') }}">
-    <button type="submit" class="btn-unio btn-sm">Preparar confirmações de amanhã</button>
+    <button type="submit" class="btn-unio btn-sm">{% if reminders.whatsapp_live|default(false) %}Enviar confirmações de amanhã{% else %}Preparar confirmações de amanhã{% endif %}</button>
 </form>
 {% endblock %}
 
@@ -19,6 +19,7 @@
 {% include 'components/kpi_row.html.twig' with { items: [
     { value: reminders.pendentes_hoje, label: 'Questionários pendentes', icon: 'fa-bell', tone: 'amber', variant: reminders.pendentes_hoje > 0 ? 'warning' : '' },
     { value: agenda_amanha|length, label: 'Agenda amanhã', icon: 'fa-calendar-check', tone: 'sky' },
+    { value: reminders.whatsapp_live|default(false) ? 'Live' : 'wa.me', label: 'WhatsApp', icon: 'fa-mobile-screen', tone: reminders.whatsapp_live|default(false) ? 'teal' : 'amber' },
 ], mb: 'mb-0' } %}
 {% endblock %}
 
@@ -51,7 +52,13 @@
 
 <section class="unio-card mt-3">
     <h3 class="clinic-ops-panel__title px-3 pt-3 mb-0">Confirmação de agenda — amanhã</h3>
-    <p class="text-muted small px-3 mb-2">Prepara e-mail, link WhatsApp e webhook <code>agenda_confirmacao</code> (Meta/Twilio depois).</p>
+    <p class="text-muted small px-3 mb-2">
+        {% if reminders.whatsapp_live|default(false) %}
+        Envia via <strong>Meta Cloud API</strong>, e-mail e webhook <code>agenda_confirmacao</code>. Link wa.me permanece como atalho manual.
+        {% else %}
+        Prepara e-mail, link WhatsApp (wa.me) e webhook <code>agenda_confirmacao</code>. Configure <code>WHATSAPP_META_*</code> no servidor para envio automático.
+        {% endif %}
+    </p>
     {% if agenda_amanha is empty %}
     <p class="text-muted px-3 pb-3 mb-0">Nenhum horário marcado/confirmado para amanhã.</p>
     {% else %}
@@ -90,6 +97,43 @@
                         {% endif %}
                         <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
                     </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+
+<section class="unio-card mt-3">
+    <h3 class="clinic-ops-panel__title px-3 pt-3 mb-0">Últimos envios WhatsApp</h3>
+    <p class="text-muted small px-3 mb-2">Log de entrega Meta / noop (últimos 20).</p>
+    {% set outbound = reminders.outbound_recent|default([]) %}
+    {% if outbound is empty %}
+    <p class="text-muted px-3 pb-3 mb-0">Nenhum envio registrado ainda.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Quando</th>
+                    <th>Evento</th>
+                    <th>Destino</th>
+                    <th>Status</th>
+                    <th>Provedor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in outbound %}
+                <tr>
+                    <td>{{ m.quando }}</td>
+                    <td><code>{{ m.evento }}</code></td>
+                    <td>{{ m.destino|default('—') }}</td>
+                    <td>
+                        <span class="badge-perfil {{ m.status == 'sent' ? 'success' : (m.status == 'failed' ? 'danger' : 'warning') }}">{{ m.status }}</span>
+                        {% if m.erro %}<span class="d-block text-muted small">{{ m.erro }}</span>{% endif %}
+                    </td>
+                    <td>{{ m.provider }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

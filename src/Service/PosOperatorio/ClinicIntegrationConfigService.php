@@ -22,7 +22,7 @@ final class ClinicIntegrationConfigService
             'webhook_url' => (string) ($stored['webhook_url'] ?? ''),
             'webhook_events' => \is_array($stored['webhook_events'] ?? null)
                 ? array_values(array_filter($stored['webhook_events'], 'is_string'))
-                : ['alerta_p1', 'questionario_pendente', 'alerta_escalado', 'carteirinha.emitida', 'comprovante.emitido', 'verificacao.sucesso', 'checkin.realizado'],
+                : ['alerta_p1', 'questionario_pendente', 'alerta_escalado', 'agenda_confirmacao', 'carteirinha.emitida', 'comprovante.emitido', 'verificacao.sucesso', 'checkin.realizado'],
             'lembretes_sms' => (bool) ($stored['lembretes_sms'] ?? true),
         ];
     }

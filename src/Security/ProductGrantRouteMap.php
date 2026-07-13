@@ -377,6 +377,7 @@ final class ProductGrantRouteMap
         'app_pos_operatorio_relatorios_export_questionarios' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
         'app_pos_operatorio_integracoes' => ['scope' => 'hub_pos_operatorio', 'product' => 'configuracoes'],
         'app_pos_operatorio_integracoes_webhook' => ['scope' => 'hub_pos_operatorio', 'product' => 'configuracoes'],
+        'app_pos_operatorio_integracoes_whatsapp_teste' => ['scope' => 'hub_pos_operatorio', 'product' => 'configuracoes'],
         'app_pos_operatorio_compliance' => ['scope' => 'hub_pos_operatorio', 'product' => 'configuracoes'],
         'app_pos_operatorio_config' => ['scope' => 'hub_pos_operatorio', 'product' => 'configuracoes'],
         'app_pos_operatorio_config_salvar' => ['scope' => 'hub_pos_operatorio', 'product' => 'configuracoes'],
