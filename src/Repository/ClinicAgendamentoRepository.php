@@ -100,4 +100,34 @@ class ClinicAgendamentoRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Agendamentos de hoje ainda em espera de recepção (marcado/confirmado).
+     *
+     * @return list<ClinicAgendamento>
+     */
+    public function findTodayAwaitingReception(
+        Empresa $empresa,
+        \App\Entity\PosOperatorioPaciente $paciente,
+        \DateTimeImmutable $dayStart,
+        \DateTimeImmutable $dayEnd,
+    ): array {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.empresa = :empresa')
+            ->andWhere('a.paciente = :paciente')
+            ->andWhere('a.inicio >= :inicio')
+            ->andWhere('a.inicio < :fim')
+            ->andWhere('a.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('paciente', $paciente)
+            ->setParameter('inicio', $dayStart)
+            ->setParameter('fim', $dayEnd)
+            ->setParameter('statuses', [
+                ClinicAgendamento::STATUS_MARCADO,
+                ClinicAgendamento::STATUS_CONFIRMADO,
+            ])
+            ->orderBy('a.inicio', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

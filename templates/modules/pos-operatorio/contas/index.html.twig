@@ -13,6 +13,16 @@
 <a href="{{ path('app_pos_operatorio_convenios') }}" class="btn-unio-ghost btn-sm">Convênios</a>
 {% endblock %}
 
+{% block hub_kpis %}
+{% set aberto_reais = (total_aberto_centavos|default(0) / 100)|number_format(2, ',', '.') %}
+{% set pago_reais = (total_pago_centavos|default(0) / 100)|number_format(2, ',', '.') %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: qtd_abertas|default(0), label: 'Contas em aberto', icon: 'fa-file-invoice', tone: 'amber', variant: qtd_abertas|default(0) > 0 ? 'warning' : '' },
+    { value: 'R$ ' ~ aberto_reais, label: 'A receber', icon: 'fa-hand-holding-dollar', tone: 'rose' },
+    { value: 'R$ ' ~ pago_reais, label: 'Recebido', icon: 'fa-check', tone: 'teal' },
+], mb: 'mb-0' } %}
+{% endblock %}
+
 {% block hub_content %}
 {% if list_truncated|default(false) %}
 <div class="alert alert-warning">

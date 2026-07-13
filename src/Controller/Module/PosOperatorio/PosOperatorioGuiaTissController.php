@@ -56,6 +56,20 @@ final class PosOperatorioGuiaTissController extends AbstractController
         ]);
     }
 
+    #[Route('/glosas', name: 'app_pos_operatorio_guias_glosas', methods: ['GET'])]
+    public function glosas(): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $panel = $this->guias->glosaPanel($empresa);
+
+        return $this->render('modules/pos-operatorio/guias/glosas.html.twig', [
+            'empresa' => $empresa,
+            'pos_section' => 'guias',
+            'panel' => $panel,
+            'status_labels' => ClinicGuiaTissService::statusLabels(),
+        ]);
+    }
+
     #[Route('/tuss/search', name: 'app_pos_operatorio_guias_tuss_search', methods: ['GET'])]
     public function tussSearch(Request $request): JsonResponse
     {
@@ -190,6 +204,7 @@ final class PosOperatorioGuiaTissController extends AbstractController
             'guia' => $guia,
             'status_labels' => ClinicGuiaTissService::statusLabels(),
             'next_statuses' => ClinicGuiaTiss::allowedTransitionsFrom($guia->getStatus()),
+            'pre_envio_checklist' => $this->guias->preEnvioChecklist($guia),
             'tuss_search_url' => $this->generateUrl('app_pos_operatorio_guias_tuss_search'),
         ]);
     }

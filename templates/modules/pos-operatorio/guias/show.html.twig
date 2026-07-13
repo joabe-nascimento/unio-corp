@@ -60,6 +60,17 @@
                 Glosa ou cancelamento encerram; glosa pode reabrir para correção.
             </p>
             {% if 'enviado' in next %}
+            <div class="mb-3">
+                <p class="small text-muted mb-1">Checklist pré-envio</p>
+                <ul class="list-unstyled small mb-2">
+                    {% for item in pre_envio_checklist|default([]) %}
+                    <li class="{{ item.ok ? 'text-success' : 'text-danger' }}">
+                        <i class="fas {{ item.ok ? 'fa-check' : 'fa-xmark' }}" aria-hidden="true"></i>
+                        {{ item.label }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
             <form method="post" class="mb-2">
                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_guia_' ~ guia.id) }}">
                 <input type="hidden" name="action" value="status">

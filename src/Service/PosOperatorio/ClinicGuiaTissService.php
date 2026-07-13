@@ -200,6 +200,15 @@ final class ClinicGuiaTissService
             throw new \InvalidArgumentException('Adicione ao menos um item antes de marcar como enviada.');
         }
 
+        if ($status === ClinicGuiaTiss::STATUS_ENVIADO) {
+            $checklist = $this->preEnvioChecklist($guia);
+            $fails = array_values(array_filter($checklist, static fn (array $i): bool => !($i['ok'] ?? false)));
+            if ($fails !== []) {
+                $msgs = array_map(static fn (array $i): string => (string) $i['label'], $fails);
+                throw new \InvalidArgumentException('Checklist pré-envio: '.implode('; ', $msgs));
+            }
+        }
+
         if ($status === ClinicGuiaTiss::STATUS_PAGO) {
             if ($guia->getItens()->isEmpty()) {
                 throw new \InvalidArgumentException('Adicione ao menos um item antes de marcar a guia como paga.');
@@ -263,6 +272,59 @@ final class ClinicGuiaTissService
             ClinicGuiaTiss::STATUS_GLOSADO => 'Glosado',
             ClinicGuiaTiss::STATUS_PAGO => 'Pago',
             ClinicGuiaTiss::STATUS_CANCELADO => 'Cancelado',
+        ];
+    }
+
+    /**
+     * Painel anti-glosa: lista glosadas + taxa por convênio + checklist helpers.
+     *
+     * @return array{
+     *     glosadas: list<ClinicGuiaTiss>,
+     *     stats: list<array{convenio_id: int|null, convenio: string, total: int, glosadas: int, pagas: int, taxa_glosa: float}>,
+     *     total_glosadas: int,
+     *     taxa_geral: float
+     * }
+     */
+    public function glosaPanel(Empresa $empresa): array
+    {
+        $glosadas = $this->list($empresa, ClinicGuiaTiss::STATUS_GLOSADO);
+        $stats = $this->guias->glosaStatsByConvenio($empresa);
+        $totalBase = array_sum(array_column($stats, 'total'));
+        $totalGlosa = array_sum(array_column($stats, 'glosadas'));
+
+        return [
+            'glosadas' => $glosadas,
+            'stats' => $stats,
+            'total_glosadas' => $this->countList($empresa, ClinicGuiaTiss::STATUS_GLOSADO),
+            'taxa_geral' => $totalBase > 0 ? round(($totalGlosa / $totalBase) * 100, 1) : 0.0,
+        ];
+    }
+
+    /**
+     * @return list<array{id: string, label: string, ok: bool}>
+     */
+    public function preEnvioChecklist(ClinicGuiaTiss $guia): array
+    {
+        $numero = trim((string) $guia->getNumeroGuia());
+        $hasItems = !$guia->getItens()->isEmpty();
+        $hasTuss = false;
+        foreach ($guia->getItens() as $item) {
+            if (trim((string) $item->getCodigoTuss()) !== '') {
+                $hasTuss = true;
+                break;
+            }
+        }
+        $valorOk = $guia->totalCentavos() > 0;
+        $convenioOk = $guia->getConvenio() !== null;
+        $ansOk = $convenioOk && trim((string) ($guia->getConvenio()?->getRegistroAns() ?? '')) !== '';
+
+        return [
+            ['id' => 'numero', 'label' => 'Número da guia preenchido', 'ok' => $numero !== ''],
+            ['id' => 'itens', 'label' => 'Pelo menos um item', 'ok' => $hasItems],
+            ['id' => 'tuss', 'label' => 'Código TUSS em ao menos um item', 'ok' => $hasTuss],
+            ['id' => 'valor', 'label' => 'Valor total maior que zero', 'ok' => $valorOk],
+            ['id' => 'convenio', 'label' => 'Convênio vinculado', 'ok' => $convenioOk],
+            ['id' => 'ans', 'label' => 'Registro ANS do convênio', 'ok' => $ansOk],
         ];
     }
 

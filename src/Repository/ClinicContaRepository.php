@@ -67,4 +67,16 @@ class ClinicContaRepository extends ServiceEntityRepository
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
+
+    public function sumValorCentavosByStatus(Empresa $empresa, string $status): int
+    {
+        return (int) $this->createQueryBuilder('c')
+            ->select('COALESCE(SUM(c.valorCentavos), 0)')
+            ->andWhere('c.empresa = :empresa')
+            ->andWhere('c.status = :status')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

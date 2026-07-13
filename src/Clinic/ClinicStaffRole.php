@@ -47,6 +47,7 @@ final class ClinicStaffRole
         self::COORDENACAO => [
             'relatorios',
             'configuracoes',
+            'pacientes',
         ],
     ];
 
@@ -101,6 +102,7 @@ final class ClinicStaffRole
             'produtos',
             'comercial',
             'crm',
+            'pacientes',
         ],
     ];
 

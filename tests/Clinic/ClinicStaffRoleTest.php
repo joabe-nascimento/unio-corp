@@ -27,7 +27,7 @@ final class ClinicStaffRoleTest extends TestCase
 
         self::assertTrue(ClinicStaffRole::allowsProduct(ClinicStaffRole::COORDENACAO, 'relatorios'));
         self::assertTrue(ClinicStaffRole::allowsProduct(ClinicStaffRole::COORDENACAO, 'configuracoes'));
-        self::assertFalse(ClinicStaffRole::allowsProduct(ClinicStaffRole::COORDENACAO, 'pacientes'));
+        self::assertTrue(ClinicStaffRole::allowsProduct(ClinicStaffRole::COORDENACAO, 'pacientes'));
     }
 
     public function testRouteMatrixForStaffRoles(): void
@@ -56,7 +56,7 @@ final class ClinicStaffRoleTest extends TestCase
         self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_pos_operatorio_config'));
         self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_comercial'));
         self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_comercial_pipeline'));
-        self::assertFalse(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_pos_operatorio_pacientes'));
+        self::assertTrue(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::COORDENACAO, 'app_pos_operatorio_pacientes'));
         self::assertFalse(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::RECEPCAO, 'app_comercial'));
         self::assertFalse(ClinicStaffAccess::routeAllowedByPerfil(ClinicStaffRole::MEDICO, 'app_comercial'));
 

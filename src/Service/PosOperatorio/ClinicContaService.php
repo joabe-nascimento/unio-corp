@@ -64,6 +64,16 @@ final class ClinicContaService
         return $this->contas->countByEmpresaAndStatus($empresa, $status);
     }
 
+    public function sumAbertoCentavos(Empresa $empresa): int
+    {
+        return $this->contas->sumValorCentavosByStatus($empresa, ClinicConta::STATUS_ABERTO);
+    }
+
+    public function sumPagoCentavos(Empresa $empresa): int
+    {
+        return $this->contas->sumValorCentavosByStatus($empresa, ClinicConta::STATUS_PAGO);
+    }
+
     public function listLimit(): int
     {
         return ClinicContaRepository::LIST_LIMIT;

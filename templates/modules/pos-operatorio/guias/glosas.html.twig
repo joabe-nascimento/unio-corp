@@ -1,0 +1,90 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Anti-glosa TISS · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Painel anti-glosa' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Guias glosadas, taxa por convênio e reabertura para correção' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_guias', { status: 'glosado' }) }}" class="btn-unio-ghost btn-sm">Só glosadas</a>
+<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Todas as guias</a>
+{% endblock %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: panel.total_glosadas, label: 'Guias glosadas', icon: 'fa-triangle-exclamation', tone: 'amber', variant: panel.total_glosadas > 0 ? 'warning' : '' },
+    { value: panel.taxa_geral ~ '%', label: 'Taxa geral de glosa', icon: 'fa-percent', tone: 'rose' },
+    { value: panel.stats|length, label: 'Convênios no funil', icon: 'fa-building', tone: 'sky' },
+], mb: 'mb-0' } %}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-3 mb-3">
+    <h3 class="h6 mb-3">Taxa de glosa por convênio</h3>
+    {% if panel.stats is empty %}
+    <p class="text-muted mb-0">Ainda não há guias enviadas/autorizadas/pagas/glosadas para calcular taxa.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table mb-0">
+            <thead>
+                <tr>
+                    <th>Convênio</th>
+                    <th>No funil</th>
+                    <th>Glosadas</th>
+                    <th>Pagas</th>
+                    <th>Taxa</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in panel.stats %}
+                <tr>
+                    <td>{{ row.convenio }}</td>
+                    <td>{{ row.total }}</td>
+                    <td>{{ row.glosadas }}</td>
+                    <td>{{ row.pagas }}</td>
+                    <td><strong>{{ row.taxa_glosa }}%</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+
+<section class="unio-card p-0">
+    <h3 class="h6 px-3 pt-3 mb-0">Guias glosadas</h3>
+    <p class="text-muted small px-3 mb-2">Reabra para corrigir itens/cabeçalho e reenviar.</p>
+    {% if panel.glosadas is empty %}
+    <div class="p-4 text-muted">Nenhuma guia glosada no momento.</div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table mb-0">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Paciente</th>
+                    <th>Convênio</th>
+                    <th>Motivo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in panel.glosadas %}
+                <tr>
+                    <td><code>{{ g.numeroGuia }}</code></td>
+                    <td>{{ g.paciente.nome }}</td>
+                    <td>{{ g.convenio.nome }}</td>
+                    <td class="small">{{ g.motivoGlosa|default('—') }}</td>
+                    <td class="text-right">
+                        <a href="{{ path('app_pos_operatorio_guias_show', { id: g.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -107,6 +107,7 @@ final class ProductGrantAccess
         'app_recrutamento_aprovacao_decidir' => ['scope' => 'hub_recrutamento', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
         // Comercial CRM
         'app_comercial_lead_converter' => ['scope' => 'hub_comercial', 'product' => 'leads', 'min' => 'GESTOR_EQUIPE'],
+        'app_comercial_lead_paciente' => ['scope' => 'hub_comercial', 'product' => 'leads', 'min' => 'GESTOR_EQUIPE'],
         'app_comercial_lead_excluir' => ['scope' => 'hub_comercial', 'product' => 'leads', 'min' => 'GESTOR'],
         'app_comercial_oportunidade_mover' => ['scope' => 'hub_comercial', 'product' => 'pipeline', 'min' => 'GESTOR_EQUIPE'],
         'app_comercial_oportunidade_excluir' => ['scope' => 'hub_comercial', 'product' => 'pipeline', 'min' => 'GESTOR'],

@@ -1109,6 +1109,7 @@ class PermissionService
             'helena-castro' => [
                 'relatorios' => ClinicStaffRole::COORDENACAO,
                 'configuracoes' => ClinicStaffRole::COORDENACAO,
+                'pacientes' => ClinicStaffRole::COORDENACAO,
             ],
         ],
         'hub_saude_ocupacional' => [

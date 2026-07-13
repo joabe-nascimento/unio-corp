@@ -7,11 +7,13 @@ use App\Entity\Crm\CrmConta;
 use App\Entity\Crm\CrmLead;
 use App\Entity\Crm\CrmOportunidade;
 use App\Entity\Empresa;
+use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\Repository\Crm\CrmAtividadeRepository;
 use App\Repository\Crm\CrmContaRepository;
 use App\Repository\Crm\CrmLeadRepository;
 use App\Repository\Crm\CrmOportunidadeRepository;
+use App\Service\PosOperatorio\PosOperatorioPacienteService;
 use App\Service\WorkspaceService;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -27,6 +29,7 @@ final class CrmService
         private CrmContaRepository $contas,
         private CrmOportunidadeRepository $oportunidades,
         private CrmAtividadeRepository $atividades,
+        private PosOperatorioPacienteService $pacientes,
     ) {}
 
     public function requireEmpresa(User $user): Empresa
@@ -233,6 +236,29 @@ final class CrmService
         $this->em->flush();
 
         return $conta;
+    }
+
+    /**
+     * Converte lead em paciente clínico (+ conta CRM se ainda não convertido).
+     */
+    public function convertLeadToPaciente(CrmLead $lead, User $user): PosOperatorioPaciente
+    {
+        if ($lead->getStatus() !== CrmLead::STATUS_CONVERTIDO) {
+            $this->convertLead($lead, $user);
+        }
+
+        $obs = trim((string) $lead->getNotas());
+        $bridgeNote = 'CRM lead #'.$lead->getId().' · '.$lead->getNome();
+        if ($obs !== '') {
+            $bridgeNote .= "\n".$obs;
+        }
+
+        return $this->pacientes->create($lead->getEmpresa(), [
+            'nome' => $lead->getNome(),
+            'telefone' => (string) ($lead->getTelefone() ?? ''),
+            'email_contato' => (string) ($lead->getEmail() ?? ''),
+            'observacoes' => $bridgeNote,
+        ], $user);
     }
 
     /** @param array<string, mixed> $data */

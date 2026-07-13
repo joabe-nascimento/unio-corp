@@ -66,8 +66,8 @@ Uma só trilha — pós-op continua como diferencial; gestão completa se constr
 | **E1** | Agenda | **Fechada (MVP+)** | Dia/semana + recepção + WA manual + **confirmação D-1** (comando/cron) | Módulo Agenda na landing + nav |
 | **E2** | Atendimento | **MVP+ PEP leve** | SOAP + hipótese/CID; finaliza → `atendido` + evolução | Nav Atendimento |
 | **E3** | Faturamento leve | **MVP entregue** (particular) | Conta `aberto` ao finalizar; pago / cortesia / cancelar | Nav Contas |
-| **E4** | TISS | **MVP+** | Convênios + guia + lote + XML ANS + TUSS | Nav Convênios / Guias / Lotes |
-| **E5** | Escala | Depois / integrar | Financeiro, CRM/captação | Integrar > reinventar |
+| **E4** | TISS | **MVP+ anti-glosa** | Convênios + guia + lote + XML + checklist pré-envio + painel glosas | Nav Guias / Anti-glosa |
+| **E5** | Captação / caixa | **Parcial** | CRM→paciente; contas a receber (KPIs); WhatsApp Meta live | CRM + Contas |
 
 **Regra:** não pular E1→E4. Confirmação WhatsApp entra no fim de E1. Login editorial e copy de venda já falam **gestão + cuidado depois da alta**.
 

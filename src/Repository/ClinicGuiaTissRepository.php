@@ -61,4 +61,50 @@ class ClinicGuiaTissRepository extends ServiceEntityRepository
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
+
+    /**
+     * @return list<array{convenio_id: int|null, convenio: string, total: int, glosadas: int, pagas: int, taxa_glosa: float}>
+     */
+    public function glosaStatsByConvenio(Empresa $empresa): array
+    {
+        $rows = $this->createQueryBuilder('g')
+            ->select('IDENTITY(g.convenio) AS convenio_id')
+            ->addSelect('COALESCE(c.nome, \'Sem convênio\') AS convenio_nome')
+            ->addSelect('COUNT(g.id) AS total')
+            ->addSelect('SUM(CASE WHEN g.status = :glosado THEN 1 ELSE 0 END) AS glosadas')
+            ->addSelect('SUM(CASE WHEN g.status = :pago THEN 1 ELSE 0 END) AS pagas')
+            ->leftJoin('g.convenio', 'c')
+            ->andWhere('g.empresa = :empresa')
+            ->andWhere('g.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('glosado', ClinicGuiaTiss::STATUS_GLOSADO)
+            ->setParameter('pago', ClinicGuiaTiss::STATUS_PAGO)
+            ->setParameter('statuses', [
+                ClinicGuiaTiss::STATUS_ENVIADO,
+                ClinicGuiaTiss::STATUS_AUTORIZADO,
+                ClinicGuiaTiss::STATUS_GLOSADO,
+                ClinicGuiaTiss::STATUS_PAGO,
+            ])
+            ->groupBy('g.convenio')
+            ->addGroupBy('c.nome')
+            ->orderBy('glosadas', 'DESC')
+            ->getQuery()
+            ->getArrayResult();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $total = (int) ($row['total'] ?? 0);
+            $glosadas = (int) ($row['glosadas'] ?? 0);
+            $out[] = [
+                'convenio_id' => isset($row['convenio_id']) ? (int) $row['convenio_id'] : null,
+                'convenio' => (string) ($row['convenio_nome'] ?? 'Sem convênio'),
+                'total' => $total,
+                'glosadas' => $glosadas,
+                'pagas' => (int) ($row['pagas'] ?? 0),
+                'taxa_glosa' => $total > 0 ? round(($glosadas / $total) * 100, 1) : 0.0,
+            ];
+        }
+
+        return $out;
+    }
 }

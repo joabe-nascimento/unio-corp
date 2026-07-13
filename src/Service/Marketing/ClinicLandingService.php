@@ -43,7 +43,7 @@ final class ClinicLandingService
                 'app_pos_operatorio_agenda',
                 'images/marketing/modules/mod-agenda.jpg',
                 'Marque paciente e médico na mesma clínica. Marcos do protocolo (D+n) viram sugestão de horário. Menos retorno perdido, mais continuidade.',
-                ['Lista semanal por médico', 'Status marcado → confirmado → atendido', 'Agendar a partir dos retornos', 'Mesmo organismo do pós-operatório'],
+                ['Lista semanal por médico', 'Status: marcado → confirmado → chegou → atendimento → atendido/faltou', 'Agendar a partir dos retornos', 'Mesmo organismo do pós-operatório'],
                 [
                     ['value' => '18', 'label' => 'Horários na semana'],
                     ['value' => '5', 'label' => 'Do protocolo'],

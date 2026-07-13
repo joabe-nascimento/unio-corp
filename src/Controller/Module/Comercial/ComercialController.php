@@ -123,6 +123,27 @@ class ComercialController extends AbstractController
         return $this->redirectToRoute('app_comercial_cliente_show', ['id' => $conta->getId()]);
     }
 
+    #[Route('/leads/{id}/paciente', name: 'app_comercial_lead_paciente', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function leadPaciente(int $id, Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $empresa = $this->requireEmpresa($user);
+        $lead = $this->crm->loadLead($empresa, $id);
+        $this->requireCsrf($request, 'crm_lead_paciente_' . $id);
+
+        try {
+            $paciente = $this->crm->convertLeadToPaciente($lead, $user);
+            $this->addFlash('success', 'Paciente clínico criado a partir do lead.');
+
+            return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $paciente->getId()]);
+        } catch (\Throwable $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToRoute('app_comercial_lead_show', ['id' => $id]);
+        }
+    }
+
     #[Route('/leads/{id}/excluir', name: 'app_comercial_lead_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function leadExcluir(int $id, Request $request): Response
     {

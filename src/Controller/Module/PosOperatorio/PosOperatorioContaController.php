@@ -60,6 +60,9 @@ final class PosOperatorioContaController extends AbstractController
             'list_total' => $totalContas,
             'list_limit' => $listLimit,
             'list_truncated' => $totalContas > $listLimit,
+            'total_aberto_centavos' => $this->contas->sumAbertoCentavos($empresa),
+            'total_pago_centavos' => $this->contas->sumPagoCentavos($empresa),
+            'qtd_abertas' => $this->contas->countList($empresa, 'aberto'),
         ]);
     }
 
