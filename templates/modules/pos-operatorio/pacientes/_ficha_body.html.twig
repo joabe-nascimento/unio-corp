@@ -134,10 +134,17 @@
                 } %}
                 <ul class="organismo-care-milestones list-unstyled mb-0 px-3 pb-3">
                     {% for m in care_contract.marcos %}
+                    {% set _parts = m.label|split(' — ', 2) %}
                     <li class="organismo-care-milestones__item{{ m.attested ? ' is-done' : '' }}">
                         <div class="organismo-care-milestones__main">
                             <i class="fas {{ m.attested ? 'fa-check-circle' : 'fa-circle' }}" aria-hidden="true"></i>
-                            <span>{{ m.label }}</span>
+                            <span class="organismo-care-milestones__label">
+                                {% if _parts|length == 2 %}
+                                <strong class="organismo-care-milestones__when">{{ _parts[0] }}</strong><span class="organismo-care-milestones__what"> — {{ _parts[1] }}</span>
+                                {% else %}
+                                <strong class="organismo-care-milestones__when">{{ m.label }}</strong>
+                                {% endif %}
+                            </span>
                             {% if m.attested %}
                             <span class="text-muted small">{{ m.em }} · {{ m.hash|slice(0, 8) }}…</span>
                             {% endif %}

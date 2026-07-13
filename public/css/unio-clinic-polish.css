@@ -91,6 +91,18 @@ body.org-clinic.unio-organismo textarea.form-control {
     border-radius: 14px !important;
     border-color: var(--clinic-border) !important;
     box-shadow: none !important;
+    color: var(--org-ink, #1e2a3a) !important;
+}
+
+body.org-clinic.unio-organismo select.form-control,
+body.org-clinic.unio-organismo .custom-select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M6 8L0 0h12z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 10px 7px !important;
+    padding-right: 2.25rem !important;
 }
 
 body.org-clinic.unio-organismo .form-control:focus,
@@ -1281,24 +1293,78 @@ body.org-clinic .unio-offcanvas-header {
     color: var(--org-ink);
 }
 
+.clinic-paciente-form .form-group > label,
+.clinic-form-advanced .form-group > label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--org-ink, #1e2a3a);
+}
+
+.clinic-paciente-form .form-control,
+.clinic-form-advanced .form-control {
+    color: var(--org-ink, #1e2a3a);
+}
+
+.clinic-paciente-form .form-group > small,
+.clinic-form-advanced .form-group > small {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--org-ink-muted, #64748b);
+}
+
 .clinic-form-advanced {
     margin-bottom: 16px;
     border: 1px solid var(--org-border-soft);
     border-radius: 12px;
     background: rgba(234, 240, 251, 0.35);
+    overflow: hidden;
 }
 
 .clinic-form-advanced > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 12px 14px;
     font-size: 13px;
     font-weight: 700;
     color: var(--org-ink-soft);
     cursor: pointer;
     list-style: none;
+    user-select: none;
+    transition: background-color 0.15s ease;
 }
 
 .clinic-form-advanced > summary::-webkit-details-marker {
     display: none;
+}
+
+.clinic-form-advanced > summary::marker {
+    display: none;
+    content: '';
+}
+
+.clinic-form-advanced > summary::before {
+    content: '';
+    width: 0;
+    height: 0;
+    flex-shrink: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 6px solid var(--org-blue-text, #4b72be);
+    transition: transform 0.15s ease;
+}
+
+.clinic-form-advanced[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.clinic-form-advanced > summary:hover {
+    background: rgba(75, 114, 190, 0.06);
 }
 
 .clinic-form-advanced__body {
@@ -2810,4 +2876,70 @@ body.org-clinic:not(.sidebar-collapse) .clinic-sidebar-pulse__full {
 [data-theme="dark"] body.org-clinic.unio-organismo .btn.btn-outline-primary {
     background: rgba(75, 114, 190, 0.16) !important;
     color: #c5d8f5 !important;
+}
+
+/* ── Contrato de cuidado (ficha do paciente) ── */
+.organismo-care-milestones {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+.organismo-care-milestones__item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--org-border-soft, rgba(30, 42, 58, 0.08));
+}
+.organismo-care-milestones__item:first-child {
+    border-top: 0;
+}
+.organismo-care-milestones__main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 10px;
+}
+.organismo-care-milestones__main > i {
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 0.7rem;
+    color: var(--org-blue-text, #4b72be);
+    opacity: 0.55;
+}
+.organismo-care-milestones__item.is-done .organismo-care-milestones__main > i {
+    color: #10b981;
+    opacity: 1;
+    font-size: 0.85rem;
+}
+.organismo-care-milestones__when {
+    font-weight: 800;
+    color: var(--org-ink, #1e2a3a);
+    letter-spacing: -0.01em;
+}
+.organismo-care-milestones__what {
+    color: var(--org-ink-soft, #334155);
+    font-weight: 500;
+}
+.organismo-care-milestones__form {
+    margin: 0 0 0 1.35rem;
+}
+.organismo-care-milestones__form .btn-unio-ghost {
+    min-height: 32px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.organismo-memory-list__item {
+    padding: 10px 0;
+    border-top: 1px solid var(--org-border-soft, rgba(30, 42, 58, 0.08));
+}
+.organismo-memory-list__item:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+.organismo-memory-list__item strong {
+    font-weight: 700;
+    color: var(--org-ink, #1e2a3a);
 }
