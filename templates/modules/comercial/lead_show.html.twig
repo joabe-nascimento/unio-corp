@@ -27,56 +27,70 @@
             {% include 'components/section_header.html.twig' with { title: 'Editar lead', subtitle: 'Atualizado em ' ~ lead.atualizadoEm|date('d/m/Y H:i') } %}
             <form method="post" class="px-3 pb-3 crm-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('crm_lead_edit_' ~ lead.id) }}">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label" for="nome">Nome completo *</label>
+
+                <fieldset class="crm-form-section">
+                    <legend class="crm-form-section__title">Essencial</legend>
+                    <div class="form-group">
+                        <label for="nome">Nome completo *</label>
                         <input class="form-control" id="nome" name="nome" value="{{ lead.nome }}" required
                                placeholder="Ex.: Ana Paula Mendes">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="empresa_nome">Empresa / clínica</label>
-                        <input class="form-control" id="empresa_nome" name="empresa_nome" value="{{ lead.empresaNome }}"
-                               placeholder="Ex.: União Médica — unidade Centro">
+                    <div class="form-group mb-0">
+                        <label for="telefone">Telefone / WhatsApp</label>
+                        <input class="form-control" id="telefone" name="telefone" type="tel" inputmode="tel"
+                               data-mask="phone" value="{{ lead.telefone }}" placeholder="(11) 98888-0000">
+                        <small class="form-text text-muted">Canal principal de contato comercial.</small>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="email">E-mail</label>
-                        <input class="form-control" id="email" type="email" name="email" value="{{ lead.email }}"
-                               placeholder="ana@email.com">
+                </fieldset>
+
+                <details class="crm-form-advanced" open>
+                    <summary>Mais detalhes</summary>
+                    <div class="crm-form-advanced__body">
+                        <div class="form-group">
+                            <label for="empresa_nome">Empresa / clínica</label>
+                            <input class="form-control" id="empresa_nome" name="empresa_nome" value="{{ lead.empresaNome }}"
+                                   placeholder="Ex.: União Médica — unidade Centro">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="email">E-mail</label>
+                                <input class="form-control" id="email" type="email" name="email" value="{{ lead.email }}"
+                                       placeholder="ana@email.com">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="cargo">Cargo</label>
+                                <input class="form-control" id="cargo" name="cargo" value="{{ lead.cargo }}"
+                                       placeholder="Ex.: coordenadora">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="origem">Origem</label>
+                                <select class="form-control" id="origem" name="origem">
+                                    {% for o in origem_options %}
+                                    <option value="{{ o }}" {% if lead.origem == o %}selected{% endif %}>{{ origem_labels[o]|default(o) }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="status">Situação</label>
+                                <select class="form-control" id="status" name="status">
+                                    {% for s in status_options %}
+                                    <option value="{{ s }}" {% if lead.status == s %}selected{% endif %}>{{ status_labels[s]|default(s) }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="notas">Notas</label>
+                            <textarea class="form-control" id="notas" name="notas" rows="3"
+                                      placeholder="Ex.: interessada em pós-op; ligar após as 14h">{{ lead.notas }}</textarea>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="telefone">Telefone / WhatsApp</label>
-                        <input class="form-control" id="telefone" name="telefone" value="{{ lead.telefone }}"
-                               placeholder="(11) 98888-0000">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="cargo">Cargo</label>
-                        <input class="form-control" id="cargo" name="cargo" value="{{ lead.cargo }}"
-                               placeholder="Ex.: coordenadora">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="origem">Origem</label>
-                        <select class="form-control" id="origem" name="origem">
-                            {% for o in origem_options %}
-                            <option value="{{ o }}" {% if lead.origem == o %}selected{% endif %}>{{ origem_labels[o]|default(o) }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="status">Situação</label>
-                        <select class="form-control" id="status" name="status">
-                            {% for s in status_options %}
-                            <option value="{{ s }}" {% if lead.status == s %}selected{% endif %}>{{ status_labels[s]|default(s) }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label" for="notas">Notas</label>
-                        <textarea class="form-control" id="notas" name="notas" rows="3"
-                                  placeholder="Ex.: interessada em pós-op; ligar após as 14h">{{ lead.notas }}</textarea>
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn-unio btn-sm">Salvar lead</button>
-                    </div>
+                </details>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn-unio btn-sm">Salvar lead</button>
                 </div>
             </form>
         </div>

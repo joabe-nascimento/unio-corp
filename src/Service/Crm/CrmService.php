@@ -70,6 +70,7 @@ final class CrmService
             'recent_leads' => $this->leads->findByEmpresa($empresa, null, 6),
             'pending_atividades' => $this->atividades->findPendentes($empresa, 6),
             'pipeline_preview' => $board,
+            'stage_meta' => CrmOportunidade::stageMeta(),
             'modules' => $this->getModules(),
             'status_labels' => CrmLead::statusLabels(),
             'origem_labels' => CrmLead::origemLabels(),

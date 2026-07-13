@@ -16,53 +16,67 @@
             {% include 'components/section_header.html.twig' with { title: 'Editar cliente', subtitle: 'Cadastro comercial' } %}
             <form method="post" class="px-3 pb-3 crm-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('crm_conta_edit_' ~ conta.id) }}">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label" for="nome">Nome completo *</label>
+
+                <fieldset class="crm-form-section">
+                    <legend class="crm-form-section__title">Essencial</legend>
+                    <div class="form-group">
+                        <label for="nome">Nome completo *</label>
                         <input class="form-control" id="nome" name="nome" value="{{ conta.nome }}" required
                                placeholder="Ex.: Clínica Horizonte">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="documento">CNPJ ou CPF</label>
-                        <input class="form-control" id="documento" name="documento" value="{{ conta.documento }}"
-                               placeholder="00.000.000/0001-00">
+                    <div class="form-group mb-0">
+                        <label for="telefone">Telefone / WhatsApp</label>
+                        <input class="form-control" id="telefone" name="telefone" type="tel" inputmode="tel"
+                               data-mask="phone" value="{{ conta.telefone }}" placeholder="(11) 98888-0000">
+                        <small class="form-text text-muted">Usado para follow-up e confirmações.</small>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="email">E-mail</label>
-                        <input class="form-control" id="email" type="email" name="email" value="{{ conta.email }}"
-                               placeholder="contato@clinica.com.br">
+                </fieldset>
+
+                <details class="crm-form-advanced" open>
+                    <summary>Mais detalhes</summary>
+                    <div class="crm-form-advanced__body">
+                        <div class="form-group">
+                            <label for="documento">CNPJ ou CPF</label>
+                            <input class="form-control" id="documento" name="documento" value="{{ conta.documento }}"
+                                   placeholder="00.000.000/0001-00 ou 000.000.000-00" inputmode="numeric">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="email">E-mail</label>
+                                <input class="form-control" id="email" type="email" name="email" value="{{ conta.email }}"
+                                       placeholder="contato@clinica.com.br">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="segmento">Segmento</label>
+                                <input class="form-control" id="segmento" name="segmento" value="{{ conta.segmento }}"
+                                       placeholder="Ex.: ortopedia, estética">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="site">Site</label>
+                                <input class="form-control" id="site" name="site" value="{{ conta.site }}"
+                                       placeholder="https://www.exemplo.com.br">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="status">Situação</label>
+                                <select class="form-control" id="status" name="status">
+                                    {% for s in status_options %}
+                                    <option value="{{ s }}" {% if conta.status == s %}selected{% endif %}>{{ status_labels[s]|default(s) }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="notas">Notas</label>
+                            <textarea class="form-control" id="notas" name="notas" rows="3"
+                                      placeholder="Ex.: veio indicado; quer retorno em 15 dias">{{ conta.notas }}</textarea>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="telefone">Telefone / WhatsApp</label>
-                        <input class="form-control" id="telefone" name="telefone" value="{{ conta.telefone }}"
-                               placeholder="(11) 98888-0000">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="segmento">Segmento</label>
-                        <input class="form-control" id="segmento" name="segmento" value="{{ conta.segmento }}"
-                               placeholder="Ex.: ortopedia, estética">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="site">Site</label>
-                        <input class="form-control" id="site" name="site" value="{{ conta.site }}"
-                               placeholder="https://www.exemplo.com.br">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="status">Situação</label>
-                        <select class="form-control" id="status" name="status">
-                            {% for s in status_options %}
-                            <option value="{{ s }}" {% if conta.status == s %}selected{% endif %}>{{ status_labels[s]|default(s) }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label" for="notas">Notas</label>
-                        <textarea class="form-control" id="notas" name="notas" rows="3"
-                                  placeholder="Ex.: veio indicado; quer retorno em 15 dias">{{ conta.notas }}</textarea>
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn-unio btn-sm">Salvar cliente</button>
-                    </div>
+                </details>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn-unio btn-sm">Salvar cliente</button>
                 </div>
             </form>
         </div>

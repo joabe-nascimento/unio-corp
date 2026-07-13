@@ -95,7 +95,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_lead_edit_' . $id);
             try {
                 $this->crm->updateLead($lead, $request->request->all());
-                $this->addFlash('success', 'Lead atualizado.');
+                $this->addFlash('success', 'Lead salvo.');
 
                 return $this->redirectToRoute('app_comercial_lead_show', ['id' => $id]);
             } catch (\InvalidArgumentException $e) {
@@ -173,7 +173,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_oportunidade_nova');
             try {
                 $op = $this->crm->createOportunidade($empresa, $user, $request->request->all());
-                $this->addFlash('success', 'Oportunidade salva no funil.');
+                $this->addFlash('success', 'Oportunidade salva.');
 
                 return $this->redirectToRoute('app_comercial_oportunidade_show', ['id' => $op->getId()]);
             } catch (\InvalidArgumentException $e) {
@@ -206,7 +206,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_oportunidade_edit_' . $id);
             try {
                 $this->crm->updateOportunidade($op, $empresa, $request->request->all());
-                $this->addFlash('success', 'Oportunidade atualizada.');
+                $this->addFlash('success', 'Oportunidade salva.');
 
                 return $this->redirectToRoute('app_comercial_oportunidade_show', ['id' => $id]);
             } catch (\InvalidArgumentException $e) {
@@ -300,7 +300,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_conta_edit_' . $id);
             try {
                 $this->crm->updateConta($conta, $request->request->all());
-                $this->addFlash('success', 'Cliente atualizado.');
+                $this->addFlash('success', 'Cliente salvo.');
 
                 return $this->redirectToRoute('app_comercial_cliente_show', ['id' => $id]);
             } catch (\InvalidArgumentException $e) {
@@ -341,7 +341,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_atividade_nova');
             try {
                 $this->crm->createAtividade($empresa, $user, $request->request->all());
-                $this->addFlash('success', 'Atividade registrada.');
+                $this->addFlash('success', 'Atividade salva.');
 
                 return $this->redirectToRoute('app_comercial_atividades');
             } catch (\InvalidArgumentException $e) {

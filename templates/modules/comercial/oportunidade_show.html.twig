@@ -13,60 +13,73 @@
     <div class="col-lg-8">
         <div class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Editar oportunidade' } %}
-            <form method="post" class="px-3 pb-3">
+            <form method="post" class="px-3 pb-3 crm-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_edit_' ~ oportunidade.id) }}">
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <label class="form-label" for="titulo">Título *</label>
+
+                <fieldset class="crm-form-section">
+                    <legend class="crm-form-section__title">Essencial</legend>
+                    <div class="form-group">
+                        <label for="titulo">Título *</label>
                         <input class="form-control" id="titulo" name="titulo" value="{{ oportunidade.titulo }}" required
                                placeholder="Ex.: Plano Clínica — 3 médicos">
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="estagio">Estágio no funil</label>
-                        <select class="form-control" id="estagio" name="estagio">
-                            {% for s in stages %}
-                            <option value="{{ s }}" {% if oportunidade.estagio == s %}selected{% endif %}>{{ stage_meta[s].label|default(s) }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="form-row mb-0">
+                        <div class="form-group col-md-6 mb-md-0">
+                            <label for="estagio">Estágio no funil</label>
+                            <select class="form-control" id="estagio" name="estagio">
+                                {% for s in stages %}
+                                <option value="{{ s }}" {% if oportunidade.estagio == s %}selected{% endif %}>{{ stage_meta[s].label|default(s) }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6 mb-0">
+                            <label for="valor">Valor estimado (R$)</label>
+                            <input class="form-control" id="valor" name="valor" value="{{ oportunidade.valor }}" placeholder="0,00" inputmode="decimal">
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="valor">Valor estimado (R$)</label>
-                        <input class="form-control" id="valor" name="valor" value="{{ oportunidade.valor }}" placeholder="0,00">
+                </fieldset>
+
+                <details class="crm-form-advanced" open>
+                    <summary>Mais detalhes</summary>
+                    <div class="crm-form-advanced__body">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="probabilidade">Probabilidade (%)</label>
+                                <input class="form-control" id="probabilidade" type="number" min="0" max="100" name="probabilidade" value="{{ oportunidade.probabilidade }}">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="fecha_prevista">Fecha prevista</label>
+                                <input class="form-control" id="fecha_prevista" type="date" name="fecha_prevista" value="{{ oportunidade.fechaPrevista ? oportunidade.fechaPrevista|date('Y-m-d') : '' }}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="conta_id">Cliente</label>
+                            <select class="form-control" id="conta_id" name="conta_id">
+                                <option value="">Sem cliente ainda</option>
+                                {% for c in contas %}
+                                <option value="{{ c.id }}" {% if oportunidade.conta and oportunidade.conta.id == c.id %}selected{% endif %}>{{ c.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="lead_id">Lead de origem</label>
+                            <select class="form-control" id="lead_id" name="lead_id">
+                                <option value="">Sem lead</option>
+                                {% for l in leads %}
+                                <option value="{{ l.id }}" {% if oportunidade.lead and oportunidade.lead.id == l.id %}selected{% endif %}>{{ l.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="notas">Notas</label>
+                            <textarea class="form-control" id="notas" name="notas" rows="3"
+                                      placeholder="Ex.: proposta enviada; aguardando retorno">{{ oportunidade.notas }}</textarea>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="probabilidade">Probabilidade (%)</label>
-                        <input class="form-control" id="probabilidade" type="number" min="0" max="100" name="probabilidade" value="{{ oportunidade.probabilidade }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="fecha_prevista">Fecha prevista</label>
-                        <input class="form-control" id="fecha_prevista" type="date" name="fecha_prevista" value="{{ oportunidade.fechaPrevista ? oportunidade.fechaPrevista|date('Y-m-d') : '' }}">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="conta_id">Cliente</label>
-                        <select class="form-control" id="conta_id" name="conta_id">
-                            <option value="">Sem cliente ainda</option>
-                            {% for c in contas %}
-                            <option value="{{ c.id }}" {% if oportunidade.conta and oportunidade.conta.id == c.id %}selected{% endif %}>{{ c.nome }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="lead_id">Lead de origem</label>
-                        <select class="form-control" id="lead_id" name="lead_id">
-                            <option value="">Sem lead</option>
-                            {% for l in leads %}
-                            <option value="{{ l.id }}" {% if oportunidade.lead and oportunidade.lead.id == l.id %}selected{% endif %}>{{ l.nome }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label" for="notas">Notas</label>
-                        <textarea class="form-control" id="notas" name="notas" rows="3"
-                                  placeholder="Ex.: proposta enviada; aguardando retorno">{{ oportunidade.notas }}</textarea>
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn-unio btn-sm">Salvar oportunidade</button>
-                    </div>
+                </details>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn-unio btn-sm">Salvar oportunidade</button>
                 </div>
             </form>
         </div>
@@ -88,9 +101,9 @@
         <div class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Ações' } %}
             <div class="px-3 pb-3">
-                <form method="post" action="{{ path('app_comercial_oportunidade_excluir', { id: oportunidade.id }) }}" onsubmit="return confirm('Excluir oportunidade?');">
+                <form method="post" action="{{ path('app_comercial_oportunidade_excluir', { id: oportunidade.id }) }}" onsubmit="return confirm('Excluir esta oportunidade?');">
                     <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_delete_' ~ oportunidade.id) }}">
-                    <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
+                    <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir oportunidade</button>
                 </form>
             </div>
         </div>

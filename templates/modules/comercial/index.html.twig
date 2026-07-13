@@ -51,7 +51,7 @@
                     icon: 'fa-user-plus',
                     title: 'Ainda sem leads',
                     text: 'Cadastre o primeiro contato ou carregue dados de demonstração.',
-                    btn_label: 'Criar lead',
+                    btn_label: 'Novo lead',
                     btn_href: path('app_comercial_leads', { novo: 1 }),
                     compact: true
                 } %}
@@ -95,7 +95,7 @@
                 btn_ghost: true
             } %}
             {% if pending_atividades|length == 0 %}
-            <p class="px-3 pb-3 text-muted small mb-0">Nenhuma atividade pendente.</p>
+            <p class="px-3 pb-3 text-muted small mb-0">Nenhuma atividade pendente. Registre um follow-up quando precisar.</p>
             {% else %}
             <ul class="list-unstyled mb-0 px-3 pb-3">
                 {% for a in pending_atividades %}
@@ -110,10 +110,6 @@
             {% endif %}
         </div>
 
-        {% set stage_meta = {
-            lead: 'Lead', qualificacao: 'Qualificação', proposta: 'Proposta',
-            negociacao: 'Negociação', ganho: 'Ganho', perdido: 'Perdido'
-        } %}
         <div class="unio-card">
             {% include 'components/section_header.html.twig' with {
                 title: 'Pipeline (resumo)',
@@ -123,7 +119,7 @@
                 {% for stage, items in pipeline_preview %}
                     {% if stage not in ['ganho', 'perdido'] or items|length > 0 %}
                     <li class="d-flex justify-content-between py-1">
-                        <span>{{ stage_meta[stage]|default(stage) }}</span>
+                        <span>{{ stage_meta[stage].label|default(stage) }}</span>
                         <strong>{{ items|length }}</strong>
                     </li>
                     {% endif %}
