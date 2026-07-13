@@ -7,56 +7,67 @@
     open: open|default(false)
 } %}
 {% block offcanvas_body %}
-<form method="post" action="{{ path('app_comercial_atividades') }}" id="crmAtividadeNovaForm">
+{% set tipo_labels = tipo_labels|default({}) %}
+<form method="post" action="{{ path('app_comercial_atividades') }}" id="crmAtividadeNovaForm" class="crm-form">
     <input type="hidden" name="_token" value="{{ csrf_token('crm_atividade_nova') }}">
-    <div class="form-row">
-        <div class="form-group col-md-8">
-            <label for="crm-ativ-titulo">Título *</label>
-            <input class="form-control" id="crm-ativ-titulo" name="titulo" required autofocus>
+
+    <fieldset class="crm-form-section">
+        <legend class="crm-form-section__title">Essencial</legend>
+        <div class="form-group">
+            <label for="crm-ativ-titulo">O que fazer *</label>
+            <input class="form-control" id="crm-ativ-titulo" name="titulo" required autofocus
+                   placeholder="Ex.: Ligar para confirmar interesse">
         </div>
-        <div class="form-group col-md-4">
-            <label for="crm-ativ-tipo">Tipo</label>
-            <select class="form-control" id="crm-ativ-tipo" name="tipo">
-                {% for t in tipo_options %}
-                <option value="{{ t }}">{{ t }}</option>
-                {% endfor %}
-            </select>
+        <div class="form-row mb-0">
+            <div class="form-group col-md-6 mb-md-0">
+                <label for="crm-ativ-tipo">Tipo</label>
+                <select class="form-control" id="crm-ativ-tipo" name="tipo">
+                    {% for t in tipo_options %}
+                    <option value="{{ t }}">{{ tipo_labels[t]|default(t) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group col-md-6 mb-0">
+                <label for="crm-ativ-vence">Vence em</label>
+                <input class="form-control" id="crm-ativ-vence" type="date" name="vence_em">
+            </div>
         </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-4">
-            <label for="crm-ativ-vence">Vence em</label>
-            <input class="form-control" id="crm-ativ-vence" type="date" name="vence_em">
+    </fieldset>
+
+    <details class="crm-form-advanced">
+        <summary>Vínculo e detalhes</summary>
+        <div class="crm-form-advanced__body">
+            <div class="form-group">
+                <label for="crm-ativ-lead">Lead</label>
+                <select class="form-control" id="crm-ativ-lead" name="lead_id">
+                    <option value="">Sem vínculo</option>
+                    {% for l in leads %}
+                    <option value="{{ l.id }}">{{ l.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="crm-ativ-conta">Cliente</label>
+                <select class="form-control" id="crm-ativ-conta" name="conta_id">
+                    <option value="">Sem vínculo</option>
+                    {% for c in contas %}
+                    <option value="{{ c.id }}">{{ c.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-0">
+                <label for="crm-ativ-desc">Descrição</label>
+                <textarea class="form-control" id="crm-ativ-desc" name="descricao" rows="3"
+                          placeholder="Ex.: confirmar horário e enviar proposta por WhatsApp"></textarea>
+            </div>
         </div>
-        <div class="form-group col-md-4">
-            <label for="crm-ativ-lead">Lead</label>
-            <select class="form-control" id="crm-ativ-lead" name="lead_id">
-                <option value="">—</option>
-                {% for l in leads %}
-                <option value="{{ l.id }}">{{ l.nome }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-md-4">
-            <label for="crm-ativ-conta">Cliente</label>
-            <select class="form-control" id="crm-ativ-conta" name="conta_id">
-                <option value="">—</option>
-                {% for c in contas %}
-                <option value="{{ c.id }}">{{ c.nome }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="crm-ativ-desc">Descrição</label>
-        <textarea class="form-control" id="crm-ativ-desc" name="descricao" rows="3"></textarea>
-    </div>
+    </details>
 </form>
 {% endblock %}
 {% block offcanvas_footer %}
 <div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
     <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
-    <button type="submit" form="crmAtividadeNovaForm" class="btn-unio">Salvar</button>
+    <button type="submit" form="crmAtividadeNovaForm" class="btn-unio">Registrar atividade</button>
 </div>
 {% endblock %}
 {% endembed %}

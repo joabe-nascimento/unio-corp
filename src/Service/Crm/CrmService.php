@@ -64,13 +64,16 @@ final class CrmService
                 ['value' => $this->countOpenDeals($board), 'label' => 'No pipeline', 'sub' => 'Oportunidades abertas', 'route' => 'app_comercial_pipeline'],
                 ['value' => $this->formatMoney($pipelineAberto), 'label' => 'Pipeline R$', 'sub' => 'Valor em aberto', 'route' => 'app_comercial_pipeline'],
                 ['value' => $ganhos, 'label' => 'Ganhos', 'sub' => 'Oportunidades fechadas', 'route' => 'app_comercial_pipeline'],
-                ['value' => $contasTotal, 'label' => 'Clientes', 'sub' => 'Contas cadastradas', 'route' => 'app_comercial_clientes'],
+                ['value' => $contasTotal, 'label' => 'Clientes', 'sub' => 'Clientes cadastrados', 'route' => 'app_comercial_clientes'],
                 ['value' => $ativPendentes, 'label' => 'Atividades', 'sub' => 'Pendentes', 'route' => 'app_comercial_atividades'],
             ],
             'recent_leads' => $this->leads->findByEmpresa($empresa, null, 6),
             'pending_atividades' => $this->atividades->findPendentes($empresa, 6),
             'pipeline_preview' => $board,
             'modules' => $this->getModules(),
+            'status_labels' => CrmLead::statusLabels(),
+            'origem_labels' => CrmLead::origemLabels(),
+            'tipo_labels' => CrmAtividade::tipoLabels(),
         ];
     }
 
@@ -80,7 +83,7 @@ final class CrmService
         return [
             ['id' => 'leads', 'label' => 'Leads', 'icon' => 'fa-user-plus', 'route' => 'app_comercial_leads', 'subtitle' => 'Captação e qualificação'],
             ['id' => 'pipeline', 'label' => 'Pipeline', 'icon' => 'fa-diagram-project', 'route' => 'app_comercial_pipeline', 'subtitle' => 'Kanban de oportunidades'],
-            ['id' => 'clientes', 'label' => 'Clientes', 'icon' => 'fa-building', 'route' => 'app_comercial_clientes', 'subtitle' => 'Contas e contas ativas'],
+            ['id' => 'clientes', 'label' => 'Clientes', 'icon' => 'fa-building', 'route' => 'app_comercial_clientes', 'subtitle' => 'Cadastro comercial'],
             ['id' => 'atividades', 'label' => 'Atividades', 'icon' => 'fa-list-check', 'route' => 'app_comercial_atividades', 'subtitle' => 'Ligações, reuniões e tarefas'],
             ['id' => 'analytics', 'label' => 'Analytics', 'icon' => 'fa-chart-pie', 'route' => 'app_comercial_analytics', 'subtitle' => 'Funil e conversão'],
         ];
@@ -136,6 +139,7 @@ final class CrmService
             'by_origem' => $byOrigem,
             'by_stage' => $byStage,
             'stage_meta' => CrmOportunidade::stageMeta(),
+            'origem_labels' => CrmLead::origemLabels(),
         ];
     }
 
@@ -325,7 +329,7 @@ final class CrmService
     public function moveOportunidade(CrmOportunidade $op, string $estagio): CrmOportunidade
     {
         if (!\in_array($estagio, CrmOportunidade::stagesAll(), true)) {
-            throw new \InvalidArgumentException('Estágio inválido.');
+            throw new \InvalidArgumentException('Escolha um estágio válido do funil.');
         }
         $op->setEstagio($estagio);
         if ($estagio === CrmOportunidade::STAGE_GANHO) {
@@ -443,7 +447,7 @@ final class CrmService
     {
         $nome = trim((string) ($data['nome'] ?? ''));
         if ($nome === '') {
-            throw new \InvalidArgumentException('Informe o nome do lead.');
+            throw new \InvalidArgumentException('Informe o nome da pessoa (lead).');
         }
         $lead->setNome($nome);
         $lead->setEmail($this->nullableString($data['email'] ?? null));

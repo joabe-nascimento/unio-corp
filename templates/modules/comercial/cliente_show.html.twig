@@ -1,59 +1,67 @@
 {% extends 'layout/hub.html.twig' %}
 {% block title %}{{ conta.nome }} · Cliente{% endblock %}
 {% block permissions_scope %}hub_comercial{% endblock %}
+{% set status_labels = status_labels|default({}) %}
 {% set hub_page_title = conta.nome %}
-{% set hub_page_subtitle = 'Cliente · ' ~ conta.status %}
+{% set hub_page_subtitle = 'Cliente · ' ~ (status_labels[conta.status]|default(conta.status)) %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_comercial_clientes') }}" class="btn-unio-ghost btn-sm">Voltar</a>
+<a href="{{ path('app_comercial_clientes') }}" class="btn-unio-ghost btn-sm">Voltar aos clientes</a>
 {% endblock %}
 
 {% block hub_content %}
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="unio-card">
-            {% include 'components/section_header.html.twig' with { title: 'Editar cliente' } %}
-            <form method="post" class="px-3 pb-3">
+            {% include 'components/section_header.html.twig' with { title: 'Editar cliente', subtitle: 'Cadastro comercial' } %}
+            <form method="post" class="px-3 pb-3 crm-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('crm_conta_edit_' ~ conta.id) }}">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label" for="nome">Nome *</label>
-                        <input class="form-control" id="nome" name="nome" value="{{ conta.nome }}" required>
+                        <label class="form-label" for="nome">Nome completo *</label>
+                        <input class="form-control" id="nome" name="nome" value="{{ conta.nome }}" required
+                               placeholder="Ex.: Clínica Horizonte">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" for="documento">CNPJ/CPF</label>
-                        <input class="form-control" id="documento" name="documento" value="{{ conta.documento }}">
+                        <label class="form-label" for="documento">CNPJ ou CPF</label>
+                        <input class="form-control" id="documento" name="documento" value="{{ conta.documento }}"
+                               placeholder="00.000.000/0001-00">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label" for="email">E-mail</label>
-                        <input class="form-control" id="email" type="email" name="email" value="{{ conta.email }}">
+                        <input class="form-control" id="email" type="email" name="email" value="{{ conta.email }}"
+                               placeholder="contato@clinica.com.br">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label" for="telefone">Telefone</label>
-                        <input class="form-control" id="telefone" name="telefone" value="{{ conta.telefone }}">
+                        <label class="form-label" for="telefone">Telefone / WhatsApp</label>
+                        <input class="form-control" id="telefone" name="telefone" value="{{ conta.telefone }}"
+                               placeholder="(11) 98888-0000">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label" for="segmento">Segmento</label>
-                        <input class="form-control" id="segmento" name="segmento" value="{{ conta.segmento }}">
+                        <input class="form-control" id="segmento" name="segmento" value="{{ conta.segmento }}"
+                               placeholder="Ex.: ortopedia, estética">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="site">Site</label>
-                        <input class="form-control" id="site" name="site" value="{{ conta.site }}">
+                        <input class="form-control" id="site" name="site" value="{{ conta.site }}"
+                               placeholder="https://www.exemplo.com.br">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" for="status">Status</label>
+                        <label class="form-label" for="status">Situação</label>
                         <select class="form-control" id="status" name="status">
                             {% for s in status_options %}
-                            <option value="{{ s }}" {% if conta.status == s %}selected{% endif %}>{{ s }}</option>
+                            <option value="{{ s }}" {% if conta.status == s %}selected{% endif %}>{{ status_labels[s]|default(s) }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-12">
                         <label class="form-label" for="notas">Notas</label>
-                        <textarea class="form-control" id="notas" name="notas" rows="3">{{ conta.notas }}</textarea>
+                        <textarea class="form-control" id="notas" name="notas" rows="3"
+                                  placeholder="Ex.: veio indicado; quer retorno em 15 dias">{{ conta.notas }}</textarea>
                     </div>
                     <div class="col-12">
-                        <button type="submit" class="btn-unio btn-sm">Salvar</button>
+                        <button type="submit" class="btn-unio btn-sm">Salvar cliente</button>
                     </div>
                 </div>
             </form>
@@ -64,7 +72,7 @@
             {% include 'components/section_header.html.twig' with { title: 'Ações' } %}
             <div class="px-3 pb-3 d-grid gap-2">
                 <a href="{{ path('app_comercial_pipeline', { novo: 1 }) }}" class="btn-unio-ghost btn-sm">Nova oportunidade</a>
-                <form method="post" action="{{ path('app_comercial_cliente_excluir', { id: conta.id }) }}" onsubmit="return confirm('Excluir cliente?');">
+                <form method="post" action="{{ path('app_comercial_cliente_excluir', { id: conta.id }) }}" onsubmit="return confirm('Excluir este cliente?');">
                     <input type="hidden" name="_token" value="{{ csrf_token('crm_conta_delete_' ~ conta.id) }}">
                     <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir cliente</button>
                 </form>

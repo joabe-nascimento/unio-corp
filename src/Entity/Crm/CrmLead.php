@@ -117,9 +117,43 @@ class CrmLead
         return [self::STATUS_NOVO, self::STATUS_QUALIFICANDO, self::STATUS_QUALIFICADO, self::STATUS_DESCARTADO, self::STATUS_CONVERTIDO];
     }
 
+    /** @return array<string, string> */
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_NOVO => 'Novo',
+            self::STATUS_QUALIFICANDO => 'Em qualificação',
+            self::STATUS_QUALIFICADO => 'Qualificado',
+            self::STATUS_DESCARTADO => 'Descartado',
+            self::STATUS_CONVERTIDO => 'Convertido',
+        ];
+    }
+
+    public static function statusLabel(string $status): string
+    {
+        return self::statusLabels()[$status] ?? $status;
+    }
+
     /** @return list<string> */
     public static function origemList(): array
     {
         return [self::ORIGEM_MANUAL, self::ORIGEM_SITE, self::ORIGEM_INDICACAO, self::ORIGEM_EVENTO, self::ORIGEM_OUTRO];
+    }
+
+    /** @return array<string, string> */
+    public static function origemLabels(): array
+    {
+        return [
+            self::ORIGEM_MANUAL => 'Cadastro manual',
+            self::ORIGEM_SITE => 'Site / landing',
+            self::ORIGEM_INDICACAO => 'Indicação',
+            self::ORIGEM_EVENTO => 'Evento',
+            self::ORIGEM_OUTRO => 'Outro',
+        ];
+    }
+
+    public static function origemLabel(string $origem): string
+    {
+        return self::origemLabels()[$origem] ?? $origem;
     }
 }

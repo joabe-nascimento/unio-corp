@@ -61,7 +61,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_lead_novo');
             try {
                 $lead = $this->crm->createLead($empresa, $user, $request->request->all());
-                $this->addFlash('success', 'Lead criado.');
+                $this->addFlash('success', 'Lead salvo.');
 
                 return $this->redirectToRoute('app_comercial_lead_show', ['id' => $lead->getId()]);
             } catch (\InvalidArgumentException $e) {
@@ -76,7 +76,9 @@ class ComercialController extends AbstractController
             'leads' => $this->leadRepo->findByEmpresa($empresa, $status !== '' ? $status : null),
             'filter_status' => $status,
             'status_options' => CrmLead::statusList(),
+            'status_labels' => CrmLead::statusLabels(),
             'origem_options' => CrmLead::origemList(),
+            'origem_labels' => CrmLead::origemLabels(),
             'open_novo' => $request->query->getBoolean('novo'),
         ]);
     }
@@ -105,7 +107,9 @@ class ComercialController extends AbstractController
             'crm_section' => 'leads',
             'lead' => $lead,
             'status_options' => CrmLead::statusList(),
+            'status_labels' => CrmLead::statusLabels(),
             'origem_options' => CrmLead::origemList(),
+            'origem_labels' => CrmLead::origemLabels(),
         ]);
     }
 
@@ -118,7 +122,7 @@ class ComercialController extends AbstractController
         $lead = $this->crm->loadLead($empresa, $id);
         $this->requireCsrf($request, 'crm_lead_convert_' . $id);
         $conta = $this->crm->convertLead($lead, $user);
-        $this->addFlash('success', 'Lead convertido em cliente e oportunidade.');
+        $this->addFlash('success', 'Lead convertido em cliente e oportunidade no funil.');
 
         return $this->redirectToRoute('app_comercial_cliente_show', ['id' => $conta->getId()]);
     }
@@ -134,7 +138,7 @@ class ComercialController extends AbstractController
 
         try {
             $paciente = $this->crm->convertLeadToPaciente($lead, $user);
-            $this->addFlash('success', 'Paciente clínico criado a partir do lead.');
+            $this->addFlash('success', 'Paciente clínico criado a partir deste lead.');
 
             return $this->redirectToRoute('app_pos_operatorio_pacientes', ['open_ficha' => $paciente->getId()]);
         } catch (\Throwable $e) {
@@ -169,7 +173,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_oportunidade_nova');
             try {
                 $op = $this->crm->createOportunidade($empresa, $user, $request->request->all());
-                $this->addFlash('success', 'Oportunidade criada.');
+                $this->addFlash('success', 'Oportunidade salva no funil.');
 
                 return $this->redirectToRoute('app_comercial_oportunidade_show', ['id' => $op->getId()]);
             } catch (\InvalidArgumentException $e) {
@@ -230,7 +234,7 @@ class ComercialController extends AbstractController
         $this->requireCsrf($request, 'crm_oportunidade_move_' . $id);
         try {
             $this->crm->moveOportunidade($op, $request->request->getString('estagio'));
-            $this->addFlash('success', 'Estágio atualizado.');
+            $this->addFlash('success', 'Estágio da oportunidade atualizado.');
         } catch (\InvalidArgumentException $e) {
             $this->addFlash('error', $e->getMessage());
         }
@@ -267,7 +271,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_conta_nova');
             try {
                 $conta = $this->crm->createConta($empresa, $user, $request->request->all());
-                $this->addFlash('success', 'Cliente criado.');
+                $this->addFlash('success', 'Cliente salvo.');
 
                 return $this->redirectToRoute('app_comercial_cliente_show', ['id' => $conta->getId()]);
             } catch (\InvalidArgumentException $e) {
@@ -279,6 +283,7 @@ class ComercialController extends AbstractController
             'crm_section' => 'clientes',
             'contas' => $this->contaRepo->findByEmpresa($empresa),
             'status_options' => CrmConta::statusList(),
+            'status_labels' => CrmConta::statusLabels(),
             'open_novo' => $request->query->getBoolean('novo'),
         ]);
     }
@@ -307,6 +312,7 @@ class ComercialController extends AbstractController
             'crm_section' => 'clientes',
             'conta' => $conta,
             'status_options' => CrmConta::statusList(),
+            'status_labels' => CrmConta::statusLabels(),
         ]);
     }
 
@@ -335,7 +341,7 @@ class ComercialController extends AbstractController
             $this->requireCsrf($request, 'crm_atividade_nova');
             try {
                 $this->crm->createAtividade($empresa, $user, $request->request->all());
-                $this->addFlash('success', 'Atividade criada.');
+                $this->addFlash('success', 'Atividade registrada.');
 
                 return $this->redirectToRoute('app_comercial_atividades');
             } catch (\InvalidArgumentException $e) {
@@ -347,6 +353,7 @@ class ComercialController extends AbstractController
             'crm_section' => 'atividades',
             'atividades' => $this->atividadeRepo->findPendentes($empresa, 100),
             'tipo_options' => CrmAtividade::tipoList(),
+            'tipo_labels' => CrmAtividade::tipoLabels(),
             'leads' => $this->leadRepo->findByEmpresa($empresa, null, 50),
             'contas' => $this->contaRepo->findByEmpresa($empresa),
             'open_novo' => $request->query->getBoolean('novo'),
@@ -406,7 +413,7 @@ class ComercialController extends AbstractController
     private function requireCsrf(Request $request, string $tokenId): void
     {
         if (!$this->isCsrfTokenValid($tokenId, (string) $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException('Token de segurança inválido.');
+            throw $this->createAccessDeniedException('Sessão expirada ou formulário inválido. Atualize a página e tente de novo.');
         }
     }
 }

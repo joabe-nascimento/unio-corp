@@ -3,6 +3,7 @@
 {% block permissions_scope %}hub_comercial{% endblock %}
 {% set hub_page_title = 'Atividades' %}
 {% set hub_page_subtitle = 'Núcleo Comercial · Follow-ups' %}
+{% set tipo_labels = tipo_labels|default({}) %}
 
 {% block hub_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="crm-atividade-nova">
@@ -20,8 +21,8 @@
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-list-check',
             title: 'Nada pendente',
-            text: 'Crie ligações, reuniões ou tarefas de follow-up.',
-            btn_label: 'Nova atividade',
+            text: 'Registre uma ligação, reunião ou tarefa para acompanhar o funil.',
+            btn_label: 'Registrar atividade',
             btn_opens: 'crm-atividade-nova',
             compact: true
         } %}
@@ -44,7 +45,7 @@
                         <div class="fw-medium">{{ a.titulo }}</div>
                         {% if a.descricao %}<div class="small text-muted">{{ a.descricao|length > 80 ? a.descricao|slice(0, 80) ~ '…' : a.descricao }}</div>{% endif %}
                     </td>
-                    <td>{{ a.tipo }}</td>
+                    <td>{{ tipo_labels[a.tipo]|default(a.tipo) }}</td>
                     <td>{{ a.venceEm ? a.venceEm|date('d/m/Y') : '—' }}</td>
                     <td class="small">
                         {% if a.lead %}Lead: {{ a.lead.nome }}{% elseif a.conta %}Cliente: {{ a.conta.nome }}{% else %}—{% endif %}
@@ -54,7 +55,7 @@
                             <input type="hidden" name="_token" value="{{ csrf_token('crm_atividade_done_' ~ a.id) }}">
                             <button type="submit" class="btn-unio btn-sm">Concluir</button>
                         </form>
-                        <form method="post" action="{{ path('app_comercial_atividade_excluir', { id: a.id }) }}" class="d-inline" onsubmit="return confirm('Excluir?');">
+                        <form method="post" action="{{ path('app_comercial_atividade_excluir', { id: a.id }) }}" class="d-inline" onsubmit="return confirm('Excluir esta atividade?');">
                             <input type="hidden" name="_token" value="{{ csrf_token('crm_atividade_delete_' ~ a.id) }}">
                             <button type="submit" class="btn-unio-ghost btn-sm">Excluir</button>
                         </form>
@@ -72,6 +73,7 @@
 {% include 'components/comercial/atividade_offcanvas.html.twig' with {
     open: open_novo|default(false),
     tipo_options: tipo_options,
+    tipo_labels: tipo_labels,
     leads: leads,
     contas: contas
 } %}

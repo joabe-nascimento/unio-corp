@@ -96,4 +96,19 @@ class CrmConta
     {
         return [self::STATUS_PROSPECT, self::STATUS_ATIVO, self::STATUS_INATIVO];
     }
+
+    /** @return array<string, string> */
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_PROSPECT => 'Prospecto',
+            self::STATUS_ATIVO => 'Ativo',
+            self::STATUS_INATIVO => 'Inativo',
+        ];
+    }
+
+    public static function statusLabel(string $status): string
+    {
+        return self::statusLabels()[$status] ?? $status;
+    }
 }

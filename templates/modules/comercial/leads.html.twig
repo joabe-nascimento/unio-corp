@@ -3,6 +3,8 @@
 {% block permissions_scope %}hub_comercial{% endblock %}
 {% set hub_page_title = 'Leads' %}
 {% set hub_page_subtitle = 'Núcleo Comercial · Captação' %}
+{% set status_labels = status_labels|default({}) %}
+{% set origem_labels = origem_labels|default({}) %}
 
 {% block hub_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="crm-lead-novo">
@@ -14,20 +16,20 @@
 <div class="unio-card">
     {% include 'components/section_header.html.twig' with {
         title: 'Lista de leads',
-        subtitle: filter_status ? 'Filtro: ' ~ filter_status : (leads|length) ~ ' registro(s)'
+        subtitle: filter_status ? 'Filtro: ' ~ (status_labels[filter_status]|default(filter_status)) : (leads|length) ~ ' registro(s)'
     } %}
     <div class="px-3 pb-2 d-flex flex-wrap gap-2">
         <a href="{{ path('app_comercial_leads') }}" class="btn-unio-ghost btn-sm{{ filter_status == '' ? ' is-active' : '' }}">Todos</a>
         {% for s in status_options %}
-        <a href="{{ path('app_comercial_leads', { status: s }) }}" class="btn-unio-ghost btn-sm{{ filter_status == s ? ' is-active' : '' }}">{{ s }}</a>
+        <a href="{{ path('app_comercial_leads', { status: s }) }}" class="btn-unio-ghost btn-sm{{ filter_status == s ? ' is-active' : '' }}">{{ status_labels[s]|default(s) }}</a>
         {% endfor %}
     </div>
     {% if leads|length == 0 %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-user-plus',
-            title: 'Sem leads',
-            text: 'Crie o primeiro lead para alimentar o pipeline.',
-            btn_label: 'Novo lead',
+            title: 'Ainda sem leads',
+            text: 'Cadastre o primeiro contato para alimentar o pipeline de vendas.',
+            btn_label: 'Criar lead',
             btn_opens: 'crm-lead-novo',
             compact: true
         } %}
@@ -39,7 +41,7 @@
                     <th>Nome</th>
                     <th>Empresa</th>
                     <th>Contato</th>
-                    <th>Status</th>
+                    <th>Situação</th>
                     <th>Origem</th>
                     <th></th>
                 </tr>
@@ -50,8 +52,8 @@
                     <td><a href="{{ path('app_comercial_lead_show', { id: lead.id }) }}">{{ lead.nome }}</a></td>
                     <td>{{ lead.empresaNome|default('—') }}</td>
                     <td class="small">{{ lead.email|default('—') }}{% if lead.telefone %}<br>{{ lead.telefone }}{% endif %}</td>
-                    <td><span class="badge badge-soft">{{ lead.status }}</span></td>
-                    <td>{{ lead.origem }}</td>
+                    <td><span class="badge badge-soft">{{ status_labels[lead.status]|default(lead.status) }}</span></td>
+                    <td>{{ origem_labels[lead.origem]|default(lead.origem) }}</td>
                     <td class="text-end">
                         <a href="{{ path('app_comercial_lead_show', { id: lead.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
                     </td>
@@ -68,6 +70,8 @@
 {% include 'components/comercial/lead_offcanvas.html.twig' with {
     open: open_novo|default(false),
     origem_options: origem_options,
-    status_options: status_options
+    origem_labels: origem_labels,
+    status_options: status_options,
+    status_labels: status_labels
 } %}
 {% endblock %}

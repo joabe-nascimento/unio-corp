@@ -1,60 +1,75 @@
 {% embed 'components/unio_offcanvas.html.twig' with {
     id: 'crm-conta-nova',
     title: 'Novo cliente',
-    subtitle: 'Conta comercial',
+    subtitle: 'Cadastro comercial da clínica',
     icon: 'fa-building',
     size: 'lg',
     open: open|default(false)
 } %}
 {% block offcanvas_body %}
-<form method="post" action="{{ path('app_comercial_clientes') }}" id="crmContaNovaForm">
+{% set status_labels = status_labels|default({}) %}
+<form method="post" action="{{ path('app_comercial_clientes') }}" id="crmContaNovaForm" class="crm-form">
     <input type="hidden" name="_token" value="{{ csrf_token('crm_conta_nova') }}">
-    <div class="form-group">
-        <label for="crm-conta-nome">Nome *</label>
-        <input class="form-control" id="crm-conta-nome" name="nome" required autofocus>
-    </div>
-    <div class="form-group">
-        <label for="crm-conta-documento">CNPJ/CPF</label>
-        <input class="form-control" id="crm-conta-documento" name="documento">
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="crm-conta-email">E-mail</label>
-            <input class="form-control" id="crm-conta-email" type="email" name="email">
+
+    <fieldset class="crm-form-section">
+        <legend class="crm-form-section__title">Essencial</legend>
+        <div class="form-group">
+            <label for="crm-conta-nome">Nome completo *</label>
+            <input class="form-control" id="crm-conta-nome" name="nome" required autofocus
+                   autocomplete="organization" placeholder="Ex.: Clínica Horizonte ou Maria Souza">
         </div>
-        <div class="form-group col-md-6">
-            <label for="crm-conta-telefone">Telefone</label>
-            <input class="form-control" id="crm-conta-telefone" name="telefone">
+        <div class="form-group mb-0">
+            <label for="crm-conta-telefone">Telefone / WhatsApp</label>
+            <input class="form-control" id="crm-conta-telefone" name="telefone" type="tel" inputmode="tel"
+                   placeholder="(11) 98888-0000" autocomplete="tel">
+            <small class="form-text text-muted">Usado para follow-up e confirmações.</small>
         </div>
-    </div>
-    <div class="form-group">
-        <label for="crm-conta-segmento">Segmento</label>
-        <input class="form-control" id="crm-conta-segmento" name="segmento">
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="crm-conta-site">Site</label>
-            <input class="form-control" id="crm-conta-site" name="site">
+    </fieldset>
+
+    <details class="crm-form-advanced">
+        <summary>Mais detalhes</summary>
+        <div class="crm-form-advanced__body">
+            <div class="form-group">
+                <label for="crm-conta-documento">CNPJ ou CPF</label>
+                <input class="form-control" id="crm-conta-documento" name="documento"
+                       placeholder="00.000.000/0001-00" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label for="crm-conta-email">E-mail</label>
+                <input class="form-control" id="crm-conta-email" type="email" name="email"
+                       placeholder="contato@clinica.com.br" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label for="crm-conta-segmento">Segmento</label>
+                <input class="form-control" id="crm-conta-segmento" name="segmento"
+                       placeholder="Ex.: ortopedia, estética, cardiologia">
+            </div>
+            <div class="form-group">
+                <label for="crm-conta-site">Site</label>
+                <input class="form-control" id="crm-conta-site" name="site"
+                       placeholder="https://www.exemplo.com.br">
+            </div>
+            <div class="form-group">
+                <label for="crm-conta-status">Situação</label>
+                <select class="form-control" id="crm-conta-status" name="status">
+                    {% for s in status_options %}
+                    <option value="{{ s }}">{{ status_labels[s]|default(s) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-0">
+                <label for="crm-conta-notas">Notas</label>
+                <textarea class="form-control" id="crm-conta-notas" name="notas" rows="3"
+                          placeholder="Ex.: veio indicado pela Dra. Ana; quer retorno em 15 dias"></textarea>
+            </div>
         </div>
-        <div class="form-group col-md-6">
-            <label for="crm-conta-status">Status</label>
-            <select class="form-control" id="crm-conta-status" name="status">
-                {% for s in status_options %}
-                <option value="{{ s }}">{{ s }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="crm-conta-notas">Notas</label>
-        <textarea class="form-control" id="crm-conta-notas" name="notas" rows="3"></textarea>
-    </div>
+    </details>
 </form>
 {% endblock %}
 {% block offcanvas_footer %}
 <div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
     <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
-    <button type="submit" form="crmContaNovaForm" class="btn-unio">Salvar</button>
+    <button type="submit" form="crmContaNovaForm" class="btn-unio">Salvar cliente</button>
 </div>
 {% endblock %}
 {% endembed %}

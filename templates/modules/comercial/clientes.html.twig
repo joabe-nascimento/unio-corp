@@ -2,7 +2,8 @@
 {% block title %}Clientes · Comercial{% endblock %}
 {% block permissions_scope %}hub_comercial{% endblock %}
 {% set hub_page_title = 'Clientes' %}
-{% set hub_page_subtitle = 'Núcleo Comercial · Contas' %}
+{% set hub_page_subtitle = 'Núcleo Comercial · Cadastro de clientes' %}
+{% set status_labels = status_labels|default({}) %}
 
 {% block hub_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="crm-conta-nova">
@@ -13,14 +14,14 @@
 {% block hub_content %}
 <div class="unio-card">
     {% include 'components/section_header.html.twig' with {
-        title: 'Contas',
-        subtitle: (contas|length) ~ ' cliente(s)'
+        title: 'Clientes',
+        subtitle: (contas|length) ~ ' cadastro(s)'
     } %}
     {% if contas|length == 0 %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-building',
-            title: 'Nenhum cliente',
-            text: 'Cadastre contas ou converta leads qualificados.',
+            title: 'Ainda sem clientes',
+            text: 'Cadastre um cliente agora ou converta um lead qualificado no funil.',
             btn_label: 'Novo cliente',
             btn_opens: 'crm-conta-nova',
             compact: true
@@ -34,7 +35,7 @@
                     <th>Documento</th>
                     <th>Contato</th>
                     <th>Segmento</th>
-                    <th>Status</th>
+                    <th>Situação</th>
                     <th></th>
                 </tr>
             </thead>
@@ -45,7 +46,7 @@
                     <td>{{ c.documento|default('—') }}</td>
                     <td class="small">{{ c.email|default('—') }}</td>
                     <td>{{ c.segmento|default('—') }}</td>
-                    <td><span class="badge badge-soft">{{ c.status }}</span></td>
+                    <td><span class="badge badge-soft">{{ status_labels[c.status]|default(c.status) }}</span></td>
                     <td class="text-end"><a href="{{ path('app_comercial_cliente_show', { id: c.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a></td>
                 </tr>
                 {% endfor %}
@@ -59,6 +60,7 @@
 {% block page_overlays %}
 {% include 'components/comercial/conta_offcanvas.html.twig' with {
     open: open_novo|default(false),
-    status_options: status_options
+    status_options: status_options,
+    status_labels: status_labels
 } %}
 {% endblock %}

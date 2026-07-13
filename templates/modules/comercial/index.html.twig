@@ -49,9 +49,9 @@
             {% if recent_leads|length == 0 %}
                 {% include 'components/empty_state.html.twig' with {
                     icon: 'fa-user-plus',
-                    title: 'Nenhum lead ainda',
-                    text: 'Cadastre o primeiro lead ou carregue dados de demonstração.',
-                    btn_label: 'Novo lead',
+                    title: 'Ainda sem leads',
+                    text: 'Cadastre o primeiro contato ou carregue dados de demonstração.',
+                    btn_label: 'Criar lead',
                     btn_href: path('app_comercial_leads', { novo: 1 }),
                     compact: true
                 } %}
@@ -65,7 +65,7 @@
                         <tr>
                             <th>Nome</th>
                             <th>Empresa</th>
-                            <th>Status</th>
+                            <th>Situação</th>
                             <th>Origem</th>
                         </tr>
                     </thead>
@@ -74,8 +74,8 @@
                         <tr>
                             <td><a href="{{ path('app_comercial_lead_show', { id: lead.id }) }}">{{ lead.nome }}</a></td>
                             <td>{{ lead.empresaNome|default('—') }}</td>
-                            <td><span class="badge badge-soft">{{ lead.status }}</span></td>
-                            <td>{{ lead.origem }}</td>
+                            <td><span class="badge badge-soft">{{ status_labels[lead.status]|default(lead.status) }}</span></td>
+                            <td>{{ origem_labels[lead.origem]|default(lead.origem) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -102,7 +102,7 @@
                 <li class="d-flex justify-content-between align-items-start gap-2 py-2 border-bottom">
                     <div>
                         <div class="fw-medium">{{ a.titulo }}</div>
-                        <div class="small text-muted">{{ a.tipo }}{% if a.venceEm %} · {{ a.venceEm|date('d/m/Y') }}{% endif %}</div>
+                        <div class="small text-muted">{{ tipo_labels[a.tipo]|default(a.tipo) }}{% if a.venceEm %} · {{ a.venceEm|date('d/m/Y') }}{% endif %}</div>
                     </div>
                 </li>
                 {% endfor %}

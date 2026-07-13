@@ -1,66 +1,81 @@
 {% embed 'components/unio_offcanvas.html.twig' with {
     id: 'crm-lead-novo',
     title: 'Novo lead',
-    subtitle: 'Cadastro rápido',
+    subtitle: 'Captação rápida para o funil',
     icon: 'fa-user-plus',
     size: 'lg',
     open: open|default(false)
 } %}
 {% block offcanvas_body %}
-<form method="post" action="{{ path('app_comercial_leads') }}" id="crmLeadNovoForm">
+{% set status_labels = status_labels|default({}) %}
+{% set origem_labels = origem_labels|default({}) %}
+<form method="post" action="{{ path('app_comercial_leads') }}" id="crmLeadNovoForm" class="crm-form">
     <input type="hidden" name="_token" value="{{ csrf_token('crm_lead_novo') }}">
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="crm-lead-nome">Nome *</label>
-            <input class="form-control" id="crm-lead-nome" name="nome" required autofocus>
+
+    <fieldset class="crm-form-section">
+        <legend class="crm-form-section__title">Essencial</legend>
+        <div class="form-group">
+            <label for="crm-lead-nome">Nome completo *</label>
+            <input class="form-control" id="crm-lead-nome" name="nome" required autofocus
+                   autocomplete="name" placeholder="Ex.: Ana Paula Mendes">
         </div>
-        <div class="form-group col-md-6">
-            <label for="crm-lead-empresa">Empresa</label>
-            <input class="form-control" id="crm-lead-empresa" name="empresa_nome">
+        <div class="form-group mb-0">
+            <label for="crm-lead-tel">Telefone / WhatsApp</label>
+            <input class="form-control" id="crm-lead-tel" name="telefone" type="tel" inputmode="tel"
+                   placeholder="(11) 98888-0000" autocomplete="tel">
+            <small class="form-text text-muted">Canal principal de contato comercial.</small>
         </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-4">
-            <label for="crm-lead-email">E-mail</label>
-            <input class="form-control" id="crm-lead-email" type="email" name="email">
+    </fieldset>
+
+    <details class="crm-form-advanced">
+        <summary>Mais detalhes</summary>
+        <div class="crm-form-advanced__body">
+            <div class="form-group">
+                <label for="crm-lead-empresa">Empresa / clínica</label>
+                <input class="form-control" id="crm-lead-empresa" name="empresa_nome"
+                       placeholder="Ex.: União Médica — unidade Centro">
+            </div>
+            <div class="form-group">
+                <label for="crm-lead-email">E-mail</label>
+                <input class="form-control" id="crm-lead-email" type="email" name="email"
+                       placeholder="ana@email.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label for="crm-lead-cargo">Cargo</label>
+                <input class="form-control" id="crm-lead-cargo" name="cargo"
+                       placeholder="Ex.: coordenadora, médico, recepção">
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="crm-lead-origem">Origem</label>
+                    <select class="form-control" id="crm-lead-origem" name="origem">
+                        {% for o in origem_options %}
+                        <option value="{{ o }}">{{ origem_labels[o]|default(o) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="crm-lead-status">Situação</label>
+                    <select class="form-control" id="crm-lead-status" name="status">
+                        {% for s in status_options %}
+                        <option value="{{ s }}">{{ status_labels[s]|default(s) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group mb-0">
+                <label for="crm-lead-notas">Notas</label>
+                <textarea class="form-control" id="crm-lead-notas" name="notas" rows="3"
+                          placeholder="Ex.: interessada em pós-op; ligar após as 14h"></textarea>
+            </div>
         </div>
-        <div class="form-group col-md-4">
-            <label for="crm-lead-tel">Telefone</label>
-            <input class="form-control" id="crm-lead-tel" name="telefone">
-        </div>
-        <div class="form-group col-md-4">
-            <label for="crm-lead-cargo">Cargo</label>
-            <input class="form-control" id="crm-lead-cargo" name="cargo">
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="crm-lead-origem">Origem</label>
-            <select class="form-control" id="crm-lead-origem" name="origem">
-                {% for o in origem_options %}
-                <option value="{{ o }}">{{ o }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="crm-lead-status">Status</label>
-            <select class="form-control" id="crm-lead-status" name="status">
-                {% for s in status_options %}
-                <option value="{{ s }}">{{ s }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="crm-lead-notas">Notas</label>
-        <textarea class="form-control" id="crm-lead-notas" name="notas" rows="3"></textarea>
-    </div>
+    </details>
 </form>
 {% endblock %}
 {% block offcanvas_footer %}
 <div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
     <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
-    <button type="submit" form="crmLeadNovoForm" class="btn-unio">Salvar lead</button>
+    <button type="submit" form="crmLeadNovoForm" class="btn-unio">Criar lead</button>
 </div>
 {% endblock %}
 {% endembed %}

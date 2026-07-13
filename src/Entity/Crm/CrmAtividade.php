@@ -94,4 +94,21 @@ class CrmAtividade
     {
         return [self::TIPO_LIGACAO, self::TIPO_EMAIL, self::TIPO_REUNIAO, self::TIPO_TAREFA, self::TIPO_NOTA];
     }
+
+    /** @return array<string, string> */
+    public static function tipoLabels(): array
+    {
+        return [
+            self::TIPO_LIGACAO => 'Ligação',
+            self::TIPO_EMAIL => 'E-mail',
+            self::TIPO_REUNIAO => 'Reunião',
+            self::TIPO_TAREFA => 'Tarefa',
+            self::TIPO_NOTA => 'Nota',
+        ];
+    }
+
+    public static function tipoLabel(string $tipo): string
+    {
+        return self::tipoLabels()[$tipo] ?? $tipo;
+    }
 }

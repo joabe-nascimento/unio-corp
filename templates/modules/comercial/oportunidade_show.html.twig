@@ -18,10 +18,11 @@
                 <div class="row g-3">
                     <div class="col-md-8">
                         <label class="form-label" for="titulo">Título *</label>
-                        <input class="form-control" id="titulo" name="titulo" value="{{ oportunidade.titulo }}" required>
+                        <input class="form-control" id="titulo" name="titulo" value="{{ oportunidade.titulo }}" required
+                               placeholder="Ex.: Plano Clínica — 3 médicos">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label" for="estagio">Estágio</label>
+                        <label class="form-label" for="estagio">Estágio no funil</label>
                         <select class="form-control" id="estagio" name="estagio">
                             {% for s in stages %}
                             <option value="{{ s }}" {% if oportunidade.estagio == s %}selected{% endif %}>{{ stage_meta[s].label|default(s) }}</option>
@@ -29,11 +30,11 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label" for="valor">Valor (R$)</label>
-                        <input class="form-control" id="valor" name="valor" value="{{ oportunidade.valor }}">
+                        <label class="form-label" for="valor">Valor estimado (R$)</label>
+                        <input class="form-control" id="valor" name="valor" value="{{ oportunidade.valor }}" placeholder="0,00">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label" for="probabilidade">Probabilidade %</label>
+                        <label class="form-label" for="probabilidade">Probabilidade (%)</label>
                         <input class="form-control" id="probabilidade" type="number" min="0" max="100" name="probabilidade" value="{{ oportunidade.probabilidade }}">
                     </div>
                     <div class="col-md-4">
@@ -43,16 +44,16 @@
                     <div class="col-md-6">
                         <label class="form-label" for="conta_id">Cliente</label>
                         <select class="form-control" id="conta_id" name="conta_id">
-                            <option value="">—</option>
+                            <option value="">Sem cliente ainda</option>
                             {% for c in contas %}
                             <option value="{{ c.id }}" {% if oportunidade.conta and oportunidade.conta.id == c.id %}selected{% endif %}>{{ c.nome }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" for="lead_id">Lead</label>
+                        <label class="form-label" for="lead_id">Lead de origem</label>
                         <select class="form-control" id="lead_id" name="lead_id">
-                            <option value="">—</option>
+                            <option value="">Sem lead</option>
                             {% for l in leads %}
                             <option value="{{ l.id }}" {% if oportunidade.lead and oportunidade.lead.id == l.id %}selected{% endif %}>{{ l.nome }}</option>
                             {% endfor %}
@@ -60,10 +61,11 @@
                     </div>
                     <div class="col-12">
                         <label class="form-label" for="notas">Notas</label>
-                        <textarea class="form-control" id="notas" name="notas" rows="3">{{ oportunidade.notas }}</textarea>
+                        <textarea class="form-control" id="notas" name="notas" rows="3"
+                                  placeholder="Ex.: proposta enviada; aguardando retorno">{{ oportunidade.notas }}</textarea>
                     </div>
                     <div class="col-12">
-                        <button type="submit" class="btn-unio btn-sm">Salvar</button>
+                        <button type="submit" class="btn-unio btn-sm">Salvar oportunidade</button>
                     </div>
                 </div>
             </form>
