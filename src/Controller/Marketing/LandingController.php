@@ -20,7 +20,11 @@ class LandingController extends AbstractController
         ClinicPlatformScope $clinicScope,
     ): Response {
         if ($this->getUser()) {
-            return $this->redirectToRoute($redirects->afterLoginRoute());
+            $user = $this->getUser();
+
+            return $this->redirectToRoute($redirects->afterLoginRoute(
+                $user instanceof \App\Entity\User ? $user : null,
+            ));
         }
 
         $demoCard = $patientProduct->planById('premium') ?? $patientProduct->plans()[0] ?? [];

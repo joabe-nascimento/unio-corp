@@ -27,7 +27,11 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
 
-            return $this->redirectToRoute($redirects->afterLoginRoute());
+            $user = $this->getUser();
+
+            return $this->redirectToRoute($redirects->afterLoginRoute(
+                $user instanceof User ? $user : null,
+            ));
         }
 
         if ($request->query->getBoolean('timeout')) {

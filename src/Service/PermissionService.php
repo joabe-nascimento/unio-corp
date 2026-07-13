@@ -458,6 +458,7 @@ class PermissionService
             'subtitle' => 'Acompanhamento clínico pós-cirúrgico',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
+                ['id' => 'operacao', 'label' => 'Operação / recepção'],
                 ['id' => 'protocolos', 'label' => 'Protocolos'],
                 ['id' => 'questionarios', 'label' => 'Questionários'],
                 ['id' => 'alertas', 'label' => 'Alertas clínicos'],
@@ -847,6 +848,7 @@ class PermissionService
             'scope' => 'hub_pos_operatorio',
             'products' => [
                 ['id' => 'pacientes', 'label' => 'Pacientes'],
+                ['id' => 'operacao', 'label' => 'Operação / recepção'],
                 ['id' => 'protocolos', 'label' => 'Protocolos'],
                 ['id' => 'questionarios', 'label' => 'Questionários'],
                 ['id' => 'alertas', 'label' => 'Alertas clínicos'],
@@ -1064,11 +1066,13 @@ class PermissionService
         'hub_pos_operatorio' => [
             'camila-souza' => [
                 'pacientes' => ClinicStaffRole::RECEPCAO,
+                'operacao' => ClinicStaffRole::RECEPCAO,
             ],
             'beatriz-nunes' => [
                 'questionarios' => ClinicStaffRole::ENFERMAGEM,
                 'painel' => ClinicStaffRole::ENFERMAGEM,
                 'portal_paciente' => ClinicStaffRole::ENFERMAGEM,
+                'pacientes' => ClinicStaffRole::ENFERMAGEM,
             ],
             'andre-melo' => [
                 'alertas' => ClinicStaffRole::MEDICO,

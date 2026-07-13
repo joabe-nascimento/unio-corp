@@ -27,8 +27,13 @@ final class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             return new RedirectResponse($target);
         }
 
+        $user = $token->getUser();
+        $route = $this->redirects->afterLoginRoute(
+            $user instanceof \App\Entity\User ? $user : null,
+        );
+
         return new RedirectResponse(
-            $this->router->generate($this->redirects->afterLoginRoute()),
+            $this->router->generate($route),
         );
     }
 }

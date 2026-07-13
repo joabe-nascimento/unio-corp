@@ -4,7 +4,6 @@ namespace App\Clinic;
 
 /**
  * Perfis operacionais da Unio Saúde — únicos perfis de acesso clínico.
- * Substitui GESTOR / SUPERVISOR / MEMBRO no escopo hub_pos_operatorio.
  */
 final class ClinicStaffRole
 {
@@ -24,18 +23,20 @@ final class ClinicStaffRole
     ];
 
     /**
-     * Produtos do escopo hub_pos_operatorio liberados por perfil.
+     * Produtos liberados por perfil (rotas / grants).
      *
      * @var array<string, list<string>>
      */
     public const PRODUCTS_BY_ROLE = [
         self::RECEPCAO => [
             'pacientes',
+            'operacao',
         ],
         self::ENFERMAGEM => [
             'questionarios',
             'painel',
             'portal_paciente',
+            'pacientes', // ficha na triagem (links dos questionários)
         ],
         self::MEDICO => [
             'alertas',
@@ -50,7 +51,72 @@ final class ClinicStaffRole
     ];
 
     /**
-     * Feature IDs da sidebar → produto de grant.
+     * Itens da sidebar por perfil (mais restrito que o produto).
+     *
+     * @var array<string, list<string>>
+     */
+    public const FEATURES_BY_ROLE = [
+        self::RECEPCAO => [
+            'pacientes',
+            'retornos',
+            'agenda',
+            'atendimento',
+            'contas',
+            'convenios',
+            'guias',
+            'lotes',
+            'carteirinha',
+            'comprovante',
+            'recepcao',
+        ],
+        self::ENFERMAGEM => [
+            'trabalho',
+            'pacientes',
+            'questionarios',
+            'lembretes',
+            'portal',
+            'painel_dia',
+        ],
+        self::MEDICO => [
+            'trabalho',
+            'pacientes',
+            'protocolos',
+            'biblioteca',
+            'retornos',
+            'agenda',
+            'atendimento',
+            'alertas',
+            'sala_critica',
+            'plantao',
+            'contrato_cuidado',
+            'guia_medico',
+            'painel_dia',
+        ],
+        self::COORDENACAO => [
+            'qualidade',
+            'relatorios',
+            'integracoes',
+            'compliance',
+            'config',
+            'produtos',
+            'comercial',
+        ],
+    ];
+
+    /**
+     * Home operacional após login (além do Pulso shell).
+     *
+     * @var array<string, string>
+     */
+    public const HOME_ROUTE_BY_ROLE = [
+        self::RECEPCAO => 'app_pos_operatorio_pacientes',
+        self::ENFERMAGEM => 'app_pos_operatorio_questionarios',
+        self::MEDICO => 'app_pos_operatorio_alertas',
+        self::COORDENACAO => 'app_pos_operatorio_relatorios',
+    ];
+
+    /**
+     * Feature IDs → produto (fallback / documentação).
      *
      * @var array<string, string>
      */
@@ -62,10 +128,10 @@ final class ClinicStaffRole
         'retornos' => 'pacientes',
         'agenda' => 'pacientes',
         'atendimento' => 'pacientes',
-        'contas' => 'pacientes',
-        'convenios' => 'pacientes',
-        'guias' => 'pacientes',
-        'lotes' => 'pacientes',
+        'contas' => 'operacao',
+        'convenios' => 'operacao',
+        'guias' => 'operacao',
+        'lotes' => 'operacao',
         'questionarios' => 'questionarios',
         'alertas' => 'alertas',
         'sala_critica' => 'alertas',
@@ -74,15 +140,15 @@ final class ClinicStaffRole
         'qualidade' => 'relatorios',
         'contrato_cuidado' => 'protocolos',
         'relatorios' => 'relatorios',
-        'carteirinha' => 'pacientes',
-        'comprovante' => 'pacientes',
+        'carteirinha' => 'operacao',
+        'comprovante' => 'operacao',
         'guia_medico' => 'protocolos',
         'portal' => 'portal_paciente',
         'integracoes' => 'configuracoes',
         'compliance' => 'configuracoes',
         'config' => 'configuracoes',
         'produtos' => 'configuracoes',
-        'recepcao' => 'pacientes',
+        'recepcao' => 'operacao',
         'painel_dia' => 'painel',
         'comercial' => 'configuracoes',
     ];
@@ -124,8 +190,6 @@ final class ClinicStaffRole
     }
 
     /**
-     * Perfis assignáveis na matriz de permissões do hub clínico.
-     *
      * @return list<array{id: string, label: string, class: string, nivel: int, description: string}>
      */
     public static function assignableProfiles(): array
@@ -143,7 +207,7 @@ final class ClinicStaffRole
                 'label' => 'Enfermagem',
                 'class' => 'supervisor-equipe',
                 'nivel' => 2,
-                'description' => 'Triagem, questionários e painel do dia.',
+                'description' => 'Triagem, questionários e ficha para acompanhamento.',
             ],
             [
                 'id' => self::MEDICO,
@@ -201,12 +265,14 @@ final class ClinicStaffRole
 
     public static function allowsFeature(string $perfil, string $featureId): bool
     {
-        $product = self::FEATURE_PRODUCT[$featureId] ?? null;
-        if ($product === null) {
-            return false;
-        }
+        $allowed = self::FEATURES_BY_ROLE[$perfil] ?? [];
 
-        return self::allowsProduct($perfil, $product);
+        return \in_array($featureId, $allowed, true);
+    }
+
+    public static function homeRoute(string $perfil): ?string
+    {
+        return self::HOME_ROUTE_BY_ROLE[$perfil] ?? null;
     }
 
     /** @return list<array{perfil: string, acesso: string, products: list<string>}> */

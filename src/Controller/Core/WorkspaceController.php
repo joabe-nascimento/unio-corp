@@ -16,6 +16,10 @@ final class WorkspaceController extends AbstractController
     #[Route('/workspace/switch/{id}', name: 'app_workspace_switch', methods: ['GET'])]
     public function legacyRedirect(OrganismoRedirectService $redirects): Response
     {
-        return $this->redirectToRoute($redirects->homeRoute());
+        $user = $this->getUser();
+
+        return $this->redirectToRoute($redirects->homeRoute(
+            $user instanceof \App\Entity\User ? $user : null,
+        ));
     }
 }

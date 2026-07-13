@@ -34,8 +34,9 @@ class WelcomeController extends AbstractController
         $user = $this->getUser();
         $empresas = $workspace->getAvailableEmpresas($user);
 
-        if ($redirects->homeRoute() === 'app_pulso') {
-            return $this->redirectToRoute('app_pulso');
+        $home = $redirects->homeRoute($user);
+        if ($home === 'app_pulso' || str_starts_with($home, 'app_pos_operatorio_')) {
+            return $this->redirectToRoute($home);
         }
 
         $dt = $welcome->getDateTimeInfo();
