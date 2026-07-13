@@ -808,7 +808,7 @@ class NavigationService
     }
 
     /**
-     * Barra inferior do Unio Studio (uniowork) — sem Chat/Operações/RH legado.
+     * Barra inferior do Unio Studio (uniowork) — alinhada à sidebar atual.
      *
      * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
      */
@@ -818,7 +818,6 @@ class NavigationService
         $homeRoute = $this->organismoFeature->isPulsoHome() ? 'app_pulso' : 'app_dashboard';
         $clientesLabel = $this->shortMobileLabel((string) ($copy['nav_pacientes'] ?? 'Clientes'));
         $alertasLabel = $this->shortMobileLabel((string) ($copy['nav_alertas'] ?? 'Alertas'));
-        $playbooksLabel = $this->shortMobileLabel((string) ($copy['nav_protocolos'] ?? 'Playbooks'));
 
         return [
             $this->buildMobileShellLink(
@@ -834,31 +833,35 @@ class NavigationService
             ),
             $this->buildMobileShellLink(
                 'clientes',
-                'fa-folder-open',
+                'fa-handshake',
                 $clientesLabel,
-                'app_pos_operatorio_pacientes',
-                $route,
-                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_pos_operatorio_paciente'),
-            ),
-            $this->buildMobileShellLink(
-                'alertas',
-                'fa-triangle-exclamation',
-                $alertasLabel,
-                'app_pos_operatorio_alertas',
+                'app_admin_empresas',
                 $route,
                 static fn (?string $r): bool => (bool) $r && (
-                    str_starts_with($r, 'app_pos_operatorio_alerta')
-                    || str_starts_with($r, 'app_pos_operatorio_sala_critica')
+                    str_starts_with($r, 'app_admin_empresa')
+                    || $r === 'app_publicidade_clientes'
                 ),
-                $alertBadge,
             ),
             $this->buildMobileShellLink(
-                'playbooks',
-                'fa-book',
-                $playbooksLabel,
-                'app_pos_operatorio_protocolos',
+                'projetos',
+                'fa-diagram-project',
+                'Projetos',
+                'app_core_projetos',
                 $route,
-                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_pos_operatorio_protocolo'),
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_core_projetos')
+                    || $r === 'app_core_metas_nova'
+                    || $r === 'app_core_tarefa_mover'
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'notifications',
+                'fa-triangle-exclamation',
+                $alertasLabel,
+                'app_notifications',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_notifications'),
+                $alertBadge,
             ),
             $this->mobileShellMenuAction(),
         ];
