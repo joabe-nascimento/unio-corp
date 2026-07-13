@@ -137,23 +137,17 @@
                     </div>
                     {% include 'components/unio/selo.html.twig' with { variant: 'compact', label: 'Protocolo ativo' } %}
                 </div>
-                {% set _rail_ns = namespace(next_found: false, items: []) %}
-                {% for m in care_contract.marcos %}
-                    {% set _p = m.label|split(' — ', 2) %}
-                    {% set _is_next = false %}
-                    {% if not m.attested and not _rail_ns.next_found %}
-                        {% set _is_next = true %}
-                        {% set _rail_ns.next_found = true %}
-                    {% endif %}
-                    {% set _rail_ns.items = _rail_ns.items|merge([{ key: m.key, when: _p|length == 2 ? _p[0] : m.label, done: m.attested, next: _is_next }]) %}
-                {% endfor %}
-                {% if _rail_ns.items|length > 0 %}
+                {% set _next_marco = care_contract.marcos|filter(m => not m.attested)|first %}
+                {% if care_contract.marcos|length > 0 %}
                 <ul class="organismo-trilha-rail" aria-label="Marcos da Trilha Unio">
-                    {% for step in _rail_ns.items %}
+                    {% for m in care_contract.marcos %}
+                    {% set _p = m.label|split(' — ', 2) %}
+                    {% set _when = _p|length == 2 ? _p[0] : m.label %}
+                    {% set _is_next = _next_marco and _next_marco.key == m.key %}
                     {% if not loop.first %}<li class="organismo-trilha-rail__sep" aria-hidden="true"></li>{% endif %}
-                    <li class="organismo-trilha-rail__step{{ step.done ? ' is-done' : (step.next ? ' is-next' : '') }}">
+                    <li class="organismo-trilha-rail__step{{ m.attested ? ' is-done' : (_is_next ? ' is-next' : '') }}">
                         <span class="organismo-trilha-rail__dot" aria-hidden="true"></span>
-                        <span>{{ step.when }}</span>
+                        <span>{{ _when }}</span>
                     </li>
                     {% endfor %}
                 </ul>

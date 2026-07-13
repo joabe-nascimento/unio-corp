@@ -125,6 +125,9 @@ if (-not $SkipBuild) {
     if ($LASTEXITCODE -ne 0) { throw "npm run vendor:sync falhou" }
     & php bin/minify-css.php
     if ($LASTEXITCODE -ne 0) { throw "minify-css falhou" }
+    Write-Host "      asset-map:compile" -ForegroundColor DarkGray
+    & php bin/console asset-map:compile --env=prod --no-interaction
+    if ($LASTEXITCODE -ne 0) { throw "asset-map:compile falhou" }
 } else {
     Write-Host "[skip] build local (--SkipBuild)" -ForegroundColor Yellow
 }

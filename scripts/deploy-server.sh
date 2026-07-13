@@ -95,6 +95,11 @@ ci_report_step "$CI_REPORT_STEP"
 $PHP_BIN bin/console cache:clear --env=prod --no-warmup
 $PHP_BIN bin/console cache:warmup --env=prod
 
+CI_REPORT_STEP="Asset Mapper compile (prod)"
+ci_report_step "$CI_REPORT_STEP"
+$PHP_BIN bin/console asset-map:compile --env=prod --no-interaction 2>/dev/null \
+  || echo "WARN: asset-map:compile falhou ou indisponível — verifique public/assets"
+
 CI_REPORT_STEP="Migrar branding legado (admin_config)"
 ci_report_step "$CI_REPORT_STEP"
 bash "$ROOT/scripts/lib/migrate-legacy-branding.sh" "$DEPLOY_PATH" || true
@@ -118,7 +123,7 @@ link_public_dir() {
 
 CI_REPORT_STEP="Symlinks public_html → unio/public"
 ci_report_step "$CI_REPORT_STEP"
-for dir in css js images vendor uploads; do
+for dir in css js images vendor uploads assets; do
   link_public_dir "$dir"
 done
 
