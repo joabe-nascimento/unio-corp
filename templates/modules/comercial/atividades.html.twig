@@ -5,65 +5,12 @@
 {% set hub_page_subtitle = 'Núcleo Comercial · Follow-ups' %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_comercial_atividades', { novo: 1 }) }}" class="btn-unio btn-sm">
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="crm-atividade-nova">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova atividade
-</a>
+</button>
 {% endblock %}
 
 {% block hub_content %}
-{% if open_novo|default(false) %}
-<div class="unio-card mb-4">
-    {% include 'components/section_header.html.twig' with { title: 'Nova atividade' } %}
-    <form method="post" class="px-3 pb-3" action="{{ path('app_comercial_atividades') }}">
-        <input type="hidden" name="_token" value="{{ csrf_token('crm_atividade_nova') }}">
-        <div class="row g-3">
-            <div class="col-md-8">
-                <label class="form-label" for="titulo">Título *</label>
-                <input class="form-control" id="titulo" name="titulo" required>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="tipo">Tipo</label>
-                <select class="form-control" id="tipo" name="tipo">
-                    {% for t in tipo_options %}
-                    <option value="{{ t }}">{{ t }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="vence_em">Vence em</label>
-                <input class="form-control" id="vence_em" type="date" name="vence_em">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="lead_id">Lead</label>
-                <select class="form-control" id="lead_id" name="lead_id">
-                    <option value="">—</option>
-                    {% for l in leads %}
-                    <option value="{{ l.id }}">{{ l.nome }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="conta_id">Cliente</label>
-                <select class="form-control" id="conta_id" name="conta_id">
-                    <option value="">—</option>
-                    {% for c in contas %}
-                    <option value="{{ c.id }}">{{ c.nome }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-12">
-                <label class="form-label" for="descricao">Descrição</label>
-                <textarea class="form-control" id="descricao" name="descricao" rows="2"></textarea>
-            </div>
-            <div class="col-12 d-flex gap-2">
-                <button type="submit" class="btn-unio btn-sm">Salvar</button>
-                <a href="{{ path('app_comercial_atividades') }}" class="btn-unio-ghost btn-sm">Cancelar</a>
-            </div>
-        </div>
-    </form>
-</div>
-{% endif %}
-
 <div class="unio-card">
     {% include 'components/section_header.html.twig' with {
         title: 'Pendentes',
@@ -75,7 +22,8 @@
             title: 'Nada pendente',
             text: 'Crie ligações, reuniões ou tarefas de follow-up.',
             btn_label: 'Nova atividade',
-            btn_href: path('app_comercial_atividades', { novo: 1 })
+            btn_opens: 'crm-atividade-nova',
+            compact: true
         } %}
     {% else %}
     <div class="table-responsive">
@@ -118,4 +66,13 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/comercial/atividade_offcanvas.html.twig' with {
+    open: open_novo|default(false),
+    tipo_options: tipo_options,
+    leads: leads,
+    contas: contas
+} %}
 {% endblock %}

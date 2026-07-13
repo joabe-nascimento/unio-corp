@@ -5,67 +5,12 @@
 {% set hub_page_subtitle = 'Núcleo Comercial · Captação' %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_comercial_leads', { novo: 1 }) }}" class="btn-unio btn-sm">
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="crm-lead-novo">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo lead
-</a>
+</button>
 {% endblock %}
 
 {% block hub_content %}
-{% if open_novo|default(false) %}
-<div class="unio-card mb-4">
-    {% include 'components/section_header.html.twig' with { title: 'Novo lead', subtitle: 'Cadastro rápido' } %}
-    <form method="post" class="px-3 pb-3" action="{{ path('app_comercial_leads') }}">
-        <input type="hidden" name="_token" value="{{ csrf_token('crm_lead_novo') }}">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label" for="lead-nome">Nome *</label>
-                <input class="form-control" id="lead-nome" name="nome" required>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label" for="lead-empresa">Empresa</label>
-                <input class="form-control" id="lead-empresa" name="empresa_nome">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="lead-email">E-mail</label>
-                <input class="form-control" id="lead-email" type="email" name="email">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="lead-tel">Telefone</label>
-                <input class="form-control" id="lead-tel" name="telefone">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="lead-cargo">Cargo</label>
-                <input class="form-control" id="lead-cargo" name="cargo">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="lead-origem">Origem</label>
-                <select class="form-control" id="lead-origem" name="origem">
-                    {% for o in origem_options %}
-                    <option value="{{ o }}">{{ o }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="lead-status">Status</label>
-                <select class="form-control" id="lead-status" name="status">
-                    {% for s in status_options %}
-                    <option value="{{ s }}">{{ s }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-12">
-                <label class="form-label" for="lead-notas">Notas</label>
-                <textarea class="form-control" id="lead-notas" name="notas" rows="2"></textarea>
-            </div>
-            <div class="col-12 d-flex gap-2">
-                <button type="submit" class="btn-unio btn-sm">Salvar lead</button>
-                <a href="{{ path('app_comercial_leads') }}" class="btn-unio-ghost btn-sm">Cancelar</a>
-            </div>
-        </div>
-    </form>
-</div>
-{% endif %}
-
 <div class="unio-card">
     {% include 'components/section_header.html.twig' with {
         title: 'Lista de leads',
@@ -83,7 +28,8 @@
             title: 'Sem leads',
             text: 'Crie o primeiro lead para alimentar o pipeline.',
             btn_label: 'Novo lead',
-            btn_href: path('app_comercial_leads', { novo: 1 })
+            btn_opens: 'crm-lead-novo',
+            compact: true
         } %}
     {% else %}
     <div class="table-responsive">
@@ -116,4 +62,12 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/comercial/lead_offcanvas.html.twig' with {
+    open: open_novo|default(false),
+    origem_options: origem_options,
+    status_options: status_options
+} %}
 {% endblock %}

@@ -1,0 +1,62 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'crm-atividade-nova',
+    title: 'Nova atividade',
+    subtitle: 'Follow-up comercial',
+    icon: 'fa-list-check',
+    size: 'lg',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_comercial_atividades') }}" id="crmAtividadeNovaForm">
+    <input type="hidden" name="_token" value="{{ csrf_token('crm_atividade_nova') }}">
+    <div class="form-row">
+        <div class="form-group col-md-8">
+            <label for="crm-ativ-titulo">Título *</label>
+            <input class="form-control" id="crm-ativ-titulo" name="titulo" required autofocus>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="crm-ativ-tipo">Tipo</label>
+            <select class="form-control" id="crm-ativ-tipo" name="tipo">
+                {% for t in tipo_options %}
+                <option value="{{ t }}">{{ t }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="crm-ativ-vence">Vence em</label>
+            <input class="form-control" id="crm-ativ-vence" type="date" name="vence_em">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="crm-ativ-lead">Lead</label>
+            <select class="form-control" id="crm-ativ-lead" name="lead_id">
+                <option value="">—</option>
+                {% for l in leads %}
+                <option value="{{ l.id }}">{{ l.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="crm-ativ-conta">Cliente</label>
+            <select class="form-control" id="crm-ativ-conta" name="conta_id">
+                <option value="">—</option>
+                {% for c in contas %}
+                <option value="{{ c.id }}">{{ c.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="crm-ativ-desc">Descrição</label>
+        <textarea class="form-control" id="crm-ativ-desc" name="descricao" rows="3"></textarea>
+    </div>
+</form>
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="crmAtividadeNovaForm" class="btn-unio">Salvar</button>
+</div>
+{% endblock %}
+{% endembed %}

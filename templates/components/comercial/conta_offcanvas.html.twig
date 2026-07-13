@@ -1,0 +1,60 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'crm-conta-nova',
+    title: 'Novo cliente',
+    subtitle: 'Conta comercial',
+    icon: 'fa-building',
+    size: 'lg',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_comercial_clientes') }}" id="crmContaNovaForm">
+    <input type="hidden" name="_token" value="{{ csrf_token('crm_conta_nova') }}">
+    <div class="form-group">
+        <label for="crm-conta-nome">Nome *</label>
+        <input class="form-control" id="crm-conta-nome" name="nome" required autofocus>
+    </div>
+    <div class="form-group">
+        <label for="crm-conta-documento">CNPJ/CPF</label>
+        <input class="form-control" id="crm-conta-documento" name="documento">
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="crm-conta-email">E-mail</label>
+            <input class="form-control" id="crm-conta-email" type="email" name="email">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="crm-conta-telefone">Telefone</label>
+            <input class="form-control" id="crm-conta-telefone" name="telefone">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="crm-conta-segmento">Segmento</label>
+        <input class="form-control" id="crm-conta-segmento" name="segmento">
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="crm-conta-site">Site</label>
+            <input class="form-control" id="crm-conta-site" name="site">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="crm-conta-status">Status</label>
+            <select class="form-control" id="crm-conta-status" name="status">
+                {% for s in status_options %}
+                <option value="{{ s }}">{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="crm-conta-notas">Notas</label>
+        <textarea class="form-control" id="crm-conta-notas" name="notas" rows="3"></textarea>
+    </div>
+</form>
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="crmContaNovaForm" class="btn-unio">Salvar</button>
+</div>
+{% endblock %}
+{% endembed %}

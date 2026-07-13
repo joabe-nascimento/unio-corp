@@ -1,0 +1,72 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'crm-oportunidade-nova',
+    title: 'Nova oportunidade',
+    subtitle: 'Entrada no funil',
+    icon: 'fa-diagram-project',
+    size: 'lg',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_comercial_pipeline') }}" id="crmOportunidadeNovaForm">
+    <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_nova') }}">
+    <div class="form-row">
+        <div class="form-group col-md-8">
+            <label for="crm-op-titulo">Título *</label>
+            <input class="form-control" id="crm-op-titulo" name="titulo" required autofocus>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="crm-op-estagio">Estágio</label>
+            <select class="form-control" id="crm-op-estagio" name="estagio">
+                {% for s in stages %}
+                <option value="{{ s }}">{{ stage_meta[s].label|default(s) }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="crm-op-valor">Valor (R$)</label>
+            <input class="form-control" id="crm-op-valor" name="valor" placeholder="0,00">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="crm-op-prob">Probabilidade %</label>
+            <input class="form-control" id="crm-op-prob" type="number" min="0" max="100" name="probabilidade" value="20">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="crm-op-fecha">Fecha prevista</label>
+            <input class="form-control" id="crm-op-fecha" type="date" name="fecha_prevista">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="crm-op-conta">Cliente</label>
+            <select class="form-control" id="crm-op-conta" name="conta_id">
+                <option value="">—</option>
+                {% for c in contas %}
+                <option value="{{ c.id }}">{{ c.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="crm-op-lead">Lead</label>
+            <select class="form-control" id="crm-op-lead" name="lead_id">
+                <option value="">—</option>
+                {% for l in leads %}
+                <option value="{{ l.id }}">{{ l.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="crm-op-notas">Notas</label>
+        <textarea class="form-control" id="crm-op-notas" name="notas" rows="3"></textarea>
+    </div>
+</form>
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="crmOportunidadeNovaForm" class="btn-unio">Salvar</button>
+</div>
+{% endblock %}
+{% endembed %}
