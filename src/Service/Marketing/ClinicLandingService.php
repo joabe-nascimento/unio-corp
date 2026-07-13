@@ -63,8 +63,7 @@ final class ClinicLandingService
                 'Contas, guias, lote e XML para o convênio.',
                 'fa-file-invoice-dollar',
                 'app_pos_operatorio_contas',
-                'images/marketing/modules/mod-lgpd.jpg',
-                'Do atendimento à remessa: contas, convênios, catálogo TUSS, guias com status até glosa/pago, lotes e exportação XML sem planilha paralela.',
+                'images/marketing/modules/mod-faturamento-tiss.jpg',
                 ['Contas e convênios na mesma ficha', 'Guias TISS com catálogo TUSS', 'Lote/remessa e exportação XML', 'Status até glosa e pagamento'],
                 [
                     ['value' => '24', 'label' => 'Guias abertas'],
@@ -195,7 +194,7 @@ final class ClinicLandingService
                 'Recepção, Enfermagem, Médico e Coordenação.',
                 'fa-user-shield',
                 'app_pos_operatorio',
-                'images/marketing/modules/mod-pacientes.jpg',
+                'images/marketing/modules/mod-equipe.jpg',
                 'Perfis clínicos reais: cada papel vê só o que precisa. Recepção cuida de cadastro e TISS; Enfermagem de triagem; Médico de alertas e protocolos; Coordenação de relatórios e config.',
                 ['RECEPCAO · ENFERMAGEM · MEDICO · COORDENACAO', 'Home e menu filtrados por perfil', 'Rotas bloqueadas sem grant clínico', 'Sem misturar GESTOR legado no fluxo da clínica'],
                 [
@@ -217,7 +216,7 @@ final class ClinicLandingService
                 'Leads, pipeline, clientes e atividades.',
                 'fa-handshake',
                 'app_comercial',
-                'images/marketing/modules/mod-agenda.jpg',
+                'images/marketing/modules/mod-crm.jpg',
                 'Núcleo Comercial com pack CRM completo: captação de leads, kanban de oportunidades, contas, follow-ups e analytics de conversão no mesmo workspace da clínica.',
                 ['Leads com origem e status', 'Pipeline kanban até ganho/perdido', 'Clientes e conversão de lead', 'Atividades e analytics de win rate'],
                 [
