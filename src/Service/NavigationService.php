@@ -7,6 +7,8 @@ use App\Config\PlannedHubRegistry;
 use App\Entity\User;
 use App\PosOperatorio\PosOperatorioModuleCatalog;
 use App\Security\ProductGrantAccess;
+use App\Service\Organismo\OrganismoCopyService;
+use App\Service\Organismo\OrganismoFeature;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -25,6 +27,8 @@ class NavigationService
     public function __construct(
         private ProductGrantAccess $grants,
         private RouterInterface $router,
+        private OrganismoFeature $organismoFeature,
+        private OrganismoCopyService $organismoCopy,
     ) {
     }
 
@@ -753,8 +757,21 @@ class NavigationService
      *
      * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
      */
-    public function getMobileShellNav(User $user, ?string $route, int $chatUnread = 0, int $notificationsUnread = 0): array
-    {
+    public function getMobileShellNav(
+        User $user,
+        ?string $route,
+        int $chatUnread = 0,
+        int $notificationsUnread = 0,
+        int $shellAlertBadge = 0,
+    ): array {
+        if ($this->organismoFeature->isEnabled()) {
+            if ($this->organismoCopy->isClinicProfile()) {
+                return $this->getClinicMobileShellNav($route, $shellAlertBadge);
+            }
+
+            return $this->getStudioMobileShellNav($route, $shellAlertBadge);
+        }
+
         $items = [
             $this->buildMobileShellLink('dashboard', 'fa-house', 'Início', 'app_dashboard', $route, static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_dashboard')),
             $this->buildMobileShellLink('chat', 'fa-comments', 'Chat', 'app_chat', $route, static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_chat'), $chatUnread),
@@ -785,7 +802,141 @@ class NavigationService
             $notificationsUnread,
         );
 
-        $items[] = [
+        $items[] = $this->mobileShellMenuAction();
+
+        return $items;
+    }
+
+    /**
+     * Barra inferior do Unio Studio (uniowork) — alinhada à sidebar atual.
+     *
+     * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
+     */
+    private function getStudioMobileShellNav(?string $route, int $alertBadge = 0): array
+    {
+        $copy = $this->organismoCopy->getGlobals();
+        $homeRoute = $this->organismoFeature->isPulsoHome() ? 'app_pulso' : 'app_dashboard';
+        $clientesLabel = $this->shortMobileLabel((string) ($copy['nav_pacientes'] ?? 'Clientes'));
+        $alertasLabel = $this->shortMobileLabel((string) ($copy['nav_alertas'] ?? 'Alertas'));
+
+        return [
+            $this->buildMobileShellLink(
+                'dashboard',
+                'fa-house',
+                'Início',
+                $homeRoute,
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_dashboard')
+                    || $r === 'app_pulso'
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'clientes',
+                'fa-handshake',
+                $clientesLabel,
+                'app_admin_empresas',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_admin_empresa')
+                    || $r === 'app_publicidade_clientes'
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'projetos',
+                'fa-diagram-project',
+                'Projetos',
+                'app_core_projetos',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_core_projetos')
+                    || $r === 'app_core_metas_nova'
+                    || $r === 'app_core_tarefa_mover'
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'notifications',
+                'fa-triangle-exclamation',
+                $alertasLabel,
+                'app_notifications',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_notifications'),
+                $alertBadge,
+            ),
+            $this->mobileShellMenuAction(),
+        ];
+    }
+
+    /**
+     * Barra inferior da Unio Saúde — fluxo clínico.
+     *
+     * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
+     */
+    private function getClinicMobileShellNav(?string $route, int $alertBadge = 0): array
+    {
+        $homeRoute = $this->organismoFeature->isPulsoHome() ? 'app_pulso' : 'app_dashboard';
+
+        return [
+            $this->buildMobileShellLink(
+                'dashboard',
+                'fa-house-medical',
+                'Início',
+                $homeRoute,
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_dashboard')
+                    || $r === 'app_pulso'
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'agenda',
+                'fa-calendar-alt',
+                'Agenda',
+                'app_pos_operatorio_agenda',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_pos_operatorio_agenda'),
+            ),
+            $this->buildMobileShellLink(
+                'pacientes',
+                'fa-user-injured',
+                'Pacientes',
+                'app_pos_operatorio_pacientes',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_pos_operatorio_paciente')
+                    || str_starts_with($r, 'app_pos_operatorio_carteirinha')
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'alertas',
+                'fa-bell',
+                'Alertas',
+                'app_pos_operatorio_alertas',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_pos_operatorio_alerta')
+                    || str_starts_with($r, 'app_pos_operatorio_sala_critica')
+                ),
+                $alertBadge,
+            ),
+            $this->mobileShellMenuAction(),
+        ];
+    }
+
+    private function shortMobileLabel(string $label, int $max = 11): string
+    {
+        $label = trim($label);
+        if ($label === '') {
+            return 'Atalho';
+        }
+
+        return mb_strlen($label) > $max ? mb_substr($label, 0, $max - 1).'…' : $label;
+    }
+
+    /** @return array{id: string, icon: string, label: string, type: string, action: string, active: bool} */
+    private function mobileShellMenuAction(): array
+    {
+        return [
             'id' => 'menu',
             'icon' => 'fa-bars',
             'label' => 'Menu',
@@ -793,8 +944,6 @@ class NavigationService
             'action' => 'open-sidebar',
             'active' => false,
         ];
-
-        return $items;
     }
 
     /**

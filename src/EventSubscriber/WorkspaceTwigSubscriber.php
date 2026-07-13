@@ -84,23 +84,22 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             $this->twig->addGlobal($name, $value);
         }
 
+        $shellAlertBadge = 0;
         if ($this->organismoFeature->isEnabled()) {
             $this->twig->addGlobal('nav_show_plataforma', false);
             $this->twig->addGlobal('nav_show_tenant_empresas', false);
             $this->twig->addGlobal('nav_show_admin', false);
             $this->twig->addGlobal('platform_modules', []);
             if ($this->organismoCopy->isClinicProfile()) {
-                $this->twig->addGlobal(
-                    'clinic_nav_badges',
-                    $this->clinicNavBadges->forEmpresa($empresa),
-                );
+                $clinicBadges = $this->clinicNavBadges->forEmpresa($empresa);
+                $this->twig->addGlobal('clinic_nav_badges', $clinicBadges);
                 $this->twig->addGlobal('studio_nav_modules', []);
+                $shellAlertBadge = (int) ($clinicBadges['alertas'] ?? 0);
             } else {
-                $this->twig->addGlobal(
-                    'clinic_nav_badges',
-                    $this->studioNavBadges->forEmpresa($empresa, \count($empresas)),
-                );
+                $studioBadges = $this->studioNavBadges->forEmpresa($empresa, \count($empresas));
+                $this->twig->addGlobal('clinic_nav_badges', $studioBadges);
                 $this->twig->addGlobal('studio_nav_modules', []);
+                $shellAlertBadge = (int) ($studioBadges['alertas'] ?? 0);
             }
         }
 
@@ -123,6 +122,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
                 \is_string($route) ? $route : null,
                 $chatUnread,
                 $notificationsUnread,
+                $shellAlertBadge,
             ),
         );
         $this->twig->addGlobal(
