@@ -47,6 +47,10 @@
             <tbody>
                 {% for c in contas %}
                 {% set guia = guia_por_conta[c.id]|default(null) %}
+                {% set can_settle = c.status == 'aberto' and c.tipo != 'convenio' and not guia %}
+                {% set can_cancel = c.status == 'aberto' and c.tipo != 'convenio' %}
+                {% set has_atendimento = c.atendimento is not null %}
+                {% set show_overflow = can_settle or (guia and has_atendimento) or (not guia and not can_settle and has_atendimento) %}
                 <tr>
                     <td data-label="Criada">{{ c.criadoEm|date('d/m/Y H:i') }}</td>
                     <td data-label="Paciente">
@@ -63,34 +67,89 @@
                             —
                         {% endif %}
                     </td>
-                    <td data-label="Ações" class="clinic-conta-col-actions">
-                        {% if guia %}
-                        <a href="{{ path('app_pos_operatorio_guias_show', { id: guia.id }) }}" class="btn-unio btn-sm">Abrir guia</a>
-                        {% elseif c.status == 'aberto' and c.tipo != 'convenio' %}
-                        <div class="clinic-conta-row-actions">
-                            <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}" class="clinic-conta-row-actions__row">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_' ~ c.id) }}">
-                                <input type="text" name="valor" class="form-control form-control-sm clinic-conta-row-actions__valor" placeholder="0,00" inputmode="decimal" required aria-label="Valor pago">
-                                <button type="submit" name="action" value="pago" class="btn-unio btn-sm">Pago</button>
-                                <button type="submit" name="action" value="cortesia" class="btn-unio-ghost btn-sm">Cortesia</button>
-                                <button type="submit" name="action" value="cancelar" class="btn-unio-ghost btn-sm">Cancelar</button>
-                            </form>
-                            {% if convenios is not empty %}
-                            <form method="post" action="{{ path('app_pos_operatorio_guias_from_conta', { contaId: c.id }) }}" class="clinic-conta-row-actions__row">
-                                <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_guia_' ~ c.id) }}">
-                                <select name="convenio_id" class="form-control form-control-sm clinic-conta-row-actions__convenio" required aria-label="Convênio">
-                                    <option value="">Convênio…</option>
-                                    {% for conv in convenios %}
-                                    <option value="{{ conv.id }}">{{ conv.nome }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" class="btn-unio-ghost btn-sm">Gerar guia</button>
-                            </form>
+                    <td data-label="Ações" class="clinic-conta-col-actions clinic-agenda-col-actions">
+                        <div class="clinic-agenda-row-actions clinic-conta-row-actions">
+                            <div class="clinic-agenda-row-actions__primary">
+                                {% if guia %}
+                                <a href="{{ path('app_pos_operatorio_guias_show', { id: guia.id }) }}" class="btn-unio btn-sm">Abrir guia</a>
+                                {% elseif can_settle %}
+                                <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}" class="clinic-conta-pay-form">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_' ~ c.id) }}">
+                                    <input type="text" name="valor" class="form-control form-control-sm clinic-conta-row-actions__valor" placeholder="0,00" inputmode="decimal" required aria-label="Valor pago">
+                                    <button type="submit" name="action" value="pago" class="btn-unio btn-sm">Pago</button>
+                                </form>
+                                {% elseif has_atendimento %}
+                                <a href="{{ path('app_pos_operatorio_atendimento_show', { id: c.atendimento.id }) }}" class="btn-unio-ghost btn-sm">Atendimento</a>
+                                {% else %}
+                                <span class="text-muted small">—</span>
+                                {% endif %}
+                            </div>
+
+                            {% if show_overflow %}
+                            <div class="dropdown clinic-agenda-row-actions__menu">
+                                <button type="button"
+                                        class="clinic-agenda-menu-btn"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                        aria-label="Mais ações para {{ c.paciente.nome|e('html_attr') }}"
+                                        title="Mais ações">
+                                    <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right unio-dropdown clinic-agenda-row-dropdown clinic-conta-row-dropdown">
+                                    {% if can_settle %}
+                                    <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_' ~ c.id) }}">
+                                        <button type="submit" name="action" value="cortesia" class="dropdown-item">
+                                            <i class="fas fa-gift" aria-hidden="true"></i> Cortesia
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_' ~ c.id) }}">
+                                        <button type="submit" name="action" value="cancelar" class="dropdown-item text-danger">
+                                            <i class="fas fa-ban" aria-hidden="true"></i> Cancelar
+                                        </button>
+                                    </form>
+                                    {% if convenios is not empty %}
+                                    <div class="dropdown-divider"></div>
+                                    <form method="post" action="{{ path('app_pos_operatorio_guias_from_conta', { contaId: c.id }) }}" class="clinic-conta-guia-form px-3 py-2">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_guia_' ~ c.id) }}">
+                                        <label class="small text-muted d-block mb-1" for="convenio_id_{{ c.id }}">Gerar guia TISS</label>
+                                        <select id="convenio_id_{{ c.id }}" name="convenio_id" class="form-control form-control-sm clinic-conta-row-actions__convenio mb-2" required aria-label="Convênio">
+                                            <option value="">Convênio…</option>
+                                            {% for conv in convenios %}
+                                            <option value="{{ conv.id }}">{{ conv.nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn-unio-ghost btn-sm btn-block">Gerar guia</button>
+                                    </form>
+                                    {% endif %}
+                                    {% elseif guia %}
+                                    {% if has_atendimento %}
+                                    <a href="{{ path('app_pos_operatorio_atendimento_show', { id: c.atendimento.id }) }}" class="dropdown-item">
+                                        <i class="fas fa-stethoscope" aria-hidden="true"></i> Atendimento
+                                    </a>
+                                    {% endif %}
+                                    {% else %}
+                                    {% if has_atendimento %}
+                                    <a href="{{ path('app_pos_operatorio_atendimento_show', { id: c.atendimento.id }) }}" class="dropdown-item">
+                                        <i class="fas fa-stethoscope" aria-hidden="true"></i> Atendimento
+                                    </a>
+                                    {% endif %}
+                                    {% if can_cancel %}
+                                    {% if has_atendimento %}<div class="dropdown-divider"></div>{% endif %}
+                                    <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_' ~ c.id) }}">
+                                        <button type="submit" name="action" value="cancelar" class="dropdown-item text-danger">
+                                            <i class="fas fa-ban" aria-hidden="true"></i> Cancelar
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
                             {% endif %}
                         </div>
-                        {% elseif c.atendimento %}
-                        <a href="{{ path('app_pos_operatorio_atendimento_show', { id: c.atendimento.id }) }}" class="btn-unio-ghost btn-sm">Atendimento</a>
-                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

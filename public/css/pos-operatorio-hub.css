@@ -587,10 +587,10 @@
     min-height: 32px;
     padding: 0;
     margin: 0;
-    border: 1px solid transparent;
+    border: 1px solid var(--border, rgba(100, 116, 139, 0.22));
     border-radius: 8px;
-    background: transparent;
-    color: var(--text-3, #64748b);
+    background: var(--surface, #fff);
+    color: var(--text-2, #334155);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -665,54 +665,52 @@ body.org-clinic .unio-card:has(.dropdown.show) {
     box-shadow: none;
 }
 
-/* ── Contas: ações da linha ── */
+/* ── Contas: ações da linha (CTA Pago + menu ⋮, igual Agenda) ── */
 .clinic-conta-col-actions {
-    min-width: 320px;
+    min-width: 168px;
     width: 1%;
+    white-space: nowrap;
     vertical-align: middle !important;
     text-align: right;
+    overflow: visible !important;
 }
 
-.clinic-conta-row-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-    min-width: 0;
-}
-
-.clinic-conta-row-actions__row {
-    display: flex;
+.clinic-conta-pay-form {
+    display: inline-flex;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: flex-end;
     gap: 6px;
     margin: 0;
-    width: 100%;
 }
 
 .clinic-conta-row-actions__valor {
     width: 88px !important;
     max-width: 88px !important;
     min-width: 72px;
-    flex: 0 0 88px;
     height: 32px;
     border-radius: 8px;
+}
+
+.clinic-conta-row-dropdown {
+    min-width: 220px;
+}
+
+.clinic-conta-row-dropdown .dropdown-item i {
+    width: 1.1em;
+    margin-right: 8px;
+    opacity: 0.75;
+}
+
+.clinic-conta-guia-form {
+    margin: 0;
 }
 
 .clinic-conta-row-actions__convenio {
-    width: 168px !important;
-    max-width: 168px !important;
-    min-width: 120px;
-    flex: 1 1 140px;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
     height: 32px;
     border-radius: 8px;
-}
-
-.clinic-conta-row-actions .btn-unio,
-.clinic-conta-row-actions .btn-unio-ghost {
-    flex: 0 0 auto;
-    white-space: nowrap;
 }
 
 .clinic-conta-card .admin-table td,
@@ -725,9 +723,14 @@ body.org-clinic .unio-card:has(.dropdown.show) {
     overflow: visible;
 }
 
-/* Selects em linhas de ação: mesmo visual do form-control do hub */
+body.org-clinic .table-responsive:has(.clinic-conta-row-actions),
+body.org-clinic .unio-card:has(.clinic-conta-row-actions) {
+    overflow: visible !important;
+}
+
 body.org-clinic .clinic-conta-row-actions select.form-control,
-body.org-clinic .clinic-conta-row-actions .form-control {
+body.org-clinic .clinic-conta-row-actions .form-control,
+body.org-clinic .clinic-conta-row-dropdown select.form-control {
     border: 1px solid var(--border, rgba(100, 116, 139, 0.28));
     background: var(--surface, #fff);
     color: var(--text-1, #1e293b);
@@ -735,7 +738,8 @@ body.org-clinic .clinic-conta-row-actions .form-control {
 }
 
 body.org-clinic .clinic-conta-row-actions select.form-control:focus,
-body.org-clinic .clinic-conta-row-actions .form-control:focus {
+body.org-clinic .clinic-conta-row-actions .form-control:focus,
+body.org-clinic .clinic-conta-row-dropdown select.form-control:focus {
     border-color: var(--org-blue, #4b72be);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--org-blue, #4b72be) 18%, transparent);
     outline: none;
@@ -743,22 +747,16 @@ body.org-clinic .clinic-conta-row-actions .form-control:focus {
 
 @media (max-width: 991.98px) {
     .clinic-conta-col-actions {
-        min-width: 0;
         text-align: left;
+        white-space: normal;
     }
 
-    .clinic-conta-row-actions {
-        align-items: stretch;
-    }
-
-    .clinic-conta-row-actions__row {
+    .clinic-conta-pay-form {
         flex-wrap: wrap;
-        justify-content: flex-start;
     }
 
-    .clinic-conta-row-actions__valor,
-    .clinic-conta-row-actions__convenio {
-        flex: 1 1 120px;
+    .clinic-conta-row-actions__valor {
+        flex: 1 1 100px;
         max-width: none !important;
         width: auto !important;
     }
