@@ -80,15 +80,14 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
             $this->twig->addGlobal($name, $value);
         }
 
+        $clinicBadges = ['alertas' => 0];
         if ($this->organismoFeature->isEnabled()) {
+            $clinicBadges = $this->clinicNavBadges->forEmpresa($empresa);
             $this->twig->addGlobal('nav_show_plataforma', false);
             $this->twig->addGlobal('nav_show_tenant_empresas', false);
             $this->twig->addGlobal('nav_show_admin', false);
             $this->twig->addGlobal('platform_modules', []);
-            $this->twig->addGlobal(
-                'clinic_nav_badges',
-                $this->clinicNavBadges->forEmpresa($empresa),
-            );
+            $this->twig->addGlobal('clinic_nav_badges', $clinicBadges);
         }
 
         $notificationsUnread = $empresa !== null ? $this->notifications->countUnread($empresa, $user) : 0;
@@ -110,6 +109,7 @@ class WorkspaceTwigSubscriber implements EventSubscriberInterface
                 \is_string($route) ? $route : null,
                 $chatUnread,
                 $notificationsUnread,
+                (int) ($clinicBadges['alertas'] ?? 0),
             ),
         );
         $this->twig->addGlobal(

@@ -7,6 +7,8 @@ use App\Config\PlannedHubRegistry;
 use App\Entity\User;
 use App\PosOperatorio\PosOperatorioModuleCatalog;
 use App\Security\ProductGrantAccess;
+use App\Service\Organismo\OrganismoCopyService;
+use App\Service\Organismo\OrganismoFeature;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -25,6 +27,8 @@ class NavigationService
     public function __construct(
         private ProductGrantAccess $grants,
         private RouterInterface $router,
+        private OrganismoFeature $organismoFeature,
+        private OrganismoCopyService $organismoCopy,
     ) {
     }
 
@@ -753,8 +757,17 @@ class NavigationService
      *
      * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
      */
-    public function getMobileShellNav(User $user, ?string $route, int $chatUnread = 0, int $notificationsUnread = 0): array
-    {
+    public function getMobileShellNav(
+        User $user,
+        ?string $route,
+        int $chatUnread = 0,
+        int $notificationsUnread = 0,
+        int $clinicAlertBadge = 0,
+    ): array {
+        if ($this->organismoFeature->isEnabled() && $this->organismoCopy->isClinicProfile()) {
+            return $this->getClinicMobileShellNav($route, $clinicAlertBadge);
+        }
+
         $items = [
             $this->buildMobileShellLink('dashboard', 'fa-house', 'Início', 'app_dashboard', $route, static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_dashboard')),
             $this->buildMobileShellLink('chat', 'fa-comments', 'Chat', 'app_chat', $route, static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_chat'), $chatUnread),
@@ -785,7 +798,71 @@ class NavigationService
             $notificationsUnread,
         );
 
-        $items[] = [
+        $items[] = $this->mobileShellMenuAction();
+
+        return $items;
+    }
+
+    /**
+     * Barra inferior da Unio Saúde — fluxo clínico, sem Chat/Operações/RH.
+     *
+     * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
+     */
+    private function getClinicMobileShellNav(?string $route, int $alertBadge = 0): array
+    {
+        $homeRoute = $this->organismoFeature->isPulsoHome() ? 'app_pulso' : 'app_dashboard';
+
+        return [
+            $this->buildMobileShellLink(
+                'dashboard',
+                'fa-house-medical',
+                'Início',
+                $homeRoute,
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_dashboard')
+                    || $r === 'app_pulso'
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'agenda',
+                'fa-calendar-alt',
+                'Agenda',
+                'app_pos_operatorio_agenda',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_pos_operatorio_agenda'),
+            ),
+            $this->buildMobileShellLink(
+                'pacientes',
+                'fa-user-injured',
+                'Pacientes',
+                'app_pos_operatorio_pacientes',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_pos_operatorio_paciente')
+                    || str_starts_with($r, 'app_pos_operatorio_carteirinha')
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'alertas',
+                'fa-bell',
+                'Alertas',
+                'app_pos_operatorio_alertas',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_pos_operatorio_alerta')
+                    || str_starts_with($r, 'app_pos_operatorio_sala_critica')
+                ),
+                $alertBadge,
+            ),
+            $this->mobileShellMenuAction(),
+        ];
+    }
+
+    /** @return array{id: string, icon: string, label: string, type: string, action: string, active: bool} */
+    private function mobileShellMenuAction(): array
+    {
+        return [
             'id' => 'menu',
             'icon' => 'fa-bars',
             'label' => 'Menu',
@@ -793,8 +870,6 @@ class NavigationService
             'action' => 'open-sidebar',
             'active' => false,
         ];
-
-        return $items;
     }
 
     /**
