@@ -38,23 +38,28 @@
     <div class="crm-pipeline__summary" aria-label="Resumo do pipeline">
         <div class="crm-pipeline__stat">
             <span class="crm-pipeline__stat-label">Em aberto</span>
-            <strong class="crm-pipeline__stat-value">{{ open_count }}</strong>
+            <strong class="crm-pipeline__stat-value" data-crm-summary-open>{{ open_count }}</strong>
         </div>
         <div class="crm-pipeline__stat">
             <span class="crm-pipeline__stat-label">Pipeline</span>
-            <strong class="crm-pipeline__stat-value">R$ {{ open_value|number_format(2, ',', '.') }}</strong>
+            <strong class="crm-pipeline__stat-value" data-crm-summary-value">R$ {{ open_value|number_format(2, ',', '.') }}</strong>
         </div>
         <div class="crm-pipeline__stat crm-pipeline__stat--ok">
             <span class="crm-pipeline__stat-label">Ganhas</span>
-            <strong class="crm-pipeline__stat-value">{{ won_count }}</strong>
+            <strong class="crm-pipeline__stat-value" data-crm-summary-won>{{ won_count }}</strong>
         </div>
         <div class="crm-pipeline__stat crm-pipeline__stat--muted">
             <span class="crm-pipeline__stat-label">Perdidas</span>
-            <strong class="crm-pipeline__stat-value">{{ lost_count }}</strong>
+            <strong class="crm-pipeline__stat-value" data-crm-summary-lost>{{ lost_count }}</strong>
         </div>
     </div>
 
-    <div class="crm-pipeline__board kanban-board" role="list" aria-label="Estágios do pipeline">
+    <p class="crm-pipeline__hint text-muted small mb-2">
+        <i class="fas fa-grip-vertical mr-1" aria-hidden="true"></i>
+        Arraste pelo ícone de grip para mover entre os estágios (ou use o seletor no card).
+    </p>
+
+    <div class="crm-pipeline__board kanban-board" data-crm-pipeline-board data-crm-pipeline-dnd role="list" aria-label="Estágios do pipeline">
         {% for stage in stages %}
         {% set items = pipeline_board[stage]|default([]) %}
         {% set meta = stage_meta[stage]|default({ label: stage, tone: 'sky' }) %}
@@ -64,7 +69,10 @@
         {% endfor %}
         {% set col_value = _col_sum.v %}
 
-        <section class="crm-pipeline__col kanban-column crm-pipeline__col--{{ meta.tone|default('sky') }}" role="listitem" aria-label="{{ meta.label }}">
+        <section class="crm-pipeline__col kanban-column crm-pipeline__col--{{ meta.tone|default('sky') }}"
+                 data-crm-pipeline-col="{{ stage }}"
+                 role="listitem"
+                 aria-label="{{ meta.label }}">
             <header class="crm-pipeline__col-head kanban-column-header">
                 <div class="crm-pipeline__col-title">
                     <span class="crm-pipeline__col-dot" aria-hidden="true"></span>
@@ -74,15 +82,15 @@
                     </span>
                 </div>
                 <div class="crm-pipeline__col-meta">
-                    {% if items|length > 0 and col_value > 0 %}
-                    <span class="crm-pipeline__col-sum" title="Soma do estágio">R$ {{ col_value|number_format(0, ',', '.') }}</span>
-                    {% endif %}
+                    <span class="crm-pipeline__col-sum" data-crm-col-sum {% if items|length == 0 or col_value == 0 %}hidden{% endif %} title="Soma do estágio">
+                        R$ {{ col_value|number_format(0, ',', '.') }}
+                    </span>
                     <span class="kanban-column-count">{{ items|length }}</span>
                 </div>
             </header>
 
             <div class="crm-pipeline__col-body kanban-column-body">
-                <div class="kanban-column-cards">
+                <div class="kanban-column-cards" data-crm-pipeline-sort-col="{{ stage }}">
                     {% if items|length == 0 %}
                     <div class="crm-pipeline__empty">
                         <i class="fas fa-inbox" aria-hidden="true"></i>
@@ -95,7 +103,17 @@
                     </div>
                     {% else %}
                         {% for op in items %}
-                        <article class="crm-pipeline__card kanban-card">
+                        <article class="crm-pipeline__card kanban-card"
+                                 data-crm-pipeline-card
+                                 data-crm-stage="{{ op.estagio }}"
+                                 data-crm-valor="{{ op.valor|default(0) }}"
+                                 data-crm-prob="{{ op.probabilidade }}"
+                                 data-crm-move-url="{{ path('app_comercial_oportunidade_mover', { id: op.id }) }}"
+                                 data-crm-move-token="{{ csrf_token('crm_oportunidade_move_' ~ op.id) }}">
+                            <button type="button" class="crm-pipeline__drag-handle" title="Arrastar" aria-label="Arrastar oportunidade">
+                                <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+                            </button>
+
                             <a href="{{ path('app_comercial_oportunidade_show', { id: op.id }) }}" class="crm-pipeline__card-title">
                                 {{ op.titulo }}
                             </a>
@@ -129,7 +147,7 @@
                                     <label class="sr-only" for="crm-move-{{ op.id }}">Mover estágio</label>
                                     <select id="crm-move-{{ op.id }}" name="estagio" class="crm-pipeline__move-select" onchange="this.form.submit()" title="Mover para…">
                                         {% for s in stages %}
-                                        <option value="{{ s }}" {% if op.estagio == s %}selected{% endif %}>
+                                        <option value="{{ s }}" data-label="{{ stage_meta[s].label|default(s) }}" {% if op.estagio == s %}selected{% endif %}>
                                             {{ op.estagio == s ? 'Estágio atual' : '→ ' ~ (stage_meta[s].label|default(s)) }}
                                         </option>
                                         {% endfor %}
@@ -159,4 +177,10 @@
     contas: contas,
     leads: leads
 } %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/sortable.min.js') }}"></script>
+<script src="{{ asset('js/crm-pipeline.js') }}?v=1"></script>
 {% endblock %}
