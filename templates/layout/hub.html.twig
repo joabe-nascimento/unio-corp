@@ -17,10 +17,17 @@
     {% set _hub_actions_html %}
 {{ block('hub_toolbar_actions') }}
     {% endset %}
+    {# Clínica: marca no eyebrow por padrão em todas as telas hub #}
+    {% set _hub_eyebrow = hub_page_eyebrow|default(null) %}
+    {% if _hub_eyebrow is same as(null) and org_clinic|default(false) %}
+        {% set _hub_eyebrow = org_brand_label|default('Unio Saúde') %}
+    {% elseif _hub_eyebrow is same as(null) %}
+        {% set _hub_eyebrow = '' %}
+    {% endif %}
     {% include 'components/org_hub_lead.html.twig' with {
         page_title: hub_page_title|default(''),
         page_subtitle: hub_page_subtitle|default(''),
-        page_eyebrow: hub_page_eyebrow|default(''),
+        page_eyebrow: _hub_eyebrow,
         show_hub_tabs: _show_hub_tabs,
         show_perm_tab: _show_perm_tab,
         back_label: hub_back_label|default(organismo.copy.pulso|default('Pulso')),
