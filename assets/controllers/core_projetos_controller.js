@@ -89,10 +89,13 @@ export default class extends Controller {
             panel.classList.toggle('hub-tab-panel--active', active);
         });
 
-        this.element.querySelectorAll('[data-core-toolbar-for]').forEach((el) => {
-            const show = el.getAttribute('data-core-toolbar-for') === name;
-            el.hidden = !show;
-            el.style.display = show ? '' : 'none';
+        const toolbarScopes = [this.element, document.querySelector('.page-lead-zone--hub-tabs')].filter(Boolean);
+        toolbarScopes.forEach((scope) => {
+            scope.querySelectorAll('[data-core-toolbar-for]').forEach((el) => {
+                const show = el.getAttribute('data-core-toolbar-for') === name;
+                el.hidden = !show;
+                el.style.display = show ? '' : 'none';
+            });
         });
 
         if (name === 'permissions') {

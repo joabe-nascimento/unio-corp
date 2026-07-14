@@ -14,12 +14,17 @@
     </div>
 {% endblock %}
 
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') %}
+<a href="{{ path('app_pessoas_membro_novo') }}" class="btn-unio btn-sm">
+    <i class="fas fa-user-plus mr-1" aria-hidden="true"></i> Novo Membro
+</a>
+{% endif %}
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_pessoas_membros') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: grant_at_least('product_pessoas', 'membros', 'GESTOR_EQUIPE') ? 'Novo Membro' : '',
-    btn_href: path('app_pessoas_membro_novo'),
-    btn_icon: 'fa-user-plus',
     search_in_section: true,
     search_placeholder: 'Buscar por nome, cargo ou equipe…',
     search_name: 'q',

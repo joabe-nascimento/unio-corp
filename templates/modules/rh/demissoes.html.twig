@@ -2,12 +2,17 @@
 {% block title %}Demissões{% endblock %}
 {% set page_list_title = 'Demissões (Offboarding)' %}
 
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="rh-demissao-nova" data-rh-demissao-nova-open>
+    <i class="fas fa-user-minus mr-1" aria-hidden="true"></i> Nova demissão
+</button>
+{% endif %}
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_rh_demissoes') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova demissão' : '',
-    btn_opens: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'rh-demissao-nova' : '',
-    btn_icon: 'fa-user-minus',
     search_in_section: true,
     search_placeholder: 'Buscar funcionário ou motivo…',
     search_name: 'q',

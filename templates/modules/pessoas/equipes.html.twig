@@ -14,12 +14,17 @@
     </div>
 {% endblock %}
 
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_pessoas', 'equipes', 'GESTOR_EQUIPE') %}
+<a href="{{ path('app_pessoas_equipe_nova') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova Equipe
+</a>
+{% endif %}
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_pessoas_equipes') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: grant_at_least('product_pessoas', 'equipes', 'GESTOR_EQUIPE') ? 'Nova Equipe' : '',
-    btn_href: path('app_pessoas_equipe_nova'),
-    btn_icon: 'fa-plus',
     search_in_section: true,
     search_placeholder: 'Buscar equipe por nome ou responsável…',
     search_name: 'q',

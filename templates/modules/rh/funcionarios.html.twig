@@ -2,12 +2,17 @@
 {% block title %}Funcionários{% endblock %}
 {% set page_list_title = 'Funcionários' %}
 
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="rh-funcionario-novo" data-rh-funcionario-novo-open>
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo funcionário
+</button>
+{% endif %}
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_rh_funcionarios') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'Novo funcionário' : '',
-    btn_opens: grant_at_least('product_rh', 'funcionarios', 'GESTOR_EQUIPE') ? 'rh-funcionario-novo' : '',
-    btn_icon: 'fa-plus',
     search_in_section: true,
     search_placeholder: 'Buscar nome, e-mail ou cargo…',
     search_name: 'q',

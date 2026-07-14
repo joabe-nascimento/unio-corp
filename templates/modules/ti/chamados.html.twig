@@ -1,12 +1,17 @@
 {% extends 'modules/ti/_base.html.twig' %}
 
+{% block hub_toolbar_actions %}
+{% if ti_can('create_chamado') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="ti-chamado-novo" data-ti-chamado-novo-open>
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Abrir chamado
+</button>
+{% endif %}
+{{ parent() }}
+{% endblock %}
+
 {% block hub_section_toolbar %}
 <div class="ti-chamados-toolbar-wrap">
     {% embed 'components/section_toolbar.html.twig' with {
-        btn_label: ti_can('create_chamado') ? 'Abrir chamado' : '',
-        btn_opens: ti_can('create_chamado') ? 'ti-chamado-novo' : '',
-        btn_icon: 'fa-plus',
-        btn_align: 'left',
         search_in_section: false
     } %}
         {% block section_toolbar_extra_end %}

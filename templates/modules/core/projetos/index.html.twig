@@ -1,6 +1,20 @@
 {% extends 'layout/core_projetos.html.twig' %}
 {% block title %}Projetos e Metas{% endblock %}
 {% set page_list_title = 'Projetos e Metas' %}
+{% set page_list_actions_in_top = true %}
+
+{% block page_list_toolbar_actions %}
+<span data-core-toolbar-for="lista"{% if active_view|default('kanban') != 'lista' %} hidden style="display:none"{% endif %}>
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="dev-projeto" data-dev-projeto-open>
+        <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo projeto
+    </button>
+</span>
+<span data-core-toolbar-for="metas"{% if active_view|default('kanban') != 'metas' %} hidden style="display:none"{% endif %}>
+    <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="dev-meta" data-dev-meta-open>
+        <i class="fas fa-bullseye mr-1" aria-hidden="true"></i> Nova meta
+    </button>
+</span>
+{% endblock %}
 
 {% block core_projetos_kpis %}
 <div class="page-lead-kpis">
@@ -41,25 +55,6 @@
     {% endembed %}
 </div>
 
-{# Lista de projetos: Novo projeto à esquerda (padrão) #}
-<div class="core-projetos-toolbar" data-core-toolbar-for="lista"{% if active_view|default('kanban') != 'lista' %} hidden{% endif %}>
-    {% include 'components/section_toolbar.html.twig' with {
-        btn_label: 'Novo projeto',
-        btn_opens: 'dev-projeto',
-        btn_icon: 'fa-plus',
-        search_in_section: false
-    } %}
-</div>
-
-{# Metas: Nova meta à esquerda (padrão) #}
-<div class="core-projetos-toolbar" data-core-toolbar-for="metas"{% if active_view|default('kanban') != 'metas' %} hidden{% endif %}>
-    {% include 'components/section_toolbar.html.twig' with {
-        btn_label: 'Nova meta',
-        btn_opens: 'dev-meta',
-        btn_icon: 'fa-bullseye',
-        search_in_section: false
-    } %}
-</div>
 {% endblock %}
 
 {% block core_panel_kanban %}

@@ -3,12 +3,15 @@
 {% set page_list_title = 'Empresas' %}
 {% set page_list_actions_in_top = true %}
 
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="admin-nova-empresa" data-admin-nova-empresa-open>
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova empresa
+</button>
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_admin_empresas') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: 'Nova empresa',
-    btn_icon: 'fa-plus',
-    btn_opens: 'admin-nova-empresa',
     search_in_section: true,
     search_placeholder: 'Buscar por nome, CNPJ ou setor…',
     search_name: 'q',

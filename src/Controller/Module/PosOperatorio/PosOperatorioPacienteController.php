@@ -69,7 +69,7 @@ final class PosOperatorioPacienteController extends AbstractController
 
     #[Route('', name: 'app_pos_operatorio_pacientes')]
 
-    public function index(): Response
+    public function index(Request $request): Response
 
     {
 
@@ -85,7 +85,13 @@ final class PosOperatorioPacienteController extends AbstractController
 
                 'pos_section' => 'pacientes',
 
-                'pacientes' => $this->service->listByEmpresa($empresa),
+                'pacientes' => $this->service->searchByEmpresa(
+                    $empresa,
+                    (string) $request->query->get('q', ''),
+                    (string) $request->query->get('status', ''),
+                ),
+                'filter_q' => (string) $request->query->get('q', ''),
+                'filter_status' => (string) $request->query->get('status', ''),
 
                 'silenciosos_hoje' => $this->service->silentTodayIds($empresa),
 

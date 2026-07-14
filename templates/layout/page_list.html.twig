@@ -1,18 +1,17 @@
 {#
-  page_list — layout padrão para listagens (título + KPIs no topo; ações/filtros/busca na section_toolbar)
+  page_list — layout padrão para listagens
+  (título + CTAs no cabeçalho; filtros/busca na section_toolbar)
 
   Variáveis:
     page_list_title (string)
+    page_list_actions_in_top (bool, default true) — CTAs no cabeçalho
 
   Blocks:
-    page_list_toolbar_actions
+    page_list_toolbar_actions   ← botões primários (+ Novo …)
     page_list_toolbar_subnav
     page_list_kpis
-    page_list_section_toolbar
+    page_list_section_toolbar   ← filtros / busca (sem CTA principal)
     page_list_content
-
-  O wrapper .page-body-scroll evita sobreposição do rodapé em listas com KPIs, toolbar e empty state.
-  Use page_list_body_mode: 'fill' só para páginas realmente curtas (sem toolbar de seção).
 #}
 {% extends 'base.html.twig' %}
 {% block page_scroll_mode %}{{ page_list_body_mode|default('scroll') == 'fill' ? 'fill' : 'flow' }}{% endblock %}
@@ -23,7 +22,7 @@
 <div class="page-lead-zone">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: page_list_title|default(''),
-        actions_in_top: page_list_actions_in_top|default(false),
+        actions_in_top: page_list_actions_in_top|default(true),
         actions_before_title: page_list_actions_before_title|default(false)
     } %}
         {% block toolbar_actions %}{% block page_list_toolbar_actions %}{% endblock %}{% endblock %}

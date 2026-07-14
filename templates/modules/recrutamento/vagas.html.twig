@@ -10,14 +10,17 @@
     {% set status_filter_options = status_filter_options|merge([{ value: value, label: label }]) %}
 {% endfor %}
 
+{% block hub_toolbar_actions %}
+{% if can_manage_vagas %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="recrutamento-vaga-form" data-recrutamento-vaga-form-open>
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova vaga
+</button>
+{% endif %}
+{% endblock %}
+
 {% block hub_section_toolbar %}
 <form method="get" action="{{ path('app_recrutamento_vagas') }}" style="display:contents">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: can_manage_vagas ? 'Nova vaga' : '',
-    btn_opens: can_manage_vagas ? 'recrutamento-vaga-form' : '',
-    btn_icon: 'fa-plus',
-    btn_sm: true,
-    btn_align: 'left',
     search_in_section: true,
     search_placeholder: 'Buscar vaga…',
     search_name: 'q',

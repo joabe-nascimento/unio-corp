@@ -74,6 +74,13 @@ final class PosOperatorioPacienteService
 
     }
 
+    /** @return list<PosOperatorioPaciente> */
+    public function searchByEmpresa(Empresa $empresa, string $q = '', string $status = '', int $limit = 100): array
+    {
+        return $this->repository->searchByEmpresa($empresa, $q, $status, $limit, 0);
+    }
+
+
 
 
     /** @return array<int, true> */

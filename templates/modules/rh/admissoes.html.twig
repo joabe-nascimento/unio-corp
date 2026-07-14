@@ -2,12 +2,17 @@
 {% block title %}Admissões{% endblock %}
 {% set page_list_title = 'Admissões (Onboarding)' %}
 
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="rh-admissao-nova" data-rh-admissao-nova-open>
+    <i class="fas fa-user-plus mr-1" aria-hidden="true"></i> Nova admissão
+</button>
+{% endif %}
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_rh_admissoes') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'Nova admissão' : '',
-    btn_opens: grant_at_least('product_rh', 'admissoes', 'GESTOR_EQUIPE') ? 'rh-admissao-nova' : '',
-    btn_icon: 'fa-user-plus',
     search_in_section: true,
     search_placeholder: 'Buscar por nome ou e-mail…',
     search_name: 'q',

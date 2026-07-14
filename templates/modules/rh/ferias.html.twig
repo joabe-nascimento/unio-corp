@@ -2,12 +2,17 @@
 {% block title %}Férias{% endblock %}
 {% set page_list_title = 'Férias' %}
 
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_rh', 'ferias', 'GESTOR_EQUIPE') %}
+<a href="{{ path('app_rh_ferias_nova') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova solicitação
+</a>
+{% endif %}
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_rh_ferias') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: grant_at_least('product_rh', 'ferias', 'GESTOR_EQUIPE') ? 'Nova solicitação' : '',
-    btn_href: path('app_rh_ferias_nova'),
-    btn_icon: 'fa-plus',
     search_in_section: true,
     search_placeholder: 'Buscar colaborador…',
     search_name: 'q',

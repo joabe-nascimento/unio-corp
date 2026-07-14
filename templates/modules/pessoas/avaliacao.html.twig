@@ -12,12 +12,12 @@
 </div>
 {% endblock %}
 
-{% block page_list_section_toolbar %}
-{% embed 'components/section_toolbar.html.twig' with {
-    btn_label: grant_at_least('product_pessoas', 'avaliacao', 'GESTOR_EQUIPE') ? 'Nova Avaliação' : '',
-    btn_opens: grant_at_least('product_pessoas', 'avaliacao', 'GESTOR_EQUIPE') ? 'pessoas-avaliacao-nova' : '',
-    btn_icon: 'fa-star'
-} %}{% endembed %}
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_pessoas', 'avaliacao', 'GESTOR_EQUIPE') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="pessoas-avaliacao-nova" data-pessoas-avaliacao-nova-open>
+    <i class="fas fa-star mr-1" aria-hidden="true"></i> Nova Avaliação
+</button>
+{% endif %}
 {% endblock %}
 
 {% block page_list_content %}

@@ -2,6 +2,7 @@
 
 {% set _copy = organismo.copy|default({}) %}
 {% set _label_clients = _copy.nav_pacientes|default(org_clinic|default(false) ? 'Pacientes' : 'Clientes') %}
+{% set _cta_label = org_clinic|default(false) ? 'Novo paciente' : 'Novo projeto' %}
 
 {% block title %}{{ _label_clients }}{% if not org_clinic %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
 {% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
@@ -14,29 +15,82 @@
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/pos-operatorio-hub.css') }}?v=15">
+<link rel="stylesheet" href="{{ asset('css/pos-operatorio-hub.css') }}?v=16">
 {% endblock %}
 
 {% block hub_toolbar_actions %}
+<button type="button"
+        class="btn-unio btn-sm"
+        data-unio-offcanvas-open="pos-op-paciente-form"
+        data-pos-op-paciente-form-open>
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i>
+    {{ _cta_label }}
+</button>
+<button type="button"
+        class="btn-unio-ghost btn-sm"
+        id="posOpUltimaFichaBtn"
+        hidden
+        title="Abrir a última ficha vista nesta clínica">
+    <i class="fas fa-clock-rotate-left mr-1" aria-hidden="true"></i>
+    Última ficha
+</button>
 {% if not org_clinic %}
 <a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-arrow-left mr-1"></i> Visão geral
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Visão geral
 </a>
 {% endif %}
 {% endblock %}
+
 {% block hub_section_toolbar %}
+<form method="get" action="{{ path('app_pos_operatorio_pacientes') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: org_clinic|default(false) ? 'Novo paciente' : 'Novo projeto',
-    btn_opens: 'pos-op-paciente-form',
-    btn_icon: 'fa-plus',
-    btn_sm: true,
-    btn_align: 'left',
-    search_hidden: true
-} %}{% endembed %}
+    search_in_section: true,
+    search_placeholder: org_clinic|default(false) ? 'Buscar nome, código ou procedimento…' : 'Buscar nome ou código…',
+    search_name: 'q',
+    search_value: filter_q|default(''),
+    btn_sm: true
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filter_status|default(''),
+            min_width: '150px',
+            options: [
+                { value: '', label: 'Em acompanhamento' },
+                { value: 'ativo', label: 'Ativo' },
+                { value: 'alerta', label: 'Alerta' },
+                { value: 'pendente', label: 'Pendente' },
+                { value: 'encerrado', label: 'Encerrado' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_pos_operatorio_pacientes'),
+            has_filters: filter_q|default('') or filter_status|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
 {% endblock %}
 
 {% block hub_content %}
 <section class="unio-card">
+    {% if pacientes is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: org_clinic|default(false) ? 'fa-user-injured' : 'fa-folder-open',
+            title: filter_q|default('') or filter_status|default('')
+                ? 'Nenhum resultado'
+                : (org_clinic|default(false) ? 'Nenhum paciente cadastrado' : 'Nenhum projeto cadastrado'),
+            text: filter_q|default('') or filter_status|default('')
+                ? 'Ajuste a busca ou limpe os filtros.'
+                : 'Cadastre o primeiro registro para começar o acompanhamento.',
+            btn_label: (filter_q|default('') or filter_status|default('')) ? '' : _cta_label,
+            btn_opens: (filter_q|default('') or filter_status|default('')) ? '' : 'pos-op-paciente-form',
+            btn_icon: 'fa-plus',
+            btn_sm: true,
+            compact: true
+        } %}
+    {% else %}
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
@@ -91,19 +145,11 @@
                         </div>
                     </td>
                 </tr>
-                {% else %}
-                <tr>
-                    <td colspan="8" class="text-muted p-4">
-                        Nenhum paciente cadastrado.
-                        <button type="button" class="btn btn-link btn-sm p-0 align-baseline" data-unio-offcanvas-open="pos-op-paciente-form">
-                            Cadastrar agora
-                        </button>
-                    </td>
-                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% endif %}
 </section>
 {% endblock %}
 
@@ -122,7 +168,7 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/clinic-paciente-form.js') }}?v=2" defer></script>
-<script src="{{ asset('js/pos-operatorio-hub.js') }}?v=6"></script>
+<script src="{{ asset('js/pos-operatorio-hub.js') }}?v=7"></script>
 <script>
 (function () {
     if (window.UnioOffcanvas && typeof window.UnioOffcanvas.refresh === 'function') {

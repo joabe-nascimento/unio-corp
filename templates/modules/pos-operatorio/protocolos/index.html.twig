@@ -24,7 +24,20 @@
 {% endblock %}
 
 {% block hub_content %}
+{% set _proto_cta = org_clinic|default(false) ? 'Novo protocolo' : 'Novo playbook' %}
 <section class="unio-card">
+    {% if protocolos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-clipboard-list',
+            title: org_clinic|default(false) ? 'Nenhum protocolo cadastrado' : 'Nenhum playbook cadastrado',
+            text: 'Crie o primeiro modelo para orientar o acompanhamento.',
+            btn_label: _proto_cta,
+            btn_href: path('app_pos_operatorio_protocolo_novo'),
+            btn_icon: 'fa-plus',
+            btn_sm: true,
+            compact: true
+        } %}
+    {% else %}
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
@@ -49,11 +62,10 @@
                         <a href="{{ path('app_pos_operatorio_protocolo_editar', { id: pr.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
                     </td>
                 </tr>
-                {% else %}
-                <tr><td colspan="6" class="text-muted p-4">Nenhum protocolo cadastrado.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% endif %}
 </section>
 {% endblock %}

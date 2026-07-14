@@ -1,14 +1,13 @@
 {#
   empty_state — placeholder de lista ou página
 
-  Props: icon, title, text, btn_label, btn_href, btn_opens, turbo_frame
+  Use o MESMO CTA do cabeçalho (hub_toolbar_actions / page_list_toolbar_actions):
+    mesmos btn_label, btn_opens / btn_href e btn_icon.
+
+  Props: icon, title, text, btn_label, btn_href, btn_opens, btn_icon, turbo_frame
   Modifiers:
-    compact — cards internos / tabelas (não estica o painel)
-    hero    — páginas inteiras via .empty-state-panel (hubs, stubs)
-  Layout:
-    Listas vazias → .unio-card dentro de .page-body-fill (layout/page_list, hub)
-  Ação primária:
-    Se a mesma ação já está no section_toolbar / list_toolbar, não passe btn_* aqui.
+    compact — cards internos / tabelas
+    hero    — páginas inteiras via .empty-state-panel
 #}
 <div class="empty-state{% if compact|default(false) %} empty-state--compact{% endif %}{% if hero|default(false) %} empty-state--hero{% endif %}">
     <div class="empty-icon"><i class="fas {{ icon|default('fa-inbox') }}"></i></div>
@@ -17,14 +16,24 @@
         <p>{{ text }}</p>
     {% endif %}
     {% if btn_label is defined and btn_label %}
+        {% set _btn_class = 'btn-unio mt-3' ~ (btn_sm|default(false) ? ' btn-sm' : '') %}
         {% if btn_opens is defined and btn_opens %}
-            <button type="button" class="btn-unio mt-3"
+            <button type="button" class="{{ _btn_class }}"
                     data-unio-offcanvas-open="{{ btn_opens }}"
-                    data-{{ btn_opens }}-open>{{ btn_label }}</button>
+                    data-{{ btn_opens }}-open>
+                {% if btn_icon|default('') %}<i class="fas {{ btn_icon }} mr-1" aria-hidden="true"></i>{% endif %}
+                {{ btn_label }}
+            </button>
         {% elseif btn_href is defined and btn_href %}
-            <a href="{{ btn_href }}" class="btn-unio mt-3"{% if turbo_frame|default('') %} data-turbo-frame="{{ turbo_frame }}"{% endif %}>{{ btn_label }}</a>
+            <a href="{{ btn_href }}" class="{{ _btn_class }}"{% if turbo_frame|default('') %} data-turbo-frame="{{ turbo_frame }}"{% endif %}>
+                {% if btn_icon|default('') %}<i class="fas {{ btn_icon }} mr-1" aria-hidden="true"></i>{% endif %}
+                {{ btn_label }}
+            </a>
         {% else %}
-            <button type="button" class="btn-unio mt-3">{{ btn_label }}</button>
+            <button type="button" class="{{ _btn_class }}">
+                {% if btn_icon|default('') %}<i class="fas {{ btn_icon }} mr-1" aria-hidden="true"></i>{% endif %}
+                {{ btn_label }}
+            </button>
         {% endif %}
     {% endif %}
 </div>

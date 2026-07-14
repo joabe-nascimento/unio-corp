@@ -29,7 +29,8 @@
 {% set _show_page_back = page_back_route|default(null) and not page_back_hide|default(false) %}
 {% set _show_actions = not _is_page or actions_in_top|default(false) %}
 {% set _toolbar_actions_html = block('toolbar_actions')|trim %}
-{% set _actions_on_right = _show_page_back and _toolbar_actions_html != '' %}
+{# CTAs no cabeçalho ficam à direita (não colados ao título) #}
+{% set _actions_on_right = _show_actions and _toolbar_actions_html != '' and not actions_before_title|default(false) and (_is_page or _show_page_back) %}
 {% set _back_first = _show_page_back or (actions_before_title|default(false) and _show_actions) %}
 {% set _show_toolbar_end = _filters_in_top or not _search_hidden or _actions_on_right %}
 <div class="list-toolbar{% if _is_page %} list-toolbar--page{% else %} unio-card mb-3{% endif %}">

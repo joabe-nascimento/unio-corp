@@ -1,6 +1,8 @@
 (function (window, document) {
     'use strict';
 
+    var LAST_FICHA_KEY = 'unio.posop.lastFicha';
+
     function replaceIdInUrl(tpl, id) {
         return String(tpl).replace('/0/', '/' + id + '/').replace(/\/0$/, '/' + id);
     }
@@ -20,6 +22,51 @@
         }
     }
 
+    function readLastFicha() {
+        try {
+            var raw = window.localStorage.getItem(LAST_FICHA_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+            return null;
+        }
+    }
+
+    function rememberLastFicha(id, nome, codigo) {
+        if (!id) {
+            return;
+        }
+        try {
+            window.localStorage.setItem(LAST_FICHA_KEY, JSON.stringify({
+                id: String(id),
+                nome: nome || '',
+                codigo: codigo || '',
+                at: Date.now(),
+            }));
+        } catch (err) {
+            /* ignore quota */
+        }
+        refreshUltimaFichaBtn();
+    }
+
+    function refreshUltimaFichaBtn() {
+        var btn = document.getElementById('posOpUltimaFichaBtn');
+        if (!btn) {
+            return;
+        }
+        var last = readLastFicha();
+        if (!last || !last.id) {
+            btn.hidden = true;
+            return;
+        }
+        btn.hidden = false;
+        btn.setAttribute('data-pos-op-paciente-ficha', last.id);
+        btn.setAttribute('data-pos-op-paciente-nome', last.nome || '');
+        btn.setAttribute('data-pos-op-paciente-codigo', last.codigo || '');
+        btn.setAttribute('data-unio-offcanvas-open', 'pos-op-paciente-ficha');
+        var label = last.codigo || last.nome || 'ficha';
+        btn.title = 'Abrir última ficha · ' + label;
+    }
+
     function applyFichaMeta(host) {
         if (!host) {
             return;
@@ -32,6 +79,7 @@
         var nome = meta.getAttribute('data-nome') || '';
         var procedimento = meta.getAttribute('data-procedimento') || '';
         var diaPos = meta.getAttribute('data-dia-pos') || '';
+        var id = meta.getAttribute('data-id') || '';
         var subtitleParts = [codigo, procedimento];
         if (diaPos !== '') {
             subtitleParts.push('D+' + diaPos);
@@ -41,6 +89,24 @@
             nome || codigo || 'Ficha do paciente',
             subtitleParts.filter(Boolean).join(' · ')
         );
+        if (id) {
+            rememberLastFicha(id, nome, codigo);
+        }
+    }
+
+    function renderPartialError(host, retryUrl, loadingText, onLoaded) {
+        host.innerHTML =
+            '<div class="clinic-partial-error" role="alert">' +
+            '<p class="clinic-partial-error__text mb-2">Não foi possível carregar. Tente novamente.</p>' +
+            '<button type="button" class="btn-unio-ghost btn-sm" data-clinic-partial-retry>' +
+            '<i class="fas fa-rotate-right mr-1" aria-hidden="true"></i>Tentar de novo</button>' +
+            '</div>';
+        var retry = host.querySelector('[data-clinic-partial-retry]');
+        if (retry) {
+            retry.addEventListener('click', function () {
+                loadPartial(host, retryUrl, loadingText, onLoaded);
+            });
+        }
     }
 
     function loadPartial(host, url, loadingText, onLoaded) {
@@ -71,7 +137,7 @@
                 }
             })
             .catch(function () {
-                host.innerHTML = '<p class="text-danger small mb-0">Não foi possível carregar. Tente novamente.</p>';
+                renderPartialError(host, url, loadingText, onLoaded);
             });
     }
 
@@ -110,6 +176,7 @@
             editFromFicha.setAttribute('data-pos-op-paciente-nome', nome || '');
             editFromFicha.setAttribute('data-pos-op-paciente-codigo', codigo);
         }
+        rememberLastFicha(id, nome, codigo);
         return loadPartial(host, replaceIdInUrl(urlTpl, id), 'Carregando ficha…', applyFichaMeta);
     }
 
@@ -246,6 +313,7 @@
         initPacientesList: function (options) {
             bindDelegatedTriggers();
             bindFichaFooterEdit();
+            refreshUltimaFichaBtn();
             openByQuery(options);
         },
     };

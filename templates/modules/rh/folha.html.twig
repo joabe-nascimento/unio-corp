@@ -2,16 +2,19 @@
 {% block title %}Folha de pagamento{% endblock %}
 {% set page_list_title = 'Folha de pagamento' %}
 
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_rh', 'folha', 'GESTOR') %}
+<button type="submit" form="folha-gerar-form" class="btn-unio btn-sm">
+    <i class="fas fa-file-invoice-dollar mr-1" aria-hidden="true"></i> Gerar folha
+</button>
+{% endif %}
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 {% if grant_at_least('product_rh', 'folha', 'GESTOR') %}
-<form method="post" action="{{ path('app_rh_folha_gerar') }}" class="section-toolbar-form-generate" style="display:contents;">
+<form method="post" action="{{ path('app_rh_folha_gerar') }}" id="folha-gerar-form" class="section-toolbar-form-generate" style="display:contents;">
     <input type="hidden" name="_token" value="{{ csrf_token('rh_folha_form') }}">
-{% embed 'components/section_toolbar.html.twig' with {
-    btn_label: 'Gerar folha',
-    btn_icon: 'fa-file-invoice-dollar',
-    btn_submit: true,
-    btn_sm: true
-} %}
+{% embed 'components/section_toolbar.html.twig' with {} %}
     {% block section_toolbar_filters %}
         {% include 'components/filter_group.html.twig' with {
             label: 'Competência',

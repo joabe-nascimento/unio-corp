@@ -58,6 +58,42 @@ class PosOperatorioPacienteRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Lista operacional com busca (nome/código/procedimento) e filtro de status.
+     *
+     * @return list<PosOperatorioPaciente>
+     */
+    public function searchByEmpresa(
+        Empresa $empresa,
+        string $q = '',
+        string $status = '',
+        int $limit = 100,
+        int $offset = 0,
+    ): array {
+        $qb = $this->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('p.criadoEm', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        $q = trim($q);
+        if ($q !== '') {
+            $qb->andWhere('p.nome LIKE :q OR p.codigo LIKE :q OR p.procedimento LIKE :q')
+                ->setParameter('q', '%' . $q . '%');
+        }
+
+        $status = trim($status);
+        if ($status !== '') {
+            $qb->andWhere('p.status = :status')->setParameter('status', $status);
+        } else {
+            $qb->andWhere('p.status != :encerrado')
+                ->setParameter('encerrado', PosOperatorioPaciente::STATUS_ENCERRADO);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function countRecentByEmpresa(Empresa $empresa): int
     {
         return (int) $this->createQueryBuilder('p')

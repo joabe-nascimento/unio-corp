@@ -13,12 +13,17 @@
 </div>
 {% endblock %}
 
+{% block page_list_toolbar_actions %}
+{% if grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="pessoas-cargo-novo" data-pessoas-cargo-novo-open>
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo cargo
+</button>
+{% endif %}
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_pessoas_cargos') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
-    btn_label: grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') ? 'Novo cargo' : '',
-    btn_opens: grant_at_least('product_pessoas', 'cargos', 'GESTOR_EQUIPE') ? 'pessoas-cargo-novo' : '',
-    btn_icon: 'fa-plus',
     search_in_section: true,
     search_placeholder: 'Buscar por título ou área…',
     search_name: 'q',
