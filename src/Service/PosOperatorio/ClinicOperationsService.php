@@ -437,17 +437,7 @@ final class ClinicOperationsService
             'continuity_lead' => $policy['continuity_lead'],
             'whatsapp_live' => $this->whatsapp->isLive(),
             'whatsapp_provider' => $this->whatsapp->providerName(),
-            'outbound_recent' => array_map(static function ($m): array {
-                return [
-                    'id' => $m->getId(),
-                    'evento' => $m->getEvento(),
-                    'destino' => $m->getDestino(),
-                    'status' => $m->getStatus(),
-                    'provider' => $m->getProvider(),
-                    'erro' => $m->getErro(),
-                    'quando' => $m->getCriadoEm()->format('d/m H:i'),
-                ];
-            }, $this->outboundMessages->findRecentByEmpresa($empresa, 20)),
+            'outbound_recent' => $this->safeOutboundRecent($empresa),
             'pacientes' => array_map(static function (PosOperatorioPaciente $p): array {
                 $phone = preg_replace('/\D+/', '', (string) ($p->getTelefoneContato() ?? '')) ?? '';
                 $msg = rawurlencode(sprintf(
@@ -666,5 +656,26 @@ final class ClinicOperationsService
             ],
             'perfis' => \App\Clinic\ClinicStaffRole::configList(),
         ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function safeOutboundRecent(Empresa $empresa): array
+    {
+        try {
+            return array_map(static function ($m): array {
+                return [
+                    'id' => $m->getId(),
+                    'evento' => $m->getEvento(),
+                    'destino' => $m->getDestino(),
+                    'status' => $m->getStatus(),
+                    'provider' => $m->getProvider(),
+                    'erro' => $m->getErro(),
+                    'quando' => $m->getCriadoEm()->format('d/m H:i'),
+                ];
+            }, $this->outboundMessages->findRecentByEmpresa($empresa, 20));
+        } catch (\Throwable) {
+            // Ambiente sem migration de outbound ainda — não derrubar a tela de Lembretes.
+            return [];
+        }
     }
 }
