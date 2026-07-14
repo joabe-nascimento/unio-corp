@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=16">
+    <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=17">
 {% endblock %}
 
 {% block page_toolbar_layout %}yes{% endblock %}
@@ -34,11 +34,14 @@
         <div class="pulso-hero">
             <div class="pulso-hero__text">
                 {% if org_clinic|default(false) %}
-                <div class="unio-brand-lockup">
-                    {% include 'components/unio/selo.html.twig' with { variant: 'compact', label: 'Pulso da clínica' } %}
-                </div>
-                {% endif %}
+                <p class="pulso-hero__eyebrow">
+                    <i class="fas fa-house-medical" aria-hidden="true"></i>
+                    {{ org_brand_label|default('Unio Saúde') }}
+                </p>
+                <h1 class="pulso-hero__title">Pulso</h1>
+                {% else %}
                 <h1 class="pulso-hero__title">{{ org_brand_label|default('Unio Saúde') }}</h1>
+                {% endif %}
                 <p class="pulso-hero__sub">{{ organismo.copy.brand_slogan|default('Saúde que acompanha.') }}</p>
             </div>
             <div class="pulso-hero__actions">

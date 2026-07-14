@@ -1,10 +1,10 @@
 ﻿{% extends 'base.html.twig' %}
 
-{% block title %}{% block portal_title %}Portal do Cliente{% endblock %} · {{ org_brand_label|default('Unio Clínica') }}{% endblock %}
+{% block title %}{% block portal_title %}Portal do paciente{% endblock %} · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=21">
+<link rel="stylesheet" href="{{ asset('css/pos-operatorio-portal.css') }}?v=22">
 <link rel="manifest" href="{{ asset('pos-operatorio/manifest.webmanifest') }}">
 {% endblock %}
 
@@ -22,8 +22,14 @@
         <div class="pos-portal-topbar__brand">
             <span class="pos-portal-topbar__icon" aria-hidden="true"><i class="fas fa-heart-pulse"></i></span>
             <div class="pos-portal-topbar__text">
+                <span class="pos-portal-topbar__eyebrow">
+                    <i class="fas fa-house-medical" aria-hidden="true"></i>
+                    {{ org_brand_label|default('Unio Saúde') }}
+                </span>
                 <strong class="pos-portal-topbar__title">{% block portal_topbar_title %}{{ portal_page_title|default('Acompanhamento') }}{% endblock %}</strong>
-                <span class="pos-portal-topbar__sub">{{ portal_page_subtitle|default(org_brand_label|default('Unio Clínica')) }}</span>
+                {% if portal_page_subtitle|default('') %}
+                <span class="pos-portal-topbar__sub">{{ portal_page_subtitle }}</span>
+                {% endif %}
             </div>
         </div>
         {% block portal_topbar_meta %}{% endblock %}
