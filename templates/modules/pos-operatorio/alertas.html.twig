@@ -61,6 +61,15 @@
         <button type="submit" class="btn-unio btn-sm">Filtrar</button>
     </form>
 
+    {% if tickets is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-bell',
+            title: 'Fila vazia',
+            text: 'Nenhum alerta na fila.',
+            btn_sm: true,
+            compact: true
+        } %}
+    {% else %}
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
@@ -115,12 +124,11 @@
                         {% endif %}
                     </td>
                 </tr>
-                {% else %}
-                <tr><td colspan="7" class="text-center text-muted py-4">Nenhum alerta na fila.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% endif %}
 </section>
 {% endblock %}
 

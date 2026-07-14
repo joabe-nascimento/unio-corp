@@ -37,46 +37,74 @@
 <div class="clinic-ops-panels clinic-ops-panels--3">
     <section class="unio-card clinic-ops-panel">
         <h3 class="clinic-ops-panel__title">Pacientes em pré-op esta semana</h3>
+        {% if painel.pre_op_semana|default([]) is empty %}
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-hospital',
+                title: 'Sem cirurgias',
+                text: 'Nenhuma cirurgia nos próximos 7 dias.',
+                compact: true
+            } %}
+        {% else %}
         <ul class="clinic-ops-list">
             {% for p in painel.pre_op_semana|default([]) %}
             <li>{{ p.nome }} ({{ p.codigo }}) · {{ p.dia_label|default('pré') }}{% if p.data_cirurgia %} · cirurgia {{ p.data_cirurgia }}{% endif %}</li>
-            {% else %}
-            <li class="text-muted">Nenhuma cirurgia nos próximos 7 dias.</li>
             {% endfor %}
         </ul>
+        {% endif %}
     </section>
 
     <section class="unio-card clinic-ops-panel">
         <h3 class="clinic-ops-panel__title">Retornos hoje</h3>
+        {% if painel.retornos_hoje is empty %}
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-calendar-day',
+                title: 'Sem retornos',
+                text: 'Nenhum retorno previsto.',
+                compact: true
+            } %}
+        {% else %}
         <ul class="clinic-ops-list">
             {% for p in painel.retornos_hoje %}
             <li>{{ p.nome }} ({{ p.codigo }}) · {{ p.dia_label|default(p.dia_pos is not null ? 'D+' ~ p.dia_pos : '—') }}</li>
-            {% else %}
-            <li class="text-muted">Nenhum retorno previsto.</li>
             {% endfor %}
         </ul>
+        {% endif %}
     </section>
 
     <section class="unio-card clinic-ops-panel">
         <h3 class="clinic-ops-panel__title">Questionário pendente</h3>
+        {% if painel.sem_questionario is empty %}
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-clipboard-check',
+                title: 'Tudo respondido',
+                text: 'Todos responderam hoje.',
+                compact: true
+            } %}
+        {% else %}
         <ul class="clinic-ops-list">
             {% for p in painel.sem_questionario %}
             <li>{{ p.nome }} ({{ p.codigo }})</li>
-            {% else %}
-            <li class="text-muted">Todos responderam hoje.</li>
             {% endfor %}
         </ul>
+        {% endif %}
     </section>
 </div>
 
 <section class="unio-card clinic-ops-panel mt-3">
     <h3 class="clinic-ops-panel__title">Carteirinhas vencendo (7 dias)</h3>
+    {% if painel.carteirinhas_vencendo is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-id-card',
+            title: 'Nenhuma vencendo',
+            text: 'Nenhuma carteirinha próxima do vencimento.',
+            compact: true
+        } %}
+    {% else %}
     <ul class="clinic-ops-list">
         {% for p in painel.carteirinhas_vencendo %}
         <li>{{ p.nome }} ({{ p.codigo }})</li>
-        {% else %}
-        <li class="text-muted">Nenhuma carteirinha próxima do vencimento.</li>
         {% endfor %}
     </ul>
+    {% endif %}
 </section>
 {% endblock %}

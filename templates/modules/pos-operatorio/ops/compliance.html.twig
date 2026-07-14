@@ -36,7 +36,13 @@
     <section class="unio-card clinic-ops-panel p-3">
         <h3 class="clinic-ops-panel__title">Auditoria recente</h3>
         {% if compliance.auditoria is empty %}
-        <p class="text-muted small mb-0">Nenhum evento de compliance registrado.</p>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-clipboard-list',
+                title: 'Sem eventos',
+                text: 'Nenhum evento de compliance registrado.',
+                btn_sm: true,
+                compact: true
+            } %}
         {% else %}
         <ul class="clinic-ops-list clinic-ops-list--audit">
             {% for ev in compliance.auditoria %}
@@ -54,7 +60,13 @@
     <h3 class="clinic-ops-panel__title">Atestações da Trilha (evidência)</h3>
     {% set att = compliance.attestacoes_recentes|default([]) %}
     {% if att is empty %}
-    <p class="text-muted small mb-0">Nenhuma atestação registrada ainda.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-file-signature',
+            title: 'Sem atestações',
+            text: 'Nenhuma atestação registrada ainda.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="admin-table">

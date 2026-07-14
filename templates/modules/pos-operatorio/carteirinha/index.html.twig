@@ -12,7 +12,13 @@
     <section class="unio-card clinic-carteirinha-panel">
         <h3 class="clinic-ops-panel__title px-3 pt-3">Emitidas recentemente</h3>
         {% if emitidos is empty %}
-        <p class="text-muted px-3 pb-3 mb-0">Nenhuma carteirinha emitida ainda.</p>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-id-card',
+                title: 'Nenhuma carteirinha',
+                text: 'Nenhuma carteirinha emitida ainda.',
+                btn_sm: true,
+                compact: true
+            } %}
         {% else %}
         <div class="table-responsive">
             <table class="admin-table">
@@ -47,7 +53,16 @@
     <section class="unio-card clinic-carteirinha-panel">
         <h3 class="clinic-ops-panel__title px-3 pt-3">Pacientes para emitir</h3>
         {% if pacientes is empty %}
-        <p class="text-muted px-3 pb-3 mb-0">Cadastre pacientes para emitir carteirinhas.</p>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-user-plus',
+                title: 'Sem pacientes',
+                text: 'Cadastre pacientes para emitir carteirinhas.',
+                btn_label: 'Pacientes',
+                btn_href: path('app_pos_operatorio_pacientes'),
+                btn_icon: 'fa-plus',
+                btn_sm: true,
+                compact: true
+            } %}
         {% else %}
         <div class="table-responsive">
             <table class="admin-table">

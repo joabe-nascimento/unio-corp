@@ -33,6 +33,15 @@
 
 {% block hub_content %}
 <section class="unio-card clinic-questionarios-table">
+    {% if items is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-notes-medical',
+            title: 'Nenhuma resposta',
+            text: 'Nenhuma resposta registrada ainda.',
+            btn_sm: true,
+            compact: true
+        } %}
+    {% else %}
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
@@ -72,12 +81,11 @@
                         <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: row.paciente_id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
                     </td>
                 </tr>
-                {% else %}
-                <tr><td colspan="8" class="text-muted p-4">Nenhuma resposta registrada ainda.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% endif %}
 </section>
 
 <div class="clinic-questionarios-foot">

@@ -15,9 +15,17 @@
 
 {% block hub_content %}
 {% if guias is empty %}
-<section class="unio-card p-4">
-    <p class="text-muted mb-3">Nenhum guia cadastrado. O sistema usa o modelo padrão até você criar um.</p>
-    <a href="{{ path('app_pos_operatorio_guia_medico_novo') }}" class="btn-unio">Criar primeiro guia</a>
+<section class="unio-card">
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-book-medical',
+        title: 'Nenhum guia cadastrado',
+        text: 'O sistema usa o modelo padrão até você criar um.',
+        btn_label: 'Criar primeiro guia',
+        btn_href: path('app_pos_operatorio_guia_medico_novo'),
+        btn_icon: 'fa-plus',
+        btn_sm: true,
+        compact: true
+    } %}
 </section>
 {% else %}
 <div class="clinic-guia-list">

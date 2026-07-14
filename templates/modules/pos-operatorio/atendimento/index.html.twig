@@ -14,9 +14,15 @@
 {% block hub_content %}
 <section class="unio-card p-0">
     {% if atendimentos is empty %}
-    <div class="p-4 text-muted">
-        Nenhum atendimento ainda. Na agenda, use <strong>Atender</strong> quando o paciente chegar.
-    </div>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-stethoscope',
+            title: 'Nenhum atendimento',
+            text: 'Nenhum atendimento ainda. Na agenda, use Atender quando o paciente chegar.',
+            btn_label: 'Abrir agenda',
+            btn_href: path('app_pos_operatorio_agenda'),
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="table admin-table mb-0 align-middle">

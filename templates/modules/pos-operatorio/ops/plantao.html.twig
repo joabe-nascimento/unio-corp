@@ -41,7 +41,13 @@
     <form method="post" action="{{ path('app_pos_operatorio_plantao_salvar') }}" class="px-3 pb-3">
         <input type="hidden" name="_token" value="{{ csrf_token('clinic_plantao') }}">
         {% if plantao.candidates is empty %}
-        <p class="text-muted mb-0">Nenhum usuário ativo na clínica para escala.</p>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-user-nurse',
+                title: 'Sem profissionais',
+                text: 'Nenhum usuário ativo na clínica para escala.',
+                btn_sm: true,
+                compact: true
+            } %}
         {% else %}
         <div class="table-responsive">
             <table class="admin-table">

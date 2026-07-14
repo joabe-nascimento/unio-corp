@@ -43,15 +43,15 @@
 
 {% block hub_content %}
 {% set filtro_medico_id = medico_filtro ? medico_filtro.id : null %}
-<section class="unio-card mb-3 p-3">
-    <form method="get" action="{{ path('app_pos_operatorio_agenda') }}" class="d-flex flex-wrap gap-2 align-items-end">
+<section class="unio-card mb-3 p-3 clinic-agenda-filter">
+    <form method="get" action="{{ path('app_pos_operatorio_agenda') }}" class="clinic-agenda-filter__form">
         <div class="d-flex gap-1 align-items-center">
             <span class="small text-muted mr-1">Vista</span>
-            <div class="btn-group btn-group-sm" role="group" aria-label="Vista da agenda">
+            <div class="clinic-agenda-seg" role="group" aria-label="Vista da agenda">
                 <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: day|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
-                   class="btn-unio-ghost btn-sm {{ vista == 'dia' ? 'is-active' : '' }}">Dia</a>
+                   class="{{ vista == 'dia' ? 'is-active' : '' }}">Dia</a>
                 <a href="{{ path('app_pos_operatorio_agenda', { vista: 'semana', semana: week_start|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
-                   class="btn-unio-ghost btn-sm {{ vista == 'semana' ? 'is-active' : '' }}">Semana</a>
+                   class="{{ vista == 'semana' ? 'is-active' : '' }}">Semana</a>
             </div>
         </div>
 
@@ -82,7 +82,7 @@
         <a href="{{ path('app_pos_operatorio_agenda', { vista: vista }) }}" class="btn-unio-ghost btn-sm">
             {{ vista == 'dia' ? 'Hoje' : 'Semana atual' }}
         </a>
-        <span class="text-muted small align-self-center ml-auto">
+        <span class="clinic-agenda-filter__meta">
             {% if vista == 'dia' %}
             {{ day|date('d/m/Y') }}
             {% else %}
@@ -95,13 +95,19 @@
 
 <section class="unio-card clinic-agenda-card">
     {% if agendamentos is empty %}
-    <p class="text-muted p-4 mb-0">
-        Nenhum agendamento {{ vista == 'dia' ? 'neste dia' : 'nesta semana' }}.
-        <a href="{{ path('app_pos_operatorio_agenda_novo') }}">Criar horário</a>
-    </p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-calendar-plus',
+            title: 'Nenhum agendamento',
+            text: vista == 'dia' ? 'Nenhum horário neste dia.' : 'Nenhum horário nesta semana.',
+            btn_label: 'Criar horário',
+            btn_href: path('app_pos_operatorio_agenda_novo'),
+            btn_icon: 'fa-plus',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive clinic-agenda-table-wrap">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile">
             <thead>
                 <tr>
                     <th>Quando</th>
@@ -115,7 +121,7 @@
             <tbody>
                 {% for a in agendamentos %}
                 <tr class="{{ a.status == 'em_atendimento' ? 'admin-table-row--highlight' : '' }}">
-                    <td>
+                    <td data-label="Quando">
                         {% if vista == 'dia' %}
                         <strong>{{ a.inicio|date('H:i') }}</strong>
                         {% else %}
@@ -123,12 +129,12 @@
                         {% endif %}
                         <span class="d-block text-muted small">até {{ a.fim|date('H:i') }}</span>
                     </td>
-                    <td>
+                    <td data-label="Paciente">
                         <strong>{{ a.paciente.nome }}</strong>
                         <span class="d-block text-muted small">{{ a.paciente.codigo }}</span>
                     </td>
-                    <td>{{ a.medico ? a.medico.nome : '—' }}</td>
-                    <td>
+                    <td data-label="Médico">{{ a.medico ? a.medico.nome : '—' }}</td>
+                    <td data-label="Título">
                         {{ a.titulo|default('Consulta') }}
                         {% if a.protocoloDia %}
                         <span class="d-block text-muted small">D+{{ a.protocoloDia }} · {{ a.origem }}</span>
@@ -136,10 +142,10 @@
                         <span class="d-block text-muted small">{{ a.origem }}</span>
                         {% endif %}
                     </td>
-                    <td>
+                    <td data-label="Status">
                         <span class="badge-perfil {{ status_tones[a.status]|default('default') }}">{{ status_labels[a.status]|default(a.status) }}</span>
                     </td>
-                    <td class="text-right clinic-agenda-col-actions">
+                    <td data-label="" class="text-right clinic-agenda-col-actions">
                         {% set wa = whatsapp_map[a.id]|default(null) %}
                         {% set can_faltou_cancelar = a.status not in ['cancelado', 'atendido', 'faltou', 'em_atendimento'] %}
                         {% set show_whatsapp = wa and a.status in ['marcado', 'confirmado'] %}

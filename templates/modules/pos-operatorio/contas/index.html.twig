@@ -24,26 +24,40 @@
 ], mb: 'mb-0' } %}
 {% endblock %}
 
+{% set status_tones = {
+    aberto: 'warning',
+    pago: 'success',
+    glosado: 'danger',
+    cancelado: 'default'
+} %}
+
 {% block hub_content %}
 {% if list_truncated|default(false) %}
-<div class="alert alert-warning">
-    Exibindo as {{ list_limit }} contas mais recentes de {{ list_total }}. Refine o filtro de status para ver o restante.
+<div class="clinic-banner clinic-banner--warn">
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    <div>Exibindo as {{ list_limit }} contas mais recentes de {{ list_total }}. Refine o filtro de status para ver o restante.</div>
 </div>
 {% endif %}
-<p class="pos-op-back mb-3">
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="{{ filtro_status == 'aberto' ? 'fw-bold' : '' }}">Abertas</a>
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'pago' }) }}" class="{{ filtro_status == 'pago' ? 'fw-bold' : '' }}">Pagas</a>
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'glosado' }) }}" class="{{ filtro_status == 'glosado' ? 'fw-bold' : '' }}">Glosadas</a>
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'cancelado' }) }}" class="{{ filtro_status == 'cancelado' ? 'fw-bold' : '' }}">Canceladas</a>
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'fw-bold' : '' }}">Todas</a>
+<p class="clinic-filter-chips mb-3">
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="{{ filtro_status == 'aberto' ? 'is-active' : '' }}">Abertas</a>
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'pago' }) }}" class="{{ filtro_status == 'pago' ? 'is-active' : '' }}">Pagas</a>
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'glosado' }) }}" class="{{ filtro_status == 'glosado' ? 'is-active' : '' }}">Glosadas</a>
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'cancelado' }) }}" class="{{ filtro_status == 'cancelado' ? 'is-active' : '' }}">Canceladas</a>
+    <a href="{{ path('app_pos_operatorio_contas', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'is-active' : '' }}">Todas</a>
 </p>
 
 <section class="unio-card p-0 clinic-conta-card">
     {% if contas is empty %}
-    <div class="p-4 text-muted">Nenhuma conta neste filtro. Contas nascem ao finalizar um atendimento.</div>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-file-invoice',
+            title: 'Nenhuma conta',
+            text: 'Nenhuma conta neste filtro. Contas nascem ao finalizar um atendimento.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive clinic-conta-table-wrap">
-        <table class="table admin-table mb-0 align-middle">
+        <table class="table admin-table mb-0 align-middle clinic-stack-mobile">
             <thead>
                 <tr>
                     <th>Criada</th>
@@ -70,7 +84,9 @@
                     </td>
                     <td data-label="Descrição">{{ c.descricao|default('—') }}</td>
                     <td data-label="Tipo">{{ tipo_labels[c.tipo]|default(c.tipo) }}</td>
-                    <td data-label="Status">{{ status_labels[c.status]|default(c.status) }}</td>
+                    <td data-label="Status">
+                        <span class="badge-perfil {{ status_tones[c.status]|default('default') }}">{{ status_labels[c.status]|default(c.status) }}</span>
+                    </td>
                     <td data-label="Valor">
                         {% if c.valorCentavos is not null %}
                             R$ {{ (c.valorCentavos / 100)|number_format(2, ',', '.') }}

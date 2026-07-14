@@ -24,7 +24,13 @@
 <section class="unio-card p-3 mb-3">
     <h3 class="h6 mb-3">Taxa de glosa por convênio</h3>
     {% if panel.stats is empty %}
-    <p class="text-muted mb-0">Ainda não há guias enviadas/autorizadas/pagas/glosadas para calcular taxa.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-chart-pie',
+            title: 'Sem dados de glosa',
+            text: 'Ainda não há guias enviadas/autorizadas/pagas/glosadas para calcular taxa.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="admin-table mb-0">
@@ -57,7 +63,13 @@
     <h3 class="h6 px-3 pt-3 mb-0">Guias glosadas</h3>
     <p class="text-muted small px-3 mb-2">Reabra para corrigir itens/cabeçalho e reenviar.</p>
     {% if panel.glosadas is empty %}
-    <div class="p-4 text-muted">Nenhuma guia glosada no momento.</div>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-circle-check',
+            title: 'Nenhuma guia glosada',
+            text: 'Nenhuma guia glosada no momento.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="admin-table mb-0">

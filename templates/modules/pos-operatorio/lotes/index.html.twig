@@ -14,15 +14,24 @@
 
 {% block hub_content %}
 {% if list_truncated|default(false) %}
-<div class="alert alert-warning">
-    Exibindo os {{ list_limit }} lotes mais recentes de {{ list_total }}.
+<div class="clinic-banner clinic-banner--warn">
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    <div>Exibindo os {{ list_limit }} lotes mais recentes de {{ list_total }}.</div>
 </div>
 {% endif %}
 
-<section class="unio-card p-3 mb-3">
-    <h2 class="h6 mb-3">Novo lote</h2>
+<section class="unio-card p-3 mb-3 clinic-form-section">
+    <h2 class="clinic-form-section__title">Novo lote</h2>
     {% if convenios is empty %}
-    <p class="text-muted small mb-0">Cadastre um convênio ativo antes de criar lotes.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-building',
+            title: 'Sem convênios',
+            text: 'Cadastre um convênio ativo antes de criar lotes.',
+            btn_label: 'Convênios',
+            btn_href: path('app_pos_operatorio_convenios'),
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <form method="post" class="row align-items-end">
         <input type="hidden" name="_token" value="{{ csrf_token('clinic_lote_create') }}">
@@ -49,21 +58,26 @@
     {% endif %}
 </section>
 
-<p class="pos-op-back mb-3">
-    <a href="{{ path('app_pos_operatorio_lotes', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'fw-bold' : '' }}">Todos</a>
-    ·
+<p class="clinic-filter-chips mb-3">
+    <a href="{{ path('app_pos_operatorio_lotes', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'is-active' : '' }}">Todos</a>
     {% for key, label in status_labels %}
-    <a href="{{ path('app_pos_operatorio_lotes', { status: key }) }}" class="{{ filtro_status == key ? 'fw-bold' : '' }}">{{ label }}</a>
-    {% if not loop.last %} · {% endif %}
+    <a href="{{ path('app_pos_operatorio_lotes', { status: key }) }}" class="{{ filtro_status == key ? 'is-active' : '' }}">{{ label }}</a>
     {% endfor %}
 </p>
 
 <section class="unio-card p-0">
     {% if lotes is empty %}
-    <div class="p-4 text-muted">Nenhum lote neste filtro.</div>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-boxes-stacked',
+            title: 'Nenhum lote',
+            text: 'Nenhum lote neste filtro.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
+    {% set lote_tones = { aberto: 'sky', fechado: 'warning', enviado: 'success', cancelado: 'default' } %}
     <div class="table-responsive">
-        <table class="table admin-table mb-0 align-middle">
+        <table class="table admin-table mb-0 align-middle clinic-stack-mobile">
             <thead>
                 <tr>
                     <th>Criado</th>
@@ -79,17 +93,19 @@
             <tbody>
                 {% for lote in lotes %}
                 <tr>
-                    <td>{{ lote.criadoEm|date('d/m/Y H:i') }}</td>
-                    <td>{{ lote.numero }}</td>
-                    <td>{{ lote.convenio.nome }}</td>
-                    <td>{{ lote.competencia }}</td>
-                    <td>{{ lote.guias|length }}</td>
-                    <td>{{ status_labels[lote.status]|default(lote.status) }}</td>
-                    <td>
+                    <td data-label="Criado">{{ lote.criadoEm|date('d/m/Y H:i') }}</td>
+                    <td data-label="Nº lote">{{ lote.numero }}</td>
+                    <td data-label="Convênio">{{ lote.convenio.nome }}</td>
+                    <td data-label="Competência">{{ lote.competencia }}</td>
+                    <td data-label="Guias">{{ lote.guias|length }}</td>
+                    <td data-label="Status">
+                        <span class="badge-perfil {{ lote_tones[lote.status]|default('default') }}">{{ status_labels[lote.status]|default(lote.status) }}</span>
+                    </td>
+                    <td data-label="Total">
                         {% set total = lote.totalCentavos() %}
                         {% if total > 0 %}R$ {{ (total / 100)|number_format(2, ',', '.') }}{% else %}—{% endif %}
                     </td>
-                    <td class="text-right">
+                    <td data-label="Ações" class="text-right">
                         <a href="{{ path('app_pos_operatorio_lotes_show', { id: lote.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
                     </td>
                 </tr>

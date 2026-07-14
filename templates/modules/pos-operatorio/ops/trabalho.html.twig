@@ -17,9 +17,15 @@
 {% endblock %}
 
 {% block hub_content %}
-<section class="unio-card">
+<section class="unio-card ops-queue-animate">
     {% if queue.items is empty %}
-    <p class="text-muted p-4 mb-0">Nenhuma ação pendente ? pulso estável.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-list-check',
+            title: 'Fila limpa',
+            text: 'Nenhuma ação pendente — pulso estável.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="admin-table">

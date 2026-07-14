@@ -61,7 +61,13 @@
         {% endif %}
     </p>
     {% if agenda_amanha is empty %}
-    <p class="text-muted px-3 pb-3 mb-0">Nenhum horário marcado/confirmado para amanhã.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-calendar-check',
+            title: 'Agenda de amanhã vazia',
+            text: 'Nenhum horário marcado/confirmado para amanhã.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="admin-table">
@@ -113,7 +119,13 @@
         Lembretes do protocolo relativo à data da cirurgia. O botão acima também dispara estes envios.
     </p>
     {% if marcos_pre is empty %}
-    <p class="text-muted px-3 pb-3 mb-0">Nenhum paciente em D−7 ou D−3 hoje.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-route',
+            title: 'Sem marcos pré-op',
+            text: 'Nenhum paciente em D−7 ou D−3 hoje.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="admin-table">
@@ -161,7 +173,13 @@
     <p class="text-muted small px-3 mb-2">Log de entrega Meta / noop (últimos 20).</p>
     {% set outbound = reminders.outbound_recent|default([]) %}
     {% if outbound is empty %}
-    <p class="text-muted px-3 pb-3 mb-0">Nenhum envio registrado ainda.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-paper-plane',
+            title: 'Nenhum envio',
+            text: 'Nenhum envio registrado ainda.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="admin-table">
@@ -196,7 +214,13 @@
 <section class="unio-card mt-3">
     <h3 class="clinic-ops-panel__title px-3 pt-3">Pacientes sem resposta hoje</h3>
     {% if reminders.pacientes is empty %}
-    <p class="text-muted px-3 pb-3 mb-0">Todos responderam o questionário de hoje.</p>
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-clipboard-check',
+            title: 'Tudo em dia',
+            text: 'Todos responderam o questionário de hoje.',
+            btn_sm: true,
+            compact: true
+        } %}
     {% else %}
     <div class="table-responsive">
         <table class="admin-table">

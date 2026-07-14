@@ -41,7 +41,13 @@
     <section class="unio-card clinic-ops-panel p-3">
         <h3 class="clinic-ops-panel__title">Pacientes por fase</h3>
         {% if quality.heatmap is empty %}
-        <p class="text-muted small mb-0">Sem dados de acompanhamento.</p>
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-chart-simple',
+                title: 'Sem dados',
+                text: 'Sem dados de acompanhamento.',
+                btn_sm: true,
+                compact: true
+            } %}
         {% else %}
         <ul class="clinic-ops-list">
             {% for bucket, count in quality.heatmap %}
