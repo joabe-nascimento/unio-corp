@@ -4,7 +4,7 @@
 
 {% set hub_page_title = 'Painel do dia' %}
 {% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
-{% set hub_page_subtitle = 'Retornos, questionários pendentes e carteirinhas a vencer' %}
+{% set hub_page_subtitle = 'Pré-op da semana, retornos, questionários e carteirinhas' %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
 
@@ -25,21 +25,32 @@
         <dd>{{ painel.totais.checkins }}</dd>
     </div>
     <div>
-        <dt>Sem questionário</dt>
-        <dd>{{ painel.sem_questionario|length }}</dd>
+        <dt>Pré-op (7 dias)</dt>
+        <dd>{{ painel.totais.pre_op_semana|default(painel.pre_op_semana|default([])|length) }}</dd>
     </div>
     <div>
-        <dt>Carteirinhas vencendo</dt>
-        <dd>{{ painel.carteirinhas_vencendo|length }}</dd>
+        <dt>Sem questionário</dt>
+        <dd>{{ painel.sem_questionario|length }}</dd>
     </div>
 </div>
 
 <div class="clinic-ops-panels clinic-ops-panels--3">
     <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Pacientes em pré-op esta semana</h3>
+        <ul class="clinic-ops-list">
+            {% for p in painel.pre_op_semana|default([]) %}
+            <li>{{ p.nome }} ({{ p.codigo }}) · {{ p.dia_label|default('pré') }}{% if p.data_cirurgia %} · cirurgia {{ p.data_cirurgia }}{% endif %}</li>
+            {% else %}
+            <li class="text-muted">Nenhuma cirurgia nos próximos 7 dias.</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="unio-card clinic-ops-panel">
         <h3 class="clinic-ops-panel__title">Retornos hoje</h3>
         <ul class="clinic-ops-list">
             {% for p in painel.retornos_hoje %}
-            <li>{{ p.nome }} ({{ p.codigo }}) · D+{{ p.dia_pos }}</li>
+            <li>{{ p.nome }} ({{ p.codigo }}) · {{ p.dia_label|default(p.dia_pos is not null ? 'D+' ~ p.dia_pos : '—') }}</li>
             {% else %}
             <li class="text-muted">Nenhum retorno previsto.</li>
             {% endfor %}
@@ -56,16 +67,16 @@
             {% endfor %}
         </ul>
     </section>
-
-    <section class="unio-card clinic-ops-panel">
-        <h3 class="clinic-ops-panel__title">Carteirinhas vencendo (7 dias)</h3>
-        <ul class="clinic-ops-list">
-            {% for p in painel.carteirinhas_vencendo %}
-            <li>{{ p.nome }} ({{ p.codigo }})</li>
-            {% else %}
-            <li class="text-muted">Nenhuma carteirinha próxima do vencimento.</li>
-            {% endfor %}
-        </ul>
-    </section>
 </div>
+
+<section class="unio-card clinic-ops-panel mt-3">
+    <h3 class="clinic-ops-panel__title">Carteirinhas vencendo (7 dias)</h3>
+    <ul class="clinic-ops-list">
+        {% for p in painel.carteirinhas_vencendo %}
+        <li>{{ p.nome }} ({{ p.codigo }})</li>
+        {% else %}
+        <li class="text-muted">Nenhuma carteirinha próxima do vencimento.</li>
+        {% endfor %}
+    </ul>
+</section>
 {% endblock %}

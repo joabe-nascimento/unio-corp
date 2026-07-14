@@ -6,7 +6,8 @@
 {% set _status_variant = paciente.status == 'alerta' ? 'danger' : (paciente.status == 'pendente' or paciente.status == 'encerrado' ? 'muted' : 'success') %}
 {% set _score_variant = ultima_resposta and ultima_resposta.scoreRisco >= 70 ? 'danger' : (ultima_resposta and ultima_resposta.scoreRisco >= 40 ? 'warning' : '') %}
 {% set _status_label = paciente.status|pos_op_status_label %}
-{% set _proximo_val = proximo_checklist ? ('D+' ~ proximo_checklist.dia) : 'Concluído' %}
+{% set _dia_kpi = dia_relativo_label|default(dia_pos is not null ? 'D+' ~ dia_pos : null) %}
+{% set _proximo_val = proximo_checklist ? (proximo_checklist.dia_label|default(proximo_checklist.dia < 0 ? 'D−' ~ (proximo_checklist.dia|abs) : 'D+' ~ proximo_checklist.dia)) : 'Concluído' %}
 {% set _proximo_sub = proximo_checklist ? proximo_checklist.item : 'Protocolo em dia' %}
 {% if _variant == 'offcanvas' and _proximo_sub|length > 28 %}
     {% set _proximo_sub = _proximo_sub|slice(0, 26) ~ '…' %}
@@ -14,9 +15,9 @@
 
 {% set _items = [
     {
-        value: dia_pos is not null ? 'D+' ~ dia_pos : '—',
-        label: _variant == 'offcanvas' ? 'Pós-op' : 'Dia pós-op',
-        label_title: 'Dia pós-operatório',
+        value: _dia_kpi|default('—'),
+        label: is_pre_op|default(false) ? (_variant == 'offcanvas' ? 'Pré-op' : 'Dia pré-op') : (_variant == 'offcanvas' ? 'Pós-op' : 'Dia pós-op'),
+        label_title: is_pre_op|default(false) ? 'Dia pré-operatório' : 'Dia pós-operatório',
         icon: 'fa-calendar-day',
         tone: 'sky'
     },

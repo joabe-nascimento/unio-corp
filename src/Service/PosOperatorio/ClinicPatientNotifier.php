@@ -155,6 +155,62 @@ final class ClinicPatientNotifier
         ];
     }
 
+    /**
+     * Lembrete de marco da Trilha (ex.: D−7, D−3).
+     *
+     * @return array{email: bool, whatsapp_url: ?string, whatsapp_sent: bool, whatsapp_message_id: ?string, webhook: bool}
+     */
+    public function notifyTrilhaMarco(PosOperatorioPaciente $paciente, int $dia, string $item): array
+    {
+        $empresa = $paciente->getEmpresa();
+        $portalUrl = $this->urlGenerator->generate('app_clinica_portal', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $label = PosOperatorioPaciente::formatDiaRelativoLabel($dia);
+        $primeiro = explode(' ', trim($paciente->getNome()))[0] ?: 'paciente';
+
+        $subject = sprintf('Trilha Unio %s — %s', $label, $paciente->getCodigo());
+        $body = sprintf(
+            "Olá, %s!\n\nMarco %s da sua preparação:\n%s\n\nAcesse o portal do paciente:\n%s\n\nEquipe clínica UNIO SAÚDE",
+            $primeiro,
+            $label,
+            $item,
+            $portalUrl,
+        );
+        $waText = sprintf(
+            "Olá, %s! Trilha Unio %s: %s\n\nPortal: %s",
+            $primeiro,
+            $label,
+            $item,
+            $portalUrl,
+        );
+
+        $emailSent = $this->sendEmail($paciente->getEmailContato(), $subject, $body);
+        $whatsappUrl = $this->buildWhatsappLink($paciente->getTelefoneContato(), $waText);
+        $waResult = $this->whatsapp->send($empresa, $paciente->getTelefoneContato(), $waText, [
+            'event' => 'trilha_marco',
+            'paciente_id' => $paciente->getId(),
+            'dia' => $dia,
+            'template_params' => [$primeiro, $label, $item, $portalUrl],
+        ]);
+        $webhookSent = $this->webhooks->dispatch($empresa, 'trilha_marco', [
+            'paciente_id' => $paciente->getId(),
+            'codigo' => $paciente->getCodigo(),
+            'nome' => $paciente->getNome(),
+            'dia' => $dia,
+            'item' => $item,
+            'portal_url' => $portalUrl,
+            'whatsapp_url' => $whatsappUrl,
+            'whatsapp_sent' => $waResult->sent,
+        ]);
+
+        return [
+            'email' => $emailSent,
+            'whatsapp_url' => $whatsappUrl,
+            'whatsapp_sent' => $waResult->sent,
+            'whatsapp_message_id' => $waResult->providerMessageId,
+            'webhook' => $webhookSent,
+        ];
+    }
+
     public function confirmWhatsappUrlForAgendamento(ClinicAgendamento $agendamento): ?string
     {
         $paciente = $agendamento->getPaciente();
@@ -204,6 +260,7 @@ final class ClinicPatientNotifier
         return $this->buildWhatsappLink($paciente->getTelefoneContato(), $text);
     }
 
+    /** @internal also used by ops panels for wa.me shortcuts */
     public function buildWhatsappLink(?string $telefone, string $text): ?string
     {
         $phone = preg_replace('/\D+/', '', (string) $telefone) ?? '';

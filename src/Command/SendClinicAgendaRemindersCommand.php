@@ -12,7 +12,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:clinic:agenda-reminders',
-    description: 'Prepara lembretes de confirmação de agenda (D-1) — WhatsApp/e-mail/webhook',
+    description: 'Lembretes agenda D−1 + marcos Trilha D−7/D−3 + handoff D0',
 )]
 final class SendClinicAgendaRemindersCommand extends Command
 {
@@ -34,9 +34,11 @@ final class SendClinicAgendaRemindersCommand extends Command
         $result = $this->reminders->runAll($empresaId !== null ? (int) $empresaId : null);
 
         $io->success(sprintf(
-            'Agenda D-1 — %d clínica(s), %d lembrete(s) preparados (%d sem telefone).',
+            'Trilha/agenda — %d clínica(s), %d D−1, %d marcos pré, %d handoff D0 (%d sem telefone).',
             $result['empresas'],
             $result['enviados'],
+            $result['marcos'] ?? 0,
+            $result['d0'] ?? 0,
             $result['sem_telefone'],
         ));
 

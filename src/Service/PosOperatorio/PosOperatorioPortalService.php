@@ -27,15 +27,25 @@ final class PosOperatorioPortalService
         }
 
         $protocolo = $paciente->getProtocolo();
-        $perguntas = $protocolo?->getPerguntas() ?: PosOperatorioProtocoloDefaults::perguntas();
+        $isPreOp = $paciente->isPreOperatorio();
+        $perguntas = $protocolo?->getPerguntas() ?: [];
         if ($perguntas === []) {
-            $perguntas = PosOperatorioProtocoloDefaults::perguntas();
+            $perguntas = $isPreOp
+                ? PosOperatorioProtocoloDefaults::perguntasPreOp()
+                : PosOperatorioProtocoloDefaults::perguntas();
+        } elseif ($isPreOp && !$this->looksLikePreOpQuestions($perguntas)) {
+            $perguntas = PosOperatorioProtocoloDefaults::perguntasPreOp();
         }
 
+        $diaRelativo = $paciente->getDiaRelativoCirurgia();
         $diaPos = $paciente->getDiaPosOperatorio();
         $duracaoDias = $protocolo?->getDuracaoDias() ?? 14;
-        $checklist = $protocolo?->getChecklist() ?: PosOperatorioProtocoloDefaults::checklistBasico();
-        $checklistParts = $this->splitChecklist($checklist, $diaPos);
+        $checklist = $protocolo?->getChecklist() ?: (
+            $isPreOp
+                ? array_merge(PosOperatorioProtocoloDefaults::checklistPreOp(), PosOperatorioProtocoloDefaults::checklistBasico())
+                : PosOperatorioProtocoloDefaults::checklistBasico()
+        );
+        $checklistParts = $this->splitChecklist($checklist, $diaRelativo);
 
         $today = new \DateTimeImmutable('today');
         $questionarioHoje = $this->questionarioRepo->findOneByPacienteAndDate($paciente, $today);
@@ -47,7 +57,7 @@ final class PosOperatorioPortalService
         $medico = $paciente->getMedicoResponsavel();
         $procedimentoLabel = $this->procedimentoLabel($paciente);
         $retornoHoje = $this->findRetornoHoje($checklistParts['hoje']);
-        $checklistProgress = $this->mapChecklistProgress($checklist, $diaPos);
+        $checklistProgress = $this->mapChecklistProgress($checklist, $diaRelativo);
 
         return [
             'perguntas' => $perguntas,
@@ -60,10 +70,19 @@ final class PosOperatorioPortalService
             'protocolo_nome' => $protocolo?->getNome(),
             'procedimento_label' => $procedimentoLabel,
             'duracao_dias' => $duracaoDias,
-            'progress_pct' => $diaPos !== null ? min(100, (int) round(($diaPos / max(1, $duracaoDias)) * 100)) : 0,
-            'fase_label' => $this->faseLabel($diaPos, $duracaoDias, $checklistParts),
+            'progress_pct' => $this->progressPct($diaRelativo, $duracaoDias, $checklist),
+            'fase_label' => $this->faseLabel($diaRelativo, $duracaoDias, $checklistParts, $isPreOp),
             'data_cirurgia_label' => $paciente->getDataCirurgia()?->format('d/m/Y'),
-            'status_label' => $this->statusLabel($paciente->getStatus()),
+            'status_label' => $paciente->isDiaCirurgia()
+                ? 'Dia da cirurgia · handoff pré → pós'
+                : ($isPreOp ? 'Preparação para a cirurgia' : $this->statusLabel($paciente->getStatus())),
+            'is_pre_op' => $isPreOp,
+            'is_d0' => $paciente->isDiaCirurgia(),
+            'handoff_label' => $paciente->isDiaCirurgia()
+                ? 'É o dia da sua cirurgia. A Trilha Unio passa da preparação para o acompanhamento pós-op.'
+                : null,
+            'dia_relativo' => $diaRelativo,
+            'dia_relativo_label' => $diaRelativo !== null ? PosOperatorioPaciente::formatDiaRelativoLabel($diaRelativo) : null,
             'medico_nome' => $medico?->getNome(),
             'medico_email' => $medico?->getEmail(),
             'clinica_nome' => $paciente->getEmpresa()->getNome(),
@@ -75,7 +94,7 @@ final class PosOperatorioPortalService
             'retorno_hoje' => $retornoHoje,
             'retorno_confirmado' => $retornoHoje !== null && $this->eventoRepo->hasRetornoConfirmadoOnDate($paciente, $today),
             'ajuda_pendente' => $this->alertaRepo->hasOpenAlertWithMotivo($paciente, 'Paciente solicitou ajuda pelo portal'),
-            'guia_medico' => $this->medicalGuide->buildGuia($paciente, $diaPos, $checklistProgress),
+            'guia_medico' => $isPreOp ? null : $this->medicalGuide->buildGuia($paciente, $diaPos, $checklistProgress),
         ];
     }
 
@@ -83,13 +102,15 @@ final class PosOperatorioPortalService
     public function mapQuestionarioResumo(PosOperatorioQuestionarioResposta $qr): array
     {
         $respostas = $qr->getRespostas();
-        $diaRef = $qr->getPaciente()->getDiaPosOperatorio($qr->getDataReferencia());
+        $diaRef = $qr->getPaciente()->getDiaRelativoCirurgia($qr->getDataReferencia());
 
         return [
             'score' => $qr->getScoreRisco(),
             'respondido_em' => $qr->getRespondidoEm()->format('d/m/Y H:i'),
             'data_label' => $qr->getDataReferencia()->format('d/m/Y'),
-            'dia_pos' => $diaRef,
+            'dia_pos' => $diaRef !== null && $diaRef >= 0 ? $diaRef : null,
+            'dia_relativo' => $diaRef,
+            'dia_relativo_label' => $diaRef !== null ? PosOperatorioPaciente::formatDiaRelativoLabel($diaRef) : null,
             'dor' => $respostas['dor'] ?? null,
             'febre' => $respostas['febre'] ?? null,
             'respostas' => $respostas,
@@ -114,6 +135,11 @@ final class PosOperatorioPortalService
             'fase_label' => null,
             'data_cirurgia_label' => null,
             'status_label' => null,
+            'is_pre_op' => false,
+            'is_d0' => false,
+            'handoff_label' => null,
+            'dia_relativo' => null,
+            'dia_relativo_label' => null,
             'medico_nome' => null,
             'medico_email' => null,
             'clinica_nome' => null,
@@ -205,17 +231,29 @@ final class PosOperatorioPortalService
     }
 
     /** @param array{hoje: list<array<string, mixed>>, proximos: list<array<string, mixed>>} $parts */
-    private function faseLabel(?int $diaPos, int $duracaoDias, array $parts): ?string
+    private function faseLabel(?int $diaRelativo, int $duracaoDias, array $parts, bool $isPreOp): ?string
     {
-        if ($diaPos === null) {
+        if ($diaRelativo === null) {
             return null;
+        }
+
+        if ($diaRelativo === 0) {
+            return 'Handoff: dia da cirurgia — inicia o acompanhamento pós-operatório';
+        }
+
+        if ($isPreOp) {
+            if ($parts['hoje'] !== []) {
+                return 'Preparação: '.(string) ($parts['hoje'][0]['item'] ?? 'checklist pré-op');
+            }
+
+            return 'Preparação para a cirurgia';
         }
 
         if ($parts['hoje'] !== []) {
             return (string) ($parts['hoje'][0]['item'] ?? null);
         }
 
-        if ($diaPos >= $duracaoDias) {
+        if ($diaRelativo >= $duracaoDias) {
             return 'Fase final do protocolo';
         }
 
@@ -224,6 +262,36 @@ final class PosOperatorioPortalService
         }
 
         return 'Recuperação em andamento';
+    }
+
+    /** @param list<array<string, mixed>> $perguntas */
+    private function looksLikePreOpQuestions(array $perguntas): bool
+    {
+        foreach ($perguntas as $p) {
+            $id = (string) ($p['id'] ?? '');
+            if (\in_array($id, ['preparado', 'jejum', 'medicamentos'], true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @param list<array<string, mixed>> $checklist */
+    private function progressPct(?int $diaRelativo, int $duracaoDias, array $checklist): int
+    {
+        if ($diaRelativo === null || $checklist === []) {
+            return 0;
+        }
+
+        $done = 0;
+        foreach ($checklist as $item) {
+            if ((int) ($item['dia'] ?? 0) < $diaRelativo) {
+                ++$done;
+            }
+        }
+
+        return min(100, (int) round(($done / max(1, \count($checklist))) * 100));
     }
 
     private function statusLabel(string $status): string

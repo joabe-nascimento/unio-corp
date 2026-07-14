@@ -30,6 +30,7 @@
         </ul>
         <p class="text-muted small mt-3 mb-2">Retenção configurada: {{ compliance.retencao_dias|default(365) }} dias · job <code>app:pos-operatorio:retention</code></p>
         <a href="{{ path('app_pos_operatorio_relatorios_export_auditoria') }}" class="btn-unio-ghost btn-sm">Exportar trilha LGPD (CSV)</a>
+        <a href="{{ path('app_pos_operatorio_relatorios_export_attestacoes') }}" class="btn-unio-ghost btn-sm ml-2">Exportar atestações Trilha (CSV)</a>
     </section>
 
     <section class="unio-card clinic-ops-panel p-3">
@@ -48,4 +49,39 @@
         {% endif %}
     </section>
 </div>
+
+<section class="unio-card clinic-ops-panel p-3 mt-3">
+    <h3 class="clinic-ops-panel__title">Atestações da Trilha (evidência)</h3>
+    {% set att = compliance.attestacoes_recentes|default([]) %}
+    {% if att is empty %}
+    <p class="text-muted small mb-0">Nenhuma atestação registrada ainda.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Quando</th>
+                    <th>Paciente</th>
+                    <th>Marco</th>
+                    <th>Autor</th>
+                    <th>Evidência</th>
+                    <th>Hash</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in att %}
+                <tr>
+                    <td>{{ a.em }}</td>
+                    <td>{{ a.paciente }}</td>
+                    <td><code>{{ a.marco }}</code></td>
+                    <td>{{ a.autor }}</td>
+                    <td>{{ a.evidencia }}</td>
+                    <td class="admin-table-mono small">{{ a.hash }}…</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
 {% endblock %}

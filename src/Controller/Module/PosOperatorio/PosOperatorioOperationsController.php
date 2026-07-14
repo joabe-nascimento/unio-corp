@@ -136,20 +136,24 @@ final class PosOperatorioOperationsController extends AbstractController
             }
 
             $result = $this->agendaReminders->prepareForTomorrow($empresa);
-            if ($result['enviados'] > 0) {
+            $marcos = $this->agendaReminders->prepareProtocolMilestones($empresa);
+            $total = $result['enviados'] + $marcos['enviados'];
+            if ($total > 0 || $marcos['d0'] > 0) {
                 $hint = $this->whatsapp->isLive()
                     ? 'WhatsApp Meta + e-mail/webhook'
                     : 'wa.me + e-mail/webhook (Meta ainda não configurado)';
                 $this->addFlash(
                     'success',
                     sprintf(
-                        '%d lembrete(s) de confirmação processados para amanhã (%s).',
+                        '%d confirmação(ões) D−1, %d marco(s) pré-op, %d handoff(s) D0 (%s).',
                         $result['enviados'],
+                        $marcos['enviados'],
+                        $marcos['d0'],
                         $hint,
                     ),
                 );
             } else {
-                $this->addFlash('info', 'Nenhum horário pendente de lembrete para amanhã.');
+                $this->addFlash('info', 'Nenhum lembrete D−1 nem marco pré-op pendente hoje.');
             }
 
             return $this->redirectToRoute('app_pos_operatorio_lembretes');
@@ -225,6 +229,12 @@ final class PosOperatorioOperationsController extends AbstractController
     public function exportAuditoria(): StreamedResponse
     {
         return $this->exports->exportAuditoria($this->requireEmpresa());
+    }
+
+    #[Route('/relatorios/export/attestacoes', name: 'app_pos_operatorio_relatorios_export_attestacoes', methods: ['GET'])]
+    public function exportAttestacoes(): StreamedResponse
+    {
+        return $this->exports->exportAttestacoes($this->requireEmpresa());
     }
 
     #[Route('/integracoes', name: 'app_pos_operatorio_integracoes')]

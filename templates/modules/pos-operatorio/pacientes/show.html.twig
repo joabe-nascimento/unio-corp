@@ -47,7 +47,7 @@
 {% include 'components/pos_operatorio/patient_kpi_strip.html.twig' with { variant: 'full' } %}
 {% else %}
 {% include 'components/kpi_row.html.twig' with { items: [
-        { value: dia_pos is not null ? 'D+' ~ dia_pos : '—', label: 'Dia pós-op', icon: 'fa-calendar-day', tone: 'sky' },
+        { value: dia_relativo_label|default(dia_pos is not null ? 'D+' ~ dia_pos : '—'), label: is_pre_op|default(false) ? 'Dia pré-op' : 'Dia pós-op', icon: 'fa-calendar-day', tone: 'sky' },
         { value: alertas_abertos, label: 'Alertas abertos', icon: 'fa-triangle-exclamation', tone: 'rose', variant: alertas_abertos > 0 ? 'danger' : '', pulse: alertas_abertos > 0 },
         { value: paciente.status|capitalize, label: 'Status clínico', icon: 'fa-heart-pulse', tone: 'sage' },
         { value: ultima_resposta ? ultima_resposta.scoreRisco : '—', label: 'Último score', icon: 'fa-chart-line', tone: 'lavender', variant: ultima_resposta and ultima_resposta.scoreRisco >= 70 ? 'danger' : (ultima_resposta and ultima_resposta.scoreRisco >= 40 ? 'warning' : '') },
@@ -182,7 +182,7 @@
 
                     <li class="pos-op-protocol-progress__item{% if step.done %} is-done{% endif %}">
 
-                        <span class="pos-op-protocol-progress__day">D+{{ step.dia }}</span>
+                        <span class="pos-op-protocol-progress__day">{{ step.dia_label|default(step.dia < 0 ? 'D−' ~ (step.dia|abs) : 'D+' ~ step.dia) }}</span>
 
                         <span class="pos-op-protocol-progress__text">{{ step.item }}</span>
 

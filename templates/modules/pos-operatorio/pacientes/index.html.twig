@@ -111,7 +111,7 @@
                     <td><code>{{ p.codigo }}</code></td>
                     <td><strong>{{ p|pos_op_paciente_nome }}</strong></td>
                     <td>{{ p.procedimento|default('—') }}</td>
-                    <td>{% if p.diaPosOperatorio is not null %}D+{{ p.diaPosOperatorio }}{% else %}—{% endif %}</td>
+                    <td>{% set _rel = p.diaRelativoCirurgia %}{% if _rel is not null %}{{ _rel < 0 ? 'D−' ~ (_rel|abs) : 'D+' ~ _rel }}{% else %}—{% endif %}</td>
                     <td>{{ p.medicoResponsavel ? p.medicoResponsavel.nome : '—' }}</td>
                     <td>{{ p.status|pos_op_status_label }}</td>
                     <td>

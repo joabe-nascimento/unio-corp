@@ -610,14 +610,56 @@ class PosOperatorioPaciente
         return $this->eventos;
     }
 
-    public function getDiaPosOperatorio(?\DateTimeImmutable $ref = null): ?int
+    /**
+     * Dias relativos à cirurgia: negativo = pré-op (D−n), zero = dia da cirurgia, positivo = pós (D+n).
+     */
+    public function getDiaRelativoCirurgia(?\DateTimeImmutable $ref = null): ?int
     {
         if (!$this->dataCirurgia) {
             return null;
         }
         $ref ??= new \DateTimeImmutable('today');
+        $surgery = $this->dataCirurgia->setTime(0, 0);
+        $day = $ref->setTime(0, 0);
+        $diff = $surgery->diff($day);
 
-        return (int) $this->dataCirurgia->diff($ref)->days;
+        return $diff->invert === 1 ? -((int) $diff->days) : (int) $diff->days;
+    }
+
+    public function isPreOperatorio(?\DateTimeImmutable $ref = null): bool
+    {
+        $rel = $this->getDiaRelativoCirurgia($ref);
+
+        return $rel !== null && $rel < 0;
+    }
+
+    /** Dia da cirurgia (D0): handoff pré → pós. */
+    public function isDiaCirurgia(?\DateTimeImmutable $ref = null): bool
+    {
+        return $this->getDiaRelativoCirurgia($ref) === 0;
+    }
+
+    /** Dias desde a cirurgia (só pós-op); null se ainda não operou ou sem data. */
+    public function getDiaPosOperatorio(?\DateTimeImmutable $ref = null): ?int
+    {
+        $rel = $this->getDiaRelativoCirurgia($ref);
+        if ($rel === null || $rel < 0) {
+            return null;
+        }
+
+        return $rel;
+    }
+
+    public static function formatDiaRelativoLabel(int $dia): string
+    {
+        if ($dia < 0) {
+            return 'D−'.abs($dia);
+        }
+        if ($dia === 0) {
+            return 'D0';
+        }
+
+        return 'D+'.$dia;
     }
 
     public function getUltimaResposta(): ?PosOperatorioQuestionarioResposta

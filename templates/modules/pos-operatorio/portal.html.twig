@@ -1,15 +1,17 @@
 {% extends 'layout/portal_patient.html.twig' %}
 
-{% set portal_page_title = 'Pós-operatório' %}
+{% set _is_pre = is_pre_op|default(false) %}
+{% set _dia_lbl = dia_relativo_label|default(dia_pos is not null ? 'D+' ~ dia_pos : null) %}
+{% set portal_page_title = _is_pre ? 'Preparação pré-operatória' : 'Pós-operatório' %}
 {% set portal_page_subtitle = clinica_nome|default(org_brand_label|default(empresa ? empresa.nome : '')) %}
 
-{% block portal_title %}Acompanhamento pós-operatório{% endblock %}
+{% block portal_title %}{{ _is_pre ? 'Preparação para a cirurgia' : 'Acompanhamento pós-operatório' }}{% endblock %}
 
 {% block portal_topbar_meta %}
 {% if paciente %}
 <div class="pos-portal-topbar__meta">
-    {% if dia_pos is not null %}
-    <span class="pos-portal-topbar__chip">D+{{ dia_pos }}</span>
+    {% if _dia_lbl %}
+    <span class="pos-portal-topbar__chip">{{ _dia_lbl }}</span>
     {% endif %}
     {% if has_consent|default(false) %}
         {% if questionario_resumo %}
@@ -73,6 +75,16 @@
         </div>
         {% endif %}
 
+        {% if is_d0|default(false) %}
+        <div class="pos-portal-banner pos-portal-banner--care" role="status">
+            <i class="fas fa-arrows-turn-right" aria-hidden="true"></i>
+            <div>
+                <strong>Dia da cirurgia · handoff</strong>
+                <p>{{ handoff_label|default('A Trilha Unio passa da preparação para o acompanhamento pós-operatório.') }}</p>
+            </div>
+        </div>
+        {% endif %}
+
         <section class="pos-portal-hero" aria-label="Resumo do paciente">
             <div class="pos-portal-hero__main">
                 <p class="pos-portal-hero__eyebrow">{{ status_label|default('Recuperação ativa') }}</p>
@@ -93,18 +105,18 @@
                     {% endif %}
                 </dl>
             </div>
-            {% if dia_pos is not null %}
-            <div class="pos-portal-hero__badge" aria-label="Dia pós-operatório">
-                <span class="pos-portal-hero__badge-val">D+{{ dia_pos }}</span>
-                <span class="pos-portal-hero__badge-lbl">pós-op</span>
+            {% if _dia_lbl %}
+            <div class="pos-portal-hero__badge" aria-label="{{ _is_pre ? 'Dia pré-operatório' : 'Dia pós-operatório' }}">
+                <span class="pos-portal-hero__badge-val">{{ _dia_lbl }}</span>
+                <span class="pos-portal-hero__badge-lbl">{{ _is_pre ? 'pré-op' : 'pós-op' }}</span>
             </div>
             {% endif %}
         </section>
 
-        {% if duracao_dias and dia_pos is not null %}
-        <section class="pos-portal-progress" aria-label="Progresso da recuperação">
+        {% if duracao_dias and _dia_lbl %}
+        <section class="pos-portal-progress" aria-label="{{ _is_pre ? 'Progresso da preparação' : 'Progresso da recuperação' }}">
             <div class="pos-portal-progress__head">
-                <span class="pos-portal-progress__label">Recuperação</span>
+                <span class="pos-portal-progress__label">{{ _is_pre ? 'Preparação' : 'Recuperação' }}</span>
                 <span class="pos-portal-progress__value">{{ progress_pct|default(0) }}%</span>
             </div>
             <div class="pos-portal-progress__track" role="progressbar" aria-valuenow="{{ progress_pct|default(0) }}" aria-valuemin="0" aria-valuemax="100">
@@ -116,12 +128,43 @@
         </section>
         {% endif %}
 
+        {% if not _is_pre %}
         {% include 'components/pos_operatorio/medical_guide.html.twig' with { guia_medico: guia_medico|default(null) } %}
+        {% endif %}
 
+        {% if _is_pre %}
+        <section class="pos-portal-panel pos-portal-panel--day" aria-label="Preparação para a cirurgia">
+            <header class="pos-portal-panel__head">
+                <h2 class="pos-portal-panel__title">Preparação para a cirurgia</h2>
+                <p class="pos-portal-panel__sub">{{ 'now'|date('d/m/Y') }}{% if _dia_lbl %} · {{ _dia_lbl }}{% endif %}{% if data_cirurgia_label %} · cirurgia {{ data_cirurgia_label }}{% endif %}</p>
+            </header>
+            <div class="pos-portal-panel__content">
+                {% if checklist_hoje|default([])|length > 0 %}
+                <div class="pos-portal-day-focus">
+                    <strong>Marco de hoje</strong>
+                    <p>{{ checklist_hoje[0].item }}</p>
+                </div>
+                <ul class="pos-portal-checklist mt-3">
+                    {% for item in checklist_hoje %}
+                    <li class="pos-portal-checklist__item">
+                        <span class="pos-portal-checklist__day">{{ item.dia < 0 ? 'D−' ~ (item.dia|abs) : 'D+' ~ item.dia }}</span>
+                        <span class="pos-portal-checklist__text">{{ item.item }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="pos-portal-panel__text">Siga as orientações da clínica e responda o check-in abaixo para avançar na Trilha Unio.</p>
+                {% endif %}
+                {% if fase_label %}
+                <p class="pos-portal-day-phase">{{ fase_label }}</p>
+                {% endif %}
+            </div>
+        </section>
+        {% else %}
         <section class="pos-portal-panel pos-portal-panel--day" aria-label="Resumo do dia">
             <header class="pos-portal-panel__head">
                 <h2 class="pos-portal-panel__title">Resumo do dia</h2>
-                <p class="pos-portal-panel__sub">{{ 'now'|date('d/m/Y') }}{% if dia_pos is not null %} · D+{{ dia_pos }}{% endif %}{% if procedimento_label %} · {{ procedimento_label }}{% endif %}</p>
+                <p class="pos-portal-panel__sub">{{ 'now'|date('d/m/Y') }}{% if _dia_lbl %} · {{ _dia_lbl }}{% endif %}{% if procedimento_label %} · {{ procedimento_label }}{% endif %}</p>
             </header>
             <div class="pos-portal-panel__content">
                 <div class="pos-portal-day-grid">
@@ -162,7 +205,7 @@
                         <li class="pos-portal-timeline__item{{ step.done ? ' is-done' : '' }}{{ step.current ? ' is-current' : '' }}">
                             <span class="pos-portal-timeline__dot" aria-hidden="true"></span>
                             <div class="pos-portal-timeline__body">
-                                <span class="pos-portal-timeline__day">D+{{ step.dia }}</span>
+                                <span class="pos-portal-timeline__day">{{ step.dia < 0 ? 'D−' ~ (step.dia|abs) : 'D+' ~ step.dia }}</span>
                                 <span class="pos-portal-timeline__text">{{ step.item }}</span>
                             </div>
                         </li>
@@ -172,6 +215,7 @@
                 {% endif %}
             </div>
         </section>
+        {% endif %}
 
         <div class="pos-portal-status{% if questionario_resumo %} pos-portal-status--answered{% endif %}" role="list">
             <article class="pos-portal-status__card pos-portal-status__card--{{ questionario_resumo ? 'done' : 'pending' }}" role="listitem">
@@ -190,7 +234,7 @@
                 <div class="pos-portal-status__body">
                     <strong class="pos-portal-status__value">{{ dias_respondidos|default(0) }}</strong>
                     <span class="pos-portal-status__label">Dias respondidos</span>
-                    <span class="pos-portal-status__hint">Desde a cirurgia</span>
+                    <span class="pos-portal-status__hint">{{ _is_pre ? 'Na preparação' : 'Desde a cirurgia' }}</span>
                 </div>
             </article>
 
@@ -253,7 +297,7 @@
             <section class="pos-portal-panel pos-portal-panel--retorno" aria-label="Retorno ambulatorial">
                 <header class="pos-portal-panel__head">
                     <h2 class="pos-portal-panel__title">Retorno hoje</h2>
-                    <p class="pos-portal-panel__sub">D+{{ retorno_hoje.dia }} · {{ retorno_hoje.item }}</p>
+                    <p class="pos-portal-panel__sub">{{ retorno_hoje.dia < 0 ? 'D−' ~ (retorno_hoje.dia|abs) : 'D+' ~ retorno_hoje.dia }} · {{ retorno_hoje.item }}</p>
                 </header>
                 <div class="pos-portal-panel__content">
                     {% if retorno_confirmado|default(false) %}
@@ -310,8 +354,8 @@
 
             <section class="pos-portal-panel pos-portal-panel--questionario" id="questionario-hoje">
                 <header class="pos-portal-panel__head">
-                    <h2 class="pos-portal-panel__title">Questionário de hoje</h2>
-                    <p class="pos-portal-panel__sub">{{ questionario_resumo ? 'Respostas registradas na clínica' : 'Preencha e envie uma vez por dia' }}</p>
+                    <h2 class="pos-portal-panel__title">{{ _is_pre ? 'Check-in de preparação' : 'Questionário de hoje' }}</h2>
+                    <p class="pos-portal-panel__sub">{{ questionario_resumo ? 'Respostas registradas na clínica' : (_is_pre ? 'Confirme o marco do dia e avance na Trilha Unio' : 'Preencha e envie uma vez por dia') }}</p>
                 </header>
 
                 <div class="pos-portal-panel__content">
@@ -321,7 +365,7 @@
                             <i class="fas fa-circle-check" aria-hidden="true"></i>
                             <strong>Enviado hoje às {{ questionario_resumo.respondido_em|split(' ')|last }}</strong>
                         </div>
-                        <p class="pos-portal-success__text">A equipe recebeu suas respostas. Novo questionário amanhã. Em piora, contate a clínica.</p>
+                        <p class="pos-portal-success__text">{{ _is_pre ? 'Sua preparação na Trilha Unio foi atualizada. Em dúvida, fale com a clínica.' : 'A equipe recebeu suas respostas. Novo questionário amanhã. Em piora, contate a clínica.' }}</p>
                     </div>
                     {% else %}
                     <form method="post" action="{{ path('app_pos_operatorio_portal_questionario') }}" class="pos-portal-form pos-portal-form--questionario">
@@ -360,13 +404,13 @@
                             </div>
                         {% endfor %}
 
-                        <button type="submit" class="pos-portal-btn pos-portal-btn--primary pos-portal-btn--block">Enviar questionário de hoje</button>
+                        <button type="submit" class="pos-portal-btn pos-portal-btn--primary pos-portal-btn--block">{{ _is_pre ? 'Confirmar preparação de hoje' : 'Enviar questionário de hoje' }}</button>
                     </form>
                     {% endif %}
                 </div>
             </section>
 
-            {% if checklist_hoje|default([])|length > 0 %}
+            {% if not _is_pre and checklist_hoje|default([])|length > 0 %}
             <section class="pos-portal-panel">
                 <header class="pos-portal-panel__head">
                     <h2 class="pos-portal-panel__title">Orientações de hoje</h2>
@@ -376,7 +420,7 @@
                 <ul class="pos-portal-checklist">
                     {% for item in checklist_hoje %}
                     <li class="pos-portal-checklist__item">
-                        <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
+                        <span class="pos-portal-checklist__day">{{ item.dia < 0 ? 'D−' ~ (item.dia|abs) : 'D+' ~ item.dia }}</span>
                         <span class="pos-portal-checklist__text">{{ item.item }}</span>
                     </li>
                     {% endfor %}
@@ -387,7 +431,7 @@
                     <ul class="pos-portal-checklist pos-portal-checklist--muted">
                         {% for item in checklist_proximos %}
                         <li class="pos-portal-checklist__item">
-                            <span class="pos-portal-checklist__day">D+{{ item.dia }}</span>
+                            <span class="pos-portal-checklist__day">{{ item.dia < 0 ? 'D−' ~ (item.dia|abs) : 'D+' ~ item.dia }}</span>
                             <span class="pos-portal-checklist__text">{{ item.item }}</span>
                         </li>
                         {% endfor %}
@@ -402,7 +446,7 @@
             <section class="pos-portal-panel">
                 <header class="pos-portal-panel__head">
                     <h2 class="pos-portal-panel__title">Linha do protocolo</h2>
-                    <p class="pos-portal-panel__sub">Marcos da recuperação</p>
+                    <p class="pos-portal-panel__sub">{{ _is_pre ? 'Marcos da preparação e recuperação' : 'Marcos da recuperação' }}</p>
                 </header>
                 <div class="pos-portal-panel__content">
                 <ol class="pos-portal-timeline">
@@ -410,7 +454,7 @@
                     <li class="pos-portal-timeline__item{{ step.done ? ' is-done' : '' }}{{ step.current ? ' is-current' : '' }}">
                         <span class="pos-portal-timeline__dot" aria-hidden="true"></span>
                         <div class="pos-portal-timeline__body">
-                            <span class="pos-portal-timeline__day">D+{{ step.dia }}</span>
+                            <span class="pos-portal-timeline__day">{{ step.dia < 0 ? 'D−' ~ (step.dia|abs) : 'D+' ~ step.dia }}</span>
                             <span class="pos-portal-timeline__text">{{ step.item }}</span>
                         </div>
                     </li>
@@ -431,7 +475,7 @@
                     {% for item in historico_questionarios %}
                     <li class="pos-portal-history__item">
                         <span class="pos-portal-history__date">{{ item.data_label }}</span>
-                        <strong>D+{{ item.dia_pos ?? '—' }} · Score {{ item.score }}</strong>
+                        <strong>{{ item.dia_relativo_label|default(item.dia_pos is not null ? 'D+' ~ item.dia_pos : '—') }} · Score {{ item.score }}</strong>
                         <p>Dor {{ item.dor ?? '—' }}/10{% if item.febre is not null %} · Febre {{ item.febre }}°C{% endif %}</p>
                     </li>
                     {% endfor %}

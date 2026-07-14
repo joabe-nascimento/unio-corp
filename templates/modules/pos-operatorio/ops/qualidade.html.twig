@@ -4,15 +4,16 @@
 
 {% set hub_page_title = 'Qualidade clínica' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = quality.continuity_lead|default('Taxa de resposta, SLA e distribuição por dia pós-operatório') %}
+{% set hub_page_subtitle = quality.continuity_lead|default('Resposta, SLA, check-in pré e handoff D0') %}
 {% set hub_search_hidden = true %}
+{% set pre = quality.pre_op|default({}) %}
 
 {% block hub_kpis %}
 {% include 'components/kpi_row.html.twig' with { items: [
     { value: quality.taxa_resposta ~ '%', label: 'Taxa resposta hoje', icon: 'fa-percent', tone: 'sage' },
-    { value: quality.pendentes_hoje, label: 'Pendentes hoje', icon: 'fa-clock', tone: 'amber' },
-    { value: quality.sla_pct ~ '%', label: 'SLA em dia', icon: 'fa-stopwatch', tone: 'lavender' },
-    { value: quality.claims_7d|default(0), label: 'Claims 7d', icon: 'fa-hand', tone: 'sky' },
+    { value: (pre.checkin_taxa|default(0)) ~ '%', label: 'Check-in pré (7d)', icon: 'fa-clipboard-check', tone: 'sky' },
+    { value: (pre.noshow_d1_taxa|default(0)) ~ '%', label: 'No-show pós D−1', icon: 'fa-user-xmark', tone: 'amber' },
+    { value: (pre.conversao_taxa|default(0)) ~ '%', label: 'Prep → cirurgia', icon: 'fa-arrow-right', tone: 'lavender' },
 ], mb: 'mb-0' } %}
 {% endblock %}
 
@@ -28,6 +29,16 @@
     </section>
 
     <section class="unio-card clinic-ops-panel p-3">
+        <h3 class="clinic-ops-panel__title">Pré-op</h3>
+        <dl class="clinic-ops-stats">
+            <div><dt>Pré esta semana</dt><dd>{{ pre.pre_semana|default(0) }}</dd></div>
+            <div><dt>Check-in ok</dt><dd>{{ pre.checkin_ok|default(0) }}</dd></div>
+            <div><dt>No-show (base D−1)</dt><dd>{{ pre.noshow_d1|default(0) }}/{{ pre.noshow_base|default(0) }}</dd></div>
+            <div><dt>Conversão 30d</dt><dd>{{ pre.conversao_ok|default(0) }}/{{ pre.conversao_base|default(0) }}</dd></div>
+        </dl>
+    </section>
+
+    <section class="unio-card clinic-ops-panel p-3">
         <h3 class="clinic-ops-panel__title">Pacientes por fase</h3>
         {% if quality.heatmap is empty %}
         <p class="text-muted small mb-0">Sem dados de acompanhamento.</p>
@@ -38,15 +49,6 @@
             {% endfor %}
         </ul>
         {% endif %}
-    </section>
-
-    <section class="unio-card clinic-ops-panel p-3">
-        <h3 class="clinic-ops-panel__title">Ações</h3>
-        <div class="d-flex flex-column gap-2">
-            <a href="{{ path('app_pos_operatorio_questionarios') }}" class="btn-unio-ghost btn-sm">Ver questionários</a>
-            <a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">Fila de alertas</a>
-            <a href="{{ path('app_pos_operatorio_relatorios') }}" class="btn-unio-ghost btn-sm">Relatórios</a>
-        </div>
     </section>
 </div>
 {% endblock %}

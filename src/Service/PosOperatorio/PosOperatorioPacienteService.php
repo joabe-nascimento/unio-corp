@@ -351,19 +351,38 @@ final class PosOperatorioPacienteService
 
         $protocolo = $paciente->getProtocolo();
 
-        $checklist = $protocolo?->getChecklist() ?? PosOperatorioProtocoloDefaults::checklistBasico();
-
         $diaPos = $paciente->getDiaPosOperatorio();
+        $diaRelativo = $paciente->getDiaRelativoCirurgia();
+        $isPreOp = $paciente->isPreOperatorio();
+        $checklist = $protocolo?->getChecklist() ?: (
+            $isPreOp
+                ? array_merge(PosOperatorioProtocoloDefaults::checklistPreOp(), PosOperatorioProtocoloDefaults::checklistBasico())
+                : PosOperatorioProtocoloDefaults::checklistBasico()
+        );
 
-        $checklistProgress = array_map(static fn (array $item) => [
+        $checklistProgress = array_map(static function (array $item) use ($diaRelativo): array {
+            $dia = (int) ($item['dia'] ?? 0);
 
-            'dia' => (int) ($item['dia'] ?? 0),
+            return [
+                'dia' => $dia,
+                'dia_label' => PosOperatorioPaciente::formatDiaRelativoLabel($dia),
+                'item' => (string) ($item['item'] ?? ''),
+                'fase' => $dia < 0 ? 'pre' : 'pos',
+                'done' => $diaRelativo !== null && $dia < $diaRelativo,
+                'current' => $diaRelativo !== null && $dia >= $diaRelativo,
+            ];
+        }, $checklist);
 
-            'item' => (string) ($item['item'] ?? ''),
-
-            'done' => $diaPos !== null && (int) ($item['dia'] ?? 0) <= $diaPos,
-
-        ], $checklist);
+        // current only on first not-done
+        $seenCurrent = false;
+        foreach ($checklistProgress as $i => $step) {
+            if ($step['done']) {
+                $checklistProgress[$i]['current'] = false;
+                continue;
+            }
+            $checklistProgress[$i]['current'] = !$seenCurrent;
+            $seenCurrent = true;
+        }
 
         $proximoChecklist = null;
 
@@ -388,6 +407,13 @@ final class PosOperatorioPacienteService
             'display_nome' => PosOperatorioDisplay::pacienteNome($paciente),
 
             'dia_pos' => $diaPos,
+            'dia_relativo' => $diaRelativo,
+            'dia_relativo_label' => $diaRelativo !== null ? PosOperatorioPaciente::formatDiaRelativoLabel($diaRelativo) : null,
+            'is_pre_op' => $isPreOp,
+            'is_d0' => $paciente->isDiaCirurgia(),
+            'handoff_label' => $paciente->isDiaCirurgia()
+                ? 'Dia da cirurgia — handoff pré → pós na Trilha Unio'
+                : null,
 
             'protocolo_dias' => $protocolo?->getDuracaoDias(),
 
@@ -464,13 +490,29 @@ final class PosOperatorioPacienteService
             return null;
         }
 
+        $marcos = $this->attestations->milestonesView($contract);
+        $marcosPre = [];
+        $marcosPos = [];
+        foreach ($marcos as $m) {
+            $fase = (string) ($m['fase'] ?? 'pos');
+            $key = (string) ($m['key'] ?? '');
+            if ($fase === 'pre' || $fase === 'handoff') {
+                $marcosPre[] = $m;
+            }
+            if ($fase === 'pos' || $fase === 'handoff' || $key === 'questionario_hoje') {
+                $marcosPos[] = $m;
+            }
+        }
+
         return [
             'id' => $contract->getId(),
             'versao' => $contract->getVersao(),
             'status' => $contract->getStatus(),
             'hash' => $contract->getContentHash(),
             'protocolo' => $contract->getProtocolo()?->getNome(),
-            'marcos' => $marcos = $this->attestations->milestonesView($contract),
+            'marcos' => $marcos,
+            'marcos_pre' => $marcosPre,
+            'marcos_pos' => $marcosPos,
             'next_marco_key' => $this->firstOpenMarcoKey($marcos),
         ];
     }

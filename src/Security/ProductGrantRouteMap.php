@@ -377,6 +377,7 @@ final class ProductGrantRouteMap
         'app_pos_operatorio_relatorios' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
         'app_pos_operatorio_relatorios_export_alertas' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
         'app_pos_operatorio_relatorios_export_auditoria' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
+        'app_pos_operatorio_relatorios_export_attestacoes' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
         'app_pos_operatorio_relatorios_export_questionarios' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
         'app_pos_operatorio_integracoes' => ['scope' => 'hub_pos_operatorio', 'product' => 'configuracoes'],
         'app_pos_operatorio_integracoes_webhook' => ['scope' => 'hub_pos_operatorio', 'product' => 'configuracoes'],

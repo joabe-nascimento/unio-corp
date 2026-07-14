@@ -2,6 +2,7 @@
 
 namespace App\Repository\Organismo;
 
+use App\Entity\Empresa;
 use App\Entity\Organismo\OrganismoCareAttestation;
 use App\Entity\Organismo\OrganismoCareContract;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -29,5 +30,18 @@ class OrganismoCareAttestationRepository extends ServiceEntityRepository
     public function findByMarco(OrganismoCareContract $contract, string $marcoKey): ?OrganismoCareAttestation
     {
         return $this->findOneBy(['contract' => $contract, 'marcoKey' => $marcoKey]);
+    }
+
+    /** @return list<OrganismoCareAttestation> */
+    public function findRecentByEmpresa(Empresa $empresa, int $limit = 50): array
+    {
+        return $this->createQueryBuilder('a')
+            ->innerJoin('a.contract', 'c')
+            ->andWhere('c.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('a.criadoEm', 'DESC')
+            ->setMaxResults(max(1, min(500, $limit)))
+            ->getQuery()
+            ->getResult();
     }
 }

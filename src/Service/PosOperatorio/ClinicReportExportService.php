@@ -4,6 +4,7 @@ namespace App\Service\PosOperatorio;
 
 use App\Entity\Empresa;
 use App\Entity\PosOperatorioEvento;
+use App\Repository\Organismo\OrganismoCareAttestationRepository;
 use App\Repository\PosOperatorioAlertaRepository;
 use App\Repository\PosOperatorioEventoRepository;
 use App\Repository\PosOperatorioQuestionarioRespostaRepository;
@@ -15,6 +16,7 @@ final class ClinicReportExportService
         private PosOperatorioQuestionarioRespostaRepository $questionarios,
         private PosOperatorioAlertaRepository $alertas,
         private PosOperatorioEventoRepository $eventos,
+        private OrganismoCareAttestationRepository $attestations,
     ) {}
 
     public function exportQuestionarios(Empresa $empresa, int $days = 90): StreamedResponse
@@ -64,6 +66,30 @@ final class ClinicReportExportService
                         $a->getCriadoEm()->format('d/m/Y H:i'),
                         $a->getResolvidoEm()?->format('d/m/Y H:i') ?? '',
                         $a->getResponsavel()?->getNome() ?? '',
+                    ];
+                }
+            },
+        );
+    }
+
+    public function exportAttestacoes(Empresa $empresa): StreamedResponse
+    {
+        $rows = $this->attestations->findRecentByEmpresa($empresa, 500);
+
+        return $this->csvResponse(
+            sprintf('trilha-attestacoes-%s.csv', date('Y-m-d')),
+            ['Paciente', 'Código', 'Marco', 'Evidência', 'Autor', 'Hash', 'Em'],
+            function () use ($rows): \Generator {
+                foreach ($rows as $a) {
+                    $p = $a->getContract()->getPaciente();
+                    yield [
+                        $p->getNome(),
+                        $p->getCodigo(),
+                        $a->getMarcoKey(),
+                        $a->getEvidencia(),
+                        $a->getAtor()?->getNome() ?? 'Sistema',
+                        $a->getContentHash(),
+                        $a->getCriadoEm()->format('d/m/Y H:i'),
                     ];
                 }
             },

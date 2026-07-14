@@ -385,6 +385,84 @@ class PosOperatorioPacienteRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** Pacientes com cirurgia nos próximos N dias (pré-op ativo). @return list<PosOperatorioPaciente> */
+    public function findPreOpThisWeek(Empresa $empresa, int $dias = 7): array
+    {
+        $hoje = new \DateTimeImmutable('today');
+        $limite = $hoje->modify(sprintf('+%d days', max(1, $dias)));
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.dataCirurgia IS NOT NULL')
+            ->andWhere('p.dataCirurgia > :hoje')
+            ->andWhere('p.dataCirurgia <= :limite')
+            ->andWhere('p.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('hoje', $hoje)
+            ->setParameter('limite', $limite)
+            ->setParameter('statuses', [
+                PosOperatorioPaciente::STATUS_ATIVO,
+                PosOperatorioPaciente::STATUS_ALERTA,
+                PosOperatorioPaciente::STATUS_PENDENTE,
+            ])
+            ->orderBy('p.dataCirurgia', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** Pacientes cujo dia relativo à cirurgia é exatamente $diaRelativo (ex.: -7, -3, 0). @return list<PosOperatorioPaciente> */
+    public function findByRelativeSurgeryDay(Empresa $empresa, int $diaRelativo): array
+    {
+        $hoje = new \DateTimeImmutable('today');
+        $target = $hoje->modify(sprintf('%+d days', -$diaRelativo));
+
+        $start = $target->setTime(0, 0);
+        $end = $start->modify('+1 day');
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.dataCirurgia IS NOT NULL')
+            ->andWhere('p.dataCirurgia >= :start')
+            ->andWhere('p.dataCirurgia < :end')
+            ->andWhere('p.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->setParameter('statuses', [
+                PosOperatorioPaciente::STATUS_ATIVO,
+                PosOperatorioPaciente::STATUS_ALERTA,
+                PosOperatorioPaciente::STATUS_PENDENTE,
+            ])
+            ->orderBy('p.nome', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** Cirurgias em janela passada (para conversão prep→cirurgia). @return list<PosOperatorioPaciente> */
+    public function findSurgeryInPastDays(Empresa $empresa, int $dias = 30): array
+    {
+        $hoje = new \DateTimeImmutable('today');
+        $desde = $hoje->modify(sprintf('-%d days', max(1, $dias)));
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.dataCirurgia IS NOT NULL')
+            ->andWhere('p.dataCirurgia BETWEEN :desde AND :hoje')
+            ->andWhere('p.status IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('desde', $desde)
+            ->setParameter('hoje', $hoje)
+            ->setParameter('statuses', [
+                PosOperatorioPaciente::STATUS_ATIVO,
+                PosOperatorioPaciente::STATUS_ALERTA,
+                PosOperatorioPaciente::STATUS_PENDENTE,
+                PosOperatorioPaciente::STATUS_ENCERRADO,
+            ])
+            ->orderBy('p.dataCirurgia', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     /** @return list<PosOperatorioPaciente> */
     public function findRetornosNoDia(Empresa $empresa, \DateTimeImmutable $dia): array
     {

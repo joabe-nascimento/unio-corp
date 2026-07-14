@@ -85,9 +85,46 @@
         }
     }
 
+    function initTrilhaFase() {
+        qsa('[data-trilha-root]').forEach(function (root) {
+            var buttons = qsa('[data-trilha-fase]', root);
+            if (!buttons.length) return;
+            var defaultFase = root.getAttribute('data-trilha-default') || 'pos';
+
+            function activate(fase) {
+                buttons.forEach(function (btn) {
+                    var on = btn.getAttribute('data-trilha-fase') === fase;
+                    btn.classList.toggle('is-active', on);
+                    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+                });
+                qsa('[data-trilha-panel]', root).forEach(function (panel) {
+                    var show = fase === 'all' || panel.getAttribute('data-trilha-panel') === fase;
+                    panel.hidden = !show;
+                    var rail = qs('.organismo-trilha-rail', panel);
+                    if (rail) {
+                        rail.classList.toggle('is-emphasis', show);
+                        rail.classList.toggle('is-muted', !show);
+                    }
+                });
+                qsa('[data-trilha-item]', root).forEach(function (item) {
+                    var itemFase = item.getAttribute('data-trilha-item');
+                    item.hidden = !(fase === 'all' || itemFase === fase);
+                });
+            }
+
+            buttons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    activate(btn.getAttribute('data-trilha-fase') || defaultFase);
+                });
+            });
+            activate(defaultFase);
+        });
+    }
+
     function boot() {
         initRitual();
         initAttest();
+        initTrilhaFase();
     }
 
     if (document.readyState === 'loading') {

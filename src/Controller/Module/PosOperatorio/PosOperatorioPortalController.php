@@ -11,6 +11,8 @@ use App\Service\PosOperatorio\PosOperatorioPortalInviteService;
 use App\Service\PosOperatorio\PosOperatorioPortalInteractionService;
 use App\Service\PosOperatorio\PosOperatorioPortalService;
 use App\Service\PosOperatorio\PosOperatorioQuestionarioService;
+use App\Service\Organismo\Contract\CareContractService;
+use App\Service\Organismo\Contract\ContractAttestationService;
 use App\Service\WorkspaceService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,6 +36,8 @@ final class PosOperatorioPortalController extends AbstractController
         private PosOperatorioPortalInteractionService $portalInteraction,
         private PosOperatorioPortalInviteService $portalInvite,
         private PosOperatorioAuditService $audit,
+        private CareContractService $careContracts,
+        private ContractAttestationService $attestations,
         private EntityManagerInterface $em,
     ) {}
 
@@ -174,9 +178,46 @@ final class PosOperatorioPortalController extends AbstractController
 
         $respostas = $this->collectRespostas($request, $portalView['perguntas']);
         $this->questionarioService->submit($paciente, $respostas, $user);
-        $this->addFlash('success', 'Questionário enviado. A equipe clínica foi notificada se necessário.');
+        $this->attestPortalProgress($paciente, $user, $portalView);
+        $this->addFlash(
+            'success',
+            ($portalView['is_pre_op'] ?? false)
+                ? 'Check-in pré-op enviado. Sua preparação na Trilha Unio foi atualizada.'
+                : 'Questionário enviado. A equipe clínica foi notificada se necessário.',
+        );
 
         return $this->redirectToRoute('app_pos_operatorio_portal');
+    }
+
+    /** @param array<string, mixed> $portalView */
+    private function attestPortalProgress(PosOperatorioPaciente $paciente, User $user, array $portalView): void
+    {
+        try {
+            $contract = $this->careContracts->ensureForPaciente($paciente);
+            if ($contract === null) {
+                return;
+            }
+            $this->attestations->attest(
+                $contract,
+                'questionario_hoje',
+                ($portalView['is_pre_op'] ?? false) ? 'Check-in pré-op no portal' : 'Questionário do dia no portal',
+                $user,
+                ['origem' => 'portal'],
+            );
+            $hoje = $portalView['checklist_hoje'] ?? [];
+            if (\is_array($hoje) && $hoje !== []) {
+                $dia = (int) ($hoje[0]['dia'] ?? ($portalView['dia_relativo'] ?? 0));
+                $this->attestations->attestChecklistDia(
+                    $contract,
+                    $dia,
+                    ($portalView['is_pre_op'] ?? false) ? 'Marco pré-op confirmado no portal' : 'Marco confirmado no portal',
+                    $user,
+                    ['origem' => 'portal'],
+                );
+            }
+        } catch (\Throwable) {
+            // Atestação da Trilha é auxiliar ao questionário.
+        }
     }
 
     #[Route('/portal/ajuda', name: 'app_pos_operatorio_portal_ajuda', methods: ['POST'])]

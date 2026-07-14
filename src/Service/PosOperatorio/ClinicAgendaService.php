@@ -21,6 +21,7 @@ final class ClinicAgendaService
         private UserRepository $users,
         private ClinicOperationsService $operations,
         private ClinicPatientNotifier $patientNotifier,
+        private ClinicAgendaReminderService $agendaReminders,
         private EntityManagerInterface $em,
     ) {}
 
@@ -285,12 +286,21 @@ final class ClinicAgendaService
         }
 
         $this->applyFields($agendamento, $data);
+        $newStatus = null;
         if (isset($data['status']) && \is_string($data['status']) && $data['status'] !== '') {
             $this->assertStatusChange($agendamento, $empresa, $data['status']);
             $agendamento->setStatus($data['status']);
+            $newStatus = $data['status'];
         }
         $agendamento->touch();
         $this->em->flush();
+
+        if ($newStatus === ClinicAgendamento::STATUS_CONFIRMADO) {
+            $this->agendaReminders->attestTrilhaDMinus1(
+                $agendamento->getPaciente(),
+                'Confirmação de agenda/cirurgia na agenda clínica',
+            );
+        }
 
         return $agendamento;
     }
@@ -305,6 +315,13 @@ final class ClinicAgendaService
         $agendamento->setStatus($status);
         $agendamento->touch();
         $this->em->flush();
+
+        if ($status === ClinicAgendamento::STATUS_CONFIRMADO) {
+            $this->agendaReminders->attestTrilhaDMinus1(
+                $agendamento->getPaciente(),
+                'Confirmação de agenda/cirurgia na agenda clínica',
+            );
+        }
 
         return $agendamento;
     }

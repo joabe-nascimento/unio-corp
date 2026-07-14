@@ -257,7 +257,11 @@ final class PosOperatorioProtocoloService
 
             ->setChecklist($this->parseChecklistText((string) ($data['checklist_text'] ?? '')))
 
-            ->setPerguntas(PosOperatorioProtocoloDefaults::perguntas())
+            ->setPerguntas(
+                \is_array($data['perguntas'] ?? null) && $data['perguntas'] !== []
+                    ? $data['perguntas']
+                    : PosOperatorioProtocoloDefaults::perguntas()
+            )
 
             ->setRegrasAlerta($this->parseRegras($data))
 
@@ -298,6 +302,7 @@ final class PosOperatorioProtocoloService
             'tipo' => $template['tipo'] ?? '',
             'duracao_dias' => $template['duracao_dias'] ?? 14,
             'checklist_text' => $checklistText,
+            'perguntas' => $template['perguntas'] ?? PosOperatorioProtocoloDefaults::perguntas(),
             'regras_dor_p1' => $template['regras']['dor_p1_min'] ?? 8,
             'regras_febre_p2' => $template['regras']['febre_p2_min'] ?? 38.5,
         ]);
@@ -397,7 +402,7 @@ final class PosOperatorioProtocoloService
 
             }
 
-            if (preg_match('/^(\d+)\s*[:.\-]\s*(.+)$/', $line, $m)) {
+            if (preg_match('/^(-?\d+)\s*[:.\-]\s*(.+)$/u', $line, $m)) {
 
                 $out[] = ['dia' => (int) $m[1], 'item' => trim($m[2])];
 

@@ -4,6 +4,7 @@ namespace App\Service\Organismo\Contract;
 
 use App\Entity\Organismo\OrganismoCareAttestation;
 use App\Entity\Organismo\OrganismoCareContract;
+use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\Repository\Organismo\OrganismoCareAttestationRepository;
 use App\Service\Organismo\Memory\OrganismMemoryWriter;
@@ -69,19 +70,41 @@ final class ContractAttestationService
         return $att;
     }
 
-    /** @return list<array{key: string, label: string, attested: bool, hash: ?string, em: ?string}> */
+    /**
+     * @return list<array{
+     *     key: string,
+     *     label: string,
+     *     dia: int|null,
+     *     fase: string,
+     *     attested: bool,
+     *     hash: ?string,
+     *     em: ?string
+     * }>
+     */
     public function milestonesView(OrganismoCareContract $contract): array
     {
         $checklist = $contract->getSnapshot()['checklist'] ?? [];
         $items = [];
         if (\is_array($checklist) && $checklist !== []) {
-            foreach ($checklist as $i => $row) {
-                $key = 'check_'.($row['dia'] ?? $i);
-                $label = sprintf('D+%s — %s', $row['dia'] ?? $i, $row['titulo'] ?? $row['item'] ?? 'Marco');
-                $att = $this->attestations->findByMarco($contract, (string) $key);
+            $rows = array_values(array_filter(
+                $checklist,
+                static fn ($row): bool => \is_array($row),
+            ));
+            usort($rows, static function (array $a, array $b): int {
+                return ((int) ($a['dia'] ?? 0)) <=> ((int) ($b['dia'] ?? 0));
+            });
+
+            foreach ($rows as $i => $row) {
+                $dia = (int) ($row['dia'] ?? $i);
+                $key = self::marcoKeyForDia($dia);
+                $titulo = (string) ($row['titulo'] ?? $row['item'] ?? 'Marco');
+                $label = PosOperatorioPaciente::formatDiaRelativoLabel($dia).' — '.$titulo;
+                $att = $this->attestations->findByMarco($contract, $key);
                 $items[] = [
-                    'key' => (string) $key,
+                    'key' => $key,
                     'label' => $label,
+                    'dia' => $dia,
+                    'fase' => $dia < 0 ? 'pre' : ($dia === 0 ? 'handoff' : 'pos'),
                     'attested' => $att !== null,
                     'hash' => $att?->getContentHash(),
                     'em' => $att?->getCriadoEm()->format('d/m/Y H:i'),
@@ -93,7 +116,9 @@ final class ContractAttestationService
                 $att = $this->attestations->findByMarco($contract, $key);
                 $items[] = [
                     'key' => $key,
-                    'label' => 'Marco D+'.$dia,
+                    'label' => 'Marco '.PosOperatorioPaciente::formatDiaRelativoLabel($dia),
+                    'dia' => $dia,
+                    'fase' => 'pos',
                     'attested' => $att !== null,
                     'hash' => $att?->getContentHash(),
                     'em' => $att?->getCriadoEm()->format('d/m/Y H:i'),
@@ -105,12 +130,58 @@ final class ContractAttestationService
         $qAtt = $this->attestations->findByMarco($contract, $qKey);
         $items[] = [
             'key' => $qKey,
-            'label' => 'Questionário do dia',
+            'label' => 'Check-in do dia',
+            'dia' => null,
+            'fase' => 'pos',
             'attested' => $qAtt !== null,
             'hash' => $qAtt?->getContentHash(),
             'em' => $qAtt?->getCriadoEm()->format('d/m/Y H:i'),
         ];
 
         return $items;
+    }
+
+    public static function marcoKeyForDia(int $dia): string
+    {
+        return 'check_'.$dia;
+    }
+
+    /** Atesta o marco do checklist relativo ao dia, se existir no contrato. */
+    public function attestChecklistDia(
+        OrganismoCareContract $contract,
+        int $dia,
+        string $evidencia,
+        ?User $ator = null,
+        array $payload = [],
+    ): ?OrganismoCareAttestation {
+        $key = self::marcoKeyForDia($dia);
+        $checklist = $contract->getSnapshot()['checklist'] ?? [];
+        $has = false;
+        if (\is_array($checklist)) {
+            foreach ($checklist as $row) {
+                if (\is_array($row) && (int) ($row['dia'] ?? 9999) === $dia) {
+                    $has = true;
+                    break;
+                }
+            }
+        }
+        if (!$has) {
+            if ($dia === -1 && \is_array($checklist)) {
+                foreach ($checklist as $row) {
+                    if (!\is_array($row)) {
+                        continue;
+                    }
+                    // alias legado: dia 0 com texto de confirmação
+                    if ((int) ($row['dia'] ?? 9999) === 0
+                        && str_contains(mb_strtolower((string) ($row['item'] ?? $row['titulo'] ?? '')), 'confirm')) {
+                        return $this->attest($contract, 'check_0', $evidencia, $ator, $payload);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        return $this->attest($contract, $key, $evidencia, $ator, $payload);
     }
 }

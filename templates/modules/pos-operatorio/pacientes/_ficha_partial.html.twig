@@ -8,12 +8,18 @@
      data-codigo="{{ paciente.codigo|e('html_attr') }}"
      data-procedimento="{{ paciente.procedimento|default('')|e('html_attr') }}"
      data-dia-pos="{{ dia_pos is not null ? dia_pos : '' }}"
+     data-dia-relativo="{{ dia_relativo is not null ? dia_relativo : '' }}"
      data-status="{{ _status|e('html_attr') }}"></div>
 
 <header class="clinic-ficha-offcanvas-hero">
     <div class="clinic-ficha-offcanvas-hero__main">
         <span class="clinic-code">{{ paciente.codigo }}</span>
         <h3 class="clinic-ficha-offcanvas-hero__name">{{ _nome }}</h3>
+        {% if is_d0|default(false) %}
+        <span class="organismo-trilha-badge organismo-trilha-badge--hero organismo-trilha-badge--d0">D0 · Handoff pré → pós</span>
+        {% elseif is_pre_op|default(false) and dia_relativo_label|default(null) %}
+        <span class="organismo-trilha-badge organismo-trilha-badge--hero">Pré-op · {{ dia_relativo_label }}</span>
+        {% endif %}
     </div>
     <span class="clinic-status clinic-status--{% if paciente.status == 'alerta' %}danger{% elseif paciente.status == 'pendente' %}muted{% elseif paciente.status == 'encerrado' %}muted{% else %}success{% endif %}">
         {{ _status }}
@@ -26,10 +32,10 @@
 
 <p class="clinic-ficha-offcanvas-meta">
     <span class="clinic-ficha-offcanvas-meta__procedure">{{ paciente.procedimento|default('Procedimento não informado') }}</span>
-    {% if dia_pos is not null or protocolo_dias %}
+    {% if dia_relativo_label|default(null) or dia_pos is not null or protocolo_dias %}
     <span class="clinic-ficha-offcanvas-meta__phase">
-        {% if dia_pos is not null %}D+{{ dia_pos }}{% endif %}
-        {% if protocolo_dias %}{% if dia_pos is not null %} · {% endif %}protocolo {{ protocolo_dias }} dias{% endif %}
+        {% if is_pre_op|default(false) and dia_relativo_label|default(null) %}Pré-op · {{ dia_relativo_label }}{% elseif dia_relativo_label|default(null) %}{{ dia_relativo_label }}{% elseif dia_pos is not null %}D+{{ dia_pos }}{% endif %}
+        {% if protocolo_dias %}{% if dia_relativo_label|default(null) or dia_pos is not null %} · {% endif %}protocolo {{ protocolo_dias }} dias{% endif %}
     </span>
     {% endif %}
 </p>

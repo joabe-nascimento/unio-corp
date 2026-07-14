@@ -4,7 +4,7 @@
 
 {% set hub_page_title = 'Lembretes' %}
 {% set hub_page_eyebrow = org_brand_label %}
-{% set hub_page_subtitle = reminders.continuity_lead|default('Questionários pendentes e confirmação de agenda') %}
+{% set hub_page_subtitle = reminders.continuity_lead|default('Questionários pendentes e confirmação de cirurgia/consulta amanhã') %}
 {% set hub_search_hidden = true %}
 {% set agenda_amanha = reminders.agenda_amanha|default([]) %}
 
@@ -51,8 +51,9 @@
 </div>
 
 <section class="unio-card mt-3">
-    <h3 class="clinic-ops-panel__title px-3 pt-3 mb-0">Confirmação de agenda — amanhã</h3>
+    <h3 class="clinic-ops-panel__title px-3 pt-3 mb-0">Confirmação de cirurgia/consulta — amanhã (D−1)</h3>
     <p class="text-muted small px-3 mb-2">
+        Lembrete de presença para o horário de amanhã. Quando o paciente tiver Trilha com marco D−1, o envio/confirmação também atualiza a Trilha Unio.
         {% if reminders.whatsapp_live|default(false) %}
         Envia via <strong>Meta Cloud API</strong>, e-mail e webhook <code>agenda_confirmacao</code>. Link wa.me permanece como atalho manual.
         {% else %}
@@ -96,6 +97,56 @@
                         </a>
                         {% endif %}
                         <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+
+{% set marcos_pre = reminders.marcos_pre|default([]) %}
+<section class="unio-card mt-3">
+    <h3 class="clinic-ops-panel__title px-3 pt-3 mb-0">Marcos pré-op da Trilha (D−7 / D−3)</h3>
+    <p class="text-muted small px-3 mb-2">
+        Lembretes do protocolo relativo à data da cirurgia. O botão acima também dispara estes envios.
+    </p>
+    {% if marcos_pre is empty %}
+    <p class="text-muted px-3 pb-3 mb-0">Nenhum paciente em D−7 ou D−3 hoje.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Dia</th>
+                    <th>Paciente</th>
+                    <th>Marco</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in marcos_pre %}
+                <tr>
+                    <td><strong>{{ m.dia_label }}</strong></td>
+                    <td>
+                        <strong>{{ m.paciente }}</strong>
+                        <span class="d-block text-muted small">{{ m.codigo }}</span>
+                    </td>
+                    <td>{{ m.item }}</td>
+                    <td>
+                        {% if m.enviado_hoje %}
+                        <span class="badge-perfil success">Enviado hoje</span>
+                        {% else %}
+                        <span class="badge-perfil warning">Pendente</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        {% if m.whatsapp_url %}
+                        <a href="{{ m.whatsapp_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
+                        {% endif %}
+                        <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: m.paciente_id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
                     </td>
                 </tr>
                 {% endfor %}

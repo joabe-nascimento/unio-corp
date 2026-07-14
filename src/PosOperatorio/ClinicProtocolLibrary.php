@@ -244,6 +244,58 @@ final class ClinicProtocolLibrary
                 'Edema nasal, epistaxe e proteção do splint.',
                 self::checklistPadrao(21),
             ),
+            self::template(
+                'pre-op-geral',
+                'Pré-op geral + pós-op básico',
+                'pre-op-geral',
+                14,
+                'Trilha completa: preparação (D−7 a D0) e recuperação inicial (D+1 a D+7).',
+                array_merge(
+                    PosOperatorioProtocoloDefaults::checklistPreOp(),
+                    PosOperatorioProtocoloDefaults::checklistBasico(),
+                ),
+                PosOperatorioProtocoloDefaults::perguntasPreOp(),
+            ),
+            self::template(
+                'pre-op-ortognatica',
+                'Pré-op ortognática + pós',
+                'ortognatica',
+                42,
+                'Preparação reforçada (D−14 a D0) e acompanhamento com drenos/ferida.',
+                array_merge(
+                    PosOperatorioProtocoloDefaults::checklistPreOpOrtognatica(),
+                    [
+                        ['dia' => 1, 'item' => 'Repouso relativo e cuidados com dreno'],
+                        ['dia' => 7, 'item' => 'Retorno para avaliação de ferida'],
+                        ['dia' => 14, 'item' => 'Retorno cirúrgico'],
+                    ],
+                ),
+                PosOperatorioProtocoloDefaults::perguntasPreOp(),
+            ),
+            self::template(
+                'pre-op-rinoplastia',
+                'Pré-op rinoplastia + pós',
+                'rinoplastia',
+                21,
+                'Preparação nasal (D−7 a D0) e proteção do splint no pós.',
+                array_merge(
+                    PosOperatorioProtocoloDefaults::checklistPreOpRinoplastia(),
+                    self::checklistPadrao(21),
+                ),
+                PosOperatorioProtocoloDefaults::perguntasPreOp(),
+            ),
+            self::template(
+                'pre-op-cesarea',
+                'Pré-op cesárea + pós imediato',
+                'cesarea',
+                14,
+                'Preparação obstétrica (D−7 a D0) e recuperação puerperal inicial.',
+                array_merge(
+                    PosOperatorioProtocoloDefaults::checklistPreOpCesarea(),
+                    PosOperatorioProtocoloDefaults::checklistBasico(),
+                ),
+                PosOperatorioProtocoloDefaults::perguntasPreOp(),
+            ),
         ];
     }
 
@@ -290,7 +342,11 @@ final class ClinicProtocolLibrary
         return null;
     }
 
-    /** @return array{slug: string, nome: string, tipo: string, duracao_dias: int, descricao: string, checklist: list<array<string, mixed>>, regras: array<string, mixed>} */
+    /**
+     * @param list<array<string, mixed>>|null $perguntas
+     *
+     * @return array{slug: string, nome: string, tipo: string, duracao_dias: int, descricao: string, checklist: list<array<string, mixed>>, regras: array<string, mixed>, perguntas: list<array<string, mixed>>}
+     */
     private static function template(
         string $slug,
         string $nome,
@@ -298,6 +354,7 @@ final class ClinicProtocolLibrary
         int $dias,
         string $descricao,
         array $checklist,
+        ?array $perguntas = null,
     ): array {
         return [
             'slug' => $slug,
@@ -307,7 +364,7 @@ final class ClinicProtocolLibrary
             'descricao' => $descricao,
             'checklist' => $checklist,
             'regras' => PosOperatorioProtocoloDefaults::regrasAlerta(),
-            'perguntas' => PosOperatorioProtocoloDefaults::perguntas(),
+            'perguntas' => $perguntas ?? PosOperatorioProtocoloDefaults::perguntas(),
         ];
     }
 }

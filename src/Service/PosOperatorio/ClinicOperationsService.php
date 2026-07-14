@@ -2,15 +2,20 @@
 
 namespace App\Service\PosOperatorio;
 
+use App\Entity\ClinicAgendamento;
 use App\Entity\Empresa;
 use App\Entity\PosOperatorioAlerta;
 use App\Entity\PosOperatorioEvento;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
+use App\Repository\ClinicAgendamentoRepository;
+use App\Repository\Organismo\OrganismoCareAttestationRepository;
 use App\Repository\PosOperatorioAlertaRepository;
 use App\Repository\PosOperatorioEventoRepository;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\UserRepository;
+use App\Service\Organismo\Contract\CareContractService;
+use App\Service\Organismo\Contract\ContractAttestationService;
 
 /**
  * Centro de operações clínico — fila unificada, qualidade, retornos e compliance.
@@ -33,6 +38,10 @@ final class ClinicOperationsService
         private ClinicAgendaReminderService $agendaReminders,
         private \App\Repository\ClinicOutboundMessageRepository $outboundMessages,
         private \App\Service\PosOperatorio\Whatsapp\ClinicWhatsappService $whatsapp,
+        private CareContractService $careContracts,
+        private ContractAttestationService $attestations,
+        private ClinicAgendamentoRepository $agendamentos,
+        private OrganismoCareAttestationRepository $careAttestations,
     ) {}
 
     /**
@@ -84,7 +93,11 @@ final class ClinicOperationsService
                 'type_label' => 'Questionário pendente',
                 'title' => $paciente->getNome(),
                 'subtitle' => 'Sem resposta hoje no portal',
-                'meta' => $paciente->getCodigo() . ' · D+' . ($paciente->getDiaPosOperatorio() ?? '—'),
+                'meta' => $paciente->getCodigo() . ' · ' . (
+                    ($rel = $paciente->getDiaRelativoCirurgia()) !== null
+                        ? PosOperatorioPaciente::formatDiaRelativoLabel($rel)
+                        : '—'
+                ),
                 'tone' => 'amber',
                 'route' => 'app_pos_operatorio_pacientes',
                 'route_params' => ['open_ficha' => $paciente->getId()],
@@ -112,10 +125,15 @@ final class ClinicOperationsService
             ];
         }
 
+        foreach ($this->buildPreOpQueueItems($empresa) as $pre) {
+            $items[] = $pre;
+        }
+
         usort($items, static fn (array $a, array $b): int => $b['priority'] <=> $a['priority']);
 
         $p1 = $queue['stats']['p1'];
         $pendentes = $this->questionarios->buildList($empresa, 1)['stats']['pendentes'];
+        $preOpCount = \count(array_filter($items, static fn (array $i) => $i['type'] === 'pre_op'));
 
         return [
             'items' => $items,
@@ -124,9 +142,76 @@ final class ClinicOperationsService
                 'p1' => $p1,
                 'questionarios' => $pendentes,
                 'retornos' => \count(array_filter($items, static fn (array $i) => $i['type'] === 'retorno')),
+                'pre_op' => $preOpCount,
                 'sla' => \count(array_filter($queue['tickets'], static fn (array $t) => $t['sla_breach_imminent'] ?? false)),
             ],
         ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function buildPreOpQueueItems(Empresa $empresa): array
+    {
+        $items = [];
+        foreach ($this->pacientes->findPreOpThisWeek($empresa, 7) as $paciente) {
+            $rel = $paciente->getDiaRelativoCirurgia();
+            $label = $rel !== null ? PosOperatorioPaciente::formatDiaRelativoLabel($rel) : 'pré';
+            $openPre = $this->openPreMarcos($paciente);
+            $subtitle = $openPre !== []
+                ? 'Marco pendente: '.$openPre[0]
+                : 'Preparação em andamento — acompanhar Trilha';
+            $items[] = [
+                'priority' => \in_array($rel, [-1, -3], true) ? 65 : 52,
+                'type' => 'pre_op',
+                'type_label' => 'Pré-op '.$label,
+                'title' => $paciente->getNome(),
+                'subtitle' => $subtitle,
+                'meta' => $paciente->getCodigo().' · cirurgia '.($paciente->getDataCirurgia()?->format('d/m') ?? '—'),
+                'tone' => 'sky',
+                'route' => 'app_pos_operatorio_pacientes',
+                'route_params' => ['open_ficha' => $paciente->getId()],
+                'action_label' => 'Atestar / ficha',
+                'paciente_id' => $paciente->getId(),
+            ];
+        }
+        foreach ($this->pacientes->findByRelativeSurgeryDay($empresa, 0) as $paciente) {
+            $items[] = [
+                'priority' => 68,
+                'type' => 'pre_op',
+                'type_label' => 'Handoff D0',
+                'title' => $paciente->getNome(),
+                'subtitle' => 'Dia da cirurgia — confirmar transição pré → pós',
+                'meta' => $paciente->getCodigo().' · D0',
+                'tone' => 'teal',
+                'route' => 'app_pos_operatorio_pacientes',
+                'route_params' => ['open_ficha' => $paciente->getId()],
+                'action_label' => 'Abrir ficha',
+                'paciente_id' => $paciente->getId(),
+            ];
+        }
+
+        return $items;
+    }
+
+    /** @return list<string> */
+    private function openPreMarcos(PosOperatorioPaciente $paciente): array
+    {
+        try {
+            $contract = $this->careContracts->findActive($paciente);
+            if ($contract === null) {
+                return [];
+            }
+            $open = [];
+            foreach ($this->attestations->milestonesView($contract) as $m) {
+                if (($m['fase'] ?? '') !== 'pre' || ($m['attested'] ?? false)) {
+                    continue;
+                }
+                $open[] = (string) ($m['label'] ?? $m['key'] ?? 'marco');
+            }
+
+            return $open;
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /** @return array{items: list<array<string, mixed>>, proximos_7_dias: int} */
@@ -219,14 +304,16 @@ final class ClinicOperationsService
 
         $heatmap = [];
         foreach ($this->pacientes->findRecentByEmpresa($empresa, 100, 0) as $p) {
-            $dia = $p->getDiaPosOperatorio();
-            if ($dia === null) {
+            $rel = $p->getDiaRelativoCirurgia();
+            if ($rel === null) {
                 continue;
             }
-            $bucket = 'D+' . min($dia, 14);
+            $bucket = PosOperatorioPaciente::formatDiaRelativoLabel(min(max($rel, -14), 14));
             $heatmap[$bucket] = ($heatmap[$bucket] ?? 0) + 1;
         }
-        ksort($heatmap);
+        ksort($heatmap, \SORT_NATURAL);
+
+        $preMetrics = $this->buildPreOpMetrics($empresa);
 
         return [
             'taxa_resposta' => $taxaResposta,
@@ -238,7 +325,89 @@ final class ClinicOperationsService
             'claim_avg_min' => $claimAvg,
             'claims_7d' => \count($claimMinutes),
             'heatmap' => $heatmap,
+            'pre_op' => $preMetrics,
             'continuity_lead' => $this->policy->get($empresa)['continuity_lead'],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function buildPreOpMetrics(Empresa $empresa): array
+    {
+        $today = new \DateTimeImmutable('today');
+        $preWeek = $this->pacientes->findPreOpThisWeek($empresa, 7);
+        $checkInDone = 0;
+        foreach ($preWeek as $p) {
+            $rel = $p->getDiaRelativoCirurgia();
+            if ($rel === null) {
+                continue;
+            }
+            // "check-in pré" = questionário/check-in do dia OU marco vigente atestado
+            $qr = false;
+            foreach ($p->getQuestionarios() as $q) {
+                if ($q->getDataReferencia()->format('Y-m-d') === $today->format('Y-m-d')) {
+                    $qr = true;
+                    break;
+                }
+            }
+            if ($qr || $this->openPreMarcos($p) === []) {
+                ++$checkInDone;
+            }
+        }
+        $preTotal = \count($preWeek);
+        $checkInRate = $preTotal > 0 ? (int) round(($checkInDone / $preTotal) * 100) : 100;
+
+        $dayStart = $today->modify('-1 day')->setTime(0, 0);
+        $dayEnd = $today->setTime(0, 0);
+        $agendaOntem = $this->agendamentos->findByEmpresaAndInterval($empresa, $dayStart, $dayEnd);
+        $comLembrete = 0;
+        $noShow = 0;
+        foreach ($agendaOntem as $a) {
+            if ($a->getLembreteConfirmacaoEm() === null) {
+                continue;
+            }
+            ++$comLembrete;
+            if ($a->getStatus() === ClinicAgendamento::STATUS_FALTOU) {
+                ++$noShow;
+            }
+        }
+        $noShowRate = $comLembrete > 0 ? (int) round(($noShow / $comLembrete) * 100) : 0;
+
+        $surgeries = $this->pacientes->findSurgeryInPastDays($empresa, 30);
+        $converted = 0;
+        foreach ($surgeries as $p) {
+            $contract = $this->careContracts->findActive($p);
+            if ($contract === null) {
+                ++$converted;
+                continue;
+            }
+            $preAttested = 0;
+            $preTotalMarcos = 0;
+            foreach ($this->attestations->milestonesView($contract) as $m) {
+                if (($m['fase'] ?? '') !== 'pre') {
+                    continue;
+                }
+                ++$preTotalMarcos;
+                if ($m['attested'] ?? false) {
+                    ++$preAttested;
+                }
+            }
+            if ($preTotalMarcos === 0 || $preAttested > 0) {
+                ++$converted;
+            }
+        }
+        $surgTotal = \count($surgeries);
+        $conversionRate = $surgTotal > 0 ? (int) round(($converted / $surgTotal) * 100) : 100;
+
+        return [
+            'pre_semana' => $preTotal,
+            'checkin_taxa' => $checkInRate,
+            'checkin_ok' => $checkInDone,
+            'noshow_d1_taxa' => $noShowRate,
+            'noshow_d1' => $noShow,
+            'noshow_base' => $comLembrete,
+            'conversao_taxa' => $conversionRate,
+            'conversao_ok' => $converted,
+            'conversao_base' => $surgTotal,
         ];
     }
 
@@ -302,6 +471,7 @@ final class ClinicOperationsService
                 ];
             }, array_slice($pendentes, 0, 20)),
             'agenda_amanha' => $this->agendaReminders->panelForTomorrow($empresa),
+            'marcos_pre' => $this->agendaReminders->panelProtocolMilestones($empresa),
             'canais' => $canais,
             'escalacao' => $escalacao,
         ];
@@ -368,19 +538,22 @@ final class ClinicOperationsService
     {
         $quality = $this->buildQuality($empresa);
         $queue = $this->alertQueue->buildQueue($empresa);
+        $pre = $quality['pre_op'] ?? $this->buildPreOpMetrics($empresa);
 
         return [
             'resumo' => [
                 ['value' => $quality['pacientes_ativos'], 'label' => 'Pacientes ativos', 'icon' => 'fa-user-injured', 'tone' => 'sky'],
-                ['value' => $quality['taxa_resposta'] . '%', 'label' => 'Taxa resposta hoje', 'icon' => 'fa-percent', 'tone' => 'sage'],
-                ['value' => $quality['sla_pct'] . '%', 'label' => 'SLA em dia', 'icon' => 'fa-stopwatch', 'tone' => 'lavender'],
-                ['value' => $queue['stats']['p1'], 'label' => 'P1 abertos', 'icon' => 'fa-fire', 'tone' => 'rose', 'variant' => $queue['stats']['p1'] > 0 ? 'danger' : ''],
+                ['value' => ($pre['checkin_taxa'] ?? 0) . '%', 'label' => 'Check-in pré (7d)', 'icon' => 'fa-clipboard-check', 'tone' => 'sage'],
+                ['value' => ($pre['noshow_d1_taxa'] ?? 0) . '%', 'label' => 'No-show pós D−1', 'icon' => 'fa-user-xmark', 'tone' => 'amber'],
+                ['value' => ($pre['conversao_taxa'] ?? 0) . '%', 'label' => 'Prep → cirurgia (30d)', 'icon' => 'fa-arrow-right', 'tone' => 'lavender'],
             ],
+            'pre_op' => $pre,
             'exports' => [
                 ['id' => 'fichas', 'nome' => 'Fichas de pacientes', 'formato' => 'PDF', 'status' => 'active'],
                 ['id' => 'questionarios', 'nome' => 'Questionários do período', 'formato' => 'CSV', 'status' => 'active'],
                 ['id' => 'alertas', 'nome' => 'Histórico de alertas', 'formato' => 'CSV', 'status' => 'active'],
                 ['id' => 'auditoria', 'nome' => 'Trilha LGPD', 'formato' => 'CSV', 'status' => 'active'],
+                ['id' => 'attestacoes', 'nome' => 'Atestações da Trilha (pré/pós)', 'formato' => 'CSV', 'status' => 'active'],
             ],
         ];
     }
@@ -433,9 +606,22 @@ final class ClinicOperationsService
             'retention' => $retention,
             'retencao_dias' => $policy['retencao_dias'],
             'continuity_lead' => $policy['continuity_lead'],
+            'attestacoes_recentes' => array_map(static function ($a): array {
+                $p = $a->getContract()->getPaciente();
+
+                return [
+                    'marco' => $a->getMarcoKey(),
+                    'evidencia' => $a->getEvidencia(),
+                    'autor' => $a->getAtor()?->getNome() ?? 'Sistema',
+                    'em' => $a->getCriadoEm()->format('d/m/Y H:i'),
+                    'paciente' => $p->getCodigo(),
+                    'hash' => substr($a->getContentHash(), 0, 12),
+                ];
+            }, $this->careAttestations->findRecentByEmpresa($empresa, 25)),
             'politicas' => [
                 ['titulo' => 'Consentimento versionado', 'status' => 'active', 'desc' => 'Registro no portal do paciente'],
                 ['titulo' => 'Trilha de acesso à ficha', 'status' => 'active', 'desc' => 'Cada visualização gera evento'],
+                ['titulo' => 'Atestações da Trilha', 'status' => 'active', 'desc' => 'Hash encadeado de marcos pré/pós'],
                 [
                     'titulo' => 'Retenção e anonimização',
                     'status' => $retention['last_run'] ? 'active' : 'prepared',
