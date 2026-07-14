@@ -36,25 +36,38 @@
 
         {% if result %}
             {% if result.ok %}
-            <div class="alert alert-success mt-3 mb-0">
-                Check-in OK: <strong>{{ result.paciente.nome }}</strong> ({{ result.paciente.codigo }})
-                {% if result.paciente.statusClinicoLabel %} · {{ result.paciente.statusClinicoLabel }}{% endif %}
+            <div class="clinic-banner clinic-banner--ok mt-3 mb-0">
+                <i class="fas fa-circle-check" aria-hidden="true"></i>
+                <div>
+                    Check-in OK: <strong>{{ result.paciente.nome }}</strong> ({{ result.paciente.codigo }})
+                    {% if result.paciente.statusClinicoLabel %} · {{ result.paciente.statusClinicoLabel }}{% endif %}
+                </div>
             </div>
             {% else %}
-            <div class="alert alert-danger mt-3 mb-0">{{ result.error }}</div>
+            <div class="clinic-banner clinic-banner--danger mt-3 mb-0">
+                <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+                <div>{{ result.error }}</div>
+            </div>
             {% endif %}
         {% endif %}
     </section>
 
     <section class="unio-card clinic-ops-panel">
         <h3 class="clinic-ops-panel__title">Check-ins hoje ({{ painel.totais.checkins }})</h3>
+        {% if painel.checkins_hoje is empty %}
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-qrcode',
+                title: 'Nenhum check-in',
+                text: 'Nenhum check-in ainda hoje.',
+                compact: true
+            } %}
+        {% else %}
         <ul class="clinic-ops-list">
             {% for c in painel.checkins_hoje %}
             <li>{{ c.hora }} · {{ c.paciente }} ({{ c.metodo }})</li>
-            {% else %}
-            <li class="text-muted">Nenhum check-in ainda hoje.</li>
             {% endfor %}
         </ul>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

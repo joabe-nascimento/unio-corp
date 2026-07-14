@@ -3,6 +3,14 @@
 {% block permissions_scope %}hub_comercial{% endblock %}
 {% set hub_page_title = 'Núcleo Comercial' %}
 {% set hub_page_subtitle = 'CRM · Leads, pipeline e clientes' %}
+{% set hub_page_eyebrow = org_clinic|default(false) ? (org_brand_label|default('Unio Saúde')) : '' %}
+{% set status_tones = {
+    novo: 'sky',
+    qualificando: 'amber',
+    qualificado: 'success',
+    descartado: 'default',
+    convertido: 'success'
+} %}
 
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_comercial_leads', { novo: 1 }) }}" class="btn-unio btn-sm">
@@ -38,7 +46,7 @@
             cols: 2
         } %}
 
-        <div class="unio-card mt-4">
+        <div class="unio-card mt-4 p-0 ops-queue-animate">
             {% include 'components/section_header.html.twig' with {
                 title: 'Leads recentes',
                 subtitle: 'Últimas atualizações',
@@ -53,6 +61,7 @@
                     text: 'Cadastre o primeiro contato ou carregue dados de demonstração.',
                     btn_label: 'Novo lead',
                     btn_href: path('app_comercial_leads', { novo: 1 }),
+                    btn_sm: true,
                     compact: true
                 } %}
                 <div class="px-3 pb-3">
@@ -60,7 +69,7 @@
                 </div>
             {% else %}
             <div class="table-responsive">
-                <table class="table unio-table mb-0">
+                <table class="table admin-table mb-0 clinic-stack-mobile">
                     <thead>
                         <tr>
                             <th>Nome</th>
@@ -72,10 +81,12 @@
                     <tbody>
                         {% for lead in recent_leads %}
                         <tr>
-                            <td><a href="{{ path('app_comercial_lead_show', { id: lead.id }) }}">{{ lead.nome }}</a></td>
-                            <td>{{ lead.empresaNome|default('—') }}</td>
-                            <td><span class="badge badge-soft">{{ status_labels[lead.status]|default(lead.status) }}</span></td>
-                            <td>{{ origem_labels[lead.origem]|default(lead.origem) }}</td>
+                            <td data-label="Nome"><a href="{{ path('app_comercial_lead_show', { id: lead.id }) }}"><strong>{{ lead.nome }}</strong></a></td>
+                            <td data-label="Empresa">{{ lead.empresaNome|default('—') }}</td>
+                            <td data-label="Situação">
+                                <span class="badge-perfil {{ status_tones[lead.status]|default('default') }}">{{ status_labels[lead.status]|default(lead.status) }}</span>
+                            </td>
+                            <td data-label="Origem">{{ origem_labels[lead.origem]|default(lead.origem) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -95,7 +106,15 @@
                 btn_ghost: true
             } %}
             {% if pending_atividades|length == 0 %}
-            <p class="px-3 pb-3 text-muted small mb-0">Nenhuma atividade pendente. Registre um follow-up quando precisar.</p>
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-list-check',
+                    title: 'Nada pendente',
+                    text: 'Registre um follow-up quando precisar.',
+                    btn_label: 'Nova atividade',
+                    btn_href: path('app_comercial_atividades', { novo: 1 }),
+                    btn_sm: true,
+                    compact: true
+                } %}
             {% else %}
             <ul class="list-unstyled mb-0 px-3 pb-3">
                 {% for a in pending_atividades %}
@@ -113,7 +132,10 @@
         <div class="unio-card">
             {% include 'components/section_header.html.twig' with {
                 title: 'Pipeline (resumo)',
-                subtitle: 'Oportunidades por estágio'
+                subtitle: 'Oportunidades por estágio',
+                btn_label: 'Abrir',
+                btn_href: path('app_comercial_pipeline'),
+                btn_ghost: true
             } %}
             <ul class="list-unstyled mb-0 px-3 pb-3">
                 {% for stage, items in pipeline_preview %}

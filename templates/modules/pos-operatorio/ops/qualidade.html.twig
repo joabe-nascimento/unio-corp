@@ -45,13 +45,26 @@
                 icon: 'fa-chart-simple',
                 title: 'Sem dados',
                 text: 'Sem dados de acompanhamento.',
+                btn_label: 'Pacientes',
+                btn_href: path('app_pos_operatorio_pacientes'),
                 btn_sm: true,
                 compact: true
             } %}
         {% else %}
-        <ul class="clinic-ops-list">
+        {% set _hm = namespace({ max: 0 }) %}
+        {% for count in quality.heatmap %}
+            {% if count > _hm.max %}{% set _hm.max = count %}{% endif %}
+        {% endfor %}
+        <ul class="crm-analytics-bars mb-0">
             {% for bucket, count in quality.heatmap %}
-            <li><strong>{{ bucket }}</strong>: {{ count }} paciente(s)</li>
+            {% set pct = _hm.max > 0 ? ((count / _hm.max) * 100)|round : 0 %}
+            <li class="crm-analytics-bars__item">
+                <div class="crm-analytics-bars__row">
+                    <span>{{ bucket }}</span>
+                    <strong>{{ count }}</strong>
+                </div>
+                <div class="crm-analytics-bars__track" aria-hidden="true"><span style="width: {{ pct }}%"></span></div>
+            </li>
             {% endfor %}
         </ul>
         {% endif %}

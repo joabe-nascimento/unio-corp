@@ -43,6 +43,9 @@
 
 {% block hub_section_toolbar %}
 <form method="get" action="{{ path('app_pos_operatorio_pacientes') }}" style="display:contents;">
+{% if org_clinic|default(false) and filter_status|default('') %}
+<input type="hidden" name="status" value="{{ filter_status }}">
+{% endif %}
 {% embed 'components/section_toolbar.html.twig' with {
     search_in_section: true,
     search_placeholder: org_clinic|default(false) ? 'Buscar nome, código ou procedimento…' : 'Buscar nome ou código…',
@@ -51,6 +54,7 @@
     btn_sm: true
 } %}
     {% block section_toolbar_filters %}
+        {% if not org_clinic|default(false) %}
         {% include 'components/filter_group.html.twig' with {
             label: 'Status',
             name: 'status',
@@ -64,6 +68,7 @@
                 { value: 'encerrado', label: 'Encerrado' },
             ]
         } %}
+        {% endif %}
         {% include 'components/toolbar_filter_actions.html.twig' with {
             clear_href: path('app_pos_operatorio_pacientes'),
             has_filters: filter_q|default('') or filter_status|default('')

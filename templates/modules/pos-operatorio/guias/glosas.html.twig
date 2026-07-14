@@ -21,19 +21,28 @@
 {% endblock %}
 
 {% block hub_content %}
-<section class="unio-card p-3 mb-3">
-    <h3 class="h6 mb-3">Taxa de glosa por convênio</h3>
+{% if panel.total_glosadas|default(0) > 0 %}
+<div class="clinic-banner clinic-banner--warn">
+    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+    <div><strong>{{ panel.total_glosadas }}</strong> guia(s) glosada(s) — reabra, corrija e reenvie.</div>
+</div>
+{% endif %}
+
+<section class="unio-card p-0 mb-3 ops-queue-animate">
+    <h3 class="h6 px-3 pt-3 mb-3">Taxa de glosa por convênio</h3>
     {% if panel.stats is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-chart-pie',
             title: 'Sem dados de glosa',
             text: 'Ainda não há guias enviadas/autorizadas/pagas/glosadas para calcular taxa.',
+            btn_label: 'Ver guias',
+            btn_href: path('app_pos_operatorio_guias'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table mb-0">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Convênio</th>
@@ -46,11 +55,11 @@
             <tbody>
                 {% for row in panel.stats %}
                 <tr>
-                    <td>{{ row.convenio }}</td>
-                    <td>{{ row.total }}</td>
-                    <td>{{ row.glosadas }}</td>
-                    <td>{{ row.pagas }}</td>
-                    <td><strong>{{ row.taxa_glosa }}%</strong></td>
+                    <td data-label="Convênio">{{ row.convenio }}</td>
+                    <td data-label="No funil">{{ row.total }}</td>
+                    <td data-label="Glosadas">{{ row.glosadas }}</td>
+                    <td data-label="Pagas">{{ row.pagas }}</td>
+                    <td data-label="Taxa"><strong>{{ row.taxa_glosa }}%</strong></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -59,7 +68,7 @@
     {% endif %}
 </section>
 
-<section class="unio-card p-0">
+<section class="unio-card p-0 ops-queue-animate">
     <h3 class="h6 px-3 pt-3 mb-0">Guias glosadas</h3>
     <p class="text-muted small px-3 mb-2">Reabra para corrigir itens/cabeçalho e reenviar.</p>
     {% if panel.glosadas is empty %}
@@ -67,12 +76,14 @@
             icon: 'fa-circle-check',
             title: 'Nenhuma guia glosada',
             text: 'Nenhuma guia glosada no momento.',
+            btn_label: 'Ver guias',
+            btn_href: path('app_pos_operatorio_guias'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table mb-0">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Nº</th>
@@ -85,11 +96,11 @@
             <tbody>
                 {% for g in panel.glosadas %}
                 <tr>
-                    <td><code>{{ g.numeroGuia }}</code></td>
-                    <td>{{ g.paciente.nome }}</td>
-                    <td>{{ g.convenio.nome }}</td>
-                    <td class="small">{{ g.motivoGlosa|default('—') }}</td>
-                    <td class="text-right">
+                    <td data-label="Nº"><code>{{ g.numeroGuia }}</code></td>
+                    <td data-label="Paciente">{{ g.paciente.nome }}</td>
+                    <td data-label="Convênio">{{ g.convenio.nome }}</td>
+                    <td data-label="Motivo" class="small">{{ g.motivoGlosa|default('—') }}</td>
+                    <td data-label="Ações" class="text-right">
                         <a href="{{ path('app_pos_operatorio_guias_show', { id: g.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
                     </td>
                 </tr>

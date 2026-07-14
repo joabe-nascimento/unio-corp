@@ -11,6 +11,12 @@
 {% set hub_page_subtitle = 'Prioridade P1–P4 · SLA de resposta' %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
+{% set status_tones = {
+    aberto: 'sky',
+    em_atendimento: 'amber',
+    resolvido: 'success',
+    ativos: 'default'
+} %}
 
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">
@@ -38,40 +44,36 @@
      data-pos-op-poll-url="{{ path('app_pos_operatorio_api_alertas_poll') }}"
      data-pos-op-stats="{{ stats|json_encode|e('html_attr') }}"
      hidden aria-hidden="true"></div>
-<section class="unio-card mb-3">
-    <form method="get" class="d-flex flex-wrap gap-2 align-items-end p-3 border-bottom">
-        <div>
-            <label class="small text-muted mb-1" for="f-pri">Prioridade</label>
-            <select id="f-pri" name="prioridade" class="form-control form-control-sm">
-                <option value="">Todas</option>
-                {% for p in ['P1','P2','P3','P4'] %}
-                <option value="{{ p }}"{{ filters.prioridade == p ? ' selected' : '' }}>{{ p }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <label class="small text-muted mb-1" for="f-st">Status</label>
-            <select id="f-st" name="status" class="form-control form-control-sm">
-                <option value="ativos"{{ filters.status == 'ativos' or not filters.status ? ' selected' : '' }}>Ativos</option>
-                <option value="aberto"{{ filters.status == 'aberto' ? ' selected' : '' }}>Aberto</option>
-                <option value="em_atendimento"{{ filters.status == 'em_atendimento' ? ' selected' : '' }}>Em atendimento</option>
-                <option value="resolvido"{{ filters.status == 'resolvido' ? ' selected' : '' }}>Resolvido</option>
-            </select>
-        </div>
-        <button type="submit" class="btn-unio btn-sm">Filtrar</button>
-    </form>
 
+{% set _st = filters.status|default('ativos') %}
+{% set _pri = filters.prioridade|default('') %}
+<p class="clinic-filter-chips">
+    <a href="{{ path('app_pos_operatorio_alertas', { status: 'ativos' }|merge(_pri ? { prioridade: _pri } : {})) }}" class="{{ _st == 'ativos' or not _st ? 'is-active' : '' }}">Ativos</a>
+    <a href="{{ path('app_pos_operatorio_alertas', { status: 'aberto' }|merge(_pri ? { prioridade: _pri } : {})) }}" class="{{ _st == 'aberto' ? 'is-active' : '' }}">Aberto</a>
+    <a href="{{ path('app_pos_operatorio_alertas', { status: 'em_atendimento' }|merge(_pri ? { prioridade: _pri } : {})) }}" class="{{ _st == 'em_atendimento' ? 'is-active' : '' }}">Em atendimento</a>
+    <a href="{{ path('app_pos_operatorio_alertas', { status: 'resolvido' }|merge(_pri ? { prioridade: _pri } : {})) }}" class="{{ _st == 'resolvido' ? 'is-active' : '' }}">Resolvido</a>
+</p>
+<p class="clinic-filter-chips">
+    <a href="{{ path('app_pos_operatorio_alertas', { status: _st }) }}" class="{{ _pri == '' ? 'is-active' : '' }}">Todas P</a>
+    {% for p in ['P1','P2','P3','P4'] %}
+    <a href="{{ path('app_pos_operatorio_alertas', { status: _st, prioridade: p }) }}" class="{{ _pri == p ? 'is-active' : '' }}">{{ p }}</a>
+    {% endfor %}
+</p>
+
+<section class="unio-card p-0 ops-queue-animate mb-3">
     {% if tickets is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-bell',
             title: 'Fila vazia',
-            text: 'Nenhum alerta na fila.',
+            text: 'Nenhum alerta neste filtro.',
+            btn_label: 'Sala crítica',
+            btn_href: path('app_pos_operatorio_sala_critica'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Pri</th>
@@ -86,13 +88,10 @@
             <tbody>
                 {% for t in tickets %}
                 <tr class="admin-table-row">
-                    <td>
-                        {% include 'components/status_badge.html.twig' with {
-                            label: t.prioridade,
-                            variant: t.prioridade == 'P1' ? 'danger' : (t.prioridade == 'P2' ? 'warning' : 'info')
-                        } %}
+                    <td data-label="Pri">
+                        <span class="badge-perfil {{ t.prioridade == 'P1' ? 'danger' : (t.prioridade == 'P2' ? 'warning' : 'sky') }}">{{ t.prioridade }}</span>
                     </td>
-                    <td>
+                    <td data-label="Paciente">
                         <strong>{{ t.paciente_nome }}</strong><br>
                         <code class="admin-table-mono">{{ t.paciente_codigo }}</code>
                         {% if t.dia_pos is not null %}<span class="badge-perfil default ml-1">D+{{ t.dia_pos }}</span>{% endif %}
@@ -100,10 +99,12 @@
                             <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: t.paciente_id }) }}" class="btn-unio-ghost btn-xs">Ficha</a>
                         </div>
                     </td>
-                    <td>{{ t.motivo }}</td>
-                    <td>{{ t.status_label }}</td>
-                    <td>{{ t.responsavel }}</td>
-                    <td>
+                    <td data-label="Motivo">{{ t.motivo }}</td>
+                    <td data-label="Status">
+                        <span class="badge-perfil {{ status_tones[t.status]|default('default') }}">{{ t.status_label }}</span>
+                    </td>
+                    <td data-label="Responsável">{{ t.responsavel }}</td>
+                    <td data-label="SLA">
                         {% if t.sla_pct is not null %}
                         <span class="small{{ t.sla_breach_imminent ? ' text-danger font-weight-bold' : '' }}">{{ t.sla_remaining_label }}</span>
                         <div class="progress progress-xs mt-1" style="height:4px">
@@ -111,7 +112,7 @@
                         </div>
                         {% else %}—{% endif %}
                     </td>
-                    <td class="text-nowrap">
+                    <td data-label="Ações" class="text-nowrap">
                         {% if t.status != 'resolvido' %}
                         <form method="post" action="{{ path('app_pos_operatorio_alerta_assumir', {id: t.id}) }}" class="d-inline">
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token('pos_alerta_' ~ t.id) }}">

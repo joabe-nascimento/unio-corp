@@ -69,8 +69,8 @@
                     title: 'Pacientes recentes',
                     subtitle: patients_pagination.total ~ ' em acompanhamento · ' ~ patients_pagination.per_page ~ ' por página'
                 } %}
-                <div class="pos-op-patients-table-wrap">
-                    <table class="admin-table pos-op-patients-table">
+                <div class="pos-op-patients-table-wrap table-responsive ops-queue-animate">
+                    <table class="admin-table pos-op-patients-table clinic-stack-mobile mb-0">
                         <thead>
                             <tr>
                                 <th>Código</th>
@@ -86,20 +86,34 @@
                             {% for p in recent_patients %}
                             <tr class="admin-table-row{% if p.status == 'pendente' %} admin-table-row--inactive{% endif %}{% if p.id|default(null) %} admin-table-row--clickable{% endif %}"
                                 {% if p.id|default(null) %}onclick="window.location='{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id }) }}'" style="cursor:pointer"{% endif %}>
-                                <td><code class="admin-table-mono">{{ p.codigo }}</code></td>
-                                <td><strong class="pos-op-cell-name">{{ p.nome }}</strong></td>
-                                <td class="pos-op-cell-truncate" title="{{ p.procedimento }}">{{ p.procedimento }}</td>
-                                <td><span class="badge-perfil default">{{ p.dia }}</span></td>
-                                <td class="pos-op-cell-truncate" title="{{ p.medico }}">{{ p.medico }}</td>
-                                <td class="admin-table-date">{{ p.ultima_resposta }}</td>
-                                <td>
+                                <td data-label="Código"><code class="admin-table-mono">{{ p.codigo }}</code></td>
+                                <td data-label="Paciente"><strong class="pos-op-cell-name">{{ p.nome }}</strong></td>
+                                <td data-label="Procedimento" class="pos-op-cell-truncate" title="{{ p.procedimento }}">{{ p.procedimento }}</td>
+                                <td data-label="Fase"><span class="badge-perfil default">{{ p.dia }}</span></td>
+                                <td data-label="Médico" class="pos-op-cell-truncate" title="{{ p.medico }}">{{ p.medico }}</td>
+                                <td data-label="Última resp." class="admin-table-date">{{ p.ultima_resposta }}</td>
+                                <td data-label="Status">
                                     {% if p.status == 'alerta' %}
-                                    {% include 'components/status_badge.html.twig' with { label: 'Alerta ' ~ p.pri|default(''), variant: 'danger' } %}
+                                    <span class="badge-perfil danger">Alerta {{ p.pri|default('') }}</span>
                                     {% elseif p.status == 'pendente' %}
-                                    {% include 'components/status_badge.html.twig' with { label: 'Pendente', variant: 'warning' } %}
+                                    <span class="badge-perfil warning">Pendente</span>
                                     {% else %}
-                                    {% include 'components/status_badge.html.twig' with { label: p.status|pos_op_status_label, variant: 'success' } %}
+                                    <span class="badge-perfil success">{{ p.status|pos_op_status_label }}</span>
                                     {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7">
+                                    {% include 'components/empty_state.html.twig' with {
+                                        icon: 'fa-user-injured',
+                                        title: 'Nenhum paciente recente',
+                                        text: 'Cadastre o primeiro paciente para acompanhar a trilha.',
+                                        btn_label: 'Pacientes',
+                                        btn_href: path('app_pos_operatorio_pacientes'),
+                                        btn_sm: true,
+                                        compact: true
+                                    } %}
                                 </td>
                             </tr>
                             {% endfor %}

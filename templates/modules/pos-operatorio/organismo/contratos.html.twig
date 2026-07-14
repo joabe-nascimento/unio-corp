@@ -22,7 +22,7 @@
 {% endblock %}
 
 {% block hub_content %}
-<section class="unio-card">
+<section class="unio-card p-0 ops-queue-animate">
     {% include 'components/section_header.html.twig' with {
         title: 'Contratos ativos',
         subtitle: 'Cada protocolo vira um contrato versionado com prova encadeada'
@@ -32,12 +32,14 @@
             icon: 'fa-file-contract',
             title: 'Nenhum contrato',
             text: 'Nenhum contrato ativo. Vincule um protocolo ao paciente ou sincronize.',
+            btn_label: 'Pacientes',
+            btn_href: path('app_pos_operatorio_pacientes'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="table admin-table mb-0">
+        <table class="table admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Paciente</th>
@@ -51,15 +53,15 @@
             <tbody>
                 {% for c in contratos %}
                 <tr>
-                    <td>
+                    <td data-label="Paciente">
                         <strong>{{ c.paciente }}</strong>
                         <div class="text-muted small">{{ c.codigo }}</div>
                     </td>
-                    <td>{{ c.protocolo }}</td>
-                    <td>v{{ c.versao }}</td>
-                    <td><code class="admin-table-mono">{{ c.hash }}…</code></td>
-                    <td>{{ c.marcos_ok }}</td>
-                    <td>
+                    <td data-label="Protocolo">{{ c.protocolo }}</td>
+                    <td data-label="Versão">v{{ c.versao }}</td>
+                    <td data-label="Hash"><code class="admin-table-mono">{{ c.hash }}…</code></td>
+                    <td data-label="Marcos">{{ c.marcos_ok }}</td>
+                    <td data-label="Ações">
                         <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: c.paciente_id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
                     </td>
                 </tr>

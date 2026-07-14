@@ -7,6 +7,11 @@
 {% set hub_page_subtitle = continuity_lead|default('Fila unificada · ninguém fica sem resposta') %}
 {% set hub_search_hidden = true %}
 
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">Alertas</a>
+<a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">Sala crítica</a>
+{% endblock %}
+
 {% block hub_kpis %}
 {% include 'components/kpi_row.html.twig' with { items: [
     { value: queue.stats.total, label: 'Itens na fila', icon: 'fa-list-check', tone: 'sky' },
@@ -17,18 +22,27 @@
 {% endblock %}
 
 {% block hub_content %}
-<section class="unio-card ops-queue-animate">
+{% if queue.stats.p1|default(0) > 0 %}
+<div class="clinic-banner clinic-banner--danger">
+    <i class="fas fa-fire" aria-hidden="true"></i>
+    <div><strong>{{ queue.stats.p1 }}</strong> incidente(s) P1 na fila — priorize a Sala Crítica.</div>
+</div>
+{% endif %}
+
+<section class="unio-card p-0 ops-queue-animate">
     {% if queue.items is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-list-check',
             title: 'Fila limpa',
             text: 'Nenhuma ação pendente — pulso estável.',
+            btn_label: 'Visão geral',
+            btn_href: path('app_pos_operatorio'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Tipo</th>
@@ -40,10 +54,15 @@
             <tbody>
                 {% for item in queue.items %}
                 <tr>
-                    <td><span class="badge-perfil {{ item.tone == 'danger' ? 'danger' : (item.tone == 'warning' ? 'warning' : 'default') }}">{{ item.type_label }}</span></td>
-                    <td><strong>{{ item.title }}</strong><span class="d-block text-muted small">{{ item.meta }}</span></td>
-                    <td>{{ item.subtitle }}</td>
-                    <td class="text-right">
+                    <td data-label="Tipo">
+                        <span class="badge-perfil {{ item.tone == 'danger' ? 'danger' : (item.tone == 'warning' ? 'warning' : 'default') }}">{{ item.type_label }}</span>
+                    </td>
+                    <td data-label="Paciente">
+                        <strong>{{ item.title }}</strong>
+                        <span class="d-block text-muted small">{{ item.meta }}</span>
+                    </td>
+                    <td data-label="Detalhe">{{ item.subtitle }}</td>
+                    <td data-label="Ações" class="text-right">
                         <a href="{{ path(item.route, item.route_params|default({})) }}" class="btn-unio btn-sm">{{ item.action_label }}</a>
                     </td>
                 </tr>

@@ -13,6 +13,7 @@
     <input type="hidden" name="_token" value="{{ csrf_token('clinic_agenda_reminders') }}">
     <button type="submit" class="btn-unio btn-sm">{% if reminders.whatsapp_live|default(false) %}Enviar confirmações de amanhã{% else %}Preparar confirmações de amanhã{% endif %}</button>
 </form>
+<a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio-ghost btn-sm">Agenda</a>
 {% endblock %}
 
 {% block hub_kpis %}
@@ -50,7 +51,7 @@
     </section>
 </div>
 
-<section class="unio-card mt-3">
+<section class="unio-card mt-3 p-0 ops-queue-animate">
     <h3 class="clinic-ops-panel__title px-3 pt-3 mb-0">Confirmação de cirurgia/consulta — amanhã (D−1)</h3>
     <p class="text-muted small px-3 mb-2">
         Lembrete de presença para o horário de amanhã. Quando o paciente tiver Trilha com marco D−1, o envio/confirmação também atualiza a Trilha Unio.
@@ -65,12 +66,14 @@
             icon: 'fa-calendar-check',
             title: 'Agenda de amanhã vazia',
             text: 'Nenhum horário marcado/confirmado para amanhã.',
+            btn_label: 'Abrir agenda',
+            btn_href: path('app_pos_operatorio_agenda'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Quando</th>
@@ -83,20 +86,20 @@
             <tbody>
                 {% for a in agenda_amanha %}
                 <tr>
-                    <td><strong>{{ a.quando }}</strong></td>
-                    <td>
+                    <td data-label="Quando"><strong>{{ a.quando }}</strong></td>
+                    <td data-label="Paciente">
                         <strong>{{ a.paciente }}</strong>
                         <span class="d-block text-muted small">{{ a.codigo }}</span>
                     </td>
-                    <td>{{ a.titulo }}</td>
-                    <td>
+                    <td data-label="Título">{{ a.titulo }}</td>
+                    <td data-label="Lembrete">
                         {% if a.lembrete_em %}
                         <span class="badge-perfil success">Enviado {{ a.lembrete_em }}</span>
                         {% else %}
                         <span class="badge-perfil warning">Pendente</span>
                         {% endif %}
                     </td>
-                    <td class="text-right">
+                    <td data-label="Ações" class="text-right">
                         {% if a.whatsapp_url %}
                         <a href="{{ a.whatsapp_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener" title="WhatsApp">
                             <i class="fab fa-whatsapp"></i>
@@ -113,7 +116,7 @@
 </section>
 
 {% set marcos_pre = reminders.marcos_pre|default([]) %}
-<section class="unio-card mt-3">
+<section class="unio-card mt-3 p-0 ops-queue-animate">
     <h3 class="clinic-ops-panel__title px-3 pt-3 mb-0">Marcos pré-op da Trilha (D−7 / D−3)</h3>
     <p class="text-muted small px-3 mb-2">
         Lembretes do protocolo relativo à data da cirurgia. O botão acima também dispara estes envios.
@@ -123,12 +126,14 @@
             icon: 'fa-route',
             title: 'Sem marcos pré-op',
             text: 'Nenhum paciente em D−7 ou D−3 hoje.',
+            btn_label: 'Trilha / pacientes',
+            btn_href: path('app_pos_operatorio_pacientes'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Dia</th>
@@ -141,20 +146,20 @@
             <tbody>
                 {% for m in marcos_pre %}
                 <tr>
-                    <td><strong>{{ m.dia_label }}</strong></td>
-                    <td>
+                    <td data-label="Dia"><strong>{{ m.dia_label }}</strong></td>
+                    <td data-label="Paciente">
                         <strong>{{ m.paciente }}</strong>
                         <span class="d-block text-muted small">{{ m.codigo }}</span>
                     </td>
-                    <td>{{ m.item }}</td>
-                    <td>
+                    <td data-label="Marco">{{ m.item }}</td>
+                    <td data-label="Status">
                         {% if m.enviado_hoje %}
                         <span class="badge-perfil success">Enviado hoje</span>
                         {% else %}
                         <span class="badge-perfil warning">Pendente</span>
                         {% endif %}
                     </td>
-                    <td class="text-right">
+                    <td data-label="Ações" class="text-right">
                         {% if m.whatsapp_url %}
                         <a href="{{ m.whatsapp_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
                         {% endif %}
@@ -168,7 +173,7 @@
     {% endif %}
 </section>
 
-<section class="unio-card mt-3">
+<section class="unio-card mt-3 p-0 ops-queue-animate">
     <h3 class="clinic-ops-panel__title px-3 pt-3 mb-0">Últimos envios WhatsApp</h3>
     <p class="text-muted small px-3 mb-2">Log de entrega Meta / noop (últimos 20).</p>
     {% set outbound = reminders.outbound_recent|default([]) %}
@@ -182,7 +187,7 @@
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Quando</th>
@@ -195,14 +200,14 @@
             <tbody>
                 {% for m in outbound %}
                 <tr>
-                    <td>{{ m.quando }}</td>
-                    <td><code>{{ m.evento }}</code></td>
-                    <td>{{ m.destino|default('—') }}</td>
-                    <td>
+                    <td data-label="Quando">{{ m.quando }}</td>
+                    <td data-label="Evento"><code>{{ m.evento }}</code></td>
+                    <td data-label="Destino">{{ m.destino|default('—') }}</td>
+                    <td data-label="Status">
                         <span class="badge-perfil {{ m.status == 'sent' ? 'success' : (m.status == 'failed' ? 'danger' : 'warning') }}">{{ m.status }}</span>
                         {% if m.erro %}<span class="d-block text-muted small">{{ m.erro }}</span>{% endif %}
                     </td>
-                    <td>{{ m.provider }}</td>
+                    <td data-label="Provedor">{{ m.provider }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -211,19 +216,21 @@
     {% endif %}
 </section>
 
-<section class="unio-card mt-3">
+<section class="unio-card mt-3 p-0 ops-queue-animate">
     <h3 class="clinic-ops-panel__title px-3 pt-3">Pacientes sem resposta hoje</h3>
     {% if reminders.pacientes is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-clipboard-check',
             title: 'Tudo em dia',
             text: 'Todos responderam o questionário de hoje.',
+            btn_label: 'Questionários',
+            btn_href: path('app_pos_operatorio_questionarios'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Paciente</th>
@@ -236,11 +243,11 @@
             <tbody>
                 {% for p in reminders.pacientes %}
                 <tr>
-                    <td><strong>{{ p.nome }}</strong> <span class="text-muted small">{{ p.codigo }}</span></td>
-                    <td>{{ p.dia_pos|default('—') }}</td>
-                    <td class="small">{{ p.telefone|default('—') }}<br>{{ p.email|default('') }}</td>
-                    <td>{{ p.medico|default('—') }}</td>
-                    <td class="text-right">
+                    <td data-label="Paciente"><strong>{{ p.nome }}</strong> <span class="text-muted small">{{ p.codigo }}</span></td>
+                    <td data-label="D+">{{ p.dia_pos|default('—') }}</td>
+                    <td data-label="Contato" class="small">{{ p.telefone|default('—') }}<br>{{ p.email|default('') }}</td>
+                    <td data-label="Médico">{{ p.medico|default('—') }}</td>
+                    <td data-label="Ações" class="text-right">
                         {% if p.whatsapp_url %}
                         <a href="{{ p.whatsapp_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener" title="WhatsApp">
                             <i class="fab fa-whatsapp"></i>
