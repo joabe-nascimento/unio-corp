@@ -48,14 +48,18 @@ final class CareContractService
             ->setSnapshot($snapshot)
             ->setContentHash($hash);
         $this->em->persist($contract);
-        $this->memory->remember(
-            $paciente->getEmpresa(),
-            'contrato_criado',
-            sprintf('Contrato v%d — %s', $contract->getVersao(), $protocolo->getNome()),
-            ['hash' => $hash, 'protocolo' => $protocolo->getNome()],
-            15,
-            $paciente,
-        );
+        try {
+            $this->memory->remember(
+                $paciente->getEmpresa(),
+                'contrato_criado',
+                sprintf('Contrato v%d — %s', $contract->getVersao(), $protocolo->getNome()),
+                ['hash' => $hash, 'protocolo' => $protocolo->getNome()],
+                15,
+                $paciente,
+            );
+        } catch (\Throwable) {
+            // Memória Unio é auxiliar — não bloquear emissão do contrato.
+        }
         $this->em->flush();
 
         return $contract;

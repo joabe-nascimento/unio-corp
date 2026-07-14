@@ -132,18 +132,18 @@
                     <div>
                         {% include 'components/section_header.html.twig' with {
                             title: 'Trilha Unio',
-                            subtitle: 'Rota de cuidado · v' ~ care_contract.versao ~ ' · ' ~ (care_contract.hash|slice(0, 12)) ~ '…'
+                            subtitle: 'Rota de cuidado · v' ~ care_contract.versao ~ (care_contract.hash ? ' · ' ~ care_contract.hash|slice(0, 12) ~ '…' : '')
                         } %}
                     </div>
                     {% include 'components/unio/selo.html.twig' with { variant: 'compact', label: 'Protocolo ativo' } %}
                 </div>
-                {% set _next_marco = care_contract.marcos|filter(m => not m.attested)|first %}
+                {% set _next_key = care_contract.next_marco_key|default(null) %}
                 {% if care_contract.marcos|length > 0 %}
                 <ul class="organismo-trilha-rail" aria-label="Marcos da Trilha Unio">
                     {% for m in care_contract.marcos %}
                     {% set _p = m.label|split(' — ', 2) %}
                     {% set _when = _p|length == 2 ? _p[0] : m.label %}
-                    {% set _is_next = _next_marco and _next_marco.key == m.key %}
+                    {% set _is_next = _next_key and _next_key == m.key %}
                     {% if not loop.first %}<li class="organismo-trilha-rail__sep" aria-hidden="true"></li>{% endif %}
                     <li class="organismo-trilha-rail__step{{ m.attested ? ' is-done' : (_is_next ? ' is-next' : '') }}">
                         <span class="organismo-trilha-rail__dot" aria-hidden="true"></span>
@@ -166,11 +166,11 @@
                                 {% endif %}
                             </span>
                             {% if m.attested %}
-                            <span class="text-muted small">{{ m.em }} · {{ m.hash|slice(0, 8) }}…</span>
+                            <span class="text-muted small">{{ m.em }}{% if m.hash %} · {{ m.hash|slice(0, 8) }}…{% endif %}</span>
                             {% include 'components/unio/selo.html.twig' with { variant: 'compact', class: 'organismo-care-milestones__selo', label: 'Atestado' } %}
                             {% endif %}
                         </div>
-                        {% if not m.attested %}
+                        {% if not m.attested and care_contract.id %}
                         <form method="post" action="{{ path('app_organismo_contrato_atestar', { id: care_contract.id }) }}" class="organismo-care-milestones__form" data-unio-attest>
                             <input type="hidden" name="marco_key" value="{{ m.key }}">
                             <input type="hidden" name="evidencia" value="Atestação clínica na ficha">

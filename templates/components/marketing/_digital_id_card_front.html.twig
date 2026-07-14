@@ -117,14 +117,11 @@
         </dl>
         <span class="mkt-idcard__footer-bar">
             <span class="mkt-idcard__type">{{ card.doc_type_label|default('Carteira digital') }}</span>
-            {% if card.clinica|default(null) %}
-            <span class="mkt-idcard__issuer">{{ card.clinica }}</span>
-            {% endif %}
+            {% include 'components/unio/selo.html.twig' with {
+                variant: 'card',
+                brand: card.clinica|default('Unio Saúde'),
+                label: 'Cuidado acompanhado'
+            } %}
         </span>
-        {% include 'components/unio/selo.html.twig' with {
-            variant: 'card',
-            brand: 'Unio Saúde',
-            label: 'Cuidado acompanhado'
-        } %}
     </span>
 </span>

@@ -425,12 +425,32 @@ final class PosOperatorioPacienteService
 
             'cadastrado_em' => $paciente->getCriadoEm()->format('d/m/Y H:i'),
 
-            'care_contract' => $this->buildCareContractView($paciente),
+            'care_contract' => $this->safeCareContractView($paciente),
 
-            'organism_memory' => $this->organismMemory->forPaciente($paciente, 5),
+            'organism_memory' => $this->safeOrganismMemory($paciente),
 
         ];
 
+    }
+
+    /** @return array<string, mixed>|null */
+    private function safeCareContractView(PosOperatorioPaciente $paciente): ?array
+    {
+        try {
+            return $this->buildCareContractView($paciente);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /** @return list<array{tipo: string, sujeito: string, peso: int, criado_em: string}> */
+    private function safeOrganismMemory(PosOperatorioPaciente $paciente): array
+    {
+        try {
+            return $this->organismMemory->forPaciente($paciente, 5);
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /** @return array<string, mixed>|null */
@@ -450,8 +470,23 @@ final class PosOperatorioPacienteService
             'status' => $contract->getStatus(),
             'hash' => $contract->getContentHash(),
             'protocolo' => $contract->getProtocolo()?->getNome(),
-            'marcos' => $this->attestations->milestonesView($contract),
+            'marcos' => $marcos = $this->attestations->milestonesView($contract),
+            'next_marco_key' => $this->firstOpenMarcoKey($marcos),
         ];
+    }
+
+    /** @param list<array{key: string, attested: bool}> $marcos */
+    private function firstOpenMarcoKey(array $marcos): ?string
+    {
+        foreach ($marcos as $m) {
+            if (!($m['attested'] ?? false)) {
+                $key = (string) ($m['key'] ?? '');
+
+                return $key !== '' ? $key : null;
+            }
+        }
+
+        return null;
     }
 
 

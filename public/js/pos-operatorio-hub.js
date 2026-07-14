@@ -120,7 +120,9 @@
         })
             .then(function (res) {
                 if (!res.ok) {
-                    throw new Error('HTTP ' + res.status);
+                    var err = new Error('HTTP ' + res.status);
+                    err.status = res.status;
+                    throw err;
                 }
                 return res.text();
             })
@@ -136,8 +138,20 @@
                     window.UnioInputMasks.scan(host);
                 }
             })
-            .catch(function () {
-                renderPartialError(host, url, loadingText, onLoaded);
+            .catch(function (err) {
+                var detail = (err && err.status) ? ' (erro ' + err.status + ')' : '';
+                host.innerHTML =
+                    '<div class="clinic-partial-error" role="alert">' +
+                    '<p class="clinic-partial-error__text mb-2">Não foi possível carregar' + detail + '. Tente novamente.</p>' +
+                    '<button type="button" class="btn-unio-ghost btn-sm" data-clinic-partial-retry>' +
+                    '<i class="fas fa-rotate-right mr-1" aria-hidden="true"></i>Tentar de novo</button>' +
+                    '</div>';
+                var retry = host.querySelector('[data-clinic-partial-retry]');
+                if (retry) {
+                    retry.addEventListener('click', function () {
+                        loadPartial(host, url, loadingText, onLoaded);
+                    });
+                }
             });
     }
 
