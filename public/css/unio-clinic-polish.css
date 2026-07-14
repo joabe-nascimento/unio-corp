@@ -2943,3 +2943,406 @@ body.org-clinic:not(.sidebar-collapse) .clinic-sidebar-pulse__full {
     font-weight: 700;
     color: var(--org-ink, #1e2a3a);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Visual polish 2026 — atmosfera, listas, ficha, motion
+   Escopo: body.org-clinic only
+   ═══════════════════════════════════════════════════════════ */
+
+body.org-clinic.unio-organismo {
+    --clinic-page-x: clamp(20px, 3vw, 40px);
+    --clinic-stack-gap: clamp(18px, 2.2vw, 28px);
+    --clinic-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --clinic-page-bg:
+        radial-gradient(ellipse 110% 70% at 92% -8%, rgba(75, 114, 190, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse 90% 60% at -5% 100%, rgba(90, 154, 154, 0.08) 0%, transparent 52%),
+        radial-gradient(ellipse 60% 40% at 50% 40%, rgba(255, 255, 255, 0.45) 0%, transparent 70%),
+        var(--org-page, #f2f5fb);
+}
+
+/* Ritmo vertical: lead → KPIs → conteúdo */
+body.org-clinic .page-body-inner--organismo {
+    padding-top: clamp(16px, 2vw, 24px);
+    padding-bottom: clamp(28px, 4vw, 48px);
+    gap: var(--clinic-stack-gap);
+    display: flex;
+    flex-direction: column;
+}
+
+body.org-clinic .page-body-inner--organismo > .page-lead-kpis,
+body.org-clinic .page-body-inner--organismo > .hub-tab-panel {
+    margin: 0;
+}
+
+body.org-clinic .page-lead-zone--organismo {
+    padding-bottom: 4px;
+}
+
+/* Cabeçalho do módulo — tipografia editorial */
+body.org-clinic .org-hub-lead {
+    padding: clamp(22px, 3vw, 32px) var(--clinic-page-x) 8px;
+}
+
+body.org-clinic .org-hub-lead__eyebrow {
+    font-family: var(--org-font) !important;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    color: var(--org-blue-text) !important;
+    margin-bottom: 10px;
+}
+
+body.org-clinic .org-hub-lead__title {
+    font-family: var(--org-font-display) !important;
+    font-size: clamp(26px, 3.2vw, 34px) !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.9px !important;
+    line-height: 1.12 !important;
+    color: var(--org-ink) !important;
+    margin: 0 0 8px !important;
+}
+
+body.org-clinic .org-hub-lead__subtitle {
+    font-family: var(--org-font) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1.55 !important;
+    color: var(--org-ink-muted) !important;
+    max-width: 42rem;
+}
+
+body.org-clinic .org-hub-lead__actions {
+    gap: 10px;
+}
+
+body.org-clinic .org-hub-lead__actions .btn-unio,
+body.org-clinic .org-hub-lead__actions .btn-unio-ghost {
+    min-height: 40px;
+    padding: 0 18px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    transition: transform 0.22s var(--clinic-ease), box-shadow 0.22s var(--clinic-ease), background 0.22s ease, border-color 0.22s ease;
+}
+
+body.org-clinic .org-hub-lead__actions .btn-unio:hover,
+body.org-clinic .org-hub-lead__actions .btn-unio-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(75, 114, 190, 0.28);
+}
+
+body.org-clinic .org-hub-lead__actions .btn-unio-ghost:hover {
+    transform: translateY(-1px);
+    background: rgba(75, 114, 190, 0.08) !important;
+}
+
+/* Section toolbar sob o lead — menos peso visual */
+body.org-clinic .hub-tab-panel > .section-toolbar,
+body.org-clinic .hub-tab-panel > form > .section-toolbar {
+    margin-bottom: 14px;
+    padding: 2px 0 4px;
+}
+
+/* Cards do hub — sombra mais leve, sem “caixa em caixa” */
+body.org-clinic .page-body-inner--organismo > .hub-tab-panel > .unio-card,
+body.org-clinic .page-body-inner--organismo .hub-tab-panel--active > .unio-card {
+    border: 1px solid var(--clinic-border) !important;
+    box-shadow: 0 6px 24px rgba(30, 42, 58, 0.045) !important;
+    border-radius: var(--clinic-radius) !important;
+    overflow: hidden;
+}
+
+/* ── Tabelas editoriais ── */
+body.org-clinic .admin-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+body.org-clinic .admin-table thead th {
+    font-family: var(--org-font) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--org-ink-muted) !important;
+    background: rgba(234, 240, 251, 0.42) !important;
+    border-bottom: 1px solid var(--org-border-soft) !important;
+    padding: 12px 16px !important;
+    white-space: nowrap;
+}
+
+body.org-clinic .admin-table tbody td {
+    padding: 14px 16px !important;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--org-ink-soft);
+    border-bottom: 1px solid rgba(30, 42, 58, 0.05) !important;
+    vertical-align: middle;
+    transition: background 0.18s var(--clinic-ease);
+}
+
+body.org-clinic .admin-table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+body.org-clinic .admin-table tbody tr:hover td {
+    background: rgba(234, 240, 251, 0.55) !important;
+}
+
+body.org-clinic .admin-table tbody td strong {
+    font-family: var(--org-font-display) !important;
+    font-weight: 800;
+    color: var(--org-ink);
+    letter-spacing: -0.01em;
+}
+
+body.org-clinic .admin-table tbody td code,
+body.org-clinic .admin-table-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--org-blue-text);
+    background: rgba(75, 114, 190, 0.08);
+    padding: 3px 8px;
+    border-radius: 8px;
+}
+
+body.org-clinic .pos-op-paciente-row-actions {
+    display: inline-flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+body.org-clinic .pos-op-paciente-row-actions .btn-unio-ghost {
+    transition: transform 0.18s var(--clinic-ease), background 0.18s ease;
+}
+
+body.org-clinic .pos-op-paciente-row-actions .btn-unio-ghost:hover {
+    transform: translateY(-1px);
+}
+
+/* Empty states clínicos */
+body.org-clinic .empty-state--compact {
+    padding: 48px 24px !important;
+}
+
+body.org-clinic .empty-state--compact .empty-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: var(--org-blue-soft);
+    color: var(--org-blue);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 14px;
+}
+
+body.org-clinic .empty-state--compact h6 {
+    font-family: var(--org-font-display) !important;
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+    color: var(--org-ink) !important;
+}
+
+body.org-clinic .empty-state--compact p {
+    font-size: 13.5px !important;
+    color: var(--org-ink-muted) !important;
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.org-clinic .empty-state--compact .btn-unio {
+    margin-top: 18px !important;
+    transition: transform 0.22s var(--clinic-ease), box-shadow 0.22s var(--clinic-ease);
+}
+
+body.org-clinic .empty-state--compact .btn-unio:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(75, 114, 190, 0.28);
+}
+
+/* ── Ficha offcanvas ── */
+body.org-clinic .clinic-ficha-offcanvas,
+body.org-clinic .pos-op-ficha-offcanvas {
+    animation: clinic-ficha-enter 0.38s var(--clinic-ease) both;
+}
+
+@keyframes clinic-ficha-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.org-clinic .clinic-ficha-offcanvas,
+    body.org-clinic .pos-op-ficha-offcanvas {
+        animation: none;
+    }
+    body.org-clinic .org-hub-lead__actions .btn-unio:hover,
+    body.org-clinic .org-hub-lead__actions .btn-unio-ghost:hover,
+    body.org-clinic .admin-table tbody tr:hover td,
+    body.org-clinic .pos-op-paciente-row-actions .btn-unio-ghost:hover {
+        transform: none;
+    }
+}
+
+body.org-clinic .clinic-ficha-offcanvas-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 18px;
+    padding: 0 0 16px;
+    border-bottom: 1px solid rgba(30, 42, 58, 0.06);
+}
+
+body.org-clinic .clinic-ficha-offcanvas-hero__name {
+    font-family: var(--org-font-display) !important;
+    font-size: 1.35rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+    color: var(--org-ink);
+    margin: 6px 0 0;
+}
+
+body.org-clinic .clinic-ficha-offcanvas-hero .clinic-code {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--org-blue-text);
+    background: var(--org-blue-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+body.org-clinic .clinic-ficha-offcanvas-kpis {
+    margin: 0 0 18px;
+    border: 1px solid rgba(75, 114, 190, 0.12);
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(234, 240, 251, 0.55) 0%, #fff 70%);
+    box-shadow: 0 4px 16px rgba(30, 42, 58, 0.04);
+}
+
+body.org-clinic .clinic-ficha-offcanvas-meta {
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(30, 42, 58, 0.06);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: none;
+}
+
+body.org-clinic .clinic-ficha-offcanvas .pos-op-ficha-card,
+body.org-clinic .pos-op-ficha-offcanvas .pos-op-ficha-card {
+    border-radius: 18px !important;
+    border: 1px solid rgba(30, 42, 58, 0.06) !important;
+    box-shadow: 0 4px 18px rgba(30, 42, 58, 0.035) !important;
+    margin-bottom: 16px !important;
+}
+
+body.org-clinic .clinic-ficha-offcanvas-footer,
+body.org-clinic .unio-offcanvas-footer.clinic-ficha-offcanvas-footer {
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(30, 42, 58, 0.06);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+}
+
+/* Trilha Unio — progresso, não badge */
+body.org-clinic .organismo-care-card--trilha {
+    border: 1px solid rgba(75, 114, 190, 0.12) !important;
+    background:
+        linear-gradient(165deg, rgba(234, 240, 251, 0.7) 0%, rgba(255, 255, 255, 0.98) 48%) !important;
+    box-shadow: 0 6px 22px rgba(75, 114, 190, 0.06) !important;
+}
+
+body.org-clinic .organismo-trilha-head {
+    padding: 4px 1.1rem 0.15rem;
+}
+
+body.org-clinic .organismo-trilha-rail {
+    padding: 0.35rem 1.1rem 1.1rem;
+    gap: 2px;
+}
+
+body.org-clinic .organismo-trilha-rail__step {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+}
+
+body.org-clinic .organismo-trilha-rail__step.is-next {
+    color: var(--org-blue-text) !important;
+}
+
+body.org-clinic .organismo-trilha-rail__step.is-next .organismo-trilha-rail__dot {
+    width: 10px;
+    height: 10px;
+    box-shadow: 0 0 0 5px rgba(75, 114, 190, 0.16);
+}
+
+body.org-clinic .organismo-trilha-rail__sep {
+    width: 22px;
+    opacity: 0.7;
+}
+
+body.org-clinic .organismo-care-milestones__item {
+    padding: 12px 0;
+    border-top: 1px solid rgba(30, 42, 58, 0.06);
+}
+
+body.org-clinic .organismo-care-milestones__item:first-child {
+    border-top: 0;
+}
+
+/* Sala crítica — leve alinhamento ao polish */
+body.org-clinic .pos-op-war-room {
+    border-radius: var(--clinic-radius);
+}
+
+/* Botões globais da clínica — timing */
+body.org-clinic.unio-organismo .btn-unio,
+body.org-clinic.unio-organismo .btn-unio-primary {
+    transition: transform 0.22s var(--clinic-ease), box-shadow 0.22s var(--clinic-ease), background 0.2s ease, filter 0.2s ease;
+}
+
+body.org-clinic.unio-organismo .btn-unio:active,
+body.org-clinic.unio-organismo .btn-unio-primary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Offcanvas shell — entrada suave do painel */
+body.org-clinic .unio-offcanvas.is-open .unio-offcanvas-drawer {
+    animation: clinic-offcanvas-slide 0.32s var(--clinic-ease) both;
+}
+
+@keyframes clinic-offcanvas-slide {
+    from {
+        opacity: 0.85;
+        transform: translateX(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.org-clinic .unio-offcanvas.is-open .unio-offcanvas-drawer {
+        animation: none;
+    }
+}
