@@ -545,26 +545,16 @@ final class ClinicFeatureCatalog
     }
 
     /**
-     * @param list<array<string, mixed>> $products
+     * Grupo "Produtos" só fica ativo na página de gestão de produtos.
+     * Rotas dos módulos (carteirinha, guia, etc.) pertencem aos grupos de capacidade.
+     *
+     * @param list<array<string, mixed>> $products mantido por BC da função Twig
      */
-    public static function isProductsNavActive(?string $route, array $products): bool
+    public static function isProductsNavActive(?string $route, array $products = []): bool
     {
-        if ($route === 'app_pos_operatorio_produtos') {
-            return true;
-        }
+        unset($products);
 
-        foreach ($products as $product) {
-            if (!($product['enabled'] ?? true)) {
-                continue;
-            }
-            $featureRoute = (string) ($product['route'] ?? '');
-            $prefix = (string) ($product['route_prefix'] ?? $featureRoute);
-            if ($route === $featureRoute || ($prefix !== '' && str_starts_with((string) $route, $prefix))) {
-                return true;
-            }
-        }
-
-        return false;
+        return $route === 'app_pos_operatorio_produtos';
     }
 
     /** @return array<string, bool> */

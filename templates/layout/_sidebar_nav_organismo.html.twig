@@ -37,13 +37,10 @@
         </li>
         {% for product in clinic_products|default([]) %}
         {% if product.enabled|default(true) %}
-        {% set _prod_route = product.route|default('') %}
-        {% set _prod_prefix = product.route_prefix|default(_prod_route) %}
-        {% set _prod_active = route == _prod_route or (_prod_prefix != '' and route starts with _prod_prefix) %}
+        {# Atalhos para módulos — o item ativo fica no grupo de capacidade (ex.: Experiência) #}
         <li class="nav-item">
             <a href="{{ path(product.route, product.route_params|default({})) }}"
-               class="nav-link nav-submenu-link clinic-nav-submenu-link{{ _prod_active ? ' active' : '' }}"
-               {{ _prod_active ? ' aria-current="page"' : '' }}>
+               class="nav-link nav-submenu-link clinic-nav-submenu-link">
                 <p>{{ product.short|default(product.label) }}</p>
             </a>
         </li>
