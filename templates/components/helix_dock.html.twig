@@ -1,0 +1,31 @@
+{# Vitória / Lumen — aba de presença na borda (fora do header) #}
+{% import 'macros/helix.html.twig' as helix %}
+{% set _org = organismo.enabled|default(false) %}
+{% set _clinic = org_clinic|default(false) %}
+{% set _copy = organismo.copy|default({}) %}
+{% set _assistant = _org ? _copy.lumen|default('Lumen') : 'Vitória' %}
+{% set _subtitle = _org
+    ? (_clinic ? (_copy.lumen_subtitle|default('Assistente clínico')) : (_copy.lumen_subtitle|default('Consciência da colônia')))
+    : 'Assistente virtual' %}
+
+<button type="button"
+        class="helix-dock helix-trigger{% if _clinic %} helix-dock--clinic{% endif %}"
+        id="helixOpenBtn"
+        aria-expanded="false"
+        aria-controls="helixPanel"
+        title="{{ _assistant }} — {{ _subtitle }}"
+        data-tour="helix">
+    <span class="helix-dock__shell">
+        <span class="helix-dock__pulse" aria-hidden="true"></span>
+        <span class="helix-dock__avatar">
+            {{ helix.avatar('md') }}
+        </span>
+        <span class="helix-dock__copy">
+            <span class="helix-dock__name">{{ _assistant }}</span>
+            <span class="helix-dock__cue">{{ _clinic ? 'Copiloto' : 'Pergunte' }}</span>
+        </span>
+        <span class="helix-dock__chev" aria-hidden="true">
+            <i class="fas fa-chevron-left"></i>
+        </span>
+    </span>
+</button>

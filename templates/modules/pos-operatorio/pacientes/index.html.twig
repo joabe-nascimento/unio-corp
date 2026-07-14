@@ -73,8 +73,26 @@
 </form>
 {% endblock %}
 
+{% set status_tones = {
+    ativo: 'success',
+    alerta: 'danger',
+    pendente: 'amber',
+    encerrado: 'default'
+} %}
+{% set _chip_q = filter_q|default('') %}
+
 {% block hub_content %}
-<section class="unio-card">
+{% if org_clinic|default(false) %}
+<p class="clinic-filter-chips">
+    <a href="{{ path('app_pos_operatorio_pacientes', _chip_q ? { q: _chip_q } : {}) }}" class="{{ filter_status|default('') == '' ? 'is-active' : '' }}">Em acompanhamento</a>
+    <a href="{{ path('app_pos_operatorio_pacientes', { status: 'ativo' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'ativo' ? 'is-active' : '' }}">Ativo</a>
+    <a href="{{ path('app_pos_operatorio_pacientes', { status: 'alerta' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'alerta' ? 'is-active' : '' }}">Alerta</a>
+    <a href="{{ path('app_pos_operatorio_pacientes', { status: 'pendente' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'pendente' ? 'is-active' : '' }}">Pendente</a>
+    <a href="{{ path('app_pos_operatorio_pacientes', { status: 'encerrado' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'encerrado' ? 'is-active' : '' }}">Encerrado</a>
+</p>
+{% endif %}
+
+<section class="unio-card p-0 ops-queue-animate">
     {% if pacientes is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: org_clinic|default(false) ? 'fa-user-injured' : 'fa-folder-open',
@@ -92,7 +110,7 @@
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Código</th>
@@ -108,20 +126,22 @@
             <tbody>
                 {% for p in pacientes %}
                 <tr>
-                    <td><code>{{ p.codigo }}</code></td>
-                    <td><strong>{{ p|pos_op_paciente_nome }}</strong></td>
-                    <td>{{ p.procedimento|default('—') }}</td>
-                    <td>{% set _rel = p.diaRelativoCirurgia %}{% if _rel is not null %}{{ _rel < 0 ? 'D−' ~ (_rel|abs) : 'D+' ~ _rel }}{% else %}—{% endif %}</td>
-                    <td>{{ p.medicoResponsavel ? p.medicoResponsavel.nome : '—' }}</td>
-                    <td>{{ p.status|pos_op_status_label }}</td>
-                    <td>
+                    <td data-label="Código"><code>{{ p.codigo }}</code></td>
+                    <td data-label="Nome"><strong>{{ p|pos_op_paciente_nome }}</strong></td>
+                    <td data-label="Procedimento">{{ p.procedimento|default('—') }}</td>
+                    <td data-label="Fase">{% set _rel = p.diaRelativoCirurgia %}{% if _rel is not null %}{{ _rel < 0 ? 'D−' ~ (_rel|abs) : 'D+' ~ _rel }}{% else %}—{% endif %}</td>
+                    <td data-label="Médico">{{ p.medicoResponsavel ? p.medicoResponsavel.nome : '—' }}</td>
+                    <td data-label="Status">
+                        <span class="badge-perfil {{ status_tones[p.status]|default('default') }}">{{ p.status|pos_op_status_label }}</span>
+                    </td>
+                    <td data-label="Portal hoje">
                         {% if silenciosos_hoje[p.id]|default(false) %}
                         {% include 'components/status_badge.html.twig' with { label: 'Sem resposta', variant: 'warning' } %}
                         {% else %}
                         <span class="text-muted small">—</span>
                         {% endif %}
                     </td>
-                    <td class="text-right">
+                    <td data-label="Ações" class="text-right">
                         <div class="pos-op-paciente-row-actions">
                             <button type="button"
                                     class="btn-unio-ghost btn-sm"

@@ -4,31 +4,46 @@
 {% set hub_page_title = 'Clientes' %}
 {% set hub_page_subtitle = 'Núcleo Comercial · Cadastro de clientes' %}
 {% set status_labels = status_labels|default({}) %}
+{% set filter_status = filter_status|default('') %}
+{% set status_tones = {
+    prospect: 'sky',
+    ativo: 'success',
+    inativo: 'default'
+} %}
 
 {% block hub_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="crm-conta-nova">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo cliente
 </button>
+<a href="{{ path('app_comercial_leads') }}" class="btn-unio-ghost btn-sm">Leads</a>
 {% endblock %}
 
 {% block hub_content %}
-<div class="unio-card">
-    {% include 'components/section_header.html.twig' with {
-        title: 'Clientes',
-        subtitle: (contas|length) ~ ' cadastro(s)'
-    } %}
+<p class="clinic-filter-chips">
+    <a href="{{ path('app_comercial_clientes') }}" class="{{ filter_status == '' ? 'is-active' : '' }}">Todos</a>
+    {% for s in status_options %}
+    <a href="{{ path('app_comercial_clientes', { status: s }) }}" class="{{ filter_status == s ? 'is-active' : '' }}">{{ status_labels[s]|default(s) }}</a>
+    {% endfor %}
+</p>
+
+<section class="unio-card p-0 ops-queue-animate">
     {% if contas|length == 0 %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-building',
-            title: 'Ainda sem clientes',
-            text: 'Cadastre um cliente agora ou converta um lead qualificado no funil.',
-            btn_label: 'Novo cliente',
-            btn_opens: 'crm-conta-nova',
+            title: filter_status ? 'Nenhum cliente neste filtro' : 'Ainda sem clientes',
+            text: filter_status
+                ? 'Tente outro status ou limpe o filtro.'
+                : 'Cadastre um cliente agora ou converta um lead qualificado no funil.',
+            btn_label: filter_status ? 'Ver todos' : 'Novo cliente',
+            btn_href: filter_status ? path('app_comercial_clientes') : null,
+            btn_opens: filter_status ? null : 'crm-conta-nova',
+            btn_icon: filter_status ? '' : 'fa-plus',
+            btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="table unio-table mb-0">
+        <table class="table admin-table mb-0 align-middle clinic-stack-mobile">
             <thead>
                 <tr>
                     <th>Nome</th>
@@ -42,19 +57,23 @@
             <tbody>
                 {% for c in contas %}
                 <tr>
-                    <td><a href="{{ path('app_comercial_cliente_show', { id: c.id }) }}">{{ c.nome }}</a></td>
-                    <td>{{ c.documento|default('—') }}</td>
-                    <td class="small">{{ c.email|default('—') }}</td>
-                    <td>{{ c.segmento|default('—') }}</td>
-                    <td><span class="badge badge-soft">{{ status_labels[c.status]|default(c.status) }}</span></td>
-                    <td class="text-end"><a href="{{ path('app_comercial_cliente_show', { id: c.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a></td>
+                    <td data-label="Nome"><a href="{{ path('app_comercial_cliente_show', { id: c.id }) }}"><strong>{{ c.nome }}</strong></a></td>
+                    <td data-label="Documento">{{ c.documento|default('—') }}</td>
+                    <td data-label="Contato" class="small">{{ c.email|default('—') }}</td>
+                    <td data-label="Segmento">{{ c.segmento|default('—') }}</td>
+                    <td data-label="Situação">
+                        <span class="badge-perfil {{ status_tones[c.status]|default('default') }}">{{ status_labels[c.status]|default(c.status) }}</span>
+                    </td>
+                    <td data-label="Ações" class="text-right">
+                        <a href="{{ path('app_comercial_cliente_show', { id: c.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% endif %}
-</div>
+</section>
 {% endblock %}
 
 {% block page_overlays %}

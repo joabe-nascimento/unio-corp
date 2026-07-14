@@ -4,44 +4,114 @@
 {% set hub_page_title = 'Analytics comercial' %}
 {% set hub_page_subtitle = 'Núcleo Comercial · Funil e conversão' %}
 
+{% set stage_tones = {
+    lead: 'sky',
+    qualificacao: 'amber',
+    proposta: 'lavender',
+    negociacao: 'sage',
+    ganho: 'success',
+    perdido: 'rose'
+} %}
+{% set _max = namespace({ origem: 0, stage: 0 }) %}
+{% for qtd in analytics.by_origem|default({}) %}
+    {% if qtd > _max.origem %}{% set _max.origem = qtd %}{% endif %}
+{% endfor %}
+{% for qtd in analytics.by_stage|default({}) %}
+    {% if qtd > _max.stage %}{% set _max.stage = qtd %}{% endif %}
+{% endfor %}
+{% set max_origem = _max.origem %}
+{% set max_stage = _max.stage %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_comercial_pipeline') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Pipeline
+</a>
+<a href="{{ path('app_comercial_leads') }}" class="btn-unio-ghost btn-sm">Leads</a>
+{% endblock %}
+
 {% block hub_kpis %}
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
-        { value: analytics.leads_total, label: 'Leads', sub: analytics.leads_convertidos ~ ' convertidos' },
-        { value: analytics.conversao_lead_pct is not null ? analytics.conversao_lead_pct ~ '%' : '—', label: 'Conversão lead', sub: 'Lead → cliente' },
-        { value: analytics.win_rate_pct is not null ? analytics.win_rate_pct ~ '%' : '—', label: 'Taxa de ganho', sub: 'Ganho / fechados' },
-        { value: 'R$ ' ~ (analytics.pipeline_valor|number_format(0, ',', '.')), label: 'Pipeline', sub: 'Valor em aberto' },
+        { value: analytics.leads_total, label: 'Leads', sub: analytics.leads_convertidos ~ ' convertidos', icon: 'fa-user-plus', tone: 'sky' },
+        { value: analytics.conversao_lead_pct is not null ? analytics.conversao_lead_pct ~ '%' : '—', label: 'Conversão lead', sub: 'Lead → cliente', icon: 'fa-right-left', tone: 'sage' },
+        { value: analytics.win_rate_pct is not null ? analytics.win_rate_pct ~ '%' : '—', label: 'Taxa de ganho', sub: 'Ganho / fechados', icon: 'fa-trophy', tone: 'amber' },
+        { value: 'R$ ' ~ (analytics.pipeline_valor|number_format(0, ',', '.')), label: 'Pipeline', sub: 'Valor em aberto', icon: 'fa-chart-line', tone: 'sky' },
     ], mb: 'mb-0' } %}
 </div>
 {% endblock %}
 
 {% block hub_content %}
+{% if analytics.leads_total|default(0) == 0 and (analytics.by_stage|default({})|length == 0) %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-chart-pie',
+        title: 'Sem dados ainda',
+        text: 'Cadastre leads e oportunidades para ver conversão e funil.',
+        btn_label: 'Novo lead',
+        btn_href: path('app_comercial_leads', { novo: 1 }),
+        btn_icon: 'fa-plus',
+        btn_sm: true,
+        compact: true
+    } %}
+{% else %}
 <div class="row g-4">
     <div class="col-md-6">
-        <div class="unio-card">
+        <section class="unio-card crm-analytics-card">
             {% include 'components/section_header.html.twig' with { title: 'Leads por origem', subtitle: 'Captação' } %}
-            <ul class="list-unstyled mb-0 px-3 pb-3">
+            {% if analytics.by_origem|default({})|length == 0 %}
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-inbox',
+                    title: 'Sem origens',
+                    text: 'Nenhum lead registrado por origem.',
+                    compact: true
+                } %}
+            {% else %}
+            <ul class="crm-analytics-bars px-3 pb-3 mb-0">
                 {% for origem, qtd in analytics.by_origem %}
-                <li class="d-flex justify-content-between py-1 border-bottom">
-                    <span>{{ analytics.origem_labels[origem]|default(origem) }}</span>
-                    <strong>{{ qtd }}</strong>
+                {% set pct = max_origem > 0 ? ((qtd / max_origem) * 100)|round : 0 %}
+                <li class="crm-analytics-bars__item">
+                    <div class="crm-analytics-bars__row">
+                        <span>{{ analytics.origem_labels[origem]|default(origem) }}</span>
+                        <strong>{{ qtd }}</strong>
+                    </div>
+                    <div class="crm-analytics-bars__track" aria-hidden="true"><span style="width: {{ pct }}%"></span></div>
                 </li>
                 {% endfor %}
             </ul>
-        </div>
+            {% endif %}
+        </section>
     </div>
     <div class="col-md-6">
-        <div class="unio-card">
+        <section class="unio-card crm-analytics-card">
             {% include 'components/section_header.html.twig' with { title: 'Funil por estágio', subtitle: 'Oportunidades' } %}
-            <ul class="list-unstyled mb-0 px-3 pb-3">
+            {% if analytics.by_stage|default({})|length == 0 %}
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-diagram-project',
+                    title: 'Funil vazio',
+                    text: 'Crie oportunidades no pipeline.',
+                    btn_label: 'Abrir pipeline',
+                    btn_href: path('app_comercial_pipeline'),
+                    btn_sm: true,
+                    compact: true
+                } %}
+            {% else %}
+            <ul class="crm-analytics-bars px-3 pb-3 mb-0">
                 {% for stage, qtd in analytics.by_stage %}
-                <li class="d-flex justify-content-between py-1 border-bottom">
-                    <span>{{ analytics.stage_meta[stage].label|default(stage) }}</span>
-                    <strong>{{ qtd }}</strong>
+                {% set pct = max_stage > 0 ? ((qtd / max_stage) * 100)|round : 0 %}
+                <li class="crm-analytics-bars__item">
+                    <div class="crm-analytics-bars__row">
+                        <span>
+                            <span class="crm-analytics-bars__dot crm-analytics-bars__dot--{{ stage_tones[stage]|default('sky') }}" aria-hidden="true"></span>
+                            {{ analytics.stage_meta[stage].label|default(stage) }}
+                        </span>
+                        <strong>{{ qtd }}</strong>
+                    </div>
+                    <div class="crm-analytics-bars__track" aria-hidden="true"><span style="width: {{ pct }}%"></span></div>
                 </li>
                 {% endfor %}
             </ul>
-        </div>
+            {% endif %}
+        </section>
     </div>
 </div>
+{% endif %}
 {% endblock %}

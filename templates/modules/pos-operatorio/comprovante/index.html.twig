@@ -7,29 +7,36 @@
 {% set hub_page_subtitle = 'Documento do episódio cirúrgico com QR de validação pública' %}
 {% set hub_search_hidden = true %}
 
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_pacientes') }}" class="btn-unio-ghost btn-sm">Pacientes</a>
+<a href="{{ path('app_pos_operatorio_carteirinha') }}" class="btn-unio-ghost btn-sm">Carteirinhas</a>
+{% endblock %}
+
 {% block hub_content %}
 <div class="clinic-carteirinha-layout">
-    <section class="unio-card clinic-carteirinha-panel">
+    <section class="unio-card clinic-carteirinha-panel p-0 ops-queue-animate">
         <h3 class="clinic-ops-panel__title px-3 pt-3">Emitidos recentemente</h3>
         {% if emitidos is empty %}
             {% include 'components/empty_state.html.twig' with {
                 icon: 'fa-file-circle-check',
                 title: 'Nenhum comprovante',
                 text: 'Nenhum comprovante emitido ainda.',
+                btn_label: 'Ver pacientes',
+                btn_href: path('app_pos_operatorio_pacientes'),
                 btn_sm: true,
                 compact: true
             } %}
         {% else %}
         <div class="table-responsive">
-            <table class="admin-table">
+            <table class="admin-table clinic-stack-mobile mb-0">
                 <thead><tr><th>Paciente</th><th>Procedimento</th><th>Validade</th><th></th></tr></thead>
                 <tbody>
                     {% for p in emitidos %}
                     <tr>
-                        <td><strong>{{ p.nome }}</strong><span class="d-block text-muted small">{{ p.codigo }}</span></td>
-                        <td>{{ p.procedimento|default('—') }}</td>
-                        <td>{{ p.comprovanteValidoAte ? p.comprovanteValidoAte|date('d/m/Y') : '—' }}</td>
-                        <td class="text-right"><a href="{{ path('app_pos_operatorio_comprovante_paciente', { id: p.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a></td>
+                        <td data-label="Paciente"><strong>{{ p.nome }}</strong><span class="d-block text-muted small">{{ p.codigo }}</span></td>
+                        <td data-label="Procedimento">{{ p.procedimento|default('—') }}</td>
+                        <td data-label="Validade">{{ p.comprovanteValidoAte ? p.comprovanteValidoAte|date('d/m/Y') : '—' }}</td>
+                        <td data-label="Ações" class="text-right"><a href="{{ path('app_pos_operatorio_comprovante_paciente', { id: p.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -38,21 +45,33 @@
         {% endif %}
     </section>
 
-    <section class="unio-card clinic-carteirinha-panel">
+    <section class="unio-card clinic-carteirinha-panel p-0 ops-queue-animate">
         <h3 class="clinic-ops-panel__title px-3 pt-3">Pacientes para emitir</h3>
+        {% if pacientes is empty %}
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-user-plus',
+                title: 'Sem pacientes',
+                text: 'Cadastre pacientes para emitir comprovantes.',
+                btn_label: 'Pacientes',
+                btn_href: path('app_pos_operatorio_pacientes'),
+                btn_icon: 'fa-plus',
+                btn_sm: true,
+                compact: true
+            } %}
+        {% else %}
         <div class="table-responsive">
-            <table class="admin-table">
+            <table class="admin-table clinic-stack-mobile mb-0">
                 <thead><tr><th>Paciente</th><th>Cirurgia</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                     {% for p in pacientes %}
                     <tr>
-                        <td><strong>{{ p.nome }}</strong></td>
-                        <td>{{ p.dataCirurgia ? p.dataCirurgia|date('d/m/Y') : '—' }}</td>
-                        <td>
+                        <td data-label="Paciente"><strong>{{ p.nome }}</strong></td>
+                        <td data-label="Cirurgia">{{ p.dataCirurgia ? p.dataCirurgia|date('d/m/Y') : '—' }}</td>
+                        <td data-label="Status">
                             {% if p.hasComprovanteAtivo %}<span class="badge-perfil success">Ativo</span>
                             {% else %}<span class="badge-perfil default">Sem emissão</span>{% endif %}
                         </td>
-                        <td class="text-right">
+                        <td data-label="Ações" class="text-right">
                             <a href="{{ path('app_pos_operatorio_comprovante_paciente', { id: p.id }) }}" class="btn-unio btn-sm">
                                 {{ p.hasComprovanteAtivo ? 'Gerenciar' : 'Emitir' }}
                             </a>
@@ -62,6 +81,7 @@
                 </tbody>
             </table>
         </div>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

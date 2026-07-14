@@ -8,13 +8,14 @@
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
 
-{% block hub_content %}
-<p class="pos-op-back">
-    <a href="{{ path('app_pos_operatorio_recepcao') }}"><i class="fas fa-qrcode" aria-hidden="true"></i> Abrir scanner da recepção</a>
-    <span class="pos-op-back__sep" aria-hidden="true">·</span>
-    <a href="{{ path('app_pos_operatorio_comercial') }}">Comercial</a>
-</p>
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_recepcao') }}" class="btn-unio btn-sm">
+    <i class="fas fa-qrcode mr-1" aria-hidden="true"></i> Scanner
+</a>
+<a href="{{ path('app_pos_operatorio_retornos') }}" class="btn-unio-ghost btn-sm">Retornos</a>
+{% endblock %}
 
+{% block hub_content %}
 <div class="clinic-ops-stats clinic-ops-stats--4 mb-4">
     <div>
         <dt>Pacientes ativos</dt>
@@ -42,12 +43,18 @@
                 icon: 'fa-hospital',
                 title: 'Sem cirurgias',
                 text: 'Nenhuma cirurgia nos próximos 7 dias.',
+                btn_label: 'Pacientes',
+                btn_href: path('app_pos_operatorio_pacientes'),
+                btn_sm: true,
                 compact: true
             } %}
         {% else %}
         <ul class="clinic-ops-list">
             {% for p in painel.pre_op_semana|default([]) %}
-            <li>{{ p.nome }} ({{ p.codigo }}) · {{ p.dia_label|default('pré') }}{% if p.data_cirurgia %} · cirurgia {{ p.data_cirurgia }}{% endif %}</li>
+            <li>
+                <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id|default(0) }) }}">{{ p.nome }}</a>
+                <span class="text-muted">({{ p.codigo }}) · {{ p.dia_label|default('pré') }}{% if p.data_cirurgia %} · cirurgia {{ p.data_cirurgia }}{% endif %}</span>
+            </li>
             {% endfor %}
         </ul>
         {% endif %}
@@ -60,6 +67,9 @@
                 icon: 'fa-calendar-day',
                 title: 'Sem retornos',
                 text: 'Nenhum retorno previsto.',
+                btn_label: 'Ver retornos',
+                btn_href: path('app_pos_operatorio_retornos'),
+                btn_sm: true,
                 compact: true
             } %}
         {% else %}
@@ -78,6 +88,9 @@
                 icon: 'fa-clipboard-check',
                 title: 'Tudo respondido',
                 text: 'Todos responderam hoje.',
+                btn_label: 'Questionários',
+                btn_href: path('app_pos_operatorio_questionarios'),
+                btn_sm: true,
                 compact: true
             } %}
         {% else %}
@@ -97,12 +110,18 @@
             icon: 'fa-id-card',
             title: 'Nenhuma vencendo',
             text: 'Nenhuma carteirinha próxima do vencimento.',
+            btn_label: 'Carteirinhas',
+            btn_href: path('app_pos_operatorio_carteirinha'),
+            btn_sm: true,
             compact: true
         } %}
     {% else %}
     <ul class="clinic-ops-list">
         {% for p in painel.carteirinhas_vencendo %}
-        <li>{{ p.nome }} ({{ p.codigo }})</li>
+        <li>
+            <a href="{{ path('app_pos_operatorio_carteirinha_paciente', { id: p.id|default(0) }) }}">{{ p.nome }}</a>
+            <span class="text-muted">({{ p.codigo }})</span>
+        </li>
         {% endfor %}
     </ul>
     {% endif %}

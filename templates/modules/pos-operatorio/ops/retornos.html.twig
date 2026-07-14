@@ -12,21 +12,31 @@
 {% if retornos.atrasados|default(0) > 0 %}
 <span class="badge-perfil warning">{{ retornos.atrasados }} atrasado(s)</span>
 {% endif %}
+<a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio-ghost btn-sm">Agenda</a>
 {% endblock %}
 
 {% block hub_content %}
-<section class="unio-card">
+{% if retornos.atrasados|default(0) > 0 %}
+<div class="clinic-banner clinic-banner--warn">
+    <i class="fas fa-calendar-xmark" aria-hidden="true"></i>
+    <div><strong>{{ retornos.atrasados }}</strong> retorno(s) atrasado(s) — priorize o agendamento.</div>
+</div>
+{% endif %}
+
+<section class="unio-card p-0 ops-queue-animate">
     {% if retornos.items is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-calendar-day',
             title: 'Sem retornos',
             text: 'Nenhum retorno previsto na janela atual.',
+            btn_label: 'Abrir agenda',
+            btn_href: path('app_pos_operatorio_agenda'),
             btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Paciente</th>
@@ -39,20 +49,20 @@
             <tbody>
                 {% for r in retornos.items %}
                 <tr class="{{ r.hoje ? 'admin-table-row--highlight' : '' }}">
-                    <td>
+                    <td data-label="Paciente">
                         <strong>{{ r.paciente_nome }}</strong>
                         <span class="d-block text-muted small">{{ r.paciente_codigo }} · {{ r.procedimento }}</span>
                     </td>
-                    <td>{{ r.marco }}</td>
-                    <td>D+{{ r.dia_pos }} ? D+{{ r.dia_marco }}</td>
-                    <td>
+                    <td data-label="Marco">{{ r.marco }}</td>
+                    <td data-label="Dia pós-op">D+{{ r.dia_pos }} → D+{{ r.dia_marco }}</td>
+                    <td data-label="Quando">
                         {% if r.hoje %}
                         <span class="badge-perfil warning">Hoje</span>
                         {% else %}
                         {{ r.quando }}
                         {% endif %}
                     </td>
-                    <td class="text-right">
+                    <td data-label="Ações" class="text-right">
                         <a href="{{ path('app_pos_operatorio_agenda_novo', {
                             paciente_id: r.paciente_id,
                             titulo: r.titulo_sugerido|default(r.marco),

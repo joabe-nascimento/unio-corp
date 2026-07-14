@@ -7,8 +7,16 @@
 {% set hub_page_subtitle = plantao.continuity_lead|default(plantao.roteamento) %}
 {% set hub_search_hidden = true %}
 
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">Sala crítica</a>
+<a href="{{ path('app_pos_operatorio_config') }}" class="btn-unio-ghost btn-sm">Config</a>
+{% endblock %}
+
 {% block hub_content %}
-<p class="text-muted small mb-3">{{ plantao.roteamento }}</p>
+<div class="clinic-banner mb-3">
+    <i class="fas fa-user-nurse" aria-hidden="true"></i>
+    <div>{{ plantao.roteamento }}</div>
+</div>
 
 <div class="clinic-ops-panels clinic-ops-panels--3 mb-3">
     <section class="unio-card clinic-ops-panel p-3">
@@ -36,7 +44,7 @@
     </section>
 </div>
 
-<section class="unio-card mb-3">
+<section class="unio-card mb-3 p-0">
     <h3 class="clinic-ops-panel__title px-3 pt-3">Quem está de plantão</h3>
     <form method="post" action="{{ path('app_pos_operatorio_plantao_salvar') }}" class="px-3 pb-3">
         <input type="hidden" name="_token" value="{{ csrf_token('clinic_plantao') }}">
@@ -45,12 +53,14 @@
                 icon: 'fa-user-nurse',
                 title: 'Sem profissionais',
                 text: 'Nenhum usuário ativo na clínica para escala.',
+                btn_label: 'Configurações',
+                btn_href: path('app_pos_operatorio_config'),
                 btn_sm: true,
                 compact: true
             } %}
         {% else %}
         <div class="table-responsive">
-            <table class="admin-table">
+            <table class="admin-table clinic-stack-mobile">
                 <thead>
                     <tr>
                         <th>Plantão</th>
@@ -62,12 +72,15 @@
                 <tbody>
                     {% for m in plantao.plantonistas %}
                     <tr>
-                        <td>
-                            <input type="checkbox" name="plantao_user_ids[]" value="{{ m.id }}" {{ m.on_call|default(m.definido) ? 'checked' : '' }}>
+                        <td data-label="Plantão">
+                            <input type="checkbox" name="plantao_user_ids[]" value="{{ m.id }}" {{ m.on_call|default(m.definido) ? 'checked' : '' }} aria-label="Em plantão: {{ m.nome }}">
+                            {% if m.on_call|default(m.definido) %}
+                            <span class="badge-perfil success ml-1">On</span>
+                            {% endif %}
                         </td>
-                        <td><strong>{{ m.nome }}</strong></td>
-                        <td>{{ m.email|default('—') }}</td>
-                        <td>{{ m.pacientes }}</td>
+                        <td data-label="Profissional"><strong>{{ m.nome }}</strong></td>
+                        <td data-label="E-mail">{{ m.email|default('—') }}</td>
+                        <td data-label="Pacientes">{{ m.pacientes }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -75,7 +88,10 @@
         </div>
         <button type="submit" class="btn-unio btn-sm mt-2">Salvar escala</button>
         {% if not plantao.has_roster %}
-        <p class="text-muted small mt-2 mb-0">Sem plantonista marcado, P1 segue para o médico responsável do paciente.</p>
+        <p class="clinic-banner clinic-banner--warn mt-3 mb-0">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            <span>Sem plantonista marcado, P1 segue para o médico responsável do paciente.</span>
+        </p>
         {% endif %}
         {% endif %}
     </form>

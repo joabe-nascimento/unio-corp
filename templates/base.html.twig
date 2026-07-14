@@ -18,7 +18,7 @@
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
     <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=346">
     {% set _shell_polish_css = app.debug ? 'css/unio-shell-polish.css' : 'css/unio-shell-polish.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=32">
+    <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=33">
     <link rel="stylesheet" href="{{ asset('css/unio-ui-polish.css') }}?v=3">
 
     <style id="unio-shell-drawer-critical">
@@ -70,12 +70,12 @@
     }
     </style>
     {% if organismo.enabled|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=61">
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=62">
     <link rel="stylesheet" href="{{ asset('css/unio-brand-polish.css') }}?v=4">
     <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=9">
     {% if org_clinic|default(false) %}
     <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish.css') }}?v=44">
-    <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish-pack.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish-pack.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/unio-signature.css') }}?v=6">
     <link rel="stylesheet" href="{{ asset('css/pos-operatorio-ops.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/pos-operatorio-hub.css') }}?v=17">
@@ -218,11 +218,6 @@
             <li class="nav-item d-flex align-items-center">
                 {% include 'components/shell_help_hub.html.twig' %}
             </li>
-            <li class="nav-item d-flex align-items-center">
-                <button type="button" class="helix-trigger" id="helixOpenBtn" aria-expanded="false" aria-controls="helixPanel" title="Vitória — Assistente virtual" data-tour="helix">
-                    {{ helix.avatar('sm') }}
-                </button>
-            </li>
             {% if platform_modules|default([])|length > 0 %}
             <li class="nav-item d-flex align-items-center">
                 {% include 'components/platform_apps_launcher.html.twig' %}
@@ -300,6 +295,7 @@
 {% include 'components/shell_mobile_nav.html.twig' %}
 {% endif %}
 {% if app.user and (not organismo.enabled|default(false) or org_clinic|default(false)) %}
+{% include 'components/helix_dock.html.twig' %}
 {% include 'components/helix_assistant.html.twig' %}
 {% endif %}
 {% if app.user and not organismo.enabled|default(false) %}
@@ -604,6 +600,21 @@ window.addEventListener('load', runShellSidebarControls);
     var mobileMq = window.matchMedia('(max-width: 575.98px)');
 
     if (!panel || !openBtn) return;
+
+    /* Apresenta a aba de borda uma vez (descoberta do novo lugar) */
+    if (openBtn.classList.contains('helix-dock')) {
+        try {
+            if (!sessionStorage.getItem('unio-helix-dock-intro')) {
+                sessionStorage.setItem('unio-helix-dock-intro', '1');
+                window.setTimeout(function () {
+                    openBtn.classList.add('is-expanded');
+                    window.setTimeout(function () {
+                        openBtn.classList.remove('is-expanded');
+                    }, 2400);
+                }, 700);
+            }
+        } catch (e) { /* ignore */ }
+    }
 
     var faceTplEl = document.getElementById('helixFaceSmTemplate');
     var FACE_SM = faceTplEl ? faceTplEl.innerHTML.trim() : '';

@@ -4,19 +4,30 @@
 {% set hub_page_title = 'Atividades' %}
 {% set hub_page_subtitle = 'Núcleo Comercial · Follow-ups' %}
 {% set tipo_labels = tipo_labels|default({}) %}
+{% set tipo_tones = {
+    ligacao: 'sky',
+    reuniao: 'lavender',
+    email: 'amber',
+    tarefa: 'default',
+    nota: 'success'
+} %}
 
 {% block hub_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="crm-atividade-nova">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova atividade
 </button>
+<a href="{{ path('app_comercial_pipeline') }}" class="btn-unio-ghost btn-sm">Pipeline</a>
 {% endblock %}
 
 {% block hub_content %}
-<div class="unio-card">
-    {% include 'components/section_header.html.twig' with {
-        title: 'Pendentes',
-        subtitle: (atividades|length) ~ ' atividade(s)'
-    } %}
+{% if atividades|length > 0 %}
+<div class="clinic-banner mb-3">
+    <i class="fas fa-list-check" aria-hidden="true"></i>
+    <div><strong>{{ atividades|length }}</strong> atividade(s) pendente(s) no funil.</div>
+</div>
+{% endif %}
+
+<section class="unio-card p-0 ops-queue-animate">
     {% if atividades|length == 0 %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-list-check',
@@ -24,11 +35,13 @@
             text: 'Registre uma ligação, reunião ou tarefa para acompanhar o funil.',
             btn_label: 'Nova atividade',
             btn_opens: 'crm-atividade-nova',
+            btn_icon: 'fa-plus',
+            btn_sm: true,
             compact: true
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="table unio-table mb-0">
+        <table class="table admin-table mb-0 align-middle clinic-stack-mobile">
             <thead>
                 <tr>
                     <th>Título</th>
@@ -41,16 +54,18 @@
             <tbody>
                 {% for a in atividades %}
                 <tr>
-                    <td>
+                    <td data-label="Título">
                         <div class="fw-medium">{{ a.titulo }}</div>
                         {% if a.descricao %}<div class="small text-muted">{{ a.descricao|length > 80 ? a.descricao|slice(0, 80) ~ '…' : a.descricao }}</div>{% endif %}
                     </td>
-                    <td>{{ tipo_labels[a.tipo]|default(a.tipo) }}</td>
-                    <td>{{ a.venceEm ? a.venceEm|date('d/m/Y') : '—' }}</td>
-                    <td class="small">
+                    <td data-label="Tipo">
+                        <span class="badge-perfil {{ tipo_tones[a.tipo]|default('default') }}">{{ tipo_labels[a.tipo]|default(a.tipo) }}</span>
+                    </td>
+                    <td data-label="Vence">{{ a.venceEm ? a.venceEm|date('d/m/Y') : '—' }}</td>
+                    <td data-label="Vínculo" class="small">
                         {% if a.lead %}Lead: {{ a.lead.nome }}{% elseif a.conta %}Cliente: {{ a.conta.nome }}{% else %}—{% endif %}
                     </td>
-                    <td class="text-end text-nowrap">
+                    <td data-label="Ações" class="text-right text-nowrap">
                         <form method="post" action="{{ path('app_comercial_atividade_concluir', { id: a.id }) }}" class="d-inline">
                             <input type="hidden" name="_token" value="{{ csrf_token('crm_atividade_done_' ~ a.id) }}">
                             <button type="submit" class="btn-unio btn-sm">Concluir</button>
@@ -66,7 +81,7 @@
         </table>
     </div>
     {% endif %}
-</div>
+</section>
 {% endblock %}
 
 {% block page_overlays %}

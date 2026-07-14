@@ -16,15 +16,19 @@ class CrmContaRepository extends ServiceEntityRepository
     }
 
     /** @return list<CrmConta> */
-    public function findByEmpresa(Empresa $empresa, int $limit = 100): array
+    public function findByEmpresa(Empresa $empresa, ?string $status = null, int $limit = 100): array
     {
-        return $this->createQueryBuilder('c')
+        $qb = $this->createQueryBuilder('c')
             ->andWhere('c.empresa = :empresa')
             ->setParameter('empresa', $empresa)
             ->orderBy('c.atualizadoEm', 'DESC')
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($limit);
+
+        if ($status !== null && $status !== '') {
+            $qb->andWhere('c.status = :status')->setParameter('status', $status);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     public function countByEmpresa(Empresa $empresa): int

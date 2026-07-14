@@ -25,7 +25,8 @@
 
 {% block hub_content %}
 {% set _proto_cta = org_clinic|default(false) ? 'Novo protocolo' : 'Novo playbook' %}
-<section class="unio-card">
+
+<section class="unio-card p-0 ops-queue-animate">
     {% if protocolos is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-clipboard-list',
@@ -39,7 +40,7 @@
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="admin-table">
+        <table class="admin-table clinic-stack-mobile mb-0">
             <thead>
                 <tr>
                     <th>Nome</th>
@@ -53,12 +54,14 @@
             <tbody>
                 {% for pr in protocolos %}
                 <tr>
-                    <td><strong>{{ pr.nome }}</strong></td>
-                    <td>{{ pr.tipoProcedimento|default('—') }}</td>
-                    <td>{{ pr.duracaoDias }} dias</td>
-                    <td>{{ pr.checklist|length }} itens</td>
-                    <td>{{ pr.ativo ? 'Ativo' : 'Inativo' }}</td>
-                    <td class="text-right">
+                    <td data-label="Nome"><strong>{{ pr.nome }}</strong></td>
+                    <td data-label="Tipo">{{ pr.tipoProcedimento|default('—') }}</td>
+                    <td data-label="Duração">{{ pr.duracaoDias }} dias</td>
+                    <td data-label="Checklist">{{ pr.checklist|length }} itens</td>
+                    <td data-label="Status">
+                        <span class="badge-perfil {{ pr.ativo ? 'success' : 'default' }}">{{ pr.ativo ? 'Ativo' : 'Inativo' }}</span>
+                    </td>
+                    <td data-label="Ações" class="text-right">
                         <a href="{{ path('app_pos_operatorio_protocolo_editar', { id: pr.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
                     </td>
                 </tr>

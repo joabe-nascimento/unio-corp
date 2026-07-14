@@ -6,13 +6,18 @@
 {% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
 {% set hub_page_subtitle = 'Consultas leves ligadas à agenda' %}
 {% set hub_search_hidden = true %}
+{% set status_tones = {
+    em_andamento: 'amber',
+    finalizado: 'success',
+    cancelado: 'default'
+} %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio-ghost btn-sm">Abrir agenda</a>
+<a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio btn-sm">Abrir agenda</a>
 {% endblock %}
 
 {% block hub_content %}
-<section class="unio-card p-0">
+<section class="unio-card p-0 ops-queue-animate">
     {% if atendimentos is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-stethoscope',
@@ -25,7 +30,7 @@
         } %}
     {% else %}
     <div class="table-responsive">
-        <table class="table admin-table mb-0 align-middle">
+        <table class="table admin-table mb-0 align-middle clinic-stack-mobile">
             <thead>
                 <tr>
                     <th>Início</th>
@@ -38,14 +43,16 @@
             <tbody>
                 {% for a in atendimentos %}
                 <tr>
-                    <td>{{ a.iniciadoEm|date('d/m/Y H:i') }}</td>
-                    <td>
+                    <td data-label="Início">{{ a.iniciadoEm|date('d/m/Y H:i') }}</td>
+                    <td data-label="Paciente">
                         <strong>{{ a.paciente.nome }}</strong>
                         <div class="small text-muted">{{ a.paciente.codigo }}</div>
                     </td>
-                    <td>{{ a.medico ? a.medico.nome : '—' }}</td>
-                    <td>{{ status_labels[a.status]|default(a.status) }}</td>
-                    <td class="text-right">
+                    <td data-label="Médico">{{ a.medico ? a.medico.nome : '—' }}</td>
+                    <td data-label="Status">
+                        <span class="badge-perfil {{ status_tones[a.status]|default('default') }}">{{ status_labels[a.status]|default(a.status) }}</span>
+                    </td>
+                    <td data-label="Ações" class="text-right">
                         <a href="{{ path('app_pos_operatorio_atendimento_show', { id: a.id }) }}" class="btn-unio-ghost btn-sm">
                             {{ a.status == 'em_andamento' ? 'Continuar' : 'Ver' }}
                         </a>

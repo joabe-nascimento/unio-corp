@@ -279,9 +279,12 @@ class ComercialController extends AbstractController
             }
         }
 
+        $status = trim($request->query->getString('status'));
+
         return $this->render(self::T . 'clientes.html.twig', [
             'crm_section' => 'clientes',
-            'contas' => $this->contaRepo->findByEmpresa($empresa),
+            'contas' => $this->contaRepo->findByEmpresa($empresa, $status !== '' ? $status : null),
+            'filter_status' => $status,
             'status_options' => CrmConta::statusList(),
             'status_labels' => CrmConta::statusLabels(),
             'open_novo' => $request->query->getBoolean('novo'),
