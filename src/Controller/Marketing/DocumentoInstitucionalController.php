@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Twig\Environment;
 
 /**
- * Documento institucional Uniowork — PDF A4 via mPDF (capa + marca d’água).
+ * Documento institucional Uniowork — PDF A4 via mPDF (capa full-bleed + marca d’água).
  */
 class DocumentoInstitucionalController extends AbstractController
 {
@@ -23,14 +23,25 @@ class DocumentoInstitucionalController extends AbstractController
     public function pdf(): Response
     {
         $now = new \DateTimeImmutable('now');
-        $html = $this->twig->render('marketing/documento_institucional_pdf.html.twig', [
-            'doc_version' => '1.0',
+        $projectDir = (string) $this->getParameter('kernel.project_dir');
+        $logoPath = $this->resolveLogoPath($projectDir);
+
+        $vars = [
+            'doc_version' => '1.1',
             'doc_date' => $now->format('d/m/Y'),
             'doc_year' => $now->format('Y'),
+            'logo_path' => $logoPath,
             'hub_categories' => $this->hubCategories(),
+        ];
+
+        $coverHtml = $this->twig->render('marketing/documento_institucional_pdf.html.twig', $vars + [
+            'doc_section' => 'cover',
+        ]);
+        $bodyHtml = $this->twig->render('marketing/documento_institucional_pdf.html.twig', $vars + [
+            'doc_section' => 'body',
         ]);
 
-        $tmpDir = $this->getParameter('kernel.project_dir') . '/var/mpdf';
+        $tmpDir = $projectDir . '/var/mpdf';
         if (!is_dir($tmpDir) && !mkdir($tmpDir, 0775, true) && !is_dir($tmpDir)) {
             throw new \RuntimeException('Não foi possível criar o diretório temporário do mPDF.');
         }
@@ -38,38 +49,58 @@ class DocumentoInstitucionalController extends AbstractController
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4',
-            'margin_left' => 14,
-            'margin_right' => 14,
-            'margin_top' => 16,
-            'margin_bottom' => 18,
-            'margin_header' => 8,
-            'margin_footer' => 10,
+            'margin_left' => 12,
+            'margin_right' => 12,
+            'margin_top' => 14,
+            'margin_bottom' => 16,
+            'margin_header' => 0,
+            'margin_footer' => 8,
             'tempDir' => $tmpDir,
             'default_font' => 'dejavusans',
         ]);
 
-        $mpdf->SetTitle('Uniowork — Documento Institucional da Plataforma');
+        $mpdf->SetTitle('Uniowork — Documento Institucional');
         $mpdf->SetAuthor('Unio · uniowork.com.br');
         $mpdf->SetCreator('Uniowork · mPDF');
-        $mpdf->SetSubject('Documento institucional confidencial');
+        $mpdf->SetSubject('Documento institucional confidencial · Unio Studio');
 
-        $mpdf->SetWatermarkText('UNIOWORK · CONFIDENCIAL');
+        // ── Capa full-bleed (sem margem, sem rodapé, sem marca d’água) ──
+        $mpdf->AddPageByArray([
+            'margin-left' => 0,
+            'margin-right' => 0,
+            'margin-top' => 0,
+            'margin-bottom' => 0,
+            'margin-header' => 0,
+            'margin-footer' => 0,
+        ]);
+        $mpdf->SetHTMLFooter('');
+        $mpdf->showWatermarkText = false;
+        $mpdf->WriteHTML($coverHtml);
+
+        // ── Páginas internas ──
+        $mpdf->AddPageByArray([
+            'margin-left' => 12,
+            'margin-right' => 12,
+            'margin-top' => 14,
+            'margin-bottom' => 16,
+            'margin-header' => 0,
+            'margin-footer' => 8,
+        ]);
+        $mpdf->SetWatermarkText('UNIO · CONFIDENCIAL');
         $mpdf->showWatermarkText = true;
         $mpdf->watermark_font = 'dejavusans';
-        $mpdf->watermarkTextAlpha = 0.07;
-
+        $mpdf->watermarkTextAlpha = 0.06;
         $mpdf->SetHTMLFooter('
-            <table width="100%" style="font-size:8pt;color:#64748b;border-top:1px solid #e2e8f0;padding-top:4px;">
+            <table width="100%" style="font-size:7.5pt;color:#64748b;border-top:1px solid #e2e8f0;padding-top:3px;">
                 <tr>
-                    <td width="50%">Uniowork · Documento institucional · Confidencial</td>
-                    <td width="50%" align="right">Página {PAGENO} de {nbpg}</td>
+                    <td width="55%">Unio · Documento institucional · Confidencial</td>
+                    <td width="45%" align="right">{PAGENO} / {nbpg} · uniowork.com.br</td>
                 </tr>
             </table>
         ');
+        $mpdf->WriteHTML($bodyHtml);
 
-        $mpdf->WriteHTML($html);
-
-        $filename = sprintf('uniowork-documento-institucional-v1-%s.pdf', $now->format('Ymd'));
+        $filename = sprintf('uniowork-documento-institucional-v%s-%s.pdf', '1-1', $now->format('Ymd'));
 
         return new Response(
             $mpdf->Output($filename, Destination::STRING_RETURN),
@@ -82,16 +113,29 @@ class DocumentoInstitucionalController extends AbstractController
         );
     }
 
+    private function resolveLogoPath(string $projectDir): string
+    {
+        foreach ([
+            $projectDir . '/public/images/logos/logotipo.svg',
+            $projectDir . '/public/images/logos/logotipo.png',
+            $projectDir . '/assets/images/logos/logotipo.svg',
+        ] as $candidate) {
+            if (is_file($candidate)) {
+                return str_replace('\\', '/', $candidate);
+            }
+        }
+
+        return '';
+    }
+
     /** @return list<array{title: string, hubs: list<string>}> */
     private function hubCategories(): array
     {
         return [
-            ['title' => 'Pessoas & RH', 'hubs' => ['Operações', 'Talentos', 'Maturidade', 'Clima', 'Portal do Colaborador', 'Recrutamento']],
-            ['title' => 'Negócios & Growth', 'hubs' => ['Comercial (CRM)', 'Projetos & Metas', 'Benefícios', 'Academy', 'Customer Success', 'Marketing']],
-            ['title' => 'Tecnologia', 'hubs' => ['Núcleo TI', 'Integrações', 'Inovação', 'Segurança da Informação']],
-            ['title' => 'Finanças & Compliance', 'hubs' => ['Financeiro', 'Jurídico', 'Compliance', 'Licitações']],
-            ['title' => 'Operações & Ativos', 'hubs' => ['Obras', 'Suprimentos', 'Facilities', 'Qualidade', 'PMO']],
-            ['title' => 'Inteligência', 'hubs' => ['Analytics', 'Conhecimento', 'Data & Lakehouse', 'Unio Cortex']],
+            ['title' => 'Comercial', 'hubs' => ['CRM', 'Leads', 'Pipeline kanban', 'Clientes', 'Atividades', 'Analytics']],
+            ['title' => 'Entrega', 'hubs' => ['Projetos & Metas', 'Kanban de tarefas', 'Playbooks', 'Check-ins', 'Portal do cliente']],
+            ['title' => 'Pessoas', 'hubs' => ['RH', 'Recrutamento', 'Admissões', 'Organograma', 'Portal do colaborador']],
+            ['title' => 'Operação', 'hubs' => ['Núcleo TI', 'Integrações', 'Inovação', 'Alertas', 'Vitória']],
         ];
     }
 }
