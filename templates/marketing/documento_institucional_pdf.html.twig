@@ -1,0 +1,502 @@
+{# HTML otimizado para mPDF — Documento institucional Uniowork #}
+<style>
+    body { font-family: dejavusans, sans-serif; color: #334155; font-size: 10.5pt; line-height: 1.45; }
+    h1 { font-size: 18pt; color: #071428; margin: 0 0 8pt; font-weight: bold; }
+    h2 { font-size: 13pt; color: #071428; margin: 0 0 6pt; font-weight: bold; }
+    h3 { font-size: 10.5pt; color: #0f172a; margin: 0 0 3pt; font-weight: bold; }
+    p { margin: 0 0 8pt; }
+    .eyebrow { font-size: 8pt; letter-spacing: 1.5px; text-transform: uppercase; color: #4F7FFF; font-weight: bold; margin: 0 0 4pt; }
+    .lead { font-size: 10pt; color: #64748b; margin: 0 0 12pt; }
+    .page { page-break-after: always; }
+    .page-last { page-break-after: auto; }
+    .muted { color: #64748b; }
+    .small { font-size: 9pt; }
+    .card {
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 9pt 10pt;
+        margin: 0 0 8pt;
+        background: #fff;
+    }
+    .callout {
+        border-left: 3px solid #4F7FFF;
+        background: #f0f5ff;
+        padding: 8pt 10pt;
+        margin: 10pt 0 0;
+    }
+    .callout strong { display: block; color: #0c2563; margin-bottom: 2pt; font-size: 9.5pt; }
+    table.grid { width: 100%; border-collapse: separate; border-spacing: 6pt; margin: 0 -6pt; }
+    table.grid td {
+        width: 50%;
+        vertical-align: top;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8pt 9pt;
+        background: #fff;
+    }
+    table.stats { width: 100%; border-collapse: collapse; margin: 10pt 0 12pt; }
+    table.stats td {
+        width: 33.33%;
+        text-align: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 10pt 6pt;
+    }
+    table.stats strong { display: block; font-size: 16pt; color: #071428; }
+    table.stats span { font-size: 8pt; color: #64748b; }
+    table.data { width: 100%; border-collapse: collapse; margin-top: 6pt; }
+    table.data th {
+        text-align: left;
+        background: #f1f5f9;
+        color: #4F7FFF;
+        font-size: 8pt;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 6pt 7pt;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    table.data td {
+        padding: 7pt;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 9.5pt;
+        vertical-align: top;
+    }
+    table.data td:first-child { font-weight: bold; color: #0c2563; white-space: nowrap; }
+    ul.clean { margin: 4pt 0 0 14pt; padding: 0; }
+    ul.clean li { margin: 0 0 3pt; font-size: 9.5pt; color: #64748b; }
+    .toc td { padding: 5pt 0; border-bottom: 1px solid #e2e8f0; font-size: 10pt; }
+    .toc .num { color: #4F7FFF; font-weight: bold; width: 28pt; }
+    .toc .pg { color: #94a3b8; width: 24pt; text-align: right; }
+    .pill {
+        display: inline-block;
+        font-size: 7.5pt;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: #0c2563;
+        background: #eef4ff;
+        border: 1px solid #c7d7ef;
+        padding: 3pt 7pt;
+        margin: 0 3pt 3pt 0;
+        border-radius: 10pt;
+    }
+
+    /* Capa */
+    .cover {
+        background: #071428;
+        color: #f8fafc;
+        width: 100%;
+        padding: 28pt 22pt 22pt;
+        border-radius: 4px;
+    }
+    .cover-top { border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 10pt; margin-bottom: 28pt; }
+    .cover-type { font-size: 8pt; letter-spacing: 2px; text-transform: uppercase; color: rgba(248,250,252,0.55); }
+    .cover-badge {
+        float: right;
+        font-size: 7.5pt;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #bfdbfe;
+        border: 1px solid rgba(79,127,255,0.4);
+        background: rgba(79,127,255,0.12);
+        padding: 4pt 8pt;
+        border-radius: 10pt;
+    }
+    .cover-brand { font-size: 28pt; font-weight: bold; color: #fff; margin: 0 0 6pt; letter-spacing: -0.5px; }
+    .cover-brand span { color: #4F7FFF; }
+    .cover-title { font-size: 16pt; font-weight: bold; color: #eef4ff; margin: 18pt 0 8pt; }
+    .cover-lead { color: rgba(248,250,252,0.62); font-size: 10pt; margin: 0 0 18pt; max-width: 420pt; }
+    .cover-stats { width: 100%; border-collapse: collapse; margin-bottom: 16pt; }
+    .cover-stats td {
+        width: 33.33%;
+        text-align: center;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 10pt 6pt;
+    }
+    .cover-stats strong { display: block; font-size: 16pt; color: #eef4ff; }
+    .cover-stats span { font-size: 8pt; color: rgba(248,250,252,0.55); }
+    .cover-li {
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.03);
+        padding: 7pt 10pt;
+        margin: 0 0 6pt;
+        font-size: 9pt;
+        color: rgba(248,250,252,0.78);
+    }
+    .cover-foot {
+        margin-top: 28pt;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        padding-top: 10pt;
+        font-size: 8pt;
+        color: rgba(248,250,252,0.5);
+    }
+    .close-box {
+        background: #071428;
+        color: #fff;
+        padding: 16pt;
+        text-align: center;
+        border-radius: 6px;
+        margin-top: 14pt;
+    }
+    .close-box h2 { color: #fff; margin: 0 0 4pt; }
+    .close-box p { color: rgba(248,250,252,0.7); margin: 0; }
+    .close-box a { color: #bfdbfe; font-weight: bold; text-decoration: none; }
+</style>
+
+{# ── 1. Capa ── #}
+<div class="page">
+    <div class="cover">
+        <div class="cover-top">
+            <span class="cover-badge">Confidencial</span>
+            <span class="cover-type">Documento institucional</span>
+        </div>
+
+        <div class="cover-brand">Unio<span>work</span></div>
+        <div style="font-size:9pt;color:rgba(248,250,252,0.55);letter-spacing:1px;text-transform:uppercase;">Plataforma de Gestão de Pessoas &amp; Operação</div>
+
+        <div class="cover-title">A operação da sua empresa,<br>unificada em um só ecossistema</div>
+        <p class="cover-lead">
+            Plataforma enterprise multi-empresa com 30+ núcleos modulares,
+            RH, CRM comercial, Projetos &amp; Metas, Recrutamento, Núcleo TI,
+            Integrações observáveis e assistente Vitória.
+        </p>
+
+        <table class="cover-stats">
+            <tr>
+                <td><strong>30+</strong><span>Núcleos modulares</span></td>
+                <td><strong>100%</strong><span>Multi-empresa</span></td>
+                <td><strong>7</strong><span>Categorias de hubs</span></td>
+            </tr>
+        </table>
+
+        <div class="cover-li">Holdings, franquias e multi-unidade com workspaces isolados</div>
+        <div class="cover-li">Integrações observáveis · APIs, webhooks e service desk com SLA</div>
+        <div class="cover-li">Assistente Vitória · copiloto contextual com governança por perfil</div>
+
+        <div class="cover-foot">
+            Versão {{ doc_version }} · {{ doc_date }} · uniowork.com.br · © {{ doc_year }} Unio
+        </div>
+    </div>
+</div>
+
+{# ── 2. Sumário ── #}
+<div class="page">
+    <p class="eyebrow">Navegação</p>
+    <h1>Sumário</h1>
+    <p class="lead">Material institucional para apresentação comercial, onboarding e alinhamento interno de produto da plataforma Uniowork.</p>
+
+    <table class="toc" width="100%">
+        <tr><td class="num">01</td><td>Capa</td><td class="pg">1</td></tr>
+        <tr><td class="num">02</td><td>Sumário e classificação</td><td class="pg">2</td></tr>
+        <tr><td class="num">03</td><td>Visão e proposta de valor</td><td class="pg">3</td></tr>
+        <tr><td class="num">04</td><td>Multi-empresa e governança</td><td class="pg">4</td></tr>
+        <tr><td class="num">05</td><td>RH e pessoas</td><td class="pg">5</td></tr>
+        <tr><td class="num">06</td><td>Comercial, CRM e Projetos</td><td class="pg">6</td></tr>
+        <tr><td class="num">07</td><td>Recrutamento e Inovação</td><td class="pg">7</td></tr>
+        <tr><td class="num">08</td><td>TI, Integrações e núcleos</td><td class="pg">8</td></tr>
+        <tr><td class="num">09</td><td>Vitória, white-label e segurança</td><td class="pg">9</td></tr>
+        <tr><td class="num">10</td><td>Encerramento e contato</td><td class="pg">10</td></tr>
+    </table>
+
+    <div class="callout">
+        <strong>Classificação — Confidencial</strong>
+        <span class="small muted">Uso interno e comercial sob NDA. Marca d’água “UNIOWORK · CONFIDENCIAL” em todas as páginas. Distribuição apenas com autorização da Unio.</span>
+    </div>
+</div>
+
+{# ── 3. Visão ── #}
+<div class="page">
+    <p class="eyebrow">Proposta de valor</p>
+    <h1>Uma plataforma. Toda a operação.</h1>
+    <p class="lead">A Uniowork conecta RH, núcleos de negócio, TI e integrações em workspaces isolados — com governança por perfil, identidade white-label e a assistente Vitória.</p>
+
+    <table class="stats">
+        <tr>
+            <td><strong>30+</strong><span>Núcleos modulares</span></td>
+            <td><strong>100%</strong><span>Multi-empresa</span></td>
+            <td><strong>7</strong><span>Categorias</span></td>
+        </tr>
+    </table>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Multi-empresa nativo</h3>
+                <p class="small muted" style="margin:0">Workspaces isolados para holdings, franquias e unidades — dados, permissões e branding separados.</p>
+            </td>
+            <td>
+                <h3>30+ núcleos modulares</h3>
+                <p class="small muted" style="margin:0">Centros de excelência por domínio. Ative só o que a operação precisa, sem silos.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>RH operacional completo</h3>
+                <p class="small muted" style="margin:0">Admissão, férias, folha simplificada, documentos e offboarding com trilha de auditoria.</p>
+            </td>
+            <td>
+                <h3>TI &amp; Integrações</h3>
+                <p class="small muted" style="margin:0">Service desk com SLA, conectores observáveis, APIs, webhooks e dead letter queue.</p>
+            </td>
+        </tr>
+    </table>
+
+    <div class="callout">
+        <strong>Modelo modular</strong>
+        <span class="small muted">RH, Comercial (CRM), Projetos &amp; Metas, Recrutamento, Inovação, TI e Integrações trabalham no mesmo workspace — com grants por produto.</span>
+    </div>
+</div>
+
+{# ── 4. Multi-empresa ── #}
+<div class="page">
+    <p class="eyebrow">Multi-tenant nativo</p>
+    <h1>Uma conta, várias empresas — sem misturar dados</h1>
+    <p class="lead">Cada workspace mantém colaboradores, configurações, permissões e identidade visual isolados.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Workspaces isolados</h3>
+                <p class="small muted" style="margin:0">Dados, fluxos e branding separados por empresa ou unidade de negócio.</p>
+            </td>
+            <td>
+                <h3>Troca instantânea</h3>
+                <p class="small muted" style="margin:0">Usuários com múltiplos acessos alternam de empresa sem novo login.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Perfis granulares</h3>
+                <p class="small muted" style="margin:0">Tenant, Admin, Gestor e Supervisor, com escopo por produto e núcleo.</p>
+            </td>
+            <td>
+                <h3>Grants por produto</h3>
+                <p class="small muted" style="margin:0">Libere Comercial, RH, TI ou Recrutamento conforme o papel de cada pessoa.</p>
+            </td>
+        </tr>
+    </table>
+
+    <div class="card" style="margin-top:10pt">
+        <h3>Jornada típica</h3>
+        <ul class="clean">
+            <li><strong>01 · Login</strong> — autenticação enterprise com CSRF e sessão segura</li>
+            <li><strong>02 · Workspace</strong> — escolha da empresa/unidade</li>
+            <li><strong>03 · Hub dock</strong> — atalhos dos núcleos liberados ao perfil</li>
+            <li><strong>04 · Núcleo</strong> — operação no módulo (CRM, RH, Projetos, TI…)</li>
+        </ul>
+    </div>
+</div>
+
+{# ── 5. RH ── #}
+<div class="page">
+    <p class="eyebrow">Pessoas</p>
+    <h1>RH operacional completo</h1>
+    <p class="lead">Do onboarding ao offboarding, com documentos, férias e visão de organograma no mesmo ambiente.</p>
+
+    <table class="data">
+        <thead>
+            <tr><th>Capacidade</th><th>O que entrega</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Funcionários</td><td>Cadastro, fichas e histórico no workspace da empresa.</td></tr>
+            <tr><td>Admissões</td><td>Fluxo de entrada com documentos e checklist operacional.</td></tr>
+            <tr><td>Férias &amp; ausências</td><td>Solicitações e acompanhamento pela gestão.</td></tr>
+            <tr><td>Folha simplificada</td><td>Visão operacional para o dia a dia do RH.</td></tr>
+            <tr><td>Organograma</td><td>Estrutura de cargos e times na plataforma.</td></tr>
+            <tr><td>Portal do colaborador</td><td>Autosserviço alinhado ao núcleo de pessoas.</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout">
+        <strong>Pessoas &amp; Growth no mesmo ecossistema</strong>
+        <span class="small muted">Recrutamento alimenta o RH; o Comercial conversa com Projetos; a TI atende com SLA — sem planilhas paralelas entre áreas.</span>
+    </div>
+</div>
+
+{# ── 6. CRM + Projetos ── #}
+<div class="page">
+    <p class="eyebrow">Negócios &amp; execução</p>
+    <h1>Comercial (CRM) e Projetos &amp; Metas</h1>
+    <p class="lead">Do lead ao fechamento — e do backlog à entrega — no mesmo workspace Uniowork.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Pipeline CRM</h3>
+                <ul class="clean">
+                    <li>Kanban com drag-and-drop entre estágios</li>
+                    <li>Leads, clientes, atividades e analytics</li>
+                    <li>Select de estágio como alternativa</li>
+                    <li>Contadores e valor do funil atualizados</li>
+                </ul>
+            </td>
+            <td>
+                <h3>Projetos &amp; Metas</h3>
+                <ul class="clean">
+                    <li>Kanban: Backlog → A fazer → Em andamento → Feito</li>
+                    <li>Tarefas com prioridade e card arrastável</li>
+                    <li>Lista de projetos e metas vinculadas</li>
+                    <li>Visão do que está em desenvolvimento na Unio</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <div class="card">
+        <h3>Módulos comerciais em produção</h3>
+        <p class="small muted" style="margin:0">
+            <span class="pill">Leads</span>
+            <span class="pill">Pipeline</span>
+            <span class="pill">Clientes</span>
+            <span class="pill">Atividades</span>
+            <span class="pill">Analytics</span>
+            <span class="pill">Projetos</span>
+            <span class="pill">Metas</span>
+            <span class="pill">Kanban DnD</span>
+        </p>
+    </div>
+</div>
+
+{# ── 7. Recrutamento + Inovação ── #}
+<div class="page">
+    <p class="eyebrow">Talentos &amp; inovação</p>
+    <h1>Recrutamento e Inovação</h1>
+    <p class="lead">Funil de seleção com kanban e núcleo de inovação com backlog e analytics — padrões já consolidados na plataforma.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Recrutamento</h3>
+                <ul class="clean">
+                    <li>Pipeline de seleção com drag-and-drop</li>
+                    <li>Vagas, candidatos e etapas (triagem → contrato)</li>
+                    <li>Filtros por vaga e busca</li>
+                    <li>KPIs do funil na própria tela</li>
+                </ul>
+            </td>
+            <td>
+                <h3>Inovação</h3>
+                <ul class="clean">
+                    <li>Kanban de ideias e iniciativas</li>
+                    <li>Analytics de maturidade / radar</li>
+                    <li>Mesma linguagem visual do kanban Unio</li>
+                    <li>Governança por grants de produto</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <div class="callout">
+        <strong>Padrão de experiência</strong>
+        <span class="small muted">Recrutamento, Inovação, Comercial e Projetos compartilham o vocabulário de kanban, SLA e cards — a equipe aprende uma vez e opera em todos os núcleos.</span>
+    </div>
+</div>
+
+{# ── 8. TI + catálogo ── #}
+<div class="page">
+    <p class="eyebrow">Tecnologia &amp; catálogo</p>
+    <h1>TI, Integrações e núcleos modulares</h1>
+    <p class="lead">Service desk com SLA, conectores observáveis e um catálogo de 30+ hubs agrupados por domínio.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Núcleo TI</h3>
+                <ul class="clean">
+                    <li>Chamados e service desk</li>
+                    <li>SLA e escalação (incl. P1)</li>
+                    <li>NOC e knowledge base</li>
+                    <li>Vitória no contexto de TI</li>
+                </ul>
+            </td>
+            <td>
+                <h3>Núcleo Integrações</h3>
+                <ul class="clean">
+                    <li>Conectores e observatório</li>
+                    <li>APIs e webhooks</li>
+                    <li>SLO e shadow replay</li>
+                    <li>Dead letter queue</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <h2 style="margin-top:10pt">Catálogo por categoria</h2>
+    <table class="data">
+        <thead>
+            <tr><th>Categoria</th><th>Núcleos</th></tr>
+        </thead>
+        <tbody>
+            {% for cat in hub_categories %}
+            <tr>
+                <td>{{ cat.title }}</td>
+                <td>{{ cat.hubs|join(' · ') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# ── 9. Vitória + segurança ── #}
+<div class="page">
+    <p class="eyebrow">Experiência &amp; confiança</p>
+    <h1>Vitória, white-label e segurança</h1>
+    <p class="lead">Copiloto contextual, identidade da marca e isolamento multi-tenant com governança por perfil.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Assistente Vitória</h3>
+                <p class="small muted" style="margin:0">Copiloto que ajuda a navegar módulos, núcleos e indicadores dentro das regras de acesso do usuário.</p>
+            </td>
+            <td>
+                <h3>White-label nativo</h3>
+                <p class="small muted" style="margin:0">Logo, cores, tema claro/escuro e textos personalizáveis — ideal para marcas e franquias.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Autenticação enterprise</h3>
+                <p class="small muted" style="margin:0">CSRF, sessão configurável e recuperação de senha. Área autenticada com escopo por empresa.</p>
+            </td>
+            <td>
+                <h3>LGPD &amp; auditoria</h3>
+                <p class="small muted" style="margin:0">Páginas de privacidade/termos, grants por produto e trilha operacional nos módulos críticos.</p>
+            </td>
+        </tr>
+    </table>
+
+    <div class="callout">
+        <strong>Uso deste documento</strong>
+        <span class="small muted">Classificado como confidencial. Não republicar nem remover a marca d’água sem autorização da Unio.</span>
+    </div>
+</div>
+
+{# ── 10. Encerramento ── #}
+<div class="page-last">
+    <p class="eyebrow">Próximos passos</p>
+    <h1>Pronto para apresentar — e para operar</h1>
+    <p class="lead">Use este PDF em propostas, demos e alinhamento de escopo. A marca d’água permanece em todas as páginas.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Ambiente</h3>
+                <p class="small muted" style="margin:0">Produção Uniowork<br><strong style="color:#071428">uniowork.com.br</strong></p>
+            </td>
+            <td>
+                <h3>Versão do documento</h3>
+                <p class="small muted" style="margin:0">v{{ doc_version }} · {{ doc_date }}<br>Formato A4 · 10 páginas · gerado com mPDF</p>
+            </td>
+        </tr>
+    </table>
+
+    <div class="close-box">
+        <h2>Uniowork</h2>
+        <p>Plataforma de Gestão de Pessoas &amp; Operação</p>
+        <p style="margin-top:8pt"><a href="https://uniowork.com.br">uniowork.com.br</a></p>
+    </div>
+
+    <p class="small muted" style="margin-top:14pt;text-align:center">© {{ doc_year }} Unio · Documento institucional confidencial · v{{ doc_version }}</p>
+</div>
