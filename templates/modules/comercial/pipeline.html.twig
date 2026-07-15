@@ -4,6 +4,33 @@
 {% set hub_page_title = 'Pipeline' %}
 {% set hub_page_subtitle = 'Núcleo Comercial · Oportunidades' %}
 
+{% set stage_icons = {
+    lead: 'fa-user-plus',
+    qualificacao: 'fa-comments',
+    proposta: 'fa-file-invoice',
+    negociacao: 'fa-handshake',
+    ganho: 'fa-trophy',
+    perdido: 'fa-xmark'
+} %}
+
+{% set open_items = (pipeline_board.lead|default([]))
+    |merge(pipeline_board.qualificacao|default([]))
+    |merge(pipeline_board.proposta|default([]))
+    |merge(pipeline_board.negociacao|default([])) %}
+{% set open_count = open_items|length %}
+{% set _open_sum = namespace({ v: 0 }) %}
+{% for op in open_items %}
+    {% set _open_sum.v = _open_sum.v + (op.valor ? op.valor * 1 : 0) %}
+{% endfor %}
+{% set open_value = _open_sum.v %}
+{% set won_count = pipeline_board.ganho|default([])|length %}
+{% set lost_count = pipeline_board.perdido|default([])|length %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/crm-pipeline.css') }}?v=1">
+{% endblock %}
+
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_comercial_pipeline', { novo: 1 }) }}" class="btn-unio btn-sm">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova oportunidade
@@ -72,37 +99,135 @@
 </div>
 {% endif %}
 
-<div class="crm-pipeline-board" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;align-items:start">
-    {% for stage in stages %}
-    {% set items = pipeline_board[stage]|default([]) %}
-    <div class="unio-card" style="min-height:220px">
-        {% include 'components/section_header.html.twig' with {
-            title: stage_meta[stage].label|default(stage),
-            subtitle: items|length ~ ' oportunidade(s)'
-        } %}
-        <div class="px-2 pb-2">
-            {% if items|length == 0 %}
-            <p class="text-muted small px-2">Vazio</p>
-            {% else %}
-                {% for op in items %}
-                <div class="unio-card mb-2 p-2" style="box-shadow:none;border:1px solid var(--unio-border, #e5e7eb)">
-                    <a href="{{ path('app_comercial_oportunidade_show', { id: op.id }) }}" class="fw-medium d-block mb-1">{{ op.titulo }}</a>
-                    <div class="small text-muted mb-2">
-                        {% if op.valor %}R$ {{ op.valor|number_format(2, ',', '.') }} · {% endif %}{{ op.probabilidade }}%
-                    </div>
-                    <form method="post" action="{{ path('app_comercial_oportunidade_mover', { id: op.id }) }}" class="d-flex gap-1">
-                        <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_move_' ~ op.id) }}">
-                        <select name="estagio" class="form-control form-control-sm" onchange="this.form.submit()">
-                            {% for s in stages %}
-                            <option value="{{ s }}" {% if op.estagio == s %}selected{% endif %}>{{ stage_meta[s].label|default(s) }}</option>
-                            {% endfor %}
-                        </select>
-                    </form>
-                </div>
-                {% endfor %}
-            {% endif %}
+<div class="crm-pipeline">
+    <div class="crm-pipeline__summary" aria-label="Resumo do pipeline">
+        <div class="crm-pipeline__stat">
+            <span class="crm-pipeline__stat-label">Em aberto</span>
+            <strong class="crm-pipeline__stat-value" data-crm-summary-open>{{ open_count }}</strong>
+        </div>
+        <div class="crm-pipeline__stat">
+            <span class="crm-pipeline__stat-label">Pipeline</span>
+            <strong class="crm-pipeline__stat-value" data-crm-summary-value">R$ {{ open_value|number_format(2, ',', '.') }}</strong>
+        </div>
+        <div class="crm-pipeline__stat crm-pipeline__stat--ok">
+            <span class="crm-pipeline__stat-label">Ganhas</span>
+            <strong class="crm-pipeline__stat-value" data-crm-summary-won>{{ won_count }}</strong>
+        </div>
+        <div class="crm-pipeline__stat crm-pipeline__stat--muted">
+            <span class="crm-pipeline__stat-label">Perdidas</span>
+            <strong class="crm-pipeline__stat-value" data-crm-summary-lost>{{ lost_count }}</strong>
         </div>
     </div>
-    {% endfor %}
+
+    <p class="crm-pipeline__hint text-muted small">
+        <i class="fas fa-grip-vertical mr-1" aria-hidden="true"></i>
+        Arraste pelo ícone de grip para mover entre os estágios (ou use o seletor no card).
+    </p>
+
+    <div class="crm-pipeline__board" data-crm-pipeline-board data-crm-pipeline-dnd role="list" aria-label="Estágios do pipeline">
+        {% for stage in stages %}
+        {% set items = pipeline_board[stage]|default([]) %}
+        {% set meta = stage_meta[stage]|default({ label: stage, tone: 'sky' }) %}
+        {% set _col_sum = namespace({ v: 0 }) %}
+        {% for op in items %}
+            {% set _col_sum.v = _col_sum.v + (op.valor ? op.valor * 1 : 0) %}
+        {% endfor %}
+        {% set col_value = _col_sum.v %}
+
+        <section class="crm-pipeline__col unio-card"
+                 data-crm-pipeline-col="{{ stage }}"
+                 role="listitem"
+                 aria-label="{{ meta.label }}">
+            <header class="crm-pipeline__col-head">
+                <span class="crm-pipeline__col-label">
+                    <i class="fas {{ stage_icons[stage]|default('fa-circle') }} mr-1" aria-hidden="true"></i>
+                    {{ meta.label|default(stage) }}
+                </span>
+                <div class="crm-pipeline__col-meta">
+                    <span class="crm-pipeline__col-sum" data-crm-col-sum {% if items|length == 0 or col_value == 0 %}hidden{% endif %} title="Soma do estágio">
+                        R$ {{ col_value|number_format(0, ',', '.') }}
+                    </span>
+                    <span class="kanban-column-count badge badge-light">{{ items|length }}</span>
+                </div>
+            </header>
+
+            <div class="crm-pipeline__col-body">
+                <div class="kanban-column-cards" data-crm-pipeline-sort-col="{{ stage }}">
+                    {% if items|length == 0 %}
+                    <div class="crm-pipeline__empty">
+                        <i class="fas fa-inbox" aria-hidden="true"></i>
+                        <p>Vazio</p>
+                    </div>
+                    {% else %}
+                        {% for op in items %}
+                        <article class="crm-pipeline__card"
+                                 data-crm-pipeline-card
+                                 data-crm-stage="{{ op.estagio }}"
+                                 data-crm-valor="{{ op.valor|default(0) }}"
+                                 data-crm-prob="{{ op.probabilidade }}"
+                                 data-crm-move-url="{{ path('app_comercial_oportunidade_mover', { id: op.id }) }}"
+                                 data-crm-move-token="{{ csrf_token('crm_oportunidade_move_' ~ op.id) }}">
+                            <button type="button" class="crm-pipeline__drag-handle" title="Arrastar" aria-label="Arrastar oportunidade">
+                                <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+                            </button>
+
+                            <a href="{{ path('app_comercial_oportunidade_show', { id: op.id }) }}" class="crm-pipeline__card-title">
+                                {{ op.titulo }}
+                            </a>
+
+                            {% if op.conta or op.lead %}
+                            <p class="crm-pipeline__card-sub">
+                                {% if op.conta %}{{ op.conta.nome }}{% elseif op.lead %}{{ op.lead.nome }}{% endif %}
+                            </p>
+                            {% endif %}
+
+                            <div class="crm-pipeline__card-metrics">
+                                <span class="crm-pipeline__card-value">
+                                    {% if op.valor %}R$ {{ op.valor|number_format(2, ',', '.') }}{% else %}Sem valor{% endif %}
+                                </span>
+                                <span class="crm-pipeline__card-prob">{{ op.probabilidade }}%</span>
+                            </div>
+                            <div class="crm-pipeline__prob-bar" aria-hidden="true">
+                                <span style="width: {{ op.probabilidade }}%"></span>
+                            </div>
+
+                            {% if op.fechaPrevista %}
+                            <p class="crm-pipeline__card-date">
+                                <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                                Fecha {{ op.fechaPrevista|date('d/m/Y') }}
+                            </p>
+                            {% endif %}
+
+                            <div class="crm-pipeline__card-foot">
+                                <form method="post" action="{{ path('app_comercial_oportunidade_mover', { id: op.id }) }}" class="crm-pipeline__move">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('crm_oportunidade_move_' ~ op.id) }}">
+                                    <label class="sr-only" for="crm-move-{{ op.id }}">Mover estágio</label>
+                                    <select id="crm-move-{{ op.id }}" name="estagio" class="form-control form-control-sm crm-pipeline__move-select" onchange="this.form.submit()" title="Mover para…">
+                                        {% for s in stages %}
+                                        <option value="{{ s }}" data-label="{{ stage_meta[s].label|default(s) }}" {% if op.estagio == s %}selected{% endif %}>
+                                            {{ op.estagio == s ? 'Estágio atual' : '→ ' ~ (stage_meta[s].label|default(s)) }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                                <a href="{{ path('app_comercial_oportunidade_show', { id: op.id }) }}" class="crm-pipeline__card-open" title="Abrir">
+                                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                                    <span class="sr-only">Abrir</span>
+                                </a>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+        {% endfor %}
+    </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/sortable.min.js') }}"></script>
+<script src="{{ asset('js/crm-pipeline.js') }}?v=1"></script>
 {% endblock %}

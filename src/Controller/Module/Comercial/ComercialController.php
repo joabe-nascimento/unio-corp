@@ -207,13 +207,35 @@ class ComercialController extends AbstractController
         $empresa = $this->requireEmpresa($user);
         $op = $this->crm->loadOportunidade($empresa, $id);
         $this->requireCsrf($request, 'crm_oportunidade_move_' . $id);
+
+        $from = $op->getEstagio();
+        $to = $request->request->getString('estagio');
+        $wantsJson = $request->isXmlHttpRequest()
+            || str_contains((string) $request->headers->get('Accept', ''), 'application/json');
+
         try {
-            $this->crm->moveOportunidade($op, $request->request->getString('estagio'));
-            $this->addFlash('success', 'Estágio atualizado.');
+            $this->crm->moveOportunidade($op, $to);
         } catch (\InvalidArgumentException $e) {
+            if ($wantsJson) {
+                return $this->json(['ok' => false, 'error' => $e->getMessage()], 422);
+            }
             $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToRoute('app_comercial_pipeline');
         }
 
+        if ($wantsJson) {
+            return $this->json([
+                'ok' => true,
+                'message' => 'Estágio da oportunidade atualizado.',
+                'id' => $op->getId(),
+                'from_estagio' => $from,
+                'to_estagio' => $op->getEstagio(),
+                'probabilidade' => $op->getProbabilidade(),
+            ]);
+        }
+
+        $this->addFlash('success', 'Estágio atualizado.');
         $back = $request->request->getString('back', 'pipeline');
 
         return $back === 'show'
