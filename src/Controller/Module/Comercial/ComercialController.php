@@ -158,6 +158,26 @@ class ComercialController extends AbstractController
 
         $board = $this->crm->buildPipelineBoard($empresa);
 
+        $openStages = ['lead', 'qualificacao', 'proposta', 'negociacao'];
+        $openItems = [];
+        foreach ($openStages as $stage) {
+            foreach ($board[$stage] ?? [] as $op) {
+                $openItems[] = $op;
+            }
+        }
+        $openValue = 0.0;
+        foreach ($openItems as $op) {
+            $openValue += (float) ($op->getValor() ?? 0);
+        }
+        $columnSums = [];
+        foreach (CrmOportunidade::stagesAll() as $stage) {
+            $sum = 0.0;
+            foreach ($board[$stage] ?? [] as $op) {
+                $sum += (float) ($op->getValor() ?? 0);
+            }
+            $columnSums[$stage] = $sum;
+        }
+
         return $this->render(self::T . 'pipeline.html.twig', [
             'crm_section' => 'pipeline',
             'pipeline_board' => $board,
@@ -166,6 +186,11 @@ class ComercialController extends AbstractController
             'contas' => $this->contaRepo->findByEmpresa($empresa),
             'leads' => $this->leadRepo->findByEmpresa($empresa, null, 50),
             'open_novo' => $request->query->getBoolean('novo'),
+            'pipeline_open_count' => \count($openItems),
+            'pipeline_open_value' => $openValue,
+            'pipeline_won_count' => \count($board['ganho'] ?? []),
+            'pipeline_lost_count' => \count($board['perdido'] ?? []),
+            'pipeline_column_sums' => $columnSums,
         ]);
     }
 

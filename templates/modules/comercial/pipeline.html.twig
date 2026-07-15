@@ -13,18 +13,10 @@
     perdido: 'fa-xmark'
 } %}
 
-{% set open_items = (pipeline_board.lead|default([]))
-    |merge(pipeline_board.qualificacao|default([]))
-    |merge(pipeline_board.proposta|default([]))
-    |merge(pipeline_board.negociacao|default([])) %}
-{% set open_count = open_items|length %}
-{% set _open_sum = namespace({ v: 0 }) %}
-{% for op in open_items %}
-    {% set _open_sum.v = _open_sum.v + (op.valor ? op.valor * 1 : 0) %}
-{% endfor %}
-{% set open_value = _open_sum.v %}
-{% set won_count = pipeline_board.ganho|default([])|length %}
-{% set lost_count = pipeline_board.perdido|default([])|length %}
+{% set open_count = pipeline_open_count|default(0) %}
+{% set open_value = pipeline_open_value|default(0) %}
+{% set won_count = pipeline_won_count|default(0) %}
+{% set lost_count = pipeline_lost_count|default(0) %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -128,11 +120,7 @@
         {% for stage in stages %}
         {% set items = pipeline_board[stage]|default([]) %}
         {% set meta = stage_meta[stage]|default({ label: stage, tone: 'sky' }) %}
-        {% set _col_sum = namespace({ v: 0 }) %}
-        {% for op in items %}
-            {% set _col_sum.v = _col_sum.v + (op.valor ? op.valor * 1 : 0) %}
-        {% endfor %}
-        {% set col_value = _col_sum.v %}
+        {% set col_value = pipeline_column_sums[stage]|default(0) %}
 
         <section class="crm-pipeline__col unio-card"
                  data-crm-pipeline-col="{{ stage }}"
