@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicSoapTemplate;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicCadastroRules;
@@ -44,20 +45,62 @@ final class PosOperatorioSoapTemplateController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_soap_templates');
         }
 
-        $lista = $this->templates->list($empresa);
+        $ativo = $request->query->getString('ativo', '');
+        $tipo = $request->query->getString('tipo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->templates->list($empresa);
         $tiposProcedimento = ClinicCadastroRules::TIPOS_PROCEDIMENTO_SOAP;
-        foreach ($lista as $template) {
-            $tipo = trim((string) $template->getProcedimentoTipo());
-            if ($tipo !== '' && !isset($tiposProcedimento[$tipo])) {
-                $tiposProcedimento[$tipo] = $tipo;
+        foreach ($all as $template) {
+            $tipoKey = trim((string) $template->getProcedimentoTipo());
+            if ($tipoKey !== '' && !isset($tiposProcedimento[$tipoKey])) {
+                $tiposProcedimento[$tipoKey] = $tipoKey;
             }
         }
+        if ($tipo !== '' && !isset($tiposProcedimento[$tipo])) {
+            $tipo = '';
+        }
+        $lista = array_values(array_filter(
+            $all,
+            static function (ClinicSoapTemplate $template) use ($ativo, $tipo, $q): bool {
+                if ($ativo === '1' && !$template->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $template->isAtivo()) {
+                    return false;
+                }
+                if ($tipo !== '' && $template->getProcedimentoTipo() !== $tipo) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $template->getNome(),
+                        $template->getProcedimentoTipo(),
+                        $template->getCid10Sugerido(),
+                        $template->getQueixa(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (ClinicSoapTemplate $t) => $t->isAtivo()));
 
         return $this->render('modules/pos-operatorio/soap-templates/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'soap_templates',
             'templates' => $lista,
             'tipos_procedimento' => $tiposProcedimento,
+            'filter_ativo' => $ativo,
+            'filter_tipo' => $tipo,
+            'filter_q' => $q,
+            'soap_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+            ],
         ]);
     }
 

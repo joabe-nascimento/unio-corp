@@ -4,6 +4,7 @@
 {% set hub_page_title = 'Atividades' %}
 {% set hub_page_subtitle = 'Núcleo Comercial · Follow-ups' %}
 {% set hub_page_eyebrow = org_clinic|default(false) ? (org_brand_label|default('Unio Saúde')) : '' %}
+{% set hub_search_hidden = true %}
 {% set tipo_labels = tipo_labels|default({}) %}
 {% set tipo_tones = {
     ligacao: 'sky',
@@ -20,14 +21,53 @@
 <a href="{{ path('app_comercial_pipeline') }}" class="btn-unio-ghost btn-sm">Pipeline</a>
 {% endblock %}
 
-{% block hub_content %}
-{% if atividades|length > 0 %}
-<div class="clinic-banner mb-3">
-    <i class="fas fa-list-check" aria-hidden="true"></i>
-    <div><strong>{{ atividades|length }}</strong> atividade(s) pendente(s) no funil.</div>
-</div>
-{% endif %}
+{% set _ac = atividade_counts|default({}) %}
+{% set _fq = filter_q|default('') %}
+{% set _ft = filter_tipo|default('') %}
+{% set _fv = filter_vencidas|default('') %}
+{% set _hidden = {} %}
+{% if _ft != '' %}{% set _hidden = _hidden|merge({ tipo: _ft }) %}{% endif %}
+{% if _fv != '' %}{% set _hidden = _hidden|merge({ vencidas: _fv }) %}{% endif %}
+{% set _qmerge = _fq ? { q: _fq } : {} %}
 
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_comercial_atividades'),
+    show_search: true,
+    use_form: true,
+    search_placeholder: 'Buscar título, lead ou cliente…',
+    search_name: 'q',
+    search_value: _fq,
+    hidden_fields: _hidden
+} %}
+    {% block filter_chips %}
+    <div class="hub-page-filter-bar__chip-groups">
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar por tipo',
+            chips: [
+                { href: path('app_comercial_atividades', _qmerge|merge(_fv ? { vencidas: _fv } : {})), label: 'Todas', active: _ft == '', count: _ac.total|default(null) },
+            ]|merge(
+                tipo_options|map(tid => {
+                    href: path('app_comercial_atividades', { tipo: tid }|merge(_qmerge)|merge(_fv ? { vencidas: _fv } : {})),
+                    label: tipo_labels[tid]|default(tid),
+                    active: _ft == tid,
+                    count: _ac[tid]|default(null)
+                })
+            )
+        } %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar por prazo',
+            chips: [
+                { href: path('app_comercial_atividades', _qmerge|merge(_ft ? { tipo: _ft } : {})), label: 'Todas', active: _fv == '' },
+                { href: path('app_comercial_atividades', { vencidas: '1' }|merge(_qmerge)|merge(_ft ? { tipo: _ft } : {})), label: 'Vencidas', active: _fv == '1', count: _ac.vencidas|default(null) },
+            ]
+        } %}
+    </div>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block hub_content %}
 <section class="unio-card p-0 ops-queue-animate">
     {% if atividades|length == 0 %}
         {% include 'components/empty_state.html.twig' with {

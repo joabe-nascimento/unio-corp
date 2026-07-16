@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicPacote;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicPacoteService;
@@ -45,11 +46,39 @@ final class PosOperatorioPacoteController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_pacotes');
         }
 
+        $ativo = $request->query->getString('ativo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->pacotes->list($empresa);
+        $pacotes = array_values(array_filter(
+            $all,
+            static function (ClinicPacote $pacote) use ($ativo, $q): bool {
+                if ($ativo === '1' && !$pacote->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $pacote->isAtivo()) {
+                    return false;
+                }
+                if ($q !== '' && !str_contains(mb_strtolower($pacote->getNome()), mb_strtolower($q))) {
+                    return false;
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (ClinicPacote $p) => $p->isAtivo()));
+
         return $this->render('modules/pos-operatorio/pacotes/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'pacotes',
-            'pacotes' => $this->pacotes->list($empresa),
+            'pacotes' => $pacotes,
             'procedimentos' => $this->procedimentos->list($empresa, true),
+            'filter_ativo' => $ativo,
+            'filter_q' => $q,
+            'pacote_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+            ],
         ]);
     }
 

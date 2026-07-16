@@ -27,15 +27,58 @@ final class PosOperatorioGuiaMedicoController extends AbstractController
     ) {}
 
     #[Route('', name: 'app_pos_operatorio_guia_medico', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
         $this->assertProductEnabled($empresa);
 
+        $ativo = $request->query->getString('ativo', '');
+        $padrao = $request->query->getString('padrao', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->guias->list($empresa);
+        $guias = array_values(array_filter(
+            $all,
+            static function (array $guia) use ($ativo, $padrao, $q): bool {
+                $isAtivo = (bool) ($guia['ativo'] ?? true);
+                $isPadrao = (bool) ($guia['padrao'] ?? false);
+                if ($padrao === '1' && !$isPadrao) {
+                    return false;
+                }
+                if ($ativo === '1' && !$isAtivo) {
+                    return false;
+                }
+                if ($ativo === '0' && $isAtivo) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $guia['nome'] ?? '',
+                        $guia['tipo_procedimento'] ?? '',
+                        $guia['subtitulo'] ?? '',
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (array $g): bool => (bool) ($g['ativo'] ?? true)));
+
         return $this->render(self::T . 'index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'guia_medico',
-            'guias' => $this->guias->list($empresa),
+            'guias' => $guias,
+            'filter_ativo' => $ativo,
+            'filter_padrao' => $padrao,
+            'filter_q' => $q,
+            'guia_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+                'padrao' => \count(array_filter($all, static fn (array $g): bool => (bool) ($g['padrao'] ?? false))),
+            ],
         ]);
     }
 

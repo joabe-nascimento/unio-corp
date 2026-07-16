@@ -1,0 +1,16 @@
+{#
+  hub_filter_chips — pills de filtro rápido (esquerda da faixa)
+
+  Props:
+    chips       (array)  { href, label, active?, count? }
+    aria_label  (string, opt)
+#}
+{% if chips|default([])|length > 0 %}
+<div class="clinic-filter-chips hub-page-filter-chips" role="navigation" aria-label="{{ aria_label|default('Filtrar') }}">
+    {% for chip in chips %}
+    <a href="{{ chip.href }}" class="{{ chip.active|default(false) ? 'is-active' : '' }}">
+        {{ chip.label }}{% if chip.count is defined and chip.count is not null %} ({{ chip.count }}){% endif %}
+    </a>
+    {% endfor %}
+</div>
+{% endif %}

@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Service\PosOperatorio\PosOperatorioQuestionarioListService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -22,13 +23,24 @@ final class PosOperatorioQuestionarioController extends AbstractController
     ) {}
 
     #[Route('', name: 'app_pos_operatorio_questionarios')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
+        $filtro = $request->query->getString('filtro', '');
         $data = $this->service->buildList($empresa);
+        if ($filtro === 'alerta') {
+            $data['items'] = array_values(array_filter(
+                $data['items'],
+                static fn (array $row): bool => (bool) ($row['alerta_gerado'] ?? false),
+            ));
+        }
 
         return $this->render(self::T . 'index.html.twig', array_merge(
-            ['empresa' => $empresa, 'pos_section' => 'questionarios'],
+            [
+                'empresa' => $empresa,
+                'pos_section' => 'questionarios',
+                'filter_filtro' => $filtro,
+            ],
             $data,
         ));
     }

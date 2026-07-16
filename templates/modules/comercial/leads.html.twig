@@ -18,19 +18,37 @@
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="crm-lead-novo">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo lead
 </button>
-<a href="{{ path('app_comercial_pipeline') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Pipeline
-</a>
+{% embed 'components/hub_toolbar_more_menu.html.twig' %}
+    {% block items %}
+    <a href="{{ path('app_comercial_pipeline') }}" class="dropdown-item">
+        <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Pipeline
+    </a>
+    <a href="{{ path('app_comercial_clientes') }}" class="dropdown-item">
+        <i class="fas fa-building mr-1" aria-hidden="true"></i> Clientes
+    </a>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block hub_section_toolbar %}
+{% set _lc = status_counts|default({}) %}
+{% set _by = _lc.by_status|default({}) %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_comercial_leads'),
+    use_form: false
+} %}
+    {% block filter_chips %}
+        <div class="clinic-filter-chips hub-page-filter-chips" role="navigation" aria-label="Filtrar leads por situação">
+            <a href="{{ path('app_comercial_leads') }}" class="{{ filter_status == '' ? 'is-active' : '' }}">Todos{% if _lc.total is defined %} ({{ _lc.total }}){% endif %}</a>
+            {% for s in status_options %}
+            <a href="{{ path('app_comercial_leads', { status: s }) }}" class="{{ filter_status == s ? 'is-active' : '' }}">{{ status_labels[s]|default(s) }}{% if _by[s] is defined %} ({{ _by[s] }}){% endif %}</a>
+            {% endfor %}
+        </div>
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block hub_content %}
-<p class="clinic-filter-chips">
-    <a href="{{ path('app_comercial_leads') }}" class="{{ filter_status == '' ? 'is-active' : '' }}">Todos</a>
-    {% for s in status_options %}
-    <a href="{{ path('app_comercial_leads', { status: s }) }}" class="{{ filter_status == s ? 'is-active' : '' }}">{{ status_labels[s]|default(s) }}</a>
-    {% endfor %}
-</p>
-
 <section class="unio-card p-0 ops-queue-animate">
     {% if leads|length == 0 %}
         {% include 'components/empty_state.html.twig' with {

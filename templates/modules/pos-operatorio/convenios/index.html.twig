@@ -14,6 +14,33 @@
 {{ cadastro.create_button('clinic-convenio', 'Novo convênio') }}
 {% endblock %}
 
+{% set _cc = convenio_counts|default({}) %}
+{% set _fq = filter_q|default('') %}
+{% set _fa = filter_ativo|default('') %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_convenios'),
+    show_search: true,
+    use_form: true,
+    search_placeholder: 'Buscar nome, ANS ou código…',
+    search_name: 'q',
+    search_value: _fq,
+    hidden_fields: _fa != '' ? { ativo: _fa } : {}
+} %}
+    {% block filter_chips %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar convênios',
+            chips: [
+                { href: path('app_pos_operatorio_convenios', _fq ? { q: _fq } : {}), label: 'Todos', active: _fa == '', count: _cc.total|default(null) },
+                { href: path('app_pos_operatorio_convenios', { ativo: '1' }|merge(_fq ? { q: _fq } : {})), label: 'Ativos', active: _fa == '1', count: _cc.ativos|default(null) },
+                { href: path('app_pos_operatorio_convenios', { ativo: '0' }|merge(_fq ? { q: _fq } : {})), label: 'Inativos', active: _fa == '0', count: _cc.inativos|default(null) },
+            ]
+        } %}
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
 {% block hub_content %}
 <section class="unio-card clinic-convenio-list p-0">
     {% if convenios is empty %}
@@ -28,13 +55,6 @@
             btn_icon: 'fa-plus'
         } %}
     {% else %}
-    <div class="clinic-cadastro-list__head">
-        <div>
-            <strong>Convênios</strong>
-            <p class="clinic-cadastro-list__head-sub mb-0">ANS, TISS e faturamento</p>
-        </div>
-        <span class="clinic-cadastro-list__count">{{ convenios|length }}</span>
-    </div>
     <div class="clinic-cadastro-list">
         {% for c in convenios %}
         <article class="clinic-cadastro-item clinic-cadastro-item--rich">

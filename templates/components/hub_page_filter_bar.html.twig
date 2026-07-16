@@ -1,0 +1,85 @@
+{#
+  hub_page_filter_bar — faixa unificada entre KPIs e conteúdo
+
+  Layout: [chips]  ·········  [filtros avançados] [busca]  (+ FAB mobile)
+
+  Props:
+    form_action, form_method, hidden_fields
+    show_search, search_placeholder, search_name, search_value, search_disabled
+    offcanvas_id, offcanvas_title
+    meta_text
+    advanced_inline (bool) — filtros avançados na 2ª linha (desktop); empilha no mobile
+    show_controls (bool) — toolbar busca/filtros à direita (default: true se busca ou avançado)
+
+  Blocks:
+    filter_chips
+    filter_advanced      — toolbar (visível se não advanced_inline)
+    filter_advanced_row  — 2ª linha (se advanced_inline)
+    filter_tools_extra
+#}
+{% set _route = app.request.attributes.get('_route')|default('page') %}
+{% set _offcanvas_id = offcanvas_id|default('hub-filters-' ~ _route|replace({'.': '-'})) %}
+{% set _form_action = form_action|default(path(_route, app.request.attributes.get('_route_params')|default({}))) %}
+{% set _show_search = show_search|default(false) %}
+{% set _advanced_inline = advanced_inline|default(false) %}
+{% set _show_controls = show_controls|default(_show_search) %}
+{% set _hidden_fields = hidden_fields|default({}) %}
+{% set _tag = use_form|default(_show_search or _advanced_inline) ? 'form' : 'div' %}
+
+<{{ _tag }}{% if _tag == 'form' %} method="{{ form_method|default('get') }}" action="{{ _form_action }}"{% endif %}
+      class="hub-page-filter-bar"
+      data-hub-page-filter-bar>
+    {% if _hidden_fields is iterable %}
+        {% for name, value in _hidden_fields %}
+            {% if value is not same as(null) and value != '' %}
+            <input type="hidden" name="{{ name }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <div class="hub-page-filter-bar__primary">
+        <div class="hub-page-filter-bar__start">
+            {% block filter_chips %}{% endblock %}
+        </div>
+        {% if _show_controls %}
+        <div class="hub-page-filter-bar__end">
+            {% block filter_tools_extra %}{% endblock %}
+            {% embed 'components/toolbar_controls_dual.html.twig' with {
+                offcanvas_id: _offcanvas_id,
+                fab_label: offcanvas_title|default('Filtros e busca'),
+                fab_icon: 'fa-sliders'
+            } %}
+                {% block toolbar_dual_filters %}
+                    {% if not _advanced_inline %}
+                    <div class="hub-page-filter-bar__advanced-fields">
+                        {% block filter_advanced %}{% endblock %}
+                    </div>
+                    {% endif %}
+                {% endblock %}
+                {% block toolbar_dual_search %}
+                    {% if _show_search %}
+                        {% include 'components/toolbar_search.html.twig' with {
+                            search_placeholder: search_placeholder|default('Buscar…'),
+                            search_disabled: search_disabled|default(false),
+                            search_name: search_name|default('q'),
+                            search_value: search_value|default('')
+                        } %}
+                    {% endif %}
+                {% endblock %}
+            {% endembed %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if _advanced_inline %}
+    <div class="hub-page-filter-bar__advanced hub-page-filter-bar__advanced--inline">
+        {% block filter_advanced_row %}
+            {% block filter_advanced %}{% endblock %}
+        {% endblock %}
+    </div>
+    {% endif %}
+
+    {% if meta_text|default('') %}
+    <p class="hub-page-filter-bar__meta text-muted small mb-0">{{ meta_text }}</p>
+    {% endif %}
+</{{ _tag }}>

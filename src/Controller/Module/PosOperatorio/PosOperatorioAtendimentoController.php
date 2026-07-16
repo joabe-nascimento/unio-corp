@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicAtendimento;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicAtendimentoService;
@@ -24,15 +25,52 @@ final class PosOperatorioAtendimentoController extends AbstractController
     ) {}
 
     #[Route('', name: 'app_pos_operatorio_atendimento', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
+        $status = $request->query->getString('status', '');
+        if ($status !== '' && !\in_array($status, ClinicAtendimento::STATUSES, true)) {
+            $status = '';
+        }
+        $q = trim($request->query->getString('q'));
+        $all = $this->atendimentos->list($empresa);
+        $atendimentos = array_values(array_filter(
+            $all,
+            static function (ClinicAtendimento $atendimento) use ($status, $q): bool {
+                if ($status !== '' && $atendimento->getStatus() !== $status) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $atendimento->getPaciente()->getNome(),
+                        $atendimento->getPaciente()->getCodigo(),
+                        $atendimento->getMedico()?->getNome(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $statusLabels = ClinicAtendimentoService::statusLabels();
+        $statusCounts = ['total' => \count($all)];
+        foreach (array_keys($statusLabels) as $statusKey) {
+            $statusCounts[$statusKey] = \count(array_filter(
+                $all,
+                static fn (ClinicAtendimento $a) => $a->getStatus() === $statusKey,
+            ));
+        }
 
         return $this->render('modules/pos-operatorio/atendimento/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'atendimento',
-            'atendimentos' => $this->atendimentos->listRecent($empresa),
-            'status_labels' => ClinicAtendimentoService::statusLabels(),
+            'atendimentos' => $atendimentos,
+            'status_labels' => $statusLabels,
+            'filter_status' => $status,
+            'filter_q' => $q,
+            'atendimento_counts' => $statusCounts,
         ]);
     }
 

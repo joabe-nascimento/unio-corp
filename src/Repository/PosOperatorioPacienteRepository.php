@@ -43,6 +43,18 @@ class PosOperatorioPacienteRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /** @return array{em_acompanhamento: int, ativo: int, alerta: int, pendente: int, encerrado: int} */
+    public function countStatusSummary(Empresa $empresa): array
+    {
+        return [
+            'em_acompanhamento' => $this->countRecentByEmpresa($empresa),
+            'ativo' => $this->countByStatus($empresa, PosOperatorioPaciente::STATUS_ATIVO),
+            'alerta' => $this->countByStatus($empresa, PosOperatorioPaciente::STATUS_ALERTA),
+            'pendente' => $this->countByStatus($empresa, PosOperatorioPaciente::STATUS_PENDENTE),
+            'encerrado' => $this->countByStatus($empresa, PosOperatorioPaciente::STATUS_ENCERRADO),
+        ];
+    }
+
     /** @return list<PosOperatorioPaciente> */
     public function findRecentByEmpresa(Empresa $empresa, int $limit, int $offset): array
     {

@@ -18,14 +18,22 @@
     ativos: 'default'
 } %}
 
+{% set _st = filters.status|default('ativos') %}
+{% set _pri = filters.prioridade|default('') %}
+{% set _ativos_count = stats.abertos|default(0) + stats.em_atendimento|default(0) %}
+
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-flag mr-1"></i> {{ _copy.nav_sala_critica|default(org_clinic|default(false) ? 'Sala Crítica P1' : 'Prioridade alta') }}
+<a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio btn-sm">
+    <i class="fas fa-flag mr-1" aria-hidden="true"></i> {{ _copy.nav_sala_critica|default(org_clinic|default(false) ? 'Sala Crítica P1' : 'Prioridade alta') }}
 </a>
 {% if not org_clinic %}
-<a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-arrow-left mr-1"></i> Visão geral
-</a>
+{% embed 'components/hub_toolbar_more_menu.html.twig' %}
+    {% block items %}
+    <a href="{{ path('app_pos_operatorio') }}" class="dropdown-item">
+        <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Visão geral
+    </a>
+    {% endblock %}
+{% endembed %}
 {% endif %}
 {% endblock %}
 
@@ -35,7 +43,35 @@
     { value: stats.p2, label: 'P2 abertos', icon: 'fa-triangle-exclamation', tone: 'amber', variant: stats.p2 > 0 ? 'warning' : '' },
     { value: stats.abertos, label: 'Aguardando', icon: 'fa-inbox', tone: 'sky' },
     { value: stats.em_atendimento, label: 'Em atendimento', icon: 'fa-user-nurse', tone: 'sage' },
-], mb: 'mb-0' } %}
+], mb: 'mb-3' } %}
+{% endblock %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with { use_form: false } %}
+    {% block filter_chips %}
+    <div class="hub-page-filter-bar__chip-groups">
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar por status',
+            chips: [
+                { href: path('app_pos_operatorio_alertas', { status: 'ativos' }|merge(_pri ? { prioridade: _pri } : {})), label: 'Ativos', active: _st == 'ativos' or not _st, count: _ativos_count },
+                { href: path('app_pos_operatorio_alertas', { status: 'aberto' }|merge(_pri ? { prioridade: _pri } : {})), label: 'Aberto', active: _st == 'aberto', count: stats.abertos|default(null) },
+                { href: path('app_pos_operatorio_alertas', { status: 'em_atendimento' }|merge(_pri ? { prioridade: _pri } : {})), label: 'Em atendimento', active: _st == 'em_atendimento', count: stats.em_atendimento|default(null) },
+                { href: path('app_pos_operatorio_alertas', { status: 'resolvido' }|merge(_pri ? { prioridade: _pri } : {})), label: 'Resolvido', active: _st == 'resolvido' },
+            ]
+        } %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar por prioridade',
+            chips: [
+                { href: path('app_pos_operatorio_alertas', { status: _st }), label: 'Todas P', active: _pri == '' },
+                { href: path('app_pos_operatorio_alertas', { status: _st, prioridade: 'P1' }), label: 'P1', active: _pri == 'P1', count: stats.p1|default(null) },
+                { href: path('app_pos_operatorio_alertas', { status: _st, prioridade: 'P2' }), label: 'P2', active: _pri == 'P2', count: stats.p2|default(null) },
+                { href: path('app_pos_operatorio_alertas', { status: _st, prioridade: 'P3' }), label: 'P3', active: _pri == 'P3' },
+                { href: path('app_pos_operatorio_alertas', { status: _st, prioridade: 'P4' }), label: 'P4', active: _pri == 'P4' },
+            ]
+        } %}
+    </div>
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block hub_content %}
@@ -44,21 +80,6 @@
      data-pos-op-poll-url="{{ path('app_pos_operatorio_api_alertas_poll') }}"
      data-pos-op-stats="{{ stats|json_encode|e('html_attr') }}"
      hidden aria-hidden="true"></div>
-
-{% set _st = filters.status|default('ativos') %}
-{% set _pri = filters.prioridade|default('') %}
-<p class="clinic-filter-chips">
-    <a href="{{ path('app_pos_operatorio_alertas', { status: 'ativos' }|merge(_pri ? { prioridade: _pri } : {})) }}" class="{{ _st == 'ativos' or not _st ? 'is-active' : '' }}">Ativos</a>
-    <a href="{{ path('app_pos_operatorio_alertas', { status: 'aberto' }|merge(_pri ? { prioridade: _pri } : {})) }}" class="{{ _st == 'aberto' ? 'is-active' : '' }}">Aberto</a>
-    <a href="{{ path('app_pos_operatorio_alertas', { status: 'em_atendimento' }|merge(_pri ? { prioridade: _pri } : {})) }}" class="{{ _st == 'em_atendimento' ? 'is-active' : '' }}">Em atendimento</a>
-    <a href="{{ path('app_pos_operatorio_alertas', { status: 'resolvido' }|merge(_pri ? { prioridade: _pri } : {})) }}" class="{{ _st == 'resolvido' ? 'is-active' : '' }}">Resolvido</a>
-</p>
-<p class="clinic-filter-chips">
-    <a href="{{ path('app_pos_operatorio_alertas', { status: _st }) }}" class="{{ _pri == '' ? 'is-active' : '' }}">Todas P</a>
-    {% for p in ['P1','P2','P3','P4'] %}
-    <a href="{{ path('app_pos_operatorio_alertas', { status: _st, prioridade: p }) }}" class="{{ _pri == p ? 'is-active' : '' }}">{{ p }}</a>
-    {% endfor %}
-</p>
 
 <section class="unio-card p-0 ops-queue-animate mb-3">
     {% if tickets is empty %}

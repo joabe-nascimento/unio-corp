@@ -24,14 +24,44 @@ final class PosOperatorioProtocoloController extends AbstractController
     ) {}
 
     #[Route('', name: 'app_pos_operatorio_protocolos')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
+        $ativo = $request->query->getString('ativo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->service->listByEmpresa($empresa);
+        $protocolos = array_values(array_filter(
+            $all,
+            static function ($protocolo) use ($ativo, $q): bool {
+                if ($ativo === '1' && !$protocolo->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $protocolo->isAtivo()) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower($protocolo->getNome() . ' ' . ($protocolo->getTipoProcedimento() ?? ''));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn ($p) => $p->isAtivo()));
 
         return $this->render(self::T . 'index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'protocolos',
-            'protocolos' => $this->service->listByEmpresa($empresa),
+            'protocolos' => $protocolos,
+            'filter_ativo' => $ativo,
+            'filter_q' => $q,
+            'protocolo_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+            ],
         ]);
     }
 

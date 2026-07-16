@@ -101,10 +101,11 @@
             var lost = board.querySelectorAll('[data-crm-pipeline-col="perdido"] [data-crm-pipeline-card]').length;
 
             var root = board.closest('.crm-pipeline');
-            var elOpen = root && root.querySelector('[data-crm-summary-open]');
-            var elValue = root && root.querySelector('[data-crm-summary-value]');
-            var elWon = root && root.querySelector('[data-crm-summary-won]');
-            var elLost = root && root.querySelector('[data-crm-summary-lost]');
+            var scope = board.closest('.page-body-inner') || document;
+            var elOpen = scope.querySelector('[data-crm-summary-open]');
+            var elValue = scope.querySelector('[data-crm-summary-value]');
+            var elWon = scope.querySelector('[data-crm-summary-won]');
+            var elLost = scope.querySelector('[data-crm-summary-lost]');
 
             if (elOpen) elOpen.textContent = String(openCount);
             if (elWon) elWon.textContent = String(won);

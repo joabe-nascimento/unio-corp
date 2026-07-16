@@ -13,14 +13,18 @@
 {% set hub_show_tabs = false %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_portal_patient_login') }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener">
-    <i class="fas fa-globe mr-1"></i> {{ _copy.nav_portal|default(org_clinic|default(false) ? 'Portal do paciente' : 'Portal do cliente') }}
-</a>
-{% if not org_clinic %}
-<a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-arrow-left mr-1"></i> Visão geral
-</a>
-{% endif %}
+{% embed 'components/hub_toolbar_more_menu.html.twig' %}
+    {% block items %}
+    <a href="{{ path('app_portal_patient_login') }}" class="dropdown-item" target="_blank" rel="noopener">
+        <i class="fas fa-globe mr-1" aria-hidden="true"></i> {{ _copy.nav_portal|default(org_clinic|default(false) ? 'Portal do paciente' : 'Portal do cliente') }}
+    </a>
+    {% if not org_clinic %}
+    <a href="{{ path('app_pos_operatorio') }}" class="dropdown-item">
+        <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Visão geral
+    </a>
+    {% endif %}
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block hub_kpis %}
@@ -28,7 +32,23 @@
         { value: stats.hoje, label: 'Respondidos hoje', icon: 'fa-file-medical', tone: 'sage' },
         { value: stats.pendentes, label: 'Pendentes hoje', icon: 'fa-clock', tone: 'amber', variant: stats.pendentes > 0 ? 'warning' : '' },
         { value: stats.total, label: 'Últimas respostas', icon: 'fa-list', tone: 'sky' },
-    ], mb: 'mb-0' } %}
+    ], mb: 'mb-3' } %}
+{% endblock %}
+
+{% set _ff = filter_filtro|default('') %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with { use_form: false } %}
+    {% block filter_chips %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar questionários',
+            chips: [
+                { href: path('app_pos_operatorio_questionarios'), label: 'Todas', active: _ff == '', count: stats.total|default(null) },
+                { href: path('app_pos_operatorio_questionarios', { filtro: 'alerta' }), label: 'Com alerta', active: _ff == 'alerta', count: stats.alertas|default(null) },
+            ]
+        } %}
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block hub_content %}

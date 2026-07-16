@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicConvenio;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicCadastroRules;
@@ -44,13 +45,39 @@ final class PosOperatorioConvenioController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_convenios');
         }
 
-        $lista = $this->convenios->list($empresa);
+        $ativo = $request->query->getString('ativo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->convenios->list($empresa);
+        $lista = array_values(array_filter(
+            $all,
+            static function (ClinicConvenio $convenio) use ($ativo, $q): bool {
+                if ($ativo === '1' && !$convenio->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $convenio->isAtivo()) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $convenio->getNome(),
+                        $convenio->getRegistroAns(),
+                        $convenio->getCodigoPrestador(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (ClinicConvenio $c) => $c->isAtivo()));
         $versoesTiss = ClinicCadastroRules::versaoTissSelectOptions(true);
         $known = [];
         foreach ($versoesTiss as $opt) {
             $known[(string) $opt['value']] = true;
         }
-        foreach ($lista as $convenio) {
+        foreach ($all as $convenio) {
             $v = trim((string) $convenio->getVersaoTiss());
             if ($v !== '' && !isset($known[$v])) {
                 $versoesTiss[] = ['value' => $v, 'label' => $v.' (legado)'];
@@ -62,6 +89,13 @@ final class PosOperatorioConvenioController extends AbstractController
             'empresa' => $empresa,
             'pos_section' => 'convenios',
             'convenios' => $lista,
+            'filter_ativo' => $ativo,
+            'filter_q' => $q,
+            'convenio_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+            ],
             'versoes_tiss' => $versoesTiss,
         ]);
     }

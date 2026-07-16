@@ -44,16 +44,32 @@ final class PosOperatorioOperationsController extends AbstractController
     ) {}
 
     #[Route('/trabalho', name: 'app_pos_operatorio_trabalho')]
-    public function trabalho(): Response
+    public function trabalho(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
+        $tipo = $request->query->getString('tipo', '');
         $queue = $this->operations->buildWorkQueue($empresa);
+        $allItems = $queue['items'];
+        $typeCounts = [
+            'todos' => \count($allItems),
+            'alerta' => \count(array_filter($allItems, static fn (array $i): bool => $i['type'] === 'alerta')),
+            'questionario' => \count(array_filter($allItems, static fn (array $i): bool => $i['type'] === 'questionario')),
+            'retorno' => \count(array_filter($allItems, static fn (array $i): bool => $i['type'] === 'retorno')),
+        ];
+        if ($tipo !== '' && $tipo !== 'todos') {
+            $queue['items'] = array_values(array_filter(
+                $allItems,
+                static fn (array $item): bool => $item['type'] === $tipo,
+            ));
+        }
         $policy = $this->policy->get($empresa);
 
         return $this->render(self::T . 'trabalho.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'trabalho',
             'queue' => $queue,
+            'filter_tipo' => $tipo,
+            'type_counts' => $typeCounts,
             'continuity_lead' => $policy['continuity_lead'],
         ]);
     }
@@ -71,14 +87,38 @@ final class PosOperatorioOperationsController extends AbstractController
     }
 
     #[Route('/retornos', name: 'app_pos_operatorio_retornos')]
-    public function retornos(): Response
+    public function retornos(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
+        $janela = $request->query->getString('janela', 'todos');
+        $retornos = $this->agenda->buildReturnSuggestions($empresa);
+        $allItems = $retornos['items'];
+        $janelaCounts = [
+            'todos' => \count($allItems),
+            'hoje' => \count(array_filter($allItems, static fn (array $i): bool => (bool) ($i['hoje'] ?? false))),
+            'atrasados' => \count(array_filter($allItems, static fn (array $i): bool => ((int) $i['dia_marco'] - (int) $i['dia_pos']) < 0)),
+            'proximos' => \count(array_filter($allItems, static fn (array $i): bool => ((int) $i['dia_marco'] - (int) $i['dia_pos']) > 0)),
+        ];
+        if ($janela === 'hoje') {
+            $retornos['items'] = array_values(array_filter($allItems, static fn (array $i): bool => (bool) ($i['hoje'] ?? false)));
+        } elseif ($janela === 'atrasados') {
+            $retornos['items'] = array_values(array_filter(
+                $allItems,
+                static fn (array $i): bool => ((int) $i['dia_marco'] - (int) $i['dia_pos']) < 0,
+            ));
+        } elseif ($janela === 'proximos') {
+            $retornos['items'] = array_values(array_filter(
+                $allItems,
+                static fn (array $i): bool => ((int) $i['dia_marco'] - (int) $i['dia_pos']) > 0,
+            ));
+        }
 
         return $this->render(self::T . 'retornos.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'retornos',
-            'retornos' => $this->agenda->buildReturnSuggestions($empresa),
+            'retornos' => $retornos,
+            'filter_janela' => $janela,
+            'janela_counts' => $janelaCounts,
         ]);
     }
 

@@ -35,9 +35,13 @@
     Última ficha
 </button>
 {% if not org_clinic %}
-<a href="{{ path('app_pos_operatorio') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Visão geral
-</a>
+{% embed 'components/hub_toolbar_more_menu.html.twig' %}
+    {% block items %}
+    <a href="{{ path('app_pos_operatorio') }}" class="dropdown-item">
+        <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Visão geral
+    </a>
+    {% endblock %}
+{% endembed %}
 {% endif %}
 {% endblock %}
 
@@ -48,51 +52,52 @@
     encerrado: 'default'
 } %}
 {% set _chip_q = filter_q|default('') %}
+{% set _sc = status_counts|default({}) %}
 
 {% block hub_section_toolbar %}
-<form method="get" action="{{ path('app_pos_operatorio_pacientes') }}" style="display:contents;">
-{% if org_clinic|default(false) and filter_status|default('') %}
-<input type="hidden" name="status" value="{{ filter_status }}">
-{% endif %}
-{% embed 'components/section_toolbar.html.twig' with {
-    search_in_section: true,
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_pacientes'),
+    show_search: true,
+    use_form: true,
     search_placeholder: org_clinic|default(false) ? 'Buscar nome, código ou procedimento…' : 'Buscar nome ou código…',
     search_name: 'q',
     search_value: filter_q|default(''),
-    btn_sm: true
+    hidden_fields: org_clinic|default(false) and filter_status|default('') ? { status: filter_status } : {}
 } %}
-    {% block section_toolbar_filters %}
+    {% block filter_chips %}
         {% if org_clinic|default(false) %}
-        <div class="clinic-filter-chips" role="navigation" aria-label="Filtrar por status">
-            <a href="{{ path('app_pos_operatorio_pacientes', _chip_q ? { q: _chip_q } : {}) }}" class="{{ filter_status|default('') == '' ? 'is-active' : '' }}">Em acompanhamento</a>
-            <a href="{{ path('app_pos_operatorio_pacientes', { status: 'ativo' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'ativo' ? 'is-active' : '' }}">Ativo</a>
-            <a href="{{ path('app_pos_operatorio_pacientes', { status: 'alerta' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'alerta' ? 'is-active' : '' }}">Alerta</a>
-            <a href="{{ path('app_pos_operatorio_pacientes', { status: 'pendente' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'pendente' ? 'is-active' : '' }}">Pendente</a>
-            <a href="{{ path('app_pos_operatorio_pacientes', { status: 'encerrado' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'encerrado' ? 'is-active' : '' }}">Encerrado</a>
-        </div>
+            {% include 'components/hub_filter_chips.html.twig' with {
+                aria_label: 'Filtrar por status',
+                chips: [
+                    { href: path('app_pos_operatorio_pacientes', _chip_q ? { q: _chip_q } : {}), label: 'Em acompanhamento', active: filter_status|default('') == '', count: _sc.em_acompanhamento|default(null) },
+                    { href: path('app_pos_operatorio_pacientes', { status: 'ativo' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Ativo', active: filter_status|default('') == 'ativo', count: _sc.ativo|default(null) },
+                    { href: path('app_pos_operatorio_pacientes', { status: 'alerta' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Alerta', active: filter_status|default('') == 'alerta', count: _sc.alerta|default(null) },
+                    { href: path('app_pos_operatorio_pacientes', { status: 'pendente' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Pendente', active: filter_status|default('') == 'pendente', count: _sc.pendente|default(null) },
+                    { href: path('app_pos_operatorio_pacientes', { status: 'encerrado' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Encerrado', active: filter_status|default('') == 'encerrado', count: _sc.encerrado|default(null) },
+                ]
+            } %}
         {% else %}
-        {% include 'components/filter_group.html.twig' with {
-            label: 'Status',
-            name: 'status',
-            value: filter_status|default(''),
-            min_width: '150px',
-            options: [
-                { value: '', label: 'Em acompanhamento' },
-                { value: 'ativo', label: 'Ativo' },
-                { value: 'alerta', label: 'Alerta' },
-                { value: 'pendente', label: 'Pendente' },
-                { value: 'encerrado', label: 'Encerrado' },
-            ]
-        } %}
+            {% include 'components/filter_group.html.twig' with {
+                label: 'Status',
+                name: 'status',
+                value: filter_status|default(''),
+                min_width: '150px',
+                options: [
+                    { value: '', label: 'Em acompanhamento' },
+                    { value: 'ativo', label: 'Ativo' },
+                    { value: 'alerta', label: 'Alerta' },
+                    { value: 'pendente', label: 'Pendente' },
+                    { value: 'encerrado', label: 'Encerrado' },
+                ]
+            } %}
+            {% include 'components/toolbar_filter_actions.html.twig' with {
+                clear_href: path('app_pos_operatorio_pacientes'),
+                has_filters: filter_q|default('') or filter_status|default(''),
+                show_submit: true
+            } %}
         {% endif %}
-        {% include 'components/toolbar_filter_actions.html.twig' with {
-            clear_href: path('app_pos_operatorio_pacientes'),
-            has_filters: filter_q|default('') or filter_status|default(''),
-            show_submit: not org_clinic|default(false)
-        } %}
     {% endblock %}
 {% endembed %}
-</form>
 {% endblock %}
 
 {% block hub_content %}

@@ -1,0 +1,16 @@
+{#
+  hub_filter_metrics — KPIs compactos na faixa de filtros (Proposta 3)
+
+  Props:
+    metrics  (array)  { value, label, tone?, value_attr? }
+#}
+{% if metrics|default([])|length > 0 %}
+<div class="hub-page-filter-bar__metrics" role="status" aria-label="Resumo">
+    {% for metric in metrics %}
+    <div class="hub-page-filter-metric hub-page-filter-metric--{{ metric.tone|default('sky') }}">
+        <span class="hub-page-filter-metric__value"{% if metric.value_attr|default('') %} {{ metric.value_attr|raw }}{% endif %}>{{ metric.value|default('—') }}</span>
+        <span class="hub-page-filter-metric__label">{{ metric.label }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

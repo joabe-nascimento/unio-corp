@@ -3,6 +3,7 @@
 namespace App\Controller\Module\PosOperatorio;
 
 use App\Entity\Empresa;
+use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\PosOperatorio\ClinicCarteirinhaService;
@@ -35,17 +36,53 @@ final class PosOperatorioCarteirinhaController extends AbstractController
     ) {}
 
     #[Route('', name: 'app_pos_operatorio_carteirinha')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
         $this->assertProductEnabled($empresa, ClinicProductCatalog::CARTEIRINHA);
 
+        $painel = $request->query->getString('painel', '');
+        if (!\in_array($painel, ['', 'emitidos', 'pendentes'], true)) {
+            $painel = '';
+        }
+        $q = trim($request->query->getString('q'));
+        $allEmitidos = $this->carteirinha->listComEmissao($empresa);
+        $allPacientes = $this->pacienteRepo->findRecentByEmpresa($empresa, 100, 0);
+        $emitidos = array_values(array_filter(
+            $allEmitidos,
+            static fn (PosOperatorioPaciente $p): bool => self::matchesPacienteSearch($p, $q),
+        ));
+        $pacientes = array_values(array_filter(
+            $allPacientes,
+            static function (PosOperatorioPaciente $p) use ($q, $painel): bool {
+                if ($painel === 'pendentes' && $p->hasCarteirinhaAtiva()) {
+                    return false;
+                }
+                if (!self::matchesPacienteSearch($p, $q)) {
+                    return false;
+                }
+
+                return true;
+            },
+        ));
+        $semEmissao = \count(array_filter(
+            $allPacientes,
+            static fn (PosOperatorioPaciente $p): bool => !$p->hasCarteirinhaAtiva(),
+        ));
+
         return $this->render(self::T . 'index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'carteirinha',
-            'emitidos' => $this->carteirinha->listComEmissao($empresa),
-            'pacientes' => $this->pacienteRepo->findRecentByEmpresa($empresa, 50, 0),
+            'emitidos' => $emitidos,
+            'pacientes' => $pacientes,
             'planos' => ClinicCarteirinhaService::PLANOS,
+            'filter_painel' => $painel,
+            'filter_q' => $q,
+            'carteirinha_counts' => [
+                'emitidos' => \count($allEmitidos),
+                'pendentes' => $semEmissao,
+                'total' => \count($allPacientes),
+            ],
         ]);
     }
 
@@ -184,5 +221,19 @@ final class PosOperatorioCarteirinhaController extends AbstractController
         if (!$this->productConfig->isEnabled($empresa, $productId)) {
             throw $this->createAccessDeniedException('Produto desativado. Ative em Produtos da plataforma.');
         }
+    }
+
+    private static function matchesPacienteSearch(PosOperatorioPaciente $paciente, string $q): bool
+    {
+        if ($q === '') {
+            return true;
+        }
+        $haystack = mb_strtolower(implode(' ', array_filter([
+            $paciente->getNome(),
+            $paciente->getCodigo(),
+            $paciente->getProcedimento(),
+        ])));
+
+        return str_contains($haystack, mb_strtolower($q));
     }
 }

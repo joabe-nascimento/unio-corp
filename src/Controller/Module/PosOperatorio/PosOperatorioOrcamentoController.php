@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicOrcamento;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicCadastroRules;
@@ -46,7 +47,40 @@ final class PosOperatorioOrcamentoController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_orcamentos');
         }
 
-        $lista = $this->orcamentos->list($empresa);
+        $status = $request->query->getString('status', '');
+        if ($status !== '' && !isset(ClinicCadastroRules::ORCAMENTO_STATUSES[$status])) {
+            $status = '';
+        }
+        $q = trim($request->query->getString('q'));
+        $all = $this->orcamentos->list($empresa);
+        $lista = array_values(array_filter(
+            $all,
+            static function (ClinicOrcamento $orcamento) use ($status, $q): bool {
+                if ($status !== '' && $orcamento->getStatus() !== $status) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $orcamento->getLeadNome(),
+                        $orcamento->getLeadTelefone(),
+                        $orcamento->getLeadEmail(),
+                        $orcamento->getPaciente()?->getNome(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $statusCounts = ['total' => \count($all)];
+        foreach (array_keys(ClinicCadastroRules::ORCAMENTO_STATUSES) as $statusKey) {
+            $statusCounts[$statusKey] = \count(array_filter(
+                $all,
+                static fn (ClinicOrcamento $o) => $o->getStatus() === $statusKey,
+            ));
+        }
         $statusOptions = [];
         foreach ($lista as $orcamento) {
             $statusOptions[$orcamento->getId()] = $this->orcamentos->selectableStatuses($orcamento->getStatus());
@@ -56,6 +90,9 @@ final class PosOperatorioOrcamentoController extends AbstractController
             'empresa' => $empresa,
             'pos_section' => 'orcamentos',
             'orcamentos' => $lista,
+            'filter_status' => $status,
+            'filter_q' => $q,
+            'orcamento_counts' => $statusCounts,
             'statuses' => ClinicCadastroRules::ORCAMENTO_STATUSES,
             'status_options' => $statusOptions,
             'pacientes' => $this->pacientes->listByEmpresa($empresa, 200),

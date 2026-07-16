@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicProcedimento;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicProcedimentoService;
@@ -43,10 +44,45 @@ final class PosOperatorioProcedimentoController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_procedimentos');
         }
 
+        $ativo = $request->query->getString('ativo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->procedimentos->list($empresa);
+        $procedimentos = array_values(array_filter(
+            $all,
+            static function (ClinicProcedimento $procedimento) use ($ativo, $q): bool {
+                if ($ativo === '1' && !$procedimento->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $procedimento->isAtivo()) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $procedimento->getNome(),
+                        $procedimento->getCodigoInterno(),
+                        $procedimento->getCodigoTuss(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (ClinicProcedimento $p) => $p->isAtivo()));
+
         return $this->render('modules/pos-operatorio/procedimentos/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'procedimentos',
-            'procedimentos' => $this->procedimentos->list($empresa),
+            'procedimentos' => $procedimentos,
+            'filter_ativo' => $ativo,
+            'filter_q' => $q,
+            'procedimento_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+            ],
         ]);
     }
 

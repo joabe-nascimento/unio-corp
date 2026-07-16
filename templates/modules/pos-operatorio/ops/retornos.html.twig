@@ -8,15 +8,42 @@
 {% set hub_search_hidden = true %}
 
 {% block hub_toolbar_actions %}
-<span class="badge-perfil default">{{ retornos.proximos_7_dias }} marco(s)</span>
-{% if retornos.atrasados|default(0) > 0 %}
-<span class="badge-perfil warning">{{ retornos.atrasados }} atrasado(s)</span>
-{% endif %}
-<a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio-ghost btn-sm">Agenda</a>
+<a href="{{ path('app_pos_operatorio_agenda_novo') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Agendar retorno
+</a>
+{% embed 'components/hub_toolbar_more_menu.html.twig' %}
+    {% block items %}
+    <a href="{{ path('app_pos_operatorio_agenda') }}" class="dropdown-item">
+        <i class="fas fa-calendar-alt mr-1" aria-hidden="true"></i> Agenda
+    </a>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% set _jc = janela_counts|default({}) %}
+{% set _fj = filter_janela|default('todos') %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    use_form: false,
+    meta_text: retornos.proximos_7_dias ~ ' marco(s) na janela · ' ~ (retornos.atrasados|default(0)) ~ ' atrasado(s)'
+} %}
+    {% block filter_chips %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar retornos',
+            chips: [
+                { href: path('app_pos_operatorio_retornos'), label: 'Todos', active: _fj == 'todos' or _fj == '', count: _jc.todos|default(null) },
+                { href: path('app_pos_operatorio_retornos', { janela: 'hoje' }), label: 'Hoje', active: _fj == 'hoje', count: _jc.hoje|default(null) },
+                { href: path('app_pos_operatorio_retornos', { janela: 'atrasados' }), label: 'Atrasados', active: _fj == 'atrasados', count: _jc.atrasados|default(null) },
+                { href: path('app_pos_operatorio_retornos', { janela: 'proximos' }), label: 'Próximos', active: _fj == 'proximos', count: _jc.proximos|default(null) },
+            ]
+        } %}
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block hub_content %}
-{% if retornos.atrasados|default(0) > 0 %}
+{% if retornos.atrasados|default(0) > 0 and (_fj == 'todos' or _fj == '' or _fj == 'atrasados') %}
 <div class="clinic-banner clinic-banner--warn">
     <i class="fas fa-calendar-xmark" aria-hidden="true"></i>
     <div><strong>{{ retornos.atrasados }}</strong> retorno(s) atrasado(s) — priorize o agendamento.</div>
@@ -28,7 +55,7 @@
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-calendar-day',
             title: 'Sem retornos',
-            text: 'Nenhum retorno previsto na janela atual.',
+            text: 'Nenhum retorno neste filtro.',
             btn_label: 'Abrir agenda',
             btn_href: path('app_pos_operatorio_agenda'),
             btn_sm: true,

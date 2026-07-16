@@ -31,13 +31,31 @@ class CrmContaRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function countByEmpresa(Empresa $empresa): int
+    public function countByEmpresa(Empresa $empresa, ?string $status = null): int
     {
-        return (int) $this->createQueryBuilder('c')
+        $qb = $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->andWhere('c.empresa = :empresa')
-            ->setParameter('empresa', $empresa)
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->setParameter('empresa', $empresa);
+
+        if ($status !== null && $status !== '') {
+            $qb->andWhere('c.status = :status')->setParameter('status', $status);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /** @return array{total: int, by_status: array<string, int>} */
+    public function countSummaryByEmpresa(Empresa $empresa): array
+    {
+        $byStatus = [];
+        foreach (CrmConta::statusList() as $status) {
+            $byStatus[$status] = $this->countByEmpresa($empresa, $status);
+        }
+
+        return [
+            'total' => $this->countByEmpresa($empresa, null),
+            'by_status' => $byStatus,
+        ];
     }
 }

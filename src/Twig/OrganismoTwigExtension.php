@@ -31,6 +31,7 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
     {
         return [
             new TwigFunction('clinic_feature_route_active', [ClinicFeatureCatalog::class, 'isRouteActive']),
+            new TwigFunction('clinic_pinned_features', [ClinicFeatureCatalog::class, 'pinnedFeatures']),
             new TwigFunction('clinic_features_for_group', [ClinicFeatureCatalog::class, 'featuresForGroup']),
             new TwigFunction('clinic_group_open', [ClinicFeatureCatalog::class, 'isGroupActive']),
             new TwigFunction('clinic_products_nav_open', [ClinicFeatureCatalog::class, 'isProductsNavActive']),

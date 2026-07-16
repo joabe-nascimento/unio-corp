@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicProfissional;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -46,7 +47,37 @@ final class PosOperatorioProfissionalController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_profissionais');
         }
 
-        $lista = $this->profissionais->list($empresa);
+        $ativo = $request->query->getString('ativo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->profissionais->list($empresa);
+        $lista = array_values(array_filter(
+            $all,
+            static function (ClinicProfissional $profissional) use ($ativo, $q): bool {
+                if ($ativo === '1' && !$profissional->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $profissional->isAtivo()) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $profissional->getNome(),
+                        $profissional->getConselho(),
+                        $profissional->getNumeroConselho(),
+                        $profissional->getUfConselho(),
+                        $profissional->getEspecialidade(),
+                        $profissional->getTelefone(),
+                        $profissional->getEmail(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (ClinicProfissional $p) => $p->isAtivo()));
         $especialidades = ClinicCadastroRules::ESPECIALIDADES;
         $conselhos = ClinicCadastroRules::CONSELHOS;
         foreach ($lista as $profissional) {
@@ -64,6 +95,13 @@ final class PosOperatorioProfissionalController extends AbstractController
             'empresa' => $empresa,
             'pos_section' => 'profissionais',
             'profissionais' => $lista,
+            'filter_ativo' => $ativo,
+            'filter_q' => $q,
+            'profissional_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+            ],
             'usuarios' => $this->users->findActiveByEmpresa($empresa),
             'conselhos' => $conselhos,
             'especialidades' => $especialidades,

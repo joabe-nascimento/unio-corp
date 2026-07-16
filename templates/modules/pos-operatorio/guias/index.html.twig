@@ -8,10 +8,22 @@
 {% set hub_search_hidden = true %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_pos_operatorio_guias_glosas') }}" class="btn-unio-ghost btn-sm">Anti-glosa</a>
-<a href="{{ path('app_pos_operatorio_lotes') }}" class="btn-unio-ghost btn-sm">Lotes</a>
-<a href="{{ path('app_pos_operatorio_convenios') }}" class="btn-unio-ghost btn-sm">Convênios</a>
-<a href="{{ path('app_pos_operatorio_contas') }}" class="btn-unio-ghost btn-sm">Contas</a>
+<a href="{{ path('app_pos_operatorio_guias_glosas') }}" class="btn-unio btn-sm">
+    <i class="fas fa-shield-halved mr-1" aria-hidden="true"></i> Anti-glosa
+</a>
+{% embed 'components/hub_toolbar_more_menu.html.twig' %}
+    {% block items %}
+    <a href="{{ path('app_pos_operatorio_lotes') }}" class="dropdown-item">
+        <i class="fas fa-boxes-stacked mr-1" aria-hidden="true"></i> Lotes
+    </a>
+    <a href="{{ path('app_pos_operatorio_convenios') }}" class="dropdown-item">
+        <i class="fas fa-building mr-1" aria-hidden="true"></i> Convênios
+    </a>
+    <a href="{{ path('app_pos_operatorio_contas') }}" class="dropdown-item">
+        <i class="fas fa-file-invoice mr-1" aria-hidden="true"></i> Contas
+    </a>
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% set status_tones = {
@@ -23,6 +35,23 @@
     cancelado: 'default'
 } %}
 
+{% block hub_section_toolbar %}
+{% set _gc = status_counts|default({}) %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_guias'),
+    use_form: false
+} %}
+    {% block filter_chips %}
+        <div class="clinic-filter-chips hub-page-filter-chips" role="navigation" aria-label="Filtrar guias por status">
+            <a href="{{ path('app_pos_operatorio_guias', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'is-active' : '' }}">Todas{% if _gc.todos is defined %} ({{ _gc.todos }}){% endif %}</a>
+            {% for key, label in status_labels %}
+            <a href="{{ path('app_pos_operatorio_guias', { status: key }) }}" class="{{ filtro_status == key ? 'is-active' : '' }}">{{ label }}{% if _gc[key] is defined %} ({{ _gc[key] }}){% endif %}</a>
+            {% endfor %}
+        </div>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
 {% block hub_content %}
 {% if list_truncated|default(false) %}
 <div class="clinic-banner clinic-banner--warn">
@@ -30,12 +59,6 @@
     <div>Exibindo as {{ list_limit }} guias mais recentes de {{ list_total }}. Refine o filtro de status para ver o restante.</div>
 </div>
 {% endif %}
-<p class="clinic-filter-chips mb-3">
-    <a href="{{ path('app_pos_operatorio_guias', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'is-active' : '' }}">Todas</a>
-    {% for key, label in status_labels %}
-    <a href="{{ path('app_pos_operatorio_guias', { status: key }) }}" class="{{ filtro_status == key ? 'is-active' : '' }}">{{ label }}</a>
-    {% endfor %}
-</p>
 
 <section class="unio-card p-0">
     {% if guias is empty %}

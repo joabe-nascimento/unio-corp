@@ -7,23 +7,22 @@ namespace App\PosOperatorio;
  */
 final class ClinicFeatureCatalog
 {
-    public const GROUP_OPERACAO = 'operacao';
+    public const GROUP_HOJE = 'hoje';
     public const GROUP_CLINICA = 'clinica';
-    public const GROUP_MONITORAMENTO = 'monitoramento';
-    public const GROUP_INTELIGENCIA = 'inteligencia';
-    public const GROUP_EXPERIENCIA = 'experiencia';
-    public const GROUP_SISTEMA = 'sistema';
+    public const GROUP_GESTAO = 'gestao';
 
-    /** @return list<array{key: string, label: string, icon: string, storage_key: string}> */
+    /** @return list<string> */
+    public static function sidebarPinnedIds(): array
+    {
+        return ['trabalho', 'pacientes', 'agenda', 'alertas'];
+    }
+
+    /** Grupos expansíveis da sidebar (HOJE é fixo, fora desta lista).
+     * @return list<array{key: string, label: string, icon: string, storage_key: string}>
+     */
     public static function sidebarSections(): array
     {
         return [
-            [
-                'key' => self::GROUP_OPERACAO,
-                'label' => 'Pós-operatório',
-                'icon' => 'fa-briefcase-medical',
-                'storage_key' => 'clinic-operacao-sidebar-collapsed',
-            ],
             [
                 'key' => self::GROUP_CLINICA,
                 'label' => 'Clínica',
@@ -31,28 +30,10 @@ final class ClinicFeatureCatalog
                 'storage_key' => 'clinic-clinica-sidebar-collapsed',
             ],
             [
-                'key' => self::GROUP_MONITORAMENTO,
-                'label' => 'Monitoramento',
-                'icon' => 'fa-heart-pulse',
-                'storage_key' => 'clinic-monitoramento-sidebar-collapsed',
-            ],
-            [
-                'key' => self::GROUP_INTELIGENCIA,
-                'label' => 'Inteligência',
+                'key' => self::GROUP_GESTAO,
+                'label' => 'Gestão',
                 'icon' => 'fa-chart-line',
-                'storage_key' => 'clinic-inteligencia-sidebar-collapsed',
-            ],
-            [
-                'key' => self::GROUP_EXPERIENCIA,
-                'label' => 'Experiência do paciente',
-                'icon' => 'fa-hand-holding-medical',
-                'storage_key' => 'clinic-experiencia-sidebar-collapsed',
-            ],
-            [
-                'key' => self::GROUP_SISTEMA,
-                'label' => 'Sistema',
-                'icon' => 'fa-gear',
-                'storage_key' => 'clinic-sistema-sidebar-collapsed',
+                'storage_key' => 'clinic-gestao-sidebar-collapsed',
             ],
         ];
     }
@@ -64,12 +45,13 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'trabalho',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_OPERACAO,
+                'group' => self::GROUP_HOJE,
+                'sidebar_pinned' => true,
                 'route' => 'app_pos_operatorio_trabalho',
                 'route_prefix' => 'app_pos_operatorio_trabalho',
                 'icon' => 'fa-list-check',
                 'title' => 'O que fazer agora',
-                'short' => 'Fila do dia',
+                'short' => 'O que fazer agora',
                 'desc' => 'P1, questionários pendentes e retornos em uma única fila.',
                 'status' => 'active',
                 'badge_key' => 'precisa_acao',
@@ -78,7 +60,8 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'pacientes',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_CLINICA,
+                'group' => self::GROUP_HOJE,
+                'sidebar_pinned' => true,
                 'route' => 'app_pos_operatorio_pacientes',
                 'route_prefix' => 'app_pos_operatorio_paciente',
                 'icon' => 'fa-user-injured',
@@ -86,7 +69,6 @@ final class ClinicFeatureCatalog
                 'short' => 'Pacientes',
                 'desc' => 'Cadastro e ficha pós-cirúrgica.',
                 'status' => 'active',
-                'badge_key' => 'pacientes_ativos',
                 'tone' => 'sky',
             ],
             [
@@ -131,7 +113,8 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'agenda',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_CLINICA,
+                'group' => self::GROUP_HOJE,
+                'sidebar_pinned' => true,
                 'route' => 'app_pos_operatorio_agenda',
                 'route_prefix' => 'app_pos_operatorio_agenda',
                 'icon' => 'fa-calendar-alt',
@@ -313,7 +296,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'questionarios',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_MONITORAMENTO,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_questionarios',
                 'route_prefix' => 'app_pos_operatorio_questionario',
                 'icon' => 'fa-clipboard-list',
@@ -327,7 +310,8 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'alertas',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_MONITORAMENTO,
+                'group' => self::GROUP_HOJE,
+                'sidebar_pinned' => true,
                 'route' => 'app_pos_operatorio_alertas',
                 'route_prefix' => 'app_pos_operatorio_alerta',
                 'icon' => 'fa-triangle-exclamation',
@@ -341,7 +325,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'sala_critica',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_MONITORAMENTO,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_sala_critica',
                 'route_prefix' => 'app_pos_operatorio_sala_critica',
                 'icon' => 'fa-bed-pulse',
@@ -355,7 +339,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'lembretes',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_MONITORAMENTO,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_lembretes',
                 'route_prefix' => 'app_pos_operatorio_lembretes',
                 'icon' => 'fa-bell',
@@ -368,7 +352,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'plantao',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_MONITORAMENTO,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_plantao',
                 'route_prefix' => 'app_pos_operatorio_plantao',
                 'icon' => 'fa-user-clock',
@@ -381,7 +365,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'qualidade',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_INTELIGENCIA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_pos_operatorio_qualidade',
                 'route_prefix' => 'app_pos_operatorio_qualidade',
                 'icon' => 'fa-chart-pie',
@@ -394,7 +378,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'contrato_cuidado',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_INTELIGENCIA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_organismo_contratos',
                 'route_prefix' => 'app_organismo',
                 'icon' => 'fa-file-signature',
@@ -407,7 +391,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'relatorios',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_INTELIGENCIA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_pos_operatorio_relatorios',
                 'route_prefix' => 'app_pos_operatorio_relatorios',
                 'icon' => 'fa-file-export',
@@ -420,7 +404,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'carteirinha',
                 'product' => ClinicProductCatalog::CARTEIRINHA,
-                'group' => self::GROUP_EXPERIENCIA,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_carteirinha',
                 'route_prefix' => 'app_pos_operatorio_carteirinha',
                 'icon' => 'fa-id-card',
@@ -433,7 +417,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'comprovante',
                 'product' => ClinicProductCatalog::COMPROVANTE,
-                'group' => self::GROUP_EXPERIENCIA,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_comprovante',
                 'route_prefix' => 'app_pos_operatorio_comprovante',
                 'icon' => 'fa-file-medical',
@@ -446,7 +430,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'guia_medico',
                 'product' => ClinicProductCatalog::GUIA_MEDICO,
-                'group' => self::GROUP_EXPERIENCIA,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_guia_medico',
                 'route_prefix' => 'app_pos_operatorio_guia_medico',
                 'icon' => 'fa-book-medical',
@@ -459,7 +443,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'portal',
                 'product' => null,
-                'group' => self::GROUP_SISTEMA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_portal_patient_login',
                 'route_prefix' => 'app_portal_patient',
                 'icon' => 'fa-person-circle-check',
@@ -473,7 +457,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'integracoes',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_SISTEMA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_pos_operatorio_integracoes',
                 'route_prefix' => 'app_pos_operatorio_integracoes',
                 'icon' => 'fa-plug',
@@ -486,7 +470,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'compliance',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_SISTEMA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_pos_operatorio_compliance',
                 'route_prefix' => 'app_pos_operatorio_compliance',
                 'icon' => 'fa-shield-halved',
@@ -499,7 +483,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'config',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_SISTEMA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_pos_operatorio_config',
                 'route_prefix' => 'app_pos_operatorio_config',
                 'icon' => 'fa-sliders',
@@ -512,7 +496,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'produtos',
                 'product' => null,
-                'group' => self::GROUP_SISTEMA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_pos_operatorio_produtos',
                 'route_prefix' => 'app_pos_operatorio_produtos',
                 'icon' => 'fa-layer-group',
@@ -521,12 +505,11 @@ final class ClinicFeatureCatalog
                 'desc' => 'Ativar módulos da gestão clínica (pós-op, carteirinha, guia).',
                 'status' => 'active',
                 'tone' => 'lavender',
-                'sidebar_skip' => true,
             ],
             [
                 'id' => 'recepcao',
                 'product' => ClinicProductCatalog::CARTEIRINHA,
-                'group' => self::GROUP_EXPERIENCIA,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_recepcao',
                 'route_prefix' => 'app_pos_operatorio_recepcao',
                 'icon' => 'fa-qrcode',
@@ -539,7 +522,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'painel_dia',
                 'product' => ClinicProductCatalog::POS_OPERATORIO,
-                'group' => self::GROUP_OPERACAO,
+                'group' => self::GROUP_CLINICA,
                 'route' => 'app_pos_operatorio_painel_dia',
                 'route_prefix' => 'app_pos_operatorio_painel_dia',
                 'icon' => 'fa-calendar-day',
@@ -552,12 +535,12 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'crm',
                 'product' => null,
-                'group' => self::GROUP_SISTEMA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_comercial',
                 'route_prefix' => 'app_comercial',
                 'icon' => 'fa-handshake',
                 'title' => 'CRM Comercial',
-                'short' => 'CRM',
+                'short' => 'Comercial',
                 'desc' => 'Leads, pipeline, clientes, atividades e analytics.',
                 'status' => 'active',
                 'tone' => 'violet',
@@ -565,7 +548,7 @@ final class ClinicFeatureCatalog
             [
                 'id' => 'comercial',
                 'product' => null,
-                'group' => self::GROUP_SISTEMA,
+                'group' => self::GROUP_GESTAO,
                 'route' => 'app_pos_operatorio_comercial',
                 'route_prefix' => 'app_pos_operatorio_comercial',
                 'icon' => 'fa-store',
@@ -602,6 +585,33 @@ final class ClinicFeatureCatalog
     /**
      * @param list<array<string, mixed>> $features
      *
+     * @return list<array<string, mixed>>
+     */
+    public static function pinnedFeatures(array $features): array
+    {
+        $order = array_flip(self::sidebarPinnedIds());
+        $pinned = array_values(array_filter(
+            $features,
+            static fn (array $feature): bool => ($feature['sidebar_pinned'] ?? false)
+                && !($feature['sidebar_skip'] ?? false),
+        ));
+
+        usort(
+            $pinned,
+            static function (array $a, array $b) use ($order): int {
+                $oa = $order[(string) ($a['id'] ?? '')] ?? 999;
+                $ob = $order[(string) ($b['id'] ?? '')] ?? 999;
+
+                return $oa <=> $ob;
+            },
+        );
+
+        return $pinned;
+    }
+
+    /**
+     * @param list<array<string, mixed>> $features
+     *
      * @return list<array{key: string, label: string, icon: string, storage_key: string}>
      */
     public static function sectionsForFeatures(array $features): array
@@ -609,6 +619,9 @@ final class ClinicFeatureCatalog
         $groups = [];
         foreach ($features as $feature) {
             if ($feature['sidebar_skip'] ?? false) {
+                continue;
+            }
+            if ($feature['sidebar_pinned'] ?? false) {
                 continue;
             }
             $groups[(string) ($feature['group'] ?? '')] = true;
@@ -630,7 +643,8 @@ final class ClinicFeatureCatalog
         return array_values(array_filter(
             $features,
             static fn (array $feature): bool => ($feature['group'] ?? '') === $group
-                && !($feature['sidebar_skip'] ?? false),
+                && !($feature['sidebar_skip'] ?? false)
+                && !($feature['sidebar_pinned'] ?? false),
         ));
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicSala;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicCadastroRules;
@@ -46,9 +47,36 @@ final class PosOperatorioSalaController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_salas');
         }
 
-        $lista = $this->salas->list($empresa);
+        $ativo = $request->query->getString('ativo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->salas->list($empresa);
+        $lista = array_values(array_filter(
+            $all,
+            static function (ClinicSala $sala) use ($ativo, $q): bool {
+                if ($ativo === '1' && !$sala->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $sala->isAtivo()) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $sala->getNome(),
+                        $sala->getCodigo(),
+                        $sala->getTipo(),
+                        $sala->getUnidade()?->getNome(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (ClinicSala $s) => $s->isAtivo()));
         $tiposSala = ClinicCadastroRules::TIPOS_SALA;
-        foreach ($lista as $sala) {
+        foreach ($all as $sala) {
             $tipo = trim((string) $sala->getTipo());
             if ($tipo !== '' && !isset($tiposSala[$tipo])) {
                 $tiposSala[$tipo] = $tipo;
@@ -61,6 +89,13 @@ final class PosOperatorioSalaController extends AbstractController
             'salas' => $lista,
             'unidades' => $this->unidades->list($empresa, true),
             'tipos_sala' => $tiposSala,
+            'filter_ativo' => $ativo,
+            'filter_q' => $q,
+            'sala_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+            ],
         ]);
     }
 

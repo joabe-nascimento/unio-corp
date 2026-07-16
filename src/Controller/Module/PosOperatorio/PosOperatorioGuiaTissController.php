@@ -43,11 +43,16 @@ final class PosOperatorioGuiaTissController extends AbstractController
         $guias = $this->guias->list($empresa, $filtro);
         $listLimit = $this->guias->listLimit();
         $listTotal = $this->guias->countList($empresa, $filtro);
+        $statusCounts = ['todos' => $this->guias->countList($empresa, null)];
+        foreach (array_keys(ClinicGuiaTissService::statusLabels()) as $statusKey) {
+            $statusCounts[$statusKey] = $this->guias->countList($empresa, $statusKey);
+        }
 
         return $this->render('modules/pos-operatorio/guias/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'guias',
             'filtro_status' => $status,
+            'status_counts' => $statusCounts,
             'guias' => $guias,
             'status_labels' => ClinicGuiaTissService::statusLabels(),
             'list_total' => $listTotal,

@@ -38,10 +38,24 @@ class CrmLeadRepository extends ServiceEntityRepository
             ->andWhere('l.empresa = :empresa')
             ->setParameter('empresa', $empresa);
 
-        if ($status !== null) {
+        if ($status !== null && $status !== '') {
             $qb->andWhere('l.status = :status')->setParameter('status', $status);
         }
 
         return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /** @return array{total: int, by_status: array<string, int>} */
+    public function countSummaryByEmpresa(Empresa $empresa): array
+    {
+        $byStatus = [];
+        foreach (CrmLead::statusList() as $status) {
+            $byStatus[$status] = $this->countByEmpresa($empresa, $status);
+        }
+
+        return [
+            'total' => $this->countByEmpresa($empresa, null),
+            'by_status' => $byStatus,
+        ];
     }
 }

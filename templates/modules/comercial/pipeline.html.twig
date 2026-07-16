@@ -29,32 +29,31 @@
 </button>
 {% endblock %}
 
+{% block hub_kpis %}{% endblock %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with { use_form: false } %}
+    {% block filter_chips %}
+        {% include 'components/hub_filter_metrics.html.twig' with {
+            metrics: [
+                { value: open_count, label: 'Em aberto', tone: 'sky', value_attr: 'data-crm-summary-open' },
+                { value: 'R$ ' ~ open_value|number_format(2, ',', '.'), label: 'Pipeline', tone: 'lavender', value_attr: 'data-crm-summary-value' },
+                { value: won_count, label: 'Ganhas', tone: 'sage', value_attr: 'data-crm-summary-won' },
+                { value: lost_count, label: 'Perdidas', tone: 'rose', value_attr: 'data-crm-summary-lost' },
+            ]
+        } %}
+    {% endblock %}
+    {% block filter_tools_extra %}
+    <p class="hub-page-filter-bar__meta text-muted small mb-0">
+        <i class="fas fa-grip-vertical mr-1" aria-hidden="true"></i>
+        Arraste pelo grip ou use o seletor no card.
+    </p>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
 {% block hub_content %}
 <div class="crm-pipeline">
-    <div class="crm-pipeline__summary" aria-label="Resumo do pipeline">
-        <div class="crm-pipeline__stat">
-            <span class="crm-pipeline__stat-label">Em aberto</span>
-            <strong class="crm-pipeline__stat-value" data-crm-summary-open>{{ open_count }}</strong>
-        </div>
-        <div class="crm-pipeline__stat">
-            <span class="crm-pipeline__stat-label">Pipeline</span>
-            <strong class="crm-pipeline__stat-value" data-crm-summary-value">R$ {{ open_value|number_format(2, ',', '.') }}</strong>
-        </div>
-        <div class="crm-pipeline__stat crm-pipeline__stat--ok">
-            <span class="crm-pipeline__stat-label">Ganhas</span>
-            <strong class="crm-pipeline__stat-value" data-crm-summary-won>{{ won_count }}</strong>
-        </div>
-        <div class="crm-pipeline__stat crm-pipeline__stat--muted">
-            <span class="crm-pipeline__stat-label">Perdidas</span>
-            <strong class="crm-pipeline__stat-value" data-crm-summary-lost>{{ lost_count }}</strong>
-        </div>
-    </div>
-
-    <p class="crm-pipeline__hint text-muted small mb-2">
-        <i class="fas fa-grip-vertical mr-1" aria-hidden="true"></i>
-        Arraste pelo ícone de grip para mover entre os estágios (ou use o seletor no card).
-    </p>
-
     <div class="crm-pipeline__board kanban-board" data-crm-pipeline-board data-crm-pipeline-dnd role="list" aria-label="Estágios do pipeline">
         {% for stage in stages %}
         {% set items = pipeline_board[stage]|default([]) %}
@@ -175,5 +174,5 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/sortable.min.js') }}"></script>
-<script src="{{ asset('js/crm-pipeline.js') }}?v=2"></script>
+<script src="{{ asset('js/crm-pipeline.js') }}?v=3"></script>
 {% endblock %}

@@ -13,6 +13,38 @@
 </a>
 {% endblock %}
 
+{% set _gc = guia_counts|default({}) %}
+{% set _fq = filter_q|default('') %}
+{% set _fa = filter_ativo|default('') %}
+{% set _fp = filter_padrao|default('') %}
+{% set _hidden = {} %}
+{% if _fa != '' %}{% set _hidden = _hidden|merge({ ativo: _fa }) %}{% endif %}
+{% if _fp != '' %}{% set _hidden = _hidden|merge({ padrao: _fp }) %}{% endif %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_guia_medico'),
+    show_search: true,
+    use_form: true,
+    search_placeholder: 'Buscar nome ou tipo de procedimento…',
+    search_name: 'q',
+    search_value: _fq,
+    hidden_fields: _hidden
+} %}
+    {% block filter_chips %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar guias médicos',
+            chips: [
+                { href: path('app_pos_operatorio_guia_medico', _fq ? { q: _fq } : {}), label: 'Todos', active: _fa == '' and _fp == '', count: _gc.total|default(null) },
+                { href: path('app_pos_operatorio_guia_medico', { ativo: '1' }|merge(_fq ? { q: _fq } : {})), label: 'Ativos', active: _fa == '1' and _fp == '', count: _gc.ativos|default(null) },
+                { href: path('app_pos_operatorio_guia_medico', { ativo: '0' }|merge(_fq ? { q: _fq } : {})), label: 'Inativos', active: _fa == '0' and _fp == '', count: _gc.inativos|default(null) },
+                { href: path('app_pos_operatorio_guia_medico', { padrao: '1' }|merge(_fq ? { q: _fq } : {})), label: 'Padrão', active: _fp == '1', count: _gc.padrao|default(null) },
+            ]
+        } %}
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
 {% block hub_content %}
 {% if guias is empty %}
 <section class="unio-card">

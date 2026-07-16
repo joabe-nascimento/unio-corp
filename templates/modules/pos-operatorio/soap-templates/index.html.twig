@@ -13,6 +13,53 @@
 {{ cadastro.create_button('clinic-soap', 'Novo modelo') }}
 {% endblock %}
 
+{% set _tc = soap_counts|default({}) %}
+{% set _fq = filter_q|default('') %}
+{% set _fa = filter_ativo|default('') %}
+{% set _ft = filter_tipo|default('') %}
+{% set _hidden = {} %}
+{% if _fa != '' %}{% set _hidden = _hidden|merge({ ativo: _fa }) %}{% endif %}
+{% if _ft != '' %}{% set _hidden = _hidden|merge({ tipo: _ft }) %}{% endif %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_soap_templates'),
+    show_search: true,
+    use_form: true,
+    search_placeholder: 'Buscar nome, tipo ou CID…',
+    search_name: 'q',
+    search_value: _fq,
+    hidden_fields: _hidden
+} %}
+    {% block filter_chips %}
+    <div class="hub-page-filter-bar__chip-groups">
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar por status',
+            chips: [
+                { href: path('app_pos_operatorio_soap_templates', (_fq ? { q: _fq } : {})|merge(_ft ? { tipo: _ft } : {})), label: 'Todos', active: _fa == '', count: _tc.total|default(null) },
+                { href: path('app_pos_operatorio_soap_templates', { ativo: '1' }|merge(_fq ? { q: _fq } : {})|merge(_ft ? { tipo: _ft } : {})), label: 'Ativos', active: _fa == '1', count: _tc.ativos|default(null) },
+                { href: path('app_pos_operatorio_soap_templates', { ativo: '0' }|merge(_fq ? { q: _fq } : {})|merge(_ft ? { tipo: _ft } : {})), label: 'Inativos', active: _fa == '0', count: _tc.inativos|default(null) },
+            ]
+        } %}
+        {% if tipos_procedimento|default({})|length > 0 %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar por tipo de procedimento',
+            chips: [
+                { href: path('app_pos_operatorio_soap_templates', (_fq ? { q: _fq } : {})|merge(_fa ? { ativo: _fa } : {})), label: 'Todos os tipos', active: _ft == '' },
+            ]|merge(
+                tipos_procedimento|keys|map(tid => {
+                    href: path('app_pos_operatorio_soap_templates', { tipo: tid }|merge(_fq ? { q: _fq } : {})|merge(_fa ? { ativo: _fa } : {})),
+                    label: tipos_procedimento[tid],
+                    active: _ft == tid
+                })
+            )
+        } %}
+        {% endif %}
+    </div>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
 {% block hub_content %}
 <section class="unio-card p-0">
     {% if templates is empty %}
@@ -27,13 +74,6 @@
             btn_icon: 'fa-plus'
         } %}
     {% else %}
-    <div class="clinic-cadastro-list__head">
-        <div>
-            <strong>Modelos SOAP</strong>
-            <p class="clinic-cadastro-list__head-sub mb-0">Tipo, CID e queixa padrão</p>
-        </div>
-        <span class="clinic-cadastro-list__count">{{ templates|length }}</span>
-    </div>
     <div class="clinic-cadastro-list">
         {% for t in templates %}
         <article class="clinic-cadastro-item clinic-cadastro-item--rich">

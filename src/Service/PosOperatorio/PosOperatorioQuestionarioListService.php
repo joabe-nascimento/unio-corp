@@ -42,6 +42,7 @@ final class PosOperatorioQuestionarioListService
                 'hoje' => $this->repository->countByEmpresaOnDate($empresa, $today),
                 'total' => \count($items),
                 'pendentes' => $this->repository->countPacientesPendentesHoje($empresa, $today),
+                'alertas' => \count(array_filter($items, static fn (array $row): bool => (bool) ($row['alerta_gerado'] ?? false))),
             ],
         ];
     }

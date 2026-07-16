@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicEstoqueItem;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicCadastroRules;
@@ -49,12 +50,60 @@ final class PosOperatorioEstoqueController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_estoque');
         }
 
+        $ativo = $request->query->getString('ativo', '');
+        $baixo = $request->query->getString('baixo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->estoque->list($empresa);
+        $itens = array_values(array_filter(
+            $all,
+            static function (ClinicEstoqueItem $item) use ($ativo, $baixo, $q): bool {
+                if ($baixo === '1' && !$item->isAbaixoMinimo()) {
+                    return false;
+                }
+                if ($ativo === '1' && !$item->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $item->isAtivo()) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $item->getNome(),
+                        $item->getSku(),
+                        $item->getUnidade()?->getNome(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (ClinicEstoqueItem $i) => $i->isAtivo()));
+        $unidadesMedida = ClinicCadastroRules::UNIDADES_MEDIDA_ESTOQUE;
+        foreach ($all as $item) {
+            $um = trim($item->getUnidadeMedida());
+            if ($um !== '' && !isset($unidadesMedida[$um])) {
+                $unidadesMedida[$um] = $um;
+            }
+        }
+
         return $this->render('modules/pos-operatorio/estoque/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'estoque',
-            'itens' => $this->estoque->list($empresa),
+            'itens' => $itens,
             'unidades' => $this->unidades->list($empresa, true),
-            'unidades_medida' => ClinicCadastroRules::UNIDADES_MEDIDA_ESTOQUE,
+            'unidades_medida' => $unidadesMedida,
+            'filter_ativo' => $ativo,
+            'filter_baixo' => $baixo,
+            'filter_q' => $q,
+            'estoque_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+                'baixo' => \count(array_filter($all, static fn (ClinicEstoqueItem $i) => $i->isAbaixoMinimo())),
+            ],
         ]);
     }
 

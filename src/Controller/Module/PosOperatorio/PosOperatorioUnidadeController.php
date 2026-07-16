@@ -2,6 +2,7 @@
 
 namespace App\Controller\Module\PosOperatorio;
 
+use App\Entity\ClinicUnidade;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicUnidadeService;
@@ -49,10 +50,46 @@ final class PosOperatorioUnidadeController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_unidades');
         }
 
+        $ativo = $request->query->getString('ativo', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->unidades->list($empresa);
+        $unidades = array_values(array_filter(
+            $all,
+            static function (ClinicUnidade $unidade) use ($ativo, $q): bool {
+                if ($ativo === '1' && !$unidade->isAtivo()) {
+                    return false;
+                }
+                if ($ativo === '0' && $unidade->isAtivo()) {
+                    return false;
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $unidade->getNome(),
+                        $unidade->getCodigo(),
+                        $unidade->getEndereco(),
+                        $unidade->getTelefone(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $ativos = \count(array_filter($all, static fn (ClinicUnidade $u) => $u->isAtivo()));
+
         return $this->render('modules/pos-operatorio/unidades/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'unidades',
-            'unidades' => $this->unidades->list($empresa),
+            'unidades' => $unidades,
+            'filter_ativo' => $ativo,
+            'filter_q' => $q,
+            'unidade_counts' => [
+                'total' => \count($all),
+                'ativos' => $ativos,
+                'inativos' => \count($all) - $ativos,
+            ],
         ]);
     }
 

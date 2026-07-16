@@ -75,6 +75,7 @@ class ComercialController extends AbstractController
             'crm_section' => 'leads',
             'leads' => $this->leadRepo->findByEmpresa($empresa, $status !== '' ? $status : null),
             'filter_status' => $status,
+            'status_counts' => $this->leadRepo->countSummaryByEmpresa($empresa),
             'status_options' => CrmLead::statusList(),
             'status_labels' => CrmLead::statusLabels(),
             'origem_options' => CrmLead::origemList(),
@@ -307,6 +308,7 @@ class ComercialController extends AbstractController
             'crm_section' => 'clientes',
             'contas' => $this->contaRepo->findByEmpresa($empresa, $status !== '' ? $status : null),
             'filter_status' => $status,
+            'status_counts' => $this->contaRepo->countSummaryByEmpresa($empresa),
             'status_options' => CrmConta::statusList(),
             'status_labels' => CrmConta::statusLabels(),
             'open_novo' => $request->query->getBoolean('novo'),
@@ -374,14 +376,66 @@ class ComercialController extends AbstractController
             }
         }
 
+        $tipo = $request->query->getString('tipo', '');
+        if ($tipo !== '' && !\in_array($tipo, CrmAtividade::tipoList(), true)) {
+            $tipo = '';
+        }
+        $vencidas = $request->query->getString('vencidas', '');
+        $q = trim($request->query->getString('q'));
+        $all = $this->atividadeRepo->findPendentes($empresa, 200);
+        $hoje = new \DateTimeImmutable('today');
+        $atividades = array_values(array_filter(
+            $all,
+            static function (CrmAtividade $atividade) use ($tipo, $vencidas, $q, $hoje): bool {
+                if ($tipo !== '' && $atividade->getTipo() !== $tipo) {
+                    return false;
+                }
+                if ($vencidas === '1') {
+                    $vence = $atividade->getVenceEm();
+                    if ($vence === null || $vence >= $hoje) {
+                        return false;
+                    }
+                }
+                if ($q !== '') {
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $atividade->getTitulo(),
+                        $atividade->getDescricao(),
+                        $atividade->getLead()?->getNome(),
+                        $atividade->getConta()?->getNome(),
+                    ])));
+                    if (!str_contains($haystack, mb_strtolower($q))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        ));
+        $tipoLabels = CrmAtividade::tipoLabels();
+        $atividadeCounts = ['total' => \count($all)];
+        foreach (CrmAtividade::tipoList() as $tipoKey) {
+            $atividadeCounts[$tipoKey] = \count(array_filter(
+                $all,
+                static fn (CrmAtividade $a) => $a->getTipo() === $tipoKey,
+            ));
+        }
+        $atividadeCounts['vencidas'] = \count(array_filter(
+            $all,
+            static fn (CrmAtividade $a): bool => $a->getVenceEm() !== null && $a->getVenceEm() < $hoje,
+        ));
+
         return $this->render(self::T . 'atividades.html.twig', [
             'crm_section' => 'atividades',
-            'atividades' => $this->atividadeRepo->findPendentes($empresa, 100),
+            'atividades' => $atividades,
             'tipo_options' => CrmAtividade::tipoList(),
-            'tipo_labels' => CrmAtividade::tipoLabels(),
+            'tipo_labels' => $tipoLabels,
             'leads' => $this->leadRepo->findByEmpresa($empresa, null, 50),
             'contas' => $this->contaRepo->findByEmpresa($empresa),
             'open_novo' => $request->query->getBoolean('novo'),
+            'filter_tipo' => $tipo,
+            'filter_vencidas' => $vencidas,
+            'filter_q' => $q,
+            'atividade_counts' => $atividadeCounts,
         ]);
     }
 

@@ -146,6 +146,12 @@ final class ClinicAtendimentoService
         return $this->atendimentos->findRecentByEmpresa($empresa);
     }
 
+    /** @return list<ClinicAtendimento> */
+    public function list(Empresa $empresa, int $limit = 200): array
+    {
+        return $this->atendimentos->findByEmpresa($empresa, $limit);
+    }
+
     /** @return array<string, string> */
     public static function statusLabels(): array
     {

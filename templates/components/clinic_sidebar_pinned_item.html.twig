@@ -1,5 +1,5 @@
 {#
-  Subitem da sidebar clínica (dentro de grupo expansível)
+  Item fixo da zona HOJE (link de 1º nível, sem treeview)
 
   Props:
     feature   (array)  item do ClinicFeatureCatalog
@@ -10,16 +10,17 @@
 {% set _bk = feature.badge_key|default('') %}
 {% set _actionable = _bk in ['precisa_acao', 'alertas', 'questionarios', 'sala_critica'] %}
 {% set _badge = _actionable ? badges[_bk]|default(0) : 0 %}
-<li class="nav-item">
+<li class="nav-item clinic-nav-pinned">
     <a href="{{ path(feature.route) }}"
-       class="nav-link nav-submenu-link clinic-nav-submenu-link{{ _active ? ' active' : '' }}"
+       class="nav-link clinic-nav-pinned__link{{ _active ? ' active' : '' }}"
        {% if feature.external|default(false) %}target="_blank" rel="noopener"{% endif %}
        {{ _active ? ' aria-current="page"' : '' }}>
-        <p>
-            {{ feature.short|default(feature.title) }}
+        <span class="nav-icon-slot">
+            <i class="fas {{ feature.icon }} nav-icon" aria-hidden="true"></i>
             {% if _badge > 0 %}
-            <span class="clinic-nav-submenu-badge{% if _bk == 'sala_critica' %} clinic-nav-submenu-badge--danger{% elseif _bk in ['alertas', 'questionarios', 'precisa_acao'] %} clinic-nav-submenu-badge--warning{% endif %}">{{ _badge }}</span>
+            <span class="nav-clinic-badge{% if _bk == 'sala_critica' %} nav-clinic-badge--danger{% elseif _bk in ['alertas', 'questionarios', 'precisa_acao'] %} nav-clinic-badge--warning{% endif %}">{{ _badge }}</span>
             {% endif %}
-        </p>
+        </span>
+        <p>{{ feature.short|default(feature.title) }}</p>
     </a>
 </li>

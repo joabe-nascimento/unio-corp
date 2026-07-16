@@ -29,6 +29,20 @@ class ClinicAtendimentoRepository extends ServiceEntityRepository
     /**
      * @return list<ClinicAtendimento>
      */
+    public function findByEmpresa(Empresa $empresa, int $limit = 200): array
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('a.iniciadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<ClinicAtendimento>
+     */
     public function findRecentByEmpresa(Empresa $empresa, int $limit = 40): array
     {
         return $this->createQueryBuilder('a')

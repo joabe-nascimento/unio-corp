@@ -8,17 +8,42 @@
 {% set hub_search_hidden = true %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_pos_operatorio_alertas') }}" class="btn-unio-ghost btn-sm">Alertas</a>
-<a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm">Sala crítica</a>
+{% embed 'components/hub_toolbar_more_menu.html.twig' %}
+    {% block items %}
+    <a href="{{ path('app_pos_operatorio_alertas') }}" class="dropdown-item">
+        <i class="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i> Alertas
+    </a>
+    <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="dropdown-item">
+        <i class="fas fa-bed-pulse mr-1" aria-hidden="true"></i> Sala crítica
+    </a>
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
-{% block hub_kpis %}
-{% include 'components/kpi_row.html.twig' with { items: [
-    { value: queue.stats.total, label: 'Itens na fila', icon: 'fa-list-check', tone: 'sky' },
-    { value: queue.stats.p1, label: 'P1 abertos', icon: 'fa-fire', tone: 'rose', variant: queue.stats.p1 > 0 ? 'danger' : '', pulse: queue.stats.p1 > 0, route: 'app_pos_operatorio_sala_critica' },
-    { value: queue.stats.questionarios, label: 'Questionários pendentes', icon: 'fa-clipboard-list', tone: 'amber' },
-    { value: queue.stats.pre_op|default(0), label: 'Pré-op / handoff', icon: 'fa-route', tone: 'sky' },
-], mb: 'mb-0' } %}
+{% set _tc = type_counts|default({}) %}
+{% set _ft = filter_tipo|default('') %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with { use_form: false } %}
+    {% block filter_chips %}
+        {% include 'components/hub_filter_metrics.html.twig' with {
+            metrics: [
+                { value: queue.stats.p1, label: 'P1', tone: 'rose' },
+                { value: queue.stats.questionarios, label: 'Quest. pendentes', tone: 'amber' },
+                { value: queue.stats.total, label: 'Na fila', tone: 'sky' },
+            ]
+        } %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar fila do dia',
+            chips: [
+                { href: path('app_pos_operatorio_trabalho'), label: 'Todos', active: _ft == '' or _ft == 'todos', count: _tc.todos|default(null) },
+                { href: path('app_pos_operatorio_trabalho', { tipo: 'alerta' }), label: 'Alertas', active: _ft == 'alerta', count: _tc.alerta|default(null) },
+                { href: path('app_pos_operatorio_trabalho', { tipo: 'questionario' }), label: 'Questionários', active: _ft == 'questionario', count: _tc.questionario|default(null) },
+                { href: path('app_pos_operatorio_trabalho', { tipo: 'retorno' }), label: 'Retornos', active: _ft == 'retorno', count: _tc.retorno|default(null) },
+            ]
+        } %}
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block hub_content %}
@@ -34,9 +59,9 @@
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-list-check',
             title: 'Fila limpa',
-            text: 'Nenhuma ação pendente — pulso estável.',
-            btn_label: 'Visão geral',
-            btn_href: path('app_pos_operatorio'),
+            text: 'Nenhuma ação neste filtro.',
+            btn_label: _ft ? 'Ver todos' : 'Visão geral',
+            btn_href: _ft ? path('app_pos_operatorio_trabalho') : path('app_pos_operatorio'),
             btn_sm: true,
             compact: true
         } %}

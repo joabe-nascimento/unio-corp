@@ -8,15 +8,41 @@
 {% set hub_page_subtitle = 'Insumos e estoque mínimo' %}
 {% set hub_search_hidden = true %}
 {% set _unidades_medida = unidades_medida|default({}) %}
-{% for item in itens|default([]) %}
-    {% set um = item.unidadeMedida %}
-    {% if um and um not in _unidades_medida|keys %}
-        {% set _unidades_medida = _unidades_medida|merge({ (um): um }) %}
-    {% endif %}
-{% endfor %}
 
 {% block hub_toolbar_actions %}
 {{ cadastro.create_button('clinic-estoque', 'Novo item') }}
+{% endblock %}
+
+{% set _ec = estoque_counts|default({}) %}
+{% set _fq = filter_q|default('') %}
+{% set _fa = filter_ativo|default('') %}
+{% set _fb = filter_baixo|default('') %}
+{% set _hidden = {} %}
+{% if _fa != '' %}{% set _hidden = _hidden|merge({ ativo: _fa }) %}{% endif %}
+{% if _fb != '' %}{% set _hidden = _hidden|merge({ baixo: _fb }) %}{% endif %}
+
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_estoque'),
+    show_search: true,
+    use_form: true,
+    search_placeholder: 'Buscar nome, SKU ou unidade…',
+    search_name: 'q',
+    search_value: _fq,
+    hidden_fields: _hidden
+} %}
+    {% block filter_chips %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar estoque',
+            chips: [
+                { href: path('app_pos_operatorio_estoque', _fq ? { q: _fq } : {}), label: 'Todos', active: _fa == '' and _fb == '', count: _ec.total|default(null) },
+                { href: path('app_pos_operatorio_estoque', { ativo: '1' }|merge(_fq ? { q: _fq } : {})), label: 'Ativos', active: _fa == '1' and _fb == '', count: _ec.ativos|default(null) },
+                { href: path('app_pos_operatorio_estoque', { ativo: '0' }|merge(_fq ? { q: _fq } : {})), label: 'Inativos', active: _fa == '0' and _fb == '', count: _ec.inativos|default(null) },
+                { href: path('app_pos_operatorio_estoque', { baixo: '1' }|merge(_fq ? { q: _fq } : {})), label: 'Abaixo do mínimo', active: _fb == '1', count: _ec.baixo|default(null) },
+            ]
+        } %}
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block hub_content %}
@@ -33,13 +59,6 @@
             btn_icon: 'fa-plus'
         } %}
     {% else %}
-    <div class="clinic-cadastro-list__head">
-        <div>
-            <strong>Itens em estoque</strong>
-            <p class="clinic-cadastro-list__head-sub mb-0">Quantidade, mínimo e localização</p>
-        </div>
-        <span class="clinic-cadastro-list__count">{{ itens|length }}</span>
-    </div>
     <div class="clinic-cadastro-list">
         {% for item in itens %}
         {% set baixo = item.abaixoMinimo %}

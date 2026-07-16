@@ -12,15 +12,39 @@
 <a href="{{ path('app_pos_operatorio_comprovante') }}" class="btn-unio-ghost btn-sm">Comprovantes</a>
 {% endblock %}
 
-{% block hub_content %}
-{% if emitidos|length == 0 and pacientes|length > 0 %}
-<div class="clinic-banner clinic-banner--warn">
-    <i class="fas fa-id-card" aria-hidden="true"></i>
-    <div>Há pacientes sem carteirinha. Emita pela lista à direita.</div>
-</div>
-{% endif %}
+{% set _cc = carteirinha_counts|default({}) %}
+{% set _fq = filter_q|default('') %}
+{% set _fp = filter_painel|default('') %}
+{% set _hidden = _fp != '' ? { painel: _fp } : {} %}
+{% set _qmerge = _fq ? { q: _fq } : {} %}
 
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_carteirinha'),
+    show_search: true,
+    use_form: true,
+    search_placeholder: 'Buscar paciente, código ou procedimento…',
+    search_name: 'q',
+    search_value: _fq,
+    hidden_fields: _hidden,
+    meta_text: _cc.pendentes|default(0) > 0 and _fp != 'emitidos' ? (_cc.pendentes ~ ' paciente(s) sem carteirinha') : ''
+} %}
+    {% block filter_chips %}
+        {% include 'components/hub_filter_chips.html.twig' with {
+            aria_label: 'Filtrar carteirinhas',
+            chips: [
+                { href: path('app_pos_operatorio_carteirinha', _qmerge), label: 'Todos', active: _fp == '' },
+                { href: path('app_pos_operatorio_carteirinha', { painel: 'emitidos' }|merge(_qmerge)), label: 'Emitidas', active: _fp == 'emitidos', count: _cc.emitidos|default(null) },
+                { href: path('app_pos_operatorio_carteirinha', { painel: 'pendentes' }|merge(_qmerge)), label: 'Sem emissão', active: _fp == 'pendentes', count: _cc.pendentes|default(null) },
+            ]
+        } %}
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block hub_content %}
 <div class="clinic-carteirinha-layout">
+    {% if _fp != 'pendentes' %}
     <section class="unio-card clinic-carteirinha-panel p-0 ops-queue-animate">
         <h3 class="clinic-ops-panel__title px-3 pt-3">Emitidas recentemente</h3>
         {% if emitidos is empty %}
@@ -67,7 +91,9 @@
         </div>
         {% endif %}
     </section>
+    {% endif %}
 
+    {% if _fp != 'emitidos' %}
     <section class="unio-card clinic-carteirinha-panel p-0 ops-queue-animate">
         <h3 class="clinic-ops-panel__title px-3 pt-3">Pacientes para emitir</h3>
         {% if pacientes is empty %}
@@ -116,5 +142,6 @@
         </div>
         {% endif %}
     </section>
+    {% endif %}
 </div>
 {% endblock %}

@@ -8,10 +8,22 @@
 {% set hub_search_hidden = true %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_pos_operatorio_atendimento') }}" class="btn-unio-ghost btn-sm">Atendimentos</a>
-<a href="{{ path('app_pos_operatorio_contas_relatorio') }}" class="btn-unio-ghost btn-sm">Repasse / DRE</a>
-<a href="{{ path('app_pos_operatorio_guias') }}" class="btn-unio-ghost btn-sm">Guias TISS</a>
-<a href="{{ path('app_pos_operatorio_convenios') }}" class="btn-unio-ghost btn-sm">Convênios</a>
+<a href="{{ path('app_pos_operatorio_atendimento') }}" class="btn-unio btn-sm">
+    <i class="fas fa-stethoscope mr-1" aria-hidden="true"></i> Atendimentos
+</a>
+{% embed 'components/hub_toolbar_more_menu.html.twig' %}
+    {% block items %}
+    <a href="{{ path('app_pos_operatorio_contas_relatorio') }}" class="dropdown-item">
+        <i class="fas fa-chart-line mr-1" aria-hidden="true"></i> Repasse / DRE
+    </a>
+    <a href="{{ path('app_pos_operatorio_guias') }}" class="dropdown-item">
+        <i class="fas fa-file-medical mr-1" aria-hidden="true"></i> Guias TISS
+    </a>
+    <a href="{{ path('app_pos_operatorio_convenios') }}" class="dropdown-item">
+        <i class="fas fa-building mr-1" aria-hidden="true"></i> Convênios
+    </a>
+    {% endblock %}
+{% endembed %}
 {% endblock %}
 
 {% block hub_kpis %}
@@ -21,30 +33,39 @@
     { value: qtd_abertas|default(0), label: 'Contas em aberto', icon: 'fa-file-invoice', tone: 'amber', variant: qtd_abertas|default(0) > 0 ? 'warning' : '' },
     { value: 'R$ ' ~ aberto_reais, label: 'A receber', icon: 'fa-hand-holding-dollar', tone: 'rose' },
     { value: 'R$ ' ~ pago_reais, label: 'Recebido', icon: 'fa-check', tone: 'teal' },
-], mb: 'mb-0' } %}
+], mb: 'mb-3' } %}
 {% endblock %}
 
+{% block hub_section_toolbar %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_contas'),
+    use_form: false
+} %}
+    {% block filter_chips %}
+        <div class="clinic-filter-chips hub-page-filter-chips" role="navigation" aria-label="Filtrar contas por status">
+            <a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="{{ filtro_status == 'aberto' ? 'is-active' : '' }}">Abertas</a>
+            <a href="{{ path('app_pos_operatorio_contas', { status: 'pago' }) }}" class="{{ filtro_status == 'pago' ? 'is-active' : '' }}">Pagas</a>
+            <a href="{{ path('app_pos_operatorio_contas', { status: 'glosado' }) }}" class="{{ filtro_status == 'glosado' ? 'is-active' : '' }}">Glosadas</a>
+            <a href="{{ path('app_pos_operatorio_contas', { status: 'cancelado' }) }}" class="{{ filtro_status == 'cancelado' ? 'is-active' : '' }}">Canceladas</a>
+            <a href="{{ path('app_pos_operatorio_contas', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'is-active' : '' }}">Todas</a>
+        </div>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block hub_content %}
 {% set status_tones = {
     aberto: 'warning',
     pago: 'success',
     glosado: 'danger',
     cancelado: 'default'
 } %}
-
-{% block hub_content %}
 {% if list_truncated|default(false) %}
 <div class="clinic-banner clinic-banner--warn">
     <i class="fas fa-circle-info" aria-hidden="true"></i>
     <div>Exibindo as {{ list_limit }} contas mais recentes de {{ list_total }}. Refine o filtro de status para ver o restante.</div>
 </div>
 {% endif %}
-<p class="clinic-filter-chips mb-3">
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="{{ filtro_status == 'aberto' ? 'is-active' : '' }}">Abertas</a>
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'pago' }) }}" class="{{ filtro_status == 'pago' ? 'is-active' : '' }}">Pagas</a>
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'glosado' }) }}" class="{{ filtro_status == 'glosado' ? 'is-active' : '' }}">Glosadas</a>
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'cancelado' }) }}" class="{{ filtro_status == 'cancelado' ? 'is-active' : '' }}">Canceladas</a>
-    <a href="{{ path('app_pos_operatorio_contas', { status: 'todos' }) }}" class="{{ filtro_status == 'todos' ? 'is-active' : '' }}">Todas</a>
-</p>
 
 <section class="unio-card p-0 clinic-conta-card">
     {% if contas is empty %}

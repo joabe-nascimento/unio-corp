@@ -114,6 +114,7 @@ final class PosOperatorioPacienteController extends AbstractController
                 ),
                 'filter_q' => (string) $request->query->get('q', ''),
                 'filter_status' => (string) $request->query->get('status', ''),
+                'status_counts' => $this->service->statusCounts($empresa),
 
                 'silenciosos_hoje' => $this->service->silentTodayIds($empresa),
 

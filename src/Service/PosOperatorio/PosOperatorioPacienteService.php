@@ -100,6 +100,12 @@ final class PosOperatorioPacienteService
         return $this->repository->searchByEmpresa($empresa, $q, $status, $limit, 0);
     }
 
+    /** @return array{em_acompanhamento: int, ativo: int, alerta: int, pendente: int, encerrado: int} */
+    public function statusCounts(Empresa $empresa): array
+    {
+        return $this->repository->countStatusSummary($empresa);
+    }
+
 
 
 

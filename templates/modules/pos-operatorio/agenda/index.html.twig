@@ -6,6 +6,7 @@
 {% set hub_page_eyebrow = org_brand_label %}
 {% set hub_page_subtitle = vista == 'dia' ? 'Visão do dia — recepção e atendimento' : 'Visão da semana — paciente, médico e status' %}
 {% set hub_search_hidden = true %}
+{% set filtro_medico_id = medico_filtro ? medico_filtro.id : null %}
 
 {% set status_labels = status_labels|default({
     marcado: 'Marcado',
@@ -27,7 +28,9 @@
 } %}
 
 {% block hub_toolbar_actions %}
-<a href="{{ path('app_pos_operatorio_agenda_novo') }}" class="btn-unio btn-sm">Novo horário</a>
+<a href="{{ path('app_pos_operatorio_agenda_novo') }}" class="btn-unio btn-sm">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo horário
+</a>
 {% endblock %}
 
 {% block hub_kpis %}
@@ -41,36 +44,45 @@
 ], mb: 'mb-3' } %}
 {% endblock %}
 
-{% block hub_content %}
-{% set filtro_medico_id = medico_filtro ? medico_filtro.id : null %}
-<section class="unio-card mb-3 clinic-agenda-filter">
-    <form method="get" action="{{ path('app_pos_operatorio_agenda') }}" class="clinic-agenda-filter__form">
-        <div class="clinic-agenda-filter__field">
-            <span class="clinic-agenda-filter__label" id="agenda-vista-label">Vista</span>
-            <div class="clinic-agenda-seg" role="group" aria-labelledby="agenda-vista-label">
-                <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: day|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
-                   class="{{ vista == 'dia' ? 'is-active' : '' }}">Dia</a>
-                <a href="{{ path('app_pos_operatorio_agenda', { vista: 'semana', semana: week_start|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
-                   class="{{ vista == 'semana' ? 'is-active' : '' }}">Semana</a>
-            </div>
-        </div>
-
+{% block hub_section_toolbar %}
+{% set _agenda_meta %}
+{% if vista == 'dia' %}
+{{ day|date('d/m/Y') }}
+{% else %}
+{{ week_start|date('d/m') }} — {{ week_end|date_modify('-1 day')|date('d/m/Y') }}
+{% endif %}
+· {{ agendamentos|length }} horário(s)
+{% endset %}
+{% embed 'components/hub_page_filter_bar.html.twig' with {
+    form_action: path('app_pos_operatorio_agenda'),
+    advanced_inline: true,
+    use_form: true,
+    meta_text: _agenda_meta
+} %}
+    {% block filter_chips %}
+    <div class="clinic-agenda-seg hub-page-filter-chips" role="group" aria-label="Vista da agenda">
+        <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: day|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
+           class="{{ vista == 'dia' ? 'is-active' : '' }}">Dia</a>
+        <a href="{{ path('app_pos_operatorio_agenda', { vista: 'semana', semana: week_start|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
+           class="{{ vista == 'semana' ? 'is-active' : '' }}">Semana</a>
+    </div>
+    {% endblock %}
+    {% block filter_advanced_row %}
         {% if vista == 'dia' %}
-        <div class="clinic-agenda-filter__field clinic-agenda-filter__field--date">
-            <label class="clinic-agenda-filter__label" for="dia">Dia</label>
+        <div class="hub-page-filter-bar__field">
+            <label for="dia">Dia</label>
             <input id="dia" type="date" name="dia" class="form-control form-control-sm" value="{{ day|date('Y-m-d') }}">
             <input type="hidden" name="vista" value="dia">
         </div>
         {% else %}
-        <div class="clinic-agenda-filter__field clinic-agenda-filter__field--date">
-            <label class="clinic-agenda-filter__label" for="semana">A partir de</label>
+        <div class="hub-page-filter-bar__field">
+            <label for="semana">A partir de</label>
             <input id="semana" type="date" name="semana" class="form-control form-control-sm" value="{{ week_start|date('Y-m-d') }}">
             <input type="hidden" name="vista" value="semana">
         </div>
         {% endif %}
-
-        <div class="clinic-agenda-filter__field clinic-agenda-filter__field--medico">
-            <label class="clinic-agenda-filter__label" for="medico_id">Médico</label>
+        <div class="hub-page-filter-bar__field">
+            <label for="medico_id">Médico</label>
             <select id="medico_id" name="medico_id" class="form-control form-control-sm">
                 <option value="">Todos</option>
                 {% for m in medicos %}
@@ -78,31 +90,17 @@
                 {% endfor %}
             </select>
         </div>
-
-        <div class="clinic-agenda-filter__actions">
-            <span class="clinic-agenda-filter__label clinic-agenda-filter__label--spacer" aria-hidden="true">&nbsp;</span>
-            <div class="clinic-agenda-filter__actions-row">
-                <button type="submit" class="btn-unio-ghost btn-sm">Filtrar</button>
-                <a href="{{ path('app_pos_operatorio_agenda', { vista: vista }) }}" class="btn-unio-ghost btn-sm">
-                    {{ vista == 'dia' ? 'Hoje' : 'Semana atual' }}
-                </a>
-            </div>
+        <div class="hub-page-filter-bar__actions">
+            <button type="submit" class="btn-unio-ghost btn-sm">Filtrar</button>
+            <a href="{{ path('app_pos_operatorio_agenda', { vista: vista }) }}" class="btn-unio-ghost btn-sm">
+                {{ vista == 'dia' ? 'Hoje' : 'Semana atual' }}
+            </a>
         </div>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
 
-        <div class="clinic-agenda-filter__meta">
-            <span class="clinic-agenda-filter__label clinic-agenda-filter__label--spacer" aria-hidden="true">&nbsp;</span>
-            <p class="clinic-agenda-filter__meta-text mb-0">
-                {% if vista == 'dia' %}
-                {{ day|date('d/m/Y') }}
-                {% else %}
-                {{ week_start|date('d/m') }} — {{ week_end|date_modify('-1 day')|date('d/m/Y') }}
-                {% endif %}
-                · {{ agendamentos|length }} horário(s)
-            </p>
-        </div>
-    </form>
-</section>
-
+{% block hub_content %}
 <section class="unio-card clinic-agenda-card">
     {% if agendamentos is empty %}
         {% include 'components/empty_state.html.twig' with {
