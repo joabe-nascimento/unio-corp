@@ -492,6 +492,8 @@ final class PosOperatorioPacienteController extends AbstractController
 
             'parentescos' => ClinicCadastroRules::PARENTESCOS,
 
+            'ufs' => ClinicCadastroRules::ufSelectOptions(false),
+
         ];
 
     }

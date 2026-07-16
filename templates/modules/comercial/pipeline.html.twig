@@ -19,11 +19,7 @@
     |merge(pipeline_board.proposta|default([]))
     |merge(pipeline_board.negociacao|default([])) %}
 {% set open_count = open_items|length %}
-{% set _open_sum = namespace({ v: 0 }) %}
-{% for op in open_items %}
-    {% set _open_sum.v = _open_sum.v + (op.valor ? op.valor * 1 : 0) %}
-{% endfor %}
-{% set open_value = _open_sum.v %}
+{% set open_value = open_items|map(op => op.valor|default(0) * 1)|reduce((a, b) => a + b, 0) %}
 {% set won_count = pipeline_board.ganho|default([])|length %}
 {% set lost_count = pipeline_board.perdido|default([])|length %}
 
@@ -63,11 +59,7 @@
         {% for stage in stages %}
         {% set items = pipeline_board[stage]|default([]) %}
         {% set meta = stage_meta[stage]|default({ label: stage, tone: 'sky' }) %}
-        {% set _col_sum = namespace({ v: 0 }) %}
-        {% for op in items %}
-            {% set _col_sum.v = _col_sum.v + (op.valor ? op.valor * 1 : 0) %}
-        {% endfor %}
-        {% set col_value = _col_sum.v %}
+        {% set col_value = items|map(op => op.valor|default(0) * 1)|reduce((a, b) => a + b, 0) %}
 
         <section class="crm-pipeline__col kanban-column crm-pipeline__col--{{ meta.tone|default('sky') }}"
                  data-crm-pipeline-col="{{ stage }}"

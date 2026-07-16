@@ -297,6 +297,47 @@ body.layout-inset-shell .hub-tab-panel > form > .section-toolbar {
     position: relative;
     vertical-align: middle;
 }
+.unio-row-actions-menu .dropdown-menu,
+.unio-row-actions-dropdown {
+    min-width: 10.5rem;
+    z-index: 1065;
+}
+/* Portal no body — acima de linhas/cards/transform da tabela */
+.unio-row-actions-dropdown--portal,
+body > .dropdown-menu.unio-row-actions-dropdown--portal,
+body > .dropdown-menu.unio-dropdown.unio-row-actions-dropdown--portal {
+    position: fixed !important;
+    z-index: 2000 !important;
+    min-width: 10.5rem;
+    margin: 0 !important;
+    transform: none !important;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+}
+/* Fallback quando o JS ainda não posicionou (fixed) */
+.unio-row-actions-menu > .dropdown-menu.dropdown-menu-right {
+    right: 0;
+    left: auto !important;
+    transform: none;
+}
+body.layout-inset-shell .admin-table td:has(.unio-row-actions-menu),
+body.layout-inset-shell .admin-table th:has(.unio-row-actions-menu),
+body.layout-inset-shell .admin-table tr:has(.unio-row-actions-menu .dropdown.show),
+body.layout-inset-shell .table-responsive:has(.unio-row-actions-menu .dropdown.show),
+body.layout-inset-shell .unio-card:has(.unio-row-actions-menu .dropdown.show) {
+    overflow: visible !important;
+}
+body.layout-inset-shell .admin-table td.text-right:has(.unio-row-actions-menu) {
+    width: 1%;
+    white-space: nowrap;
+}
+/* Animação de linha não pode criar containing block no menu aberto */
+body.layout-inset-shell .ops-queue-animate .admin-table tbody tr:has(.dropdown.show),
+body.org-clinic .ops-queue-animate .admin-table tbody tr:has(.dropdown.show) {
+    animation: none !important;
+    transform: none !important;
+    z-index: 30;
+    position: relative;
+}
 .unio-row-menu-btn {
     appearance: none;
     -webkit-appearance: none;

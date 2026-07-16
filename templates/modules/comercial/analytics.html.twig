@@ -13,15 +13,8 @@
     ganho: 'success',
     perdido: 'rose'
 } %}
-{% set _max = namespace({ origem: 0, stage: 0 }) %}
-{% for qtd in analytics.by_origem|default({}) %}
-    {% if qtd > _max.origem %}{% set _max.origem = qtd %}{% endif %}
-{% endfor %}
-{% for qtd in analytics.by_stage|default({}) %}
-    {% if qtd > _max.stage %}{% set _max.stage = qtd %}{% endif %}
-{% endfor %}
-{% set max_origem = _max.origem %}
-{% set max_stage = _max.stage %}
+{% set max_origem = analytics.by_origem|default({})|reduce((m, c) => c > m ? c : m, 0) %}
+{% set max_stage = analytics.by_stage|default({})|reduce((m, c) => c > m ? c : m, 0) %}
 
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_comercial_pipeline') }}" class="btn-unio-ghost btn-sm">

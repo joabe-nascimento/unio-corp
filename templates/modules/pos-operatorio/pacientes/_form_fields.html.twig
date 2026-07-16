@@ -100,45 +100,73 @@
             </div>
         </fieldset>
 
-        <fieldset class="clinic-form-section">
+        <fieldset class="clinic-form-section" data-clinic-endereco
+                  data-cep-url="{{ path('app_pos_operatorio_localidades_cep', { cep: '00000000' }) }}"
+                  data-cidades-url="{{ path('app_pos_operatorio_localidades_cidades') }}"
+                  data-bairros-url="{{ path('app_pos_operatorio_localidades_bairros') }}">
             <legend class="clinic-form-section__title">
                 <i class="fas fa-map-marker-alt" aria-hidden="true"></i> Endereço
             </legend>
+            <p class="text-muted small mb-2">Digite o CEP para preencher automaticamente. UF, cidade e bairro usam listas oficiais (IBGE / BrasilAPI).</p>
             <div class="row">
                 <div class="col-md-3 form-group">
                     <label for="{{ _pfx }}cep">CEP</label>
                     <input id="{{ _pfx }}cep" name="cep" class="form-control" inputmode="numeric" maxlength="9"
-                           value="{{ paciente ? paciente.cep : '' }}">
+                           data-mask="cep" data-endereco-cep autocomplete="postal-code"
+                           placeholder="00000-000"
+                           value="{{ paciente and paciente.cep ? (paciente.cep|length == 8 ? paciente.cep|slice(0,5) ~ '-' ~ paciente.cep|slice(5) : paciente.cep) : '' }}">
+                    <small class="text-muted" data-endereco-cep-status></small>
                 </div>
                 <div class="col-md-7 form-group">
                     <label for="{{ _pfx }}logradouro">Logradouro</label>
                     <input id="{{ _pfx }}logradouro" name="logradouro" class="form-control" maxlength="180"
+                           data-endereco-logradouro autocomplete="address-line1"
                            value="{{ paciente ? paciente.logradouro : '' }}">
                 </div>
                 <div class="col-md-2 form-group">
                     <label for="{{ _pfx }}numero_endereco">Número</label>
                     <input id="{{ _pfx }}numero_endereco" name="numero_endereco" class="form-control" maxlength="20"
+                           data-endereco-numero autocomplete="address-line2"
                            value="{{ paciente ? paciente.numeroEndereco : '' }}">
                 </div>
                 <div class="col-md-4 form-group">
                     <label for="{{ _pfx }}complemento">Complemento</label>
                     <input id="{{ _pfx }}complemento" name="complemento" class="form-control" maxlength="80"
+                           data-endereco-complemento
                            value="{{ paciente ? paciente.complemento : '' }}">
+                </div>
+                <div class="col-md-3 form-group">
+                    <label for="{{ _pfx }}uf">UF</label>
+                    <select id="{{ _pfx }}uf" name="uf" class="form-control" data-endereco-uf>
+                        <option value="">—</option>
+                        {% for ufOpt in ufs|default([]) %}
+                        <option value="{{ ufOpt.value }}"{{ paciente and paciente.uf == ufOpt.value ? ' selected' : '' }}>{{ ufOpt.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5 form-group">
+                    <label for="{{ _pfx }}cidade">Cidade</label>
+                    <select id="{{ _pfx }}cidade" name="cidade" class="form-control" data-endereco-cidade
+                            data-initial-cidade="{{ paciente ? paciente.cidade|default('')|e('html_attr') : '' }}">
+                        <option value="">{{ paciente and paciente.uf ? 'Carregando…' : 'Selecione a UF' }}</option>
+                        {% if paciente and paciente.cidade %}
+                        <option value="{{ paciente.cidade }}" selected>{{ paciente.cidade }}</option>
+                        {% endif %}
+                    </select>
                 </div>
                 <div class="col-md-4 form-group">
                     <label for="{{ _pfx }}bairro">Bairro</label>
-                    <input id="{{ _pfx }}bairro" name="bairro" class="form-control" maxlength="80"
-                           value="{{ paciente ? paciente.bairro : '' }}">
-                </div>
-                <div class="col-md-3 form-group">
-                    <label for="{{ _pfx }}cidade">Cidade</label>
-                    <input id="{{ _pfx }}cidade" name="cidade" class="form-control" maxlength="80"
-                           value="{{ paciente ? paciente.cidade : '' }}">
-                </div>
-                <div class="col-md-1 form-group">
-                    <label for="{{ _pfx }}uf">UF</label>
-                    <input id="{{ _pfx }}uf" name="uf" class="form-control" maxlength="2"
-                           value="{{ paciente ? paciente.uf : '' }}">
+                    <select id="{{ _pfx }}bairro" name="bairro" class="form-control" data-endereco-bairro
+                            data-initial-bairro="{{ paciente ? paciente.bairro|default('')|e('html_attr') : '' }}">
+                        <option value="">{{ paciente and paciente.cidade ? 'Selecione…' : 'Selecione a cidade' }}</option>
+                        {% if paciente and paciente.bairro %}
+                        <option value="{{ paciente.bairro }}" selected>{{ paciente.bairro }}</option>
+                        {% endif %}
+                        <option value="__outro__">Outro (digitar)</option>
+                    </select>
+                    <input type="text" class="form-control mt-2" data-endereco-bairro-outro maxlength="80"
+                           placeholder="Digite o bairro" hidden
+                           value="">
                 </div>
             </div>
         </fieldset>

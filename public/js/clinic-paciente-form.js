@@ -1,6 +1,252 @@
 (function (window, document) {
     'use strict';
 
+    function digits(value) {
+        return String(value || '').replace(/\D+/g, '');
+    }
+
+    function fillSelect(select, items, selectedValue, placeholder) {
+        if (!select) return;
+        var current = selectedValue != null ? String(selectedValue) : String(select.value || '');
+        select.innerHTML = '';
+        var empty = document.createElement('option');
+        empty.value = '';
+        empty.textContent = placeholder || 'Selecione…';
+        select.appendChild(empty);
+
+        var found = false;
+        (items || []).forEach(function (item) {
+            var opt = document.createElement('option');
+            opt.value = item.value;
+            opt.textContent = item.label || item.value;
+            if (item.ibge) opt.setAttribute('data-ibge', item.ibge);
+            if (current && item.value === current) {
+                opt.selected = true;
+                found = true;
+            }
+            select.appendChild(opt);
+        });
+
+        if (current && !found) {
+            var custom = document.createElement('option');
+            custom.value = current;
+            custom.textContent = current;
+            custom.selected = true;
+            select.appendChild(custom);
+        }
+    }
+
+    function ensureOutroOption(select) {
+        if (!select) return;
+        var has = false;
+        Array.prototype.forEach.call(select.options, function (opt) {
+            if (opt.value === '__outro__') has = true;
+        });
+        if (!has) {
+            var opt = document.createElement('option');
+            opt.value = '__outro__';
+            opt.textContent = 'Outro (digitar)';
+            select.appendChild(opt);
+        }
+    }
+
+    function initEndereco(root) {
+        var box = root.querySelector('[data-clinic-endereco]');
+        if (!box || box.getAttribute('data-endereco-init') === '1') return;
+        box.setAttribute('data-endereco-init', '1');
+
+        var cepUrlTpl = box.getAttribute('data-cep-url') || '';
+        var cidadesUrl = box.getAttribute('data-cidades-url') || '';
+        var bairrosUrl = box.getAttribute('data-bairros-url') || '';
+
+        var cepInput = box.querySelector('[data-endereco-cep]');
+        var logradouro = box.querySelector('[data-endereco-logradouro]');
+        var complemento = box.querySelector('[data-endereco-complemento]');
+        var ufSelect = box.querySelector('[data-endereco-uf]');
+        var cidadeSelect = box.querySelector('[data-endereco-cidade]');
+        var bairroSelect = box.querySelector('[data-endereco-bairro]');
+        var bairroOutro = box.querySelector('[data-endereco-bairro-outro]');
+        var statusEl = box.querySelector('[data-endereco-cep-status]');
+        var numero = box.querySelector('[data-endereco-numero]');
+
+        var cityIbge = '';
+        var loadingCities = false;
+        var loadingBairros = false;
+
+        function setStatus(msg, isError) {
+            if (!statusEl) return;
+            statusEl.textContent = msg || '';
+            statusEl.classList.toggle('text-danger', !!isError);
+            statusEl.classList.toggle('text-muted', !isError);
+        }
+
+        function syncBairroOutro() {
+            if (!bairroSelect || !bairroOutro) return;
+            var isOutro = bairroSelect.value === '__outro__';
+            bairroOutro.hidden = !isOutro;
+            if (isOutro) {
+                bairroOutro.setAttribute('name', 'bairro');
+                bairroSelect.removeAttribute('name');
+                if (!bairroOutro.value) bairroOutro.focus();
+            } else {
+                bairroSelect.setAttribute('name', 'bairro');
+                bairroOutro.removeAttribute('name');
+            }
+        }
+
+        function selectedCityIbge() {
+            if (!cidadeSelect || cidadeSelect.selectedIndex < 0) return cityIbge || '';
+            var opt = cidadeSelect.options[cidadeSelect.selectedIndex];
+            return (opt && opt.getAttribute('data-ibge')) || cityIbge || '';
+        }
+
+        function loadBairros(preferred, extraFromCep) {
+            if (!bairroSelect || !bairrosUrl) return Promise.resolve();
+            var ibge = selectedCityIbge();
+            if (!ibge && !extraFromCep && !preferred) {
+                fillSelect(bairroSelect, [], preferred || '', 'Selecione a cidade');
+                ensureOutroOption(bairroSelect);
+                syncBairroOutro();
+                return Promise.resolve();
+            }
+            loadingBairros = true;
+            bairroSelect.disabled = true;
+            var url = bairrosUrl + '?ibge=' + encodeURIComponent(ibge || '');
+            if (extraFromCep) url += '&bairro=' + encodeURIComponent(extraFromCep);
+            return fetch(url, { headers: { Accept: 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    fillSelect(bairroSelect, data.items || [], preferred || extraFromCep || '', 'Selecione…');
+                    ensureOutroOption(bairroSelect);
+                    syncBairroOutro();
+                })
+                .catch(function () {
+                    var seed = preferred || extraFromCep || '';
+                    fillSelect(bairroSelect, seed ? [{ value: seed, label: seed }] : [], seed, 'Selecione…');
+                    ensureOutroOption(bairroSelect);
+                    syncBairroOutro();
+                })
+                .finally(function () {
+                    loadingBairros = false;
+                    bairroSelect.disabled = false;
+                });
+        }
+
+        function loadCidades(uf, preferredCity, preferredBairro, fromCepBairro) {
+            if (!cidadeSelect || !cidadesUrl) return Promise.resolve();
+            if (!uf) {
+                fillSelect(cidadeSelect, [], '', 'Selecione a UF');
+                fillSelect(bairroSelect, [], '', 'Selecione a cidade');
+                ensureOutroOption(bairroSelect);
+                syncBairroOutro();
+                return Promise.resolve();
+            }
+            loadingCities = true;
+            cidadeSelect.disabled = true;
+            return fetch(cidadesUrl + '?uf=' + encodeURIComponent(uf), { headers: { Accept: 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    fillSelect(cidadeSelect, data.items || [], preferredCity || '', 'Selecione…');
+                    if (preferredCity) {
+                        Array.prototype.forEach.call(cidadeSelect.options, function (opt) {
+                            if (opt.value === preferredCity && opt.getAttribute('data-ibge')) {
+                                cityIbge = opt.getAttribute('data-ibge') || '';
+                            }
+                        });
+                    }
+                    return loadBairros(preferredBairro, fromCepBairro);
+                })
+                .catch(function () {
+                    fillSelect(
+                        cidadeSelect,
+                        preferredCity ? [{ value: preferredCity, label: preferredCity }] : [],
+                        preferredCity || '',
+                        'Não foi possível carregar'
+                    );
+                })
+                .finally(function () {
+                    loadingCities = false;
+                    cidadeSelect.disabled = false;
+                });
+        }
+
+        function lookupCep() {
+            if (!cepInput || !cepUrlTpl) return;
+            var d = digits(cepInput.value);
+            if (d.length !== 8) return;
+            setStatus('Buscando CEP…');
+            var url = cepUrlTpl.replace('00000000', d);
+            fetch(url, { headers: { Accept: 'application/json' } })
+                .then(function (r) {
+                    return r.json().then(function (body) {
+                        return { ok: r.ok, body: body };
+                    });
+                })
+                .then(function (res) {
+                    if (!res.ok || !res.body || !res.body.endereco) {
+                        setStatus((res.body && res.body.error) || 'CEP não encontrado.', true);
+                        return;
+                    }
+                    var e = res.body.endereco;
+                    setStatus('Endereço encontrado.');
+                    if (logradouro && e.logradouro) logradouro.value = e.logradouro;
+                    if (complemento && e.complemento && !complemento.value) complemento.value = e.complemento;
+                    if (cepInput && e.cep) cepInput.value = e.cep;
+                    cityIbge = e.ibge || '';
+                    if (ufSelect && e.uf) {
+                        ufSelect.value = e.uf;
+                    }
+                    return loadCidades(e.uf || '', e.cidade || '', e.bairro || '', e.bairro || '').then(function () {
+                        if (numero) numero.focus();
+                    });
+                })
+                .catch(function () {
+                    setStatus('Falha ao consultar o CEP.', true);
+                });
+        }
+
+        if (cepInput) {
+            var cepTimer = null;
+            cepInput.addEventListener('blur', lookupCep);
+            cepInput.addEventListener('input', function () {
+                clearTimeout(cepTimer);
+                var d = digits(cepInput.value);
+                if (d.length === 8) {
+                    cepTimer = setTimeout(lookupCep, 280);
+                }
+            });
+        }
+
+        if (ufSelect) {
+            ufSelect.addEventListener('change', function () {
+                cityIbge = '';
+                loadCidades(ufSelect.value, '', '', '');
+            });
+        }
+
+        if (cidadeSelect) {
+            cidadeSelect.addEventListener('change', function () {
+                var opt = cidadeSelect.options[cidadeSelect.selectedIndex];
+                cityIbge = (opt && opt.getAttribute('data-ibge')) || '';
+                loadBairros('', '');
+            });
+        }
+
+        if (bairroSelect) {
+            bairroSelect.addEventListener('change', syncBairroOutro);
+        }
+
+        // Estado inicial (edição)
+        var initialUf = ufSelect ? ufSelect.value : '';
+        var initialCidade = cidadeSelect ? (cidadeSelect.getAttribute('data-initial-cidade') || cidadeSelect.value) : '';
+        var initialBairro = bairroSelect ? (bairroSelect.getAttribute('data-initial-bairro') || bairroSelect.value) : '';
+        ensureOutroOption(bairroSelect);
+        syncBairroOutro();
+        if (initialUf) {
+            loadCidades(initialUf, initialCidade, initialBairro, initialBairro);
+        }
+    }
+
     function initForm(root) {
         if (!root || root.getAttribute('data-clinic-paciente-init') === '1') {
             return;
@@ -94,6 +340,7 @@
         }
 
         refreshPreview();
+        initEndereco(root);
         if (window.UnioInputMasks && typeof window.UnioInputMasks.scan === 'function') {
             window.UnioInputMasks.scan(root);
         }
@@ -108,6 +355,10 @@
     } else {
         scan();
     }
+
+    // Offcanvas pode injetar o form depois
+    document.addEventListener('shown.bs.offcanvas', scan);
+    document.addEventListener('unio:offcanvas-open', scan);
 
     window.ClinicPacienteForm = {
         init: initForm,
