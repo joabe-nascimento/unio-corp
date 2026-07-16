@@ -25,6 +25,30 @@ class ClinicConvenio
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $registroAns = null;
 
+    #[ORM\Column(length: 14, nullable: true)]
+    private ?string $cnpj = null;
+
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $codigoPrestador = null;
+
+    #[ORM\Column(length: 16, nullable: true)]
+    private ?string $versaoTiss = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $contatoFaturamento = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $emailFaturamento = null;
+
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $telefoneFaturamento = null;
+
+    #[ORM\Column(type: 'smallint', options: ['default' => 30])]
+    private int $prazoGlosaDias = 30;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $observacoes = null;
+
     #[ORM\Column]
     private bool $ativo = true;
 
@@ -83,6 +107,102 @@ class ClinicConvenio
     public function setRegistroAns(?string $registroAns): static
     {
         $this->registroAns = $registroAns;
+
+        return $this;
+    }
+
+    public function getCnpj(): ?string
+    {
+        return $this->cnpj;
+    }
+
+    public function setCnpj(?string $cnpj): static
+    {
+        $this->cnpj = $cnpj;
+
+        return $this;
+    }
+
+    public function getCodigoPrestador(): ?string
+    {
+        return $this->codigoPrestador;
+    }
+
+    public function setCodigoPrestador(?string $codigoPrestador): static
+    {
+        $this->codigoPrestador = $codigoPrestador;
+
+        return $this;
+    }
+
+    public function getVersaoTiss(): ?string
+    {
+        return $this->versaoTiss;
+    }
+
+    public function setVersaoTiss(?string $versaoTiss): static
+    {
+        $this->versaoTiss = $versaoTiss;
+
+        return $this;
+    }
+
+    public function getContatoFaturamento(): ?string
+    {
+        return $this->contatoFaturamento;
+    }
+
+    public function setContatoFaturamento(?string $contatoFaturamento): static
+    {
+        $this->contatoFaturamento = $contatoFaturamento;
+
+        return $this;
+    }
+
+    public function getEmailFaturamento(): ?string
+    {
+        return $this->emailFaturamento;
+    }
+
+    public function setEmailFaturamento(?string $emailFaturamento): static
+    {
+        $this->emailFaturamento = $emailFaturamento;
+
+        return $this;
+    }
+
+    public function getTelefoneFaturamento(): ?string
+    {
+        return $this->telefoneFaturamento;
+    }
+
+    public function setTelefoneFaturamento(?string $telefoneFaturamento): static
+    {
+        $this->telefoneFaturamento = $telefoneFaturamento;
+
+        return $this;
+    }
+
+    public function getPrazoGlosaDias(): int
+    {
+        return $this->prazoGlosaDias;
+    }
+
+    public function setPrazoGlosaDias(int $prazoGlosaDias): static
+    {
+        $this->prazoGlosaDias = $prazoGlosaDias;
+
+        return $this;
+    }
+
+    public function getObservacoes(): ?string
+    {
+        return $this->observacoes;
+    }
+
+    public function setObservacoes(?string $observacoes): static
+    {
+        $this->observacoes = $observacoes;
 
         return $this;
     }

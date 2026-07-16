@@ -1068,7 +1068,7 @@
 
         .section-header {
             display: flex;
-            align-items: flex-end;
+            align-items: flex-start;
             justify-content: space-between;
             gap: 16px;
             flex-wrap: wrap;
@@ -1077,8 +1077,22 @@
         .section-header--in-card {
             margin-bottom: 1rem;
         }
+        /* Cards sem padding (p-0): o header precisa do próprio respiro */
+        .unio-card.p-0 > .section-header--in-card {
+            padding: 1.15rem 1.25rem 1rem;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .unio-card.p-0 > .section-header--in-card .section-title {
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .unio-card.p-0 > .section-header--in-card .section-subtitle {
+            line-height: 1.45;
+        }
         .section-header-text {
             min-width: 0;
+            flex: 1 1 auto;
         }
         .section-header-action {
             white-space: nowrap;
@@ -2029,6 +2043,50 @@
             flex: 1 1 auto;
             min-width: 0;
         }
+        /* Chips de status + lupa na mesma linha (listas / ETLs) */
+        .section-toolbar:has(.clinic-filter-chips) {
+            align-items: center;
+        }
+        .section-toolbar:has(.clinic-filter-chips) .section-toolbar-start:not(:has(.section-toolbar-text, .section-toolbar-actions, .section-toolbar-heading)) {
+            display: none;
+        }
+        .section-toolbar-end:has(.clinic-filter-chips),
+        .list-toolbar-end:has(.clinic-filter-chips) {
+            flex: 1 1 100%;
+            align-items: center;
+            justify-content: stretch;
+        }
+        .toolbar-inline-controls:has(.clinic-filter-chips),
+        .list-toolbar-end:has(.clinic-filter-chips) {
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
+        }
+        .toolbar-inline-controls .clinic-filter-chips,
+        .list-toolbar-end .clinic-filter-chips,
+        .section-toolbar-end .clinic-filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .toolbar-inline-controls:has(.clinic-filter-chips) .filter-group--search,
+        .list-toolbar-end:has(.clinic-filter-chips) .filter-group--search,
+        .section-toolbar-end:has(.clinic-filter-chips) .filter-group--search {
+            margin-left: auto;
+            flex: 0 0 auto;
+            align-self: center;
+        }
+        .toolbar-inline-controls:has(.clinic-filter-chips) .list-search-toggle,
+        .list-toolbar-end:has(.clinic-filter-chips) .list-search-toggle,
+        .section-toolbar-end:has(.clinic-filter-chips) .list-search-toggle {
+            width: 36px;
+            height: 36px;
+        }
         .toolbar-mobile-fab {
             display: none;
         }
@@ -2066,6 +2124,11 @@
                 width: 100%;
                 min-width: 0;
                 max-width: none;
+                margin-left: 0;
+            }
+            .toolbar-controls-dual .toolbar-inline-controls .clinic-filter-chips {
+                flex: 1 1 100%;
+                width: 100%;
             }
             .toolbar-controls-dual .toolbar-inline-controls .filter-select-wrap {
                 display: block;
@@ -3680,6 +3743,10 @@
         }
         .unio-offcanvas-footer {
             flex-shrink: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
             padding: 14px 20px 18px;
             border-top: 1px solid var(--border);
             background: var(--surface-2);

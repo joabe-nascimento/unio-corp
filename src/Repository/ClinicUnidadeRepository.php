@@ -15,15 +15,31 @@ class ClinicUnidadeRepository extends ServiceEntityRepository
         parent::__construct($registry, ClinicUnidade::class);
     }
 
+    public function findOneByEmpresa(Empresa $empresa, int $id): ?ClinicUnidade
+    {
+        return $this->findOneBy(['id' => $id, 'empresa' => $empresa]);
+    }
+
+    /**
+     * @return list<ClinicUnidade>
+     */
+    public function findByEmpresa(Empresa $empresa, bool $onlyAtivos = false): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->andWhere('u.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->orderBy('u.nome', 'ASC');
+
+        if ($onlyAtivos) {
+            $qb->andWhere('u.ativo = true');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     /** @return list<ClinicUnidade> */
     public function findAtivasByEmpresa(Empresa $empresa): array
     {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.empresa = :empresa')
-            ->andWhere('u.ativo = true')
-            ->setParameter('empresa', $empresa)
-            ->orderBy('u.nome', 'ASC')
-            ->getQuery()
-            ->getResult();
+        return $this->findByEmpresa($empresa, true);
     }
 }

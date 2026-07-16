@@ -1,0 +1,145 @@
+﻿{% extends 'layout/hub.html.twig' %}
+{% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+
+{% block title %}Salas · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Salas' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Consultórios e centros cirúrgicos' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_unidades') }}" class="btn-unio-ghost btn-sm">Unidades</a>
+{{ cadastro.create_button('clinic-sala', 'Nova sala') }}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-0">
+    {% if salas is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-door-open',
+            title: 'Nenhuma sala cadastrada',
+            text: 'Cadastre a primeira sala para agenda e centro cirúrgico.',
+            btn_sm: true,
+            compact: true,
+            btn_label: 'Nova sala',
+            btn_opens: 'clinic-sala',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="clinic-cadastro-list__head">
+        <div>
+            <strong>Salas</strong>
+            <p class="clinic-cadastro-list__head-sub mb-0">Tipo, capacidade e unidade</p>
+        </div>
+        <span class="clinic-cadastro-list__count">{{ salas|length }}</span>
+    </div>
+    <div class="clinic-cadastro-list">
+        {% for s in salas %}
+        <article class="clinic-cadastro-item clinic-cadastro-item--rich">
+            <div class="clinic-cadastro-item__view">
+                <div class="clinic-cadastro-item__main">
+                    <div class="clinic-cadastro-item__body">
+                        <div class="clinic-cadastro-item__title-row">
+                            <h3 class="clinic-cadastro-item__title">{{ s.nome }}</h3>
+                            <span class="clinic-cadastro-chip {{ s.ativo ? 'clinic-cadastro-chip--ok' : 'clinic-cadastro-chip--off' }}">
+                                {{ s.ativo ? 'Ativa' : 'Inativa' }}
+                            </span>
+                        </div>
+                        <dl class="clinic-cadastro-facts">
+                            <div>
+                                <dt>Código</dt>
+                                <dd>{{ s.codigo }}</dd>
+                            </div>
+                            <div>
+                                <dt>Tipo</dt>
+                                <dd>{{ tipos_sala[s.tipo]|default(s.tipo) }}</dd>
+                            </div>
+                            <div>
+                                <dt>Capacidade</dt>
+                                <dd>{{ s.capacidade }}</dd>
+                            </div>
+                            {% if s.unidade %}
+                            <div>
+                                <dt>Unidade</dt>
+                                <dd>{{ s.unidade.nome }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                <div class="clinic-cadastro-item__actions">
+                    {{ cadastro.edit_button('clinic-sala', s.id, csrf_token('clinic_sala_' ~ s.id), {
+                        fields: {
+                            nome: s.nome,
+                            codigo: s.codigo,
+                            tipo: s.tipo,
+                            capacidade: s.capacidade,
+                            unidade_id: s.unidade ? s.unidade.id : '',
+                            ativo: s.ativo ? '1' : '0'
+                        }
+                    }) }}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% embed 'components/cadastro_form_offcanvas.html.twig' with {
+    id: 'clinic-sala',
+    form_id: 'clinicSalaForm',
+    title: 'Nova sala',
+    title_edit: 'Editar sala',
+    subtitle: 'Cadastro de consultório ou centro cirúrgico',
+    icon: 'fa-door-open',
+    create_action: path('app_pos_operatorio_salas'),
+    edit_action: path('app_pos_operatorio_salas_editar', { id: 0 }),
+    create_token: csrf_token('clinic_sala_new'),
+    ativo_label: 'Sala ativa'
+} %}
+    {% block form_fields %}
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Identificação</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'sala_nome', name: 'nome', label: 'Nome da sala', required: true,
+                placeholder: 'Ex.: Consultório 1', attrs: { maxlength: '120' }
+            } %}
+            <div class="row g-2">
+                <div class="col-md-5">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'sala_codigo', name: 'codigo', label: 'Código', required: true,
+                        placeholder: 'S01', inputmode: 'text',
+                        attrs: { maxlength: '16', 'data-mask': 'uppercase', autocomplete: 'off' }
+                    } %}
+                </div>
+                <div class="col-md-7">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'sala_tipo', name: 'tipo', label: 'Tipo', type: 'select', required: true,
+                        options: tipos_sala|keys|map(tid => { value: tid, label: tipos_sala[tid] })
+                    } %}
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Operação</legend>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'sala_capacidade', name: 'capacidade', label: 'Capacidade', type: 'number',
+                        value: '1', placeholder: '1', required: true,
+                        attrs: { min: '1', max: '20' }
+                    } %}
+                </div>
+                <div class="col-md-8">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'sala_unidade', name: 'unidade_id', label: 'Unidade / filial', type: 'select',
+                        options: [{ value: '', label: '— Sem unidade —' }]|merge(unidades|map(u => { value: u.id ~ '', label: u.nome }))
+                    } %}
+                </div>
+            </div>
+        </fieldset>
+    {% endblock %}
+{% endembed %}
+{% endblock %}

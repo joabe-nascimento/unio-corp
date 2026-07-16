@@ -22,6 +22,16 @@ use App\PosOperatorio\PosOperatorioDisplay;
 use App\PosOperatorio\PosOperatorioTimelineFormatter;
 use App\Support\BrPersonFormat;
 
+use App\Repository\ClinicConvenioRepository;
+
+use App\Repository\ClinicPacoteRepository;
+
+use App\Repository\ClinicProcedimentoRepository;
+
+use App\Repository\ClinicProfissionalRepository;
+
+use App\Repository\ClinicUnidadeRepository;
+
 use App\Repository\PosOperatorioPacienteRepository;
 
 use App\Repository\PosOperatorioProtocoloRepository;
@@ -59,6 +69,16 @@ final class PosOperatorioPacienteService
         private ContractAttestationService $attestations,
 
         private OrganismMemoryQuery $organismMemory,
+
+        private ?ClinicUnidadeRepository $unidadeRepo = null,
+
+        private ?ClinicConvenioRepository $convenioRepo = null,
+
+        private ?ClinicProfissionalRepository $profissionalRepo = null,
+
+        private ?ClinicProcedimentoRepository $procedimentoRepo = null,
+
+        private ?ClinicPacoteRepository $pacoteRepo = null,
 
     ) {}
 
@@ -177,6 +197,7 @@ final class PosOperatorioPacienteService
 
         $this->applyContactExtras($paciente, $data);
         $this->applyCpf($paciente, $empresa, $data);
+        $this->applyCadastroCompleto($paciente, $empresa, $data);
 
         $this->applyDataCirurgia($paciente, (string) ($data['data_cirurgia'] ?? ''));
         $this->applyDataNascimento($paciente, $data);
@@ -235,6 +256,7 @@ final class PosOperatorioPacienteService
 
         $this->applyContactExtras($paciente, $data);
         $this->applyCpf($paciente, $paciente->getEmpresa(), $data);
+        $this->applyCadastroCompleto($paciente, $paciente->getEmpresa(), $data);
 
         $this->applyDataCirurgia($paciente, (string) ($data['data_cirurgia'] ?? ''));
         $this->applyDataNascimento($paciente, $data);
@@ -778,6 +800,130 @@ final class PosOperatorioPacienteService
 
         $paciente->setObservacoes(trim((string) ($data['observacoes'] ?? '')) ?: null);
 
+    }
+
+    /** @param array<string, mixed> $data */
+    private function applyCadastroCompleto(PosOperatorioPaciente $paciente, Empresa $empresa, array $data): void
+    {
+        $paciente->setSexo(ClinicCadastroRules::normalizeSexo(isset($data['sexo']) ? (string) $data['sexo'] : null));
+        $paciente->setRg(trim((string) ($data['rg'] ?? '')) ?: null);
+        $paciente->setCns(ClinicCadastroRules::normalizeCns(isset($data['cns']) ? (string) $data['cns'] : null));
+        $paciente->setCep(ClinicCadastroRules::normalizeCep(isset($data['cep']) ? (string) $data['cep'] : null));
+        $paciente->setLogradouro(trim((string) ($data['logradouro'] ?? '')) ?: null);
+        $paciente->setNumeroEndereco(trim((string) ($data['numero_endereco'] ?? '')) ?: null);
+        $paciente->setComplemento(trim((string) ($data['complemento'] ?? '')) ?: null);
+        $paciente->setBairro(trim((string) ($data['bairro'] ?? '')) ?: null);
+        $paciente->setCidade(trim((string) ($data['cidade'] ?? '')) ?: null);
+        $paciente->setUf(ClinicCadastroRules::normalizeUf(isset($data['uf']) ? (string) $data['uf'] : null));
+        ClinicCadastroRules::assertEnderecoCoerente(
+            $paciente->getCep(),
+            $paciente->getCidade(),
+            $paciente->getUf(),
+        );
+        ClinicCadastroRules::assertDataCirurgiaCoerente($paciente->getDataCirurgia());
+        ClinicCadastroRules::assertIdadeMinimaCirurgia($paciente->getDataNascimento(), $paciente->getDataCirurgia());
+
+        if ($this->unidadeRepo !== null && array_key_exists('unidade_id', $data)) {
+            $unidadeId = (int) ($data['unidade_id'] ?? 0);
+            $paciente->setUnidade(
+                $unidadeId > 0 ? $this->unidadeRepo->findOneByEmpresa($empresa, $unidadeId) : null
+            );
+        }
+
+        $convenioId = (int) ($data['convenio_id'] ?? 0);
+        $numeroCarteirinha = trim((string) ($data['numero_carteirinha_convenio'] ?? ''));
+        if (array_key_exists('convenio_id', $data)) {
+            ClinicCadastroRules::assertCarteirinhaConvenio($convenioId > 0 ? $convenioId : null, $numeroCarteirinha);
+        }
+
+        if ($this->convenioRepo !== null && array_key_exists('convenio_id', $data)) {
+            $convenio = $convenioId > 0 ? $this->convenioRepo->findOneByEmpresa($empresa, $convenioId) : null;
+            if ($convenio !== null && ($convenio->getRegistroAns() === null || trim((string) $convenio->getRegistroAns()) === '')) {
+                // Convênio sem registro ANS: faturamento TISS exigirá o cadastro ANS — não bloqueia o paciente.
+            }
+            $paciente->setConvenio($convenio);
+        }
+
+        if (array_key_exists('numero_carteirinha_convenio', $data) || array_key_exists('convenio_id', $data)) {
+            $paciente->setNumeroCarteirinhaConvenio($numeroCarteirinha !== '' ? mb_substr($numeroCarteirinha, 0, 40) : null);
+        }
+
+        $validadeRaw = trim((string) ($data['validade_carteirinha_convenio'] ?? ''));
+        if ($validadeRaw === '') {
+            $paciente->setValidadeCarteirinhaConvenio(null);
+        } else {
+            $validade = \DateTimeImmutable::createFromFormat('Y-m-d', $validadeRaw);
+            $paciente->setValidadeCarteirinhaConvenio($validade ?: null);
+        }
+
+        $origem = trim((string) ($data['origem_clinica'] ?? ''));
+        if ($origem === '') {
+            $paciente->setOrigemClinica(null);
+        } elseif (!isset(ClinicCadastroRules::ORIGENS_CLINICAS[$origem])) {
+            throw new \InvalidArgumentException('Origem clínica inválida.');
+        } else {
+            $paciente->setOrigemClinica($origem);
+        }
+
+        $paciente->setIndicadoPor(trim((string) ($data['indicado_por'] ?? '')) ?: null);
+        $paciente->setTitularNome(trim((string) ($data['titular_nome'] ?? '')) ?: null);
+
+        if (array_key_exists('titular_cpf', $data)) {
+            $titularCpfRaw = trim((string) ($data['titular_cpf'] ?? ''));
+            if ($titularCpfRaw === '') {
+                $paciente->setTitularCpf(null);
+            } else {
+                $paciente->setTitularCpf(ClinicCadastroRules::normalizeCpf($titularCpfRaw));
+            }
+        }
+
+        $parentesco = trim((string) ($data['parentesco_titular'] ?? ''));
+        if ($parentesco === '') {
+            $paciente->setParentescoTitular(null);
+        } elseif (!isset(ClinicCadastroRules::PARENTESCOS[$parentesco])) {
+            throw new \InvalidArgumentException('Parentesco do titular inválido.');
+        } else {
+            $paciente->setParentescoTitular($parentesco);
+        }
+
+        $hasAnamneseKeys = array_key_exists('anamnese_alergias', $data)
+            || array_key_exists('anamnese_medicamentos', $data)
+            || array_key_exists('anamnese_comorbidades', $data)
+            || array_key_exists('anamnese_cirurgias', $data)
+            || array_key_exists('anamnese_habitos', $data)
+            || array_key_exists('anamnese_obs', $data);
+
+        if ($hasAnamneseKeys) {
+            $paciente->setAnamnese(ClinicCadastroRules::validateAnamnese([
+                'alergias' => $data['anamnese_alergias'] ?? '',
+                'medicamentos_uso' => $data['anamnese_medicamentos'] ?? '',
+                'comorbidades' => $data['anamnese_comorbidades'] ?? '',
+                'cirurgias_previas' => $data['anamnese_cirurgias'] ?? '',
+                'habitos' => $data['anamnese_habitos'] ?? '',
+                'observacoes' => $data['anamnese_obs'] ?? '',
+            ]));
+        }
+
+        if ($this->profissionalRepo !== null && array_key_exists('profissional_id', $data)) {
+            $profissionalId = (int) ($data['profissional_id'] ?? 0);
+            $paciente->setProfissional(
+                $profissionalId > 0 ? $this->profissionalRepo->findOneByEmpresa($empresa, $profissionalId) : null
+            );
+        }
+
+        if ($this->procedimentoRepo !== null && array_key_exists('procedimento_id', $data)) {
+            $procedimentoId = (int) ($data['procedimento_id'] ?? 0);
+            $paciente->setProcedimentoCatalogo(
+                $procedimentoId > 0 ? $this->procedimentoRepo->findOneByEmpresa($empresa, $procedimentoId) : null
+            );
+        }
+
+        if ($this->pacoteRepo !== null && array_key_exists('pacote_id', $data)) {
+            $pacoteId = (int) ($data['pacote_id'] ?? 0);
+            $paciente->setPacote(
+                $pacoteId > 0 ? $this->pacoteRepo->findOneByEmpresa($empresa, $pacoteId) : null
+            );
+        }
     }
 
     private function applyCpf(PosOperatorioPaciente $paciente, Empresa $empresa, array $data): void

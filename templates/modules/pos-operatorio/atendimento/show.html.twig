@@ -30,6 +30,24 @@
         <section class="unio-card p-3">
             <form method="post">
                 <input type="hidden" name="_token" value="{{ csrf_token('clinic_atendimento_' ~ atendimento.id) }}">
+                {% if atendimento.status == 'em_andamento' and soap_templates|default([]) is not empty %}
+                <div class="mb-3">
+                    <label class="small text-muted d-block" for="soap_template_id">Modelo SOAP</label>
+                    <select id="soap_template_id" class="form-control" data-soap-template-select>
+                        <option value="">— Aplicar modelo —</option>
+                        {% for t in soap_templates %}
+                        <option value="{{ t.id }}"
+                                data-queixa="{{ t.queixa|default('')|e('html_attr') }}"
+                                data-exame="{{ t.exame|default('')|e('html_attr') }}"
+                                data-hipotese="{{ t.hipotese|default('')|e('html_attr') }}"
+                                data-conduta="{{ t.conduta|default('')|e('html_attr') }}"
+                                data-cid10="{{ t.cid10Sugerido|default('')|e('html_attr') }}">
+                            {{ t.nome }}{% if t.procedimentoTipo %} · {{ t.procedimentoTipo }}{% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
                 <div class="mb-3">
                     <label class="small text-muted d-block" for="queixa">Queixa / motivo</label>
                     <textarea id="queixa" name="queixa" class="form-control" rows="3" {{ atendimento.status != 'em_andamento' ? 'readonly' : '' }}>{{ atendimento.queixa }}</textarea>
@@ -55,7 +73,11 @@
                         <input id="cid10" type="text" name="cid10" class="form-control" maxlength="16"
                                value="{{ atendimento.cid10 }}"
                                {{ atendimento.status != 'em_andamento' ? 'readonly' : '' }}
-                               placeholder="Ex.: Z48.0">
+                               placeholder="Ex.: Z48.0"
+                               data-cid-search="{{ cid10_search_url|default(path('app_pos_operatorio_cid10_search')) }}"
+                               list="cid10-suggestions"
+                               autocomplete="off">
+                        <datalist id="cid10-suggestions"></datalist>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -75,4 +97,54 @@
         </section>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+  var templateSelect = document.querySelector('[data-soap-template-select]');
+  if (templateSelect) {
+    templateSelect.addEventListener('change', function () {
+      var opt = templateSelect.options[templateSelect.selectedIndex];
+      if (!opt || !opt.value) return;
+      var set = function (id, attr) {
+        var el = document.getElementById(id);
+        if (el && opt.getAttribute(attr)) el.value = opt.getAttribute(attr);
+      };
+      set('queixa', 'data-queixa');
+      set('exame', 'data-exame');
+      set('hipotese', 'data-hipotese');
+      set('conduta', 'data-conduta');
+      set('cid10', 'data-cid10');
+    });
+  }
+
+  var cidInput = document.querySelector('[data-cid-search]');
+  var list = document.getElementById('cid10-suggestions');
+  if (!cidInput || !list) return;
+  var timer = null;
+  cidInput.addEventListener('input', function () {
+    var q = cidInput.value.trim();
+    clearTimeout(timer);
+    if (q.length < 2) {
+      list.innerHTML = '';
+      return;
+    }
+    timer = setTimeout(function () {
+      fetch(cidInput.getAttribute('data-cid-search') + '?q=' + encodeURIComponent(q) + '&limit=15', {
+        headers: { 'Accept': 'application/json' }
+      }).then(function (r) { return r.json(); }).then(function (data) {
+        list.innerHTML = '';
+        (data.items || []).forEach(function (item) {
+          var option = document.createElement('option');
+          option.value = item.codigo || item.code || '';
+          option.label = (item.codigo || item.code || '') + ' — ' + (item.descricao || item.label || '');
+          list.appendChild(option);
+        });
+      }).catch(function () {});
+    }, 250);
+  });
+})();
+</script>
 {% endblock %}

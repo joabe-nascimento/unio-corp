@@ -1,0 +1,186 @@
+﻿{% extends 'layout/hub.html.twig' %}
+{% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+
+{% block title %}Modelos SOAP · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Modelos SOAP' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Modelos de atendimento clínico' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_atendimento') }}" class="btn-unio-ghost btn-sm">Atendimento</a>
+{{ cadastro.create_button('clinic-soap', 'Novo modelo') }}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-0">
+    {% if templates is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-notes-medical',
+            title: 'Nenhum modelo cadastrado',
+            text: 'Cadastre o primeiro modelo SOAP para agilizar o atendimento.',
+            btn_sm: true,
+            compact: true,
+            btn_label: 'Novo modelo',
+            btn_opens: 'clinic-soap',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="clinic-cadastro-list__head">
+        <div>
+            <strong>Modelos SOAP</strong>
+            <p class="clinic-cadastro-list__head-sub mb-0">Tipo, CID e queixa padrão</p>
+        </div>
+        <span class="clinic-cadastro-list__count">{{ templates|length }}</span>
+    </div>
+    <div class="clinic-cadastro-list">
+        {% for t in templates %}
+        <article class="clinic-cadastro-item clinic-cadastro-item--rich">
+            <div class="clinic-cadastro-item__view">
+                <div class="clinic-cadastro-item__main">
+                    <div class="clinic-cadastro-item__body">
+                        <div class="clinic-cadastro-item__title-row">
+                            <h3 class="clinic-cadastro-item__title">{{ t.nome }}</h3>
+                            <span class="clinic-cadastro-chip {{ t.ativo ? 'clinic-cadastro-chip--ok' : 'clinic-cadastro-chip--off' }}">
+                                {{ t.ativo ? 'Ativo' : 'Inativo' }}
+                            </span>
+                        </div>
+                        <dl class="clinic-cadastro-facts">
+                            {% if t.procedimentoTipo %}
+                            <div>
+                                <dt>Tipo</dt>
+                                <dd>{{ t.procedimentoTipo }}</dd>
+                            </div>
+                            {% endif %}
+                            {% if t.cid10Sugerido %}
+                            <div>
+                                <dt>CID-10</dt>
+                                <dd>{{ t.cid10Sugerido }}</dd>
+                            </div>
+                            {% endif %}
+                            {% if t.queixa %}
+                            <div>
+                                <dt>Queixa (S)</dt>
+                                <dd>{{ t.queixa|length > 90 ? t.queixa|slice(0, 90) ~ '…' : t.queixa }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                <div class="clinic-cadastro-item__actions">
+                    {{ cadastro.edit_button('clinic-soap', t.id, csrf_token('clinic_soap_' ~ t.id), {
+                        fields: {
+                            nome: t.nome,
+                            procedimento_tipo: t.procedimentoTipo|default(''),
+                            cid10_sugerido: t.cid10Sugerido|default(''),
+                            queixa: t.queixa|default(''),
+                            exame: t.exame|default(''),
+                            hipotese: t.hipotese|default(''),
+                            conduta: t.conduta|default(''),
+                            ativo: t.ativo ? '1' : '0'
+                        }
+                    }) }}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% embed 'components/cadastro_form_offcanvas.html.twig' with {
+    id: 'clinic-soap',
+    form_id: 'clinicSoapForm',
+    title: 'Novo modelo SOAP',
+    title_edit: 'Editar modelo SOAP',
+    subtitle: 'Identificação e blocos S-O-A-P',
+    icon: 'fa-notes-medical',
+    size: 'lg',
+    create_action: path('app_pos_operatorio_soap_templates'),
+    edit_action: path('app_pos_operatorio_soap_templates_editar', { id: 0 }),
+    create_token: csrf_token('clinic_soap_new'),
+    ativo_label: 'Modelo ativo'
+} %}
+    {% block form_fields %}
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Identificação</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'soap_nome', name: 'nome', label: 'Nome do modelo', required: true,
+                placeholder: 'Ex.: Retorno pós-hernioplastia', attrs: { maxlength: '120' }
+            } %}
+            <div class="row g-2">
+                <div class="col-md-7">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'soap_tipo', name: 'procedimento_tipo', label: 'Tipo de procedimento', type: 'select',
+                        options: [{ value: '', label: '— Selecione —' }]|merge(
+                            tipos_procedimento|keys|map(t => { value: t, label: tipos_procedimento[t] })
+                        )
+                    } %}
+                </div>
+                <div class="col-md-5">
+                    <div class="unio-form-group">
+                        <label class="unio-form-label" for="soap_cid">CID-10 sugerido</label>
+                        <input class="unio-form-control" id="soap_cid" name="cid10_sugerido" maxlength="16"
+                               placeholder="Ex.: Z98.8"
+                               data-mask="uppercase"
+                               data-cid-search="{{ path('app_pos_operatorio_cid10_search') }}"
+                               list="cid10-suggestions-soap" autocomplete="off">
+                        <datalist id="cid10-suggestions-soap"></datalist>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">SOAP</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'soap_queixa', name: 'queixa', label: 'Queixa (S)', type: 'textarea', rows: 2,
+                placeholder: 'O que o paciente relata…'
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'soap_exame', name: 'exame', label: 'Exame (O)', type: 'textarea', rows: 2,
+                placeholder: 'Achados do exame físico…'
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'soap_hipotese', name: 'hipotese', label: 'Hipótese (A)', type: 'textarea', rows: 2,
+                placeholder: 'Avaliação / hipótese diagnóstica…'
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'soap_conduta', name: 'conduta', label: 'Conduta (P)', type: 'textarea', rows: 2,
+                placeholder: 'Plano, orientações e próximos passos…'
+            } %}
+        </fieldset>
+    {% endblock %}
+{% endembed %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+  var input = document.querySelector('[data-cid-search]');
+  if (!input) return;
+  var list = document.getElementById('cid10-suggestions-soap');
+  var timer = null;
+  input.addEventListener('input', function () {
+    var q = (input.value || '').trim();
+    clearTimeout(timer);
+    if (q.length < 1 || !list) return;
+    timer = setTimeout(function () {
+      fetch(input.getAttribute('data-cid-search') + '?q=' + encodeURIComponent(q) + '&limit=12', {
+        headers: { 'Accept': 'application/json' }
+      }).then(function (r) { return r.json(); }).then(function (data) {
+        list.innerHTML = '';
+        var rows = (data && data.items) ? data.items : (Array.isArray(data) ? data : []);
+        rows.forEach(function (row) {
+          var opt = document.createElement('option');
+          opt.value = row.codigo || '';
+          opt.label = (row.codigo || '') + ' — ' + (row.descricao || '');
+          list.appendChild(opt);
+        });
+      }).catch(function () {});
+    }, 220);
+  });
+})();
+</script>
+{% endblock %}

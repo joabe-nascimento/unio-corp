@@ -12,6 +12,18 @@ use App\PosOperatorio\PosOperatorioDisplay;
 
 use App\Repository\UserRepository;
 
+use App\Service\PosOperatorio\ClinicCadastroRules;
+
+use App\Service\PosOperatorio\ClinicConvenioService;
+
+use App\Service\PosOperatorio\ClinicPacoteService;
+
+use App\Service\PosOperatorio\ClinicProcedimentoService;
+
+use App\Service\PosOperatorio\ClinicProfissionalService;
+
+use App\Service\PosOperatorio\ClinicUnidadeService;
+
 use App\Service\PosOperatorio\PosOperatorioAuditService;
 
 use App\Service\PosOperatorio\PosOperatorioPacienteService;
@@ -62,6 +74,16 @@ final class PosOperatorioPacienteController extends AbstractController
         private PosOperatorioReminderService $reminderService,
 
         private PosOperatorioPortalInviteService $portalInvite,
+
+        private ?ClinicUnidadeService $unidadeService = null,
+
+        private ?ClinicConvenioService $convenioService = null,
+
+        private ?ClinicProfissionalService $profissionalService = null,
+
+        private ?ClinicProcedimentoService $procedimentoService = null,
+
+        private ?ClinicPacoteService $pacoteService = null,
 
     ) {}
 
@@ -455,6 +477,20 @@ final class PosOperatorioPacienteController extends AbstractController
             'portal_users' => $usuarios,
 
             'current_user_id' => $this->getUser() instanceof User ? $this->getUser()->getId() : null,
+
+            'unidades' => $this->unidadeService?->list($empresa, true) ?? [],
+
+            'convenios' => $this->convenioService?->list($empresa, true) ?? [],
+
+            'profissionais' => $this->profissionalService?->list($empresa, true) ?? [],
+
+            'procedimentos_catalogo' => $this->procedimentoService?->list($empresa, true) ?? [],
+
+            'pacotes' => $this->pacoteService?->list($empresa, true) ?? [],
+
+            'origens_clinicas' => ClinicCadastroRules::ORIGENS_CLINICAS,
+
+            'parentescos' => ClinicCadastroRules::PARENTESCOS,
 
         ];
 

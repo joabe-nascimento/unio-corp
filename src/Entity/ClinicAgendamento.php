@@ -61,6 +61,18 @@ class ClinicAgendamento
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $medico = null;
 
+    #[ORM\ManyToOne(targetEntity: ClinicSala::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicSala $sala = null;
+
+    #[ORM\ManyToOne(targetEntity: ClinicProfissional::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicProfissional $profissional = null;
+
+    #[ORM\ManyToOne(targetEntity: ClinicProcedimento::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicProcedimento $procedimento = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $inicio;
 
@@ -142,6 +154,42 @@ class ClinicAgendamento
     public function setMedico(?User $medico): static
     {
         $this->medico = $medico;
+
+        return $this;
+    }
+
+    public function getSala(): ?ClinicSala
+    {
+        return $this->sala;
+    }
+
+    public function setSala(?ClinicSala $sala): static
+    {
+        $this->sala = $sala;
+
+        return $this;
+    }
+
+    public function getProfissional(): ?ClinicProfissional
+    {
+        return $this->profissional;
+    }
+
+    public function setProfissional(?ClinicProfissional $profissional): static
+    {
+        $this->profissional = $profissional;
+
+        return $this;
+    }
+
+    public function getProcedimento(): ?ClinicProcedimento
+    {
+        return $this->procedimento;
+    }
+
+    public function setProcedimento(?ClinicProcedimento $procedimento): static
+    {
+        $this->procedimento = $procedimento;
 
         return $this;
     }

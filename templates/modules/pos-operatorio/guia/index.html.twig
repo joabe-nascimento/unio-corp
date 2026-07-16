@@ -53,12 +53,17 @@
             <li>{{ line }}</li>
             {% endfor %}
         </ul>
-        <footer class="d-flex gap-2 mt-3">
-            <a href="{{ path('app_pos_operatorio_guia_medico_editar', { id: guia.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
-            <form method="post" action="{{ path('app_pos_operatorio_guia_medico_excluir', { id: guia.id }) }}" onsubmit="return confirm('Remover este guia?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('guia_medico_delete_' ~ guia.id) }}">
-                <button type="submit" class="btn-unio-ghost btn-sm text-danger">Excluir</button>
-            </form>
+        <footer class="d-flex justify-content-end mt-3">
+            {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações do guia' } %}
+                {% block items %}
+                <a href="{{ path('app_pos_operatorio_guia_medico_editar', { id: guia.id }) }}" class="dropdown-item">Editar</a>
+                <div class="dropdown-divider"></div>
+                <form method="post" action="{{ path('app_pos_operatorio_guia_medico_excluir', { id: guia.id }) }}" onsubmit="return confirm('Remover este guia?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('guia_medico_delete_' ~ guia.id) }}">
+                    <button type="submit" class="dropdown-item text-danger">Excluir</button>
+                </form>
+                {% endblock %}
+            {% endembed %}
         </footer>
     </article>
     {% endfor %}

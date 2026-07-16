@@ -100,12 +100,14 @@
                         {% endif %}
                     </td>
                     <td data-label="Ações" class="text-right">
-                        {% if a.whatsapp_url %}
-                        <a href="{{ a.whatsapp_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener" title="WhatsApp">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
-                        {% endif %}
-                        <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                        {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações' } %}
+                            {% block items %}
+                            <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="dropdown-item">Abrir</a>
+                            {% if a.whatsapp_url %}
+                            <a href="{{ a.whatsapp_url }}" class="dropdown-item" target="_blank" rel="noopener">WhatsApp</a>
+                            {% endif %}
+                            {% endblock %}
+                        {% endembed %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -160,10 +162,14 @@
                         {% endif %}
                     </td>
                     <td data-label="Ações" class="text-right">
-                        {% if m.whatsapp_url %}
-                        <a href="{{ m.whatsapp_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
-                        {% endif %}
-                        <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: m.paciente_id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
+                        {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações' } %}
+                            {% block items %}
+                            <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: m.paciente_id }) }}" class="dropdown-item">Ficha</a>
+                            {% if m.whatsapp_url %}
+                            <a href="{{ m.whatsapp_url }}" class="dropdown-item" target="_blank" rel="noopener">WhatsApp</a>
+                            {% endif %}
+                            {% endblock %}
+                        {% endembed %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -248,12 +254,14 @@
                     <td data-label="Contato" class="small">{{ p.telefone|default('—') }}<br>{{ p.email|default('') }}</td>
                     <td data-label="Médico">{{ p.medico|default('—') }}</td>
                     <td data-label="Ações" class="text-right">
-                        {% if p.whatsapp_url %}
-                        <a href="{{ p.whatsapp_url }}" class="btn-unio-ghost btn-sm" target="_blank" rel="noopener" title="WhatsApp">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
-                        {% endif %}
-                        <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id }) }}" class="btn-unio-ghost btn-sm">Ficha</a>
+                        {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações de ' ~ p.nome } %}
+                            {% block items %}
+                            <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id }) }}" class="dropdown-item">Ficha</a>
+                            {% if p.whatsapp_url %}
+                            <a href="{{ p.whatsapp_url }}" class="dropdown-item" target="_blank" rel="noopener">WhatsApp</a>
+                            {% endif %}
+                            {% endblock %}
+                        {% endembed %}
                     </td>
                 </tr>
                 {% endfor %}

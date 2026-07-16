@@ -106,35 +106,71 @@ body.org-clinic .clinic-agenda-filter {
         linear-gradient(165deg, rgba(234, 240, 251, 0.72) 0%, rgba(255, 255, 255, 0.98) 55%);
     box-shadow: 0 6px 22px rgba(75, 114, 190, 0.05);
     border-radius: 18px;
+    padding: 1rem 1.15rem;
 }
 body.org-clinic .clinic-agenda-filter__form {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem 1rem;
     align-items: flex-end;
+    gap: 0.85rem 1.15rem;
 }
+body.org-clinic .clinic-agenda-filter__field,
+body.org-clinic .clinic-agenda-filter__actions,
+body.org-clinic .clinic-agenda-filter__meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    min-width: 0;
+}
+body.org-clinic .clinic-agenda-filter__field--date {
+    flex: 0 0 10.5rem;
+}
+body.org-clinic .clinic-agenda-filter__field--medico {
+    flex: 1 1 12rem;
+    max-width: 18rem;
+}
+body.org-clinic .clinic-agenda-filter__label,
 body.org-clinic .clinic-agenda-filter label {
+    display: block;
     font-family: var(--org-font-display) !important;
     font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: #64748b;
-    margin-bottom: 0.25rem;
+    line-height: 1.2;
+    margin: 0;
+    min-height: 1rem;
+}
+body.org-clinic .clinic-agenda-filter__label--spacer {
+    visibility: hidden;
+    user-select: none;
 }
 body.org-clinic .clinic-agenda-seg {
     display: inline-flex;
+    align-items: stretch;
+    flex-shrink: 0;
     padding: 3px;
-    border-radius: 999px;
+    border-radius: 10px;
     background: rgba(30, 42, 58, 0.06);
     gap: 2px;
+    min-height: 38px;
+    box-sizing: border-box;
 }
 body.org-clinic .clinic-agenda-seg a {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
     min-height: 32px;
-    padding: 0 0.9rem !important;
-    border-radius: 999px !important;
+    min-width: 4.25rem;
+    padding: 0 1rem !important;
+    border-radius: 8px !important;
     font-weight: 800;
     font-size: 0.8rem;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
     color: #64748b !important;
     background: transparent !important;
     border: 0 !important;
@@ -145,11 +181,41 @@ body.org-clinic .clinic-agenda-seg a:hover {
     color: #fff !important;
     background: linear-gradient(180deg, #4b72be 0%, #3d61a8 100%) !important;
 }
+body.org-clinic .clinic-agenda-filter .form-control {
+    width: 100%;
+    min-height: 38px;
+    height: 38px;
+}
+body.org-clinic .clinic-agenda-filter__actions-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 38px;
+}
+body.org-clinic .clinic-agenda-filter__actions-row .btn-unio-ghost,
+body.org-clinic .clinic-agenda-filter__actions-row .btn-unio {
+    min-height: 38px;
+    height: 38px;
+    padding-left: 0.95rem;
+    padding-right: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
 body.org-clinic .clinic-agenda-filter__meta {
     margin-left: auto;
+    align-items: flex-end;
+    text-align: right;
+}
+body.org-clinic .clinic-agenda-filter__meta-text {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
     font-size: 0.85rem;
     color: #64748b;
     font-weight: 600;
+    white-space: nowrap;
 }
 body.org-clinic .clinic-agenda-card {
     border: 1px solid rgba(75, 114, 190, 0.1);
@@ -164,12 +230,37 @@ body.org-clinic .clinic-agenda-card .admin-table tbody tr:nth-child(3) { animati
 body.org-clinic .clinic-agenda-card .admin-table tbody tr:nth-child(4) { animation-delay: 0.11s; }
 body.org-clinic .clinic-agenda-card .admin-table tbody tr:nth-child(5) { animation-delay: 0.14s; }
 
-/* Status filter chips (contas / guias / lotes) */
+/* Status filter chips (contas / guias / lotes / pacientes) */
 body.org-clinic .clinic-filter-chips {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.4rem;
     margin: 0 0 1rem;
+}
+/* Na toolbar com lupa: mesma linha, chips à esquerda e busca à direita */
+body.org-clinic .toolbar-inline-controls .clinic-filter-chips,
+body.org-clinic .section-toolbar-end .clinic-filter-chips,
+body.org-clinic .list-toolbar-end .clinic-filter-chips {
+    margin: 0;
+}
+body.org-clinic .clinic-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin: 0 0 1rem;
+}
+body.org-clinic .clinic-filter-bar .clinic-filter-chips {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+body.org-clinic .clinic-filter-bar .filter-group--search {
+    margin-left: auto;
+    flex: 0 0 auto;
+    align-self: center;
 }
 body.org-clinic .clinic-filter-chips a {
     display: inline-flex;
@@ -319,9 +410,40 @@ body.org-clinic .empty-state--compact .empty-icon i {
         justify-content: flex-start;
         flex-wrap: wrap;
     }
+    body.org-clinic .clinic-agenda-filter__form {
+        gap: 0.85rem;
+    }
+    body.org-clinic .clinic-agenda-filter__field--date,
+    body.org-clinic .clinic-agenda-filter__field--medico,
+    body.org-clinic .clinic-agenda-filter__actions {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+    body.org-clinic .clinic-agenda-filter__label--spacer {
+        display: none;
+    }
+    body.org-clinic .clinic-agenda-filter__actions-row {
+        width: 100%;
+    }
+    body.org-clinic .clinic-agenda-filter__actions-row .btn-unio-ghost,
+    body.org-clinic .clinic-agenda-filter__actions-row .btn-unio {
+        flex: 1 1 auto;
+    }
     body.org-clinic .clinic-agenda-filter__meta {
         margin-left: 0;
         width: 100%;
+        align-items: flex-start;
+        text-align: left;
+    }
+    body.org-clinic .clinic-agenda-filter__meta-text {
+        white-space: normal;
+        min-height: 0;
+    }
+    body.org-clinic .clinic-agenda-seg {
+        width: 100%;
+    }
+    body.org-clinic .clinic-agenda-seg a {
+        flex: 1 1 0;
     }
 }
 

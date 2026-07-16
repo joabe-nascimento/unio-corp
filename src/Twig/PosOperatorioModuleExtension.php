@@ -5,6 +5,7 @@ namespace App\Twig;
 use App\Entity\PosOperatorioPaciente;
 use App\PosOperatorio\PosOperatorioDisplay;
 use App\PosOperatorio\PosOperatorioModuleCatalog;
+use App\Support\BrPersonFormat;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -16,6 +17,8 @@ class PosOperatorioModuleExtension extends AbstractExtension
         return [
             new TwigFilter('pos_op_paciente_nome', [$this, 'pacienteNome']),
             new TwigFilter('pos_op_status_label', [$this, 'statusLabel']),
+            new TwigFilter('br_phone', [$this, 'formatPhone']),
+            new TwigFilter('br_initials', [$this, 'initials']),
         ];
     }
 
@@ -68,5 +71,25 @@ class PosOperatorioModuleExtension extends AbstractExtension
     public function statusLabel(string $status): string
     {
         return PosOperatorioDisplay::statusLabel($status);
+    }
+
+    public function formatPhone(?string $value): string
+    {
+        return BrPersonFormat::formatPhone($value);
+    }
+
+    public function initials(?string $name): string
+    {
+        $name = trim((string) $name);
+        if ($name === '') {
+            return '?';
+        }
+        $parts = preg_split('/\s+/', $name) ?: [];
+        $first = mb_strtoupper(mb_substr($parts[0] ?? '', 0, 1));
+        $last = count($parts) > 1
+            ? mb_strtoupper(mb_substr($parts[array_key_last($parts)], 0, 1))
+            : '';
+
+        return $first.$last;
     }
 }

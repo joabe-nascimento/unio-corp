@@ -43,11 +43,11 @@
 
 {% block hub_content %}
 {% set filtro_medico_id = medico_filtro ? medico_filtro.id : null %}
-<section class="unio-card mb-3 p-3 clinic-agenda-filter">
+<section class="unio-card mb-3 clinic-agenda-filter">
     <form method="get" action="{{ path('app_pos_operatorio_agenda') }}" class="clinic-agenda-filter__form">
-        <div class="d-flex gap-1 align-items-center">
-            <span class="small text-muted mr-1">Vista</span>
-            <div class="clinic-agenda-seg" role="group" aria-label="Vista da agenda">
+        <div class="clinic-agenda-filter__field">
+            <span class="clinic-agenda-filter__label" id="agenda-vista-label">Vista</span>
+            <div class="clinic-agenda-seg" role="group" aria-labelledby="agenda-vista-label">
                 <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: day|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
                    class="{{ vista == 'dia' ? 'is-active' : '' }}">Dia</a>
                 <a href="{{ path('app_pos_operatorio_agenda', { vista: 'semana', semana: week_start|date('Y-m-d') }|merge(filtro_medico_id ? { medico_id: filtro_medico_id } : {})) }}"
@@ -56,21 +56,21 @@
         </div>
 
         {% if vista == 'dia' %}
-        <div>
-            <label class="small text-muted d-block" for="dia">Dia</label>
+        <div class="clinic-agenda-filter__field clinic-agenda-filter__field--date">
+            <label class="clinic-agenda-filter__label" for="dia">Dia</label>
             <input id="dia" type="date" name="dia" class="form-control form-control-sm" value="{{ day|date('Y-m-d') }}">
             <input type="hidden" name="vista" value="dia">
         </div>
         {% else %}
-        <div>
-            <label class="small text-muted d-block" for="semana">Semana a partir de</label>
+        <div class="clinic-agenda-filter__field clinic-agenda-filter__field--date">
+            <label class="clinic-agenda-filter__label" for="semana">A partir de</label>
             <input id="semana" type="date" name="semana" class="form-control form-control-sm" value="{{ week_start|date('Y-m-d') }}">
             <input type="hidden" name="vista" value="semana">
         </div>
         {% endif %}
 
-        <div>
-            <label class="small text-muted d-block" for="medico_id">Médico</label>
+        <div class="clinic-agenda-filter__field clinic-agenda-filter__field--medico">
+            <label class="clinic-agenda-filter__label" for="medico_id">Médico</label>
             <select id="medico_id" name="medico_id" class="form-control form-control-sm">
                 <option value="">Todos</option>
                 {% for m in medicos %}
@@ -78,18 +78,28 @@
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="btn-unio-ghost btn-sm">Filtrar</button>
-        <a href="{{ path('app_pos_operatorio_agenda', { vista: vista }) }}" class="btn-unio-ghost btn-sm">
-            {{ vista == 'dia' ? 'Hoje' : 'Semana atual' }}
-        </a>
-        <span class="clinic-agenda-filter__meta">
-            {% if vista == 'dia' %}
-            {{ day|date('d/m/Y') }}
-            {% else %}
-            {{ week_start|date('d/m') }} — {{ week_end|date_modify('-1 day')|date('d/m/Y') }}
-            {% endif %}
-            · {{ agendamentos|length }} horário(s)
-        </span>
+
+        <div class="clinic-agenda-filter__actions">
+            <span class="clinic-agenda-filter__label clinic-agenda-filter__label--spacer" aria-hidden="true">&nbsp;</span>
+            <div class="clinic-agenda-filter__actions-row">
+                <button type="submit" class="btn-unio-ghost btn-sm">Filtrar</button>
+                <a href="{{ path('app_pos_operatorio_agenda', { vista: vista }) }}" class="btn-unio-ghost btn-sm">
+                    {{ vista == 'dia' ? 'Hoje' : 'Semana atual' }}
+                </a>
+            </div>
+        </div>
+
+        <div class="clinic-agenda-filter__meta">
+            <span class="clinic-agenda-filter__label clinic-agenda-filter__label--spacer" aria-hidden="true">&nbsp;</span>
+            <p class="clinic-agenda-filter__meta-text mb-0">
+                {% if vista == 'dia' %}
+                {{ day|date('d/m/Y') }}
+                {% else %}
+                {{ week_start|date('d/m') }} — {{ week_end|date_modify('-1 day')|date('d/m/Y') }}
+                {% endif %}
+                · {{ agendamentos|length }} horário(s)
+            </p>
+        </div>
     </form>
 </section>
 
@@ -202,14 +212,10 @@
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right unio-dropdown clinic-agenda-row-dropdown">
                                     {% if not edit_as_primary %}
-                                    <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="dropdown-item">
-                                        <i class="fas fa-pen" aria-hidden="true"></i> Editar
-                                    </a>
+                                    <a href="{{ path('app_pos_operatorio_agenda_editar', { id: a.id }) }}" class="dropdown-item">Editar</a>
                                     {% endif %}
                                     {% if show_whatsapp %}
-                                    <a href="{{ wa }}" class="dropdown-item" target="_blank" rel="noopener">
-                                        <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
-                                    </a>
+                                    <a href="{{ wa }}" class="dropdown-item" target="_blank" rel="noopener">WhatsApp</a>
                                     {% endif %}
                                     {% if can_faltou_cancelar %}
                                     {% if not edit_as_primary or show_whatsapp %}

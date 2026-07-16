@@ -84,7 +84,11 @@
                         {% endif %}
                     </td>
                     <td data-label="Ações" class="text-right">
-                        <a href="{{ path('app_pos_operatorio_guias_show', { id: g.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                        {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações da guia ' ~ g.numeroGuia } %}
+                            {% block items %}
+                            <a href="{{ path('app_pos_operatorio_guias_show', { id: g.id }) }}" class="dropdown-item">Abrir</a>
+                            {% endblock %}
+                        {% endembed %}
                     </td>
                 </tr>
                 {% endfor %}

@@ -1,0 +1,173 @@
+﻿{% extends 'layout/hub.html.twig' %}
+{% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+
+{% block title %}Profissionais · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Profissionais' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Equipe clínica e conselhos profissionais' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+{{ cadastro.create_button('clinic-profissional', 'Novo profissional') }}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-0">
+    {% if profissionais is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-user-doctor',
+            title: 'Nenhum profissional cadastrado',
+            text: 'Cadastre o primeiro profissional da equipe clínica.',
+            btn_sm: true,
+            compact: true,
+            btn_label: 'Novo profissional',
+            btn_opens: 'clinic-profissional',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="clinic-cadastro-list__head">
+        <div>
+            <strong>Equipe clínica</strong>
+            <p class="clinic-cadastro-list__head-sub mb-0">Conselho, especialidade e contato</p>
+        </div>
+        <span class="clinic-cadastro-list__count">{{ profissionais|length }} {{ profissionais|length == 1 ? 'profissional' : 'profissionais' }}</span>
+    </div>
+    <div class="clinic-cadastro-list">
+        {% for p in profissionais %}
+        <article class="clinic-cadastro-item clinic-cadastro-item--rich">
+            <div class="clinic-cadastro-item__view">
+                <div class="clinic-cadastro-item__main">
+                    <div class="clinic-cadastro-item__body">
+                        <div class="clinic-cadastro-item__title-row">
+                            <h3 class="clinic-cadastro-item__title">{{ p.nome }}</h3>
+                            <span class="clinic-cadastro-chip {{ p.ativo ? 'clinic-cadastro-chip--ok' : 'clinic-cadastro-chip--off' }}">
+                                {{ p.ativo ? 'Ativo' : 'Inativo' }}
+                            </span>
+                        </div>
+                        <dl class="clinic-cadastro-facts">
+                            <div>
+                                <dt>Conselho</dt>
+                                <dd>{{ p.conselho }} {{ p.numeroConselho }}{% if p.ufConselho %} · {{ p.ufConselho }}{% endif %}</dd>
+                            </div>
+                            {% if p.especialidade %}
+                            <div>
+                                <dt>Especialidade</dt>
+                                <dd>{{ p.especialidade }}</dd>
+                            </div>
+                            {% endif %}
+                            {% if p.telefone or p.email %}
+                            <div>
+                                <dt>Contato</dt>
+                                <dd>
+                                    {% if p.telefone %}{{ p.telefone|br_phone }}{% endif %}
+                                    {% if p.telefone and p.email %} · {% endif %}
+                                    {% if p.email %}{{ p.email }}{% endif %}
+                                </dd>
+                            </div>
+                            {% endif %}
+                            {% if p.user %}
+                            <div>
+                                <dt>Usuário</dt>
+                                <dd>{{ p.user.nome }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                <div class="clinic-cadastro-item__actions">
+                    {{ cadastro.edit_button('clinic-profissional', p.id, csrf_token('clinic_profissional_' ~ p.id), {
+                        fields: {
+                            nome: p.nome,
+                            conselho: p.conselho,
+                            numero_conselho: p.numeroConselho,
+                            uf_conselho: p.ufConselho|default(''),
+                            especialidade: p.especialidade|default(''),
+                            user_id: p.user ? p.user.id : '',
+                            telefone: p.telefone|default(''),
+                            email: p.email|default(''),
+                            ativo: p.ativo ? '1' : '0'
+                        }
+                    }) }}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% embed 'components/cadastro_form_offcanvas.html.twig' with {
+    id: 'clinic-profissional',
+    form_id: 'clinicProfissionalForm',
+    title: 'Novo profissional',
+    title_edit: 'Editar profissional',
+    subtitle: 'Identificação, conselho e contato',
+    icon: 'fa-user-doctor',
+    size: 'lg',
+    create_action: path('app_pos_operatorio_profissionais'),
+    edit_action: path('app_pos_operatorio_profissionais_editar', { id: 0 }),
+    create_token: csrf_token('clinic_profissional_new'),
+    ativo_label: 'Profissional ativo'
+} %}
+    {% block form_fields %}
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Identificação</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'prof_nome', name: 'nome', label: 'Nome completo', required: true,
+                placeholder: 'Ex.: Dra. Renata Oliveira', attrs: { maxlength: '160', autocomplete: 'name' }
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'prof_esp', name: 'especialidade', label: 'Especialidade', type: 'select',
+                options: [{ value: '', label: '— Selecione —' }]|merge(
+                    especialidades|keys|map(e => { value: e, label: especialidades[e] })
+                )
+            } %}
+        </fieldset>
+
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Conselho profissional</legend>
+            <div class="row g-2">
+                <div class="col-md-5">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'prof_conselho', name: 'conselho', label: 'Conselho', type: 'select', required: true,
+                        options: conselhos|keys|map(cid => { value: cid, label: conselhos[cid] })
+                    } %}
+                </div>
+                <div class="col-md-4">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'prof_numero', name: 'numero_conselho', label: 'Nº do conselho', required: true,
+                        placeholder: '123456', inputmode: 'numeric',
+                        attrs: { maxlength: '32', autocomplete: 'off' }
+                    } %}
+                </div>
+                <div class="col-md-3">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'prof_uf', name: 'uf_conselho', label: 'UF', type: 'select', required: true,
+                        options: ufs
+                    } %}
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Contato e acesso</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'prof_tel', name: 'telefone', label: 'Telefone / WhatsApp',
+                placeholder: '(11) 98888-0000', inputmode: 'tel',
+                attrs: { maxlength: '16', 'data-mask': 'phone', autocomplete: 'tel' }
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'prof_email', name: 'email', label: 'E-mail', type: 'email',
+                placeholder: 'medico@clinica.com',
+                attrs: { maxlength: '120', autocomplete: 'email' }
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'prof_user', name: 'user_id', label: 'Usuário do sistema', type: 'select',
+                options: [{ value: '', label: '— Sem vínculo —' }]|merge(usuarios|map(usr => { value: usr.id ~ '', label: usr.nome })),
+                help_text: 'Opcional: vincula o profissional a um login da clínica.'
+            } %}
+        </fieldset>
+    {% endblock %}
+{% endembed %}
+{% endblock %}

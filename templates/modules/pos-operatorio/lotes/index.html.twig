@@ -106,7 +106,11 @@
                         {% if total > 0 %}R$ {{ (total / 100)|number_format(2, ',', '.') }}{% else %}—{% endif %}
                     </td>
                     <td data-label="Ações" class="text-right">
-                        <a href="{{ path('app_pos_operatorio_lotes_show', { id: lote.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                        {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações do lote' } %}
+                            {% block items %}
+                            <a href="{{ path('app_pos_operatorio_lotes_show', { id: lote.id }) }}" class="dropdown-item">Abrir</a>
+                            {% endblock %}
+                        {% endembed %}
                     </td>
                 </tr>
                 {% endfor %}

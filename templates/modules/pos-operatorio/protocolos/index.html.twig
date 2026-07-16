@@ -62,7 +62,13 @@
                         <span class="badge-perfil {{ pr.ativo ? 'success' : 'default' }}">{{ pr.ativo ? 'Ativo' : 'Inativo' }}</span>
                     </td>
                     <td data-label="Ações" class="text-right">
-                        <a href="{{ path('app_pos_operatorio_protocolo_editar', { id: pr.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                        {% embed 'components/row_actions_menu.html.twig' with {
+                            aria_label: 'Mais ações de ' ~ pr.nome
+                        } %}
+                            {% block items %}
+                            <a href="{{ path('app_pos_operatorio_protocolo_editar', { id: pr.id }) }}" class="dropdown-item">Editar</a>
+                            {% endblock %}
+                        {% endembed %}
                     </td>
                 </tr>
                 {% endfor %}

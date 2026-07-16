@@ -1,0 +1,127 @@
+﻿{% extends 'layout/hub.html.twig' %}
+{% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+
+{% block title %}Pacotes · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Pacotes' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Combos de procedimentos' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_procedimentos') }}" class="btn-unio-ghost btn-sm">Procedimentos</a>
+{{ cadastro.create_button('clinic-pacote', 'Novo pacote') }}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-0">
+    {% if pacotes is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-box-open',
+            title: 'Nenhum pacote cadastrado',
+            text: 'Cadastre o primeiro pacote comercial.',
+            btn_sm: true,
+            compact: true,
+            btn_label: 'Novo pacote',
+            btn_opens: 'clinic-pacote',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="clinic-cadastro-list__head">
+        <div>
+            <strong>Pacotes</strong>
+            <p class="clinic-cadastro-list__head-sub mb-0">Valor e composição</p>
+        </div>
+        <span class="clinic-cadastro-list__count">{{ pacotes|length }}</span>
+    </div>
+    <div class="clinic-cadastro-list">
+        {% for p in pacotes %}
+        <article class="clinic-cadastro-item clinic-cadastro-item--rich">
+            <div class="clinic-cadastro-item__view">
+                <div class="clinic-cadastro-item__main">
+                    <div class="clinic-cadastro-item__body">
+                        <div class="clinic-cadastro-item__title-row">
+                            <h3 class="clinic-cadastro-item__title">{{ p.nome }}</h3>
+                            <span class="clinic-cadastro-chip {{ p.ativo ? 'clinic-cadastro-chip--ok' : 'clinic-cadastro-chip--off' }}">
+                                {{ p.ativo ? 'Ativo' : 'Inativo' }}
+                            </span>
+                        </div>
+                        <dl class="clinic-cadastro-facts">
+                            {% if p.valorCentavos is not null %}
+                            <div>
+                                <dt>Valor</dt>
+                                <dd>R$ {{ (p.valorCentavos / 100)|number_format(2, ',', '.') }}</dd>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <dt>Itens</dt>
+                                <dd>{{ p.itens|length }} {{ p.itens|length == 1 ? 'procedimento' : 'procedimentos' }}</dd>
+                            </div>
+                            {% if p.descricao %}
+                            <div>
+                                <dt>Descrição</dt>
+                                <dd>{{ p.descricao|length > 80 ? p.descricao|slice(0, 80) ~ '…' : p.descricao }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                <div class="clinic-cadastro-item__actions">
+                    {{ cadastro.edit_button('clinic-pacote', p.id, csrf_token('clinic_pacote_' ~ p.id), {
+                        fields: {
+                            nome: p.nome,
+                            valor: p.valorCentavos is not null ? (p.valorCentavos / 100)|number_format(2, ',', '.') : '',
+                            descricao: p.descricao|default(''),
+                            itens: p.itens|json_encode(constant('JSON_UNESCAPED_UNICODE')),
+                            ativo: p.ativo ? '1' : '0'
+                        }
+                    }) }}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% embed 'components/cadastro_form_offcanvas.html.twig' with {
+    id: 'clinic-pacote',
+    form_id: 'clinicPacoteForm',
+    title: 'Novo pacote',
+    title_edit: 'Editar pacote',
+    subtitle: 'Nome, valor e itens inclusos',
+    icon: 'fa-box-open',
+    size: 'lg',
+    create_action: path('app_pos_operatorio_pacotes'),
+    edit_action: path('app_pos_operatorio_pacotes_editar', { id: 0 }),
+    create_token: csrf_token('clinic_pacote_new'),
+    ativo_label: 'Pacote ativo'
+} %}
+    {% block form_fields %}
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Pacote</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'pacote_nome', name: 'nome', label: 'Nome do pacote', required: true,
+                placeholder: 'Ex.: Pacote rinoplastia full', attrs: { maxlength: '160' }
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'pacote_valor', name: 'valor', label: 'Valor do pacote (R$)',
+                placeholder: 'R$ 0,00', inputmode: 'decimal',
+                attrs: { 'data-mask': 'money', autocomplete: 'off' }
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'pacote_desc', name: 'descricao', label: 'Descrição', type: 'textarea', rows: 2,
+                placeholder: 'O que está incluso no pacote'
+            } %}
+        </fieldset>
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Composição</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'pacote_itens', name: 'itens', label: 'Itens (JSON)', type: 'textarea', rows: 4,
+                placeholder: '[{"nome":"Consulta","valor":"350,00"}]',
+                help_text: 'Lista de itens do pacote. Ex.: nome e valor de cada procedimento incluso.'
+            } %}
+        </fieldset>
+    {% endblock %}
+{% endembed %}
+{% endblock %}

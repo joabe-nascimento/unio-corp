@@ -5,6 +5,7 @@ namespace App\Controller\Module\PosOperatorio;
 use App\Entity\Empresa;
 use App\Entity\User;
 use App\Service\PosOperatorio\ClinicAtendimentoService;
+use App\Service\PosOperatorio\ClinicSoapTemplateService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ final class PosOperatorioAtendimentoController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private ClinicAtendimentoService $atendimentos,
+        private ?ClinicSoapTemplateService $soapTemplates = null,
     ) {}
 
     #[Route('', name: 'app_pos_operatorio_atendimento', methods: ['GET'])]
@@ -115,6 +117,8 @@ final class PosOperatorioAtendimentoController extends AbstractController
             'atendimento' => $atendimento,
             'agendamento' => $atendimento->getAgendamento(),
             'status_labels' => ClinicAtendimentoService::statusLabels(),
+            'soap_templates' => $this->soapTemplates?->list($empresa, true) ?? [],
+            'cid10_search_url' => $this->generateUrl('app_pos_operatorio_cid10_search'),
         ]);
     }
 

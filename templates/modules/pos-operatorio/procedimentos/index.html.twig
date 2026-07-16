@@ -1,0 +1,155 @@
+﻿{% extends 'layout/hub.html.twig' %}
+{% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+
+{% block title %}Procedimentos · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Procedimentos' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Catálogo clínico e valores' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_pacotes') }}" class="btn-unio-ghost btn-sm">Pacotes</a>
+{{ cadastro.create_button('clinic-procedimento', 'Novo procedimento') }}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-0">
+    {% if procedimentos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-syringe',
+            title: 'Nenhum procedimento cadastrado',
+            text: 'Cadastre o primeiro procedimento do catálogo.',
+            btn_sm: true,
+            compact: true,
+            btn_label: 'Novo procedimento',
+            btn_opens: 'clinic-procedimento',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="clinic-cadastro-list__head">
+        <div>
+            <strong>Procedimentos</strong>
+            <p class="clinic-cadastro-list__head-sub mb-0">Códigos, duração e valor</p>
+        </div>
+        <span class="clinic-cadastro-list__count">{{ procedimentos|length }}</span>
+    </div>
+    <div class="clinic-cadastro-list">
+        {% for p in procedimentos %}
+        <article class="clinic-cadastro-item clinic-cadastro-item--rich">
+            <div class="clinic-cadastro-item__view">
+                <div class="clinic-cadastro-item__main">
+                    <div class="clinic-cadastro-item__body">
+                        <div class="clinic-cadastro-item__title-row">
+                            <h3 class="clinic-cadastro-item__title">{{ p.nome }}</h3>
+                            <span class="clinic-cadastro-chip {{ p.ativo ? 'clinic-cadastro-chip--ok' : 'clinic-cadastro-chip--off' }}">
+                                {{ p.ativo ? 'Ativo' : 'Inativo' }}
+                            </span>
+                        </div>
+                        <dl class="clinic-cadastro-facts">
+                            {% if p.codigoInterno %}
+                            <div>
+                                <dt>Cód. interno</dt>
+                                <dd>{{ p.codigoInterno }}</dd>
+                            </div>
+                            {% endif %}
+                            {% if p.codigoTuss %}
+                            <div>
+                                <dt>TUSS</dt>
+                                <dd>{{ p.codigoTuss }}</dd>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <dt>Duração</dt>
+                                <dd>{{ p.duracaoMinutos }} min</dd>
+                            </div>
+                            {% if p.valorCentavos is not null %}
+                            <div>
+                                <dt>Valor</dt>
+                                <dd>R$ {{ (p.valorCentavos / 100)|number_format(2, ',', '.') }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                <div class="clinic-cadastro-item__actions">
+                    {{ cadastro.edit_button('clinic-procedimento', p.id, csrf_token('clinic_procedimento_' ~ p.id), {
+                        fields: {
+                            nome: p.nome,
+                            codigo_interno: p.codigoInterno|default(''),
+                            codigo_tuss: p.codigoTuss|default(''),
+                            valor: p.valorCentavos is not null ? (p.valorCentavos / 100)|number_format(2, ',', '.') : '',
+                            duracao_minutos: p.duracaoMinutos,
+                            descricao: p.descricao|default(''),
+                            ativo: p.ativo ? '1' : '0'
+                        }
+                    }) }}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% embed 'components/cadastro_form_offcanvas.html.twig' with {
+    id: 'clinic-procedimento',
+    form_id: 'clinicProcedimentoForm',
+    title: 'Novo procedimento',
+    title_edit: 'Editar procedimento',
+    subtitle: 'Identificação, códigos e valor',
+    icon: 'fa-syringe',
+    create_action: path('app_pos_operatorio_procedimentos'),
+    edit_action: path('app_pos_operatorio_procedimentos_editar', { id: 0 }),
+    create_token: csrf_token('clinic_procedimento_new'),
+    ativo_label: 'Procedimento ativo'
+} %}
+    {% block form_fields %}
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Identificação</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'proc_nome', name: 'nome', label: 'Nome do procedimento', required: true,
+                placeholder: 'Ex.: Herniorrafia inguinal', attrs: { maxlength: '180' }
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'proc_desc', name: 'descricao', label: 'Descrição', type: 'textarea', rows: 2,
+                placeholder: 'Detalhes clínicos ou comerciais (opcional)', attrs: { maxlength: '500' }
+            } %}
+        </fieldset>
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Códigos e duração</legend>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'proc_interno', name: 'codigo_interno', label: 'Cód. interno',
+                        placeholder: 'HERN-01',
+                        attrs: { maxlength: '32', 'data-mask': 'uppercase', autocomplete: 'off' }
+                    } %}
+                </div>
+                <div class="col-md-4">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'proc_tuss', name: 'codigo_tuss', label: 'Código TUSS',
+                        placeholder: '31003068', inputmode: 'numeric',
+                        attrs: { maxlength: '20', pattern: '[0-9]*', autocomplete: 'off' }
+                    } %}
+                </div>
+                <div class="col-md-4">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'proc_duracao', name: 'duracao_minutos', label: 'Duração (min)', type: 'number',
+                        value: '30', placeholder: '30', required: true,
+                        attrs: { min: '5', max: '480' }
+                    } %}
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Valor</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'proc_valor', name: 'valor', label: 'Valor de tabela (R$)',
+                placeholder: 'R$ 0,00', inputmode: 'decimal',
+                attrs: { 'data-mask': 'money', autocomplete: 'off' }
+            } %}
+        </fieldset>
+    {% endblock %}
+{% endembed %}
+{% endblock %}

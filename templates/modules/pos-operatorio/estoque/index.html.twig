@@ -1,0 +1,164 @@
+﻿{% extends 'layout/hub.html.twig' %}
+{% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+
+{% block title %}Estoque · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Estoque' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Insumos e estoque mínimo' %}
+{% set hub_search_hidden = true %}
+{% set _unidades_medida = unidades_medida|default({}) %}
+{% for item in itens|default([]) %}
+    {% set um = item.unidadeMedida %}
+    {% if um and um not in _unidades_medida|keys %}
+        {% set _unidades_medida = _unidades_medida|merge({ (um): um }) %}
+    {% endif %}
+{% endfor %}
+
+{% block hub_toolbar_actions %}
+{{ cadastro.create_button('clinic-estoque', 'Novo item') }}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-0">
+    {% if itens is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-boxes-stacked',
+            title: 'Nenhum item cadastrado',
+            text: 'Cadastre o primeiro item de estoque.',
+            btn_sm: true,
+            compact: true,
+            btn_label: 'Novo item',
+            btn_opens: 'clinic-estoque',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="clinic-cadastro-list__head">
+        <div>
+            <strong>Itens em estoque</strong>
+            <p class="clinic-cadastro-list__head-sub mb-0">Quantidade, mínimo e localização</p>
+        </div>
+        <span class="clinic-cadastro-list__count">{{ itens|length }}</span>
+    </div>
+    <div class="clinic-cadastro-list">
+        {% for item in itens %}
+        {% set baixo = item.abaixoMinimo %}
+        <article class="clinic-cadastro-item clinic-cadastro-item--rich">
+            <div class="clinic-cadastro-item__view">
+                <div class="clinic-cadastro-item__main">
+                    <div class="clinic-cadastro-item__body">
+                        <div class="clinic-cadastro-item__title-row">
+                            <h3 class="clinic-cadastro-item__title">{{ item.nome }}</h3>
+                            {% if baixo %}
+                            <span class="clinic-cadastro-chip clinic-cadastro-chip--warn">Abaixo do mínimo</span>
+                            {% endif %}
+                            <span class="clinic-cadastro-chip {{ item.ativo ? 'clinic-cadastro-chip--ok' : 'clinic-cadastro-chip--off' }}">
+                                {{ item.ativo ? 'Ativo' : 'Inativo' }}
+                            </span>
+                        </div>
+                        <dl class="clinic-cadastro-facts">
+                            {% if item.sku %}
+                            <div>
+                                <dt>SKU</dt>
+                                <dd>{{ item.sku }}</dd>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <dt>Saldo</dt>
+                                <dd>{{ item.quantidade }} {{ item.unidadeMedida }}</dd>
+                            </div>
+                            <div>
+                                <dt>Mínimo</dt>
+                                <dd>{{ item.minimo }} {{ item.unidadeMedida }}</dd>
+                            </div>
+                            {% if item.unidade %}
+                            <div>
+                                <dt>Filial</dt>
+                                <dd>{{ item.unidade.nome }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                <div class="clinic-cadastro-item__actions">
+                    {{ cadastro.edit_button('clinic-estoque', item.id, csrf_token('clinic_estoque_' ~ item.id), {
+                        fields: {
+                            nome: item.nome,
+                            sku: item.sku|default(''),
+                            unidade_medida: item.unidadeMedida,
+                            quantidade: item.quantidade,
+                            minimo: item.minimo,
+                            unidade_id: item.unidade ? item.unidade.id : '',
+                            ativo: item.ativo ? '1' : '0'
+                        }
+                    }) }}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% embed 'components/cadastro_form_offcanvas.html.twig' with {
+    id: 'clinic-estoque',
+    form_id: 'clinicEstoqueForm',
+    title: 'Novo item',
+    title_edit: 'Editar item',
+    subtitle: 'Identificação, saldo e mínimo',
+    icon: 'fa-boxes-stacked',
+    create_action: path('app_pos_operatorio_estoque'),
+    edit_action: path('app_pos_operatorio_estoque_editar', { id: 0 }),
+    create_token: csrf_token('clinic_estoque_new'),
+    ativo_label: 'Item ativo'
+} %}
+    {% block form_fields %}
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Identificação</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'est_nome', name: 'nome', label: 'Nome do item', required: true,
+                placeholder: 'Ex.: Kit curativo', attrs: { maxlength: '160' }
+            } %}
+            <div class="row g-2">
+                <div class="col-md-6">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'est_sku', name: 'sku', label: 'SKU',
+                        placeholder: 'KIT-CUR-01',
+                        attrs: { maxlength: '32', 'data-mask': 'uppercase', autocomplete: 'off' }
+                    } %}
+                </div>
+                <div class="col-md-6">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'est_un', name: 'unidade_medida', label: 'Unidade de medida', type: 'select', required: true,
+                        value: 'un',
+                        options: _unidades_medida|keys|map(k => { value: k, label: _unidades_medida[k] })
+                    } %}
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Saldo e localização</legend>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'est_qtd', name: 'quantidade', label: 'Quantidade', type: 'number',
+                        value: '0', required: true, attrs: { min: '0' }
+                    } %}
+                </div>
+                <div class="col-md-4">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'est_min', name: 'minimo', label: 'Estoque mínimo', type: 'number',
+                        value: '0', required: true, attrs: { min: '0' }
+                    } %}
+                </div>
+                <div class="col-md-4">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'est_unidade', name: 'unidade_id', label: 'Filial', type: 'select',
+                        options: [{ value: '', label: '— Opcional —' }]|merge(unidades|map(u => { value: u.id ~ '', label: u.nome }))
+                    } %}
+                </div>
+            </div>
+        </fieldset>
+    {% endblock %}
+{% endembed %}
+{% endblock %}

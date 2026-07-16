@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PosOperatorioPacienteRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -129,6 +130,74 @@ class PosOperatorioPaciente
     #[ORM\ManyToOne(targetEntity: ClinicUnidade::class)]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?ClinicUnidade $unidade = null;
+
+    #[ORM\Column(length: 1, nullable: true)]
+    private ?string $sexo = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $rg = null;
+
+    #[ORM\Column(length: 15, nullable: true)]
+    private ?string $cns = null;
+
+    #[ORM\Column(length: 8, nullable: true)]
+    private ?string $cep = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $logradouro = null;
+
+    #[ORM\Column(name: 'numero_endereco', length: 20, nullable: true)]
+    private ?string $numeroEndereco = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $complemento = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $bairro = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $cidade = null;
+
+    #[ORM\Column(length: 2, nullable: true)]
+    private ?string $uf = null;
+
+    #[ORM\ManyToOne(targetEntity: ClinicConvenio::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicConvenio $convenio = null;
+
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $numeroCarteirinhaConvenio = null;
+
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $validadeCarteirinhaConvenio = null;
+
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $origemClinica = null;
+
+    #[ORM\Column(length: 160, nullable: true)]
+    private ?string $indicadoPor = null;
+
+    #[ORM\Column(length: 160, nullable: true)]
+    private ?string $titularNome = null;
+
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $parentescoTitular = null;
+
+    /** @var array<string, mixed>|null */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $anamnese = null;
+
+    #[ORM\ManyToOne(targetEntity: ClinicProfissional::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicProfissional $profissional = null;
+
+    #[ORM\ManyToOne(targetEntity: ClinicProcedimento::class)]
+    #[ORM\JoinColumn(name: 'procedimento_id', nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicProcedimento $procedimentoCatalogo = null;
+
+    #[ORM\ManyToOne(targetEntity: ClinicPacote::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ClinicPacote $pacote = null;
 
     /** @var Collection<int, PosOperatorioQuestionarioResposta> */
     #[ORM\OneToMany(mappedBy: 'paciente', targetEntity: PosOperatorioQuestionarioResposta::class, cascade: ['persist'])]
@@ -574,6 +643,260 @@ class PosOperatorioPaciente
     public function setUnidade(?ClinicUnidade $unidade): static
     {
         $this->unidade = $unidade;
+
+        return $this;
+    }
+
+    public function getSexo(): ?string
+    {
+        return $this->sexo;
+    }
+
+    public function setSexo(?string $sexo): static
+    {
+        $this->sexo = $sexo;
+
+        return $this;
+    }
+
+    public function getRg(): ?string
+    {
+        return $this->rg;
+    }
+
+    public function setRg(?string $rg): static
+    {
+        $this->rg = $rg;
+
+        return $this;
+    }
+
+    public function getCns(): ?string
+    {
+        return $this->cns;
+    }
+
+    public function setCns(?string $cns): static
+    {
+        $this->cns = $cns;
+
+        return $this;
+    }
+
+    public function getCep(): ?string
+    {
+        return $this->cep;
+    }
+
+    public function setCep(?string $cep): static
+    {
+        $this->cep = $cep;
+
+        return $this;
+    }
+
+    public function getLogradouro(): ?string
+    {
+        return $this->logradouro;
+    }
+
+    public function setLogradouro(?string $logradouro): static
+    {
+        $this->logradouro = $logradouro;
+
+        return $this;
+    }
+
+    public function getNumeroEndereco(): ?string
+    {
+        return $this->numeroEndereco;
+    }
+
+    public function setNumeroEndereco(?string $numeroEndereco): static
+    {
+        $this->numeroEndereco = $numeroEndereco;
+
+        return $this;
+    }
+
+    public function getComplemento(): ?string
+    {
+        return $this->complemento;
+    }
+
+    public function setComplemento(?string $complemento): static
+    {
+        $this->complemento = $complemento;
+
+        return $this;
+    }
+
+    public function getBairro(): ?string
+    {
+        return $this->bairro;
+    }
+
+    public function setBairro(?string $bairro): static
+    {
+        $this->bairro = $bairro;
+
+        return $this;
+    }
+
+    public function getCidade(): ?string
+    {
+        return $this->cidade;
+    }
+
+    public function setCidade(?string $cidade): static
+    {
+        $this->cidade = $cidade;
+
+        return $this;
+    }
+
+    public function getUf(): ?string
+    {
+        return $this->uf;
+    }
+
+    public function setUf(?string $uf): static
+    {
+        $this->uf = $uf;
+
+        return $this;
+    }
+
+    public function getConvenio(): ?ClinicConvenio
+    {
+        return $this->convenio;
+    }
+
+    public function setConvenio(?ClinicConvenio $convenio): static
+    {
+        $this->convenio = $convenio;
+
+        return $this;
+    }
+
+    public function getNumeroCarteirinhaConvenio(): ?string
+    {
+        return $this->numeroCarteirinhaConvenio;
+    }
+
+    public function setNumeroCarteirinhaConvenio(?string $numeroCarteirinhaConvenio): static
+    {
+        $this->numeroCarteirinhaConvenio = $numeroCarteirinhaConvenio;
+
+        return $this;
+    }
+
+    public function getValidadeCarteirinhaConvenio(): ?\DateTimeImmutable
+    {
+        return $this->validadeCarteirinhaConvenio;
+    }
+
+    public function setValidadeCarteirinhaConvenio(?\DateTimeImmutable $validadeCarteirinhaConvenio): static
+    {
+        $this->validadeCarteirinhaConvenio = $validadeCarteirinhaConvenio;
+
+        return $this;
+    }
+
+    public function getOrigemClinica(): ?string
+    {
+        return $this->origemClinica;
+    }
+
+    public function setOrigemClinica(?string $origemClinica): static
+    {
+        $this->origemClinica = $origemClinica;
+
+        return $this;
+    }
+
+    public function getIndicadoPor(): ?string
+    {
+        return $this->indicadoPor;
+    }
+
+    public function setIndicadoPor(?string $indicadoPor): static
+    {
+        $this->indicadoPor = $indicadoPor;
+
+        return $this;
+    }
+
+    public function getTitularNome(): ?string
+    {
+        return $this->titularNome;
+    }
+
+    public function setTitularNome(?string $titularNome): static
+    {
+        $this->titularNome = $titularNome;
+
+        return $this;
+    }
+
+    public function getParentescoTitular(): ?string
+    {
+        return $this->parentescoTitular;
+    }
+
+    public function setParentescoTitular(?string $parentescoTitular): static
+    {
+        $this->parentescoTitular = $parentescoTitular;
+
+        return $this;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function getAnamnese(): ?array
+    {
+        return $this->anamnese;
+    }
+
+    /** @param array<string, mixed>|null $anamnese */
+    public function setAnamnese(?array $anamnese): static
+    {
+        $this->anamnese = $anamnese;
+
+        return $this;
+    }
+
+    public function getProfissional(): ?ClinicProfissional
+    {
+        return $this->profissional;
+    }
+
+    public function setProfissional(?ClinicProfissional $profissional): static
+    {
+        $this->profissional = $profissional;
+
+        return $this;
+    }
+
+    public function getProcedimentoCatalogo(): ?ClinicProcedimento
+    {
+        return $this->procedimentoCatalogo;
+    }
+
+    public function setProcedimentoCatalogo(?ClinicProcedimento $procedimentoCatalogo): static
+    {
+        $this->procedimentoCatalogo = $procedimentoCatalogo;
+
+        return $this;
+    }
+
+    public function getPacote(): ?ClinicPacote
+    {
+        return $this->pacote;
+    }
+
+    public function setPacote(?ClinicPacote $pacote): static
+    {
+        $this->pacote = $pacote;
 
         return $this;
     }

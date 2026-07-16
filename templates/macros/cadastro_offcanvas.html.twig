@@ -1,0 +1,54 @@
+{#
+  Macros para cadastro em offcanvas
+
+  {% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+  {{ cadastro.create_button('clinic-sala', 'Nova sala') }}
+  {{ cadastro.edit_button('clinic-sala', item.id, csrf_token('clinic_sala_' ~ item.id), {
+      fields: { nome: item.nome, codigo: item.codigo, ativo: item.ativo ? '1' : '0' }
+  }) }}
+#}
+{% macro create_button(panel_id, label, options = {}) %}
+    {% set _ghost = options.ghost|default(false) %}
+    {% set _class = options.class|default('btn-sm') %}
+    <button type="button"
+            class="{{ _ghost ? 'btn-unio-ghost' : 'btn-unio' }} {{ _class }}"
+            data-unio-offcanvas-open="{{ panel_id }}"
+            data-cadastro-create="{{ panel_id }}">
+        {{ label }}
+    </button>
+{% endmacro %}
+
+{% macro edit_button(panel_id, entity_id, csrf_token_value, options = {}) %}
+    {% set _label = options.label|default('Editar') %}
+    {% set _fields = options.fields|default({}) %}
+    {% set _attrs = options.attrs|default({}) %}
+    {% set _aria = options.aria_label|default('Mais ações') %}
+    <div class="dropdown unio-row-actions-menu">
+        <button type="button"
+                class="unio-row-menu-btn"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-label="{{ _aria }}"
+                title="Mais ações">
+            <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right unio-dropdown">
+            <button type="button"
+                    class="dropdown-item"
+                    data-unio-offcanvas-open="{{ panel_id }}"
+                    data-cadastro-edit="{{ panel_id }}"
+                    data-cadastro-id="{{ entity_id }}"
+                    data-cadastro-token="{{ csrf_token_value }}"
+                    {% for name, value in _fields %}
+                    data-field-{{ name }}="{{ value|e('html_attr') }}"
+                    {% endfor %}
+                    {% for attr_name, attr_value in _attrs %}
+                    {{ attr_name }}="{{ attr_value|e('html_attr') }}"
+                    {% endfor %}>
+                {{ _label }}
+            </button>
+        </div>
+    </div>
+{% endmacro %}
+

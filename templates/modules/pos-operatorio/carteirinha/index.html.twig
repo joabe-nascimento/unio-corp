@@ -54,7 +54,11 @@
                         <td data-label="Plano">{{ planos[p.carteirinhaPlano]|default(p.carteirinhaPlano) }}</td>
                         <td data-label="Validade">{{ p.carteirinhaValidaAte ? p.carteirinhaValidaAte|date('d/m/Y') : '—' }}</td>
                         <td data-label="Ações" class="text-right">
-                            <a href="{{ path('app_pos_operatorio_carteirinha_paciente', { id: p.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                            {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações de ' ~ p.nome } %}
+                                {% block items %}
+                                <a href="{{ path('app_pos_operatorio_carteirinha_paciente', { id: p.id }) }}" class="dropdown-item">Abrir</a>
+                                {% endblock %}
+                            {% endembed %}
                         </td>
                     </tr>
                     {% endfor %}

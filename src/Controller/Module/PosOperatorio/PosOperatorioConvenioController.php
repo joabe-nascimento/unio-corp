@@ -4,6 +4,7 @@ namespace App\Controller\Module\PosOperatorio;
 
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Service\PosOperatorio\ClinicCadastroRules;
 use App\Service\PosOperatorio\ClinicConvenioService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,11 +35,7 @@ final class PosOperatorioConvenioController extends AbstractController
             }
 
             try {
-                $this->convenios->create($empresa, [
-                    'nome' => $request->request->getString('nome'),
-                    'registro_ans' => $request->request->getString('registro_ans'),
-                    'ativo' => true,
-                ]);
+                $this->convenios->create($empresa, $this->payload($request, true));
                 $this->addFlash('success', 'Convênio cadastrado.');
             } catch (\Throwable $e) {
                 $this->addFlash('error', $e->getMessage());
@@ -47,10 +44,25 @@ final class PosOperatorioConvenioController extends AbstractController
             return $this->redirectToRoute('app_pos_operatorio_convenios');
         }
 
+        $lista = $this->convenios->list($empresa);
+        $versoesTiss = ClinicCadastroRules::versaoTissSelectOptions(true);
+        $known = [];
+        foreach ($versoesTiss as $opt) {
+            $known[(string) $opt['value']] = true;
+        }
+        foreach ($lista as $convenio) {
+            $v = trim((string) $convenio->getVersaoTiss());
+            if ($v !== '' && !isset($known[$v])) {
+                $versoesTiss[] = ['value' => $v, 'label' => $v.' (legado)'];
+                $known[$v] = true;
+            }
+        }
+
         return $this->render('modules/pos-operatorio/convenios/index.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'convenios',
-            'convenios' => $this->convenios->list($empresa),
+            'convenios' => $lista,
+            'versoes_tiss' => $versoesTiss,
         ]);
     }
 
@@ -70,17 +82,31 @@ final class PosOperatorioConvenioController extends AbstractController
         }
 
         try {
-            $this->convenios->update($convenio, $empresa, [
-                'nome' => $request->request->getString('nome'),
-                'registro_ans' => $request->request->getString('registro_ans'),
-                'ativo' => $request->request->getBoolean('ativo'),
-            ]);
+            $this->convenios->update($convenio, $empresa, $this->payload($request, false));
             $this->addFlash('success', 'Convênio atualizado.');
         } catch (\Throwable $e) {
             $this->addFlash('error', $e->getMessage());
         }
 
         return $this->redirectToRoute('app_pos_operatorio_convenios');
+    }
+
+    /** @return array<string, mixed> */
+    private function payload(Request $request, bool $creating): array
+    {
+        return [
+            'nome' => $request->request->getString('nome'),
+            'registro_ans' => $request->request->getString('registro_ans'),
+            'cnpj' => $request->request->getString('cnpj'),
+            'codigo_prestador' => $request->request->getString('codigo_prestador'),
+            'versao_tiss' => $request->request->getString('versao_tiss'),
+            'contato_faturamento' => $request->request->getString('contato_faturamento'),
+            'email_faturamento' => $request->request->getString('email_faturamento'),
+            'telefone_faturamento' => $request->request->getString('telefone_faturamento'),
+            'prazo_glosa_dias' => $request->request->getInt('prazo_glosa_dias') ?: 30,
+            'observacoes' => $request->request->getString('observacoes'),
+            'ativo' => $creating ? true : $request->request->getBoolean('ativo'),
+        ];
     }
 
     private function requireEmpresa(): Empresa

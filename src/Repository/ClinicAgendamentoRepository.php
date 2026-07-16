@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\ClinicAgendamento;
+use App\Entity\ClinicSala;
 use App\Entity\Empresa;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -129,5 +130,36 @@ class ClinicAgendamentoRepository extends ServiceEntityRepository
             ->orderBy('a.inicio', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /** Conflito de sala: outro horário ativo com intervalo sobreposto. */
+    public function hasSalaOverlap(
+        Empresa $empresa,
+        ClinicSala $sala,
+        \DateTimeImmutable $inicio,
+        \DateTimeImmutable $fim,
+        ?int $ignoreId = null,
+    ): bool {
+        $qb = $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.empresa = :empresa')
+            ->andWhere('a.sala = :sala')
+            ->andWhere('a.status NOT IN (:cancelados)')
+            ->andWhere('a.inicio < :fim')
+            ->andWhere('a.fim > :inicio')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('sala', $sala)
+            ->setParameter('inicio', $inicio)
+            ->setParameter('fim', $fim)
+            ->setParameter('cancelados', [
+                ClinicAgendamento::STATUS_CANCELADO,
+                ClinicAgendamento::STATUS_FALTOU,
+            ]);
+
+        if ($ignoreId !== null && $ignoreId > 0) {
+            $qb->andWhere('a.id != :ignore')->setParameter('ignore', $ignoreId);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
     }
 }

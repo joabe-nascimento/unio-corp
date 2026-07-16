@@ -1,0 +1,126 @@
+﻿{% extends 'layout/hub.html.twig' %}
+{% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+
+{% block title %}Unidades · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Unidades' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Filiais e endereços da clínica' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_salas') }}" class="btn-unio-ghost btn-sm">Salas</a>
+{{ cadastro.create_button('clinic-unidade', 'Nova unidade') }}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-0">
+    {% if unidades is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-hospital',
+            title: 'Nenhuma unidade cadastrada',
+            text: 'Cadastre a primeira unidade para vincular salas e estoque.',
+            btn_sm: true,
+            compact: true,
+            btn_label: 'Nova unidade',
+            btn_opens: 'clinic-unidade',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="clinic-cadastro-list__head">
+        <div>
+            <strong>Unidades</strong>
+            <p class="clinic-cadastro-list__head-sub mb-0">Código, endereço e telefone</p>
+        </div>
+        <span class="clinic-cadastro-list__count">{{ unidades|length }}</span>
+    </div>
+    <div class="clinic-cadastro-list">
+        {% for u in unidades %}
+        <article class="clinic-cadastro-item clinic-cadastro-item--rich">
+            <div class="clinic-cadastro-item__view">
+                <div class="clinic-cadastro-item__main">
+                    <div class="clinic-cadastro-item__body">
+                        <div class="clinic-cadastro-item__title-row">
+                            <h3 class="clinic-cadastro-item__title">{{ u.nome }}</h3>
+                            <span class="clinic-cadastro-chip {{ u.ativo ? 'clinic-cadastro-chip--ok' : 'clinic-cadastro-chip--off' }}">
+                                {{ u.ativo ? 'Ativa' : 'Inativa' }}
+                            </span>
+                        </div>
+                        <dl class="clinic-cadastro-facts">
+                            <div>
+                                <dt>Código</dt>
+                                <dd>{{ u.codigo }}</dd>
+                            </div>
+                            {% if u.endereco %}
+                            <div>
+                                <dt>Endereço</dt>
+                                <dd>{{ u.endereco }}</dd>
+                            </div>
+                            {% endif %}
+                            {% if u.telefone %}
+                            <div>
+                                <dt>Telefone</dt>
+                                <dd>{{ u.telefone|br_phone }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                <div class="clinic-cadastro-item__actions">
+                    {{ cadastro.edit_button('clinic-unidade', u.id, csrf_token('clinic_unidade_' ~ u.id), {
+                        fields: {
+                            nome: u.nome,
+                            codigo: u.codigo,
+                            endereco: u.endereco|default(''),
+                            telefone: u.telefone|default(''),
+                            ativo: u.ativo ? '1' : '0'
+                        }
+                    }) }}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% embed 'components/cadastro_form_offcanvas.html.twig' with {
+    id: 'clinic-unidade',
+    form_id: 'clinicUnidadeForm',
+    title: 'Nova unidade',
+    title_edit: 'Editar unidade',
+    subtitle: 'Filial, código e contato',
+    icon: 'fa-hospital',
+    create_action: path('app_pos_operatorio_unidades'),
+    edit_action: path('app_pos_operatorio_unidades_editar', { id: 0 }),
+    create_token: csrf_token('clinic_unidade_new'),
+    ativo_label: 'Unidade ativa'
+} %}
+    {% block form_fields %}
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Identificação</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'unidade_nome', name: 'nome', label: 'Nome da unidade', required: true,
+                placeholder: 'Ex.: Unidade Centro', attrs: { maxlength: '120' }
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'unidade_codigo', name: 'codigo', label: 'Código interno', required: true,
+                placeholder: 'MATRIZ', inputmode: 'text',
+                attrs: { maxlength: '16', 'data-mask': 'uppercase', autocomplete: 'off' }
+            } %}
+        </fieldset>
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Localização e contato</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'unidade_endereco', name: 'endereco', label: 'Endereço',
+                placeholder: 'Rua, número, bairro', attrs: { maxlength: '255' }
+            } %}
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'unidade_telefone', name: 'telefone', label: 'Telefone',
+                placeholder: '(11) 99999-0000', inputmode: 'tel',
+                attrs: { maxlength: '16', 'data-mask': 'phone', autocomplete: 'tel' }
+            } %}
+        </fieldset>
+    {% endblock %}
+{% endembed %}
+{% endblock %}

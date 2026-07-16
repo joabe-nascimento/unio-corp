@@ -1,0 +1,225 @@
+﻿{% extends 'layout/hub.html.twig' %}
+{% import 'macros/cadastro_offcanvas.html.twig' as cadastro %}
+
+{% block title %}Orçamentos · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Orçamentos' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'Propostas comerciais e conversão' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_pacientes') }}" class="btn-unio-ghost btn-sm">Pacientes</a>
+{{ cadastro.create_button('clinic-orcamento', 'Novo orçamento') }}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card p-0">
+    {% if orcamentos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-file-invoice',
+            title: 'Nenhum orçamento cadastrado',
+            text: 'Cadastre o primeiro orçamento para um lead.',
+            btn_sm: true,
+            compact: true,
+            btn_label: 'Novo orçamento',
+            btn_opens: 'clinic-orcamento',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="clinic-cadastro-list__head">
+        <div>
+            <strong>Orçamentos</strong>
+            <p class="clinic-cadastro-list__head-sub mb-0">Lead, status e total</p>
+        </div>
+        <span class="clinic-cadastro-list__count">{{ orcamentos|length }}</span>
+    </div>
+    <div class="clinic-cadastro-list">
+        {% for o in orcamentos %}
+        <article class="clinic-cadastro-item clinic-cadastro-item--rich">
+            <div class="clinic-cadastro-item__view">
+                <div class="clinic-cadastro-item__main">
+                    <div class="clinic-cadastro-item__body">
+                        <div class="clinic-cadastro-item__title-row">
+                            <h3 class="clinic-cadastro-item__title">#{{ o.id }} · {{ o.leadNome|default('Sem lead') }}</h3>
+                            <span class="clinic-cadastro-chip">{{ statuses[o.status]|default(o.status) }}</span>
+                        </div>
+                        <dl class="clinic-cadastro-facts">
+                            <div>
+                                <dt>Total</dt>
+                                <dd>R$ {{ (o.totalCentavos / 100)|number_format(2, ',', '.') }}</dd>
+                            </div>
+                            {% if o.leadTelefone or o.leadEmail %}
+                            <div>
+                                <dt>Contato</dt>
+                                <dd>
+                                    {% if o.leadTelefone %}{{ o.leadTelefone|br_phone }}{% endif %}
+                                    {% if o.leadTelefone and o.leadEmail %} · {% endif %}
+                                    {% if o.leadEmail %}{{ o.leadEmail }}{% endif %}
+                                </dd>
+                            </div>
+                            {% endif %}
+                            {% if o.paciente %}
+                            <div>
+                                <dt>Paciente</dt>
+                                <dd>{{ o.paciente.nome }}</dd>
+                            </div>
+                            {% endif %}
+                            {% if o.validade %}
+                            <div>
+                                <dt>Validade</dt>
+                                <dd>{{ o.validade|date('d/m/Y') }}</dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                <div class="clinic-cadastro-item__actions">
+                    {{ cadastro.edit_button('clinic-orcamento', o.id, csrf_token('clinic_orcamento_' ~ o.id), {
+                        fields: {
+                            lead_nome: o.leadNome|default(''),
+                            lead_telefone: o.leadTelefone|default(''),
+                            lead_email: o.leadEmail|default(''),
+                            status: o.status,
+                            desconto: (o.descontoCentavos / 100)|number_format(2, ',', '.'),
+                            validade: o.validade ? o.validade|date('Y-m-d') : '',
+                            observacoes: o.observacoes|default(''),
+                            itens: o.itens|json_encode(constant('JSON_UNESCAPED_UNICODE'))
+                        },
+                        attrs: {
+                            'data-select-filters': { status: status_options[o.id]|default([o.status]) }|json_encode(constant('JSON_UNESCAPED_UNICODE'))
+                        }
+                    }) }}
+                </div>
+            </div>
+            {% if o.status in ['enviado', 'aprovado'] %}
+            <form method="post" action="{{ path('app_pos_operatorio_orcamentos_converter', { id: o.id }) }}" class="clinic-cadastro-item__convert px-3 pb-3">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_orcamento_convert_' ~ o.id) }}">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-8">
+                        <label class="form-label small mb-1" for="orc_pac_{{ o.id }}">Converter → paciente</label>
+                        <select id="orc_pac_{{ o.id }}" name="paciente_id" class="form-control form-control-sm" required>
+                            <option value="">Selecione…</option>
+                            {% for pac in pacientes %}
+                                <option value="{{ pac.id }}">{{ pac.codigo }} — {{ pac.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn-unio btn-sm w-100">Vincular</button>
+                    </div>
+                </div>
+            </form>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+{% embed 'components/cadastro_form_offcanvas.html.twig' with {
+    id: 'clinic-orcamento',
+    form_id: 'clinicOrcamentoForm',
+    title: 'Novo orçamento',
+    title_edit: 'Editar orçamento',
+    subtitle: 'Lead, itens e condições',
+    icon: 'fa-file-invoice',
+    size: 'lg',
+    create_action: path('app_pos_operatorio_orcamentos'),
+    edit_action: path('app_pos_operatorio_orcamentos_editar', { id: 0 }),
+    create_token: csrf_token('clinic_orcamento_new'),
+    show_ativo: false
+} %}
+    {% block form_fields %}
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Lead</legend>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'orc_lead', name: 'lead_nome', label: 'Nome',
+                placeholder: 'Nome do interessado', attrs: { maxlength: '160' }
+            } %}
+            <div class="row g-2">
+                <div class="col-md-6">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'orc_tel', name: 'lead_telefone', label: 'Telefone',
+                        placeholder: '(11) 99999-0000', inputmode: 'tel',
+                        attrs: { maxlength: '16', 'data-mask': 'phone', autocomplete: 'tel' }
+                    } %}
+                </div>
+                <div class="col-md-6">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'orc_email', name: 'lead_email', label: 'E-mail', type: 'email',
+                        placeholder: 'contato@email.com',
+                        attrs: { maxlength: '120', autocomplete: 'email' }
+                    } %}
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="crm-form-section" data-cadastro-create-only>
+            <legend class="crm-form-section__title">Itens da proposta</legend>
+            <div class="row g-2">
+                <div class="col-md-7">
+                    <div class="unio-form-group">
+                        <label class="unio-form-label" for="orc_item1">Item 1 — nome</label>
+                        <input id="orc_item1" name="item_nome[]" class="unio-form-control" placeholder="Procedimento" maxlength="160">
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="unio-form-group">
+                        <label class="unio-form-label" for="orc_val1">Valor</label>
+                        <input id="orc_val1" name="item_valor[]" class="unio-form-control" placeholder="R$ 0,00"
+                               inputmode="decimal" data-mask="money" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-7">
+                    <div class="unio-form-group">
+                        <label class="unio-form-label" for="orc_item2">Item 2 — nome</label>
+                        <input id="orc_item2" name="item_nome[]" class="unio-form-control" placeholder="Segundo item (opcional)" maxlength="160">
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="unio-form-group">
+                        <label class="unio-form-label" for="orc_val2">Valor</label>
+                        <input id="orc_val2" name="item_valor[]" class="unio-form-control" placeholder="R$ 0,00"
+                               inputmode="decimal" data-mask="money" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div data-cadastro-edit-only hidden>
+            <fieldset class="crm-form-section">
+                <legend class="crm-form-section__title">Status e itens</legend>
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'orc_status', name: 'status', label: 'Status', type: 'select',
+                    options: statuses|keys|map(sid => { value: sid, label: statuses[sid] })
+                } %}
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'orc_itens', name: 'itens', label: 'Itens (JSON)', type: 'textarea', rows: 3
+                } %}
+            </fieldset>
+        </div>
+        <fieldset class="crm-form-section">
+            <legend class="crm-form-section__title">Condições</legend>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'orc_desc', name: 'desconto', label: 'Desconto (R$)',
+                        value: '', placeholder: 'R$ 0,00', inputmode: 'decimal',
+                        attrs: { 'data-mask': 'money', autocomplete: 'off' }
+                    } %}
+                </div>
+                <div class="col-md-6">
+                    {% include 'components/unio_form_field.html.twig' with {
+                        id: 'orc_validade', name: 'validade', label: 'Validade', type: 'date'
+                    } %}
+                </div>
+            </div>
+            {% include 'components/unio_form_field.html.twig' with {
+                id: 'orc_obs', name: 'observacoes', label: 'Observações', type: 'textarea', rows: 2,
+                placeholder: 'Condições comerciais, formas de pagamento…'
+            } %}
+        </fieldset>
+    {% endblock %}
+{% endembed %}
+{% endblock %}

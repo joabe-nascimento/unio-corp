@@ -12,13 +12,13 @@ body.org-clinic.unio-organismo {
     --clinic-radius: 22px;
     --clinic-radius-lg: 28px;
     --clinic-radius-btn: 999px;
-    --clinic-border: rgba(30, 42, 58, 0.07);
-    --clinic-border-hover: rgba(30, 42, 58, 0.12);
+    --clinic-border: rgba(30, 42, 58, 0.18);
+    --clinic-border-hover: rgba(30, 42, 58, 0.28);
     --clinic-shadow: 0 10px 36px rgba(30, 42, 58, 0.06);
     --clinic-shadow-hover: 0 16px 44px rgba(30, 42, 58, 0.1);
     --org-radius: 22px;
     --org-border: var(--clinic-border);
-    --org-border-soft: rgba(30, 42, 58, 0.06);
+    --org-border-soft: rgba(30, 42, 58, 0.12);
     --org-font: 'Nunito', 'Quicksand', system-ui, sans-serif;
     --org-font-display: 'Nunito', 'Quicksand', system-ui, sans-serif;
     --clinic-page-bg:
@@ -86,12 +86,35 @@ body.org-clinic.unio-organismo input[type="email"],
 body.org-clinic.unio-organismo input[type="search"],
 body.org-clinic.unio-organismo input[type="password"],
 body.org-clinic.unio-organismo input[type="number"],
+body.org-clinic.unio-organismo input[type="tel"],
 body.org-clinic.unio-organismo input[type="date"],
-body.org-clinic.unio-organismo textarea.form-control {
+body.org-clinic.unio-organismo input[type="time"],
+body.org-clinic.unio-organismo textarea.form-control,
+body.org-clinic.unio-organismo textarea {
     border-radius: 14px !important;
-    border-color: var(--clinic-border) !important;
+    border: 1.5px solid var(--clinic-border) !important;
+    background-color: #fff !important;
     box-shadow: none !important;
     color: var(--org-ink, #1e2a3a) !important;
+}
+
+body.org-clinic.unio-organismo .form-control::placeholder,
+body.org-clinic.unio-organismo input::placeholder,
+body.org-clinic.unio-organismo textarea::placeholder {
+    color: #7b8794 !important;
+    opacity: 1 !important;
+}
+
+body.org-clinic.unio-organismo .form-control::-webkit-input-placeholder,
+body.org-clinic.unio-organismo input::-webkit-input-placeholder,
+body.org-clinic.unio-organismo textarea::-webkit-input-placeholder {
+    color: #7b8794 !important;
+}
+
+body.org-clinic.unio-organismo .text-muted,
+body.org-clinic.unio-organismo .form-text,
+body.org-clinic.unio-organismo small.text-muted {
+    color: #5a6b82 !important;
 }
 
 body.org-clinic.unio-organismo select.form-control,
@@ -105,14 +128,22 @@ body.org-clinic.unio-organismo .custom-select {
     padding-right: 2.25rem !important;
 }
 
-body.org-clinic.unio-organismo .form-control:focus,
-body.org-clinic.unio-organismo select.form-control:focus,
-body.org-clinic.unio-organismo textarea.form-control:focus {
-    border-color: rgba(75, 114, 190, 0.35) !important;
-    box-shadow: 0 0 0 4px rgba(75, 114, 190, 0.1) !important;
+body.org-clinic.unio-organismo .form-control:hover,
+body.org-clinic.unio-organismo select.form-control:hover,
+body.org-clinic.unio-organismo textarea.form-control:hover,
+body.org-clinic.unio-organismo textarea:hover {
+    border-color: var(--clinic-border-hover) !important;
 }
 
-/* Botões — pílula suave, texto centrado (inline-flex) */
+body.org-clinic.unio-organismo .form-control:focus,
+body.org-clinic.unio-organismo select.form-control:focus,
+body.org-clinic.unio-organismo textarea.form-control:focus,
+body.org-clinic.unio-organismo textarea:focus {
+    border-color: #4b72be !important;
+    box-shadow: 0 0 0 4px rgba(75, 114, 190, 0.16) !important;
+}
+
+/* Botões — pílula suave; alinhamento em unio-ui-polish */
 body.org-clinic.unio-organismo .btn-unio,
 body.org-clinic.unio-organismo .btn-unio-primary,
 body.org-clinic.unio-organismo button.btn-unio-primary,
@@ -123,13 +154,17 @@ body.org-clinic.unio-organismo .page-body-inner--organismo .btn-unio {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 6px;
+    gap: 0.4rem;
     border-radius: var(--clinic-radius-btn) !important;
     border-width: 0 !important;
     font-weight: 700 !important;
     letter-spacing: -0.01em;
-    line-height: 1.25 !important;
-    padding: 0.55rem 1.25rem !important;
+    line-height: 1.2 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+    min-height: 38px;
     box-shadow: none !important;
     vertical-align: middle;
     transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
@@ -2492,6 +2527,26 @@ body.org-clinic:not(.sidebar-collapse) .clinic-sidebar-pulse__full {
     color: #fff !important;
 }
 
+.clinic-carteirinha-paciente__preview .mkt-idcard--landscape .mkt-idcard__face--front {
+    padding: 10px 13px 15px;
+    gap: 6px;
+}
+
+.clinic-carteirinha-paciente__preview .mkt-idcard--landscape .mkt-idcard__footer-bar {
+    flex-shrink: 0;
+    padding-top: 5px;
+    padding-bottom: 2px;
+    min-height: 22px;
+    overflow: visible;
+}
+
+.clinic-carteirinha-paciente__preview .mkt-idcard__footer-bar .unio-selo--card,
+.clinic-carteirinha-paciente__preview .mkt-idcard__footer-bar .unio-selo__brand,
+.clinic-carteirinha-paciente__preview .mkt-idcard__footer-bar .unio-selo__label {
+    overflow: visible;
+    line-height: 1.3;
+}
+
 .clinic-carteirinha-paciente__preview .mkt-idcard-widget__flip-hint {
     font-size: 11px;
     margin: 4px 0 0;
@@ -3267,4 +3322,273 @@ body.org-clinic .organismo-care-milestones__item:first-child {
 /* Sala crítica — leve alinhamento ao polish */
 body.org-clinic .pos-op-war-room {
     border-radius: var(--clinic-radius);
+}
+
+/* ── Cadastros clínicos — lista limpa + edição sob demanda ── */
+body.org-clinic .clinic-cadastro-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+body.org-clinic .clinic-cadastro-item {
+    border-bottom: 1px solid rgba(30, 42, 58, 0.08);
+    padding: 0.95rem 1.15rem;
+}
+
+body.org-clinic .clinic-cadastro-item:last-child {
+    border-bottom: 0;
+}
+
+body.org-clinic .clinic-cadastro-item__view {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+body.org-clinic .clinic-cadastro-item.is-editing .clinic-cadastro-item__view {
+    display: none;
+}
+
+body.org-clinic .clinic-cadastro-item__edit {
+    display: none;
+}
+
+body.org-clinic .clinic-cadastro-item.is-editing .clinic-cadastro-item__edit {
+    display: block;
+}
+
+body.org-clinic .clinic-cadastro-item__title {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--org-ink, #1e2a3a);
+    line-height: 1.25;
+}
+
+body.org-clinic .clinic-cadastro-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.55rem;
+    align-items: center;
+}
+
+body.org-clinic .clinic-cadastro-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.22rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    background: #eaf0fb;
+    color: #3d61a8;
+    border: 1px solid rgba(75, 114, 190, 0.16);
+}
+
+body.org-clinic .clinic-cadastro-chip--muted {
+    background: #f1f5f9;
+    color: #5a6b82;
+    border-color: rgba(30, 42, 58, 0.08);
+}
+
+body.org-clinic .clinic-cadastro-chip--ok {
+    background: rgba(34, 197, 94, 0.12);
+    color: #15803d;
+    border-color: rgba(34, 197, 94, 0.22);
+}
+
+body.org-clinic .clinic-cadastro-chip--off {
+    background: rgba(148, 163, 184, 0.16);
+    color: #64748b;
+    border-color: rgba(100, 116, 139, 0.2);
+}
+
+body.org-clinic .clinic-cadastro-chip--warn {
+    background: rgba(245, 158, 11, 0.14);
+    color: #b45309;
+    border-color: rgba(245, 158, 11, 0.28);
+}
+
+body.org-clinic .clinic-cadastro-item__actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+body.org-clinic .clinic-cadastro-item__edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+body.org-clinic .clinic-cadastro-list__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.15rem 1.25rem 1rem;
+    border-bottom: 1px solid rgba(30, 42, 58, 0.08);
+    background: rgba(234, 240, 251, 0.35);
+}
+
+body.org-clinic .clinic-cadastro-list__head strong {
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--org-ink, #1e2a3a);
+}
+
+body.org-clinic .clinic-cadastro-list__head-sub {
+    margin-top: 0.15rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6b7c93;
+}
+
+body.org-clinic .clinic-cadastro-list__count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #5a6b82;
+    white-space: nowrap;
+}
+
+/* Lista rica — fatos estruturados (sem ícones/avatares) */
+body.org-clinic .clinic-cadastro-item--rich {
+    padding: 1.05rem 1.25rem;
+}
+
+body.org-clinic .clinic-cadastro-item__main {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+body.org-clinic .clinic-cadastro-avatar {
+    display: none !important;
+}
+
+body.org-clinic .clinic-cadastro-item__body {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+body.org-clinic .clinic-cadastro-item__actions {
+    display: flex;
+    align-items: flex-start;
+    flex-shrink: 0;
+    margin-left: 0.75rem;
+}
+
+body.org-clinic .clinic-cadastro-item__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.65rem;
+    margin-bottom: 0.45rem;
+}
+
+body.org-clinic .clinic-cadastro-item--rich .clinic-cadastro-item__title {
+    margin: 0;
+    font-size: 1.02rem;
+}
+
+body.org-clinic .clinic-cadastro-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.45rem 1rem;
+    margin: 0;
+}
+
+body.org-clinic .clinic-cadastro-facts dt {
+    margin: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #7a8aa0;
+}
+
+body.org-clinic .clinic-cadastro-facts dd {
+    margin: 0.12rem 0 0;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--org-ink, #1e2a3a);
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+body.org-clinic .unio-offcanvas-form .crm-form-section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.15rem;
+}
+
+body.org-clinic .unio-offcanvas-form .crm-form-section:last-of-type {
+    margin-bottom: 0.5rem;
+}
+
+body.org-clinic .unio-offcanvas-form .crm-form-section__title {
+    margin-bottom: 0.75rem;
+}
+
+/* Cadastros — mobile: evita estouro e empilha ações */
+@media (max-width: 767.98px) {
+    body.org-clinic .clinic-cadastro-list__head {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.5rem 0.75rem;
+    }
+
+    body.org-clinic .clinic-cadastro-list__count {
+        margin-left: 0;
+    }
+
+    body.org-clinic .clinic-cadastro-item,
+    body.org-clinic .clinic-cadastro-item--rich {
+        padding: 0.9rem 0.95rem;
+    }
+
+    body.org-clinic .clinic-cadastro-item__view {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    body.org-clinic .clinic-cadastro-item__actions {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+
+    body.org-clinic .clinic-cadastro-facts {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+    }
+
+    body.org-clinic .clinic-cadastro-item__convert {
+        padding-left: 0.95rem !important;
+        padding-right: 0.95rem !important;
+    }
+
+    body.org-clinic .clinic-cadastro-item__convert .row {
+        margin: 0;
+    }
+
+    body.org-clinic .clinic-cadastro-item__convert [class*="col-"] {
+        padding-left: 0;
+        padding-right: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    body.org-clinic .unio-row-actions-menu .dropdown-menu {
+        right: 0;
+        left: auto;
+        min-width: 10.5rem;
+    }
 }

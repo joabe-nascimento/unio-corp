@@ -1,0 +1,26 @@
+{#
+  row_actions_menu — menu ⋮ para ações de linha (listas e tabelas)
+
+  Uso com embed:
+    {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações' } %}
+      {% block items %}
+        <a href="..." class="dropdown-item">Abrir</a>
+        <button type="button" class="dropdown-item" ...>Editar</button>
+      {% endblock %}
+    {% endembed %}
+#}
+{% set _aria = aria_label|default('Mais ações') %}
+<div class="dropdown unio-row-actions-menu">
+    <button type="button"
+            class="unio-row-menu-btn"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-label="{{ _aria }}"
+            title="Mais ações">
+        <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right unio-dropdown">
+        {% block items %}{% endblock %}
+    </div>
+</div>

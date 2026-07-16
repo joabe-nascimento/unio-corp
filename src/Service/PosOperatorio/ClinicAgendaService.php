@@ -3,11 +3,17 @@
 namespace App\Service\PosOperatorio;
 
 use App\Entity\ClinicAgendamento;
+use App\Entity\ClinicProcedimento;
+use App\Entity\ClinicProfissional;
+use App\Entity\ClinicSala;
 use App\Entity\Empresa;
 use App\Entity\PosOperatorioPaciente;
 use App\Entity\User;
 use App\Repository\ClinicAgendamentoRepository;
 use App\Repository\ClinicAtendimentoRepository;
+use App\Repository\ClinicProcedimentoRepository;
+use App\Repository\ClinicProfissionalRepository;
+use App\Repository\ClinicSalaRepository;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,6 +29,9 @@ final class ClinicAgendaService
         private ClinicPatientNotifier $patientNotifier,
         private ClinicAgendaReminderService $agendaReminders,
         private EntityManagerInterface $em,
+        private ?ClinicSalaRepository $salas = null,
+        private ?ClinicProfissionalRepository $profissionais = null,
+        private ?ClinicProcedimentoRepository $procedimentos = null,
     ) {}
 
     /**
@@ -174,6 +183,24 @@ final class ClinicAgendaService
     public function listMedicos(Empresa $empresa): array
     {
         return $this->users->findActiveByEmpresa($empresa);
+    }
+
+    /** @return list<ClinicSala> */
+    public function listSalas(Empresa $empresa): array
+    {
+        return $this->salas?->findByEmpresa($empresa, true) ?? [];
+    }
+
+    /** @return list<ClinicProfissional> */
+    public function listProfissionais(Empresa $empresa): array
+    {
+        return $this->profissionais?->findByEmpresa($empresa, true) ?? [];
+    }
+
+    /** @return list<ClinicProcedimento> */
+    public function listProcedimentos(Empresa $empresa): array
+    {
+        return $this->procedimentos?->findByEmpresa($empresa, true) ?? [];
     }
 
     public function find(Empresa $empresa, int $id): ?ClinicAgendamento
@@ -428,6 +455,42 @@ final class ClinicAgendaService
         if (array_key_exists('protocolo_dia', $data)) {
             $dia = $data['protocolo_dia'];
             $agendamento->setProtocoloDia($dia !== null && $dia !== '' ? (int) $dia : null);
+        }
+
+        if (array_key_exists('sala_id', $data)) {
+            $salaId = (int) ($data['sala_id'] ?? 0);
+            $sala = null;
+            if ($salaId > 0 && $this->salas !== null) {
+                $sala = $this->salas->findOneByEmpresa($agendamento->getEmpresa(), $salaId);
+            }
+            $agendamento->setSala($sala);
+        }
+        if (array_key_exists('profissional_id', $data)) {
+            $profissionalId = (int) ($data['profissional_id'] ?? 0);
+            $profissional = null;
+            if ($profissionalId > 0 && $this->profissionais !== null) {
+                $profissional = $this->profissionais->findOneByEmpresa($agendamento->getEmpresa(), $profissionalId);
+            }
+            $agendamento->setProfissional($profissional);
+        }
+        if (array_key_exists('procedimento_id', $data)) {
+            $procedimentoId = (int) ($data['procedimento_id'] ?? 0);
+            $procedimento = null;
+            if ($procedimentoId > 0 && $this->procedimentos !== null) {
+                $procedimento = $this->procedimentos->findOneByEmpresa($agendamento->getEmpresa(), $procedimentoId);
+            }
+            $agendamento->setProcedimento($procedimento);
+        }
+
+        $sala = $agendamento->getSala();
+        if ($sala !== null && $this->agendamentos->hasSalaOverlap(
+            $agendamento->getEmpresa(),
+            $sala,
+            $agendamento->getInicio(),
+            $agendamento->getFim(),
+            $agendamento->getId(),
+        )) {
+            throw new \InvalidArgumentException('Sala ocupada neste horário. Escolha outro horário ou outra sala.');
         }
         // Status: sempre via assertStatusChange em create/update/changeStatus
     }

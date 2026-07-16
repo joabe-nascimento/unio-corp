@@ -41,6 +41,14 @@
 {% endif %}
 {% endblock %}
 
+{% set status_tones = {
+    ativo: 'success',
+    alerta: 'danger',
+    pendente: 'amber',
+    encerrado: 'default'
+} %}
+{% set _chip_q = filter_q|default('') %}
+
 {% block hub_section_toolbar %}
 <form method="get" action="{{ path('app_pos_operatorio_pacientes') }}" style="display:contents;">
 {% if org_clinic|default(false) and filter_status|default('') %}
@@ -54,7 +62,15 @@
     btn_sm: true
 } %}
     {% block section_toolbar_filters %}
-        {% if not org_clinic|default(false) %}
+        {% if org_clinic|default(false) %}
+        <div class="clinic-filter-chips" role="navigation" aria-label="Filtrar por status">
+            <a href="{{ path('app_pos_operatorio_pacientes', _chip_q ? { q: _chip_q } : {}) }}" class="{{ filter_status|default('') == '' ? 'is-active' : '' }}">Em acompanhamento</a>
+            <a href="{{ path('app_pos_operatorio_pacientes', { status: 'ativo' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'ativo' ? 'is-active' : '' }}">Ativo</a>
+            <a href="{{ path('app_pos_operatorio_pacientes', { status: 'alerta' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'alerta' ? 'is-active' : '' }}">Alerta</a>
+            <a href="{{ path('app_pos_operatorio_pacientes', { status: 'pendente' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'pendente' ? 'is-active' : '' }}">Pendente</a>
+            <a href="{{ path('app_pos_operatorio_pacientes', { status: 'encerrado' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'encerrado' ? 'is-active' : '' }}">Encerrado</a>
+        </div>
+        {% else %}
         {% include 'components/filter_group.html.twig' with {
             label: 'Status',
             name: 'status',
@@ -71,32 +87,15 @@
         {% endif %}
         {% include 'components/toolbar_filter_actions.html.twig' with {
             clear_href: path('app_pos_operatorio_pacientes'),
-            has_filters: filter_q|default('') or filter_status|default('')
+            has_filters: filter_q|default('') or filter_status|default(''),
+            show_submit: not org_clinic|default(false)
         } %}
     {% endblock %}
 {% endembed %}
 </form>
 {% endblock %}
 
-{% set status_tones = {
-    ativo: 'success',
-    alerta: 'danger',
-    pendente: 'amber',
-    encerrado: 'default'
-} %}
-{% set _chip_q = filter_q|default('') %}
-
 {% block hub_content %}
-{% if org_clinic|default(false) %}
-<p class="clinic-filter-chips">
-    <a href="{{ path('app_pos_operatorio_pacientes', _chip_q ? { q: _chip_q } : {}) }}" class="{{ filter_status|default('') == '' ? 'is-active' : '' }}">Em acompanhamento</a>
-    <a href="{{ path('app_pos_operatorio_pacientes', { status: 'ativo' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'ativo' ? 'is-active' : '' }}">Ativo</a>
-    <a href="{{ path('app_pos_operatorio_pacientes', { status: 'alerta' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'alerta' ? 'is-active' : '' }}">Alerta</a>
-    <a href="{{ path('app_pos_operatorio_pacientes', { status: 'pendente' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'pendente' ? 'is-active' : '' }}">Pendente</a>
-    <a href="{{ path('app_pos_operatorio_pacientes', { status: 'encerrado' }|merge(_chip_q ? { q: _chip_q } : {})) }}" class="{{ filter_status|default('') == 'encerrado' ? 'is-active' : '' }}">Encerrado</a>
-</p>
-{% endif %}
-
 <section class="unio-card p-0 ops-queue-animate">
     {% if pacientes is empty %}
         {% include 'components/empty_state.html.twig' with {
@@ -147,27 +146,28 @@
                         {% endif %}
                     </td>
                     <td data-label="Ações" class="text-right">
-                        <div class="pos-op-paciente-row-actions">
+                        {% embed 'components/row_actions_menu.html.twig' with {
+                            aria_label: 'Mais ações de ' ~ (p|pos_op_paciente_nome)
+                        } %}
+                            {% block items %}
                             <button type="button"
-                                    class="btn-unio-ghost btn-sm"
-                                    title="Ver ficha"
+                                    class="dropdown-item"
                                     data-unio-offcanvas-open="pos-op-paciente-ficha"
                                     data-pos-op-paciente-ficha="{{ p.id }}"
                                     data-pos-op-paciente-nome="{{ p|pos_op_paciente_nome|e('html_attr') }}"
                                     data-pos-op-paciente-codigo="{{ p.codigo|e('html_attr') }}">
-                                <i class="fas fa-eye" aria-hidden="true"></i>
-                                <span class="ml-1">Ficha</span>
+                                Ver ficha
                             </button>
                             <button type="button"
-                                    class="btn-unio-ghost btn-sm"
-                                    title="Editar paciente"
+                                    class="dropdown-item"
                                     data-unio-offcanvas-open="pos-op-paciente-edit"
                                     data-pos-op-paciente-edit="{{ p.id }}"
                                     data-pos-op-paciente-nome="{{ p|pos_op_paciente_nome|e('html_attr') }}"
                                     data-pos-op-paciente-codigo="{{ p.codigo|e('html_attr') }}">
-                                <i class="fas fa-pen" aria-hidden="true"></i>
+                                Editar
                             </button>
-                        </div>
+                            {% endblock %}
+                        {% endembed %}
                     </td>
                 </tr>
                 {% endfor %}

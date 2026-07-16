@@ -52,6 +52,7 @@ final class PosOperatorioProtocoloController extends AbstractController
                 static fn (array $i) => ($i['dia'] ?? '') . ': ' . ($i['item'] ?? ''),
                 PosOperatorioProtocoloDefaults::checklistBasico(),
             )),
+            'perguntas_text' => $this->service->formatPerguntasText(PosOperatorioProtocoloDefaults::perguntas()),
             'regras_dor_p1' => PosOperatorioProtocoloDefaults::regrasAlerta()['dor_p1_min'],
             'regras_febre_p2' => PosOperatorioProtocoloDefaults::regrasAlerta()['febre_p2_min'],
         ]);
@@ -75,6 +76,7 @@ final class PosOperatorioProtocoloController extends AbstractController
             'pos_section' => 'protocolos',
             'protocolo' => $protocolo,
             'checklist_text' => $this->service->formatChecklistText($protocolo),
+            'perguntas_text' => $this->service->formatPerguntasText($protocolo),
             'regras_dor_p1' => $protocolo->getRegrasAlerta()['dor_p1_min'] ?? 8,
             'regras_febre_p2' => $protocolo->getRegrasAlerta()['febre_p2_min'] ?? 38.5,
         ]);
@@ -102,12 +104,20 @@ final class PosOperatorioProtocoloController extends AbstractController
         $data = $request->request->all();
         $data['ativo'] = $request->request->getBoolean('ativo', true);
 
-        if ($protocolo) {
-            $this->service->update($protocolo, $data);
-            $this->addFlash('success', 'Protocolo atualizado.');
-        } else {
-            $this->service->create($empresa, $data);
-            $this->addFlash('success', 'Protocolo criado.');
+        try {
+            if ($protocolo) {
+                $this->service->update($protocolo, $data);
+                $this->addFlash('success', 'Protocolo atualizado.');
+            } else {
+                $this->service->create($empresa, $data);
+                $this->addFlash('success', 'Protocolo criado.');
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $protocolo
+                ? $this->redirectToRoute('app_pos_operatorio_protocolo_editar', ['id' => $protocolo->getId()])
+                : $this->redirectToRoute('app_pos_operatorio_protocolo_novo');
         }
 
         return $this->redirectToRoute('app_pos_operatorio_protocolos');

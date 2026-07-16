@@ -1,0 +1,81 @@
+{#
+  Cadastro form offcanvas — painel lateral padrão para create/edit na plataforma.
+
+  Usa o unio_offcanvas + UnioCadastroOffcanvas (public/js/unio-cadastro-offcanvas.js).
+
+  Uso:
+    {% embed 'components/cadastro_form_offcanvas.html.twig' with {
+        id: 'clinic-sala',
+        form_id: 'clinicSalaForm',
+        title: 'Nova sala',
+        title_edit: 'Editar sala',
+        subtitle: 'Consultórios e centros cirúrgicos',
+        icon: 'fa-door-open',
+        create_action: path('app_pos_operatorio_salas'),
+        edit_action: path('app_pos_operatorio_salas_editar', { id: 0 }),
+        create_token: csrf_token('clinic_sala_new'),
+        ativo_label: 'Sala ativa'
+    } %}
+        {% block form_fields %}
+            ... campos ...
+        {% endblock %}
+    {% endembed %}
+
+  Abrir novo:
+    data-unio-offcanvas-open="clinic-sala" data-cadastro-create="clinic-sala"
+
+  Abrir edição:
+    data-unio-offcanvas-open="clinic-sala"
+    data-cadastro-edit="clinic-sala"
+    data-cadastro-id="123"
+    data-cadastro-token="…"
+    data-field-{campo}="valor"
+#}
+{% extends 'components/unio_offcanvas.html.twig' %}
+
+{% set title = title_create|default(title|default('Novo cadastro')) %}
+{% set icon = icon|default('fa-pen-to-square') %}
+{% set size = size|default('md') %}
+{% set accent = accent is not defined or accent %}
+{% set _form_id = form_id %}
+{% set _title_create = title_create|default(title|default('Novo cadastro')) %}
+{% set _title_edit = title_edit|default('Editar cadastro') %}
+{% set _submit_create = submit_create|default('Cadastrar') %}
+{% set _submit_edit = submit_edit|default('Salvar') %}
+{% set _show_ativo = show_ativo is not defined or show_ativo %}
+
+{% block offcanvas_body %}
+<form method="post"
+      action="{{ create_action }}"
+      class="unio-form unio-offcanvas-form"
+      id="{{ _form_id }}"
+      data-cadastro-form="{{ id }}"
+      data-cadastro-create-action="{{ create_action }}"
+      data-cadastro-edit-action="{{ edit_action }}"
+      data-cadastro-create-token="{{ create_token }}"
+      data-cadastro-title-create="{{ _title_create }}"
+      data-cadastro-title-edit="{{ _title_edit }}"
+      data-cadastro-submit-create="{{ _submit_create }}"
+      data-cadastro-submit-edit="{{ _submit_edit }}">
+    <input type="hidden" name="_token" value="{{ create_token }}" data-cadastro-token-input>
+    {% block form_fields %}{% endblock %}
+    {% if _show_ativo %}
+    <div class="unio-form-group" data-cadastro-edit-only hidden>
+        <label class="small d-inline-flex align-items-center gap-2 mb-0">
+            <input type="checkbox" name="ativo" value="1" data-cadastro-ativo checked>
+            {{ ativo_label|default('Registro ativo') }}
+        </label>
+    </div>
+    {% endif %}
+</form>
+{% endblock %}
+
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer">
+    <button type="submit" form="{{ _form_id }}" class="btn-unio">
+        <i class="fas fa-check" aria-hidden="true"></i>
+        <span data-cadastro-submit-label="{{ id }}">{{ _submit_create }}</span>
+    </button>
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+</div>
+{% endblock %}

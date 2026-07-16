@@ -38,6 +38,33 @@
                 </select>
             </div>
             <div class="col-md-4 mb-3">
+                <label class="small text-muted d-block" for="sala_id">Sala</label>
+                <select id="sala_id" name="sala_id" class="form-control">
+                    <option value="">—</option>
+                    {% for s in salas|default([]) %}
+                    <option value="{{ s.id }}" {{ prefill.sala_id|default(null) == s.id ? 'selected' : '' }}>{{ s.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="small text-muted d-block" for="profissional_id">Profissional</label>
+                <select id="profissional_id" name="profissional_id" class="form-control">
+                    <option value="">—</option>
+                    {% for p in profissionais|default([]) %}
+                    <option value="{{ p.id }}" {{ prefill.profissional_id|default(null) == p.id ? 'selected' : '' }}>{{ p.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="small text-muted d-block" for="procedimento_id">Procedimento</label>
+                <select id="procedimento_id" name="procedimento_id" class="form-control">
+                    <option value="">—</option>
+                    {% for pr in procedimentos|default([]) %}
+                    <option value="{{ pr.id }}" {{ prefill.procedimento_id|default(null) == pr.id ? 'selected' : '' }}>{{ pr.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
                 <label class="small text-muted d-block" for="inicio">Início</label>
                 <input id="inicio" type="datetime-local" name="inicio" class="form-control" required value="{{ prefill.inicio|default('') }}">
             </div>

@@ -75,6 +75,194 @@
 
         <fieldset class="clinic-form-section">
             <legend class="clinic-form-section__title">
+                <i class="fas fa-id-card" aria-hidden="true"></i> Documentos
+            </legend>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label for="{{ _pfx }}sexo">Sexo</label>
+                    <select id="{{ _pfx }}sexo" name="sexo" class="form-control">
+                        <option value="">—</option>
+                        <option value="M"{{ paciente and paciente.sexo == 'M' ? ' selected' : '' }}>Masculino</option>
+                        <option value="F"{{ paciente and paciente.sexo == 'F' ? ' selected' : '' }}>Feminino</option>
+                        <option value="O"{{ paciente and paciente.sexo == 'O' ? ' selected' : '' }}>Outro</option>
+                    </select>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="{{ _pfx }}rg">RG</label>
+                    <input id="{{ _pfx }}rg" name="rg" class="form-control" maxlength="20"
+                           value="{{ paciente ? paciente.rg : '' }}">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="{{ _pfx }}cns">CNS</label>
+                    <input id="{{ _pfx }}cns" name="cns" class="form-control" inputmode="numeric" maxlength="15"
+                           value="{{ paciente ? paciente.cns : '' }}">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i> Endereço
+            </legend>
+            <div class="row">
+                <div class="col-md-3 form-group">
+                    <label for="{{ _pfx }}cep">CEP</label>
+                    <input id="{{ _pfx }}cep" name="cep" class="form-control" inputmode="numeric" maxlength="9"
+                           value="{{ paciente ? paciente.cep : '' }}">
+                </div>
+                <div class="col-md-7 form-group">
+                    <label for="{{ _pfx }}logradouro">Logradouro</label>
+                    <input id="{{ _pfx }}logradouro" name="logradouro" class="form-control" maxlength="180"
+                           value="{{ paciente ? paciente.logradouro : '' }}">
+                </div>
+                <div class="col-md-2 form-group">
+                    <label for="{{ _pfx }}numero_endereco">Número</label>
+                    <input id="{{ _pfx }}numero_endereco" name="numero_endereco" class="form-control" maxlength="20"
+                           value="{{ paciente ? paciente.numeroEndereco : '' }}">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="{{ _pfx }}complemento">Complemento</label>
+                    <input id="{{ _pfx }}complemento" name="complemento" class="form-control" maxlength="80"
+                           value="{{ paciente ? paciente.complemento : '' }}">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="{{ _pfx }}bairro">Bairro</label>
+                    <input id="{{ _pfx }}bairro" name="bairro" class="form-control" maxlength="80"
+                           value="{{ paciente ? paciente.bairro : '' }}">
+                </div>
+                <div class="col-md-3 form-group">
+                    <label for="{{ _pfx }}cidade">Cidade</label>
+                    <input id="{{ _pfx }}cidade" name="cidade" class="form-control" maxlength="80"
+                           value="{{ paciente ? paciente.cidade : '' }}">
+                </div>
+                <div class="col-md-1 form-group">
+                    <label for="{{ _pfx }}uf">UF</label>
+                    <input id="{{ _pfx }}uf" name="uf" class="form-control" maxlength="2"
+                           value="{{ paciente ? paciente.uf : '' }}">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-hospital" aria-hidden="true"></i> Convênio
+            </legend>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}unidade_id">Unidade</label>
+                    <select id="{{ _pfx }}unidade_id" name="unidade_id" class="form-control">
+                        <option value="">—</option>
+                        {% for u in unidades|default([]) %}
+                        <option value="{{ u.id }}"{{ paciente and paciente.unidade and paciente.unidade.id == u.id ? ' selected' : '' }}>{{ u.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}convenio_id">Convênio</label>
+                    <select id="{{ _pfx }}convenio_id" name="convenio_id" class="form-control">
+                        <option value="">Particular / sem convênio</option>
+                        {% for c in convenios|default([]) %}
+                        <option value="{{ c.id }}"{{ paciente and paciente.convenio and paciente.convenio.id == c.id ? ' selected' : '' }}>{{ c.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}numero_carteirinha_convenio">Nº carteirinha</label>
+                    <input id="{{ _pfx }}numero_carteirinha_convenio" name="numero_carteirinha_convenio" class="form-control" maxlength="40"
+                           value="{{ paciente ? paciente.numeroCarteirinhaConvenio : '' }}">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}validade_carteirinha_convenio">Validade carteirinha</label>
+                    <input id="{{ _pfx }}validade_carteirinha_convenio" name="validade_carteirinha_convenio" type="date" class="form-control"
+                           value="{{ paciente and paciente.validadeCarteirinhaConvenio ? paciente.validadeCarteirinhaConvenio|date('Y-m-d') : '' }}">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-bullhorn" aria-hidden="true"></i> Origem
+            </legend>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}origem_clinica">Origem clínica</label>
+                    <select id="{{ _pfx }}origem_clinica" name="origem_clinica" class="form-control">
+                        <option value="">—</option>
+                        {% for key, label in origens_clinicas|default({}) %}
+                        <option value="{{ key }}"{{ paciente and paciente.origemClinica == key ? ' selected' : '' }}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}indicado_por">Indicado por</label>
+                    <input id="{{ _pfx }}indicado_por" name="indicado_por" class="form-control" maxlength="160"
+                           value="{{ paciente ? paciente.indicadoPor : '' }}">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-users" aria-hidden="true"></i> Titular / dependente
+            </legend>
+            <div class="row">
+                <div class="col-md-5 form-group">
+                    <label for="{{ _pfx }}titular_nome">Nome do titular</label>
+                    <input id="{{ _pfx }}titular_nome" name="titular_nome" class="form-control" maxlength="160"
+                           value="{{ paciente ? paciente.titularNome : '' }}">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="{{ _pfx }}titular_cpf">CPF do titular</label>
+                    <input id="{{ _pfx }}titular_cpf" name="titular_cpf" class="form-control" inputmode="numeric" data-mask="cpf"
+                           value="{{ paciente and paciente.titularCpf ? paciente.titularCpf|slice(0,3) ~ '.' ~ paciente.titularCpf|slice(3,3) ~ '.' ~ paciente.titularCpf|slice(6,3) ~ '-' ~ paciente.titularCpf|slice(9,2) : '' }}">
+                </div>
+                <div class="col-md-3 form-group">
+                    <label for="{{ _pfx }}parentesco_titular">Parentesco</label>
+                    <select id="{{ _pfx }}parentesco_titular" name="parentesco_titular" class="form-control">
+                        <option value="">—</option>
+                        {% for key, label in parentescos|default({}) %}
+                        <option value="{{ key }}"{{ paciente and paciente.parentescoTitular == key ? ' selected' : '' }}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        {% set _anamnese = paciente and paciente.anamnese ? paciente.anamnese : {} %}
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
+                <i class="fas fa-notes-medical" aria-hidden="true"></i> Anamnese estruturada
+            </legend>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}anamnese_alergias">Alergias</label>
+                    <textarea id="{{ _pfx }}anamnese_alergias" name="anamnese_alergias" class="form-control" rows="2">{{ _anamnese.alergias|default('') }}</textarea>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}anamnese_medicamentos">Medicamentos em uso</label>
+                    <textarea id="{{ _pfx }}anamnese_medicamentos" name="anamnese_medicamentos" class="form-control" rows="2">{{ _anamnese.medicamentos_uso|default('') }}</textarea>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}anamnese_comorbidades">Comorbidades</label>
+                    <textarea id="{{ _pfx }}anamnese_comorbidades" name="anamnese_comorbidades" class="form-control" rows="2">{{ _anamnese.comorbidades|default('') }}</textarea>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}anamnese_cirurgias">Cirurgias prévias</label>
+                    <textarea id="{{ _pfx }}anamnese_cirurgias" name="anamnese_cirurgias" class="form-control" rows="2">{{ _anamnese.cirurgias_previas|default('') }}</textarea>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}anamnese_habitos">Hábitos</label>
+                    <textarea id="{{ _pfx }}anamnese_habitos" name="anamnese_habitos" class="form-control" rows="2">{{ _anamnese.habitos|default('') }}</textarea>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ _pfx }}anamnese_obs">Observações da anamnese</label>
+                    <textarea id="{{ _pfx }}anamnese_obs" name="anamnese_obs" class="form-control" rows="2">{{ _anamnese.observacoes|default('') }}</textarea>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="clinic-form-section">
+            <legend class="clinic-form-section__title">
                 <i class="fas fa-notes-medical" aria-hidden="true"></i> Observações clínicas
             </legend>
             <div class="form-group mb-0">
@@ -110,6 +298,33 @@
                         {% endfor %}
                     </select>
                     <small class="text-muted">Opcional no cadastro. O paciente pode responder questionários diários pelo portal.</small>
+                </div>
+                <div class="form-group">
+                    <label for="{{ _pfx }}profissional_id">Profissional (catálogo)</label>
+                    <select id="{{ _pfx }}profissional_id" name="profissional_id" class="form-control">
+                        <option value="">—</option>
+                        {% for p in profissionais|default([]) %}
+                        <option value="{{ p.id }}"{{ paciente and paciente.profissional and paciente.profissional.id == p.id ? ' selected' : '' }}>{{ p.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="{{ _pfx }}procedimento_id">Procedimento (catálogo)</label>
+                    <select id="{{ _pfx }}procedimento_id" name="procedimento_id" class="form-control">
+                        <option value="">—</option>
+                        {% for pr in procedimentos_catalogo|default([]) %}
+                        <option value="{{ pr.id }}"{{ paciente and paciente.procedimentoCatalogo and paciente.procedimentoCatalogo.id == pr.id ? ' selected' : '' }}>{{ pr.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group mb-0">
+                    <label for="{{ _pfx }}pacote_id">Pacote</label>
+                    <select id="{{ _pfx }}pacote_id" name="pacote_id" class="form-control">
+                        <option value="">—</option>
+                        {% for pk in pacotes|default([]) %}
+                        <option value="{{ pk.id }}"{{ paciente and paciente.pacote and paciente.pacote.id == pk.id ? ' selected' : '' }}>{{ pk.nome }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
         </details>

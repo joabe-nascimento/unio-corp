@@ -257,11 +257,7 @@ final class PosOperatorioProtocoloService
 
             ->setChecklist($this->parseChecklistText((string) ($data['checklist_text'] ?? '')))
 
-            ->setPerguntas(
-                \is_array($data['perguntas'] ?? null) && $data['perguntas'] !== []
-                    ? $data['perguntas']
-                    : PosOperatorioProtocoloDefaults::perguntas()
-            )
+            ->setPerguntas($this->resolvePerguntasFromData($data))
 
             ->setRegrasAlerta($this->parseRegras($data))
 
@@ -340,6 +336,13 @@ final class PosOperatorioProtocoloService
 
         }
 
+        if (array_key_exists('perguntas_text', $data) || array_key_exists('perguntas', $data)) {
+            $perguntas = $this->resolvePerguntasFromData($data, keepExisting: true);
+            if ($perguntas !== []) {
+                $protocolo->setPerguntas($perguntas);
+            }
+        }
+
 
 
         if (array_key_exists('regras_dor_p1', $data) || array_key_exists('regras_febre_p2', $data)) {
@@ -380,6 +383,110 @@ final class PosOperatorioProtocoloService
 
         return implode("\n", $lines);
 
+    }
+
+    public function formatPerguntasText(PosOperatorioProtocolo|array $protocoloOrPerguntas): string
+    {
+        $perguntas = $protocoloOrPerguntas instanceof PosOperatorioProtocolo
+            ? $protocoloOrPerguntas->getPerguntas()
+            : $protocoloOrPerguntas;
+        $lines = [];
+        foreach ($perguntas as $pergunta) {
+            if (!\is_array($pergunta)) {
+                continue;
+            }
+            $id = trim((string) ($pergunta['id'] ?? ''));
+            $tipo = trim((string) ($pergunta['tipo'] ?? ''));
+            $label = trim((string) ($pergunta['label'] ?? ''));
+            if ($id === '' || $tipo === '' || $label === '') {
+                continue;
+            }
+            $line = $id.'|'.$tipo.'|'.$label;
+            if ($tipo === 'select') {
+                $opcoesParts = [];
+                foreach ($pergunta['opcoes'] ?? [] as $opcao) {
+                    if (\is_array($opcao)) {
+                        $value = trim((string) ($opcao['value'] ?? ''));
+                        $opLabel = trim((string) ($opcao['label'] ?? $value));
+                        if ($value !== '') {
+                            $opcoesParts[] = $value.':'.$opLabel;
+                        }
+                    } else {
+                        $text = trim((string) $opcao);
+                        if ($text !== '') {
+                            $opcoesParts[] = $text;
+                        }
+                    }
+                }
+                if ($opcoesParts !== []) {
+                    $line .= '|'.implode(';', $opcoesParts);
+                }
+            }
+            $lines[] = $line;
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function resolvePerguntasFromData(array $data, bool $keepExisting = false): array
+    {
+        if (\is_array($data['perguntas'] ?? null) && $data['perguntas'] !== []) {
+            return $data['perguntas'];
+        }
+
+        if (array_key_exists('perguntas_text', $data)) {
+            $parsed = $this->parsePerguntasText((string) $data['perguntas_text']);
+            if ($parsed !== []) {
+                return $parsed;
+            }
+            if ($keepExisting) {
+                return [];
+            }
+        }
+
+        return PosOperatorioProtocoloDefaults::perguntas();
+    }
+
+    /**
+     * @return list<array{id: string, tipo: string, label: string, opcoes?: list<string>}>
+     */
+    public function parsePerguntasText(string $text): array
+    {
+        $out = [];
+        foreach (preg_split('/\r\n|\r|\n/', $text) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '' || !str_contains($line, '|')) {
+                continue;
+            }
+            $parts = array_map('trim', explode('|', $line, 4));
+            $id = $parts[0] ?? '';
+            $tipo = $parts[1] ?? '';
+            $label = $parts[2] ?? '';
+            $opcoesRaw = $parts[3] ?? '';
+            $payload = [
+                'id' => $id,
+                'tipo' => $tipo,
+                'label' => $label,
+            ];
+            if ($tipo === 'select') {
+                $opcoes = [];
+                foreach (explode(';', $opcoesRaw) as $chunk) {
+                    $chunk = trim($chunk);
+                    if ($chunk !== '') {
+                        $opcoes[] = $chunk;
+                    }
+                }
+                $payload['opcoes'] = $opcoes;
+            }
+            $out[] = ClinicCadastroRules::validatePerguntaQuestionario($payload);
+        }
+
+        return $out;
     }
 
 

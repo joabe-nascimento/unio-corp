@@ -36,7 +36,13 @@
                         <td data-label="Paciente"><strong>{{ p.nome }}</strong><span class="d-block text-muted small">{{ p.codigo }}</span></td>
                         <td data-label="Procedimento">{{ p.procedimento|default('—') }}</td>
                         <td data-label="Validade">{{ p.comprovanteValidoAte ? p.comprovanteValidoAte|date('d/m/Y') : '—' }}</td>
-                        <td data-label="Ações" class="text-right"><a href="{{ path('app_pos_operatorio_comprovante_paciente', { id: p.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a></td>
+                        <td data-label="Ações" class="text-right">
+                            {% embed 'components/row_actions_menu.html.twig' with { aria_label: 'Mais ações de ' ~ p.nome } %}
+                                {% block items %}
+                                <a href="{{ path('app_pos_operatorio_comprovante_paciente', { id: p.id }) }}" class="dropdown-item">Abrir</a>
+                                {% endblock %}
+                            {% endembed %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
