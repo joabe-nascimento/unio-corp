@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planos | Unio Saúde</title>
+    <meta name="description" content="Planos Unio Saúde por clínica — Essencial, Clínica e Rede. Continuidade pós-alta, operação clínica, TISS e CRM.">
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/marketing-planos.css') }}?v=1">
+</head>
+<body class="plans-page">
+    <header class="plans-topbar">
+        <div class="plans-topbar__inner">
+            <a href="{{ path('app_home') }}" class="plans-topbar__brand" aria-label="Unio Saúde">
+                <span class="plans-topbar__logo-stage">
+                    <img class="plans-topbar__logo" src="{{ asset('images/logos/logotipo.svg') }}" alt="Unio Saúde" width="148" height="40">
+                </span>
+            </a>
+            <div class="plans-topbar__actions">
+                <a class="plans-link-ghost" href="{{ path('app_home') }}">Início</a>
+                <a class="plans-btn plans-btn--primary" href="{{ path('app_login') }}">Entrar</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="plans-hero" aria-labelledby="plans-hero-title">
+        <div class="plans-hero__atmosphere" aria-hidden="true"></div>
+        <div class="plans-hero__logo-wrap">
+            <img class="plans-hero__logo" src="{{ asset('images/logos/logotipo.svg') }}" alt="Unio Saúde" width="280" height="78">
+        </div>
+        <h1 id="plans-hero-title" class="plans-hero__title">Planos por clínica, <em>não por usuário</em></h1>
+        <p class="plans-hero__lead">Preço alinhado ao que a Unio entrega: continuidade pós-alta, operação clínica, faturamento TISS e CRM no Clínica e Rede.</p>
+        <div class="plans-hero__cta">
+            <a class="plans-btn plans-btn--primary plans-btn--lg" href="#planos">Ver planos</a>
+            <a class="plans-btn plans-btn--surface plans-btn--lg" href="{{ path('app_login') }}">Entrar agora</a>
+        </div>
+        <p class="plans-hero__meta">
+            <span><i class="fas fa-check-circle" aria-hidden="true"></i> Ativação imediata</span>
+            <span><i class="fas fa-check-circle" aria-hidden="true"></i> Sem cartão para começar</span>
+            <span><i class="fas fa-check-circle" aria-hidden="true"></i> Suporte configurável</span>
+        </p>
+    </section>
+
+    <section class="plans-section" id="planos" aria-label="Comparativo de planos">
+        <div class="plans-grid">
+            {% for plan in plans %}
+            <article class="plans-card{% if plan.destaque|default(false) or plan.id == default_plan %} plans-card--featured{% endif %}">
+                {% if plan.destaque|default(false) or plan.id == default_plan %}
+                <span class="plans-card__badge">Recomendado</span>
+                {% endif %}
+                <h2 class="plans-card__name">{{ plan.nome }}</h2>
+                <p class="plans-card__price">
+                    <strong>{{ plan.preco }}</strong>
+                    {% if plan.preco_sufixo|default('') %}<span>{{ plan.preco_sufixo }}</span>{% endif %}
+                </p>
+                {% if plan.preco_nota|default('') %}
+                <p class="plans-card__note">{{ plan.preco_nota }}</p>
+                {% endif %}
+                <ul class="plans-card__features">
+                    {% for item in plan.inclui|default([]) %}
+                    <li><i class="fas fa-check" aria-hidden="true"></i> {{ item }}</li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ path('app_login') }}" class="plans-btn plans-btn--surface plans-btn--block">
+                    {{ plan.cta|default('Saiba mais') }}
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="plans-why" aria-labelledby="plans-why-title">
+        <div class="plans-why__panel">
+            <div class="plans-why__copy">
+                <p class="plans-why__eyebrow">Por que Unio</p>
+                <h2 id="plans-why-title">Cuidado depois da alta, no mesmo sistema</h2>
+                <p>Agenda, atendimento, TISS, pós-operatório e CRM comercial sem trocar de ferramenta a cada etapa.</p>
+            </div>
+            <ul class="plans-why__points">
+                <li><i class="fas fa-heartbeat" aria-hidden="true"></i> Continuidade pós-alta com alertas e protocolos</li>
+                <li><i class="fas fa-file-medical" aria-hidden="true"></i> Guias TISS, lote/remessa e XML no plano Clínica</li>
+                <li><i class="fas fa-diagram-project" aria-hidden="true"></i> CRM comercial para leads, pipeline e clientes</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="plans-cta" aria-labelledby="plans-cta-title">
+        <div class="plans-cta__inner">
+            <h2 id="plans-cta-title">Pronto para operar com a Unio?</h2>
+            <p>Escolha o plano da sua clínica e comece com a mesma identidade da landing.</p>
+            <div class="plans-cta__actions">
+                <a class="plans-btn plans-btn--white plans-btn--lg" href="{{ path('app_login') }}">Entrar agora</a>
+                <a class="plans-btn plans-btn--outline-light plans-btn--lg" href="{{ path('app_home') }}">Voltar ao início</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="plans-foot">
+        <p>Unio Saúde · <a href="{{ path('app_home') }}">uniowork.com.br</a></p>
+    </footer>
+</body>
+</html>
