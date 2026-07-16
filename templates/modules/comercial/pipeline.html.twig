@@ -102,9 +102,10 @@
                                  data-crm-prob="{{ op.probabilidade }}"
                                  data-crm-move-url="{{ path('app_comercial_oportunidade_mover', { id: op.id }) }}"
                                  data-crm-move-token="{{ csrf_token('crm_oportunidade_move_' ~ op.id) }}">
-                            <button type="button" class="crm-pipeline__drag-handle" title="Arrastar" aria-label="Arrastar oportunidade">
+                            {# span (não button): Sortable filtrava "button" e o grip nunca iniciava o drag #}
+                            <span class="crm-pipeline__drag-handle" title="Arrastar" role="button" tabindex="0" aria-label="Arrastar oportunidade">
                                 <i class="fas fa-grip-vertical" aria-hidden="true"></i>
-                            </button>
+                            </span>
 
                             <a href="{{ path('app_comercial_oportunidade_show', { id: op.id }) }}" class="crm-pipeline__card-title">
                                 {{ op.titulo }}
@@ -174,5 +175,5 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/sortable.min.js') }}"></script>
-<script src="{{ asset('js/crm-pipeline.js') }}?v=1"></script>
+<script src="{{ asset('js/crm-pipeline.js') }}?v=2"></script>
 {% endblock %}

@@ -12,24 +12,25 @@
         }
     }
 
-    ready(function () {
+    function initBoard(attempt) {
         var board = document.querySelector('[data-crm-pipeline-board]');
         if (!board || board.dataset.crmPipelineInit === '1') {
             return;
         }
-        board.dataset.crmPipelineInit = '1';
 
         if (typeof Sortable === 'undefined') {
+            if ((attempt || 0) < 40) {
+                window.setTimeout(function () {
+                    initBoard((attempt || 0) + 1);
+                }, 50);
+            }
             return;
         }
 
+        board.dataset.crmPipelineInit = '1';
+
         function columnEls() {
             return board.querySelectorAll('[data-crm-pipeline-col]');
-        }
-
-        function cardsContainer(stage) {
-            var col = board.querySelector('[data-crm-pipeline-col="' + stage + '"]');
-            return col ? col.querySelector('[data-crm-pipeline-sort-col]') : null;
         }
 
         function updateColumnCount(stage) {
@@ -45,6 +46,7 @@
             if (container.querySelector('.crm-pipeline__empty')) return;
             var empty = document.createElement('div');
             empty.className = 'crm-pipeline__empty';
+            empty.setAttribute('data-crm-pipeline-empty', '1');
             empty.innerHTML = '<i class="fas fa-inbox" aria-hidden="true"></i><p>Vazio</p>';
             container.appendChild(empty);
         }
@@ -52,6 +54,12 @@
         function removeEmpty(container) {
             if (!container) return;
             container.querySelectorAll('.crm-pipeline__empty').forEach(function (el) {
+                el.remove();
+            });
+        }
+
+        function clearAllEmptyPlaceholders() {
+            board.querySelectorAll('.crm-pipeline__empty').forEach(function (el) {
                 el.remove();
             });
         }
@@ -70,6 +78,10 @@
             }
             ensureEmpty(from);
             removeEmpty(evt.to);
+            columnEls().forEach(function (col) {
+                var sortEl = col.querySelector('[data-crm-pipeline-sort-col]');
+                ensureEmpty(sortEl);
+            });
             updateColumnCount(stageFromContainer(from));
             updateColumnCount(stageFromContainer(evt.to));
             refreshSummary();
@@ -88,10 +100,11 @@
             var won = board.querySelectorAll('[data-crm-pipeline-col="ganho"] [data-crm-pipeline-card]').length;
             var lost = board.querySelectorAll('[data-crm-pipeline-col="perdido"] [data-crm-pipeline-card]').length;
 
-            var elOpen = board.closest('.crm-pipeline') && board.closest('.crm-pipeline').querySelector('[data-crm-summary-open]');
-            var elValue = board.closest('.crm-pipeline') && board.closest('.crm-pipeline').querySelector('[data-crm-summary-value]');
-            var elWon = board.closest('.crm-pipeline') && board.closest('.crm-pipeline').querySelector('[data-crm-summary-won]');
-            var elLost = board.closest('.crm-pipeline') && board.closest('.crm-pipeline').querySelector('[data-crm-summary-lost]');
+            var root = board.closest('.crm-pipeline');
+            var elOpen = root && root.querySelector('[data-crm-summary-open]');
+            var elValue = root && root.querySelector('[data-crm-summary-value]');
+            var elWon = root && root.querySelector('[data-crm-summary-won]');
+            var elLost = root && root.querySelector('[data-crm-summary-lost]');
 
             if (elOpen) elOpen.textContent = String(openCount);
             if (elWon) elWon.textContent = String(won);
@@ -153,6 +166,17 @@
             }
         }
 
+        function isInteractiveFilter(evt, target) {
+            // O handle de arraste NÃO pode ser filtrado (antes era <button> e o Sortable
+            // bloqueava o drag por causa de filter: 'button').
+            if (target.closest && target.closest('.crm-pipeline__drag-handle')) {
+                return false;
+            }
+            return !!(target.closest && target.closest(
+                'a, button, input, select, textarea, label, form, .crm-pipeline__move, .crm-pipeline__card-open'
+            ));
+        }
+
         columnEls().forEach(function (col) {
             var sortEl = col.querySelector('[data-crm-pipeline-sort-col]');
             if (!sortEl) return;
@@ -165,17 +189,21 @@
                 ghostClass: 'crm-pipeline__card--ghost',
                 dragClass: 'crm-pipeline__card--drag',
                 chosenClass: 'crm-pipeline__card--chosen',
-                filter: 'a, button, input, select, textarea, label, form',
+                filter: isInteractiveFilter,
                 preventOnFilter: true,
-                delay: 80,
+                delay: 0,
                 delayOnTouchOnly: true,
                 touchStartThreshold: 3,
                 forceFallback: true,
                 fallbackOnBody: true,
+                fallbackTolerance: 3,
                 swapThreshold: 0.65,
+                emptyInsertThreshold: 48,
                 onStart: function (evt) {
                     var width = evt.item.getBoundingClientRect().width;
                     if (width > 0) evt.item.style.width = width + 'px';
+                    // Placeholders "Vazio" atrapalham o insert em colunas vazias.
+                    clearAllEmptyPlaceholders();
                     board.classList.add('is-dragging');
                 },
                 onEnd: function (evt) {
@@ -187,7 +215,9 @@
                     var newStage = stageFromContainer(evt.to);
 
                     removeEmpty(evt.to);
-                    ensureEmpty(evt.from);
+                    columnEls().forEach(function (c) {
+                        ensureEmpty(c.querySelector('[data-crm-pipeline-sort-col]'));
+                    });
                     updateColumnCount(fromStage);
                     updateColumnCount(newStage);
 
@@ -200,6 +230,7 @@
                     var token = card.getAttribute('data-crm-move-token');
                     if (!moveUrl || !token) {
                         revertDrag(evt);
+                        toast('Não foi possível mover: token ausente.', 'error');
                         return;
                     }
 
@@ -224,6 +255,13 @@
                                     throw new Error((data && data.error) || 'Não foi possível mover a oportunidade.');
                                 }
                                 return data;
+                            }).catch(function (parseErr) {
+                                if (parseErr instanceof Error && parseErr.message && parseErr.message.indexOf('mover') !== -1) {
+                                    throw parseErr;
+                                }
+                                throw new Error(res.status === 403
+                                    ? 'Sem permissão para mover.'
+                                    : 'Resposta inválida do servidor.');
                             });
                         })
                         .then(function (data) {
@@ -241,5 +279,9 @@
                 },
             });
         });
+    }
+
+    ready(function () {
+        initBoard(0);
     });
 })();
