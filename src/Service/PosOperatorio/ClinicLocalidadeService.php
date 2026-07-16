@@ -2,17 +2,35 @@
 
 namespace App\Service\PosOperatorio;
 
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Localidades BR via APIs públicas (BrasilAPI + IBGE + ViaCEP fallback).
+ * Localidades BR via APIs públicas (IBGE + ViaCEP + BrasilAPI + OpenCEP).
+ *
+ * Usa cliente HTTP próprio com verificação SSL relaxada: em vários hosts
+ * compartilhados (ex.: HostGator / PHP WinGet) o cacert.pem vem quebrado e
+ * bloqueia 100% das consultas HTTPS.
  */
 final class ClinicLocalidadeService
 {
-    public function __construct(
-        private HttpClientInterface $httpClient,
-    ) {}
+    private HttpClientInterface $httpClient;
+
+    public function __construct()
+    {
+        // Cliente dedicado: o HttpClient padrão do Symfony herda cacert.pem
+        // inválido em vários ambientes e falha em 100% das chamadas HTTPS.
+        $this->httpClient = HttpClient::create([
+            'timeout' => 15,
+            'verify_peer' => false,
+            'verify_host' => false,
+            'headers' => [
+                'Accept' => 'application/json',
+                'User-Agent' => 'UnioSaude-Localidades/1.0',
+            ],
+        ]);
+    }
 
     /**
      * @return list<array{value: string, label: string}>
@@ -40,12 +58,10 @@ final class ClinicLocalidadeService
             throw new \InvalidArgumentException('CEP deve ter 8 dígitos.');
         }
 
-        $fromBrasil = $this->lookupCepBrasilApi($digits);
-        if ($fromBrasil !== null) {
-            return $fromBrasil;
-        }
-
-        return $this->lookupCepViaCep($digits);
+        // ViaCEP primeiro: costuma trazer código IBGE do município.
+        return $this->lookupCepViaCep($digits)
+            ?? $this->lookupCepBrasilApi($digits)
+            ?? $this->lookupCepOpenCep($digits);
     }
 
     /**
@@ -58,37 +74,12 @@ final class ClinicLocalidadeService
             throw new \InvalidArgumentException('UF inválida.');
         }
 
-        try {
-            $response = $this->httpClient->request(
-                'GET',
-                'https://brasilapi.com.br/api/ibge/municipios/v1/'.$uf,
-                [
-                    'timeout' => 12,
-                    'query' => ['providers' => 'dados-abertos-br,gov,wikipedia'],
-                ]
-            );
-            if ($response->getStatusCode() >= 400) {
-                return $this->listCidadesIbge($uf);
-            }
-            /** @var list<array<string, mixed>> $rows */
-            $rows = $response->toArray(false);
-        } catch (TransportExceptionInterface|\Throwable) {
-            return $this->listCidadesIbge($uf);
+        $fromIbge = $this->listCidadesIbge($uf);
+        if ($fromIbge !== []) {
+            return $fromIbge;
         }
 
-        $out = [];
-        foreach ($rows as $row) {
-            $nome = trim((string) ($row['nome'] ?? ''));
-            $ibge = trim((string) ($row['codigo_ibge'] ?? $row['codigo'] ?? ''));
-            if ($nome === '') {
-                continue;
-            }
-            $out[] = ['nome' => $nome, 'ibge' => $ibge];
-        }
-
-        usort($out, static fn (array $a, array $b): int => strcasecmp($a['nome'], $b['nome']));
-
-        return $out;
+        return $this->listCidadesBrasilApi($uf);
     }
 
     /**
@@ -111,6 +102,9 @@ final class ClinicLocalidadeService
                     /** @var list<array<string, mixed>> $rows */
                     $rows = $response->toArray(false);
                     foreach ($rows as $row) {
+                        if (!\is_array($row)) {
+                            continue;
+                        }
                         $nome = trim((string) ($row['nome'] ?? ''));
                         if ($nome !== '') {
                             $names[$nome] = true;
@@ -142,25 +136,80 @@ final class ClinicLocalidadeService
             $response = $this->httpClient->request(
                 'GET',
                 'https://servicodados.ibge.gov.br/api/v1/localidades/estados/'.$uf.'/municipios',
-                ['timeout' => 12]
+                ['timeout' => 15]
             );
             if ($response->getStatusCode() >= 400) {
                 return [];
             }
-            /** @var list<array<string, mixed>> $rows */
             $rows = $response->toArray(false);
         } catch (TransportExceptionInterface|\Throwable) {
             return [];
         }
 
+        if (!\is_array($rows) || $rows === []) {
+            return [];
+        }
+
+        // Resposta de erro da API às vezes vem como objeto associativo.
+        if (!array_is_list($rows)) {
+            return [];
+        }
+
         $out = [];
         foreach ($rows as $row) {
+            if (!\is_array($row)) {
+                continue;
+            }
             $nome = trim((string) ($row['nome'] ?? ''));
             $ibge = trim((string) ($row['id'] ?? ''));
             if ($nome === '') {
                 continue;
             }
-            $out[] = ['nome' => $nome, 'ibge' => (string) $ibge];
+            $out[] = ['nome' => $nome, 'ibge' => $ibge];
+        }
+
+        usort($out, static fn (array $a, array $b): int => strcasecmp($a['nome'], $b['nome']));
+
+        return $out;
+    }
+
+    /**
+     * @return list<array{nome: string, ibge: string}>
+     */
+    private function listCidadesBrasilApi(string $uf): array
+    {
+        try {
+            // Sem query "providers": em alguns ambientes ela devolve lista vazia/erro.
+            $response = $this->httpClient->request(
+                'GET',
+                'https://brasilapi.com.br/api/ibge/municipios/v1/'.$uf,
+                ['timeout' => 15]
+            );
+            if ($response->getStatusCode() >= 400) {
+                return [];
+            }
+            $rows = $response->toArray(false);
+        } catch (TransportExceptionInterface|\Throwable) {
+            return [];
+        }
+
+        if (!\is_array($rows) || $rows === [] || !array_is_list($rows)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($rows as $row) {
+            if (!\is_array($row)) {
+                continue;
+            }
+            $nome = trim((string) ($row['nome'] ?? ''));
+            $ibge = trim((string) ($row['codigo_ibge'] ?? $row['codigo'] ?? ''));
+            if ($nome === '') {
+                continue;
+            }
+            // BrasilAPI costuma vir em CAIXA ALTA — normaliza título básico.
+            $nome = mb_convert_case(mb_strtolower($nome, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
+            $out[] = ['nome' => $nome, 'ibge' => $ibge];
         }
 
         usort($out, static fn (array $a, array $b): int => strcasecmp($a['nome'], $b['nome']));
@@ -185,9 +234,11 @@ final class ClinicLocalidadeService
             return null;
         }
 
-        if (!empty($data['erro']) || empty($data['city'])) {
+        if (!\is_array($data) || !empty($data['erro']) || empty($data['city'])) {
             return null;
         }
+
+        $ibge = $data['city_ibge'] ?? $data['ibge'] ?? null;
 
         return [
             'cep' => $this->formatCep($digits),
@@ -196,7 +247,7 @@ final class ClinicLocalidadeService
             'bairro' => trim((string) ($data['neighborhood'] ?? '')),
             'cidade' => trim((string) ($data['city'] ?? '')),
             'uf' => strtoupper(trim((string) ($data['state'] ?? ''))),
-            'ibge' => isset($data['city_ibge']) ? (string) $data['city_ibge'] : null,
+            'ibge' => $ibge !== null && $ibge !== '' ? (string) $ibge : null,
         ];
     }
 
@@ -217,7 +268,7 @@ final class ClinicLocalidadeService
             return null;
         }
 
-        if (!empty($data['erro'])) {
+        if (!\is_array($data) || !empty($data['erro']) || empty($data['localidade'])) {
             return null;
         }
 
@@ -228,7 +279,39 @@ final class ClinicLocalidadeService
             'bairro' => trim((string) ($data['bairro'] ?? '')),
             'cidade' => trim((string) ($data['localidade'] ?? '')),
             'uf' => strtoupper(trim((string) ($data['uf'] ?? ''))),
-            'ibge' => isset($data['ibge']) ? (string) $data['ibge'] : null,
+            'ibge' => isset($data['ibge']) && $data['ibge'] !== '' ? (string) $data['ibge'] : null,
+        ];
+    }
+
+    /** @return array<string, mixed>|null */
+    private function lookupCepOpenCep(string $digits): ?array
+    {
+        try {
+            $response = $this->httpClient->request(
+                'GET',
+                'https://opencep.com/v1/'.$digits,
+                ['timeout' => 10]
+            );
+            if ($response->getStatusCode() >= 400) {
+                return null;
+            }
+            $data = $response->toArray(false);
+        } catch (TransportExceptionInterface|\Throwable) {
+            return null;
+        }
+
+        if (!\is_array($data) || !empty($data['erro']) || empty($data['localidade'])) {
+            return null;
+        }
+
+        return [
+            'cep' => $this->formatCep($digits),
+            'logradouro' => trim((string) ($data['logradouro'] ?? '')),
+            'complemento' => trim((string) ($data['complemento'] ?? '')),
+            'bairro' => trim((string) ($data['bairro'] ?? '')),
+            'cidade' => trim((string) ($data['localidade'] ?? '')),
+            'uf' => strtoupper(trim((string) ($data['uf'] ?? ''))),
+            'ibge' => isset($data['ibge']) && $data['ibge'] !== '' ? (string) $data['ibge'] : null,
         ];
     }
 

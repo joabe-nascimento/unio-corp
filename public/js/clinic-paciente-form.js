@@ -103,9 +103,21 @@
         function loadBairros(preferred, extraFromCep) {
             if (!bairroSelect || !bairrosUrl) return Promise.resolve();
             var ibge = selectedCityIbge();
-            if (!ibge && !extraFromCep && !preferred) {
-                fillSelect(bairroSelect, [], preferred || '', 'Selecione a cidade');
+            var cityName = cidadeSelect ? String(cidadeSelect.value || '') : '';
+            if (!ibge && !extraFromCep && !preferred && !cityName) {
+                fillSelect(bairroSelect, [], '', 'Selecione a cidade');
                 ensureOutroOption(bairroSelect);
+                syncBairroOutro();
+                return Promise.resolve();
+            }
+            // Cidade escolhida sem IBGE: ainda libera “Outro” / bairro do CEP.
+            if (!ibge && (extraFromCep || preferred || cityName)) {
+                var seedOnly = preferred || extraFromCep || '';
+                fillSelect(bairroSelect, seedOnly ? [{ value: seedOnly, label: seedOnly }] : [], seedOnly, 'Selecione…');
+                ensureOutroOption(bairroSelect);
+                if (!seedOnly) {
+                    bairroSelect.value = '__outro__';
+                }
                 syncBairroOutro();
                 return Promise.resolve();
             }
@@ -113,10 +125,15 @@
             bairroSelect.disabled = true;
             var url = bairrosUrl + '?ibge=' + encodeURIComponent(ibge || '');
             if (extraFromCep) url += '&bairro=' + encodeURIComponent(extraFromCep);
-            return fetch(url, { headers: { Accept: 'application/json' } })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    fillSelect(bairroSelect, data.items || [], preferred || extraFromCep || '', 'Selecione…');
+            return fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+                .then(function (r) {
+                    return r.json().then(function (body) {
+                        return { ok: r.ok, body: body };
+                    });
+                })
+                .then(function (res) {
+                    var items = (res.body && res.body.items) || [];
+                    fillSelect(bairroSelect, items, preferred || extraFromCep || '', 'Selecione…');
                     ensureOutroOption(bairroSelect);
                     syncBairroOutro();
                 })
@@ -143,16 +160,40 @@
             }
             loadingCities = true;
             cidadeSelect.disabled = true;
-            return fetch(cidadesUrl + '?uf=' + encodeURIComponent(uf), { headers: { Accept: 'application/json' } })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    fillSelect(cidadeSelect, data.items || [], preferredCity || '', 'Selecione…');
+            fillSelect(cidadeSelect, [], preferredCity || '', 'Carregando…');
+            return fetch(cidadesUrl + '?uf=' + encodeURIComponent(uf), {
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin'
+            })
+                .then(function (r) {
+                    return r.json().then(function (body) {
+                        return { ok: r.ok, status: r.status, body: body };
+                    });
+                })
+                .then(function (res) {
+                    var items = (res.body && res.body.items) || [];
+                    if (!res.ok || !items.length) {
+                        fillSelect(
+                            cidadeSelect,
+                            preferredCity ? [{ value: preferredCity, label: preferredCity }] : [],
+                            preferredCity || '',
+                            (res.body && res.body.error) || 'Nenhuma cidade encontrada'
+                        );
+                        return loadBairros(preferredBairro, fromCepBairro);
+                    }
+                    fillSelect(cidadeSelect, items, preferredCity || '', 'Selecione…');
                     if (preferredCity) {
                         Array.prototype.forEach.call(cidadeSelect.options, function (opt) {
                             if (opt.value === preferredCity && opt.getAttribute('data-ibge')) {
                                 cityIbge = opt.getAttribute('data-ibge') || '';
                             }
                         });
+                    }
+                    // Sem preferência: se só uma cidade bate pelo nome parcial do CEP, ok;
+                    // senão pega IBGE da opção selecionada.
+                    if (!cityIbge && cidadeSelect.value) {
+                        var sel = cidadeSelect.options[cidadeSelect.selectedIndex];
+                        cityIbge = (sel && sel.getAttribute('data-ibge')) || '';
                     }
                     return loadBairros(preferredBairro, fromCepBairro);
                 })
@@ -163,6 +204,7 @@
                         preferredCity || '',
                         'Não foi possível carregar'
                     );
+                    return loadBairros(preferredBairro, fromCepBairro);
                 })
                 .finally(function () {
                     loadingCities = false;
