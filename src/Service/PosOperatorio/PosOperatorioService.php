@@ -73,7 +73,8 @@ final class PosOperatorioService
 
         $pendentes = array_values(array_filter($recentPatients, static fn (array $r) => $r['status'] === 'pendente'));
 
-        $chartPayload = $this->overviewAnalytics->getChartPayload($empresa);
+        // Overview: só faixa executiva. Gráficos pesados ficam em Qualidade / Contas / CRM.
+        $chartPayload = $this->overviewAnalytics->getChartPayload($empresa, false);
 
         return [
             'empresa' => $empresa,
@@ -94,7 +95,7 @@ final class PosOperatorioService
             'timeline_events' => $this->buildTimelineForEmpresa($empresa),
             'team_online' => [],
             'protocol_phases' => $this->protocolPhasesFromPacientes($pacientes),
-            'chart_sections' => $chartPayload['sections'],
+            'chart_sections' => [],
             'chart_executive' => $chartPayload['executive'],
         ];
     }

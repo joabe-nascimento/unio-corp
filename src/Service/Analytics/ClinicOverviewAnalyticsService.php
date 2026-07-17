@@ -31,7 +31,7 @@ final class ClinicOverviewAnalyticsService
      *     meta: array{chart_count: int, section_count: int, generated_at: string}
      * }
      */
-    public function getChartPayload(Empresa $empresa): array
+    public function getChartPayload(Empresa $empresa, bool $withSections = true): array
     {
         $today = new \DateTimeImmutable('today');
         $dayEnd = $today->modify('+1 day');
@@ -67,9 +67,12 @@ final class ClinicOverviewAnalyticsService
             ],
         ];
 
-        $sections = array_values(array_filter([
-            $this->buildTodaySection($agendaHoje, $respondidos, $alertasAbertos, $marcados, $confirmados),
-        ]));
+        $sections = [];
+        if ($withSections) {
+            $sections = array_values(array_filter([
+                $this->buildTodaySection($agendaHoje, $respondidos, $alertasAbertos, $marcados, $confirmados),
+            ]));
+        }
 
         return $this->chartPanelFactory->wrap($sections, $executive);
     }

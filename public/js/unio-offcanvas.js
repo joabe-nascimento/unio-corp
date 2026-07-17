@@ -4,6 +4,9 @@
  * HTML:  [data-unio-offcanvas="id"]
  * Abrir: [data-unio-offcanvas-open="id"]  ou legado [data-{id}-open]
  * Fechar:[data-unio-offcanvas-close] dentro do painel, ou legado [data-{id}-close]
+ *
+ * Painéis são movidos para document.body ao registrar, para não ficarem
+ * presos em overflow/stacking do app-page-scroll (layout inset).
  */
 (function () {
     'use strict';
@@ -11,14 +14,26 @@
     var BODY_CLASS = 'unio-offcanvas-open';
     var LEGACY_OPEN_RE = /^data-([a-z0-9-]+)-open$/;
     var LEGACY_CLOSE_RE = /^data-([a-z0-9-]+)-close$/;
+    var PORTAL_ATTR = 'data-unio-offcanvas-portal';
 
     var panels = {};
 
-    function register(root) {
-        var id = root.getAttribute('data-unio-offcanvas');
-        if (!id || panels[id]) {
+    function mountToBody(root) {
+        if (!root || root.parentNode === document.body) {
             return;
         }
+        if (!root.hasAttribute(PORTAL_ATTR)) {
+            root.setAttribute(PORTAL_ATTR, '1');
+        }
+        document.body.appendChild(root);
+    }
+
+    function register(root) {
+        var id = root.getAttribute('data-unio-offcanvas');
+        if (!id) {
+            return;
+        }
+        mountToBody(root);
         panels[id] = root;
         if (root.classList.contains('is-open')) {
             document.body.classList.add(BODY_CLASS);
@@ -98,6 +113,7 @@
         if (window.UnioInputMasks && typeof window.UnioInputMasks.scan === 'function') {
             window.UnioInputMasks.scan(root);
         }
+        document.dispatchEvent(new CustomEvent('unio-offcanvas-opened', { detail: { id: id, root: root } }));
         focusFirst(root);
     }
 
@@ -114,6 +130,7 @@
                 document.body.classList.remove(BODY_CLASS);
             }
         }
+        document.dispatchEvent(new CustomEvent('unio-offcanvas-closed', { detail: { id: id, root: root } }));
     }
 
     function closeAll() {

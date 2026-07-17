@@ -694,10 +694,13 @@ html[data-theme="light"] .unio-organismo .sidebar-bottom,
     outline: none;
 }
 
-.unio-organismo .helix-dock.helix-trigger.is-active {
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(110%, -50%);
+.unio-organismo .helix-dock.helix-trigger.is-active,
+body.unio-offcanvas-open .unio-organismo .helix-dock.helix-trigger,
+body.unio-offcanvas-open .helix-dock.helix-trigger {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translate(110%, -50%) !important;
+    visibility: hidden !important;
 }
 
 .unio-organismo .helix-dock.helix-trigger::before {
@@ -796,8 +799,10 @@ html[data-theme="light"] .unio-organismo .sidebar-bottom,
         transform: translate(0, 0);
     }
 
-    .unio-organismo .helix-dock.helix-trigger.is-active {
-        transform: translate(110%, 0);
+    .unio-organismo .helix-dock.helix-trigger.is-active,
+    body.unio-offcanvas-open .unio-organismo .helix-dock.helix-trigger,
+    body.unio-offcanvas-open .helix-dock.helix-trigger {
+        transform: translate(110%, 0) !important;
     }
 }
 
@@ -1270,8 +1275,11 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 
 .unio-organismo .organismo-practice-panel .nav-submenu-link {
     position: relative;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
     margin: 1px 8px 1px 14px !important;
-    padding: 7px 12px 7px 28px !important;
+    padding: 7px 12px 7px 10px !important;
     border-radius: 9px !important;
     color: var(--org-sidebar-muted) !important;
     transition: background 0.16s ease, color 0.16s ease;
@@ -1279,15 +1287,16 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 
 .unio-organismo .organismo-practice-panel .nav-submenu-link::before {
     content: '';
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static !important;
+    flex: 0 0 7px;
     width: 7px;
     height: 7px;
+    margin: 0 !important;
     border-radius: 50%;
     background: var(--org-sage);
     opacity: 0.55;
+    align-self: center;
+    transform: none !important;
     transition: opacity 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
@@ -1316,7 +1325,7 @@ html[data-theme="dark"] .unio-organismo .sidebar-bottom {
 
 .unio-organismo .organismo-practice-panel .nav-submenu-link:hover::before {
     opacity: 0.85;
-    transform: translateY(-50%) scale(1.15);
+    transform: scale(1.15) !important;
 }
 
 .unio-organismo .organismo-practice-panel .nav-submenu-link.active {
@@ -3976,13 +3985,13 @@ body.unio-organismo.sidebar-mini:not(.sidebar-collapse) .sidebar-top .org-sideba
     position: relative !important;
     display: flex !important;
     align-items: center !important;
-    gap: 8px;
+    gap: 10px !important;
     width: 100% !important;
     max-width: 100% !important;
     min-height: 36px !important;
     height: auto !important;
     margin: 0 !important;
-    padding: 8px 12px 8px 1.65rem !important;
+    padding: 8px 12px 8px 10px !important;
     border-radius: 8px !important;
     box-sizing: border-box;
     line-height: 1.25;
@@ -3991,16 +4000,17 @@ body.unio-organismo.sidebar-mini:not(.sidebar-collapse) .sidebar-top .org-sideba
 
 .unio-organismo .nav-sidebar .clinic-nav-submenu-link::before {
     content: '';
-    position: absolute;
-    left: 0.55rem;
-    top: 50%;
+    position: static !important;
+    flex: 0 0 6px;
     width: 6px;
     height: 6px;
-    margin-top: -3px;
+    margin: 0 !important;
     border-radius: 50%;
     background: var(--org-sidebar-blue);
     opacity: 0.45;
     pointer-events: none;
+    align-self: center;
+    transform: none !important;
 }
 
 .unio-organismo .nav-sidebar .clinic-nav-group__children > .nav-item:nth-child(6n+1) .clinic-nav-submenu-link::before { background: var(--org-terra); }
@@ -4019,6 +4029,7 @@ body.unio-organismo.sidebar-mini:not(.sidebar-collapse) .sidebar-top .org-sideba
 .unio-organismo .nav-sidebar .clinic-nav-submenu-link:hover::before,
 .unio-organismo .nav-sidebar .clinic-nav-submenu-link.active::before {
     opacity: 1;
+    transform: scale(1.12) !important;
 }
 
 .unio-organismo .nav-sidebar .clinic-nav-submenu-link.active {
@@ -4033,6 +4044,7 @@ body.unio-organismo.sidebar-mini:not(.sidebar-collapse) .sidebar-top .org-sideba
     margin: 0 !important;
     padding: 0 !important;
     min-width: 0;
+    flex: 1 1 auto;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

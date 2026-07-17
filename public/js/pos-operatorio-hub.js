@@ -225,6 +225,7 @@
                     fichaBtn.getAttribute('data-pos-op-paciente-nome') || '',
                     fichaBtn.getAttribute('data-pos-op-paciente-codigo') || ''
                 );
+                openOffcanvas('pos-op-paciente-ficha');
                 return;
             }
 
@@ -235,6 +236,7 @@
                     editBtn.getAttribute('data-pos-op-paciente-nome') || '',
                     editBtn.getAttribute('data-pos-op-paciente-codigo') || ''
                 );
+                openOffcanvas('pos-op-paciente-edit');
             }
         }, true);
     }

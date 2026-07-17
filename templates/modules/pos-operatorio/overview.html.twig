@@ -1,4 +1,4 @@
-﻿{% extends 'layout/hub.html.twig' %}
+{% extends 'layout/hub.html.twig' %}
 
 {% block title %}{{ org_brand_label|default('Unio Clínica') }}{% endblock %}
 {% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
@@ -61,16 +61,10 @@
         pos_ticker: pos_ticker
     } %}
 
-    {% if chart_sections|default([])|length > 0 %}
+    {% if chart_executive.kpis|default([])|length > 0 %}
     <div class="mb-4">
-        {% include 'components/charts/panel.html.twig' with {
-            sections: chart_sections,
-            chart_executive: chart_executive|default({ kpis: [] }),
-            panel_id: 'clinic-overview',
-            title: 'Performance de hoje',
-            subtitle: 'Agenda, confirmações e fila clínica',
-            title_icon: 'fa-gauge-high',
-            class: 'clinic-overview-charts'
+        {% include 'components/charts/executive_strip.html.twig' with {
+            executive: chart_executive
         } only %}
     </div>
     {% endif %}
@@ -272,6 +266,5 @@
 
 {% block javascripts %}
 {{ parent() }}
-{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 7 } only %}
 <script src="{{ asset('js/rh-hub-dashboard.js') }}?v=8"></script>
 {% endblock %}
