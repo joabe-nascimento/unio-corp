@@ -4,10 +4,13 @@ namespace App\Controller\Module\PosOperatorio;
 
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Service\Analytics\ClinicFinanceAnalyticsService;
 use App\Service\PosOperatorio\ClinicContaService;
 use App\Service\PosOperatorio\ClinicConvenioService;
 use App\Service\PosOperatorio\ClinicFinanceReportService;
 use App\Service\PosOperatorio\ClinicGuiaTissService;
+use App\Service\PosOperatorio\ClinicIntegrationConfigService;
+use App\Service\PosOperatorio\Payment\ClinicAsaasPaymentService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +28,9 @@ final class PosOperatorioContaController extends AbstractController
         private ClinicConvenioService $convenios,
         private ClinicGuiaTissService $guias,
         private ClinicFinanceReportService $financeReport,
+        private ClinicFinanceAnalyticsService $financeAnalytics,
+        private ClinicAsaasPaymentService $asaasPayments,
+        private ClinicIntegrationConfigService $integrationConfig,
     ) {}
 
     #[Route('/relatorio', name: 'app_pos_operatorio_contas_relatorio', methods: ['GET'])]
@@ -32,12 +38,15 @@ final class PosOperatorioContaController extends AbstractController
     {
         $empresa = $this->requireEmpresa();
         $report = $this->financeReport->build($empresa);
+        $chartPayload = $this->financeAnalytics->getChartPayload($empresa);
 
         return $this->render('modules/pos-operatorio/contas/relatorio.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'contas',
             'dre' => $report['dre'],
             'repasse' => $report['repasse'],
+            'chart_sections' => $chartPayload['sections'],
+            'chart_executive' => $chartPayload['executive'],
         ]);
     }
 
@@ -79,7 +88,45 @@ final class PosOperatorioContaController extends AbstractController
             'total_aberto_centavos' => $this->contas->sumAbertoCentavos($empresa),
             'total_pago_centavos' => $this->contas->sumPagoCentavos($empresa),
             'qtd_abertas' => $this->contas->countList($empresa, 'aberto'),
+            'asaas_ready' => $this->integrationConfig->asaasConfigured($empresa),
         ]);
+    }
+
+    #[Route('/{id}/cobranca', name: 'app_pos_operatorio_contas_cobranca', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function cobranca(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $conta = $this->contas->findForEmpresa($empresa, $id);
+        if ($conta === null) {
+            throw $this->createNotFoundException();
+        }
+
+        if (!$this->isCsrfTokenValid('clinic_conta_pay_'.$id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_contas', ['status' => 'aberto']);
+        }
+
+        $method = $request->request->getString('method', ClinicAsaasPaymentService::METHOD_PIX);
+        if (!\in_array($method, [ClinicAsaasPaymentService::METHOD_PIX, ClinicAsaasPaymentService::METHOD_LINK], true)) {
+            $method = ClinicAsaasPaymentService::METHOD_PIX;
+        }
+
+        try {
+            $charge = $this->asaasPayments->createCharge($conta, $empresa, $method);
+            $this->addFlash(
+                'success',
+                sprintf(
+                    'Cobrança %s gerada. Link: %s',
+                    $method === ClinicAsaasPaymentService::METHOD_PIX ? 'Pix' : 'link',
+                    $charge['url'],
+                ),
+            );
+        } catch (\Throwable $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_pos_operatorio_contas', ['status' => 'aberto']);
     }
 
     #[Route('/{id}/acao', name: 'app_pos_operatorio_contas_acao', requirements: ['id' => '\d+'], methods: ['POST'])]

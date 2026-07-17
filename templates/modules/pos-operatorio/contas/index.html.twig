@@ -107,6 +107,12 @@
                     <td data-label="Tipo">{{ tipo_labels[c.tipo]|default(c.tipo) }}</td>
                     <td data-label="Status">
                         <span class="badge-perfil {{ status_tones[c.status]|default('default') }}">{{ status_labels[c.status]|default(c.status) }}</span>
+                        {% if c.paymentStatus == 'pending' and c.paymentUrl %}
+                        <div class="mt-1">
+                            <span class="badge-perfil warning">Aguardando Pix</span>
+                            <a href="{{ c.paymentUrl }}" class="small d-block" target="_blank" rel="noopener">Abrir link</a>
+                        </div>
+                        {% endif %}
                     </td>
                     <td data-label="Valor">
                         {% if c.valorCentavos is not null %}
@@ -147,6 +153,29 @@
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right unio-dropdown clinic-agenda-row-dropdown clinic-conta-row-dropdown">
                                     {% if can_settle %}
+                                    {% if c.tipo == 'particular' %}
+                                    {% if asaas_ready|default(false) %}
+                                    <form method="post" action="{{ path('app_pos_operatorio_contas_cobranca', { id: c.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_pay_' ~ c.id) }}">
+                                        <input type="hidden" name="method" value="pix">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-qrcode" aria-hidden="true"></i> Gerar Pix
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{{ path('app_pos_operatorio_contas_cobranca', { id: c.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_pay_' ~ c.id) }}">
+                                        <input type="hidden" name="method" value="link">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-link" aria-hidden="true"></i> Gerar link
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <a href="{{ path('app_pos_operatorio_integracoes') }}" class="dropdown-item">
+                                        <i class="fas fa-plug" aria-hidden="true"></i> Configurar Asaas
+                                    </a>
+                                    {% endif %}
+                                    <div class="dropdown-divider"></div>
+                                    {% endif %}
                                     <form method="post" action="{{ path('app_pos_operatorio_contas_acao', { id: c.id }) }}">
                                         <input type="hidden" name="_token" value="{{ csrf_token('clinic_conta_' ~ c.id) }}">
                                         <button type="submit" name="action" value="cortesia" class="dropdown-item">

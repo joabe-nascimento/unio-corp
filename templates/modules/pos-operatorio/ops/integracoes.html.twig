@@ -56,10 +56,16 @@
         <span class="badge-perfil warning">Preparado (wa.me)</span>
         {% endif %}
     </p>
+    <p class="small mb-1"><strong>Webhook inbound (confirmação CONFIRMO)</strong></p>
+    <code class="d-block mb-2">{{ whatsapp_meta_webhook_url|default('') }}</code>
     <pre class="small mb-3">WHATSAPP_PROVIDER=meta
 WHATSAPP_META_TOKEN=...
 WHATSAPP_META_PHONE_NUMBER_ID=...
+WHATSAPP_META_EMPRESA_CNPJ=...
+WHATSAPP_META_VERIFY_TOKEN=...
+WHATSAPP_META_APP_SECRET=...
 WHATSAPP_META_GRAPH_VERSION=v21.0</pre>
+    <p class="text-muted small mb-3">O lembrete D−1 inclui link assinado de confirmação (funciona também com wa.me).</p>
     {% if whatsapp_live|default(false) %}
     <form method="post" action="{{ path('app_pos_operatorio_integracoes_whatsapp_teste') }}" class="d-flex flex-wrap gap-2 align-items-end">
         <input type="hidden" name="_token" value="{{ csrf_token('clinic_whatsapp_teste') }}">
@@ -72,6 +78,41 @@ WHATSAPP_META_GRAPH_VERSION=v21.0</pre>
     {% else %}
     <p class="text-muted small mb-0">Com as variáveis acima no servidor Unio Saúde, o canal passa a <strong>Ativo</strong> em Lembretes.</p>
     {% endif %}
+</section>
+
+<section class="unio-card p-4 mb-3">
+    <h3 class="clinic-ops-panel__title">Asaas · Pix e link de pagamento</h3>
+    <p class="text-muted small mb-2">
+        Gera cobrança nas Contas particulares abertas. Webhook marca a conta como paga.
+    </p>
+    <p class="mb-2">
+        <strong>Status:</strong>
+        {% if asaas_ready|default(false) %}
+        <span class="badge-perfil success">Pronto</span>
+        {% else %}
+        <span class="badge-perfil warning">Não configurado</span>
+        {% endif %}
+    </p>
+    <p class="small mb-1"><strong>Webhook Asaas</strong></p>
+    <code class="d-block mb-2">{{ asaas_webhook_url|default('') }}</code>
+    <p class="text-muted small">No painel Asaas, envie o segredo pelo header <code>asaas-access-token</code>. API key e token ficam somente no <code>.env.local</code> do servidor.</p>
+    <form method="post" action="{{ path('app_pos_operatorio_integracoes_asaas') }}" class="mt-3">
+        <input type="hidden" name="_token" value="{{ csrf_token('clinic_asaas') }}">
+        <div class="form-group">
+            <label for="asaas_env">Ambiente</label>
+            <select id="asaas_env" name="asaas_env" class="form-control">
+                <option value="sandbox"{{ (integration_config.asaas_env|default('sandbox')) == 'sandbox' ? ' selected' : '' }}>Sandbox</option>
+                <option value="production"{{ (integration_config.asaas_env|default('sandbox')) == 'production' ? ' selected' : '' }}>Produção</option>
+            </select>
+        </div>
+        <label class="d-flex align-items-center gap-2 mb-3">
+            <input type="checkbox" name="asaas_enabled" value="1"{{ integration_config.asaas_enabled|default(false) ? ' checked' : '' }}>
+            <span>Ativar cobranças Asaas nesta clínica</span>
+        </label>
+        <pre class="small mb-3">ASAAS_API_KEY=$aact_...
+ASAAS_WEBHOOK_TOKEN=segredo-forte</pre>
+        <button type="submit" class="btn-unio">Salvar Asaas</button>
+    </form>
 </section>
 
 <section class="unio-card p-4">

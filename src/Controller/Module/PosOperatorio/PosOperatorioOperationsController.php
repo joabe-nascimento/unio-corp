@@ -5,6 +5,7 @@ namespace App\Controller\Module\PosOperatorio;
 use App\Entity\User;
 use App\PosOperatorio\ClinicFeatureCatalog;
 use App\PosOperatorio\ClinicProtocolLibrary;
+use App\Service\Analytics\ClinicQualityAnalyticsService;
 use App\Service\PosOperatorio\ClinicAgendaReminderService;
 use App\Service\PosOperatorio\ClinicAgendaService;
 use App\Service\PosOperatorio\ClinicAltaIntakeService;
@@ -41,6 +42,7 @@ final class PosOperatorioOperationsController extends AbstractController
         private ClinicAltaIntakeService $alta,
         private ClinicAgendaReminderService $agendaReminders,
         private ClinicWhatsappService $whatsapp,
+        private ClinicQualityAnalyticsService $qualityAnalytics,
     ) {}
 
     #[Route('/trabalho', name: 'app_pos_operatorio_trabalho')]
@@ -78,11 +80,14 @@ final class PosOperatorioOperationsController extends AbstractController
     public function qualidade(): Response
     {
         $empresa = $this->requireEmpresa();
+        $chartPayload = $this->qualityAnalytics->getChartPayload($empresa);
 
         return $this->render(self::T . 'qualidade.html.twig', [
             'empresa' => $empresa,
             'pos_section' => 'qualidade',
             'quality' => $this->operations->buildQuality($empresa),
+            'chart_sections' => $chartPayload['sections'],
+            'chart_executive' => $chartPayload['executive'],
         ]);
     }
 
@@ -307,7 +312,29 @@ final class PosOperatorioOperationsController extends AbstractController
             'alta_endpoint' => $this->generateUrl('app_pos_operatorio_api_alta', [], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL),
             'whatsapp_live' => $this->whatsapp->isLive(),
             'whatsapp_provider' => $this->whatsapp->providerName(),
+            'whatsapp_meta_webhook_url' => $this->generateUrl('app_api_whatsapp_meta_webhook', [], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL),
+            'asaas_webhook_url' => $this->generateUrl('app_api_asaas_webhook', [], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL),
+            'asaas_ready' => $this->integrationConfig->asaasConfigured($empresa),
         ]);
+    }
+
+    #[Route('/integracoes/asaas', name: 'app_pos_operatorio_integracoes_asaas', methods: ['POST'])]
+    public function integracoesAsaas(Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        if (!$this->isCsrfTokenValid('clinic_asaas', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token inválido.');
+
+            return $this->redirectToRoute('app_pos_operatorio_integracoes');
+        }
+
+        $this->integrationConfig->saveAsaas($empresa, [
+            'asaas_env' => (string) $request->request->get('asaas_env', 'sandbox'),
+            'asaas_enabled' => $request->request->has('asaas_enabled'),
+        ]);
+        $this->addFlash('success', 'Configuração Asaas salva.');
+
+        return $this->redirectToRoute('app_pos_operatorio_integracoes');
     }
 
     #[Route('/integracoes/whatsapp-teste', name: 'app_pos_operatorio_integracoes_whatsapp_teste', methods: ['POST'])]

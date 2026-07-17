@@ -14,6 +14,7 @@ use App\Repository\PosOperatorioEventoRepository;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Repository\PosOperatorioProtocoloRepository;
 use App\Rh\RhProcessDisplay;
+use App\Service\Analytics\ClinicOverviewAnalyticsService;
 use App\Service\WorkspaceService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -33,6 +34,7 @@ final class PosOperatorioService
         private PosOperatorioAlertaRepository $alertaRepo,
         private PosOperatorioProtocoloRepository $protocoloRepo,
         private PosOperatorioEventoRepository $eventoRepo,
+        private ClinicOverviewAnalyticsService $overviewAnalytics,
     ) {}
 
     /** @return array<string, mixed> */
@@ -71,6 +73,8 @@ final class PosOperatorioService
 
         $pendentes = array_values(array_filter($recentPatients, static fn (array $r) => $r['status'] === 'pendente'));
 
+        $chartPayload = $this->overviewAnalytics->getChartPayload($empresa);
+
         return [
             'empresa' => $empresa,
             'pos_section' => 'overview',
@@ -90,6 +94,8 @@ final class PosOperatorioService
             'timeline_events' => $this->buildTimelineForEmpresa($empresa),
             'team_online' => [],
             'protocol_phases' => $this->protocolPhasesFromPacientes($pacientes),
+            'chart_sections' => $chartPayload['sections'],
+            'chart_executive' => $chartPayload['executive'],
         ];
     }
 
@@ -121,6 +127,8 @@ final class PosOperatorioService
             'timeline_events' => $this->timelineEvents(),
             'team_online' => [],
             'protocol_phases' => $this->protocolPhases(),
+            'chart_sections' => [],
+            'chart_executive' => ['kpis' => []],
         ];
     }
 

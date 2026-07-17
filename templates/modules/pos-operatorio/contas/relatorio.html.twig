@@ -24,6 +24,20 @@
 {% endblock %}
 
 {% block hub_content %}
+{% if chart_sections|default([])|length > 0 %}
+<div class="mb-4">
+    {% include 'components/charts/panel.html.twig' with {
+        sections: chart_sections,
+        chart_executive: chart_executive|default({ kpis: [] }),
+        panel_id: 'clinic-finance',
+        title: 'Inteligência financeira',
+        subtitle: 'Mix, tendência de receita e repasse',
+        title_icon: 'fa-chart-pie',
+        class: 'clinic-finance-charts'
+    } only %}
+</div>
+{% endif %}
+
 <section class="unio-card p-4 mb-4">
     <h2 class="h5 mb-3">DRE leve</h2>
     <div class="table-responsive">
@@ -94,4 +108,9 @@
     </div>
     {% endif %}
 </section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 7 } only %}
 {% endblock %}

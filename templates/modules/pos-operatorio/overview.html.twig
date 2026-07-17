@@ -61,6 +61,20 @@
         pos_ticker: pos_ticker
     } %}
 
+    {% if chart_sections|default([])|length > 0 %}
+    <div class="mb-4">
+        {% include 'components/charts/panel.html.twig' with {
+            sections: chart_sections,
+            chart_executive: chart_executive|default({ kpis: [] }),
+            panel_id: 'clinic-overview',
+            title: 'Performance de hoje',
+            subtitle: 'Agenda, confirmações e fila clínica',
+            title_icon: 'fa-gauge-high',
+            class: 'clinic-overview-charts'
+        } only %}
+    </div>
+    {% endif %}
+
     <div class="row pos-op-overview-grid">
         <div class="col-xl-8 pos-op-main">
 
@@ -258,5 +272,6 @@
 
 {% block javascripts %}
 {{ parent() }}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 7 } only %}
 <script src="{{ asset('js/rh-hub-dashboard.js') }}?v=8"></script>
 {% endblock %}

@@ -262,6 +262,12 @@ WHATSAPP_PROVIDER=meta
 WHATSAPP_META_TOKEN=...
 WHATSAPP_META_PHONE_NUMBER_ID=...
 WHATSAPP_META_GRAPH_VERSION=v21.0
+WHATSAPP_META_VERIFY_TOKEN=...
+WHATSAPP_META_APP_SECRET=...
+# Single-tenant:
+WHATSAPP_META_EMPRESA_CNPJ=00000000000000
+# Multi-tenant (substitui a linha acima):
+WHATSAPP_META_TENANT_MAP={"PHONE_NUMBER_ID":"CNPJ_SEM_PONTUACAO"}
 # Templates HSM aprovados na Meta (fora da janela 24h). Sem nome → envia texto.
 WHATSAPP_META_TEMPLATE_AGENDA=confirmacao_agenda
 WHATSAPP_META_TEMPLATE_QUESTIONARIO=questionario_pendente
@@ -270,7 +276,7 @@ WHATSAPP_META_TEMPLATE_LANG=pt_BR
 
 Parâmetros esperados no body do template (ordem):
 
-- **Agenda:** nome, título, data/hora, médico  
+- **Agenda:** nome, título, data/hora, médico, URL assinada de confirmação
 - **Questionário:** nome, dia pós, URL do portal  
 
 Se o template falhar, o sistema faz fallback para mensagem de texto (janela 24h / sessão aberta).
@@ -285,6 +291,25 @@ Cron sugerido (cPanel → Cron Jobs), a partir de `~/unio-uniosaude`:
 ```
 
 Ops: `/pos-operatorio/lembretes` (status + log) e `/pos-operatorio/integracoes` (teste Meta).
+
+---
+
+## Asaas (Pix e link)
+
+Credenciais ficam somente no `.env.local`; não são gravadas no banco nem no store da clínica:
+
+```env
+# Single-tenant:
+ASAAS_API_KEY=$aact_...
+# Multi-tenant (CNPJ sem pontuação → chave):
+ASAAS_API_KEYS_JSON={"00000000000000":"$aact_..."}
+# Obrigatório para aceitar webhooks:
+ASAAS_WEBHOOK_TOKEN=gere-um-segredo-forte
+```
+
+Cadastre `https://uniosaude.uniowork.com.br/api/asaas/webhook` no Asaas e configure
+o segredo no header `asaas-access-token`. Comece em sandbox; ative produção somente
+depois de validar geração da cobrança e baixa automática da conta.
 
 ---
 

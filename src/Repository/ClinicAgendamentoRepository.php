@@ -132,6 +132,33 @@ class ClinicAgendamentoRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Próximos horários marcados (hoje/amanhã) para confirmação inbound por telefone.
+     *
+     * @return list<ClinicAgendamento>
+     */
+    public function findMarcadosForPhoneConfirm(
+        Empresa $empresa,
+        \DateTimeImmutable $inicio,
+        \DateTimeImmutable $fim,
+    ): array {
+        return $this->createQueryBuilder('a')
+            ->innerJoin('a.paciente', 'p')
+            ->addSelect('p')
+            ->andWhere('a.empresa = :empresa')
+            ->andWhere('a.inicio >= :inicio')
+            ->andWhere('a.inicio < :fim')
+            ->andWhere('a.status = :status')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('inicio', $inicio)
+            ->setParameter('fim', $fim)
+            ->setParameter('status', ClinicAgendamento::STATUS_MARCADO)
+            ->orderBy('a.inicio', 'ASC')
+            ->setMaxResults(80)
+            ->getQuery()
+            ->getResult();
+    }
+
     /** Conflito de sala: outro horário ativo com intervalo sobreposto. */
     public function hasSalaOverlap(
         Empresa $empresa,

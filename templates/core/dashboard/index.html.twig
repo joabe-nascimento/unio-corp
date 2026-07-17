@@ -150,6 +150,20 @@
             <p class="clinic-activity-empty-sub">{{ org_clinic|default(false) ? 'Todos os protocolos estão em dia.' : 'Todas as entregas estão em dia.' }}</p>
         </div>
     </section>
+
+    {% if chart_sections|default([])|length > 0 %}
+    <section class="clinic-home-charts mt-4" aria-label="Indicadores e gráficos">
+        {% include 'components/charts/panel.html.twig' with {
+            sections: chart_sections,
+            chart_executive: chart_executive|default({ kpis: [] }),
+            panel_id: 'clinic-home',
+            title: 'Performance de hoje',
+            subtitle: 'Agenda, confirmações e fila clínica',
+            title_icon: 'fa-gauge-high',
+            class: 'clinic-overview-charts'
+        } only %}
+    </section>
+    {% endif %}
 </div>
 {% else %}
 {% embed 'components/inset_page_shell.html.twig' with {
@@ -208,6 +222,7 @@
 
 {% include 'components/charts/panel.html.twig' with {
     sections: chart_sections|default([]),
+    chart_executive: chart_executive|default({ kpis: [] }),
     class: 'dashboard-analytics'
 } %}
 {% endblock %}
@@ -229,8 +244,9 @@
     setInterval(tick, 30000);
 })();
 </script>
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 7 } only %}
 {% else %}
-{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 6 } only %}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 7 } only %}
 <script src="{{ asset('js/dashboard-home.js') }}?v=1"></script>
 <script src="{{ asset('js/onboarding-checklist.js') }}?v=2"></script>
 {% endif %}

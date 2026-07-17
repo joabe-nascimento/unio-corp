@@ -17,6 +17,7 @@ final class ClinicPatientNotifier
         private ClinicIntegrationConfigService $integrationConfig,
         private UrlGeneratorInterface $urlGenerator,
         private ClinicWhatsappService $whatsapp,
+        private ClinicAgendaConfirmToken $confirmToken,
         private ?MailerInterface $mailer = null,
         private string $mailerFrom = 'noreply@unio.app',
     ) {}
@@ -103,21 +104,25 @@ final class ClinicPatientNotifier
         $medico = $agendamento->getMedico()?->getNome();
         $primeiro = explode(' ', trim($paciente->getNome()))[0] ?: 'paciente';
 
+        $confirmUrl = $this->confirmUrlForAgendamento($agendamento);
+
         $subject = sprintf('Confirme seu horário — %s', $paciente->getCodigo());
         $body = sprintf(
-            "Olá, %s!\n\nConfirmando seu horário:\n%s\n%s%s\n\nResponda CONFIRMO ou REMARCAR.\n\nEquipe clínica",
+            "Olá, %s!\n\nConfirmando seu horário:\n%s\n%s%s\n\nConfirme pelo link:\n%s\n\nOu responda CONFIRMO / REMARCAR.\n\nEquipe clínica",
             $primeiro,
             $titulo,
             $quando,
             $medico ? "\nCom: ".$medico : '',
+            $confirmUrl,
         );
 
         $waText = sprintf(
-            "Olá, %s! Confirmando seu horário na clínica:\n\n%s\n%s%s\n\nResponda *CONFIRMO* ou *REMARCAR* por favor.",
+            "Olá, %s! Confirmando seu horário na clínica:\n\n%s\n%s%s\n\nConfirme aqui: %s\n\nOu responda *CONFIRMO* / *REMARCAR*.",
             $primeiro,
             $titulo,
             $quando,
             $medico ? "\nCom: ".$medico : '',
+            $confirmUrl,
         );
 
         $emailSent = $this->sendEmail($paciente->getEmailContato(), $subject, $body);
@@ -130,6 +135,7 @@ final class ClinicPatientNotifier
                 $titulo,
                 $quando,
                 $medico ?: 'equipe clínica',
+                $confirmUrl,
             ],
         ]);
 
@@ -142,6 +148,7 @@ final class ClinicPatientNotifier
             'email' => $paciente->getEmailContato(),
             'inicio' => $agendamento->getInicio()->format(\DateTimeInterface::ATOM),
             'titulo' => $titulo,
+            'confirm_url' => $confirmUrl,
             'whatsapp_url' => $whatsappUrl,
             'whatsapp_sent' => $waResult->sent,
         ]);
@@ -211,6 +218,15 @@ final class ClinicPatientNotifier
         ];
     }
 
+    public function confirmUrlForAgendamento(ClinicAgendamento $agendamento): string
+    {
+        return $this->urlGenerator->generate(
+            'app_clinica_agenda_confirmar',
+            ['token' => $this->confirmToken->issue($agendamento)],
+            UrlGeneratorInterface::ABSOLUTE_URL,
+        );
+    }
+
     public function confirmWhatsappUrlForAgendamento(ClinicAgendamento $agendamento): ?string
     {
         $paciente = $agendamento->getPaciente();
@@ -218,13 +234,15 @@ final class ClinicPatientNotifier
         $medico = $agendamento->getMedico()?->getNome();
         $titulo = $agendamento->getTitulo() ?: 'consulta';
         $quando = $agendamento->getInicio()->format('d/m/Y \à\s H:i');
+        $confirmUrl = $this->confirmUrlForAgendamento($agendamento);
 
         $text = sprintf(
-            "Olá, %s! Confirmando seu horário na clínica:\n\n%s\n%s%s\n\nResponda *CONFIRMO* ou *REMARCAR* por favor.",
+            "Olá, %s! Confirmando seu horário na clínica:\n\n%s\n%s%s\n\nConfirme aqui: %s\n\nOu responda *CONFIRMO* / *REMARCAR*.",
             $primeiro,
             $titulo,
             $quando,
             $medico ? "\nCom: ".$medico : '',
+            $confirmUrl,
         );
 
         return $this->buildWhatsappLink($paciente->getTelefoneContato(), $text);

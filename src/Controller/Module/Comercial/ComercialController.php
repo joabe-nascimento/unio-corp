@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Repository\Crm\CrmAtividadeRepository;
 use App\Repository\Crm\CrmContaRepository;
 use App\Repository\Crm\CrmLeadRepository;
+use App\Service\Analytics\ClinicCrmAnalyticsService;
 use App\Service\Crm\CrmService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +32,7 @@ class ComercialController extends AbstractController
         private CrmLeadRepository $leadRepo,
         private CrmContaRepository $contaRepo,
         private CrmAtividadeRepository $atividadeRepo,
+        private ClinicCrmAnalyticsService $crmAnalytics,
     ) {}
 
     #[Route('', name: 'app_comercial')]
@@ -473,10 +475,13 @@ class ComercialController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $empresa = $this->requireEmpresa($user);
+        $chartPayload = $this->crmAnalytics->getChartPayload($empresa);
 
         return $this->render(self::T . 'analytics.html.twig', [
             'crm_section' => 'analytics',
             'analytics' => $this->crm->getAnalytics($empresa),
+            'chart_sections' => $chartPayload['sections'],
+            'chart_executive' => $chartPayload['executive'],
         ]);
     }
 

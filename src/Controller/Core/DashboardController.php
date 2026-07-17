@@ -2,6 +2,7 @@
 
 namespace App\Controller\Core;
 
+use App\Service\Analytics\ClinicOverviewAnalyticsService;
 use App\Service\DashboardStatsService;
 use App\Service\NavigationService;
 use App\Service\OnboardingProgressService;
@@ -28,6 +29,7 @@ class DashboardController extends AbstractController
         OnboardingProgressService $onboardingProgress,
         OrganismoCopyService $organismoCopy,
         ClinicOperationsService $clinicOperations,
+        ClinicOverviewAnalyticsService $clinicOverviewAnalytics,
     ): Response {
         /** @var \App\Entity\User $user */
         $user     = $this->getUser();
@@ -36,15 +38,21 @@ class DashboardController extends AbstractController
         $layout   = $navigation->getLayout($user);
         $dt       = $welcome->getDateTimeInfo();
         $clinicQueue = null;
+        $chartSections = $analytics->getChartSections($user, $empresa);
+        $chartExecutive = ['kpis' => []];
         if ($organismoCopy->isClinicProfile() && $empresa !== null) {
             $clinicQueue = $clinicOperations->buildWorkQueue($empresa);
+            $clinicCharts = $clinicOverviewAnalytics->getChartPayload($empresa);
+            $chartSections = array_merge($clinicCharts['sections'], $chartSections);
+            $chartExecutive = $clinicCharts['executive'];
         }
 
         return $this->render('core/dashboard/index.html.twig', [
             'layout'          => $layout,
             'layout_headline' => $dashboardStats->getLayoutHeadline($layout, $empresa),
             'kpis'            => $dashboardStats->getKpis($user, $empresa, $layout, \count($empresas)),
-            'chart_sections'  => $analytics->getChartSections($user, $empresa),
+            'chart_sections'  => $chartSections,
+            'chart_executive' => $chartExecutive,
             'empresa'         => $empresa,
             'empresas'        => $empresas,
             'account_pending' => empty($empresas) && !$user->hasPlatformAccess(),

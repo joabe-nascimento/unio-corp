@@ -23,6 +23,13 @@ parameters:
     env(WHATSAPP_META_TEMPLATE_AGENDA): ''
     env(WHATSAPP_META_TEMPLATE_QUESTIONARIO): ''
     env(WHATSAPP_META_TEMPLATE_LANG): 'pt_BR'
+    env(WHATSAPP_META_VERIFY_TOKEN): ''
+    env(WHATSAPP_META_APP_SECRET): ''
+    env(WHATSAPP_META_EMPRESA_CNPJ): ''
+    env(WHATSAPP_META_TENANT_MAP): '{}'
+    env(ASAAS_API_KEY): ''
+    env(ASAAS_API_KEYS_JSON): '{}'
+    env(ASAAS_WEBHOOK_TOKEN): ''
     whatsapp_provider_default: ''
     whatsapp_meta_token_default: ''
     whatsapp_meta_phone_number_id_default: ''
@@ -30,6 +37,13 @@ parameters:
     whatsapp_meta_template_agenda_default: ''
     whatsapp_meta_template_questionario_default: ''
     whatsapp_meta_template_lang_default: 'pt_BR'
+    whatsapp_meta_verify_token_default: ''
+    whatsapp_meta_app_secret_default: ''
+    whatsapp_meta_empresa_cnpj_default: ''
+    whatsapp_meta_tenant_map_default: '{}'
+    asaas_api_key_default: ''
+    asaas_api_keys_json_default: '{}'
+    asaas_webhook_token_default: ''
 
     wallet_apple_pass_type_id_default: ''
     wallet_apple_team_id_default: ''
@@ -96,6 +110,25 @@ services:
         arguments:
             $mailerFrom: '%app.mailer_from%'
 
+    App\Service\PosOperatorio\ClinicAgendaConfirmToken:
+        arguments:
+            $appSecret: '%kernel.secret%'
+
+    App\Service\PosOperatorio\Whatsapp\WhatsappMetaTenantResolver:
+        arguments:
+            $metaPhoneNumberId: '%env(default:whatsapp_meta_phone_number_id_default:WHATSAPP_META_PHONE_NUMBER_ID)%'
+            $metaEmpresaCnpj: '%env(default:whatsapp_meta_empresa_cnpj_default:WHATSAPP_META_EMPRESA_CNPJ)%'
+            $metaTenantMapJson: '%env(default:whatsapp_meta_tenant_map_default:WHATSAPP_META_TENANT_MAP)%'
+
+    App\Controller\Api\WhatsappMetaWebhookController:
+        arguments:
+            $verifyToken: '%env(default:whatsapp_meta_verify_token_default:WHATSAPP_META_VERIFY_TOKEN)%'
+            $appSecret: '%env(default:whatsapp_meta_app_secret_default:WHATSAPP_META_APP_SECRET)%'
+
+    App\Controller\Api\AsaasWebhookController:
+        arguments:
+            $webhookToken: '%env(default:asaas_webhook_token_default:ASAAS_WEBHOOK_TOKEN)%'
+
     App\Service\PosOperatorio\Whatsapp\ClinicWhatsappSenderFactory:
         arguments:
             $provider: '%env(default:whatsapp_provider_default:WHATSAPP_PROVIDER)%'
@@ -110,7 +143,9 @@ services:
         factory: ['@App\Service\PosOperatorio\Whatsapp\ClinicWhatsappSenderFactory', 'create']
 
     App\Service\PosOperatorio\ClinicIntegrationConfigService:
-        arguments: {}
+        arguments:
+            $asaasApiKey: '%env(default:asaas_api_key_default:ASAAS_API_KEY)%'
+            $asaasApiKeysJson: '%env(default:asaas_api_keys_json_default:ASAAS_API_KEYS_JSON)%'
 
     App\Service\PosOperatorio\ClinicProductConfigService:
         arguments: {}

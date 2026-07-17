@@ -74,6 +74,21 @@ class ClinicConta
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $pagoEm = null;
 
+    #[ORM\Column(length: 24, nullable: true)]
+    private ?string $paymentProvider = null;
+
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $paymentExternalId = null;
+
+    #[ORM\Column(length: 512, nullable: true)]
+    private ?string $paymentUrl = null;
+
+    #[ORM\Column(length: 16, nullable: true)]
+    private ?string $paymentMethod = null;
+
+    #[ORM\Column(length: 24, nullable: true)]
+    private ?string $paymentStatus = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $criadoEm;
 
@@ -213,6 +228,66 @@ class ClinicConta
     public function setPagoEm(?\DateTimeImmutable $pagoEm): static
     {
         $this->pagoEm = $pagoEm;
+
+        return $this;
+    }
+
+    public function getPaymentProvider(): ?string
+    {
+        return $this->paymentProvider;
+    }
+
+    public function setPaymentProvider(?string $paymentProvider): static
+    {
+        $this->paymentProvider = $paymentProvider;
+
+        return $this;
+    }
+
+    public function getPaymentExternalId(): ?string
+    {
+        return $this->paymentExternalId;
+    }
+
+    public function setPaymentExternalId(?string $paymentExternalId): static
+    {
+        $this->paymentExternalId = $paymentExternalId;
+
+        return $this;
+    }
+
+    public function getPaymentUrl(): ?string
+    {
+        return $this->paymentUrl;
+    }
+
+    public function setPaymentUrl(?string $paymentUrl): static
+    {
+        $this->paymentUrl = $paymentUrl;
+
+        return $this;
+    }
+
+    public function getPaymentMethod(): ?string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(?string $paymentMethod): static
+    {
+        $this->paymentMethod = $paymentMethod;
+
+        return $this;
+    }
+
+    public function getPaymentStatus(): ?string
+    {
+        return $this->paymentStatus;
+    }
+
+    public function setPaymentStatus(?string $paymentStatus): static
+    {
+        $this->paymentStatus = $paymentStatus;
 
         return $this;
     }

@@ -18,6 +18,20 @@
 {% endblock %}
 
 {% block hub_content %}
+{% if chart_sections|default([])|length > 0 %}
+<div class="mb-4">
+    {% include 'components/charts/panel.html.twig' with {
+        sections: chart_sections,
+        chart_executive: chart_executive|default({ kpis: [] }),
+        panel_id: 'clinic-quality',
+        title: 'Inteligência clínica',
+        subtitle: 'Tendência de resposta, SLA e anti no-show',
+        title_icon: 'fa-chart-line',
+        class: 'clinic-quality-charts'
+    } only %}
+</div>
+{% endif %}
+
 <div class="clinic-ops-panels clinic-ops-panels--3">
     <section class="unio-card clinic-ops-panel p-3">
         <h3 class="clinic-ops-panel__title">Questionários hoje</h3>
@@ -67,4 +81,9 @@
         {% endif %}
     </section>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 7 } only %}
 {% endblock %}
