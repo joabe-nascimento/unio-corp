@@ -544,6 +544,7 @@ final class ClinicOperationsService
                 ['id' => 'alertas', 'nome' => 'Histórico de alertas', 'formato' => 'CSV', 'status' => 'active'],
                 ['id' => 'auditoria', 'nome' => 'Trilha LGPD', 'formato' => 'CSV', 'status' => 'active'],
                 ['id' => 'attestacoes', 'nome' => 'Atestações da Trilha (pré/pós)', 'formato' => 'CSV', 'status' => 'active'],
+                ['id' => 'outcomes', 'nome' => 'Unio Outcomes™ (PROMs e risco)', 'formato' => 'CSV', 'status' => 'active'],
             ],
         ];
     }

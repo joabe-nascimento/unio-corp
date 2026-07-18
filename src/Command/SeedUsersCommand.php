@@ -7,6 +7,7 @@ use App\Command\Concern\ProdSeedGuardTrait;
 use App\Dev\DevSeedEmails;
 use App\Entity\Empresa;
 use App\Entity\User;
+use App\Service\Security\DefaultUserPasswordProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,11 +22,13 @@ class SeedUsersCommand extends Command
     use ProdSeedGuardTrait;
 
     public const DEMO_EMPRESA_NOME = 'Unio Demo';
-    public const SEED_PASSWORD = 'unio123';
+    /** @deprecated Use DefaultUserPasswordProvider / APP_DEFAULT_USER_PASSWORD */
+    public const SEED_PASSWORD = DefaultUserPasswordProvider::FALLBACK;
 
     public function __construct(
         private EntityManagerInterface $em,
         private UserPasswordHasherInterface $hasher,
+        private DefaultUserPasswordProvider $defaultPasswordProvider,
         private string $appEnv = 'dev',
     ) {
         parent::__construct();
@@ -43,6 +46,8 @@ class SeedUsersCommand extends Command
         if (($code = $this->refuseInProductionUnlessAllowed($input, $io)) !== null) {
             return $code;
         }
+
+        $seedPassword = $this->defaultPasswordProvider->get();
 
         $empresaRepo = $this->em->getRepository(Empresa::class);
         $userRepo = $this->em->getRepository(User::class);
@@ -76,14 +81,14 @@ class SeedUsersCommand extends Command
             $user->setRoles([$user->getRolePrincipal()]);
             // Contas clínicas: sempre regrava senha demo para login previsível.
             if ($isNew || !empty($data['reset_password'])) {
-                $user->setPassword($this->hasher->hashPassword($user, self::SEED_PASSWORD));
+                $user->setPassword($this->hasher->hashPassword($user, $seedPassword));
             }
             $user->setAtivo(true);
             if ($data['empresa']) {
                 $user->setEmpresa($data['empresa']);
             }
             $this->em->persist($user);
-            $io->text('  ' . $data['email'] . ' [' . $data['perfil'] . ']' . (!empty($data['reset_password']) || $isNew ? ' senha=' . self::SEED_PASSWORD : ''));
+            $io->text('  ' . $data['email'] . ' [' . $data['perfil'] . ']' . (!empty($data['reset_password']) || $isNew ? ' senha=' . $seedPassword : ''));
         }
 
         // Migra Marcela (legado GESTOR na Nexus) para Coordenação clínica, se ainda existir.
@@ -91,7 +96,7 @@ class SeedUsersCommand extends Command
         if ($marcela instanceof User && $marcela->getPerfil() === 'GESTOR') {
             $marcela->setPerfil(ClinicStaffRole::COORDENACAO);
             $marcela->setRoles([$marcela->getRolePrincipal()]);
-            $marcela->setPassword($this->hasher->hashPassword($marcela, self::SEED_PASSWORD));
+            $marcela->setPassword($this->hasher->hashPassword($marcela, $seedPassword));
             $this->em->persist($marcela);
             $io->text('  ' . DevSeedEmails::MARCELA . ' [COORDENACAO] migrada de GESTOR');
         }
@@ -121,7 +126,7 @@ class SeedUsersCommand extends Command
         }
 
         $this->em->flush();
-        $io->success('Seed concluído. Senha clínica/demo: ' . self::SEED_PASSWORD);
+        $io->success('Seed concluído. Senha clínica/demo: ' . $seedPassword);
 
         return Command::SUCCESS;
     }

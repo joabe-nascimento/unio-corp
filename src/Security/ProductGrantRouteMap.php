@@ -345,6 +345,8 @@ final class ProductGrantRouteMap
         'app_pos_operatorio_questionarios' => ['scope' => 'hub_pos_operatorio', 'product' => 'questionarios'],
         'app_pos_operatorio_trabalho' => ['scope' => 'hub_pos_operatorio', 'product' => 'painel'],
         'app_pos_operatorio_qualidade' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
+        'app_pos_operatorio_outcomes' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
+        'app_pos_operatorio_outcomes_export' => ['scope' => 'hub_pos_operatorio', 'product' => 'relatorios'],
         'app_organismo_contratos' => ['scope' => 'hub_pos_operatorio', 'product' => 'protocolos'],
         'app_organismo_contrato_atestar' => ['scope' => 'hub_pos_operatorio', 'product' => 'protocolos'],
         'app_organismo_bootstrap_contratos' => ['scope' => 'hub_pos_operatorio', 'product' => 'protocolos'],

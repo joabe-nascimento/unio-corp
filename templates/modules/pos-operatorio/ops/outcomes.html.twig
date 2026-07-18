@@ -1,0 +1,180 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Unio Outcomes™ · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Unio Outcomes™' %}
+{% set hub_page_eyebrow = org_brand_label %}
+{% set hub_page_subtitle = 'Inteligência de resultado clínico — risco preditivo, índice por cirurgião e loop receita ↔ cuidado' %}
+{% set hub_search_hidden = true %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/clinic-outcomes.css') }}?v=2">
+{% endblock %}
+
+{% block hub_toolbar_actions %}
+<form method="get" action="{{ path('app_pos_operatorio_outcomes') }}" class="outcomes-filter-form d-flex align-items-center gap-2">
+    <label class="sr-only" for="outcomes-medico">Cirurgião</label>
+    <select id="outcomes-medico" name="medico" class="form-control form-control-sm outcomes-filter-select" onchange="this.form.submit()">
+        <option value="">Todos os cirurgiões</option>
+        {% for m in outcomes.medicos %}
+        <option value="{{ m.id }}"{{ outcomes.medico_filter == m.id ? ' selected' : '' }}>{{ m.nome }}</option>
+        {% endfor %}
+    </select>
+    <a href="{{ path('app_pos_operatorio_outcomes_export', outcomes.medico_filter ? {medico: outcomes.medico_filter} : {}) }}"
+       class="btn-unio btn-sm">
+        <i class="fas fa-file-export" aria-hidden="true"></i> Exportar CSV
+    </a>
+</form>
+{% endblock %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: outcomes.kpis, mb: 'mb-0' } %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="outcomes-grid">
+
+    {# ── Camada 1: Score de risco preditivo ── #}
+    <section class="unio-card outcomes-panel outcomes-panel--risk p-3">
+        <header class="outcomes-panel__head">
+            <div>
+                <h2 class="outcomes-panel__title">
+                    <i class="fas fa-heart-pulse outcomes-panel__icon" aria-hidden="true"></i>
+                    Score de risco preditivo
+                </h2>
+                <p class="outcomes-panel__desc">Vitória + questionários + alertas — identifique complicações antes do P1.</p>
+            </div>
+        </header>
+
+        {% if outcomes.risk_patients is empty %}
+            {% include 'components/empty_state.html.twig' with {
+                icon: 'fa-user-injured',
+                title: 'Sem pacientes em acompanhamento',
+                text: 'Cadastre pacientes na Trilha Unio para gerar scores de risco.',
+                btn_label: 'Pacientes',
+                btn_href: path('app_pos_operatorio_pacientes'),
+                btn_sm: true,
+                compact: true
+            } %}
+        {% else %}
+        <div class="table-responsive outcomes-table-wrap">
+            <table class="table table-sm outcomes-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Cirurgião</th>
+                        <th>Score</th>
+                        <th>Adesão</th>
+                        <th>Dor</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in outcomes.risk_patients %}
+                    <tr>
+                        <td>
+                            <strong class="outcomes-table__name">{{ row.nome }}</strong>
+                            <span class="outcomes-table__meta">{{ row.codigo }}{% if row.dia_pos is not null %} · D+{{ row.dia_pos }}{% endif %}</span>
+                        </td>
+                        <td class="outcomes-table__muted">{{ row.medico }}</td>
+                        <td>
+                            <div class="outcomes-risk-cell">
+                                <span class="outcomes-risk outcomes-risk--{{ row.nivel }}">{{ row.score }}</span>
+                                <span class="outcomes-risk__label">{{ row.nivel_label }}</span>
+                            </div>
+                        </td>
+                        <td class="outcomes-table__num">{{ row.adesao_pct }}%</td>
+                        <td class="outcomes-table__num">{{ row.dor_media is not null ? row.dor_media ~ '/10' : '—' }}</td>
+                        <td class="outcomes-table__action">
+                            <a href="{{ path('app_pos_operatorio_pacientes', {open_ficha: row.id}) }}" class="btn-unio btn-sm btn-outline-unio">Ficha</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </section>
+
+    {# ── Camada 2: Índice por cirurgião ── #}
+    <section class="unio-card outcomes-panel outcomes-panel--surgeons p-3">
+        <header class="outcomes-panel__head">
+            <div>
+                <h2 class="outcomes-panel__title">
+                    <i class="fas fa-user-doctor outcomes-panel__icon" aria-hidden="true"></i>
+                    Índice de resultado por cirurgião
+                </h2>
+                <p class="outcomes-panel__desc">Adesão, dor, satisfação e alertas P1 — relatório white-label para o médico.</p>
+            </div>
+        </header>
+
+        {% if outcomes.surgeons is empty %}
+            <p class="text-muted small mb-0">Defina o médico responsável nas fichas para ver o ranking.</p>
+        {% else %}
+        <div class="outcomes-surgeon-list">
+            {% for s in outcomes.surgeons %}
+            <article class="outcomes-surgeon-card">
+                <div class="outcomes-surgeon-card__rank">{{ loop.index }}</div>
+                <div class="outcomes-surgeon-card__main">
+                    <strong class="outcomes-surgeon-card__name">{{ s.nome }}</strong>
+                    <p class="outcomes-surgeon-card__proc">{{ s.pacientes }} paciente(s) · {{ s.procedimento_top }}</p>
+                    <div class="outcomes-surgeon-card__metrics">
+                        <span title="Adesão aos questionários"><i class="fas fa-clipboard-check" aria-hidden="true"></i> {{ s.adesao_pct }}%</span>
+                        <span title="Dor média PROM"><i class="fas fa-heart-pulse" aria-hidden="true"></i> {{ s.dor_media is not null ? s.dor_media ~ '/10' : '—' }}</span>
+                        <span title="Satisfação"><i class="fas fa-face-smile" aria-hidden="true"></i> {{ s.satisfacao is not null ? s.satisfacao ~ '%' : '—' }}</span>
+                        <span title="Alertas P1"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {{ s.alertas_p1 }}</span>
+                    </div>
+                </div>
+                <div class="outcomes-surgeon-card__aside">
+                    <span class="outcomes-index">{{ s.outcome_index }}<small>%</small></span>
+                    <a href="{{ path('app_pos_operatorio_outcomes', {medico: s.id}) }}" class="btn-unio btn-sm btn-outline-unio outcomes-surgeon-card__action">Filtrar</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+
+    {# ── Camada 3: Loop receita ↔ cuidado ── #}
+    <section class="unio-card outcomes-panel outcomes-panel--revenue p-3">
+        <header class="outcomes-panel__head">
+            <div>
+                <h2 class="outcomes-panel__title">
+                    <i class="fas fa-arrows-spin outcomes-panel__icon" aria-hidden="true"></i>
+                    Loop receita ↔ cuidado
+                </h2>
+                <p class="outcomes-panel__desc">CRM → cirurgia → pós-op → indicação — funil com prova de resultado.</p>
+            </div>
+        </header>
+
+        {% set rev = outcomes.revenue_loop %}
+        <div class="outcomes-funnel">
+            {% for step in rev.funil %}
+            <div class="outcomes-funnel__step">
+                <div class="outcomes-funnel__icon"><i class="fas {{ step.icon }}" aria-hidden="true"></i></div>
+                <strong class="outcomes-funnel__value">{{ step.valor }}</strong>
+                <span class="outcomes-funnel__label">{{ step.etapa }}</span>
+            </div>
+            {% if not loop.last %}
+            <div class="outcomes-funnel__arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <p class="outcomes-revenue-note">{{ rev.roi_narrativa }}</p>
+
+        <div class="outcomes-revenue-links">
+            <a href="{{ path('app_comercial') }}" class="btn-unio btn-sm btn-outline-unio">Abrir CRM</a>
+            <a href="{{ path('app_pos_operatorio_relatorios') }}" class="btn-unio btn-sm btn-outline-unio">Relatórios</a>
+        </div>
+    </section>
+
+</div>
+
+<section class="unio-card outcomes-brand p-3 mt-3">
+    <p class="outcomes-brand__tagline mb-0">
+        <strong>Unio Saúde</strong> — a única plataforma que acompanha o paciente do lead à prova de resultado.
+    </p>
+</section>
+{% endblock %}

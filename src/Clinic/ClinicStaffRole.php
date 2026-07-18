@@ -85,6 +85,7 @@ final class ClinicStaffRole
         self::MEDICO => [
             'trabalho',
             'pacientes',
+            'outcomes',
             'protocolos',
             'biblioteca',
             'retornos',
@@ -99,6 +100,7 @@ final class ClinicStaffRole
             'painel_dia',
         ],
         self::COORDENACAO => [
+            'outcomes',
             'qualidade',
             'relatorios',
             'integracoes',
@@ -152,6 +154,7 @@ final class ClinicStaffRole
         'lembretes' => 'questionarios',
         'plantao' => 'alertas',
         'qualidade' => 'relatorios',
+        'outcomes' => 'relatorios',
         'contrato_cuidado' => 'protocolos',
         'relatorios' => 'relatorios',
         'carteirinha' => 'operacao',

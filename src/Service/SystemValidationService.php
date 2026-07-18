@@ -35,6 +35,7 @@ final class SystemValidationService
             'app_pos_operatorio_protocolos' => false,
             'app_pos_operatorio_config' => false,
             'app_pos_operatorio_relatorios' => false,
+            'app_pos_operatorio_outcomes' => false,
         ],
         DevSeedEmails::BEATRIZ_ENFERMAGEM => [
             'app_pos_operatorio_questionarios' => true,
@@ -54,9 +55,11 @@ final class SystemValidationService
             'app_pos_operatorio_config' => false,
             'app_pos_operatorio_questionarios' => false,
             'app_pos_operatorio_relatorios' => false,
+            'app_pos_operatorio_outcomes' => false,
         ],
         DevSeedEmails::HELENA_COORDENACAO => [
             'app_pos_operatorio_relatorios' => true,
+            'app_pos_operatorio_outcomes' => true,
             'app_pos_operatorio_config' => true,
             'app_pos_operatorio_pacientes' => false,
             'app_pos_operatorio_alertas' => false,
@@ -200,6 +203,7 @@ final class SystemValidationService
         'app_pos_operatorio_questionarios',
         'app_pos_operatorio_protocolos',
         'app_pos_operatorio_relatorios',
+        'app_pos_operatorio_outcomes',
         'app_pos_operatorio_config',
         'app_workspace_select',
         'app_workspace_switch',

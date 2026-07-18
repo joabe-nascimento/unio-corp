@@ -27,10 +27,13 @@
                 </li>
 {% endmacro %}
 
-{# Subitem dentro de módulo expansível (sem ícone) #}
-{% macro submenu(label, href, active, extra_class) %}
+{# Subitem dentro de módulo expansível — ícone leve opcional (5º arg) #}
+{% macro submenu(label, href, active, extra_class, icon) %}
 <li class="nav-item">
     <a href="{{ href }}" class="nav-link nav-submenu-link{{ extra_class ? ' ' ~ extra_class : '' }}{{ active ? ' active' : '' }}"{{ active ? ' aria-current="page"' : '' }}>
+        <span class="nav-submenu-icon-slot" aria-hidden="true">
+            <i class="fas {{ icon|default('fa-circle') }} nav-submenu-icon"></i>
+        </span>
         <p>{{ label }}</p>
     </a>
 </li>

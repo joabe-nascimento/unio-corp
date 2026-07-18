@@ -155,6 +155,7 @@ final class PageBackResolver
         'app_pos_operatorio_questionarios' => 'app_dashboard',
         'app_pos_operatorio_trabalho' => 'app_dashboard',
         'app_pos_operatorio_qualidade' => 'app_dashboard',
+        'app_pos_operatorio_outcomes' => 'app_dashboard',
         'app_pos_operatorio_retornos' => 'app_dashboard',
         'app_pos_operatorio_biblioteca' => 'app_dashboard',
         'app_pos_operatorio_lembretes' => 'app_dashboard',

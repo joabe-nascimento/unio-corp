@@ -8,6 +8,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.mailer_from: '%env(MAILER_FROM_ADDRESS)%'
+    app.default_user_password_default: 'unio123'
+    env(APP_DEFAULT_USER_PASSWORD): ''
     vitoria_ai_url_default: ''
     vitoria_ai_key_default: 'dev-vitoria-key-change-me'
     vitoria_ai_enabled_default: 'true'
@@ -207,7 +209,15 @@ services:
         arguments:
             $defaultUri: '%env(default:default_uri_default:DEFAULT_URI)%'
 
+    App\Service\Security\DefaultUserPasswordProvider:
+        arguments:
+            $defaultPassword: '%env(default:app.default_user_password_default:APP_DEFAULT_USER_PASSWORD)%'
+
     App\Command\SeedUsersCommand:
+        arguments:
+            $appEnv: '%kernel.environment%'
+
+    App\Command\ResetAllUserPasswordsCommand:
         arguments:
             $appEnv: '%kernel.environment%'
 

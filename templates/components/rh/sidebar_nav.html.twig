@@ -4,7 +4,7 @@
 #}
 {% import 'macros/sidebar_nav.html.twig' as nav %}
 
-{{ nav.submenu('Visão geral', path('app_rh'), route == 'app_rh', 'rh-sidebar-link') }}
+{{ nav.submenu('Visão geral', path('app_rh'), route == 'app_rh', 'rh-sidebar-link', 'fa-gauge-high') }}
 
 {% set rh_groups = {
     'operacao': 'Operação',
@@ -28,7 +28,8 @@
                 rh_module_sidebar_label(mod),
                 path(mod.route),
                 rh_module_route_active(route, mod.route),
-                'rh-sidebar-link'
+                'rh-sidebar-link',
+                mod.icon|default('fa-circle')
             ) }}
         {% endif %}
     {% endfor %}
