@@ -747,6 +747,59 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin_configuracoes', ['_fragment' => 'cfg-sistema']);
     }
 
+    // ────────────────────────── WHATSAPP ────────────────────────────────
+
+    #[Route('/whatsapp', name: 'app_admin_whatsapp')]
+    public function whatsapp(Request $request): Response
+    {
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('admin_whatsapp_config', (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token inválido.');
+                return $this->redirectToRoute('app_admin_whatsapp');
+            }
+
+            $config = [
+                'whatsapp_enabled' => $request->request->has('whatsapp_enabled'),
+                'whatsapp_provider' => trim((string) $request->request->get('whatsapp_provider', '')),
+                'whatsapp_api_url' => trim((string) $request->request->get('whatsapp_api_url', '')),
+                'whatsapp_api_key' => trim((string) $request->request->get('whatsapp_api_key', '')),
+                'whatsapp_phone_number' => trim((string) $request->request->get('whatsapp_phone_number', '')),
+                'whatsapp_auto_confirm_enabled' => $request->request->has('whatsapp_auto_confirm_enabled'),
+                'whatsapp_auto_reminder_enabled' => $request->request->has('whatsapp_auto_reminder_enabled'),
+                'whatsapp_reminder_hours' => (int) $request->request->get('whatsapp_reminder_hours', 24),
+                'whatsapp_trilha_enabled' => $request->request->has('whatsapp_trilha_enabled'),
+            ];
+
+            foreach ($config as $key => $value) {
+                $this->platformConfig->set($key, $value);
+            }
+
+            $actor = $this->getUser();
+            $this->platformAudit->record(
+                PlatformAuditLog::CATEGORY_CONFIG,
+                PlatformAuditLog::ACTION_SAVE,
+                PlatformAuditLog::OUTCOME_SUCCESS,
+                'Configurações do WhatsApp salvas',
+                $actor instanceof User ? $actor : null,
+                null,
+                'whatsapp_config',
+                null,
+                'platform_config',
+                $request,
+                ['enabled' => $config['whatsapp_enabled']],
+            );
+
+            $this->addFlash('success', 'Configurações do WhatsApp salvas com sucesso.');
+            return $this->redirectToRoute('app_admin_whatsapp', ['saved' => 1]);
+        }
+
+        $config = $this->platformConfig->all();
+
+        return $this->render(self::T . 'whatsapp.html.twig', [
+            'config' => $config,
+        ]);
+    }
+
     // ────────────────────────── Helpers ────────────────────────────────
 
     private function syncGrants(User $user, array $input): void

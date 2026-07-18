@@ -55,6 +55,10 @@ parameters:
     wallet_google_issuer_id_default: ''
     wallet_google_service_account_path_default: ''
     wallet_google_origins_default: ''
+    
+    # JWT Configuration
+    env(JWT_SECRET_KEY): 'your-super-secret-jwt-key-change-this-in-production-minimum-32-chars'
+    jwt_secret_key_default: 'dev-jwt-secret-key-please-change-in-production-32chars'
 
 services:
     # default configuration for services in *this* file
@@ -297,6 +301,12 @@ services:
 
     App\Service\Vitoria\Tool\AbrirAdmissaoTool:
         tags: ['app.vitoria_tool']
+
+    # JWT Service for Mobile API
+    App\Service\Security\JwtService:
+        arguments:
+            $secretKey: '%env(default:jwt_secret_key_default:JWT_SECRET_KEY)%'
+            $expirationSeconds: 86400  # 24 horas
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

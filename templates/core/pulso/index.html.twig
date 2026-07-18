@@ -1,10 +1,11 @@
-﻿{% extends 'base.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}{{ org_brand_label|default('Unio Saúde') }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=17">
+    <link rel="stylesheet" href="{{ asset('css/clinic-finance-dashboard.css') }}?v=1">
 {% endblock %}
 
 {% block page_toolbar_layout %}yes{% endblock %}
@@ -185,6 +186,9 @@
             </a>
         </div>
     </section>
+
+    {# Dashboard Financeiro Executivo #}
+    {% include 'components/clinic/finance_dashboard_widget.html.twig' %}
     {% endif %}
 
     <section class="unio-card pulso-cenas-card" aria-labelledby="pulsoCenasHeading">
@@ -236,4 +240,6 @@
 {% block javascripts %}
     {{ parent() }}
     <script src="{{ asset('js/unio-pulso.js') }}?v=3" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="{{ asset('js/clinic-finance-dashboard.js') }}?v=1" defer></script>
 {% endblock %}

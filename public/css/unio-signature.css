@@ -339,14 +339,28 @@
 
 /* Ritual onboarding — banner Vitória */
 .unio-ritual {
+    --ritual-bg: linear-gradient(105deg, #ffffff 0%, #f7faff 55%, #eef2fb 100%);
+    --ritual-border: rgba(79, 127, 255, 0.12);
+    --ritual-shadow: 0 8px 28px rgba(30, 42, 58, 0.05);
+    --ritual-overlay-h: linear-gradient(90deg,
+        #f7faff 0%,
+        rgba(247, 250, 255, 0.88) 10%,
+        rgba(247, 250, 255, 0.35) 28%,
+        transparent 48%);
+    --ritual-overlay-v: linear-gradient(180deg,
+        #ffffff 0%,
+        rgba(255, 255, 255, 0.7) 28%,
+        rgba(255, 255, 255, 0.15) 55%,
+        transparent 78%);
+    --ritual-avatar-ring: rgba(255, 255, 255, 0.92);
     display: block;
     position: relative;
     margin: 0 0 1rem;
     overflow: hidden;
     border-radius: 18px;
-    border: 1px solid rgba(79, 127, 255, 0.12);
-    background: linear-gradient(105deg, #ffffff 0%, #f7faff 55%, #eef2fb 100%);
-    box-shadow: 0 8px 28px rgba(30, 42, 58, 0.05);
+    border: 1px solid var(--ritual-border);
+    background: var(--ritual-bg);
+    box-shadow: var(--ritual-shadow);
     isolation: isolate;
     min-height: 11.5rem;
 }
@@ -388,7 +402,7 @@
 .unio-ritual__ai-pill .helix-avatar {
     width: 1.3rem;
     height: 1.3rem;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92);
+    box-shadow: 0 0 0 2px var(--ritual-avatar-ring);
 }
 
 .unio-ritual__portrait {
@@ -407,11 +421,7 @@
     position: absolute;
     inset: 0;
     z-index: 2;
-    background: linear-gradient(90deg,
-        #f7faff 0%,
-        rgba(247, 250, 255, 0.88) 10%,
-        rgba(247, 250, 255, 0.35) 28%,
-        transparent 48%);
+    background: var(--ritual-overlay-h);
     pointer-events: none;
 }
 .unio-ritual__banner-art {
@@ -493,11 +503,7 @@
         height: 9.5rem;
     }
     .unio-ritual__portrait::before {
-        background: linear-gradient(180deg,
-            #ffffff 0%,
-            rgba(255, 255, 255, 0.7) 28%,
-            rgba(255, 255, 255, 0.15) 55%,
-            transparent 78%);
+        background: var(--ritual-overlay-v);
     }
     .unio-ritual__banner-art {
         object-position: center 28%;
@@ -512,6 +518,50 @@
         width: 100%;
         justify-content: center;
     }
+}
+
+/* Tema escuro — banner harmonizado com o shell */
+[data-theme="dark"] .unio-ritual {
+    --ritual-bg: linear-gradient(105deg, #121828 0%, #0f1624 52%, #0c121c 100%);
+    --ritual-border: rgba(91, 124, 245, 0.22);
+    --ritual-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    --ritual-overlay-h: linear-gradient(90deg,
+        #121828 0%,
+        rgba(18, 24, 40, 0.92) 12%,
+        rgba(18, 24, 40, 0.45) 30%,
+        transparent 50%);
+    --ritual-overlay-v: linear-gradient(180deg,
+        #121828 0%,
+        rgba(18, 24, 40, 0.82) 30%,
+        rgba(18, 24, 40, 0.25) 58%,
+        transparent 80%);
+    --ritual-avatar-ring: rgba(18, 24, 40, 0.95);
+}
+
+[data-theme="dark"] .unio-ritual__title {
+    color: var(--text-1, #e8ecf4);
+}
+
+[data-theme="dark"] .unio-ritual__desc {
+    color: var(--text-2, rgba(232, 236, 244, 0.72));
+}
+
+[data-theme="dark"] .unio-ritual__ai-pill {
+    color: #9eb8f5;
+    background: rgba(91, 124, 245, 0.14);
+    border-color: rgba(91, 124, 245, 0.28);
+}
+
+[data-theme="dark"] .unio-ritual__actions .btn-unio-ghost {
+    color: #c5d8f5;
+    background: rgba(91, 124, 245, 0.12);
+    border-color: rgba(91, 124, 245, 0.28);
+}
+
+[data-theme="dark"] .unio-ritual__actions .btn-unio-ghost:hover {
+    color: #e8ecf4;
+    background: rgba(91, 124, 245, 0.22);
+    border-color: rgba(91, 124, 245, 0.4);
 }
 
 /* Microinteração atestar */

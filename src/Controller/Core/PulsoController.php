@@ -3,6 +3,7 @@
 namespace App\Controller\Core;
 
 use App\Entity\User;
+use App\Service\Analytics\ClinicFinanceAnalyticsService;
 use App\Service\NavigationService;
 use App\Service\Organismo\OrganismoFeature;
 use App\Service\Organismo\PulsoService;
@@ -21,6 +22,7 @@ final class PulsoController extends AbstractController
         PulsoService $pulso,
         WorkspaceService $workspace,
         NavigationService $navigation,
+        ClinicFinanceAnalyticsService $financeAnalytics,
     ): Response {
         if (!$organismo->isEnabled()) {
             return $this->redirectToRoute('app_dashboard');
@@ -33,11 +35,18 @@ final class PulsoController extends AbstractController
         $layout = $navigation->getLayout($user);
         $snapshot = $pulso->buildSnapshot($user, $empresa, $layout, \count($empresas));
 
+        $financeData = ['dre' => [], 'repasse' => [], 'trend_labels' => [], 'trend_values' => []];
+        try {
+            $financeData = $financeAnalytics->getWidgetData($empresa);
+        } catch (\Exception $e) {
+        }
+
         return $this->render('core/pulso/index.html.twig', [
             'snapshot' => $snapshot,
             'empresa' => $empresa,
             'empresas' => $empresas,
             'pulso_api_url' => $this->generateUrl('api_pulso'),
+            'finance_data' => $financeData,
         ]);
     }
 }

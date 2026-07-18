@@ -74,6 +74,57 @@ final class ClinicFinanceAnalyticsService
     }
 
     /**
+     * Gera dados simplificados para o widget do dashboard
+     *
+     * @return array{
+     *     dre: array<string, mixed>,
+     *     repasse: list<array<string, mixed>>,
+     *     trend_labels: list<string>,
+     *     trend_values: list<float>
+     * }
+     */
+    public function getWidgetData(Empresa $empresa): array
+    {
+        $report = $this->financeReport->build($empresa);
+        $dre = $report['dre'];
+        $repasse = $report['repasse'];
+
+        $today = new \DateTimeImmutable('today');
+        $byDay = [];
+        for ($i = 6; $i >= 0; --$i) {
+            $byDay[$today->modify(sprintf('-%d days', $i))->format('Y-m-d')] = 0.0;
+        }
+
+        $contas = $this->contas->findByEmpresaAndStatus($empresa, ClinicConta::STATUS_PAGO, 500);
+        $since = $today->modify('-6 days')->setTime(0, 0);
+
+        foreach ($contas as $conta) {
+            $pagoEm = $conta->getPagoEm() ?? $conta->getAtualizadoEm();
+            if ($pagoEm < $since) {
+                continue;
+            }
+            $key = $pagoEm->format('Y-m-d');
+            if (isset($byDay[$key])) {
+                $byDay[$key] += ((int) ($conta->getValorCentavos() ?? 0)) / 100;
+            }
+        }
+
+        $labels = [];
+        $values = [];
+        foreach ($byDay as $ymd => $valor) {
+            $labels[] = (new \DateTimeImmutable($ymd))->format('d/m');
+            $values[] = round($valor, 2);
+        }
+
+        return [
+            'dre' => $dre,
+            'repasse' => $repasse,
+            'trend_labels' => $labels,
+            'trend_values' => $values,
+        ];
+    }
+
+    /**
      * @param array<string, mixed> $dre
      * @param list<array<string, mixed>> $repasse
      *

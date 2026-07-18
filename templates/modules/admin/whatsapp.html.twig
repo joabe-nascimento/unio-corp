@@ -1,0 +1,623 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}WhatsApp — Administração{% endblock %}
+{% block permissions_scope %}hub_admin{% endblock %}
+{% set hub_page_title = 'Configurações WhatsApp' %}
+{% set hub_page_body_mode = 'scroll' %}
+
+{% block hub_content %}
+<div class="cfg-layout">
+
+    {# ── Sidebar de navegação ── #}
+    <nav class="cfg-sidebar" id="cfgSidebar" aria-label="Seções WhatsApp">
+        <a href="#whatsapp-geral" class="cfg-sidebar-item cfg-sidebar-item--active" data-cfg-nav="geral">
+            <i class="fab fa-whatsapp" aria-hidden="true"></i> Configurações
+        </a>
+        <a href="#whatsapp-automacao" class="cfg-sidebar-item" data-cfg-nav="automacao">
+            <i class="fas fa-robot" aria-hidden="true"></i> Automação
+        </a>
+        <a href="#whatsapp-templates" class="cfg-sidebar-item" data-cfg-nav="templates">
+            <i class="fas fa-message" aria-hidden="true"></i> Templates
+        </a>
+        <a href="#whatsapp-teste" class="cfg-sidebar-item" data-cfg-nav="teste">
+            <i class="fas fa-vial" aria-hidden="true"></i> Testes
+        </a>
+    </nav>
+
+    {# ── Conteúdo das seções ── #}
+    <div class="cfg-content">
+
+        <form method="post" action="{{ path('app_admin_whatsapp') }}" class="unio-form" id="whatsappForm">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_whatsapp_config') }}">
+
+        {# ── 1. Configurações Gerais ── #}
+        <section class="cfg-section cfg-section--visible" id="whatsapp-geral" data-cfg-section="geral">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fab fa-whatsapp" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Configurações Gerais</h2>
+                    <p class="cfg-section-sub">Credenciais e configurações básicas do WhatsApp Business API.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="cfg-toggle-wrapper mb-4">
+                    <label class="cfg-toggle">
+                        <input type="checkbox" name="whatsapp_enabled" 
+                               {{ config.whatsapp_enabled|default(false) ? 'checked' : '' }}>
+                        <span class="cfg-toggle-slider"></span>
+                    </label>
+                    <div class="cfg-toggle-label">
+                        <strong>Ativar integração WhatsApp</strong>
+                        <p>Habilita o envio de mensagens automáticas via WhatsApp Business API</p>
+                    </div>
+                </div>
+
+                <div class="cfg-form-group">
+                    <label for="whatsapp_provider" class="cfg-label">Provedor</label>
+                    <select name="whatsapp_provider" id="whatsapp_provider" class="unio-input">
+                        <option value="evolution" {{ config.whatsapp_provider|default('') == 'evolution' ? 'selected' : '' }}>
+                            Evolution API
+                        </option>
+                        <option value="twilio" {{ config.whatsapp_provider|default('') == 'twilio' ? 'selected' : '' }}>
+                            Twilio
+                        </option>
+                        <option value="messagebird" {{ config.whatsapp_provider|default('') == 'messagebird' ? 'selected' : '' }}>
+                            MessageBird
+                        </option>
+                        <option value="custom" {{ config.whatsapp_provider|default('') == 'custom' ? 'selected' : '' }}>
+                            Customizado
+                        </option>
+                    </select>
+                    <small class="cfg-hint">Provedor da API de WhatsApp Business</small>
+                </div>
+
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'whatsapp_api_url',
+                    name: 'whatsapp_api_url',
+                    label: 'URL da API',
+                    value: config.whatsapp_api_url|default(''),
+                    placeholder: 'https://api.evolution.com.br/v1',
+                    hint: 'Endpoint base da API do provedor'
+                } %}
+
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'whatsapp_api_key',
+                    name: 'whatsapp_api_key',
+                    label: 'API Key',
+                    type: 'password',
+                    value: config.whatsapp_api_key|default(''),
+                    placeholder: '••••••••••••••••',
+                    hint: 'Chave de autenticação (será armazenada de forma segura)'
+                } %}
+
+                {% include 'components/unio_form_field.html.twig' with {
+                    id: 'whatsapp_phone_number',
+                    name: 'whatsapp_phone_number',
+                    label: 'Número do WhatsApp Business',
+                    value: config.whatsapp_phone_number|default(''),
+                    placeholder: '+55 11 98765-4321',
+                    hint: 'Número com código do país (ex: +55 11 98765-4321)'
+                } %}
+            </div>
+        </section>
+
+        {# ── 2. Automação de Mensagens ── #}
+        <section class="cfg-section" id="whatsapp-automacao" data-cfg-section="automacao">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fas fa-robot" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Automação de Mensagens</h2>
+                    <p class="cfg-section-sub">Configure envios automáticos para eventos específicos.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="cfg-auto-section mb-4">
+                    <div class="cfg-toggle-wrapper">
+                        <label class="cfg-toggle">
+                            <input type="checkbox" name="whatsapp_auto_confirm_enabled" 
+                                   {{ config.whatsapp_auto_confirm_enabled|default(false) ? 'checked' : '' }}>
+                            <span class="cfg-toggle-slider"></span>
+                        </label>
+                        <div class="cfg-toggle-label">
+                            <strong>Confirmação de agendamento (D-1)</strong>
+                            <p>Envia lembrete 24h antes da consulta pedindo confirmação</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cfg-auto-section mb-4">
+                    <div class="cfg-toggle-wrapper mb-2">
+                        <label class="cfg-toggle">
+                            <input type="checkbox" name="whatsapp_auto_reminder_enabled" 
+                                   {{ config.whatsapp_auto_reminder_enabled|default(false) ? 'checked' : '' }}>
+                            <span class="cfg-toggle-slider"></span>
+                        </label>
+                        <div class="cfg-toggle-label">
+                            <strong>Lembrete de consulta</strong>
+                            <p>Envia lembrete automático antes da consulta</p>
+                        </div>
+                    </div>
+                    <div class="cfg-form-group" style="padding-left: 54px;">
+                        <label for="whatsapp_reminder_hours" class="cfg-label">Enviar com</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="number" 
+                                   name="whatsapp_reminder_hours" 
+                                   id="whatsapp_reminder_hours" 
+                                   class="unio-input" 
+                                   value="{{ config.whatsapp_reminder_hours|default(24) }}" 
+                                   min="1" 
+                                   max="168"
+                                   style="max-width: 100px;">
+                            <span>horas de antecedência</span>
+                        </div>
+                        <small class="cfg-hint">De 1 a 168 horas (7 dias)</small>
+                    </div>
+                </div>
+
+                <div class="cfg-auto-section mb-4">
+                    <div class="cfg-toggle-wrapper">
+                        <label class="cfg-toggle">
+                            <input type="checkbox" name="whatsapp_trilha_enabled" 
+                                   {{ config.whatsapp_trilha_enabled|default(false) ? 'checked' : '' }}>
+                            <span class="cfg-toggle-slider"></span>
+                        </label>
+                        <div class="cfg-toggle-label">
+                            <strong>Trilha pré-operatória</strong>
+                            <p>Envia marcos da trilha Unio (D-7, D-3, D-1, pós-operatório)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# ── 3. Templates de Mensagens ── #}
+        <section class="cfg-section" id="whatsapp-templates" data-cfg-section="templates">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fas fa-message" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Templates de Mensagens</h2>
+                    <p class="cfg-section-sub">Personalize os textos das mensagens automáticas.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-circle-info me-2"></i>
+                    Os templates estão sendo gerenciados via código para garantir formatação consistente. 
+                    Use as variáveis disponíveis: <code>{nome}</code>, <code>{data}</code>, <code>{profissional}</code>, etc.
+                </div>
+
+                <div class="cfg-template-list">
+                    <div class="cfg-template-item">
+                        <h4><i class="fas fa-calendar-check"></i> Confirmação de Agendamento</h4>
+                        <p>Enviado 24h antes da consulta</p>
+                        <code>WhatsappTemplateLibrary::agendaConfirmacao()</code>
+                    </div>
+                    <div class="cfg-template-item">
+                        <h4><i class="fas fa-route"></i> Marco da Trilha</h4>
+                        <p>Marcos importantes (D-7, D-3, D-1, pós-op)</p>
+                        <code>WhatsappTemplateLibrary::trilhaMarco()</code>
+                    </div>
+                    <div class="cfg-template-item">
+                        <h4><i class="fas fa-flask-vial"></i> Resultado de Exame</h4>
+                        <p>Notifica quando resultados estão disponíveis</p>
+                        <code>WhatsappTemplateLibrary::resultadoExame()</code>
+                    </div>
+                    <div class="cfg-template-item">
+                        <h4><i class="fas fa-pills"></i> Lembrete de Medicação</h4>
+                        <p>Lembretes para tomar medicamentos</p>
+                        <code>WhatsappTemplateLibrary::lembreteMedicacao()</code>
+                    </div>
+                    <div class="cfg-template-item">
+                        <h4><i class="fas fa-credit-card"></i> Cobrança de Conta</h4>
+                        <p>Lembretes de contas em aberto</p>
+                        <code>WhatsappTemplateLibrary::cobrancaConta()</code>
+                    </div>
+                    <div class="cfg-template-item">
+                        <h4><i class="fas fa-star"></i> Pesquisa de Satisfação</h4>
+                        <p>Enviado após atendimento</p>
+                        <code>WhatsappTemplateLibrary::pesquisaSatisfacao()</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# ── 4. Testes ── #}
+        <section class="cfg-section" id="whatsapp-teste" data-cfg-section="teste">
+            <div class="cfg-section-header">
+                <div class="cfg-section-icon"><i class="fas fa-vial" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="cfg-section-title">Testar Integração</h2>
+                    <p class="cfg-section-sub">Envie mensagens de teste para validar a configuração.</p>
+                </div>
+            </div>
+
+            <div class="cfg-fields">
+                <div class="alert alert-warning mb-4">
+                    <i class="fas fa-triangle-exclamation me-2"></i>
+                    <strong>Atenção:</strong> Salve as configurações acima antes de realizar testes.
+                </div>
+
+                <div class="cfg-test-box">
+                    <label for="test_phone" class="cfg-label">Número de teste</label>
+                    <input type="tel" id="test_phone" class="unio-input mb-3" placeholder="+55 11 98765-4321">
+                    
+                    <label for="test_template" class="cfg-label">Template</label>
+                    <select id="test_template" class="unio-input mb-3">
+                        <option value="confirmacao">Confirmação de agendamento</option>
+                        <option value="trilha">Marco da trilha</option>
+                        <option value="resultado">Resultado de exame</option>
+                        <option value="lembrete">Lembrete de medicação</option>
+                    </select>
+
+                    <button type="button" class="unio-btn unio-btn--secondary" id="btnSendTest">
+                        <i class="fab fa-whatsapp me-2"></i> Enviar Teste
+                    </button>
+                </div>
+
+                <div id="testResult" class="mt-3" style="display: none;"></div>
+            </div>
+        </section>
+
+        {# ── Botões de ação ── #}
+        <div class="cfg-actions">
+            <button type="submit" class="unio-btn unio-btn--primary">
+                <i class="fas fa-check me-2"></i> Salvar Configurações
+            </button>
+            <a href="{{ path('app_admin') }}" class="unio-btn unio-btn--ghost">
+                <i class="fas fa-times me-2"></i> Cancelar
+            </a>
+        </div>
+
+        </form>
+
+    </div>
+</div>
+
+<style>
+.cfg-layout {
+    display: flex;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.cfg-sidebar {
+    flex: 0 0 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: sticky;
+    top: 24px;
+    height: fit-content;
+}
+
+.cfg-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-secondary, #64748b);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.cfg-sidebar-item:hover {
+    background: var(--bg-secondary, #f8fafc);
+    color: var(--text-primary, #0f172a);
+}
+
+.cfg-sidebar-item--active {
+    background: var(--primary-50, #eff6ff);
+    color: var(--primary-600, #2563eb);
+}
+
+.cfg-sidebar-item i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.cfg-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.cfg-section {
+    display: none;
+    margin-bottom: 48px;
+}
+
+.cfg-section--visible {
+    display: block;
+}
+
+.cfg-section-header {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.cfg-section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--primary-50, #eff6ff);
+    color: var(--primary-600, #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.cfg-section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary, #0f172a);
+    margin: 0 0 4px 0;
+}
+
+.cfg-section-sub {
+    font-size: 14px;
+    color: var(--text-secondary, #64748b);
+    margin: 0;
+}
+
+.cfg-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.cfg-toggle-wrapper {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.cfg-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.cfg-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.cfg-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.cfg-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.cfg-toggle input:checked + .cfg-toggle-slider {
+    background-color: var(--primary-600, #2563eb);
+}
+
+.cfg-toggle input:checked + .cfg-toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.cfg-toggle-label strong {
+    display: block;
+    font-size: 15px;
+    color: var(--text-primary, #0f172a);
+    margin-bottom: 4px;
+}
+
+.cfg-toggle-label p {
+    font-size: 13px;
+    color: var(--text-secondary, #64748b);
+    margin: 0;
+}
+
+.cfg-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cfg-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary, #0f172a);
+}
+
+.cfg-hint {
+    font-size: 13px;
+    color: var(--text-secondary, #64748b);
+}
+
+.cfg-template-list {
+    display: grid;
+    gap: 16px;
+}
+
+.cfg-template-item {
+    padding: 16px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 8px;
+    background: var(--bg-primary, white);
+}
+
+.cfg-template-item h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary, #0f172a);
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cfg-template-item h4 i {
+    color: var(--primary-600, #2563eb);
+}
+
+.cfg-template-item p {
+    font-size: 13px;
+    color: var(--text-secondary, #64748b);
+    margin: 0 0 8px 0;
+}
+
+.cfg-template-item code {
+    font-size: 12px;
+    padding: 4px 8px;
+    background: var(--bg-secondary, #f8fafc);
+    border-radius: 4px;
+    color: var(--primary-700, #1d4ed8);
+}
+
+.cfg-test-box {
+    padding: 24px;
+    border: 2px dashed var(--border-color, #e2e8f0);
+    border-radius: 12px;
+    background: var(--bg-secondary, #f8fafc);
+}
+
+.cfg-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+@media (max-width: 768px) {
+    .cfg-layout {
+        flex-direction: column;
+    }
+    
+    .cfg-sidebar {
+        position: static;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    
+    .cfg-sidebar-item {
+        flex-shrink: 0;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Navegação entre seções
+    const navLinks = document.querySelectorAll('[data-cfg-nav]');
+    const sections = document.querySelectorAll('[data-cfg-section]');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.dataset.cfgNav;
+            
+            // Atualizar navegação
+            navLinks.forEach(l => l.classList.remove('cfg-sidebar-item--active'));
+            this.classList.add('cfg-sidebar-item--active');
+            
+            // Atualizar seções
+            sections.forEach(s => s.classList.remove('cfg-section--visible'));
+            const targetSection = document.querySelector(`[data-cfg-section="${target}"]`);
+            if (targetSection) {
+                targetSection.classList.add('cfg-section--visible');
+            }
+        });
+    });
+    
+    // Teste de envio
+    const btnSendTest = document.getElementById('btnSendTest');
+    if (btnSendTest) {
+        btnSendTest.addEventListener('click', async function() {
+            const phone = document.getElementById('test_phone').value;
+            const template = document.getElementById('test_template').value;
+            const resultDiv = document.getElementById('testResult');
+            
+            if (!phone) {
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-circle-xmark me-2"></i>Digite um número de telefone</div>';
+                resultDiv.style.display = 'block';
+                return;
+            }
+            
+            // Desabilitar botão e mostrar loading
+            btnSendTest.disabled = true;
+            btnSendTest.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Enviando...';
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-circle-notch fa-spin me-2"></i>Enviando mensagem de teste...</div>';
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/whatsapp/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        template: template
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-circle-check me-2"></i>
+                            <strong>Sucesso!</strong> Mensagem enviada para ${data.phone}
+                            <br><small class="mt-2 d-block">Template: ${data.template}</small>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-circle-xmark me-2"></i>
+                            <strong>Erro:</strong> ${data.error || 'Falha ao enviar mensagem'}
+                            ${data.details ? '<br><small class="mt-1 d-block">' + data.details + '</small>' : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-circle-xmark me-2"></i>
+                        <strong>Erro de conexão:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Reabilitar botão
+                btnSendTest.disabled = false;
+                btnSendTest.innerHTML = '<i class="fab fa-whatsapp me-2"></i> Enviar Teste';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

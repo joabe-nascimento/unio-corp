@@ -1,0 +1,135 @@
+{# Widget financeiro para o Pulso — resumo executivo com gráficos #}
+{% set _dre = finance_data.dre|default({}) %}
+{% set _hoje = 'now'|date('Y-m-d') %}
+
+<section class="unio-card clinic-finance-widget" data-widget="finance-dashboard">
+    <div class="clinic-finance-header">
+        <div class="clinic-finance-header__text">
+            <h2 class="clinic-finance-title">
+                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                Visão Financeira
+            </h2>
+            <p class="clinic-finance-subtitle">Receita, despesas e indicadores do mês</p>
+        </div>
+        <div class="clinic-finance-header__actions">
+            <span class="clinic-finance-period">{{ 'now'|date('F/Y')|capitalize }}</span>
+            <a href="{{ path('app_pos_operatorio_contas_relatorio') }}" class="btn-unio-ghost btn-sm">
+                Ver relatório completo
+            </a>
+        </div>
+    </div>
+
+    {# KPIs principais #}
+    <div class="clinic-finance-kpis">
+        <div class="clinic-finance-kpi clinic-finance-kpi--primary">
+            <div class="clinic-finance-kpi__icon clinic-finance-kpi__icon--success">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="clinic-finance-kpi__content">
+                <span class="clinic-finance-kpi__label">Recebido</span>
+                <strong class="clinic-finance-kpi__value">
+                    R$ {{ (_dre.recebido_centavos|default(0) / 100)|number_format(2, ',', '.') }}
+                </strong>
+                <span class="clinic-finance-kpi__meta">{{ _dre.qtd_pagas|default(0) }} contas pagas</span>
+            </div>
+        </div>
+
+        <div class="clinic-finance-kpi">
+            <div class="clinic-finance-kpi__icon clinic-finance-kpi__icon--warning">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="clinic-finance-kpi__content">
+                <span class="clinic-finance-kpi__label">A receber</span>
+                <strong class="clinic-finance-kpi__value clinic-finance-kpi__value--amber">
+                    R$ {{ (_dre.a_receber_centavos|default(0) / 100)|number_format(2, ',', '.') }}
+                </strong>
+                <span class="clinic-finance-kpi__meta">{{ _dre.qtd_abertas|default(0) }} contas abertas</span>
+            </div>
+        </div>
+
+        <div class="clinic-finance-kpi">
+            <div class="clinic-finance-kpi__icon clinic-finance-kpi__icon--danger">
+                <i class="fas fa-ban"></i>
+            </div>
+            <div class="clinic-finance-kpi__content">
+                <span class="clinic-finance-kpi__label">Glosado</span>
+                <strong class="clinic-finance-kpi__value clinic-finance-kpi__value--danger">
+                    R$ {{ (_dre.glosado_centavos|default(0) / 100)|number_format(2, ',', '.') }}
+                </strong>
+                <span class="clinic-finance-kpi__meta">Convênios</span>
+            </div>
+        </div>
+
+        <div class="clinic-finance-kpi">
+            <div class="clinic-finance-kpi__icon clinic-finance-kpi__icon--info">
+                <i class="fas fa-percentage"></i>
+            </div>
+            <div class="clinic-finance-kpi__content">
+                <span class="clinic-finance-kpi__label">Taxa de conversão</span>
+                {% set _recebido = _dre.recebido_centavos|default(0) %}
+                {% set _a_receber = _dre.a_receber_centavos|default(0) %}
+                {% set _total = _recebido + _a_receber %}
+                {% set _taxa = _total > 0 ? ((_recebido / _total) * 100) : 0 %}
+                <strong class="clinic-finance-kpi__value">{{ _taxa|number_format(1) }}%</strong>
+                <span class="clinic-finance-kpi__meta">Pago vs. Total</span>
+            </div>
+        </div>
+    </div>
+
+    {# Grid de gráficos #}
+    <div class="clinic-finance-charts">
+        {# Gráfico de mix de receita #}
+        <div class="clinic-finance-chart-card">
+            <h3 class="clinic-finance-chart-title">Mix de Receita</h3>
+            <canvas id="financeChartMix" 
+                    data-chart-type="doughnut"
+                    data-chart-labels='["Particular","Convênio","Cortesia"]'
+                    data-chart-data='[{{ (_dre.particular_pago_centavos|default(0)/100) }},{{ (_dre.convenio_pago_centavos|default(0)/100) }},{{ (_dre.cortesia_centavos|default(0)/100) }}]'
+                    width="400" 
+                    height="300"></canvas>
+        </div>
+
+        {# Tendência de receita (últimos 7 dias) #}
+        <div class="clinic-finance-chart-card clinic-finance-chart-card--wide">
+            <h3 class="clinic-finance-chart-title">Receita Recebida · 7 dias</h3>
+            <canvas id="financeChartTrend" 
+                    data-chart-type="line"
+                    data-chart-labels='{{ finance_data.trend_labels|default([])|json_encode|raw }}'
+                    data-chart-data='{{ finance_data.trend_values|default([])|json_encode|raw }}'
+                    width="800" 
+                    height="300"></canvas>
+        </div>
+
+        {# Top 5 médicos por repasse #}
+        <div class="clinic-finance-chart-card">
+            <h3 class="clinic-finance-chart-title">Top Médicos · Repasse</h3>
+            <div class="clinic-finance-ranking">
+                {% for medico in finance_data.repasse|default([])|slice(0, 5) %}
+                <div class="clinic-finance-ranking-item">
+                    <span class="clinic-finance-ranking-rank">{{ loop.index }}º</span>
+                    <span class="clinic-finance-ranking-name">{{ medico.medico_nome }}</span>
+                    <strong class="clinic-finance-ranking-value">R$ {{ (medico.total_centavos / 100)|number_format(2, ',', '.') }}</strong>
+                </div>
+                {% else %}
+                <p class="clinic-finance-empty">Nenhum repasse registrado</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# Ações rápidas #}
+    <div class="clinic-finance-actions">
+        <a href="{{ path('app_pos_operatorio_contas', { status: 'aberto' }) }}" class="clinic-finance-action-btn">
+            <i class="fas fa-hand-holding-dollar"></i>
+            <span>Contas a receber ({{ _dre.qtd_abertas|default(0) }})</span>
+        </a>
+        <a href="{{ path('app_pos_operatorio_guias_glosas') }}" class="clinic-finance-action-btn">
+            <i class="fas fa-shield-halved"></i>
+            <span>Painel anti-glosa</span>
+        </a>
+        <a href="{{ path('app_pos_operatorio_contas_relatorio') }}" class="clinic-finance-action-btn">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>DRE & Repasse</span>
+        </a>
+    </div>
+</section>
