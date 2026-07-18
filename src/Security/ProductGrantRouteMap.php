@@ -327,6 +327,8 @@ final class ProductGrantRouteMap
         'app_pos_operatorio_portal_ajuda' => ['scope' => 'hub_pos_operatorio', 'product' => 'portal_paciente'],
         'app_pos_operatorio_portal_retorno' => ['scope' => 'hub_pos_operatorio', 'product' => 'portal_paciente'],
         'app_pos_operatorio_pacientes' => ['scope' => 'hub_pos_operatorio', 'product' => 'pacientes'],
+        'app_pos_operatorio_pacientes_importar' => ['scope' => 'hub_pos_operatorio', 'product' => 'pacientes'],
+        'app_pos_operatorio_pacientes_importar_modelo' => ['scope' => 'hub_pos_operatorio', 'product' => 'pacientes'],
         'app_pos_operatorio_paciente_novo' => ['scope' => 'hub_pos_operatorio', 'product' => 'operacao'],
         'app_pos_operatorio_paciente_show' => ['scope' => 'hub_pos_operatorio', 'product' => 'pacientes'],
         'app_pos_operatorio_paciente_editar' => ['scope' => 'hub_pos_operatorio', 'product' => 'pacientes'],

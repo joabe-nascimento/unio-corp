@@ -1,0 +1,97 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Importar planilha · Pacientes{% endblock %}
+
+{% set hub_page_title = 'Importar planilha' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Saúde') %}
+{% set hub_page_subtitle = 'CSV → paciente na Trilha Unio com protocolo e data da cirurgia' %}
+{% set hub_search_hidden = true %}
+{% set hub_show_tabs = false %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_pacientes_importar_modelo') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-download mr-1" aria-hidden="true"></i>
+    Baixar modelo
+</a>
+<a href="{{ path('app_pos_operatorio_pacientes') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i>
+    Voltar
+</a>
+{% endblock %}
+
+{% block hub_content %}
+{% for msg in app.flashes('success') %}
+<div class="clinic-banner clinic-banner--ok mb-3"><i class="fas fa-circle-check" aria-hidden="true"></i><div>{{ msg }}</div></div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="clinic-banner clinic-banner--danger mb-3"><i class="fas fa-circle-exclamation" aria-hidden="true"></i><div>{{ msg }}</div></div>
+{% endfor %}
+
+<div class="clinic-ops-panels mb-4">
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Como funciona</h3>
+        <ol class="pos-op-checklist mb-0">
+            <li class="is-done"><span>Baixe o modelo CSV</span><em>Colunas padronizadas</em></li>
+            <li class="is-done"><span>Preencha nome, procedimento e data da cirurgia</span><em>Obrigatórios</em></li>
+            <li class="is-done"><span>Envie o arquivo</span><em>Cria paciente + inicia Trilha Unio</em></li>
+        </ol>
+    </section>
+
+    <section class="unio-card clinic-ops-panel">
+        <h3 class="clinic-ops-panel__title">Colunas aceitas</h3>
+        <ul class="clinic-ops-list mb-0 small">
+            <li><strong>nome</strong> — obrigatório</li>
+            <li><strong>procedimento</strong> — nome do protocolo (obrigatório)</li>
+            <li><strong>data_cirurgia</strong> — AAAA-MM-DD ou DD/MM/AAAA (obrigatório)</li>
+            <li><strong>telefone</strong>, <strong>cpf</strong>, <strong>email</strong> — opcionais</li>
+            <li><strong>medico_email</strong> — e-mail do médico responsável (opcional)</li>
+        </ul>
+    </section>
+</div>
+
+{% if protocolos is not empty %}
+<section class="unio-card p-4 mb-4">
+    <h3 class="clinic-ops-panel__title">Protocolos disponíveis na clínica</h3>
+    <p class="text-muted small mb-2">Use estes nomes na coluna <code>procedimento</code>:</p>
+    <div class="d-flex flex-wrap gap-2">
+        {% for p in protocolos %}
+            <span class="badge badge-light border">{{ p.nome }}</span>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="unio-card p-4 mb-4">
+    <h3 class="clinic-ops-panel__title">Enviar planilha</h3>
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="_token" value="{{ csrf_token('pos_op_import_trilha') }}">
+
+        <div class="form-group mb-3">
+            <label class="font-weight-bold" for="arquivo">Arquivo CSV</label>
+            <input type="file" id="arquivo" name="arquivo" class="form-control-file" accept=".csv,text/csv">
+            <small class="form-text text-muted">Exporte do Excel como “CSV UTF-8” ou use o modelo.</small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="font-weight-bold" for="csv">Ou cole o conteúdo</label>
+            <textarea id="csv" name="csv" rows="7" class="form-control pos-op-csv font-monospace small" placeholder="{{ template_headers|join(',') }}&#10;Maria Silva,Herniorrafia inguinal,2026-07-10,11999998888,,,"></textarea>
+        </div>
+
+        <button type="submit" class="btn-unio">
+            <i class="fas fa-file-import mr-1" aria-hidden="true"></i>
+            Importar na Trilha
+        </button>
+    </form>
+</section>
+
+{% if result and result.ok and result.erros is not empty %}
+<section class="unio-card p-4">
+    <h3 class="clinic-ops-panel__title text-danger">Linhas com erro</h3>
+    <ul class="clinic-ops-list mb-0 small">
+        {% for erro in result.erros %}
+            <li>{{ erro }}</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% endblock %}
