@@ -8,7 +8,7 @@
 #}
 {% set _active = clinic_feature_route_active(route, feature) %}
 {% set _bk = feature.badge_key|default('') %}
-{% set _actionable = _bk in ['precisa_acao', 'alertas', 'questionarios', 'sala_critica'] %}
+{% set _actionable = _bk in ['precisa_acao', 'alertas', 'questionarios', 'sala_critica', 'solicitacoes', 'assinaturas', 'tarefas'] %}
 {% set _badge = _actionable ? badges[_bk]|default(0) : 0 %}
 <li class="nav-item">
     <a href="{{ path(feature.route) }}"
@@ -18,7 +18,7 @@
         <p>
             {{ feature.short|default(feature.title) }}
             {% if _badge > 0 %}
-            <span class="clinic-nav-submenu-badge{% if _bk == 'sala_critica' %} clinic-nav-submenu-badge--danger{% elseif _bk in ['alertas', 'questionarios', 'precisa_acao'] %} clinic-nav-submenu-badge--warning{% endif %}">{{ _badge }}</span>
+            <span class="clinic-nav-submenu-badge{% if _bk == 'sala_critica' %} clinic-nav-submenu-badge--danger{% elseif _bk in ['alertas', 'questionarios', 'precisa_acao', 'solicitacoes', 'assinaturas', 'tarefas'] %} clinic-nav-submenu-badge--warning{% endif %}">{{ _badge }}</span>
             {% endif %}
         </p>
     </a>

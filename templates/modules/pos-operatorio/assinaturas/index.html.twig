@@ -1,0 +1,98 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Assinaturas · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Assinaturas eletrônicas' %}
+{% set hub_page_subtitle = 'Consentimentos, contratos e termos clínicos' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: open|default(0), label: 'Em aberto', icon: 'fa-file-signature', tone: 'sky' },
+    { value: counts.pendente_paciente|default(0), label: 'Pend. paciente', icon: 'fa-user', tone: 'amber' },
+    { value: counts.pendente_medico|default(0), label: 'Pend. médico', icon: 'fa-user-doctor', tone: 'lavender' },
+    { value: counts.concluida|default(0), label: 'Concluídas', icon: 'fa-circle-check', tone: 'sage' },
+], mb: 'mb-3' } %}
+{% endblock %}
+
+{% block hub_section_toolbar %}
+<div class="hub-page-filter-chips mb-3" role="group" aria-label="Filtrar assinaturas">
+    <a href="{{ path('app_pos_operatorio_assinaturas') }}" class="{{ aba == 'pendentes' ? 'is-active' : '' }}">Em aberto</a>
+    <a href="{{ path('app_pos_operatorio_assinaturas', { aba: 'paciente' }) }}" class="{{ aba == 'paciente' ? 'is-active' : '' }}">Pend. paciente</a>
+    <a href="{{ path('app_pos_operatorio_assinaturas', { aba: 'medico' }) }}" class="{{ aba == 'medico' ? 'is-active' : '' }}">Pend. médico</a>
+    <a href="{{ path('app_pos_operatorio_assinaturas', { aba: 'fila' }) }}" class="{{ aba == 'fila' ? 'is-active' : '' }}">Na fila</a>
+    <a href="{{ path('app_pos_operatorio_assinaturas', { aba: 'concluidas' }) }}" class="{{ aba == 'concluidas' ? 'is-active' : '' }}">Concluídas</a>
+</div>
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card mb-4">
+    <h3 class="clinic-ops-panel__title">Novo documento</h3>
+    <form method="post" class="row align-items-end">
+        <input type="hidden" name="_token" value="{{ csrf_token('clinic_assinatura_nova') }}">
+        <input type="hidden" name="aba" value="{{ aba }}">
+        <div class="col-md-5 mb-2">
+            <label class="small font-weight-bold" for="titulo">Título</label>
+            <input id="titulo" name="titulo" class="form-control form-control-sm" required placeholder="Ex.: Termo de consentimento cirúrgico">
+        </div>
+        <div class="col-md-4 mb-2">
+            <label class="small font-weight-bold" for="tipo">Tipo</label>
+            <select id="tipo" name="tipo" class="form-control form-control-sm">
+                {% for key, label in tipos %}
+                <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 mb-2">
+            <button type="submit" class="btn-unio btn-sm btn-block">Adicionar à fila</button>
+        </div>
+    </form>
+</section>
+
+<section class="unio-card p-0">
+    {% if items is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-file-signature',
+            title: 'Nenhum documento nesta aba',
+            text: 'Crie um termo ou consentimento para iniciar o fluxo de assinatura.',
+            compact: true
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table clinic-stack-mobile mb-0">
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Paciente</th>
+                    <th>Status</th>
+                    <th>Criado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td data-label="Documento">
+                        <strong>{{ item.titulo }}</strong>
+                        <span class="d-block text-muted small">{{ item.tipo }}</span>
+                    </td>
+                    <td data-label="Paciente">{{ item.paciente|default('—') }}</td>
+                    <td data-label="Status"><span class="badge-perfil default">{{ item.status_label }}</span></td>
+                    <td data-label="Criado">{{ item.criado_em }}</td>
+                    <td data-label="Ações" class="text-right">
+                        {% if item.status != 'concluida' and item.status != 'cancelada' %}
+                        <form method="post" action="{{ path('app_pos_operatorio_assinatura_avancar', { id: item.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('clinic_assinatura_' ~ item.id) }}">
+                            <input type="hidden" name="aba" value="{{ aba }}">
+                            <button type="submit" class="btn-unio btn-sm">Avançar</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -397,7 +397,7 @@ final class ClinicAgendaService
         $pacienteId = isset($query['paciente_id']) ? (int) $query['paciente_id'] : null;
         $paciente = $pacienteId ? $this->findPaciente($empresa, $pacienteId) : null;
 
-        $sugestaoData = trim((string) ($query['sugestao_data'] ?? ''));
+        $sugestaoData = trim((string) ($query['sugestao_data'] ?? ($query['dia'] ?? '')));
         if ($sugestaoData !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $sugestaoData)) {
             $inicio = new \DateTimeImmutable($sugestaoData . ' 09:00:00');
         } else {
@@ -419,7 +419,7 @@ final class ClinicAgendaService
             'inicio' => $inicio->format('Y-m-d\TH:i'),
             'fim' => $fim->format('Y-m-d\TH:i'),
             'titulo' => $titulo !== '' ? $titulo : ($protocoloDia !== null ? 'Retorno D+' . $protocoloDia : ''),
-            'observacao' => '',
+            'observacao' => trim((string) ($query['observacao'] ?? '')),
             'origem' => $origem,
             'protocolo_dia' => $protocoloDia,
         ];

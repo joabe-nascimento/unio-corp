@@ -11,22 +11,13 @@
     {% endif %}
 
     {% if org_clinic|default(false) %}
-    <aside class="unio-ritual" data-unio-ritual aria-label="Ativação Unio">
-        <div class="unio-ritual__row">
-            <div>
-                {% include 'components/unio/selo.html.twig' with { variant: 'stamp', label: 'Ativação da clínica', show_slogan: true } %}
-                <h2 class="unio-ritual__title">Bem-vindo à Unio Saúde</h2>
-                <p class="unio-ritual__desc">Comece pela Trilha: cadastre o primeiro paciente e acompanhe o cuidado depois da alta.</p>
-            </div>
-            <button type="button" class="unio-ritual__dismiss" data-unio-ritual-dismiss>Agora não</button>
-        </div>
-        <div class="unio-ritual__actions">
-            <a href="{{ path('app_pos_operatorio_pacientes', { open_novo: 1 }) }}" class="btn-unio btn-sm" data-unio-ritual-action>Primeiro paciente na Trilha</a>
-            <a href="{{ path('app_pos_operatorio_sala_critica') }}" class="btn-unio-ghost btn-sm" data-unio-ritual-action>Ver Sala Crítica</a>
-        </div>
-    </aside>
+    {% include 'components/unio/ritual_banner.html.twig' %}
     {% endif %}
 
+    {% if reception_home|default(null) %}
+        {% include 'components/clinic/clinic_home_hero_compact.html.twig' %}
+        {% include 'components/clinic/clinic_home_operational.html.twig' %}
+    {% else %}
     <header class="clinic-home-hero{% if org_clinic|default(false) %} clinic-home-hero--clinic{% endif %}">
         <div class="clinic-home-hero__body">
             <div class="clinic-home-hero__meta">
@@ -62,7 +53,9 @@
             </ul>
         </div>
     </header>
+    {% endif %}
 
+    {% if not reception_home|default(null) %}
     {% set _badges = clinic_nav_badges|default({}) %}
     {% set _copy = organismo.copy|default({}) %}
     <section class="clinic-home-kpis" aria-label="Indicadores em tempo real">
@@ -144,12 +137,23 @@
             <i class="fas fa-bell-exclamation" aria-hidden="true"></i>
             <h2>Atividade recente</h2>
         </header>
+        {% if clinic_queue|default(null) and clinic_queue.items|default([])|length > 0 %}
+            {% include 'components/clinic/clinic_work_queue.html.twig' with {
+                queue: clinic_queue,
+                compact: true
+            } only %}
+            <p class="text-center mt-3 mb-0">
+                <a href="{{ path('app_pos_operatorio_trabalho') }}" class="clinic-home-section-link">Ver fila completa <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </p>
+        {% else %}
         <div class="clinic-home-activity__body clinic-home-activity__body--empty">
             <span class="clinic-activity-empty-icon" aria-hidden="true"><i class="fas fa-circle-check"></i></span>
             <p class="clinic-activity-empty-text">Nenhum alerta no momento</p>
             <p class="clinic-activity-empty-sub">{{ org_clinic|default(false) ? 'Todos os protocolos estão em dia.' : 'Todas as entregas estão em dia.' }}</p>
         </div>
+        {% endif %}
     </section>
+    {% endif %}
 
 </div>
 {% else %}
@@ -231,6 +235,9 @@
     setInterval(tick, 30000);
 })();
 </script>
+{% if reception_home|default(null) %}
+<script src="{{ asset('js/clinic-home-operational.js') }}?v=1"></script>
+{% endif %}
 {% else %}
 {% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 7 } only %}
 <script src="{{ asset('js/dashboard-home.js') }}?v=1"></script>

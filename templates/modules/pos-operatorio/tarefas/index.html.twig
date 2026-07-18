@@ -1,0 +1,74 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Tarefas · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Tarefas da equipe' %}
+{% set hub_page_subtitle = 'Lembretes administrativos e pendências internas' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_kpis %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: pending|default(0), label: 'Pendentes', icon: 'fa-list-check', tone: 'amber' },
+], mb: 'mb-3' } %}
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card mb-4">
+    <h3 class="clinic-ops-panel__title">Nova tarefa</h3>
+    <form method="post" action="{{ path('app_pos_operatorio_tarefas') }}" class="row align-items-end">
+        <input type="hidden" name="_token" value="{{ csrf_token('clinic_tarefa_nova') }}">
+        <input type="hidden" name="redirect" value="app_pos_operatorio_tarefas">
+        <div class="col-md-5 mb-2">
+            <label class="small font-weight-bold" for="titulo">Título</label>
+            <input id="titulo" name="titulo" class="form-control form-control-sm" required maxlength="180" placeholder="Ex.: confirmar retornos da semana">
+        </div>
+        <div class="col-md-3 mb-2">
+            <label class="small font-weight-bold" for="vencimento">Vencimento</label>
+            <input id="vencimento" name="vencimento" type="date" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-2 mb-2">
+            <button type="submit" class="btn-unio btn-sm btn-block">Adicionar</button>
+        </div>
+    </form>
+</section>
+
+<section class="unio-card p-0">
+    {% if items is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-list-check',
+            title: 'Nenhuma tarefa pendente',
+            text: 'Crie lembretes para a equipe da recepção e coordenação.',
+            compact: true
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table clinic-stack-mobile mb-0">
+            <thead>
+                <tr>
+                    <th>Tarefa</th>
+                    <th>Vencimento</th>
+                    <th>Criada</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td data-label="Tarefa"><strong>{{ item.titulo }}</strong></td>
+                    <td data-label="Vencimento">{{ item.vencimento|default('—') }}</td>
+                    <td data-label="Criada">{{ item.criado_em }}</td>
+                    <td data-label="Ações" class="text-right">
+                        <form method="post" action="{{ path('app_pos_operatorio_tarefa_concluir', { id: item.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('clinic_tarefa_' ~ item.id) }}">
+                            <input type="hidden" name="redirect" value="app_pos_operatorio_tarefas">
+                            <button type="submit" class="btn-unio btn-sm">Concluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

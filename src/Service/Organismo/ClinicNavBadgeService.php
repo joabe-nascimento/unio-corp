@@ -3,6 +3,9 @@
 namespace App\Service\Organismo;
 
 use App\Entity\Empresa;
+use App\Repository\ClinicAgendaSolicitacaoRepository;
+use App\Repository\ClinicAssinaturaDocumentoRepository;
+use App\Repository\ClinicTarefaRepository;
 use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\PosOperatorio\PosOperatorioAlertQueueService;
 use App\Service\PosOperatorio\PosOperatorioQuestionarioListService;
@@ -14,9 +17,12 @@ final class ClinicNavBadgeService
         private PosOperatorioAlertQueueService $alertQueue,
         private PosOperatorioQuestionarioListService $questionarios,
         private PosOperatorioPacienteRepository $pacientes,
+        private ClinicAgendaSolicitacaoRepository $solicitacoes,
+        private ClinicAssinaturaDocumentoRepository $assinaturas,
+        private ClinicTarefaRepository $tarefas,
     ) {}
 
-    /** @return array{sala_critica: int, alertas: int, questionarios: int, pacientes_ativos: int, pacientes_alerta: int, precisa_acao: int} */
+    /** @return array{sala_critica: int, alertas: int, questionarios: int, pacientes_ativos: int, pacientes_alerta: int, precisa_acao: int, solicitacoes: int, assinaturas: int, tarefas: int} */
     public function forEmpresa(?Empresa $empresa): array
     {
         if ($empresa === null) {
@@ -27,6 +33,9 @@ final class ClinicNavBadgeService
                 'pacientes_ativos' => 0,
                 'pacientes_alerta' => 0,
                 'precisa_acao' => 0,
+                'solicitacoes' => 0,
+                'assinaturas' => 0,
+                'tarefas' => 0,
             ];
         }
 
@@ -43,6 +52,9 @@ final class ClinicNavBadgeService
             'pacientes_ativos' => $this->pacientes->countAtivosByEmpresa($empresa),
             'pacientes_alerta' => $pacientesAlerta,
             'precisa_acao' => $precisaAcao,
+            'solicitacoes' => $this->solicitacoes->countPendingByEmpresa($empresa),
+            'assinaturas' => $this->assinaturas->countOpenByEmpresa($empresa),
+            'tarefas' => $this->tarefas->countPendingByEmpresa($empresa),
         ];
     }
 }

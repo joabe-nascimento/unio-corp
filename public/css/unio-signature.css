@@ -337,47 +337,181 @@
     font-weight: 600;
 }
 
-/* Ritual onboarding */
+/* Ritual onboarding — banner Vitória */
 .unio-ritual {
-    display: none;
+    display: block;
+    position: relative;
     margin: 0 0 1rem;
-    padding: 1rem 1.1rem;
-    border-radius: 14px;
-    border: 1px solid var(--org-border-soft, rgba(30, 42, 58, 0.1));
-    background: linear-gradient(135deg, rgba(234, 240, 251, 0.9) 0%, #fff 70%);
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid rgba(79, 127, 255, 0.12);
+    background: linear-gradient(105deg, #ffffff 0%, #f7faff 55%, #eef2fb 100%);
+    box-shadow: 0 8px 28px rgba(30, 42, 58, 0.05);
+    isolation: isolate;
+    min-height: 11.5rem;
 }
-.unio-ritual.is-visible { display: block; }
-.unio-ritual__row {
+.unio-ritual--vitoria { min-height: 11.5rem; }
+
+.unio-ritual__content {
+    position: relative;
+    z-index: 2;
+    padding: 1.3rem 1.5rem 1.35rem;
+    padding-right: clamp(10rem, 28vw, 15rem);
+    min-width: 0;
+    width: min(42rem, 62%);
+}
+.unio-ritual__head {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.6rem;
+    margin-bottom: 0.75rem;
 }
+.unio-ritual__head .unio-selo--compact {
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+.unio-ritual__ai-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.26rem 0.65rem 0.26rem 0.3rem;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--org-accent, #4f7fff);
+    background: rgba(79, 127, 255, 0.08);
+    border: 1px solid rgba(79, 127, 255, 0.14);
+}
+.unio-ritual__ai-pill .helix-avatar {
+    width: 1.3rem;
+    height: 1.3rem;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92);
+}
+
+.unio-ritual__portrait {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: clamp(240px, 42vw, 420px);
+    margin: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.unio-ritual__portrait::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(90deg,
+        #f7faff 0%,
+        rgba(247, 250, 255, 0.88) 10%,
+        rgba(247, 250, 255, 0.35) 28%,
+        transparent 48%);
+    pointer-events: none;
+}
+.unio-ritual__banner-art {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 72% center;
+}
+
 .unio-ritual__title {
-    margin: 0.15rem 0 0.25rem;
-    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.25rem, 2.1vw, 1.7rem);
     font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
     color: var(--org-ink, #1e2a3a);
 }
 .unio-ritual__desc {
     margin: 0;
-    font-size: 0.85rem;
+    max-width: 38rem;
+    font-size: clamp(0.92rem, 1.2vw, 1.08rem);
+    line-height: 1.45;
     color: var(--org-ink-muted, #64748b);
 }
 .unio-ritual__actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 0.85rem;
+    margin-top: 1.15rem;
 }
-.unio-ritual__dismiss {
-    border: 0;
-    background: transparent;
-    color: var(--org-ink-muted, #64748b);
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 0.25rem 0.4rem;
+.unio-ritual__actions .btn-unio {
+    font-size: 0.92rem;
+    padding: 0.55rem 1.15rem;
+}
+
+@media (min-width: 1100px) {
+    .unio-ritual__title,
+    .unio-ritual__desc {
+        white-space: nowrap;
+        max-width: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    .unio-ritual__content {
+        width: min(36rem, 58%);
+        padding-right: clamp(9rem, 26vw, 13rem);
+    }
+    .unio-ritual__title {
+        font-size: clamp(1.2rem, 2vw, 1.45rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .unio-ritual {
+        min-height: 0;
+    }
+    .unio-ritual__content {
+        width: 100%;
+        max-width: 100%;
+        padding: 1.15rem 1.25rem 9.5rem;
+    }
+    .unio-ritual__title {
+        white-space: normal;
+        font-size: 1.28rem;
+    }
+    .unio-ritual__desc {
+        white-space: normal;
+        max-width: 100%;
+        font-size: 0.95rem;
+    }
+    .unio-ritual__portrait {
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 9.5rem;
+    }
+    .unio-ritual__portrait::before {
+        background: linear-gradient(180deg,
+            #ffffff 0%,
+            rgba(255, 255, 255, 0.7) 28%,
+            rgba(255, 255, 255, 0.15) 55%,
+            transparent 78%);
+    }
+    .unio-ritual__banner-art {
+        object-position: center 28%;
+    }
+}
+@media (max-width: 640px) {
+    .unio-ritual__content { padding: 1rem 1rem 8.5rem; }
+    .unio-ritual__title { font-size: 1.18rem; }
+    .unio-ritual__desc { font-size: 0.9rem; }
+    .unio-ritual__portrait { height: 8.5rem; }
+    .unio-ritual__actions .btn-unio {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* Microinteração atestar */

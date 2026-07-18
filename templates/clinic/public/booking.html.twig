@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if ok|default(false) %}Agendar horário{% else %}Agendamento{% endif %} · {{ empresa.nome|default('Unio Saúde') }}</title>
+    <style>
+        :root { --ink:#132033; --muted:#5b6b7c; --ok:#0f766e; --err:#b45309; --accent:#4b72be; }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family: system-ui, sans-serif; background: linear-gradient(160deg,#e8f0f7 0%,#f7fafc 45%,#eef3f8 100%); color:var(--ink); min-height:100vh; padding:1.5rem; }
+        .wrap { width:min(34rem,100%); margin:0 auto; }
+        .card { background:rgba(255,255,255,.94); border:1px solid rgba(19,32,51,.08); border-radius:1.25rem; padding:1.75rem; box-shadow:0 18px 40px rgba(19,32,51,.08); }
+        .brand { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 .5rem; }
+        h1 { font-family: Georgia, serif; font-size:1.65rem; margin:0 0 .5rem; line-height:1.2; }
+        .lead { margin:0 0 1.25rem; color:var(--muted); line-height:1.5; font-size:.95rem; }
+        label { display:block; font-size:.8rem; font-weight:700; margin:0 0 .35rem; color:var(--ink); }
+        input, select, textarea { width:100%; border:1px solid rgba(19,32,51,.12); border-radius:.65rem; padding:.65rem .75rem; font:inherit; margin:0 0 .9rem; background:#fff; }
+        textarea { min-height:4.5rem; resize:vertical; }
+        .row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+        @media (max-width:560px) { .row { grid-template-columns:1fr; } }
+        .btn { display:inline-flex; align-items:center; justify-content:center; width:100%; border:0; border-radius:.75rem; padding:.8rem 1rem; font-weight:700; background:var(--accent); color:#fff; cursor:pointer; }
+        .status { margin-bottom:.75rem; font-size:.8rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color: {% if submitted|default(false) %}var(--ok){% elseif error|default('') %}var(--err){% else %}var(--accent){% endif %}; }
+        .err { color:var(--err); font-size:.9rem; margin-bottom:.75rem; }
+    </style>
+</head>
+<body>
+<main class="wrap">
+    <div class="card">
+        {% if not ok|default(false) %}
+            <p class="brand">Unio Saúde</p>
+            <h1>Indisponível</h1>
+            <p class="lead">{{ message|default('Não foi possível abrir o agendamento.') }}</p>
+        {% elseif submitted|default(false) %}
+            <p class="brand">{{ empresa.nome }}</p>
+            <span class="status">Pedido enviado</span>
+            <h1>Recebemos sua solicitação</h1>
+            <p class="lead">A equipe da clínica vai entrar em contato para confirmar data e horário. Obrigado!</p>
+        {% else %}
+            <p class="brand">{{ empresa.nome }}</p>
+            <span class="status">Agendamento online</span>
+            <h1>Solicitar horário</h1>
+            <p class="lead">Preencha os dados abaixo. A clínica confirma o agendamento com você por telefone ou WhatsApp.</p>
+            {% if error|default('') %}<p class="err">{{ error }}</p>{% endif %}
+            <form method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_public_booking') }}">
+                <label for="nome">Nome completo</label>
+                <input id="nome" name="nome" required maxlength="160" value="{{ form.nome|default('') }}">
+                <div class="row">
+                    <div>
+                        <label for="telefone">Telefone / WhatsApp</label>
+                        <input id="telefone" name="telefone" required inputmode="tel" value="{{ form.telefone|default('') }}">
+                    </div>
+                    <div>
+                        <label for="email">E-mail (opcional)</label>
+                        <input id="email" name="email" type="email" value="{{ form.email|default('') }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="motivo">Motivo</label>
+                        <select id="motivo" name="motivo">
+                            {% for key, label in motivos %}
+                            <option value="{{ key }}"{{ form.motivo|default('consulta') == key ? ' selected' : '' }}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="data_preferida">Data preferida</label>
+                        <input id="data_preferida" name="data_preferida" type="date" min="{{ 'now'|date('Y-m-d') }}" value="{{ form.data_preferida|default('') }}">
+                    </div>
+                </div>
+                <label for="periodo">Período</label>
+                <select id="periodo" name="periodo">
+                    {% for key, label in periodos %}
+                    <option value="{{ key }}"{{ form.periodo|default('indiferente') == key ? ' selected' : '' }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <label for="observacao">Observações</label>
+                <textarea id="observacao" name="observacao" placeholder="Conte brevemente o motivo da consulta">{{ form.observacao|default('') }}</textarea>
+                <button type="submit" class="btn">Enviar solicitação</button>
+            </form>
+        {% endif %}
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{% extends 'layout/hub.html.twig' %}
+
+{% block title %}Solicitações de agenda · {{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+
+{% set hub_page_title = 'Solicitações online' %}
+{% set hub_page_subtitle = 'Pedidos recebidos pelo link público de agendamento' %}
+{% set hub_search_hidden = true %}
+
+{% block hub_toolbar_actions %}
+<a href="{{ path('app_pos_operatorio_agenda') }}" class="btn-unio-ghost btn-sm">Agenda</a>
+{% endblock %}
+
+{% block hub_content %}
+<div class="clinic-home-promo unio-card mb-4">
+    <div class="clinic-home-promo__icon" aria-hidden="true"><i class="fas fa-link"></i></div>
+    <div class="clinic-home-promo__body">
+        <p class="clinic-home-promo__eyebrow">Link público</p>
+        <h2 class="clinic-home-promo__title">Compartilhe com pacientes</h2>
+        <p class="clinic-home-promo__desc clinic-booking-url" data-booking-url="{{ booking_url }}">{{ booking_url }}</p>
+    </div>
+    <div class="clinic-home-promo__actions">
+        <button type="button" class="btn-unio btn-sm" data-copy-booking-url>Copiar link</button>
+    </div>
+</div>
+
+<section class="unio-card p-0">
+    {% if items is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-inbox',
+            title: 'Nenhuma solicitação pendente',
+            text: 'Quando um paciente usar o link público, o pedido aparece aqui.',
+            compact: true
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table clinic-stack-mobile mb-0">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Motivo</th>
+                    <th>Preferência</th>
+                    <th>Recebido</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td data-label="Paciente">
+                        <strong>{{ item.nome }}</strong>
+                        <span class="d-block text-muted small">{{ item.telefone }}</span>
+                    </td>
+                    <td data-label="Motivo">{{ item.motivo }}</td>
+                    <td data-label="Preferência">
+                        {{ item.data_preferida|default('—') }} · {{ item.periodo }}
+                    </td>
+                    <td data-label="Recebido">{{ item.criado_em }}</td>
+                    <td data-label="Ações" class="text-right text-nowrap">
+                        <form method="post" action="{{ path('app_pos_operatorio_solicitacoes_agendar', { id: item.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('clinic_solicitacao_' ~ item.id) }}">
+                            <button type="submit" class="btn-unio btn-sm">Agendar</button>
+                        </form>
+                        <form method="post" action="{{ path('app_pos_operatorio_solicitacoes_recusar', { id: item.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('clinic_solicitacao_' ~ item.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm">Recusar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/clinic-home-operational.js') }}?v=1"></script>
+{% endblock %}

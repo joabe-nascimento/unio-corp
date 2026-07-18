@@ -1,0 +1,41 @@
+{# Banner de ativação — onboarding clínica com Vitória IA #}
+{% import 'macros/helix.html.twig' as helix %}
+{% set _desc = desc|default('Cadastre o primeiro paciente na Trilha e acompanhe o cuidado com a Vitória.') %}
+{% set _primary_label = primary_label|default('Começar na Trilha') %}
+{% set _primary_route = primary_route|default('app_pos_operatorio_pacientes') %}
+{% set _primary_params = primary_params|default({ open_novo: 1 }) %}
+
+<aside class="unio-ritual unio-ritual--vitoria" aria-label="Ativação Unio">
+    <div class="unio-ritual__content">
+        <header class="unio-ritual__head">
+            {% include 'components/unio/selo.html.twig' with {
+                variant: 'compact',
+                label: label|default('Ativação da clínica'),
+                show_slogan: false
+            } %}
+            <span class="unio-ritual__ai-pill">
+                {{ helix.avatar('sm') }}
+                <span>Vitória · copiloto IA</span>
+            </span>
+        </header>
+
+        <h2 class="unio-ritual__title">Bem-vindo à&nbsp;Unio&nbsp;Saúde</h2>
+        <p class="unio-ritual__desc">{{ _desc }}</p>
+
+        <div class="unio-ritual__actions">
+            <a href="{{ path(_primary_route, _primary_params) }}" class="btn-unio btn-sm">{{ _primary_label }}</a>
+        </div>
+    </div>
+
+    <figure class="unio-ritual__portrait" aria-hidden="true">
+        <img
+            class="unio-ritual__banner-art"
+            src="{{ asset('images/vitoria-banner-clean.png') }}"
+            alt=""
+            width="960"
+            height="540"
+            loading="lazy"
+            decoding="async"
+        >
+    </figure>
+</aside>

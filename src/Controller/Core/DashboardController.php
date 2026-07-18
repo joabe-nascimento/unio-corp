@@ -2,6 +2,7 @@
 
 namespace App\Controller\Core;
 
+use App\Service\Clinic\ClinicReceptionHomeService;
 use App\Service\DashboardStatsService;
 use App\Service\NavigationService;
 use App\Service\OnboardingProgressService;
@@ -28,6 +29,7 @@ class DashboardController extends AbstractController
         OnboardingProgressService $onboardingProgress,
         OrganismoCopyService $organismoCopy,
         ClinicOperationsService $clinicOperations,
+        ClinicReceptionHomeService $clinicReceptionHome,
     ): Response {
         /** @var \App\Entity\User $user */
         $user     = $this->getUser();
@@ -36,12 +38,14 @@ class DashboardController extends AbstractController
         $layout   = $navigation->getLayout($user);
         $dt       = $welcome->getDateTimeInfo();
         $clinicQueue = null;
+        $receptionHome = null;
         $isClinic = $organismoCopy->isClinicProfile();
         // Clínica: Início operacional. BI em Qualidade / Contas / CRM Analytics.
         $chartSections = $isClinic ? [] : $analytics->getChartSections($user, $empresa);
         $chartExecutive = ['kpis' => []];
         if ($isClinic && $empresa !== null) {
             $clinicQueue = $clinicOperations->buildWorkQueue($empresa);
+            $receptionHome = $clinicReceptionHome->build($empresa);
         }
 
         return $this->render('core/dashboard/index.html.twig', [
@@ -59,6 +63,7 @@ class DashboardController extends AbstractController
             'weekday'         => $dt['weekday'],
             'onboarding'      => $onboardingProgress->build($user, $empresa, \count($empresas)),
             'clinic_queue'    => $clinicQueue,
+            'reception_home'  => $receptionHome,
         ]);
     }
 }

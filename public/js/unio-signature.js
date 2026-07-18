@@ -4,8 +4,6 @@
 (function () {
     'use strict';
 
-    var RITUAL_KEY = 'unio-ritual-v1-done';
-
     function qs(sel, root) {
         return (root || document).querySelector(sel);
     }
@@ -35,27 +33,6 @@
             el.classList.remove('is-on');
             setTimeout(function () { el.remove(); }, 400);
         }, 3200);
-    }
-
-    function initRitual() {
-        var ritual = qs('[data-unio-ritual]');
-        if (!ritual) return;
-        try {
-            if (localStorage.getItem(RITUAL_KEY) === '1') return;
-        } catch (e) { /* ignore */ }
-        ritual.classList.add('is-visible');
-        var dismiss = qs('[data-unio-ritual-dismiss]', ritual);
-        if (dismiss) {
-            dismiss.addEventListener('click', function () {
-                ritual.classList.remove('is-visible');
-                try { localStorage.setItem(RITUAL_KEY, '1'); } catch (e2) { /* ignore */ }
-            });
-        }
-        qsa('[data-unio-ritual-action]', ritual).forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                try { localStorage.setItem(RITUAL_KEY, '1'); } catch (e3) { /* ignore */ }
-            });
-        });
     }
 
     function initAttest() {
@@ -122,7 +99,6 @@
     }
 
     function boot() {
-        initRitual();
         initAttest();
         initTrilhaFase();
     }

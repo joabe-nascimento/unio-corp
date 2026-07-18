@@ -1,0 +1,245 @@
+{# Painel operacional do dia — inspiração recepção (agenda + pendências + continuidade) #}
+{% set _home = reception_home|default({}) %}
+{% set _agenda = _home.agenda|default({}) %}
+{% set _painel = _home.painel|default({}) %}
+{% set _queue = _home.queue|default(clinic_queue|default({})) %}
+{% set _promo = _home.promo|default({}) %}
+{% set _booking = _home.booking|default({}) %}
+{% set _assinaturas = _home.assinaturas|default({}) %}
+{% set _tarefas = _home.tarefas|default({}) %}
+{% set _day = _agenda.day|default(null) %}
+{% set _agenda_day_param = _day ? _day|date('Y-m-d') : 'now'|date('Y-m-d') %}
+{% set _redirect = app.request.attributes.get('_route') %}
+
+<section class="clinic-home-operational" aria-label="Operação do dia">
+    <div class="clinic-home-promo unio-card">
+        <div class="clinic-home-promo__icon" aria-hidden="true">
+            <i class="fas fa-link"></i>
+        </div>
+        <div class="clinic-home-promo__body">
+            <p class="clinic-home-promo__eyebrow">Link de agendamento</p>
+            <h2 class="clinic-home-promo__title">{{ _promo.title|default('Link de agendamento') }}</h2>
+            <p class="clinic-home-promo__desc">{{ _promo.description|default('Compartilhe com pacientes para solicitar horário online.') }}</p>
+            {% if _booking.url|default('') %}
+            <p class="clinic-booking-url clinic-home-promo__url" data-booking-url="{{ _booking.url }}">{{ _booking.url }}</p>
+            {% endif %}
+            {% if _booking.pending|default(0) > 0 %}
+            <p class="clinic-home-promo__badge"><span class="badge-perfil warning">{{ _booking.pending }} solicitação(ões) nova(s)</span></p>
+            {% endif %}
+        </div>
+        <div class="clinic-home-promo__actions">
+            <button type="button" class="btn-unio btn-sm" data-copy-booking-url>Copiar link</button>
+            <a href="{{ path('app_pos_operatorio_solicitacoes') }}" class="btn-unio-ghost btn-sm">
+                {{ _promo.cta|default('Ver solicitações') }}
+            </a>
+            <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: _agenda_day_param }) }}" class="btn-unio-ghost btn-sm">
+                {{ _promo.secondary_cta|default('Agenda do dia') }}
+            </a>
+        </div>
+    </div>
+
+    <div class="clinic-day-stat-cards" role="list" aria-label="Resumo da agenda de hoje">
+        {% for card in _agenda.cards|default([]) %}
+        <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: _agenda_day_param }) }}"
+           class="clinic-day-stat-card clinic-day-stat-card--{{ card.tone|default('sky') }}"
+           role="listitem">
+            <span class="clinic-day-stat-card__icon" aria-hidden="true"><i class="fas {{ card.icon|default('fa-calendar') }}"></i></span>
+            <span class="clinic-day-stat-card__value">{{ card.value|default(0) }}</span>
+            <span class="clinic-day-stat-card__label">{{ card.label }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="clinic-home-operational__grid">
+        <section class="unio-card clinic-home-operational__panel">
+            <header class="clinic-home-section-head">
+                <div>
+                    <h2 class="clinic-home-section-title">Agenda de hoje</h2>
+                    <p class="clinic-home-section-sub">
+                        {% if _day %}{{ _day|date('d/m/Y') }}{% else %}Hoje{% endif %}
+                        · {{ _agenda.total|default(0) }} horário(s)
+                    </p>
+                </div>
+                <a href="{{ path('app_pos_operatorio_agenda', { vista: 'dia', dia: _agenda_day_param }) }}" class="clinic-home-section-link">
+                    Ver agenda <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </header>
+
+            {% if _agenda.slots|default([]) is empty %}
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'fa-calendar-day',
+                    title: 'Sem horários hoje',
+                    text: 'Cadastre um horário na agenda ou confira a visão da semana.',
+                    btn_label: 'Novo horário',
+                    btn_href: path('app_pos_operatorio_agenda_novo'),
+                    btn_sm: true,
+                    compact: true
+                } %}
+            {% else %}
+            <ol class="clinic-agenda-day-list">
+                {% for slot in _agenda.slots %}
+                <li class="clinic-agenda-day-list__item">
+                    <span class="clinic-agenda-day-list__time">{{ slot.hora }}</span>
+                    <div class="clinic-agenda-day-list__main">
+                        <strong>{{ slot.paciente }}</strong>
+                        <span class="clinic-agenda-day-list__meta">
+                            {{ slot.titulo }}{% if slot.medico %} · {{ slot.medico }}{% endif %}
+                        </span>
+                    </div>
+                    <span class="badge-perfil {{ slot.tone == 'sage' ? 'success' : (slot.tone == 'amber' ? 'warning' : (slot.tone == 'rose' ? 'danger' : 'default')) }}">
+                        {{ slot.status_label }}
+                    </span>
+                </li>
+                {% endfor %}
+            </ol>
+            {% endif %}
+        </section>
+
+        <section class="clinic-home-operational__panel clinic-home-queue">
+            <header class="clinic-home-section-head">
+                <div>
+                    <h2 class="clinic-home-section-title">Pendências clínicas</h2>
+                    <p class="clinic-home-section-sub">
+                        {{ _queue.stats.total|default(0) }} item(ns) na fila
+                        {% if _queue.stats.p1|default(0) > 0 %} · <strong class="text-danger">{{ _queue.stats.p1 }} P1</strong>{% endif %}
+                    </p>
+                </div>
+                <a href="{{ path('app_pos_operatorio_trabalho') }}" class="clinic-home-section-link">
+                    Ver tudo <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </header>
+
+            {% if _queue.stats.p1|default(0) > 0 %}
+            <div class="clinic-banner clinic-banner--danger mb-3">
+                <i class="fas fa-fire" aria-hidden="true"></i>
+                <div><strong>{{ _queue.stats.p1 }}</strong> alerta(s) P1 — priorize a Sala Crítica.</div>
+            </div>
+            {% endif %}
+
+            {% include 'components/clinic/clinic_work_queue.html.twig' with {
+                queue: _queue,
+                compact: true
+            } only %}
+        </section>
+    </div>
+
+    <div class="clinic-home-operational__grid clinic-home-operational__grid--secondary">
+        <section class="unio-card clinic-home-operational__panel">
+            <header class="clinic-home-section-head">
+                <div>
+                    <h2 class="clinic-home-section-title">Assinaturas pendentes</h2>
+                    <p class="clinic-home-section-sub">{{ _assinaturas.open|default(0) }} documento(s) em aberto</p>
+                </div>
+                <a href="{{ path('app_pos_operatorio_assinaturas') }}" class="clinic-home-section-link">
+                    Ver todas <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </header>
+            {% if _assinaturas.items|default([]) is empty %}
+                <p class="text-muted small mb-0">Nenhum documento aguardando assinatura.</p>
+            {% else %}
+            <ul class="clinic-ops-list">
+                {% for doc in _assinaturas.items %}
+                <li>
+                    <strong>{{ doc.titulo }}</strong>
+                    <span class="text-muted"> · {{ doc.status_label }}{% if doc.paciente %} · {{ doc.paciente }}{% endif %}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </section>
+
+        <section class="unio-card clinic-home-operational__panel">
+            <header class="clinic-home-section-head">
+                <div>
+                    <h2 class="clinic-home-section-title">Tarefas da equipe</h2>
+                    <p class="clinic-home-section-sub">{{ _tarefas.pending|default(0) }} pendente(s)</p>
+                </div>
+                <a href="{{ path('app_pos_operatorio_tarefas') }}" class="clinic-home-section-link">
+                    Ver todas <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </header>
+
+            <form method="post" action="{{ path('app_pos_operatorio_tarefas') }}" class="clinic-task-form mb-3">
+                <input type="hidden" name="_token" value="{{ csrf_token('clinic_tarefa_nova') }}">
+                <input type="hidden" name="redirect" value="{{ _redirect }}">
+                <div class="clinic-task-form__row">
+                    <input type="text" name="titulo" class="form-control form-control-sm" placeholder="Nova tarefa (ex.: confirmar retornos)" required maxlength="180">
+                    <input type="date" name="vencimento" class="form-control form-control-sm" aria-label="Vencimento">
+                    <button type="submit" class="btn-unio btn-sm">Adicionar</button>
+                </div>
+            </form>
+
+            {% if _tarefas.items|default([]) is empty %}
+                <p class="text-muted small mb-0">Nenhuma tarefa pendente.</p>
+            {% else %}
+            <ul class="clinic-task-list">
+                {% for tarefa in _tarefas.items %}
+                <li class="clinic-task-list__item">
+                    <div>
+                        <strong>{{ tarefa.titulo }}</strong>
+                        {% if tarefa.vencimento %}
+                        <span class="d-block text-muted small{% if tarefa.vencimento_hoje %} text-warning font-weight-bold{% endif %}">Vence {{ tarefa.vencimento }}</span>
+                        {% endif %}
+                    </div>
+                    <form method="post" action="{{ path('app_pos_operatorio_tarefa_concluir', { id: tarefa.id }) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('clinic_tarefa_' ~ tarefa.id) }}">
+                        <input type="hidden" name="redirect" value="{{ _redirect }}">
+                        <button type="submit" class="btn-unio-ghost btn-sm" title="Concluir"><i class="fas fa-check" aria-hidden="true"></i></button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </section>
+    </div>
+
+    <div class="clinic-ops-panels clinic-ops-panels--3 clinic-home-operational__panels">
+        <section class="unio-card clinic-ops-panel">
+            <h3 class="clinic-ops-panel__title">Solicitações online</h3>
+            {% if _booking.items|default([]) is empty %}
+                <p class="text-muted small mb-0">Nenhum pedido pendente pelo link público.</p>
+            {% else %}
+            <ul class="clinic-ops-list">
+                {% for s in _booking.items %}
+                <li>
+                    <a href="{{ path('app_pos_operatorio_solicitacoes') }}">{{ s.nome }}</a>
+                    <span class="text-muted"> · {{ s.motivo }}{% if s.data_preferida %} · {{ s.data_preferida }}{% endif %}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </section>
+
+        <section class="unio-card clinic-ops-panel">
+            <h3 class="clinic-home-ops-panel__title clinic-ops-panel__title">Pré-op esta semana</h3>
+            {% if _painel.pre_op_semana|default([]) is empty %}
+                <p class="text-muted small mb-0">Sem cirurgias nos próximos 7 dias.</p>
+            {% else %}
+            <ul class="clinic-ops-list">
+                {% for p in _painel.pre_op_semana|slice(0, 5) %}
+                <li>
+                    <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id|default(0) }) }}">{{ p.nome }}</a>
+                    <span class="text-muted"> · {{ p.dia_label|default('pré') }}{% if p.data_cirurgia %} · {{ p.data_cirurgia }}{% endif %}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </section>
+
+        <section class="unio-card clinic-ops-panel">
+            <h3 class="clinic-ops-panel__title">Questionário pendente</h3>
+            {% if _painel.sem_questionario|default([]) is empty %}
+                <p class="text-muted small mb-0">Todos responderam hoje no portal.</p>
+            {% else %}
+            <ul class="clinic-ops-list">
+                {% for p in _painel.sem_questionario|slice(0, 5) %}
+                <li>
+                    <a href="{{ path('app_pos_operatorio_pacientes', { open_ficha: p.id|default(0) }) }}">{{ p.nome }}</a>
+                    <span class="text-muted"> ({{ p.codigo }})</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </section>
+    </div>
+</section>
