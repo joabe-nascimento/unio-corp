@@ -27,6 +27,9 @@
             {% elseif item.value is defined or item.kpi_key|default('') %}
             <span class="org-kpi-strip__value{% if _variant %} org-kpi-strip__value--{{ _variant }}{% endif %}"
                   {% if item.kpi_key|default('') %} data-recrutamento-pipeline-kpi="{{ item.kpi_key }}"{% endif %}
+                  {% if item.value_num is defined %} data-unio-countup="{{ item.value_num }}"{% endif %}
+                  {% if item.value_suffix|default('') %} data-unio-countup-suffix="{{ item.value_suffix }}"{% endif %}
+                  {% if item.value_prefix|default('') %} data-unio-countup-prefix="{{ item.value_prefix }}"{% endif %}
                   {% if item.kpi_data|default('') %} {{ item.kpi_data|raw }}{% endif %}>{{ item.value|default('') }}</span>
             {% endif %}
             <span class="org-kpi-strip__label"{% if item.label_title|default('') %} title="{{ item.label_title }}"{% endif %}>{{ item.label }}</span>

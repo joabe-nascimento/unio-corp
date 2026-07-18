@@ -5,16 +5,102 @@
         return String(value || '').replace(/\D+/g, '');
     }
 
+    function getTomSelect(select) {
+        return select && select.tomselect ? select.tomselect : null;
+    }
+
+    function getSelectValue(select) {
+        if (!select) return '';
+        var ts = getTomSelect(select);
+        return ts ? String(ts.getValue() || '') : String(select.value || '');
+    }
+
+    function setSelectValue(select, value) {
+        if (!select) return;
+        var ts = getTomSelect(select);
+        if (ts) ts.setValue(value || '', true);
+        else select.value = value || '';
+    }
+
+    function initTomSelect(select, placeholder, extra) {
+        if (!select || getTomSelect(select) || typeof window.TomSelect === 'undefined') {
+            return getTomSelect(select);
+        }
+        var options = Object.assign({
+            allowEmptyOption: true,
+            create: false,
+            maxOptions: 500,
+            placeholder: placeholder || 'Selecione…',
+            dropdownParent: 'body',
+            sortField: { field: 'text', direction: 'asc' },
+        }, extra || {});
+        return new window.TomSelect(select, options);
+    }
+
+    function optionIbge(select, value) {
+        if (!select || !value) return '';
+        var ts = getTomSelect(select);
+        if (ts && ts.options[value] && ts.options[value].ibge) {
+            return ts.options[value].ibge;
+        }
+        var opts = select.options || [];
+        for (var i = 0; i < opts.length; i++) {
+            if (opts[i].value === value) {
+                return opts[i].getAttribute('data-ibge') || '';
+            }
+        }
+        return '';
+    }
+
+    function setSelectDisabled(select, disabled) {
+        if (!select) return;
+        var ts = getTomSelect(select);
+        if (ts) {
+            if (disabled) ts.disable();
+            else ts.enable();
+        } else {
+            select.disabled = disabled;
+        }
+    }
+
     function fillSelect(select, items, selectedValue, placeholder) {
         if (!select) return;
         var current = selectedValue != null ? String(selectedValue) : String(select.value || '');
+        var ts = getTomSelect(select);
+
+        if (ts) {
+            ts.clear(true);
+            ts.clearOptions();
+            ts.addOption({ value: '', text: placeholder || 'Selecione…' });
+
+            var found = false;
+            (items || []).forEach(function (item) {
+                var entry = {
+                    value: item.value,
+                    text: item.label || item.value,
+                };
+                if (item.ibge) entry.ibge = item.ibge;
+                ts.addOption(entry);
+                if (current && item.value === current) found = true;
+            });
+
+            if (current && !found && current !== '__outro__') {
+                ts.addOption({ value: current, text: current });
+                found = true;
+            }
+
+            ts.setValue(found ? current : '', true);
+            ts.refreshOptions(false);
+            return;
+        }
+
         select.innerHTML = '';
         var empty = document.createElement('option');
         empty.value = '';
         empty.textContent = placeholder || 'Selecione…';
         select.appendChild(empty);
 
-        var found = false;
+        var foundNative = false;
         (items || []).forEach(function (item) {
             var opt = document.createElement('option');
             opt.value = item.value;
@@ -22,12 +108,12 @@
             if (item.ibge) opt.setAttribute('data-ibge', item.ibge);
             if (current && item.value === current) {
                 opt.selected = true;
-                found = true;
+                foundNative = true;
             }
             select.appendChild(opt);
         });
 
-        if (current && !found) {
+        if (current && !foundNative) {
             var custom = document.createElement('option');
             custom.value = current;
             custom.textContent = current;
@@ -38,6 +124,14 @@
 
     function ensureOutroOption(select) {
         if (!select) return;
+        var ts = getTomSelect(select);
+        if (ts) {
+            if (!ts.options.__outro__) {
+                ts.addOption({ value: '__outro__', text: 'Outro (digitar)' });
+                ts.refreshOptions(false);
+            }
+            return;
+        }
         var has = false;
         Array.prototype.forEach.call(select.options, function (opt) {
             if (opt.value === '__outro__') has = true;
@@ -82,7 +176,9 @@
 
         function syncBairroOutro() {
             if (!bairroSelect || !bairroOutro) return;
-            var isOutro = bairroSelect.value === '__outro__';
+            var ts = getTomSelect(bairroSelect);
+            var value = ts ? ts.getValue() : bairroSelect.value;
+            var isOutro = value === '__outro__';
             bairroOutro.hidden = !isOutro;
             if (isOutro) {
                 bairroOutro.setAttribute('name', 'bairro');
@@ -95,15 +191,16 @@
         }
 
         function selectedCityIbge() {
-            if (!cidadeSelect || cidadeSelect.selectedIndex < 0) return cityIbge || '';
-            var opt = cidadeSelect.options[cidadeSelect.selectedIndex];
-            return (opt && opt.getAttribute('data-ibge')) || cityIbge || '';
+            if (!cidadeSelect) return cityIbge || '';
+            var ts = getTomSelect(cidadeSelect);
+            var val = ts ? ts.getValue() : cidadeSelect.value;
+            return optionIbge(cidadeSelect, val) || cityIbge || '';
         }
 
         function loadBairros(preferred, extraFromCep) {
             if (!bairroSelect || !bairrosUrl) return Promise.resolve();
             var ibge = selectedCityIbge();
-            var cityName = cidadeSelect ? String(cidadeSelect.value || '') : '';
+            var cityName = cidadeSelect ? getSelectValue(cidadeSelect) : '';
             if (!ibge && !extraFromCep && !preferred && !cityName) {
                 fillSelect(bairroSelect, [], '', 'Selecione a cidade');
                 ensureOutroOption(bairroSelect);
@@ -116,13 +213,13 @@
                 fillSelect(bairroSelect, seedOnly ? [{ value: seedOnly, label: seedOnly }] : [], seedOnly, 'Selecione…');
                 ensureOutroOption(bairroSelect);
                 if (!seedOnly) {
-                    bairroSelect.value = '__outro__';
+                    setSelectValue(bairroSelect, '__outro__');
                 }
                 syncBairroOutro();
                 return Promise.resolve();
             }
             loadingBairros = true;
-            bairroSelect.disabled = true;
+            setSelectDisabled(bairroSelect, true);
             var url = bairrosUrl + '?ibge=' + encodeURIComponent(ibge || '');
             if (extraFromCep) url += '&bairro=' + encodeURIComponent(extraFromCep);
             return fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
@@ -145,7 +242,7 @@
                 })
                 .finally(function () {
                     loadingBairros = false;
-                    bairroSelect.disabled = false;
+                    setSelectDisabled(bairroSelect, false);
                 });
         }
 
@@ -159,7 +256,7 @@
                 return Promise.resolve();
             }
             loadingCities = true;
-            cidadeSelect.disabled = true;
+            setSelectDisabled(cidadeSelect, true);
             fillSelect(cidadeSelect, [], preferredCity || '', 'Carregando…');
             return fetch(cidadesUrl + '?uf=' + encodeURIComponent(uf), {
                 headers: { Accept: 'application/json' },
@@ -183,17 +280,12 @@
                     }
                     fillSelect(cidadeSelect, items, preferredCity || '', 'Selecione…');
                     if (preferredCity) {
-                        Array.prototype.forEach.call(cidadeSelect.options, function (opt) {
-                            if (opt.value === preferredCity && opt.getAttribute('data-ibge')) {
-                                cityIbge = opt.getAttribute('data-ibge') || '';
-                            }
-                        });
+                        cityIbge = optionIbge(cidadeSelect, preferredCity) || cityIbge;
                     }
-                    // Sem preferência: se só uma cidade bate pelo nome parcial do CEP, ok;
-                    // senão pega IBGE da opção selecionada.
-                    if (!cityIbge && cidadeSelect.value) {
-                        var sel = cidadeSelect.options[cidadeSelect.selectedIndex];
-                        cityIbge = (sel && sel.getAttribute('data-ibge')) || '';
+                    if (!cityIbge && cidadeSelect) {
+                        var tsCity = getTomSelect(cidadeSelect);
+                        var cityVal = tsCity ? tsCity.getValue() : cidadeSelect.value;
+                        cityIbge = optionIbge(cidadeSelect, cityVal) || cityIbge;
                     }
                     return loadBairros(preferredBairro, fromCepBairro);
                 })
@@ -208,9 +300,16 @@
                 })
                 .finally(function () {
                     loadingCities = false;
-                    cidadeSelect.disabled = false;
+                    setSelectDisabled(cidadeSelect, false);
                 });
         }
+
+        initTomSelect(ufSelect, 'UF', { sortField: null });
+        initTomSelect(cidadeSelect, 'Selecione a cidade');
+        initTomSelect(bairroSelect, 'Selecione o bairro');
+        if (ufSelect) ufSelect.classList.add('clinic-endereco-ts');
+        if (cidadeSelect) cidadeSelect.classList.add('clinic-endereco-ts');
+        if (bairroSelect) bairroSelect.classList.add('clinic-endereco-ts');
 
         function lookupCep() {
             if (!cepInput || !cepUrlTpl) return;
@@ -236,7 +335,7 @@
                     if (cepInput && e.cep) cepInput.value = e.cep;
                     cityIbge = e.ibge || '';
                     if (ufSelect && e.uf) {
-                        ufSelect.value = e.uf;
+                        setSelectValue(ufSelect, e.uf);
                     }
                     return loadCidades(e.uf || '', e.cidade || '', e.bairro || '', e.bairro || '').then(function () {
                         if (numero) numero.focus();
@@ -262,14 +361,15 @@
         if (ufSelect) {
             ufSelect.addEventListener('change', function () {
                 cityIbge = '';
-                loadCidades(ufSelect.value, '', '', '');
+                loadCidades(getSelectValue(ufSelect), '', '', '');
             });
         }
 
         if (cidadeSelect) {
             cidadeSelect.addEventListener('change', function () {
-                var opt = cidadeSelect.options[cidadeSelect.selectedIndex];
-                cityIbge = (opt && opt.getAttribute('data-ibge')) || '';
+                var ts = getTomSelect(cidadeSelect);
+                var val = ts ? ts.getValue() : cidadeSelect.value;
+                cityIbge = optionIbge(cidadeSelect, val) || '';
                 loadBairros('', '');
             });
         }
@@ -279,7 +379,7 @@
         }
 
         // Estado inicial (edição)
-        var initialUf = ufSelect ? ufSelect.value : '';
+        var initialUf = ufSelect ? getSelectValue(ufSelect) : '';
         var initialCidade = cidadeSelect ? (cidadeSelect.getAttribute('data-initial-cidade') || cidadeSelect.value) : '';
         var initialBairro = bairroSelect ? (bairroSelect.getAttribute('data-initial-bairro') || bairroSelect.value) : '';
         ensureOutroOption(bairroSelect);

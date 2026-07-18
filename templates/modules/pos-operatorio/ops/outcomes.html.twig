@@ -9,7 +9,7 @@
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/clinic-outcomes.css') }}?v=2">
+<link rel="stylesheet" href="{{ asset('css/clinic-outcomes.css') }}?v=6">
 {% endblock %}
 
 {% block hub_toolbar_actions %}
@@ -25,6 +25,9 @@
        class="btn-unio btn-sm">
         <i class="fas fa-file-export" aria-hidden="true"></i> Exportar CSV
     </a>
+    <button type="button" class="btn-unio-ghost btn-sm" data-outcomes-tour>
+        <i class="fas fa-route" aria-hidden="true"></i> <span data-outcomes-tour-label>Tour</span>
+    </button>
 </form>
 {% endblock %}
 
@@ -58,6 +61,25 @@
                 compact: true
             } %}
         {% else %}
+        {% if outcomes.risk_chart.total|default(0) > 0 %}
+        <div class="outcomes-risk-chart-block">
+            <div class="outcomes-risk-chart-wrap">
+                <canvas id="outcomes-risk-chart" role="img" aria-label="Distribuição de risco: alto, moderado e baixo"></canvas>
+            </div>
+            <ul id="outcomes-risk-legend" class="outcomes-risk-chart-legend" aria-hidden="true"></ul>
+        </div>
+        {% endif %}
+        <div class="outcomes-grid-toolbar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+            <label class="outcomes-risk-search-wrap mb-0 flex-grow-1">
+                <span class="sr-only">Buscar paciente</span>
+                <input type="search" class="form-control form-control-sm outcomes-risk-search" placeholder="Buscar paciente…" autocomplete="off">
+            </label>
+            <button type="button" class="btn-unio-ghost btn-sm flex-shrink-0" data-outcomes-grid-export title="Exportar linhas visíveis na tabela (respeita o filtro de busca)">
+                <i class="fas fa-table" aria-hidden="true"></i> Exportar tabela
+            </button>
+        </div>
+        <div id="outcomes-risk-grid" class="outcomes-risk-table-mount"></div>
+        <noscript>
         <div class="table-responsive outcomes-table-wrap">
             <table class="table table-sm outcomes-table mb-0">
                 <thead>
@@ -84,7 +106,7 @@
                                 <span class="outcomes-risk__label">{{ row.nivel_label }}</span>
                             </div>
                         </td>
-                        <td class="outcomes-table__num">{{ row.adesao_pct }}%</td>
+                        <td class="outcomes-table__num">{{ row.adesao_pct is not null ? row.adesao_pct ~ '%' : '—' }}</td>
                         <td class="outcomes-table__num">{{ row.dor_media is not null ? row.dor_media ~ '/10' : '—' }}</td>
                         <td class="outcomes-table__action">
                             <a href="{{ path('app_pos_operatorio_pacientes', {open_ficha: row.id}) }}" class="btn-unio btn-sm btn-outline-unio">Ficha</a>
@@ -94,6 +116,7 @@
                 </tbody>
             </table>
         </div>
+        </noscript>
         {% endif %}
     </section>
 
@@ -112,12 +135,15 @@
         {% if outcomes.surgeons is empty %}
             <p class="text-muted small mb-0">Defina o médico responsável nas fichas para ver o ranking.</p>
         {% else %}
-        <div class="outcomes-surgeon-list">
+        <div class="outcomes-surgeon-list" data-unio-auto-animate>
             {% for s in outcomes.surgeons %}
             <article class="outcomes-surgeon-card">
                 <div class="outcomes-surgeon-card__rank">{{ loop.index }}</div>
-                <div class="outcomes-surgeon-card__main">
+                <div class="outcomes-surgeon-card__head">
                     <strong class="outcomes-surgeon-card__name">{{ s.nome }}</strong>
+                    <span class="outcomes-index">{{ s.outcome_index }}<small>%</small></span>
+                </div>
+                <div class="outcomes-surgeon-card__body">
                     <p class="outcomes-surgeon-card__proc">{{ s.pacientes }} paciente(s) · {{ s.procedimento_top }}</p>
                     <div class="outcomes-surgeon-card__metrics">
                         <span title="Adesão aos questionários"><i class="fas fa-clipboard-check" aria-hidden="true"></i> {{ s.adesao_pct }}%</span>
@@ -126,8 +152,7 @@
                         <span title="Alertas P1"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {{ s.alertas_p1 }}</span>
                     </div>
                 </div>
-                <div class="outcomes-surgeon-card__aside">
-                    <span class="outcomes-index">{{ s.outcome_index }}<small>%</small></span>
+                <div class="outcomes-surgeon-card__foot">
                     <a href="{{ path('app_pos_operatorio_outcomes', {medico: s.id}) }}" class="btn-unio btn-sm btn-outline-unio outcomes-surgeon-card__action">Filtrar</a>
                 </div>
             </article>
@@ -177,4 +202,28 @@
         <strong>Unio Saúde</strong> — a única plataforma que acompanha o paciente do lead à prova de resultado.
     </p>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% set outcomes_rows = [] %}
+{% for row in outcomes.risk_patients %}
+    {% set outcomes_rows = outcomes_rows|merge([{
+        nome: row.nome,
+        codigo: row.codigo,
+        meta: row.codigo ~ (row.dia_pos is not null ? ' · D+' ~ row.dia_pos : ''),
+        medico: row.medico,
+        score: row.score,
+        nivel: row.nivel,
+        nivel_label: row.nivel_label,
+        adesao_pct: row.adesao_pct is not null ? row.adesao_pct : 0,
+        dor: row.dor_media is not null ? row.dor_media ~ '/10' : '—',
+        ficha_href: path('app_pos_operatorio_pacientes', {open_ficha: row.id})
+    }]) %}
+{% endfor %}
+<script id="outcomes-page-data" type="application/json">{{ {
+    risk_chart: outcomes.risk_chart,
+    risk_rows: outcomes_rows
+}|json_encode|raw }}</script>
+<script src="{{ asset('js/clinic-outcomes.js') }}?v=3" defer></script>
 {% endblock %}

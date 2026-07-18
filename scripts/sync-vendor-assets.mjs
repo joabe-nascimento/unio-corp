@@ -22,6 +22,18 @@ const copies = [
   ['node_modules/tom-select/dist/css/tom-select.bootstrap4.min.css', 'tom-select/tom-select.bootstrap4.min.css'],
   ['node_modules/tom-select/dist/js/tom-select.complete.min.js', 'tom-select/tom-select.complete.min.js'],
   ['node_modules/chart.js/dist/chart.umd.js', 'chart.js/chart.umd.min.js'],
+  ['node_modules/countup.js/dist/countUp.umd.js', 'countup/countUp.umd.min.js'],
+  ['node_modules/@formkit/auto-animate/index.mjs', 'auto-animate/index.mjs'],
+  ['node_modules/driver.js/dist/driver.js.iife.js', 'driver.js/driver.iife.min.js'],
+  ['node_modules/driver.js/dist/driver.css', 'driver.js/driver.min.css'],
+  ['node_modules/gridjs/dist/gridjs.umd.js', 'gridjs/gridjs.umd.min.js'],
+  ['node_modules/gridjs/dist/theme/mermaid.min.css', 'gridjs/mermaid.min.css'],
+  ['node_modules/notyf/notyf.min.js', 'notyf/notyf.min.js'],
+  ['node_modules/notyf/notyf.min.css', 'notyf/notyf.min.css'],
+  ['node_modules/flatpickr/dist/flatpickr.min.js', 'flatpickr/flatpickr.min.js'],
+  ['node_modules/flatpickr/dist/flatpickr.min.css', 'flatpickr/flatpickr.min.css'],
+  ['node_modules/flatpickr/dist/l10n/pt.js', 'flatpickr/l10n/pt.min.js'],
+  ['node_modules/cleave.js/dist/cleave.min.js', 'cleave/cleave.min.js'],
 ];
 
 function copyFile(from, to) {

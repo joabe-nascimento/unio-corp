@@ -3,6 +3,7 @@
 namespace App\Controller\Module\PosOperatorio;
 
 use App\Entity\User;
+use App\Http\RequestInts;
 use App\Service\PosOperatorio\ClinicOutcomesService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,7 +26,7 @@ final class PosOperatorioOutcomesController extends AbstractController
     public function index(Request $request): Response
     {
         $empresa = $this->requireEmpresa();
-        $medicoId = $request->query->getInt('medico') ?: null;
+        $medicoId = RequestInts::positiveOrNull($request->query->get('medico'));
 
         return $this->render('modules/pos-operatorio/ops/outcomes.html.twig', [
             'empresa' => $empresa,
@@ -38,7 +39,7 @@ final class PosOperatorioOutcomesController extends AbstractController
     public function export(Request $request): StreamedResponse
     {
         $empresa = $this->requireEmpresa();
-        $medicoId = $request->query->getInt('medico') ?: null;
+        $medicoId = RequestInts::positiveOrNull($request->query->get('medico'));
 
         return $this->outcomes->exportCsv($empresa, $medicoId);
     }

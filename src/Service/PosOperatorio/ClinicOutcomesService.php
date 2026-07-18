@@ -102,6 +102,13 @@ final class ClinicOutcomesService
 
         usort($riskPatients, static fn (array $a, array $b): int => $b['score'] <=> $a['score']);
         $highRisk = \count(array_filter($riskPatients, static fn (array $r): bool => $r['nivel'] === 'alto'));
+        $riskChart = ['alto' => 0, 'moderado' => 0, 'baixo' => 0];
+        foreach ($riskPatients as $rp) {
+            $nivel = $rp['nivel'];
+            if (isset($riskChart[$nivel])) {
+                ++$riskChart[$nivel];
+            }
+        }
         $riskPatientsTop = \array_slice($riskPatients, 0, 25);
 
         $surgeons = [];
@@ -136,10 +143,18 @@ final class ClinicOutcomesService
 
         return [
             'kpis' => [
-                ['value' => (string) \count($patients), 'label' => 'Pacientes monitorados', 'icon' => 'fa-user-injured', 'tone' => 'sky'],
-                ['value' => $avgOutcome > 0 ? $avgOutcome.'%' : '—', 'label' => 'Índice Outcomes médio', 'icon' => 'fa-chart-line', 'tone' => 'sage'],
-                ['value' => (string) $highRisk, 'label' => 'Risco elevado', 'icon' => 'fa-triangle-exclamation', 'tone' => 'rose'],
-                ['value' => ($revenueLoop['crm_conversao_pct'] ?? 0).'%', 'label' => 'CRM → paciente', 'icon' => 'fa-handshake', 'tone' => 'lavender'],
+                ['value' => (string) \count($patients), 'value_num' => \count($patients), 'label' => 'Pacientes monitorados', 'icon' => 'fa-user-injured', 'tone' => 'sky'],
+                array_merge(
+                    ['value' => $avgOutcome > 0 ? $avgOutcome.'%' : '—', 'label' => 'Índice Outcomes médio', 'icon' => 'fa-chart-line', 'tone' => 'sage'],
+                    $avgOutcome > 0 ? ['value_num' => $avgOutcome, 'value_suffix' => '%'] : []
+                ),
+                ['value' => (string) $highRisk, 'value_num' => $highRisk, 'label' => 'Risco elevado', 'icon' => 'fa-triangle-exclamation', 'tone' => 'rose'],
+                ['value' => ($revenueLoop['crm_conversao_pct'] ?? 0).'%', 'value_num' => (int) ($revenueLoop['crm_conversao_pct'] ?? 0), 'value_suffix' => '%', 'label' => 'CRM → paciente', 'icon' => 'fa-handshake', 'tone' => 'lavender'],
+            ],
+            'risk_chart' => [
+                'labels' => ['Alto', 'Moderado', 'Baixo'],
+                'values' => [$riskChart['alto'], $riskChart['moderado'], $riskChart['baixo']],
+                'total' => $riskChart['alto'] + $riskChart['moderado'] + $riskChart['baixo'],
             ],
             'risk_patients' => $riskPatientsTop,
             'risk_patients_all' => $riskPatients,

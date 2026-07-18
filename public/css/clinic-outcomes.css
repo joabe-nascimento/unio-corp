@@ -62,11 +62,21 @@
 
 @media (min-width: 1100px) {
     .outcomes-grid {
-        grid-template-columns: 1.2fr 1fr;
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr);
     }
 
     .outcomes-panel--revenue {
         grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 1100px) and (max-width: 1280px) {
+    .outcomes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .outcomes-panel--surgeons {
+        grid-column: 1;
     }
 }
 
@@ -100,12 +110,14 @@
 /* ── Tabela de risco ── */
 .outcomes-table-wrap {
     margin: 0;
-    overflow-x: visible;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .outcomes-table {
-    table-layout: fixed;
+    table-layout: auto;
     width: 100%;
+    min-width: 36rem;
 }
 
 .outcomes-table th {
@@ -117,24 +129,8 @@
     white-space: nowrap;
     padding-top: 0.35rem;
     padding-bottom: 0.35rem;
+    vertical-align: bottom;
 }
-
-.outcomes-table th:nth-child(1),
-.outcomes-table td:nth-child(1) { width: 30%; }
-
-.outcomes-table th:nth-child(2),
-.outcomes-table td:nth-child(2) { width: 24%; }
-
-.outcomes-table th:nth-child(3),
-.outcomes-table td:nth-child(3) { width: 16%; }
-
-.outcomes-table th:nth-child(4),
-.outcomes-table td:nth-child(4),
-.outcomes-table th:nth-child(5),
-.outcomes-table td:nth-child(5) { width: 10%; }
-
-.outcomes-table th:nth-child(6),
-.outcomes-table td:nth-child(6) { width: 10%; }
 
 .outcomes-table td {
     vertical-align: middle;
@@ -146,26 +142,25 @@
 .outcomes-table__name {
     display: block;
     font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.3;
+    word-break: break-word;
 }
 
 .outcomes-table__meta {
     display: block;
     font-size: 0.75rem;
     color: var(--text-3, #7e8fa2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.35;
+    margin-top: 0.15rem;
+    word-break: break-word;
 }
 
 .outcomes-table__muted {
     color: var(--text-2, #4d5f76);
     font-size: 0.8rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.35;
+    word-break: break-word;
+    min-width: 6.5rem;
 }
 
 .outcomes-table__num {
@@ -228,9 +223,13 @@
 
 .outcomes-surgeon-card {
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.65rem 0.85rem;
-    align-items: center;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    grid-template-areas:
+        "rank head"
+        "rank body"
+        "foot foot";
+    gap: 0.35rem 0.75rem;
+    align-items: start;
     padding: 0.75rem 0.85rem;
     border-radius: 10px;
     background: color-mix(in srgb, var(--org-blue, #4b72be) 4%, var(--surface-2, #fff));
@@ -238,6 +237,7 @@
 }
 
 .outcomes-surgeon-card__rank {
+    grid-area: rank;
     width: 1.75rem;
     height: 1.75rem;
     border-radius: 50%;
@@ -249,51 +249,58 @@
     background: var(--org-blue-soft, #eaf0fb);
     color: var(--org-blue-text, #3d61a8);
     flex-shrink: 0;
-    align-self: center;
+    margin-top: 0.1rem;
 }
 
-.outcomes-surgeon-card__main {
+.outcomes-surgeon-card__head {
+    grid-area: head;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.65rem;
     min-width: 0;
+}
+
+.outcomes-surgeon-card__body {
+    grid-area: body;
+    min-width: 0;
+}
+
+.outcomes-surgeon-card__foot {
+    grid-area: foot;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.35rem;
+    margin-top: 0.15rem;
+    border-top: 1px solid color-mix(in srgb, var(--border, #e4eaf4) 80%, transparent);
 }
 
 .outcomes-surgeon-card__name {
     display: block;
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: 0.9rem;
     font-weight: 700;
     color: var(--org-blue-text, #3d61a8);
-    line-height: 1.25;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.3;
+    word-break: break-word;
 }
 
 .outcomes-surgeon-card__proc {
-    margin: 0.2rem 0 0.4rem;
+    margin: 0 0 0.45rem;
     font-size: 0.75rem;
     color: var(--text-3, #7e8fa2);
-    line-height: 1.35;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.outcomes-surgeon-card__aside {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 0.45rem;
-    flex-shrink: 0;
-    align-self: stretch;
-    padding-left: 0.25rem;
+    line-height: 1.4;
+    word-break: break-word;
 }
 
 .outcomes-index {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--org-blue, var(--accent, #4b72be));
     line-height: 1;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .outcomes-index small {
@@ -403,4 +410,162 @@
 
 .outcomes-brand__tagline strong {
     color: var(--org-blue-text, #3d61a8);
+}
+
+.outcomes-risk-chart-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+}
+
+.outcomes-risk-chart-wrap {
+    position: relative;
+    width: 168px;
+    height: 168px;
+    flex: 0 0 auto;
+}
+
+.outcomes-risk-chart-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-width: 10rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.outcomes-risk-chart-legend__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-2, #4d5f76);
+}
+
+.outcomes-risk-chart-legend__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.outcomes-risk-chart-legend__label {
+    flex: 1 1 auto;
+    font-weight: 600;
+    color: var(--org-ink, #1e2a3a);
+}
+
+.outcomes-risk-chart-legend__value {
+    font-variant-numeric: tabular-nums;
+    color: var(--org-ink-muted, #64748b);
+}
+
+.outcomes-risk-chart-legend__value small {
+    font-size: 0.75rem;
+}
+
+.outcomes-grid-toolbar {
+    gap: 0.5rem;
+}
+
+.outcomes-risk-search-wrap {
+    min-width: min(100%, 14rem);
+    max-width: 22rem;
+    flex: 1 1 12rem;
+}
+
+.outcomes-risk-search {
+    border-radius: 10px !important;
+    width: 100%;
+}
+
+.outcomes-risk-table-mount .outcomes-risk-count {
+    font-size: 0.78rem;
+}
+
+.outcomes-table--interactive tbody tr:hover {
+    background: color-mix(in srgb, var(--org-blue, #4b72be) 4%, transparent);
+}
+
+/* ── Responsivo (mobile / tablet) ── */
+@media (max-width: 575.98px) {
+    .outcomes-filter-form {
+        flex-wrap: wrap;
+    }
+
+    .outcomes-filter-form .btn-unio,
+    .outcomes-filter-form .btn-unio-ghost {
+        flex: 1 1 calc(50% - 0.25rem);
+        justify-content: center;
+    }
+
+    .outcomes-filter-select {
+        width: 100%;
+        max-width: none;
+        flex: 1 1 100%;
+    }
+
+    .outcomes-grid-toolbar {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .outcomes-risk-search-wrap {
+        max-width: none;
+        width: 100%;
+    }
+
+    .outcomes-grid-toolbar [data-outcomes-grid-export] {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .outcomes-risk-chart-block {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: left;
+    }
+
+    .outcomes-risk-chart-wrap {
+        margin: 0 auto;
+    }
+
+    .outcomes-risk-chart-legend {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .outcomes-table {
+        min-width: 32rem;
+    }
+
+    .outcomes-funnel__arrow {
+        display: none;
+    }
+
+    .outcomes-funnel__step {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 0;
+    }
+
+    .outcomes-revenue-links .btn-unio {
+        flex: 1 1 calc(50% - 0.25rem);
+        justify-content: center;
+    }
+}
+
+@media (max-width: 399.98px) {
+    .outcomes-filter-form .btn-unio,
+    .outcomes-filter-form .btn-unio-ghost {
+        flex: 1 1 100%;
+    }
+
+    .outcomes-funnel__step {
+        flex: 1 1 100%;
+    }
 }
