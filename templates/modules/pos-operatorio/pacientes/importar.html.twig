@@ -8,6 +8,14 @@
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
 
+{% set _sample_row = 'Maria Silva,Herniorrafia inguinal,2026-07-10,11999998888,52998224725,maria@email.com,' %}
+{% set _sample_csv = template_headers|join(',') ~ '\n' ~ _sample_row %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/pos-operatorio-ops.css') }}?v=3">
+{% endblock %}
+
 {% block hub_toolbar_actions %}
 <a href="{{ path('app_pos_operatorio_pacientes_importar_modelo') }}" class="btn-unio-ghost btn-sm">
     <i class="fas fa-download mr-1" aria-hidden="true"></i>
@@ -17,6 +25,15 @@
     <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i>
     Voltar
 </a>
+{% endblock %}
+
+{% block hub_kpis %}
+{% if result and result.ok and result.importados|default(0) > 0 %}
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: result.importados, label: 'Importados', icon: 'fa-circle-check', tone: 'success' },
+    { value: result.erros|default([])|length, label: 'Com erro', icon: 'fa-triangle-exclamation', tone: result.erros|default([])|length > 0 ? 'amber' : 'default' },
+], mb: 'mb-3' } %}
+{% endif %}
 {% endblock %}
 
 {% block hub_content %}
@@ -29,69 +46,138 @@
 
 <div class="clinic-ops-panels mb-4">
     <section class="unio-card clinic-ops-panel">
-        <h3 class="clinic-ops-panel__title">Como funciona</h3>
+        <h3 class="clinic-ops-panel__title"><i class="fas fa-route mr-1 text-primary" aria-hidden="true"></i> Trilha Unio em 3 passos</h3>
         <ol class="pos-op-checklist mb-0">
             <li class="is-done"><span>Baixe o modelo CSV</span><em>Colunas padronizadas</em></li>
-            <li class="is-done"><span>Preencha nome, procedimento e data da cirurgia</span><em>Obrigatórios</em></li>
-            <li class="is-done"><span>Envie o arquivo</span><em>Cria paciente + inicia Trilha Unio</em></li>
+            <li class="is-done"><span>Preencha nome, procedimento e data</span><em>Campos obrigatórios</em></li>
+            <li class="is-done"><span>Envie o arquivo</span><em>Paciente + protocolo + marcos</em></li>
         </ol>
     </section>
 
     <section class="unio-card clinic-ops-panel">
-        <h3 class="clinic-ops-panel__title">Colunas aceitas</h3>
-        <ul class="clinic-ops-list mb-0 small">
-            <li><strong>nome</strong> — obrigatório</li>
-            <li><strong>procedimento</strong> — nome do protocolo (obrigatório)</li>
-            <li><strong>data_cirurgia</strong> — AAAA-MM-DD ou DD/MM/AAAA (obrigatório)</li>
-            <li><strong>telefone</strong>, <strong>cpf</strong>, <strong>email</strong> — opcionais</li>
-            <li><strong>medico_email</strong> — e-mail do médico responsável (opcional)</li>
-        </ul>
+        <h3 class="clinic-ops-panel__title"><i class="fas fa-table-columns mr-1 text-primary" aria-hidden="true"></i> Colunas</h3>
+        <div class="trilha-import-cols">
+            {% for col in template_headers %}
+                <span class="trilha-import-col{% if col in ['nome', 'procedimento', 'data_cirurgia'] %} trilha-import-col--req{% endif %}">
+                    <code>{{ col }}</code>
+                    {% if col in ['nome', 'procedimento', 'data_cirurgia'] %}<em>obrig.</em>{% endif %}
+                </span>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-unio-ghost btn-sm mt-2" data-trilha-copy-headers>
+            <i class="fas fa-copy mr-1" aria-hidden="true"></i>
+            Copiar cabeçalho
+        </button>
     </section>
 </div>
 
 {% if protocolos is not empty %}
 <section class="unio-card p-4 mb-4">
-    <h3 class="clinic-ops-panel__title">Protocolos disponíveis na clínica</h3>
-    <p class="text-muted small mb-2">Use estes nomes na coluna <code>procedimento</code>:</p>
-    <div class="d-flex flex-wrap gap-2">
+    <h3 class="clinic-ops-panel__title">Protocolos aceitos em <code>procedimento</code></h3>
+    <p class="text-muted small mb-2">Clique para copiar o nome exato:</p>
+    <div class="trilha-import-protocols">
         {% for p in protocolos %}
-            <span class="badge badge-light border">{{ p.nome }}</span>
+            <button type="button" class="trilha-import-protocol" data-trilha-copy-text="{{ p.nome }}">
+                <i class="fas fa-file-medical" aria-hidden="true"></i>
+                {{ p.nome }}
+            </button>
         {% endfor %}
     </div>
 </section>
 {% endif %}
 
-<section class="unio-card p-4 mb-4">
-    <h3 class="clinic-ops-panel__title">Enviar planilha</h3>
-    <form method="post" enctype="multipart/form-data">
+<section class="unio-card p-4 mb-4" data-trilha-import-root>
+    <div class="trilha-import-head">
+        <h3 class="clinic-ops-panel__title mb-0">Enviar planilha</h3>
+        <div class="trilha-import-tabs" role="tablist" aria-label="Modo de envio">
+            <button type="button" class="trilha-import-tab is-active" role="tab" aria-selected="true" data-trilha-tab="arquivo">
+                <i class="fas fa-file-arrow-up" aria-hidden="true"></i> Arquivo
+            </button>
+            <button type="button" class="trilha-import-tab" role="tab" aria-selected="false" data-trilha-tab="colar">
+                <i class="fas fa-paste" aria-hidden="true"></i> Colar
+            </button>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="trilha-import-form" data-trilha-import-form>
         <input type="hidden" name="_token" value="{{ csrf_token('pos_op_import_trilha') }}">
 
-        <div class="form-group mb-3">
-            <label class="font-weight-bold" for="arquivo">Arquivo CSV</label>
-            <input type="file" id="arquivo" name="arquivo" class="form-control-file" accept=".csv,text/csv">
-            <small class="form-text text-muted">Exporte do Excel como “CSV UTF-8” ou use o modelo.</small>
+        <div class="trilha-import-pane is-active" data-trilha-pane="arquivo" role="tabpanel">
+            {% include 'components/unio/file_upload.html.twig' with {
+                id: 'trilha-import-arquivo',
+                name: 'arquivo',
+                accept: '.csv,text/csv',
+                hint: 'CSV UTF-8 · arraste ou clique · até 2 MB'
+            } %}
+            <p class="trilha-import-tip">
+                <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                No Excel: <strong>Salvar como → CSV UTF-8</strong>
+            </p>
         </div>
 
-        <div class="form-group mb-3">
-            <label class="font-weight-bold" for="csv">Ou cole o conteúdo</label>
-            <textarea id="csv" name="csv" rows="7" class="form-control pos-op-csv font-monospace small" placeholder="{{ template_headers|join(',') }}&#10;Maria Silva,Herniorrafia inguinal,2026-07-10,11999998888,,,"></textarea>
+        <div class="trilha-import-pane" data-trilha-pane="colar" role="tabpanel" hidden>
+            <div class="trilha-import-text-head">
+                <label class="font-weight-bold mb-0" for="csv">Conteúdo CSV</label>
+                <button type="button" class="btn-unio-ghost btn-sm" data-trilha-fill-example>
+                    <i class="fas fa-wand-magic-sparkles mr-1" aria-hidden="true"></i>
+                    Exemplo
+                </button>
+            </div>
+            <textarea id="csv" name="csv" rows="8" class="form-control pos-op-csv trilha-import-textarea" data-trilha-csv-text placeholder="{{ template_headers|join(',') }}&#10;{{ _sample_row }}"></textarea>
         </div>
 
-        <button type="submit" class="btn-unio">
-            <i class="fas fa-file-import mr-1" aria-hidden="true"></i>
-            Importar na Trilha
-        </button>
+        <div class="trilha-import-preview" data-trilha-preview hidden>
+            <div class="trilha-import-preview__icon" aria-hidden="true"><i class="fas fa-table"></i></div>
+            <div class="trilha-import-preview__body">
+                <strong data-trilha-preview-rows>0 pacientes</strong>
+                <span class="text-muted small" data-trilha-preview-cols></span>
+            </div>
+            <span class="trilha-import-preview__badge" data-trilha-preview-status></span>
+        </div>
+
+        <div class="trilha-import-actions">
+            <button type="submit" class="btn-unio" data-trilha-submit>
+                <i class="fas fa-file-import mr-1" aria-hidden="true"></i>
+                Importar na Trilha
+            </button>
+            <a href="{{ path('app_pos_operatorio_pacientes_importar_modelo') }}" class="btn-unio-ghost">
+                <i class="fas fa-download mr-1" aria-hidden="true"></i>
+                Modelo CSV
+            </a>
+        </div>
     </form>
 </section>
 
+{% if result and result.ok and result.importados|default(0) > 0 %}
+<section class="unio-card p-4 mb-4 trilha-import-success">
+    <h3 class="clinic-ops-panel__title text-success">
+        <i class="fas fa-circle-check mr-1" aria-hidden="true"></i>
+        Importação concluída
+    </h3>
+    <p class="mb-3">{{ result.importados }} paciente(s) entraram na Trilha Unio com protocolo e data de cirurgia.</p>
+    <a href="{{ path('app_pos_operatorio_pacientes') }}" class="btn-unio btn-sm">
+        <i class="fas fa-user-injured mr-1" aria-hidden="true"></i>
+        Ver pacientes
+    </a>
+</section>
+{% endif %}
+
 {% if result and result.ok and result.erros is not empty %}
 <section class="unio-card p-4">
-    <h3 class="clinic-ops-panel__title text-danger">Linhas com erro</h3>
-    <ul class="clinic-ops-list mb-0 small">
+    <h3 class="clinic-ops-panel__title text-danger">
+        <i class="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i>
+        Linhas com erro ({{ result.erros|length }})
+    </h3>
+    <ul class="trilha-import-errors mb-0">
         {% for erro in result.erros %}
             <li>{{ erro }}</li>
         {% endfor %}
     </ul>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/clinic-trilha-import.js') }}?v=1" defer></script>
 {% endblock %}
