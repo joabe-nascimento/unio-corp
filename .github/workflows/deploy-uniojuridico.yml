@@ -1,0 +1,39 @@
+name: Deploy Unio Jurídico
+
+# Deploy automatico desativado no push — billing Actions bloqueado.
+# Publicar em producao: scripts/deploy-uniojuridico-manual.ps1 (ver docs/uniojuridico/README.md)
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-uniojuridico-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate-reusable.yml
+    with:
+      git_branch: uniojuridico
+
+  deploy:
+    needs: validate
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      github_environment: uniojuridico
+      deploy_path_default: /home2/joabef36/unio-uniojuridico
+      deploy_public_html_default: /home2/joabef36/uniojuridico.uniowork.com.br
+      archive_remote_name: deploy-uniojuridico.tar.gz
+      skip_unio_platform_steps: false
+      report_artifact_prefix: deploy-report-uniojuridico
+      failure_summary_title: Falha no deploy Unio Jurídico
+    secrets: inherit
+
+  smoke_test:
+    needs: deploy
+    uses: ./.github/workflows/smoke-test-hostgator-reusable.yml
+    with:
+      default_uri: https://uniojuridico.uniowork.com.br
+      paths: |
+        /
+        /login
+    secrets: inherit

@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\User;
+use App\Service\Juridico\JurisFlowAiClient;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\PosOperatorio\VitoriaContextService;
 use App\Service\Vitoria\VitoriaClient;
@@ -21,18 +22,32 @@ final class VitoriaApiController extends AbstractController
 {
     public function __construct(
         private VitoriaClient $vitoria,
+        private JurisFlowAiClient $juridicoAi,
         private WorkspaceService $workspace,
         private VitoriaContextService $vitoriaContext,
         private VitoriaToolRegistry $toolRegistry,
         private OrganismoCopyService $organismoCopy,
     ) {}
 
+    /**
+     * Escolhe o motor de IA ativo conforme a identidade da plataforma:
+     * Unio Jurídico usa o JurisFlow (LangChain + RAG jurídico); demais usam a Vitória padrão.
+     */
+    private function activeClient(): VitoriaClient|JurisFlowAiClient
+    {
+        if ($this->organismoCopy->isJuridicoProfile()) {
+            return $this->juridicoAi;
+        }
+
+        return $this->vitoria;
+    }
+
     #[Route('/status', name: 'api_vitoria_status', methods: ['GET'])]
     public function status(): JsonResponse
     {
         return $this->json([
             'enabled' => true,
-            'online' => $this->vitoria->isAvailable(),
+            'online' => $this->activeClient()->isAvailable(),
             'assistant' => $this->organismoCopy->lumen(),
         ]);
     }
@@ -107,13 +122,14 @@ final class VitoriaApiController extends AbstractController
             'user_name' => $user->getNome() ?? 'Usuário',
             'patient_codigo' => $pacienteCodigo,
             'assistant' => $this->organismoCopy->lumen(),
+            'escritorio_id' => $empresa?->getId() !== null ? (string) $empresa->getId() : 'default',
         ];
 
-        if ($empresa) {
+        if ($empresa && !$this->organismoCopy->isJuridicoProfile()) {
             $context = $this->vitoriaContext->enrichChatContext($empresa, $context, is_string($pacienteCodigo) ? $pacienteCodigo : null);
         }
 
-        $result = $this->vitoria->chat($message, $history, $context);
+        $result = $this->activeClient()->chat($message, $history, $context);
         if ($result === null) {
             return $this->json([
                 'reply' => sprintf(

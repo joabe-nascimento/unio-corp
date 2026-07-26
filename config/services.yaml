@@ -13,6 +13,9 @@ parameters:
     vitoria_ai_url_default: ''
     vitoria_ai_key_default: 'dev-vitoria-key-change-me'
     vitoria_ai_enabled_default: 'true'
+    legal_ai_url_default: 'http://127.0.0.1:8090'
+    legal_ai_enabled_default: 'false'
+    legal_ai_escritorio_id_default: 'default'
     default_uri_default: 'http://127.0.0.1:8000'
     mercure_url_default: 'http://localhost:3000/.well-known/mercure'
     mercure_jwt_default: '!ChangeMe!UnioMercureJwtDevSecret32!'
@@ -208,6 +211,12 @@ services:
             $enabled: '%env(bool:default:vitoria_ai_enabled_default:VITORIA_AI_ENABLED)%'
             $baseUrl: '%env(default:vitoria_ai_url_default:VITORIA_AI_URL)%'
             $apiKey: '%env(default:vitoria_ai_key_default:VITORIA_AI_KEY)%'
+
+    App\Service\Juridico\JurisFlowAiClient:
+        arguments:
+            $enabled: '%env(bool:default:legal_ai_enabled_default:LEGAL_AI_ENABLED)%'
+            $baseUrl: '%env(default:legal_ai_url_default:LEGAL_AI_URL)%'
+            $defaultEscritorioId: '%env(default:legal_ai_escritorio_id_default:LEGAL_AI_ESCRITORIO_ID)%'
 
     App\Command\VitoriaSmokeTestCommand:
         arguments:

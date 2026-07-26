@@ -59,6 +59,19 @@ final class OrganismoCopyService
             || str_contains($brand, 'saude');
     }
 
+    /** Perfil jurídico (uniojuridico) — escritório de advocacia. */
+    public function isJuridicoProfile(): bool
+    {
+        $unit = mb_strtolower($this->unitLabel);
+        $brand = mb_strtolower($this->brandName);
+
+        return str_contains($brand, 'jurídico')
+            || str_contains($brand, 'juridico')
+            || str_contains($brand, 'advocacia')
+            || str_contains($unit, 'escritório')
+            || str_contains($unit, 'escritorio');
+    }
+
     public function colonia(): string
     {
         return $this->unitLabel;

@@ -45,11 +45,13 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
             return [
                 'organismo' => ['enabled' => false, 'pulso_home' => false, 'copy' => []],
                 'org_clinic' => false,
+                'org_juridico' => false,
                 'org_brand_label' => null,
             ];
         }
 
         $isClinic = $this->copy->isClinicProfile();
+        $isJuridico = !$isClinic && $this->copy->isJuridicoProfile();
         $enabledProducts = $this->resolveProductEnabledMap();
         $navFeatures = $isClinic
             ? ClinicFeatureCatalog::filterByProducts(ClinicFeatureCatalog::all(), $enabledProducts)
@@ -67,6 +69,7 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
                 'copy' => $this->copy->getGlobals(),
             ],
             'org_clinic' => $isClinic,
+            'org_juridico' => $isJuridico,
             'org_brand_label' => $this->copy->brandName(),
             'clinic_nav_sections' => $isClinic ? ClinicFeatureCatalog::sectionsForFeatures($navFeatures) : [],
             'clinic_nav_features' => $navFeatures,
