@@ -34,6 +34,12 @@ class PlatformConfigService
     /** Favicon quadrado Unio Saúde (derivado de unio-saude.png). */
     public const SAUDE_FAVICON_ASSET = '/images/logos/favicon-unio-saude.png';
 
+    /** Logotipo Unio Jurídico (escritório de advocacia). */
+    public const JURIDICO_LOGO_ASSET = '/images/logos/unio-juridico.png';
+
+    /** Favicon quadrado Unio Jurídico. */
+    public const JURIDICO_FAVICON_ASSET = '/images/logos/favicon-unio-juridico.png';
+
     /** @var array<string,string> Placeholders exibidos quando nenhum asset foi configurado. */
     public const DEFAULT_ASSET_PATHS = [
         'logo_url'      => self::DEFAULT_LOGO_ASSET,
