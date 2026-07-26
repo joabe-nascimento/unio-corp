@@ -16,7 +16,7 @@
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=19">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=6">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-juridico.css') }}?v=5">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-juridico.css') }}?v=6">
 </head>
 <body class="marketing-home mkt-v2 mkt-juridico">
 
@@ -163,6 +163,131 @@
                     <strong>Bruna</strong>
                     <span>Copiloto jurídico ativo</span>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--autonomous" id="agente-autonomo">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Agente Autônomo</p>
+                <h2>Bruna trabalha 24/7 para você</h2>
+                <p>Um copiloto jurídico inteligente que nunca dorme, monitora prazos, pesquisa jurisprudência e te avisa sobre o que realmente importa.</p>
+            </header>
+            <div class="jur-autonomous-grid">
+                {% for feature in autonomous_features|default([]) %}
+                <article class="jur-autonomous-card jur-reveal">
+                    <div class="jur-autonomous-card__header">
+                        <div class="jur-autonomous-card__icon">
+                            <i class="fas {{ feature.icon }}" aria-hidden="true"></i>
+                        </div>
+                        {% if feature.status == 'active' %}
+                        <span class="jur-autonomous-badge jur-autonomous-badge--active">Ativo</span>
+                        {% elseif feature.status == 'development' %}
+                        <span class="jur-autonomous-badge jur-autonomous-badge--dev">Em desenvolvimento</span>
+                        {% else %}
+                        <span class="jur-autonomous-badge jur-autonomous-badge--planned">Planejado</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="jur-autonomous-card__title">{{ feature.title }}</h3>
+                    <p class="jur-autonomous-card__text">{{ feature.text }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--comparison" id="antes-depois">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Transformação</p>
+                <h2>Antes e depois da Bruna</h2>
+                <p>Veja o impacto real no seu dia a dia jurídico</p>
+            </header>
+            <div class="jur-comparison-grid">
+                {% for item in before_after|default([]) %}
+                <article class="jur-comparison-item jur-reveal">
+                    <div class="jur-comparison-category">{{ item.category }}</div>
+                    <div class="jur-comparison-before">
+                        <span class="jur-comparison-label">Antes</span>
+                        <p>{{ item.before }}</p>
+                    </div>
+                    <div class="jur-comparison-arrow">
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </div>
+                    <div class="jur-comparison-after">
+                        <span class="jur-comparison-label">Agora</span>
+                        <p>{{ item.after }}</p>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--interactive" id="demonstracao">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Demonstração Interativa</p>
+                <h2>Experimente perguntar para a Bruna</h2>
+                <p>Veja exemplos reais de como a IA jurídica responde</p>
+            </header>
+            <div class="jur-interactive-demo">
+                {% for useCase in interactive_use_cases|default([]) %}
+                <article class="jur-demo-card jur-reveal">
+                    <div class="jur-demo-question">
+                        <div class="jur-demo-avatar">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                        <div class="jur-demo-bubble jur-demo-bubble--user">
+                            {{ useCase.question }}
+                        </div>
+                    </div>
+                    <div class="jur-demo-answer">
+                        <div class="jur-demo-avatar jur-demo-avatar--bruna">
+                            <i class="fas fa-robot" aria-hidden="true"></i>
+                        </div>
+                        <div class="jur-demo-bubble jur-demo-bubble--bruna">
+                            {{ useCase.answer }}
+                        </div>
+                    </div>
+                    <div class="jur-demo-tag">
+                        <i class="fas fa-tag" aria-hidden="true"></i>
+                        {{ useCase.demo }}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            <div class="jur-demo-cta jur-reveal">
+                <p>Pronto para ter sua própria assistente jurídica?</p>
+                <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">
+                    <i class="fas fa-rocket mr-2" aria-hidden="true"></i>
+                    Começar agora
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--daily" id="rotina-expandida">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Seu Novo Dia</p>
+                <h2>Como a Bruna transforma sua rotina</h2>
+                <p>Do início ao fim do expediente, um copiloto trabalhando por você</p>
+            </header>
+            <div class="jur-daily-timeline">
+                {% for item in daily_routine|default([]) %}
+                <article class="jur-daily-item jur-reveal">
+                    <div class="jur-daily-time">
+                        <i class="fas {{ item.icon }}" aria-hidden="true"></i>
+                        <span>{{ item.time }}</span>
+                    </div>
+                    <div class="jur-daily-content">
+                        <h3>{{ item.title }}</h3>
+                        <p>{{ item.desc }}</p>
+                    </div>
+                </article>
+                {% endfor %}
             </div>
         </div>
     </section>

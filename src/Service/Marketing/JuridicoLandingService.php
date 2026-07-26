@@ -29,7 +29,7 @@ final class JuridicoLandingService
             [
                 'icon' => 'fa-robot',
                 'title' => 'IA jurídica Bruna',
-                'text' => 'Prazos processuais, jurisprudência, contratos e honorários com copiloto dedicado.',
+                'text' => 'Agente autônomo que trabalha 24/7 gerenciando prazos, pesquisando jurisprudência e analisando contratos.',
             ],
             [
                 'icon' => 'fa-file-contract',
@@ -40,6 +40,135 @@ final class JuridicoLandingService
                 'icon' => 'fa-chart-line',
                 'title' => 'Financeiro do escritório',
                 'text' => 'Honorários, repasses e indicadores executivos no Pulso jurídico.',
+            ],
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function autonomousFeatures(): array
+    {
+        return [
+            [
+                'icon' => 'fa-brain',
+                'title' => 'Agente Autônomo 24/7',
+                'text' => 'Bruna monitora prazos críticos, identifica publicações relevantes e envia alertas automáticos mesmo fora do horário comercial.',
+                'status' => 'active',
+            ],
+            [
+                'icon' => 'fa-magnifying-glass',
+                'title' => 'Pesquisa Inteligente de Jurisprudência',
+                'text' => 'Busca automática em STF, STJ e TRTs com resumos contextualizados e citações ABNT prontas.',
+                'status' => 'active',
+            ],
+            [
+                'icon' => 'fa-calculator',
+                'title' => 'Cálculo Automático de Prazos CPC',
+                'text' => 'Motor processual que considera feriados forenses, suspensões e prazos em dobro automaticamente.',
+                'status' => 'active',
+            ],
+            [
+                'icon' => 'fa-file-lines',
+                'title' => 'Análise de Contratos',
+                'text' => 'Identifica cláusulas críticas, riscos e pontos de atenção em contratos complexos.',
+                'status' => 'active',
+            ],
+            [
+                'icon' => 'fa-envelope',
+                'title' => 'Triagem de Publicações DJe',
+                'text' => 'Classifica automaticamente intimações, despachos e sentenças por ordem de urgência.',
+                'status' => 'development',
+            ],
+            [
+                'icon' => 'fa-wand-magic-sparkles',
+                'title' => 'Geração Assistida de Petições',
+                'text' => 'Cria minutas baseadas em templates do escritório com fundamentos sugeridos pela IA.',
+                'status' => 'development',
+            ],
+            [
+                'icon' => 'fa-building-columns',
+                'title' => 'Integração com Tribunais',
+                'text' => 'Sincronização automática com PJe, e-SAJ e Projudi para captura de andamentos.',
+                'status' => 'planned',
+            ],
+            [
+                'icon' => 'fa-scale-unbalanced',
+                'title' => 'Previsão de Êxito',
+                'text' => 'Modelo preditivo que estima probabilidade de sucesso baseado em histórico e jurisprudência.',
+                'status' => 'planned',
+            ],
+        ];
+    }
+
+    /** @return list<array{time: string, title: string, desc: string, icon: string}> */
+    public function dailyRoutine(): array
+    {
+        return [
+            [
+                'time' => '08:00',
+                'title' => 'Resumo Matinal Automático',
+                'desc' => 'Bruna envia relatório com prazos do dia, novos andamentos e publicações relevantes.',
+                'icon' => 'fa-sun',
+            ],
+            [
+                'time' => '14:30',
+                'title' => 'Alertas Contextualizados',
+                'desc' => 'Notificações inteligentes sobre audiências, vencimentos e tarefas urgentes com um clique para ação.',
+                'icon' => 'fa-bell',
+            ],
+            [
+                'time' => '18:00',
+                'title' => 'Consolidação Noturna',
+                'desc' => 'Enquanto você descansa, Bruna organiza documentos, atualiza dashboards e prepara o dia seguinte.',
+                'icon' => 'fa-moon',
+            ],
+        ];
+    }
+
+    /** @return list<array{before: string, after: string, category: string}> */
+    public function beforeAfter(): array
+    {
+        return [
+            [
+                'before' => '3 horas/dia em planilhas de prazos',
+                'after' => '10 minutos revisando alertas automáticos',
+                'category' => 'Gestão de Prazos',
+            ],
+            [
+                'before' => '45 minutos pesquisando jurisprudência',
+                'after' => '5 minutos com resumos contextualizados',
+                'category' => 'Pesquisa Jurídica',
+            ],
+            [
+                'before' => '2 horas analisando contratos manualmente',
+                'after' => '20 minutos revisando análise da IA',
+                'category' => 'Due Diligence',
+            ],
+            [
+                'before' => 'Risco de perder prazo por feriado esquecido',
+                'after' => 'Motor CPC calcula automaticamente',
+                'category' => 'Compliance Processual',
+            ],
+        ];
+    }
+
+    /** @return list<array{question: string, answer: string, demo: string}> */
+    public function interactiveUseCases(): array
+    {
+        return [
+            [
+                'question' => 'Calcule o prazo para apelação considerando a data de publicação em 15/03/2026',
+                'answer' => 'Prazo de 15 dias úteis. Vencimento: 07/04/2026 (considerando feriados e suspensões forenses da comarca).',
+                'demo' => 'prazos',
+            ],
+            [
+                'question' => 'Pesquise jurisprudência sobre dano moral por negativação indevida no STJ',
+                'answer' => 'Encontrados 143 julgados relevantes. Tendência: R$ 8.000 a R$ 15.000. Súmula 385/STJ aplicável.',
+                'demo' => 'jurisprudencia',
+            ],
+            [
+                'question' => 'Analise as cláusulas críticas deste contrato de prestação de serviços',
+                'answer' => 'Identificadas 3 cláusulas de risco alto: limitação de responsabilidade genérica, foro não negociado, multa desproporcional.',
+                'demo' => 'contratos',
             ],
         ];
     }

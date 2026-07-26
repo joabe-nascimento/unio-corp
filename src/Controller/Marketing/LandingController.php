@@ -43,6 +43,10 @@ class LandingController extends AbstractController
                 'juridico_audiences' => $juridicoLanding->audiences(),
                 'juridico_routine' => $juridicoLanding->routine(),
                 'juridico_faq' => $juridicoLanding->faq(),
+                'autonomous_features' => $juridicoLanding->autonomousFeatures(),
+                'daily_routine' => $juridicoLanding->dailyRoutine(),
+                'before_after' => $juridicoLanding->beforeAfter(),
+                'interactive_use_cases' => $juridicoLanding->interactiveUseCases(),
             ]);
         }
 
