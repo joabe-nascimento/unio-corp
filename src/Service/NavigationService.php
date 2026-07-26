@@ -769,6 +769,10 @@ class NavigationService
                 return $this->getClinicMobileShellNav($user, $route, $clinicAlertBadge);
             }
 
+            if ($this->organismoCopy->isJuridicoProfile()) {
+                return $this->getJuridicoMobileShellNav($route, $clinicAlertBadge);
+            }
+
             return $this->getStudioMobileShellNav($route, $clinicAlertBadge);
         }
 
@@ -805,6 +809,58 @@ class NavigationService
         $items[] = $this->mobileShellMenuAction();
 
         return $items;
+    }
+
+    /**
+     * Barra inferior da Unio Jurídico — fluxo do escritório.
+     *
+     * @return list<array{id: string, icon: string, label: string, type: string, route?: string, action?: string, badge?: int, active: bool}>
+     */
+    private function getJuridicoMobileShellNav(?string $route, int $alertBadge = 0): array
+    {
+        $homeRoute = $this->organismoFeature->isPulsoHome() ? 'app_pulso' : 'app_dashboard';
+        $copy = $this->organismoCopy->getGlobals();
+
+        return [
+            $this->buildMobileShellLink(
+                'dashboard',
+                'fa-gauge-high',
+                'Pulso',
+                $homeRoute,
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_dashboard')
+                    || $r === 'app_pulso'
+                ),
+            ),
+            $this->buildMobileShellLink(
+                'processos',
+                'fa-scale-balanced',
+                'Jurídico',
+                'app_juridico',
+                $route,
+                static fn (?string $r): bool => (bool) $r && (
+                    str_starts_with($r, 'app_juridico')
+                ),
+            ),
+            [
+                'id' => 'bruna',
+                'icon' => 'fa-robot',
+                'label' => $this->shortMobileLabel((string) ($copy['lumen'] ?? 'Bruna')),
+                'type' => 'action',
+                'action' => 'open-helix',
+                'active' => false,
+            ],
+            $this->buildMobileShellLink(
+                'financeiro',
+                'fa-coins',
+                'Financeiro',
+                'app_financeiro',
+                $route,
+                static fn (?string $r): bool => (bool) $r && str_starts_with($r, 'app_financeiro'),
+            ),
+            $this->mobileShellMenuAction(),
+        ];
     }
 
     /**

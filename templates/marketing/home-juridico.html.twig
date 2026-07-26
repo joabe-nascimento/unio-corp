@@ -1,0 +1,302 @@
+﻿{% set _tema = platform_config.tema|default('light') %}
+{% set _brand = organismo.copy.brand_name|default(platform_config.plataforma_nome|default('Unio Jurídico')) %}
+{% set _tagline = organismo.copy.marketing_tagline|default(platform_config.plataforma_tagline|default('Justiça que acompanha.')) %}
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ _tema }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ _brand }} | {{ _tagline }}</title>
+    <meta name="description" content="{{ _brand }} {{ _tagline }} Plataforma de gestão jurídica com IA Bruna.">
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('unio-theme')||'{{ _tema }}')}catch(e){}</script>
+    {% include 'components/platform_favicon.html.twig' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% include 'components/unio_theme_vars.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=19">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=6">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-juridico.css') }}?v=5">
+</head>
+<body class="marketing-home mkt-v2 mkt-juridico">
+
+<header class="mkt-header mkt-header--v2" id="mktHeader">
+    <div class="mkt-header-inner mkt-header-inner--v2">
+        <a href="{{ path('app_home') }}" class="mkt-brand mkt-brand--v2" title="{{ _brand }}">
+            {% include 'components/platform_logo.html.twig' with { variant: 'full', class: 'mkt-logo mkt-logo--v2' } only %}
+        </a>
+        <nav class="mkt-nav mkt-nav--v2" id="mktMainNav" aria-label="Principal">
+            <a href="#recursos">Recursos</a>
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#ia">IA Bruna</a>
+            <a href="#faq">FAQ</a>
+        </nav>
+        <div class="mkt-header-actions mkt-header-actions--v2">
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">Acessar plataforma</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="jur-hero" id="topo">
+        <div class="jur-hero__bg" aria-hidden="true">
+            <img class="jur-hero__photo" src="{{ asset('images/marketing/hero-juridico.jpg') }}?v=1" alt="" width="1920" height="1080" decoding="async">
+            <div class="jur-hero__veil"></div>
+            <div class="jur-hero__fade"></div>
+        </div>
+        <div class="jur-hero__message jur-reveal">
+            <div class="jur-hero__message-inner">
+                <div class="jur-hero__message-content">
+                    <p class="jur-hero__eyebrow">{{ _brand }}</p>
+                    <h1>Inteligência jurídica que trabalha por você</h1>
+                    <p>Processos, prazos e documentos sincronizados em um único painel com IA dedicada ao seu escritório.</p>
+                </div>
+                <div class="jur-hero__message-actions">
+                    <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">Acessar plataforma</a>
+                    <a href="#recursos" class="mkt-btn mkt-btn--surface mkt-btn--lg">Conhecer recursos</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-metrics" aria-label="Resultados da plataforma">
+        <div class="jur-metrics__inner">
+            {% for metric in juridico_metrics|default([]) %}
+            <div class="jur-metric jur-reveal">
+                <div class="jur-metric__icon"><i class="fas {{ metric.icon }}" aria-hidden="true"></i></div>
+                <strong data-jur-count="{{ metric.target }}" data-jur-suffix="{{ metric.suffix }}">0{{ metric.suffix }}</strong>
+                <span>{{ metric.label }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="jur-section" id="recursos">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Recursos</p>
+                <h2>Tudo que o escritório precisa, em um só lugar</h2>
+                <p>Da agenda de prazos ao financeiro com copiloto jurídico integrado.</p>
+            </header>
+            <div class="jur-features">
+                {% for feature in juridico_features|default([]) %}
+                <article class="jur-feature jur-reveal">
+                    <div class="jur-feature__icon"><i class="fas {{ feature.icon }}" aria-hidden="true"></i></div>
+                    <h3>{{ feature.title }}</h3>
+                    <p>{{ feature.text }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--alt" id="como-funciona">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Como funciona</p>
+                <h2>Do cadastro ao copiloto, em três passos</h2>
+            </header>
+            <div class="jur-steps">
+                {% for step in juridico_steps|default([]) %}
+                <article class="jur-step jur-reveal">
+                    <span class="jur-step__num">{{ step.step }}</span>
+                    <h3>{{ step.title }}</h3>
+                    <p>{{ step.text }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section" id="modulos">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Módulos</p>
+                <h2>Operação jurídica completa</h2>
+            </header>
+            <div class="jur-modules">
+                {% for mod in juridico_modules|default([]) %}
+                <div class="jur-module jur-reveal">
+                    <i class="fas {{ mod.icon }}" aria-hidden="true"></i>
+                    <div>
+                        <strong>{{ mod.label }}</strong>
+                        <span>{{ mod.desc }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-banner" aria-hidden="true">
+        <img class="jur-banner__photo" src="{{ asset('images/marketing/office-juridico-banner.jpg') }}?v=1" alt="" width="1600" height="900" loading="lazy" decoding="async">
+        <div class="jur-banner__veil"></div>
+        <div class="jur-banner__fade"></div>
+        <div class="jur-banner__inner jur-reveal">
+            <p class="jur-banner__quote">Tecnologia que se adapta à rotina do escritório, não o contrário.</p>
+            <span class="jur-banner__cite">Princípio de design da Unio Jurídico</span>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--ia" id="ia">
+        <div class="jur-section__inner jur-ia-grid">
+            <div class="jur-ia-copy jur-reveal">
+                <p class="jur-section__eyebrow">Inteligência artificial</p>
+                <h2>Conheça a Bruna, sua assistente jurídica</h2>
+                <p>Calcule prazos processuais, pesquise jurisprudência, resuma peças, analise contratos e tire dúvidas sobre honorários, tudo dentro da plataforma.</p>
+                <ul class="jur-ia-chips">
+                    <li><i class="fas fa-clock"></i> Prazos</li>
+                    <li><i class="fas fa-book-open"></i> Jurisprudência</li>
+                    <li><i class="fas fa-file-contract"></i> Contratos</li>
+                    <li><i class="fas fa-coins"></i> Honorários</li>
+                </ul>
+                <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">
+                    Testar a Bruna agora
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div class="jur-ia-visual jur-reveal jur-reveal--delay">
+                <div class="jur-ia-frame">
+                    <img src="{{ asset('images/marketing/bruna-assistant-juridico.jpg') }}?v=3" alt="Bruna, assistente jurídica da Unio" width="800" height="1000" loading="lazy" decoding="async">
+                </div>
+                <div class="jur-ia-badge">
+                    <strong>Bruna</strong>
+                    <span>Copiloto jurídico ativo</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--alt" id="confianca">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Por que Unio</p>
+                <h2>Feita para a rotina real do escritório</h2>
+            </header>
+            <div class="jur-trust">
+                {% for item in juridico_trust|default([]) %}
+                <article class="jur-trust__item jur-reveal">
+                    <div class="jur-trust__icon"><i class="fas {{ item.icon }}" aria-hidden="true"></i></div>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.text }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--alt" id="para-quem">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Para quem é</p>
+                <h2>Feita para a operação real do escritório</h2>
+                <p>Não é um checklist genérico de features. É o fluxo do dia a dia jurídico.</p>
+            </header>
+            <div class="jur-audiences">
+                {% for item in juridico_audiences|default([]) %}
+                <article class="jur-audience jur-reveal">
+                    <div class="jur-audience__icon"><i class="fas {{ item.icon }}" aria-hidden="true"></i></div>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.text }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section" id="rotina">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Rotina</p>
+                <h2>Um dia típico com a Unio Jurídico</h2>
+            </header>
+            <div class="jur-routine">
+                {% for item in juridico_routine|default([]) %}
+                <article class="jur-routine__item jur-reveal">
+                    <span class="jur-routine__time">{{ item.time }}</span>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.text }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section" id="depoimentos">
+        <div class="jur-section__inner">
+            <div class="jur-testimonial jur-reveal">
+                <div class="jur-testimonial__photo">
+                    <img src="{{ asset('images/marketing/testimonial-juridico.jpg') }}?v=1" alt="{{ juridico_testimonial.name|default('') }}" width="480" height="640" loading="lazy" decoding="async">
+                </div>
+                <div class="jur-testimonial__body">
+                    <blockquote>{{ juridico_testimonial.quote|default('') }}</blockquote>
+                    <footer>
+                        <strong>{{ juridico_testimonial.name|default('') }}</strong>
+                        <span>{{ juridico_testimonial.role|default('') }}</span>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-section jur-section--alt" id="faq">
+        <div class="jur-section__inner">
+            <header class="jur-section__head jur-reveal">
+                <p class="jur-section__eyebrow">Perguntas frequentes</p>
+                <h2>O que costuma importar antes de entrar</h2>
+            </header>
+            <div class="jur-faq">
+                {% for item in juridico_faq|default([]) %}
+                <details class="jur-faq__item jur-reveal">
+                    <summary>{{ item.q }}</summary>
+                    <p>{{ item.a }}</p>
+                </details>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="jur-cta">
+        <div class="jur-cta__bg" aria-hidden="true">
+            <img src="{{ asset('images/marketing/hero-juridico.jpg') }}?v=1" alt="" loading="lazy" decoding="async">
+        </div>
+        <div class="jur-cta__veil" aria-hidden="true"></div>
+        <div class="jur-cta__fade" aria-hidden="true"></div>
+        <div class="jur-cta__content jur-reveal">
+            <p class="jur-cta__eyebrow">Próximo passo</p>
+            <h2>Entre e veja o pulso do seu escritório</h2>
+            <p>Processos, prazos e a Bruna no mesmo lugar.</p>
+            <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow mkt-btn--lg">Acessar {{ _brand }}</a>
+        </div>
+    </section>
+</main>
+
+<footer class="jur-footer">
+    <div class="jur-footer__inner">
+        <div class="jur-footer__col jur-footer__col--brand">
+            {% include 'components/platform_logo.html.twig' with { variant: 'full', width: 120, height: 36 } only %}
+            <p>{{ _tagline }}</p>
+        </div>
+        <nav class="jur-footer__col" aria-label="Plataforma">
+            <span class="jur-footer__heading">Plataforma</span>
+            <a href="#recursos">Recursos</a>
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#ia">IA Bruna</a>
+        </nav>
+        <nav class="jur-footer__col" aria-label="Acesso">
+            <span class="jur-footer__heading">Acesso</span>
+            <a href="{{ path('app_login') }}">Entrar</a>
+            <a href="{{ path('app_forgot_password') }}">Esqueci a senha</a>
+        </nav>
+        <div class="jur-footer__col jur-footer__col--legal">
+            <span class="jur-footer__heading">Legal</span>
+            {% include 'components/platform_legal.html.twig' with { variant: 'full' } %}
+        </div>
+    </div>
+</footer>
+
+{% include 'components/cookie_consent_banner.html.twig' %}
+<script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
+<script src="{{ asset('js/marketing-home-juridico.js') }}?v=2" defer></script>
+</body>
+</html>

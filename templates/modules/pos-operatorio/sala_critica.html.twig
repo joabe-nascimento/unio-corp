@@ -1,14 +1,15 @@
 {% extends 'layout/hub.html.twig' %}
 
 {% set _copy = organismo.copy|default({}) %}
-{% set _label_sala = _copy.nav_sala_critica|default(org_clinic|default(false) ? 'Sala Crítica' : 'Prioridade alta') %}
+{% set _is_jur = org_juridico|default(false) %}
+{% set _label_sala = _is_jur ? 'Prazos Críticos' : _copy.nav_sala_critica|default(org_clinic|default(false) ? 'Sala Crítica' : 'Prioridade alta') %}
 
-{% block title %}{{ _label_sala }}{% if not org_clinic %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
-{% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
+{% block title %}{{ _label_sala }}{% if not org_clinic and not _is_jur %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
+{% block permissions_scope %}{% if not org_clinic and not _is_jur %}hub_pos_operatorio{% endif %}{% endblock %}
 
 {% set hub_page_title = _label_sala %}
-{% set hub_page_eyebrow = org_clinic ? org_brand_label : '' %}
-{% set hub_page_subtitle = org_clinic|default(false) ? 'Alertas P1 · coordenação clínica' : 'Alertas P1 · atenção imediata' %}
+{% set hub_page_eyebrow = (org_clinic or _is_jur) ? org_brand_label : '' %}
+{% set hub_page_subtitle = org_clinic|default(false) ? 'Alertas P1 · coordenação clínica' : (_is_jur ? 'Prazos críticos · atenção imediata do escritório' : 'Alertas P1 · atenção imediata') %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
 
@@ -25,7 +26,7 @@
 {% include 'components/kpi_row.html.twig' with { items: [
         { value: p1_count, label: 'Incidentes P1', icon: 'fa-fire', tone: 'rose', variant: p1_count > 0 ? 'danger' : 'success', pulse: p1_count > 0 },
         { value: severity_score|default(0), label: 'Índice severidade', icon: 'fa-heart-pulse', tone: 'amber', variant: severity_level|default('stable') == 'critical' ? 'danger' : (severity_level|default('stable') == 'elevated' ? 'warning' : '') },
-        { value: stats.em_atendimento|default(0), label: 'Em atendimento', icon: 'fa-user-nurse', tone: 'sage' },
+        { value: stats.em_atendimento|default(0), label: 'Em atendimento', icon: org_juridico|default(false) ? 'fa-user-tie' : 'fa-user-nurse', tone: 'sage' },
         { value: stats.abertos|default(0), label: 'Aguardando triagem', icon: 'fa-inbox', tone: 'sky', route: 'app_pos_operatorio_alertas' },
     ], mb: 'mb-0' } %}
 {% endblock %}

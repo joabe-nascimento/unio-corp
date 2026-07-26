@@ -1,0 +1,76 @@
+{# Navegação Unio Jurídico — módulos de produto (sem Unio Saúde) #}
+{% set route = app.request.attributes.get('_route') %}
+{% set copy = organismo.copy|default({}) %}
+{% set _lumen = copy.lumen|default('Bruna') %}
+{% set _route_params = app.request.attributes.get('_route_params')|default({}) %}
+{% set _active_slug = _route_params.slug|default('') %}
+
+<li class="nav-item">
+    <a href="{{ path('app_dashboard') }}" class="nav-link {{ route == 'app_dashboard' or route == 'app_pulso' ? 'active' : '' }}">
+        <span class="nav-icon-slot">
+            <i class="fas fa-gauge-high nav-icon" aria-hidden="true"></i>
+        </span>
+        <p>Pulso</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_juridico') }}" class="nav-link {{ route == 'app_juridico' ? 'active' : '' }}">
+        <span class="nav-icon-slot">
+            <i class="fas fa-th-large nav-icon" aria-hidden="true"></i>
+        </span>
+        <p>Hub Jurídico</p>
+    </a>
+</li>
+
+<li class="sidebar-hub-separator" aria-hidden="true"></li>
+<li class="nav-item sidebar-hub-heading-item">
+    <div class="sidebar-hub-heading">
+        <span class="sidebar-hub-heading-label">{{ copy.lumen_subtitle|default('IA Jurídica') }}</span>
+    </div>
+</li>
+
+<li class="nav-item">
+    <a href="#" class="nav-link js-unio-open-helix" aria-label="Abrir {{ _lumen }}">
+        <span class="nav-icon-slot">
+            <i class="fas fa-robot nav-icon" aria-hidden="true"></i>
+        </span>
+        <p>{{ _lumen }}</p>
+    </a>
+</li>
+
+{% for section in juridico_module_sections|default([]) %}
+<li class="sidebar-hub-separator" aria-hidden="true"></li>
+<li class="nav-item sidebar-hub-heading-item">
+    <div class="sidebar-hub-heading">
+        <span class="sidebar-hub-heading-label">{{ section.label }}</span>
+    </div>
+</li>
+{% for module in section.modules %}
+<li class="nav-item">
+    <a href="{{ path('app_juridico_modulo', { slug: module.slug }) }}"
+       class="nav-link {{ route == 'app_juridico_modulo' and _active_slug == module.slug ? 'active' : '' }}">
+        <span class="nav-icon-slot">
+            <i class="fas {{ module.icon }} nav-icon" aria-hidden="true"></i>
+        </span>
+        <p>{{ module.label }}</p>
+    </a>
+</li>
+{% endfor %}
+{% endfor %}
+
+<li class="sidebar-hub-separator" aria-hidden="true"></li>
+<li class="nav-item sidebar-hub-heading-item">
+    <div class="sidebar-hub-heading">
+        <span class="sidebar-hub-heading-label">Plataforma</span>
+    </div>
+</li>
+
+<li class="nav-item">
+    <a href="{{ path('app_financeiro') }}" class="nav-link {{ route starts with 'app_financeiro' ? 'active' : '' }}">
+        <span class="nav-icon-slot">
+            <i class="fas fa-wallet nav-icon" aria-hidden="true"></i>
+        </span>
+        <p>Núcleo Financeiro</p>
+    </a>
+</li>

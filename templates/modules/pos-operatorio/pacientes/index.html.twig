@@ -1,21 +1,23 @@
 {% extends 'layout/hub.html.twig' %}
 
 {% set _copy = organismo.copy|default({}) %}
-{% set _label_clients = _copy.nav_pacientes|default(org_clinic|default(false) ? 'Pacientes' : 'Clientes') %}
-{% set _cta_label = org_clinic|default(false) ? 'Novo paciente' : 'Novo projeto' %}
+{% set _is_jur = org_juridico|default(false) %}
+{% set _label_clients = _is_jur ? 'Clientes' : _copy.nav_pacientes|default(org_clinic|default(false) ? 'Pacientes' : 'Clientes') %}
+{% set _cta_label = org_clinic|default(false) ? 'Novo paciente' : (_is_jur ? 'Novo cliente' : 'Novo projeto') %}
 
-{% block title %}{{ _label_clients }}{% if not org_clinic %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
-{% block permissions_scope %}{% if not org_clinic %}hub_pos_operatorio{% endif %}{% endblock %}
+{% block title %}{{ _label_clients }}{% if not org_clinic and not _is_jur %} · {{ _copy.brand_name|default('Studio') }}{% endif %}{% endblock %}
+{% block permissions_scope %}{% if not org_clinic and not _is_jur %}hub_pos_operatorio{% endif %}{% endblock %}
 
 {% set hub_page_title = _label_clients %}
-{% set hub_page_eyebrow = org_clinic ? org_brand_label : '' %}
-{% set hub_page_subtitle = org_clinic|default(false) ? 'Cadastro e acompanhamento pós-cirúrgico' : 'Cadastro de clientes e projetos digitais' %}
+{% set hub_page_eyebrow = (org_clinic or _is_jur) ? org_brand_label : '' %}
+{% set hub_page_subtitle = org_clinic|default(false)
+    ? 'Cadastro e acompanhamento pós-cirúrgico'
+    : (_is_jur ? 'Cadastro de clientes e processos do escritório' : 'Cadastro de clientes e projetos digitais') %}
 {% set hub_search_hidden = true %}
 {% set hub_show_tabs = false %}
 
 {% block stylesheets %}
 {{ parent() }}
-<link rel="stylesheet" href="{{ asset('css/pos-operatorio-hub.css') }}?v=16">
 {% endblock %}
 
 {% block hub_toolbar_actions %}
@@ -65,10 +67,10 @@
     form_action: path('app_pos_operatorio_pacientes'),
     show_search: true,
     use_form: true,
-    search_placeholder: org_clinic|default(false) ? 'Buscar nome, código ou procedimento…' : 'Buscar nome ou código…',
+    search_placeholder: org_clinic|default(false) ? 'Buscar nome, código ou procedimento…' : (_is_jur ? 'Buscar cliente, código ou processo…' : 'Buscar nome ou código…'),
     search_name: 'q',
     search_value: filter_q|default(''),
-    hidden_fields: org_clinic|default(false) and filter_status|default('') ? { status: filter_status } : {}
+    hidden_fields: (org_clinic|default(false) or _is_jur) and filter_status|default('') ? { status: filter_status } : {}
 } %}
     {% block filter_chips %}
         {% if org_clinic|default(false) %}
@@ -76,6 +78,17 @@
                 aria_label: 'Filtrar por status',
                 chips: [
                     { href: path('app_pos_operatorio_pacientes', _chip_q ? { q: _chip_q } : {}), label: 'Em acompanhamento', active: filter_status|default('') == '', count: _sc.em_acompanhamento|default(null) },
+                    { href: path('app_pos_operatorio_pacientes', { status: 'ativo' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Ativo', active: filter_status|default('') == 'ativo', count: _sc.ativo|default(null) },
+                    { href: path('app_pos_operatorio_pacientes', { status: 'alerta' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Alerta', active: filter_status|default('') == 'alerta', count: _sc.alerta|default(null) },
+                    { href: path('app_pos_operatorio_pacientes', { status: 'pendente' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Pendente', active: filter_status|default('') == 'pendente', count: _sc.pendente|default(null) },
+                    { href: path('app_pos_operatorio_pacientes', { status: 'encerrado' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Encerrado', active: filter_status|default('') == 'encerrado', count: _sc.encerrado|default(null) },
+                ]
+            } %}
+        {% elseif _is_jur %}
+            {% include 'components/hub_filter_chips.html.twig' with {
+                aria_label: 'Filtrar por status',
+                chips: [
+                    { href: path('app_pos_operatorio_pacientes', _chip_q ? { q: _chip_q } : {}), label: 'Em andamento', active: filter_status|default('') == '', count: _sc.em_acompanhamento|default(null) },
                     { href: path('app_pos_operatorio_pacientes', { status: 'ativo' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Ativo', active: filter_status|default('') == 'ativo', count: _sc.ativo|default(null) },
                     { href: path('app_pos_operatorio_pacientes', { status: 'alerta' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Alerta', active: filter_status|default('') == 'alerta', count: _sc.alerta|default(null) },
                     { href: path('app_pos_operatorio_pacientes', { status: 'pendente' }|merge(_chip_q ? { q: _chip_q } : {})), label: 'Pendente', active: filter_status|default('') == 'pendente', count: _sc.pendente|default(null) },
@@ -110,10 +123,10 @@
 <section class="unio-card p-0 ops-queue-animate">
     {% if pacientes is empty %}
         {% include 'components/empty_state.html.twig' with {
-            icon: org_clinic|default(false) ? 'fa-user-injured' : 'fa-folder-open',
+            icon: org_clinic|default(false) ? 'fa-user-injured' : (_is_jur ? 'fa-user-tie' : 'fa-folder-open'),
             title: filter_q|default('') or filter_status|default('')
                 ? 'Nenhum resultado'
-                : (org_clinic|default(false) ? 'Nenhum paciente cadastrado' : 'Nenhum projeto cadastrado'),
+                : (org_clinic|default(false) ? 'Nenhum paciente cadastrado' : (_is_jur ? 'Nenhum cliente cadastrado' : 'Nenhum projeto cadastrado')),
             text: filter_q|default('') or filter_status|default('')
                 ? 'Ajuste a busca ou limpe os filtros.'
                 : 'Cadastre o primeiro registro para começar o acompanhamento.',
@@ -130,11 +143,11 @@
                 <tr>
                     <th>Código</th>
                     <th>Nome</th>
-                    <th>Procedimento</th>
-                    <th>Fase</th>
-                    <th>Médico</th>
+                    <th>{{ _is_jur ? 'Processo' : 'Procedimento' }}</th>
+                    <th>{{ _is_jur ? 'Prazo' : 'Fase' }}</th>
+                    <th>{{ _is_jur ? 'Advogado' : 'Médico' }}</th>
                     <th>Status</th>
-                    <th>Portal hoje</th>
+                    {% if not _is_jur %}<th>Portal hoje</th>{% endif %}
                     <th class="text-right">Ações</th>
                 </tr>
             </thead>
@@ -143,12 +156,13 @@
                 <tr>
                     <td data-label="Código"><code>{{ p.codigo }}</code></td>
                     <td data-label="Nome"><strong>{{ p|pos_op_paciente_nome }}</strong></td>
-                    <td data-label="Procedimento">{{ p.procedimento|default('—') }}</td>
-                    <td data-label="Fase">{% set _rel = p.diaRelativoCirurgia %}{% if _rel is not null %}{{ _rel < 0 ? 'D−' ~ (_rel|abs) : 'D+' ~ _rel }}{% else %}—{% endif %}</td>
-                    <td data-label="Médico">{{ p.medicoResponsavel ? p.medicoResponsavel.nome : '—' }}</td>
+                    <td data-label="{{ _is_jur ? 'Processo' : 'Procedimento' }}">{{ p.procedimento|default('—') }}</td>
+                    <td data-label="{{ _is_jur ? 'Prazo' : 'Fase' }}">{% set _rel = p.diaRelativoCirurgia %}{% if _rel is not null %}{{ _rel < 0 ? 'D−' ~ (_rel|abs) : 'D+' ~ _rel }}{% else %}—{% endif %}</td>
+                    <td data-label="{{ _is_jur ? 'Advogado' : 'Médico' }}">{{ p.medicoResponsavel ? p.medicoResponsavel.nome : '—' }}</td>
                     <td data-label="Status">
                         <span class="badge-perfil {{ status_tones[p.status]|default('default') }}">{{ p.status|pos_op_status_label }}</span>
                     </td>
+                    {% if not _is_jur %}
                     <td data-label="Portal hoje">
                         {% if silenciosos_hoje[p.id]|default(false) %}
                         {% include 'components/status_badge.html.twig' with { label: 'Sem resposta', variant: 'warning' } %}
@@ -156,6 +170,7 @@
                         <span class="text-muted small">—</span>
                         {% endif %}
                     </td>
+                    {% endif %}
                     <td data-label="Ações" class="text-right">
                         {% embed 'components/row_actions_menu.html.twig' with {
                             aria_label: 'Mais ações de ' ~ (p|pos_op_paciente_nome)

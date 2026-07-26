@@ -1,17 +1,20 @@
 {% set _tema = platform_config.tema|default('dark') %}
 {% set _brand = organismo.copy.brand_name|default(platform_config.plataforma_nome|default('Unio')) %}
 {% set _is_clinic = org_clinic|default(false) %}
+{% set _is_juridico = org_juridico|default(false) %}
 {% set _slogan = organismo.enabled|default(false)
-    ? organismo.copy.marketing_tagline|default(_is_clinic ? 'Saúde que acompanha.' : 'Evolui com você.')
+    ? organismo.copy.marketing_tagline|default(_is_clinic ? 'Saúde que acompanha.' : (_is_juridico ? 'Justiça que acompanha.' : 'Evolui com você.'))
     : platform_config.plataforma_tagline|default('Pessoas. Processos. Resultados.') %}
 {# Lead curto no login (mesma ideia do Work: uma frase sob o slogan) #}
 {% set _lead = organismo.enabled|default(false)
     ? (_is_clinic
         ? 'Agenda, continuidade pós-operatória e documentos do paciente em um só lugar.'
-        : organismo.copy.hero_desc|default(''))
+        : (_is_juridico
+            ? 'Clientes, processos, prazos e documentos do escritório em um só lugar, com IA jurídica integrada.'
+            : organismo.copy.hero_desc|default('')))
     : '' %}
 {% set _eyebrow = organismo.enabled|default(false)
-    ? organismo.copy.marketing_eyebrow|default(_is_clinic ? 'Gestão clínica unificada' : 'Plataforma digital')
+    ? organismo.copy.marketing_eyebrow|default(_is_clinic ? 'Gestão clínica unificada' : (_is_juridico ? 'Plataforma de gestão jurídica' : 'Plataforma digital'))
     : '' %}
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="{{ _tema }}">
@@ -25,9 +28,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/legal-pages.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/auth-login.css') }}?v=19">
+    {% if _is_juridico %}
+    <link rel="stylesheet" href="{{ asset('css/auth-login-juridico.css') }}?v=2">
+    {% endif %}
     {% include 'components/unio_theme_vars.html.twig' %}
 </head>
-<body class="auth-page{% if _is_clinic %} auth-page--clinic{% endif %}">
+<body class="auth-page{% if _is_clinic %} auth-page--clinic{% endif %}{% if _is_juridico %} auth-page--juridico{% endif %}">
 
 <div class="auth-scene" aria-hidden="true">
     <div class="auth-scene__gradient"></div>
@@ -55,7 +61,7 @@
 </header>
 
 <main class="auth-main">
-    <section class="auth-brand{% if _is_clinic %} auth-brand--story{% endif %}" aria-label="Sobre a plataforma">
+    <section class="auth-brand{% if _is_clinic or _is_juridico %} auth-brand--story{% endif %}" aria-label="Sobre a plataforma">
         {% if _is_clinic %}
         <div class="auth-brand__media" aria-hidden="true">
             <img
@@ -68,8 +74,20 @@
             >
             <div class="auth-brand__media-veil"></div>
         </div>
+        {% elseif _is_juridico %}
+        <div class="auth-brand__media" aria-hidden="true">
+            <img
+                class="auth-brand__photo"
+                src="{{ asset('images/auth/login-juridico-editorial.jpg') }}?v=1"
+                alt=""
+                width="1200"
+                height="1600"
+                decoding="async"
+            >
+            <div class="auth-brand__media-veil"></div>
+        </div>
         {% endif %}
-        <div class="auth-brand__content{% if _is_clinic %} auth-brand__content--clinic{% else %} auth-brand__content--studio{% endif %}">
+        <div class="auth-brand__content{% if _is_clinic %} auth-brand__content--clinic{% elseif _is_juridico %} auth-brand__content--juridico{% else %} auth-brand__content--studio{% endif %}">
             {% if _is_clinic %}
             <div class="auth-brand__top">
                 {% include 'components/auth_logo_animated.html.twig' only %}
@@ -78,6 +96,15 @@
             </div>
             <div class="auth-brand__story-wrap">
                 {% include 'components/auth_brand_story.html.twig' %}
+            </div>
+            {% elseif _is_juridico %}
+            <div class="auth-brand__top">
+                {% include 'components/auth_logo_animated.html.twig' only %}
+                <p class="auth-brand__eyebrow">{{ _eyebrow|default('Plataforma jurídica') }}</p>
+                <h1 class="auth-brand__sr-only">{{ _brand }}</h1>
+            </div>
+            <div class="auth-brand__story-wrap">
+                {% include 'components/auth_brand_story_juridico.html.twig' %}
             </div>
             {% else %}
             {% include 'components/auth_logo_animated.html.twig' only %}

@@ -4,7 +4,11 @@
 {% set badges = clinic_nav_badges|default({}) %}
 {% set copy = organismo.copy|default({}) %}
 {% set _clinic = org_clinic|default(false) %}
+{% set _juridico = org_juridico|default(false) %}
 
+{% if _juridico %}
+{% include 'layout/_sidebar_nav_juridico.html.twig' %}
+{% else %}
 <li class="nav-item">
     <a href="{{ path('app_dashboard') }}" class="nav-link {{ route == 'app_dashboard' or route == 'app_pulso' ? 'active' : '' }}">
         <span class="nav-icon-slot">
@@ -151,6 +155,7 @@
         <p>{{ copy.nav_portal|default(_clinic ? 'Portal do Paciente' : 'Portal do cliente') }}</p>
     </a>
 </li>
+{% endif %}
 {% endif %}
 
 <li class="sidebar-hub-separator" aria-hidden="true"></li>

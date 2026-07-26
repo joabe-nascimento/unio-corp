@@ -4,7 +4,7 @@
 {% set _clinic = org_clinic|default(false) %}
 {% set _juridico = org_juridico|default(false) %}
 {% set _copy = organismo.copy|default({}) %}
-{% set _assistant = _org ? _copy.lumen|default('Lumen') : 'Vitória' %}
+{% set _assistant = _juridico ? 'Bruna' : (_org ? _copy.lumen|default('Lumen') : 'Vitória') %}
 {% set _subtitle = _org ? (_clinic ? (_copy.lumen_subtitle|default('Assistente clínico')) : (_juridico ? (_copy.lumen_subtitle|default('Assistente jurídica')) : (_copy.lumen_subtitle|default('Consciência da colônia')))) : 'Assistente virtual' %}
 {% set _slogan = _copy.brand_slogan|default('Saúde que acompanha.') %}
 
@@ -24,7 +24,7 @@
     <aside class="helix-drawer" role="dialog" aria-modal="true" aria-labelledby="helixTitle">
         <header class="helix-header">
             <div class="helix-header-brand">
-                {{ helix.avatar('md') }}
+                {{ helix.avatar('md', false, _juridico ? 'images/marketing/bruna-assistant-juridico.jpg' : null) }}
                 <div class="helix-header-text">
                     <h2 id="helixTitle" class="helix-title">{{ _assistant }}</h2>
                     <p class="helix-subtitle">{{ _subtitle }}</p>

@@ -1,0 +1,428 @@
+{% extends 'layout/hub.html.twig' %}
+{% block title %}{{ module.label }} · Unio Jurídico{% endblock %}
+{% block permissions_scope %}hub_juridico{% endblock %}
+{% set hub_page_title = module.label %}
+{% set hub_page_subtitle = module.subtitle %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Jurídico') %}
+{% set hub_back_label = 'Unio Jurídico' %}
+
+{% block hub_toolbar_actions %}
+<span class="jur-mod-status jur-mod-status--{{ module.status }}">{{ status_label }}</span>
+<button type="button"
+        class="btn-unio btn-sm js-helix-prompt"
+        data-helix-prompt="{{ module.bruna_prompt }}">
+    <i class="fas fa-robot mr-1" aria-hidden="true"></i>
+    Perguntar à Bruna
+</button>
+<a href="{{ path('app_juridico') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i>
+    Todos os módulos
+</a>
+{% endblock %}
+
+{% block hub_kpis %}
+{% if module.metrics|default([])|length > 0 %}
+<div class="page-lead-kpis">
+    <div class="org-kpi-strip org-kpi-strip--tiles">
+        {% for metric in module.metrics %}
+        <article class="org-kpi-strip__item org-kpi-strip__item--neutral">
+            <div class="org-kpi-strip__body">
+                <span class="org-kpi-strip__value">{{ metric.value }}</span>
+                <span class="org-kpi-strip__label">{{ metric.label }}</span>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block hub_content %}
+<div class="jur-mod-page">
+    <section class="unio-card jur-mod-hero mb-4">
+        <div class="jur-mod-hero__inner">
+            <div class="jur-mod-hero__icon" aria-hidden="true">
+                <i class="fas {{ module.icon }}"></i>
+            </div>
+            <div class="jur-mod-hero__body">
+                <p class="jur-mod-hero__tagline">{{ module.tagline }}</p>
+                <p class="jur-mod-hero__desc">{{ module.empty_text }}</p>
+            </div>
+            <span class="jur-mod-status jur-mod-status--{{ module.status }} jur-mod-status--lg">{{ status_label }}</span>
+        </div>
+    </section>
+
+    {# Dados de exemplo — mostrar quando houver seed_data disponível #}
+    {% if seed_data is defined and seed_data|length > 0 %}
+    <section class="unio-card mb-4">
+        <div class="section-header mb-3">
+            <div class="section-header__body">
+                <h2 class="section-header__title">Dados de Exemplo (Seed)</h2>
+                <p class="section-header__subtitle">Visualização de como este módulo funcionará em produção</p>
+            </div>
+        </div>
+
+        {% if seed_data.processos is defined %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Cliente</th>
+                        <th>Área</th>
+                        <th>Fase</th>
+                        <th>Responsável</th>
+                        <th>Prazo</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in seed_data.processos %}
+                    <tr>
+                        <td><code class="text-muted" style="font-size: 0.85rem;">{{ p.numero }}</code></td>
+                        <td><strong>{{ p.cliente }}</strong></td>
+                        <td><span class="badge badge-soft-primary">{{ p.area }}</span></td>
+                        <td>{{ p.fase }}</td>
+                        <td>{{ p.responsavel }}</td>
+                        <td>
+                            {% if p.prazo_dias < 7 %}
+                            <span class="badge badge-danger">{{ p.prazo_dias }}d</span>
+                            {% else %}
+                            <span class="badge badge-success">{{ p.prazo_dias }}d</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ p.valor }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if seed_data.prazos is defined %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Processo</th>
+                        <th>Data Limite</th>
+                        <th>Responsável</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in seed_data.prazos %}
+                    <tr>
+                        <td><strong>{{ p.tipo }}</strong></td>
+                        <td>{{ p.descricao }}</td>
+                        <td><code class="text-muted" style="font-size: 0.82rem;">{{ p.processo }}</code></td>
+                        <td>{{ p.data_limite|date('d/m/Y') }}<br><small class="text-muted">{{ p.dias_restantes }} dias</small></td>
+                        <td>{{ p.responsavel }}</td>
+                        <td>
+                            {% if p.status == 'crítico' %}
+                            <span class="badge badge-danger">Crítico</span>
+                            {% elseif p.status == 'alerta' %}
+                            <span class="badge badge-warning">Alerta</span>
+                            {% else %}
+                            <span class="badge badge-success">OK</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if seed_data.clientes is defined %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Contato</th>
+                        <th>Área de Atuação</th>
+                        <th>Processos</th>
+                        <th>Valor Carteira</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in seed_data.clientes %}
+                    <tr>
+                        <td><strong>{{ c.nome }}</strong><br><small class="text-muted">{{ c.cnpj_cpf }}</small></td>
+                        <td><span class="badge badge-soft-secondary">{{ c.tipo }}</span></td>
+                        <td>
+                            {{ c.email }}<br>
+                            <small class="text-muted">{{ c.telefone }}</small>
+                        </td>
+                        <td>{{ c.area_atuacao }}</td>
+                        <td><span class="badge badge-info">{{ c.processos_ativos }}</span></td>
+                        <td>{{ c.valor_carteira }}</td>
+                        <td>
+                            {% if c.status == 'premium' %}
+                            <span class="badge badge-warning">Premium</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Standard</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if seed_data.contratos is defined %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Partes</th>
+                        <th>Vigência</th>
+                        <th>Valor</th>
+                        <th>Cláusulas Críticas</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in seed_data.contratos %}
+                    <tr>
+                        <td><strong>{{ c.nome }}</strong></td>
+                        <td><span class="badge badge-soft-primary">{{ c.tipo }}</span></td>
+                        <td><small>{{ c.partes }}</small></td>
+                        <td>{{ c.vigencia_inicio|date('d/m/Y') }} a {{ c.vigencia_fim|date('d/m/Y') }}</td>
+                        <td>{{ c.valor_mensal }}</td>
+                        <td>
+                            {% if c.clausulas_criticas > 2 %}
+                            <span class="badge badge-danger">{{ c.clausulas_criticas }}</span>
+                            {% else %}
+                            <span class="badge badge-success">{{ c.clausulas_criticas }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if c.alerta_renovacao %}
+                            <span class="badge badge-warning"><i class="fas fa-bell mr-1"></i>Renovar</span>
+                            {% else %}
+                            <span class="badge badge-success">{{ c.status_revisao|title }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if seed_data.documentos is defined %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Tamanho</th>
+                        <th>Data</th>
+                        <th>Processo</th>
+                        <th>Confidencial</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in seed_data.documentos %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-file-pdf text-danger mr-2"></i>
+                            <strong>{{ d.nome }}</strong>
+                        </td>
+                        <td><span class="badge badge-soft-secondary">{{ d.categoria }}</span></td>
+                        <td class="text-muted">{{ d.tamanho }}</td>
+                        <td>{{ d.data|date('d/m/Y') }}</td>
+                        <td><code style="font-size: 0.82rem;">{{ d.processo }}</code></td>
+                        <td>
+                            {% if d.confidencial %}
+                            <i class="fas fa-lock text-warning"></i>
+                            {% else %}
+                            <i class="fas fa-lock-open text-muted"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if seed_data.jurisprudencia is defined %}
+        <div class="list-group list-group-flush">
+            {% for j in seed_data.jurisprudencia %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h5 class="mb-1">{{ j.tema }}</h5>
+                        <p class="mb-1 text-muted">{{ j.tribunal }} · {{ j.link }}</p>
+                    </div>
+                    {% if j.relevancia == 'alta' %}
+                    <span class="badge badge-danger">Alta Relevância</span>
+                    {% else %}
+                    <span class="badge badge-info">Média Relevância</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <small class="text-muted">Data: {{ j.data|date('d/m/Y') }}</small>
+                    <small class="text-muted">·</small>
+                    <small><strong>Resultado:</strong> {{ j.resultado }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if seed_data.advogados is defined %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Advogado</th>
+                        <th>Horas/Mês</th>
+                        <th>Processos</th>
+                        <th>Taxa Êxito</th>
+                        <th>Receita/Mês</th>
+                        <th>Carga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in seed_data.advogados %}
+                    <tr>
+                        <td><strong>{{ a.advogado }}</strong></td>
+                        <td>{{ a.horas_mes }}</td>
+                        <td><span class="badge badge-info">{{ a.processos_ativos }}</span></td>
+                        <td>
+                            {% if a.taxa_exito|replace({'%': ''})|number_format >= 75 %}
+                            <span class="badge badge-success">{{ a.taxa_exito }}</span>
+                            {% else %}
+                            <span class="badge badge-warning">{{ a.taxa_exito }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ a.receita_mes }}</td>
+                        <td>
+                            {% if a.carga == 'alta' %}
+                            <span class="badge badge-danger">Alta</span>
+                            {% elseif a.carga == 'média' %}
+                            <span class="badge badge-warning">Média</span>
+                            {% else %}
+                            <span class="badge badge-success">Baixa</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <section class="unio-card jur-mod-block">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'O que este módulo entrega',
+                    subtitle: 'Funcionalidades previstas para o mercado'
+                } %}
+                <ul class="jur-mod-feature-list">
+                    {% for feature in module.features %}
+                    <li>
+                        <i class="fas fa-check" aria-hidden="true"></i>
+                        <span>{{ feature }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section class="unio-card jur-mod-block mt-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Capacidades diferenciais',
+                    subtitle: 'Por que escritórios pagam por isso'
+                } %}
+                <div class="jur-mod-cap-grid">
+                    {% for cap in module.capabilities %}
+                    <article class="jur-mod-cap-card">
+                        <span class="jur-mod-cap-card__icon" aria-hidden="true"><i class="fas {{ cap.icon }}"></i></span>
+                        <h3 class="jur-mod-cap-card__title">{{ cap.title }}</h3>
+                        <p class="jur-mod-cap-card__text">{{ cap.text }}</p>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="unio-card jur-mod-block mt-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Roadmap de entrega',
+                    subtitle: 'Fases de desenvolvimento'
+                } %}
+                <div class="jur-mod-roadmap">
+                    {% for phase in module.roadmap %}
+                    <article class="jur-mod-roadmap__phase">
+                        <span class="jur-mod-roadmap__badge">{{ phase.phase }}</span>
+                        <h3 class="jur-mod-roadmap__title">{{ phase.title }}</h3>
+                        <ul class="jur-mod-roadmap__items">
+                            {% for item in phase.items %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+        <div class="col-xl-4">
+            <section class="unio-card jur-mod-block jur-mod-side">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Bruna · copiloto',
+                    subtitle: 'Experimente agora via JurisFlow'
+                } %}
+                <p class="jur-mod-side__prompt-label">Sugestão para este módulo:</p>
+                <blockquote class="jur-mod-side__prompt">"{{ module.bruna_prompt }}"</blockquote>
+                <button type="button"
+                        class="btn-unio btn-sm btn-block js-helix-prompt"
+                        data-helix-prompt="{{ module.bruna_prompt }}">
+                    <i class="fas fa-robot mr-1" aria-hidden="true"></i>
+                    Abrir na Bruna
+                </button>
+            </section>
+
+            {% if module.integrations|default([])|length > 0 %}
+            <section class="unio-card jur-mod-block jur-mod-side mt-4">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Integrações',
+                    subtitle: 'Ecossistema previsto'
+                } %}
+                <div class="jur-mod-side__integrations">
+                    {% for integration in module.integrations %}
+                    <span class="jur-mod-integration-pill">{{ integration }}</span>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <section class="unio-card jur-mod-block jur-mod-side mt-4 jur-mod-side--muted">
+                {% include 'components/empty_state.html.twig' with {
+                    icon: module.icon,
+                    title: module.empty_title,
+                    text: 'Estamos construindo este módulo com foco em operação real de escritórios médios e grandes. Enquanto isso, use a Bruna para tarefas relacionadas.',
+                    btn_label: 'Voltar ao hub jurídico',
+                    btn_href: path('app_juridico'),
+                    btn_sm: true,
+                    compact: true
+                } %}
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

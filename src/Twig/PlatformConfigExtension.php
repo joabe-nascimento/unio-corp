@@ -72,12 +72,6 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
                 : PlatformConfigService::SAUDE_LOGO_ASSET;
         }
 
-        if ($this->usesJuridicoBrandAsset($variant, $key)) {
-            return $variant === 'favicon'
-                ? PlatformConfigService::JURIDICO_FAVICON_ASSET
-                : PlatformConfigService::JURIDICO_LOGO_ASSET;
-        }
-
         return $this->config->resolveAssetUrl($key);
     }
 
@@ -90,7 +84,7 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
             return true;
         }
 
-        return $this->usesSaudeBrandAsset($variant, $key) || $this->usesJuridicoBrandAsset($variant, $key);
+        return $this->usesSaudeBrandAsset($variant, $key);
     }
 
     /** @param 'logo'|'full'|'mark'|'favicon' $variant */
@@ -108,20 +102,6 @@ class PlatformConfigExtension extends AbstractExtension implements GlobalsInterf
     private function usesSaudeBrandAsset(string $variant, string $key): bool
     {
         if (!$this->organismoFeature->isEnabled() || !$this->organismoCopy->isClinicProfile()) {
-            return false;
-        }
-
-        if ($this->config->hasCustomAsset($key)) {
-            return false;
-        }
-
-        return \in_array($variant, ['full', 'logo', 'main', 'mark', 'favicon'], true);
-    }
-
-    /** @param 'logo'|'full'|'mark'|'favicon' $variant */
-    private function usesJuridicoBrandAsset(string $variant, string $key): bool
-    {
-        if (!$this->organismoFeature->isEnabled() || !$this->organismoCopy->isJuridicoProfile()) {
             return false;
         }
 

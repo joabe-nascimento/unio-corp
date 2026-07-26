@@ -48,6 +48,7 @@ final class PageBackResolver
         'app_compliance' => 'app_dashboard',
         'app_analytics' => 'app_dashboard',
         'app_juridico' => 'app_dashboard',
+        'app_juridico_modulo' => 'app_juridico',
         'app_clima' => 'app_dashboard',
         'app_sst' => 'app_dashboard',
         'app_comunicacao' => 'app_dashboard',

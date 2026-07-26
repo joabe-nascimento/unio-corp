@@ -4,7 +4,9 @@ namespace App\Controller\Marketing;
 
 use App\Service\Marketing\ClinicLandingService;
 use App\Service\Marketing\ClinicPatientProductService;
+use App\Service\Marketing\JuridicoLandingService;
 use App\Service\Clinic\ClinicPlatformScope;
+use App\Service\Juridico\JuridicoPlatformScope;
 use App\Service\Organismo\OrganismoRedirectService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +20,8 @@ class LandingController extends AbstractController
         ClinicPatientProductService $patientProduct,
         ClinicLandingService $clinicLanding,
         ClinicPlatformScope $clinicScope,
+        JuridicoLandingService $juridicoLanding,
+        JuridicoPlatformScope $juridicoScope,
     ): Response {
         if ($this->getUser()) {
             $user = $this->getUser();
@@ -25,6 +29,21 @@ class LandingController extends AbstractController
             return $this->redirectToRoute($redirects->afterLoginRoute(
                 $user instanceof \App\Entity\User ? $user : null,
             ));
+        }
+
+        if ($juridicoScope->isActive()) {
+            return $this->render('marketing/home-juridico.html.twig', [
+                'juridico_features' => $juridicoLanding->features(),
+                'juridico_modules' => $juridicoLanding->modules(),
+                'juridico_stats' => $juridicoLanding->stats(),
+                'juridico_metrics' => $juridicoLanding->metrics(),
+                'juridico_testimonial' => $juridicoLanding->testimonial(),
+                'juridico_steps' => $juridicoLanding->steps(),
+                'juridico_trust' => $juridicoLanding->trust(),
+                'juridico_audiences' => $juridicoLanding->audiences(),
+                'juridico_routine' => $juridicoLanding->routine(),
+                'juridico_faq' => $juridicoLanding->faq(),
+            ]);
         }
 
         $demoCard = $patientProduct->planById('premium') ?? $patientProduct->plans()[0] ?? [];

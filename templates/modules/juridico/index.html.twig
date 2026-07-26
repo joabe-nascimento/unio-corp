@@ -1,7 +1,84 @@
-{% include 'components/planned_hub_index.html.twig' with { hub: {
-    label: 'Núcleo Jurídico',
-    scope: 'hub_juridico',
-    empty_icon: 'fa-gavel',
-    empty_title: 'Núcleo Jurídico em desenvolvimento',
-    empty_text: 'Contratos, processos trabalhistas e pareceres jurídicos estarão disponíveis em breve.'
-} } %}
+{% extends 'layout/hub.html.twig' %}
+{% block title %}Unio Jurídico{% endblock %}
+{% block permissions_scope %}hub_juridico{% endblock %}
+{% set hub_page_title = 'Unio Jurídico' %}
+{% set hub_page_subtitle = 'Plataforma completa para escritórios de advocacia — ' ~ module_count ~ ' módulos no roadmap' %}
+{% set hub_page_eyebrow = org_brand_label|default('Unio Jurídico') %}
+
+{% block hub_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm js-unio-open-helix">
+    <i class="fas fa-robot mr-1" aria-hidden="true"></i>
+    {{ organismo.copy.lumen|default('Bruna') }}
+</button>
+<a href="{{ path('app_financeiro') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-coins mr-1" aria-hidden="true"></i>
+    Financeiro
+</a>
+{% endblock %}
+
+{% block hub_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: kpis, mb: 'mb-0' } %}
+</div>
+{% endblock %}
+
+{% block hub_content %}
+<section class="unio-card jur-mod-spotlight mb-4" aria-label="Copiloto jurídico">
+    <div class="jur-mod-spotlight__grid">
+        <div class="jur-mod-spotlight__copy">
+            <span class="jur-mod-spotlight__eyebrow">
+                <i class="fas fa-robot" aria-hidden="true"></i>
+                JurisFlow · IA jurídica
+            </span>
+            <h2 class="jur-mod-spotlight__title">Bruna conecta prazos, processos, contratos e jurisprudência</h2>
+            <p class="jur-mod-spotlight__text">
+                O mesmo motor de IA do JurisFlow já integrado ao chat — cálculo de prazos CPC,
+                pesquisa jurisprudencial, análise de contratos e honorários OAB em linguagem natural.
+            </p>
+            <div class="jur-mod-spotlight__actions">
+                <button type="button" class="btn-unio btn-sm js-unio-open-helix">Abrir copiloto</button>
+                <a href="{{ path('app_juridico_modulo', { slug: 'jurisprudencia' }) }}" class="btn-unio-ghost btn-sm">Jurisprudência IA</a>
+            </div>
+        </div>
+        <ul class="jur-mod-spotlight__chips" aria-label="Capacidades da Bruna">
+            <li><button type="button" class="jur-mod-chip js-helix-prompt" data-helix-prompt="Calcule o prazo para apelação considerando a data de hoje.">Prazos CPC</button></li>
+            <li><button type="button" class="jur-mod-chip js-helix-prompt" data-helix-prompt="Pesquise jurisprudência sobre horas extras no STJ.">Jurisprudência</button></li>
+            <li><button type="button" class="jur-mod-chip js-helix-prompt" data-helix-prompt="Analise os riscos deste contrato: [cole o texto aqui]">Contratos</button></li>
+            <li><button type="button" class="jur-mod-chip js-helix-prompt" data-helix-prompt="Calcule honorários para ação cível de R$ 80.000.">Honorários</button></li>
+            <li><button type="button" class="jur-mod-chip js-helix-prompt" data-helix-prompt="Resuma os pontos principais desta petição: [cole o texto]">Resumir peça</button></li>
+        </ul>
+    </div>
+</section>
+
+{% for section in sections %}
+    {% set module_items = [] %}
+    {% for m in section.modules %}
+        {% set module_items = module_items|merge([{
+            icon: m.icon,
+            title: m.label,
+            subtitle: m.subtitle ~ ' · ' ~ (m.status == 'alpha' ? 'Alpha' : (m.status == 'beta' ? 'Beta' : 'Em breve')),
+            route: 'app_juridico_modulo',
+            route_params: { slug: m.slug }
+        }]) %}
+    {% endfor %}
+    {% include 'components/module_grid.html.twig' with {
+        title: section.label,
+        subtitle: 'Módulos em desenvolvimento — visão de produto para o mercado advocatício',
+        items: module_items,
+        cols: 3
+    } %}
+    {% if not loop.last %}<div class="mb-2"></div>{% endif %}
+{% endfor %}
+
+<section class="unio-card jur-mod-integrations mt-4" aria-labelledby="jurIntegrationsHeading">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Ecossistema integrado',
+        subtitle: 'Conectores previstos para operação real do escritório'
+    } %}
+    <div class="jur-mod-integrations__grid">
+        {% for name in ['PJe', 'e-SAJ', 'Projudi', 'DJe / DJEN', 'JurisFlow AI', 'WhatsApp Meta', 'Asaas', 'Google Calendar', 'ICP-Brasil', 'DataJud'] %}
+        <span class="jur-mod-integration-pill">{{ name }}</span>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

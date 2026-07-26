@@ -139,7 +139,7 @@ class SeedUsersCommand extends Command
     private function seedUsers(array $empresas): array
     {
         return [
-            ['nome' => 'Joabe Nascimento', 'email' => DevSeedEmails::JOABE, 'perfil' => 'TENANT', 'empresa' => null],
+            ['nome' => 'Joabe Nascimento', 'email' => DevSeedEmails::JOABE, 'perfil' => 'TENANT', 'empresa' => null, 'reset_password' => true],
             // Unio Saúde — apenas os 4 perfis clínicos (Nexus Saúde)
             [
                 'nome' => 'Camila Souza',

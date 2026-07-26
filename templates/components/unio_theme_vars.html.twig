@@ -1,12 +1,34 @@
 {# Paleta global — carregar antes de unio-app.css #}
+{% if org_juridico|default(false) %}
+{% set _cor = '#9C2C3C' %}
+{% set _accent_rgb = '156, 44, 60' %}
+{% else %}
 {% set _cor = platform_config.cor_primaria|default('#4F7FFF') %}
+{% set _accent_rgb = platform_accent_rgb() %}
+{% endif %}
     <link rel="stylesheet" href="{{ asset('css/unio-theme.css') }}?v=21">
 {# cor_primaria da plataforma — accent sólido em ambos os temas #}
 <style>
 [data-theme="dark"],
 [data-theme="light"] {
     --accent: {{ _cor }};
-    --accent-rgb: {{ platform_accent_rgb() }};
+    --accent-rgb: {{ _accent_rgb }};
     --action-solid: {{ _cor }};
 }
+{% if org_juridico|default(false) %}
+[data-theme="dark"] {
+    --accent: #d98a96;
+    --accent-rgb: 217, 138, 150;
+    --action-solid: #d98a96;
+    --accent-dim: rgba(217, 138, 150, 0.12);
+    --accent-line: rgba(217, 138, 150, 0.24);
+}
+[data-theme="light"] {
+    --accent: #7a2130;
+    --accent-rgb: 122, 33, 48;
+    --action-solid: #7a2130;
+    --accent-dim: rgba(122, 33, 48, 0.1);
+    --accent-line: rgba(122, 33, 48, 0.22);
+}
+{% endif %}
 </style>

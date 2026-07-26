@@ -1,11 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ org_brand_label|default('Unio Saúde') }}{% endblock %}
+{% block title %}{{ org_brand_label|default(org_juridico|default(false) ? 'Unio Jurídico' : 'Unio Saúde') }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/unio-pulso.css') }}?v=17">
+    {% if org_clinic|default(false) %}
     <link rel="stylesheet" href="{{ asset('css/clinic-finance-dashboard.css') }}?v=1">
+    {% endif %}
 {% endblock %}
 
 {% block page_toolbar_layout %}yes{% endblock %}
@@ -16,21 +18,23 @@
 
     {% if org_clinic|default(false) %}
     {% include 'components/unio/ritual_banner.html.twig' %}
+    {% elseif org_juridico|default(false) %}
+    {% include 'components/unio/ritual_banner_juridico.html.twig' %}
     {% endif %}
 
     <section class="unio-card pulso-hero-card">
         <div class="pulso-hero">
             <div class="pulso-hero__text">
-                {% if org_clinic|default(false) %}
+                {% if org_clinic|default(false) or org_juridico|default(false) %}
                 <p class="pulso-hero__eyebrow">
-                    <i class="fas fa-house-medical" aria-hidden="true"></i>
-                    {{ org_brand_label|default('Unio Saúde') }}
+                    <i class="fas {{ org_clinic|default(false) ? 'fa-house-medical' : 'fa-scale-balanced' }}" aria-hidden="true"></i>
+                    {{ org_brand_label|default(org_juridico|default(false) ? 'Unio Jurídico' : 'Unio Saúde') }}
                 </p>
                 <h1 class="pulso-hero__title">Pulso</h1>
                 {% else %}
-                <h1 class="pulso-hero__title">{{ org_brand_label|default('Unio Saúde') }}</h1>
+                <h1 class="pulso-hero__title">{{ org_brand_label|default('Unio') }}</h1>
                 {% endif %}
-                <p class="pulso-hero__sub">{{ organismo.copy.brand_slogan|default('Saúde que acompanha.') }}</p>
+                <p class="pulso-hero__sub">{{ organismo.copy.brand_slogan|default(org_juridico|default(false) ? 'Justiça que acompanha.' : 'Saúde que acompanha.') }}</p>
             </div>
             <div class="pulso-hero__actions">
                 <div class="pulso-vital pulso-vital--{{ snapshot.pulso.nivel|default('saudavel') }}" id="pulsoVitalBadge">
@@ -73,13 +77,13 @@
         items: [
             {
                 value: snapshot.pulso.cenas_ativas|default(0),
-                label: organismo.copy.pulso_projects_active|default('Pacientes ativos'),
+                label: organismo.copy.pulso_projects_active|default(org_juridico|default(false) ? 'Casos ativos' : (org_clinic|default(false) ? 'Pacientes ativos' : 'Projetos ativos')),
                 tone: 'sky',
                 kpi_key: 'pulso_ativas'
             },
             {
                 value: snapshot.pulso.cenas_aguardando|default(0),
-                label: organismo.copy.pulso_in_progress|default('Em acompanhamento'),
+                label: organismo.copy.pulso_in_progress|default(org_juridico|default(false) ? 'Em andamento' : (org_clinic|default(false) ? 'Em acompanhamento' : 'Em progresso')),
                 tone: 'amber',
                 kpi_key: 'pulso_aguardando'
             },
@@ -189,6 +193,39 @@
 
     {# Dashboard Financeiro Executivo #}
     {% include 'components/clinic/finance_dashboard_widget.html.twig' %}
+    {% elseif org_juridico|default(false) %}
+    <section class="unio-card pulso-shortcuts-card" aria-label="Atalhos do escritório">
+        {% include 'components/section_header.html.twig' with {
+            title: 'Operação jurídica',
+            subtitle: 'Atalhos para o fluxo do dia'
+        } %}
+        <div class="pulso-shortcuts">
+            <a href="{{ path('app_juridico') }}" class="pulso-shortcut">
+                <i class="fas fa-th-large" aria-hidden="true"></i>
+                <span>Hub Jurídico</span>
+            </a>
+            <a href="{{ path('app_juridico_modulo', { slug: 'processos' }) }}" class="pulso-shortcut">
+                <i class="fas fa-scale-balanced" aria-hidden="true"></i>
+                <span>Processos</span>
+            </a>
+            <a href="{{ path('app_juridico_modulo', { slug: 'prazos' }) }}" class="pulso-shortcut">
+                <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                <span>Prazos</span>
+            </a>
+            <a href="#" class="pulso-shortcut js-unio-open-helix">
+                <i class="fas fa-robot" aria-hidden="true"></i>
+                <span>{{ organismo.copy.lumen|default('Bruna') }}</span>
+            </a>
+            <a href="{{ path('app_juridico_modulo', { slug: 'clientes' }) }}" class="pulso-shortcut">
+                <i class="fas fa-user-tie" aria-hidden="true"></i>
+                <span>CRM</span>
+            </a>
+            <a href="{{ path('app_financeiro') }}" class="pulso-shortcut">
+                <i class="fas fa-coins" aria-hidden="true"></i>
+                <span>Financeiro</span>
+            </a>
+        </div>
+    </section>
     {% endif %}
 
     <section class="unio-card pulso-cenas-card" aria-labelledby="pulsoCenasHeading">
@@ -208,7 +245,7 @@
                 {% include 'core/pulso/_cena_card.html.twig' with { cena: cena } %}
                 {% else %}
                 <div class="pulso-empty">
-                    <p>{{ organismo.copy.pulso_empty|default('Nenhum paciente em acompanhamento ativo.') }}</p>
+                    <p>{{ organismo.copy.pulso_empty|default(org_juridico|default(false) ? 'Nenhum processo ativo no escritório.' : (org_clinic|default(false) ? 'Nenhum paciente em acompanhamento ativo.' : 'Nenhum caso em andamento.')) }}</p>
                 </div>
                 {% endfor %}
             </div>
@@ -218,7 +255,7 @@
     {% if snapshot.kpis|default([])|length > 0 %}
     <section class="unio-card pulso-kpis-card" aria-labelledby="pulsoKpisHeading">
         {% include 'components/section_header.html.twig' with {
-            title: organismo.copy.pulso_kpis_heading|default('Indicadores da clínica')
+            title: organismo.copy.pulso_kpis_heading|default(org_juridico|default(false) ? 'Indicadores do escritório' : (org_clinic|default(false) ? 'Indicadores da clínica' : 'Indicadores')),
         } %}
         <div class="pulso-kpis-card__body">
             <div class="org-kpi-strip org-kpi-strip--tiles">
@@ -240,6 +277,8 @@
 {% block javascripts %}
     {{ parent() }}
     <script src="{{ asset('js/unio-pulso.js') }}?v=3" defer></script>
+    {% if org_clinic|default(false) %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="{{ asset('js/clinic-finance-dashboard.js') }}?v=1" defer></script>
+    {% endif %}
 {% endblock %}
