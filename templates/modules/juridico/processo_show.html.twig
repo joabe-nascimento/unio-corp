@@ -54,17 +54,17 @@
                             <h3>Tarefas</h3>
                             <span class="text-muted small">{{ _pendentes }} pendente(s) de {{ tarefas|length }}</span>
                         </div>
-                        <form method="post" action="{{ path('app_juridico_processo_tarefa_novo', { id: processo.id }) }}" class="jur-inline-form">
+                        <form method="post" action="{{ path('app_juridico_processo_tarefa_novo', { id: processo.id }) }}" class="jur-inline-form jur-inline-form--wrap jur-inline-form--tabs">
                             <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_tarefa_form') }}">
-                            <input type="text" name="titulo" class="form-control" placeholder="Nova tarefa…" required>
-                            <input type="date" name="prazo" class="form-control jur-inline-form__date" title="Prazo">
+                            <input type="text" name="titulo" class="form-control jur-inline-form__grow" placeholder="Nova tarefa…" required>
+                            <input type="date" name="prazo" class="form-control jur-inline-form__date" title="Prazo" aria-label="Prazo">
                             <select name="responsavel_id" class="form-control jur-inline-form__select" title="Responsável">
                                 <option value="">— Responsável —</option>
                                 {% for u in responsaveis %}
                                 <option value="{{ u.id }}">{{ u.nome }}</option>
                                 {% endfor %}
                             </select>
-                            <button type="submit" class="btn-unio btn-sm"><i class="fas fa-plus" aria-hidden="true"></i></button>
+                            <button type="submit" class="btn-unio btn-sm jur-inline-form__submit">Adicionar</button>
                         </form>
 
                         {% if tarefas is empty %}
@@ -103,9 +103,9 @@
                             <h3>Partes e representação</h3>
                             <span class="text-muted small">{{ partes|length }} cadastrada(s)</span>
                         </div>
-                        <form method="post" action="{{ path('app_juridico_processo_parte_novo', { id: processo.id }) }}" class="jur-inline-form jur-inline-form--wrap">
+                        <form method="post" action="{{ path('app_juridico_processo_parte_novo', { id: processo.id }) }}" class="jur-inline-form jur-inline-form--wrap jur-inline-form--tabs">
                             <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_parte_form') }}">
-                            <input type="text" name="nome" class="form-control" placeholder="Nome da parte…" required>
+                            <input type="text" name="nome" class="form-control jur-inline-form__grow" placeholder="Nome da parte…" required>
                             <select name="polo" class="form-control jur-inline-form__select" title="Polo">
                                 <option value="ativo">Polo ativo</option>
                                 <option value="passivo">Polo passivo</option>
@@ -120,8 +120,8 @@
                                 <option value="outro">Outro</option>
                             </select>
                             <input type="text" name="advogado" class="form-control jur-inline-form__select" placeholder="Advogado (opcional)">
-                            <input type="text" name="oab" class="form-control jur-inline-form__date" placeholder="OAB">
-                            <button type="submit" class="btn-unio btn-sm"><i class="fas fa-plus" aria-hidden="true"></i></button>
+                            <input type="text" name="oab" class="form-control jur-inline-form__oab" placeholder="OAB">
+                            <button type="submit" class="btn-unio btn-sm jur-inline-form__submit">Adicionar</button>
                         </form>
 
                         {% if partes is empty %}
