@@ -49,6 +49,21 @@
         return digits(value).slice(0, 6);
     }
 
+    function maskDocumento(value) {
+        var d = digits(value).slice(0, 14);
+        return d.length <= 11 ? maskCpf(d) : maskCnpj(d);
+    }
+
+    function maskCnj(value) {
+        var d = digits(value).slice(0, 20);
+        if (d.length <= 7) return d;
+        if (d.length <= 9) return d.slice(0, 7) + '-' + d.slice(7);
+        if (d.length <= 13) return d.slice(0, 7) + '-' + d.slice(7, 9) + '.' + d.slice(9);
+        if (d.length <= 14) return d.slice(0, 7) + '-' + d.slice(7, 9) + '.' + d.slice(9, 13) + '.' + d.slice(13);
+        if (d.length <= 16) return d.slice(0, 7) + '-' + d.slice(7, 9) + '.' + d.slice(9, 13) + '.' + d.slice(13, 14) + '.' + d.slice(14);
+        return d.slice(0, 7) + '-' + d.slice(7, 9) + '.' + d.slice(9, 13) + '.' + d.slice(13, 14) + '.' + d.slice(14, 16) + '.' + d.slice(16);
+    }
+
     function maskMoney(value) {
         var d = digits(value);
         if (d === '') return '';
@@ -134,6 +149,12 @@
                 break;
             case 'agency':
                 input.value = maskAgency(raw);
+                break;
+            case 'documento':
+                input.value = maskDocumento(raw);
+                break;
+            case 'cnj':
+                input.value = maskCnj(raw);
                 break;
             case 'money':
                 input.value = maskMoney(raw);
@@ -287,6 +308,28 @@
                     return false;
                 }
                 break;
+            case 'documento': {
+                var docLen = digits(value).length;
+                if (docLen === 11 && !isValidCpf(value)) {
+                    input.setCustomValidity('CPF inválido.');
+                    return false;
+                }
+                if (docLen === 14 && !isValidCnpj(value)) {
+                    input.setCustomValidity('CNPJ inválido.');
+                    return false;
+                }
+                if (docLen !== 11 && docLen !== 14) {
+                    input.setCustomValidity('Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.');
+                    return false;
+                }
+                break;
+            }
+            case 'cnj':
+                if (digits(value).length !== 20) {
+                    input.setCustomValidity('Número do processo deve seguir o padrão CNJ (20 dígitos).');
+                    return false;
+                }
+                break;
             default:
                 break;
         }
@@ -334,6 +377,8 @@
         maskCnpj: maskCnpj,
         maskUf: maskUf,
         maskMoney: maskMoney,
+        maskDocumento: maskDocumento,
+        maskCnj: maskCnj,
     };
 
     function boot() {
