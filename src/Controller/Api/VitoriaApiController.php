@@ -154,6 +154,15 @@ final class VitoriaApiController extends AbstractController
 
         if ($isJuridico && $acoesSugeridas !== []) {
             $result['suggested_actions'] = $acoesSugeridas;
+            
+            // Quando há ações sugeridas determinísticas, sobrescreve mensagem genérica
+            // da IA com algo direto e útil, evitando ruído
+            $replyLower = mb_strtolower($result['reply']);
+            if (str_contains($replyLower, 'instabilidade') || str_contains($replyLower, 'indisponível') || str_contains($replyLower, 'tudo bem por aqui')) {
+                $primeiraAcao = $acoesSugeridas[0];
+                $acao = mb_strtolower(str_replace(['Registrar prazo:', 'Criar tarefa:', 'Calcular', ': De ', ': '], ['registrar esse prazo', 'criar essa tarefa', 'calcular isso', ' de ', ' '], $primeiraAcao['label']));
+                $result['reply'] = sprintf('Entendi! Posso %s para você.', $acao);
+            }
         }
 
         return $this->json($result);
