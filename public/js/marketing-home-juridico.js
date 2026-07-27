@@ -85,4 +85,37 @@
         }, { threshold: 0.5 });
         counters.forEach(function (el) { countObserver.observe(el); });
     }
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        var icon = document.getElementById('footerThemeIcon');
+        if (icon) {
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        var btn = document.getElementById('footerThemeToggle');
+        if (btn) {
+            var label = theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro';
+            btn.title = label;
+            btn.setAttribute('aria-label', label);
+        }
+        try {
+            localStorage.setItem('unio-theme', theme);
+        } catch (e) { /* ignore */ }
+    }
+
+    var savedTheme = 'light';
+    try {
+        savedTheme = localStorage.getItem('unio-theme') || document.documentElement.getAttribute('data-theme') || 'light';
+    } catch (e) {
+        savedTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    }
+    applyTheme(savedTheme);
+
+    var footerThemeToggle = document.getElementById('footerThemeToggle');
+    if (footerThemeToggle) {
+        footerThemeToggle.addEventListener('click', function () {
+            var current = document.documentElement.getAttribute('data-theme') || 'light';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+    }
 })();

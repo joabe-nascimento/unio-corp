@@ -1,6 +1,8 @@
 ﻿{% set _tema = platform_config.tema|default('light') %}
 {% set _brand = organismo.copy.brand_name|default(platform_config.plataforma_nome|default('Unio Jurídico')) %}
 {% set _tagline = organismo.copy.marketing_tagline|default(platform_config.plataforma_tagline|default('Justiça que acompanha.')) %}
+{% set _hero_desc = organismo.copy.hero_desc|default('Unio Jurídico reúne clientes, processos, prazos, documentos e uma IA jurídica dedicada em um único lugar.') %}
+{% set _logo_custom = platform_asset_custom('full') %}
 
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="{{ _tema }}">
@@ -16,7 +18,7 @@
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=19">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=6">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-juridico.css') }}?v=11">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-juridico.css') }}?v=12">
 </head>
 <body class="marketing-home mkt-v2 mkt-juridico">
 
@@ -396,34 +398,71 @@
     </section>
 </main>
 
-<footer class="jur-footer">
-    <div class="jur-footer__inner">
-        <div class="jur-footer__col jur-footer__col--brand">
-            <div class="jur-footer__brand">
-                {% include 'components/platform_logo.html.twig' with { variant: 'full', class: 'jur-footer__logo' } only %}
-                <p class="jur-footer__tagline">{{ _tagline }}</p>
+<footer class="mkt-footer">
+    <div class="mkt-footer-inner">
+        <div class="mkt-footer-grid">
+            <div class="mkt-footer-col mkt-footer-col--brand">
+                {% include 'components/platform_logo.html.twig' with {
+                    variant: 'full',
+                    class: 'mkt-footer-logo mkt-logo mkt-logo--v2' ~ (_logo_custom ? ' mkt-logo--custom' : '')
+                } only %}
+                <p class="mkt-footer-tagline">{{ _tagline }}</p>
+                <p class="mkt-footer-desc">{{ _hero_desc }}</p>
+                {% include 'components/platform_support.html.twig' with { extra_class: ' mkt-footer-support' } %}
+            </div>
+
+            <div class="mkt-footer-col">
+                <h4 class="mkt-footer-col-title">Plataforma</h4>
+                <ul class="mkt-footer-links">
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#como-funciona">Como funciona</a></li>
+                    <li><a href="#ia">IA Bruna</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div class="mkt-footer-col">
+                <h4 class="mkt-footer-col-title">Acesso</h4>
+                <ul class="mkt-footer-links">
+                    <li><a href="{{ path('app_login') }}"><i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i> Entrar na plataforma</a></li>
+                    <li><a href="{{ path('app_forgot_password') }}"><i class="fas fa-key" aria-hidden="true"></i> Esqueci a senha</a></li>
+                </ul>
+            </div>
+
+            <div class="mkt-footer-col">
+                <h4 class="mkt-footer-col-title">Conformidade</h4>
+                <ul class="mkt-footer-links">
+                    <li><a href="{{ path('app_legal_privacidade') }}">Política de Privacidade</a></li>
+                    <li><a href="{{ path('app_legal_termos') }}">Termos de Uso</a></li>
+                    <li><a href="{{ path('app_legal_lgpd') }}">Canal LGPD</a></li>
+                    <li><span class="mkt-footer-badge"><i class="fas fa-shield-halved" aria-hidden="true"></i> LGPD conforme</span></li>
+                    <li><span class="mkt-footer-badge"><i class="fas fa-lock" aria-hidden="true"></i> Dados protegidos</span></li>
+                </ul>
             </div>
         </div>
-        <nav class="jur-footer__col" aria-label="Plataforma">
-            <span class="jur-footer__heading">Plataforma</span>
-            <a href="#recursos">Recursos</a>
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#ia">IA Bruna</a>
-        </nav>
-        <nav class="jur-footer__col" aria-label="Acesso">
-            <span class="jur-footer__heading">Acesso</span>
-            <a href="{{ path('app_login') }}">Entrar</a>
-            <a href="{{ path('app_forgot_password') }}">Esqueci a senha</a>
-        </nav>
-        <div class="jur-footer__col jur-footer__col--legal">
-            <span class="jur-footer__heading">Legal</span>
-            {% include 'components/platform_legal.html.twig' with { variant: 'full' } %}
+
+        <div class="mkt-footer-bottom">
+            <p class="mkt-footer-copy">
+                © {{ "now"|date("Y") }} <strong>{{ _brand }}</strong>.
+                Todos os direitos reservados.
+            </p>
+            {% set _cnpj_mkt = platform_config.operadora_cnpj|default('')|trim %}
+            {% if _cnpj_mkt %}
+            <p class="mkt-footer-copy mkt-footer-copy--cnpj">
+                {% if platform_config.operadora_nome_fantasia|default('')|trim %}{{ platform_config.operadora_nome_fantasia|trim }} · {% endif %}CNPJ {{ _cnpj_mkt }}
+            </p>
+            {% endif %}
+            <div class="mkt-footer-bottom-actions">
+                <button type="button" class="mkt-theme-btn mkt-footer-theme-btn" id="footerThemeToggle" title="Alternar tema" aria-label="Alternar tema">
+                    <i class="fas fa-sun" id="footerThemeIcon" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
     </div>
 </footer>
 
 {% include 'components/cookie_consent_banner.html.twig' %}
 <script src="{{ asset('js/unio-cookie-consent.js') }}?v=1" defer></script>
-<script src="{{ asset('js/marketing-home-juridico.js') }}?v=2" defer></script>
+<script src="{{ asset('js/marketing-home-juridico.js') }}?v=3" defer></script>
 </body>
 </html>
