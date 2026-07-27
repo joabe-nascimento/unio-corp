@@ -1426,3 +1426,542 @@ body.org-juridico .jur-proc-hero .btn-unio-ghost.jur-proc-hero__ghost i {
 [data-theme="dark"] .jur-proc-hero {
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
 }
+
+/* ============================================================
+   Central de alertas de risco (Processos)
+   ============================================================ */
+
+.jur-risco-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    background: var(--surface, #fff);
+    border: 1px solid var(--accent-line, rgba(122, 33, 48, 0.2));
+    border-radius: 14px;
+    padding: 1rem 1.15rem;
+    margin-bottom: 1.1rem;
+}
+
+.jur-risco-panel--ok {
+    border-color: var(--border, rgba(0, 0, 0, 0.08));
+}
+
+.jur-risco-panel__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+}
+
+.jur-risco-panel__icon {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--accent-dim, rgba(122, 33, 48, 0.12));
+    color: var(--accent, #7a2130);
+    font-size: 1rem;
+}
+
+.jur-risco-panel--ok .jur-risco-panel__icon {
+    background: rgba(34, 174, 108, 0.12);
+    color: #22ae6c;
+}
+
+.jur-risco-panel__title {
+    margin: 0 0 0.15rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-risco-panel__subtitle {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-2, #64748b);
+}
+
+.jur-risco-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.jur-risco-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 9px;
+    background: var(--surface-2, rgba(0, 0, 0, 0.02));
+    font-size: 0.84rem;
+}
+
+.jur-risco-item__icon {
+    color: var(--text-2, #64748b);
+    font-size: 0.85rem;
+}
+
+.jur-risco-item__text {
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-risco-item__processo {
+    font-weight: 700;
+    color: var(--accent, #7a2130);
+    text-decoration: none;
+}
+
+.jur-risco-item__processo:hover {
+    text-decoration: underline;
+}
+
+.jur-risco-badge {
+    flex: 0 0 auto;
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+}
+
+.jur-risco-badge--alto { background: rgba(220, 38, 61, 0.14); color: #dc263d; }
+.jur-risco-badge--medio { background: rgba(184, 137, 43, 0.16); color: #a3771f; }
+.jur-risco-badge--baixo { background: rgba(100, 116, 139, 0.14); color: #64748b; }
+
+.jur-risco-panel__more {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-3, #94a3b8);
+}
+
+/* ============================================================
+   Toggle Lista / Kanban
+   ============================================================ */
+
+.jur-view-tabs {
+    display: inline-flex;
+    gap: 0.3rem;
+    padding: 0.25rem;
+    background: var(--surface-2, rgba(0, 0, 0, 0.03));
+    border-radius: 11px;
+    margin-bottom: 0.9rem;
+}
+
+.jur-view-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-2, #64748b);
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.jur-view-tab:hover {
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-view-tab.is-active {
+    background: var(--surface, #fff);
+    color: var(--accent, #7a2130);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+/* ============================================================
+   Kanban de fases (Processos)
+   ============================================================ */
+
+.jur-kanban {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(220px, 1fr));
+    gap: 0.85rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.jur-kanban-col {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-2, rgba(0, 0, 0, 0.02));
+    border: 1px solid var(--border, rgba(0, 0, 0, 0.06));
+    border-radius: 12px;
+    min-height: 220px;
+}
+
+.jur-kanban-col__head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.65rem 0.7rem;
+    border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.06));
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-kanban-col__icon {
+    color: var(--accent, #7a2130);
+    font-size: 0.8rem;
+}
+
+.jur-kanban-col__title {
+    flex: 1;
+}
+
+.jur-kanban-col__count {
+    background: var(--accent-dim, rgba(122, 33, 48, 0.12));
+    color: var(--accent, #7a2130);
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+}
+
+.jur-kanban-col__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    min-height: 120px;
+    transition: background 0.15s ease;
+}
+
+.jur-kanban-col__body.is-dragover {
+    background: var(--accent-dim, rgba(122, 33, 48, 0.08));
+    border-radius: 8px;
+}
+
+.jur-kanban-col__empty {
+    margin: 0.4rem 0 0;
+    font-size: 0.74rem;
+    color: var(--text-3, #94a3b8);
+    text-align: center;
+}
+
+.jur-kanban-card {
+    display: block;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    cursor: grab;
+    text-decoration: none;
+    transition: box-shadow 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+.jur-kanban-card:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+    transform: translateY(-1px);
+}
+
+.jur-kanban-card.is-dragging {
+    opacity: 0.45;
+}
+
+.jur-kanban-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    color: var(--text-2, #64748b);
+}
+
+.jur-kanban-card__flag {
+    color: #dc263d;
+    font-size: 0.72rem;
+}
+
+.jur-kanban-card__cliente {
+    margin-top: 0.25rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-kanban-card__meta {
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+
+.jur-kanban-card__valor {
+    font-size: 0.74rem;
+    color: var(--text-2, #64748b);
+    font-weight: 600;
+}
+
+@media (max-width: 991.98px) {
+    .jur-kanban {
+        grid-template-columns: repeat(6, minmax(200px, 1fr));
+    }
+}
+
+/* ============================================================
+   Tarefas e Partes — detalhe do processo
+   ============================================================ */
+
+.jur-inline-form {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    margin-bottom: 0.2rem;
+}
+
+.jur-inline-form--wrap {
+    flex-wrap: wrap;
+}
+
+.jur-inline-form .form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.jur-inline-form__date {
+    flex: 0 0 145px;
+}
+
+.jur-inline-form__select {
+    flex: 0 0 150px;
+}
+
+.jur-inline-form .btn-unio {
+    flex: 0 0 auto;
+}
+
+.jur-tarefa-list,
+.jur-parte-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.jur-tarefa-item,
+.jur-parte-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 9px;
+    background: var(--surface-2, rgba(0, 0, 0, 0.02));
+}
+
+.jur-tarefa-item__toggle-form {
+    flex: 0 0 auto;
+}
+
+.jur-tarefa-item__toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1.05rem;
+    color: var(--text-3, #94a3b8);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.jur-tarefa-item--concluida .jur-tarefa-item__toggle {
+    color: #22ae6c;
+}
+
+.jur-tarefa-item__body,
+.jur-parte-item__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+}
+
+.jur-tarefa-item__titulo,
+.jur-parte-item__nome {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-tarefa-item--concluida .jur-tarefa-item__titulo {
+    text-decoration: line-through;
+    color: var(--text-3, #94a3b8);
+}
+
+.jur-tarefa-item--atrasada .jur-tarefa-item__meta strong {
+    color: #dc263d;
+}
+
+.jur-tarefa-item__meta,
+.jur-parte-item__meta {
+    font-size: 0.74rem;
+    color: var(--text-2, #64748b);
+}
+
+.jur-tarefa-item__delete {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    color: var(--text-3, #94a3b8);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.2rem;
+    line-height: 1;
+}
+
+.jur-tarefa-item__delete:hover {
+    color: #dc263d;
+}
+
+/* ============================================================
+   Jurisprudência — favoritos, copiar citação e histórico
+   ============================================================ */
+
+.jur-filter-favoritos {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    color: var(--text-2, #64748b);
+    cursor: pointer;
+    padding: 0 0.4rem;
+    white-space: nowrap;
+}
+
+.jur-filter-favoritos input {
+    accent-color: var(--accent, #7a2130);
+}
+
+.jur-favorito-btn {
+    background: none;
+    border: none;
+    padding: 0.2rem;
+    font-size: 0.95rem;
+    color: var(--text-3, #94a3b8);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.jur-favorito-btn.is-favorito,
+.jur-favorito-btn:hover {
+    color: #d9a12f;
+}
+
+.jur-copiar-citacao-btn.is-copied {
+    color: #22ae6c !important;
+    border-color: rgba(34, 174, 108, 0.4) !important;
+}
+
+.jur-ia-card__actions {
+    gap: 0.4rem;
+}
+
+.jur-historico-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+    border-radius: 16px;
+    padding: 1rem 1.1rem;
+}
+
+.jur-historico-panel__head {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-1, #1e2a3a);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.jur-historico-panel__head i {
+    color: var(--accent, #7a2130);
+}
+
+.jur-historico-panel__empty {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-3, #94a3b8);
+}
+
+.jur-historico-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    overflow-y: auto;
+}
+
+.jur-historico-item__repetir {
+    width: 100%;
+    text-align: left;
+    background: var(--surface-2, rgba(0, 0, 0, 0.02));
+    border: none;
+    border-radius: 9px;
+    padding: 0.5rem 0.6rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    transition: background 0.15s ease;
+}
+
+.jur-historico-item__repetir:hover {
+    background: var(--accent-dim, rgba(122, 33, 48, 0.1));
+}
+
+.jur-historico-item__tema {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-1, #1e2a3a);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.jur-historico-item__meta {
+    font-size: 0.72rem;
+    color: var(--text-2, #64748b);
+}
+
+@media (max-width: 991.98px) {
+    .jur-inline-form {
+        flex-wrap: wrap;
+    }
+    .jur-inline-form__date,
+    .jur-inline-form__select {
+        flex: 1 1 140px;
+    }
+}
+
+[data-theme="dark"] .jur-risco-panel,
+[data-theme="dark"] .jur-historico-panel,
+[data-theme="dark"] .jur-kanban-card {
+    background: var(--surface, #1a1f2b);
+}
+
+[data-theme="dark"] .jur-kanban-col,
+[data-theme="dark"] .jur-risco-item,
+[data-theme="dark"] .jur-tarefa-item,
+[data-theme="dark"] .jur-parte-item,
+[data-theme="dark"] .jur-historico-item__repetir,
+[data-theme="dark"] .view-tabs {
+    background: rgba(255, 255, 255, 0.03);
+}

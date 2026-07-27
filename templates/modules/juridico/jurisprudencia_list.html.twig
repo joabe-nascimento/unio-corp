@@ -11,6 +11,17 @@
 </a>
 {% endblock %}
 
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: stats.consultasMes|default(0), label: 'Consultas este mês', sub: 'Pesquisas com a Bruna', icon: 'fa-magnifying-glass', tone: 'sky' },
+        { value: stats.totalBiblioteca|default(0), label: 'Na biblioteca', sub: 'Registros salvos', icon: 'fa-book', tone: 'lavender' },
+        { value: stats.altaRelevancia|default(0), label: 'Relevância alta', sub: 'Prioritários', icon: 'fa-triangle-exclamation', tone: 'amber' },
+        { value: stats.favoritos|default(0), label: 'Favoritos', sub: 'Marcados pela equipe', icon: 'fa-star', tone: 'rose' },
+    ] } %}
+</div>
+{% endblock %}
+
 {% block page_list_section_toolbar %}
 <form method="get" action="{{ path('app_juridico_jurisprudencia') }}" style="display:contents;">
 {% embed 'components/section_toolbar.html.twig' with {
@@ -32,9 +43,28 @@
                 { value: 'baixa', label: 'Baixa' },
             ]
         } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Tribunal',
+            name: 'tribunal',
+            value: filter_tribunal|default(''),
+            min_width: '120px',
+            options: [
+                { value: '', label: 'Todos os tribunais' },
+                { value: 'STF', label: 'STF' },
+                { value: 'STJ', label: 'STJ' },
+                { value: 'TST', label: 'TST' },
+                { value: 'TRF', label: 'TRF' },
+                { value: 'TRT', label: 'TRT' },
+                { value: 'TJ', label: 'TJ' },
+            ]
+        } %}
+        <label class="filter-group jur-filter-favoritos">
+            <input type="checkbox" name="favoritos" value="1"{% if filter_favoritos|default(false) %} checked{% endif %} onchange="this.form.submit()">
+            <i class="fas fa-star" aria-hidden="true"></i> Só favoritos
+        </label>
         {% include 'components/toolbar_filter_actions.html.twig' with {
             clear_href: path('app_juridico_jurisprudencia'),
-            has_filters: filter_q|default('') or filter_relevancia|default('')
+            has_filters: filter_q|default('') or filter_relevancia|default('') or filter_tribunal|default('') or filter_favoritos|default(false)
         } %}
     {% endblock %}
 {% endembed %}
@@ -42,66 +72,92 @@
 {% endblock %}
 
 {% block page_list_content %}
-<section class="jur-ia-search" id="jurIaSearch" data-search-url="{{ path('app_juridico_jurisprudencia_pesquisar_ia') }}" data-save-url="{{ path('app_juridico_jurisprudencia_salvar_ia') }}" data-token="{{ csrf_token('juridico_jurisprudencia_ia') }}">
-    <div class="jur-ia-search__header">
-        <span class="jur-ia-search__icon" aria-hidden="true"><i class="fas fa-robot"></i></span>
-        <div class="jur-ia-search__title-block">
-            <h2 class="jur-ia-search__title">Pesquisar jurisprudência com a Bruna</h2>
-            <p class="jur-ia-search__subtitle">Motor de IA (JurisFlow) que resume teses, súmulas e precedentes do STF, STJ, TST, TRTs e TJs, com citação pronta para usar.</p>
+<div class="row g-4 mb-4">
+    <div class="col-xl-8">
+        <section class="jur-ia-search" id="jurIaSearch" data-search-url="{{ path('app_juridico_jurisprudencia_pesquisar_ia') }}" data-save-url="{{ path('app_juridico_jurisprudencia_salvar_ia') }}" data-token="{{ csrf_token('juridico_jurisprudencia_ia') }}">
+            <div class="jur-ia-search__header">
+                <span class="jur-ia-search__icon" aria-hidden="true"><i class="fas fa-robot"></i></span>
+                <div class="jur-ia-search__title-block">
+                    <h2 class="jur-ia-search__title">Pesquisar jurisprudência com a Bruna</h2>
+                    <p class="jur-ia-search__subtitle">Motor de IA (JurisFlow) que resume teses, súmulas e precedentes do STF, STJ, TST, TRTs e TJs, com citação pronta para usar.</p>
+                </div>
+            </div>
+
+            <form class="jur-ia-search__form" id="jurIaSearchForm">
+                <div class="jur-ia-search__field jur-ia-search__field--grow">
+                    <label for="jurIaTema">Tema ou pergunta</label>
+                    <input type="text" id="jurIaTema" name="tema" class="form-control" placeholder="Ex.: dano moral por negativação indevida" required>
+                </div>
+                <div class="jur-ia-search__field">
+                    <label for="jurIaTribunal">Tribunal</label>
+                    <select id="jurIaTribunal" name="tribunal" class="form-control">
+                        <option value="Todos">Todos</option>
+                        <option value="STF">STF</option>
+                        <option value="STJ">STJ</option>
+                        <option value="TST">TST</option>
+                        <option value="TRF">TRF</option>
+                        <option value="TRT">TRT</option>
+                        <option value="TJ">TJ</option>
+                    </select>
+                </div>
+                <div class="jur-ia-search__field">
+                    <label for="jurIaPeriodo">Período</label>
+                    <select id="jurIaPeriodo" name="periodo" class="form-control">
+                        <option value="">Qualquer período</option>
+                        <option value="últimos 6 meses">Últimos 6 meses</option>
+                        <option value="último 1 ano">Último 1 ano</option>
+                        <option value="últimos 3 anos">Últimos 3 anos</option>
+                        <option value="últimos 5 anos">Últimos 5 anos</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-unio jur-ia-search__submit" id="jurIaSubmit">
+                    <i class="fas fa-magnifying-glass mr-1" aria-hidden="true"></i> Pesquisar com IA
+                </button>
+            </form>
+
+            <div class="jur-ia-search__loading" id="jurIaLoading" hidden>
+                <div class="jur-ia-search__loading-icon"><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i></div>
+                <span id="jurIaLoadingText">Bruna está pesquisando…</span>
+            </div>
+
+            <div class="jur-ia-search__error alert alert-danger" id="jurIaError" hidden></div>
+
+            <div class="jur-ia-search__results" id="jurIaResults" hidden>
+                <div class="jur-ia-search__results-grid" id="jurIaResultsGrid"></div>
+                <p class="jur-ia-search__disclaimer" id="jurIaDisclaimer"></p>
+            </div>
+        </section>
+    </div>
+    <div class="col-xl-4">
+        <div class="jur-historico-panel">
+            <div class="jur-historico-panel__head">
+                <span><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> Histórico de pesquisas</span>
+            </div>
+            {% if historico|default([]) is empty %}
+            <p class="jur-historico-panel__empty">Suas pesquisas com a Bruna aparecerão aqui.</p>
+            {% else %}
+            <ul class="jur-historico-list">
+                {% for h in historico %}
+                <li class="jur-historico-item">
+                    <button type="button" class="jur-historico-item__repetir" title="Repetir esta pesquisa"
+                            data-tema="{{ h.tema }}" data-tribunal="{{ h.tribunal }}" data-periodo="{{ h.periodo|default('') }}">
+                        <span class="jur-historico-item__tema">{{ h.tema }}</span>
+                        <span class="jur-historico-item__meta">{{ h.tribunal }} · {{ h.resultadosCount }} resultado{{ h.resultadosCount != 1 ? 's' : '' }} · {{ h.criadoEm|date('d/m') }}</span>
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </div>
     </div>
-
-    <form class="jur-ia-search__form" id="jurIaSearchForm">
-        <div class="jur-ia-search__field jur-ia-search__field--grow">
-            <label for="jurIaTema">Tema ou pergunta</label>
-            <input type="text" id="jurIaTema" name="tema" class="form-control" placeholder="Ex.: dano moral por negativação indevida" required>
-        </div>
-        <div class="jur-ia-search__field">
-            <label for="jurIaTribunal">Tribunal</label>
-            <select id="jurIaTribunal" name="tribunal" class="form-control">
-                <option value="Todos">Todos</option>
-                <option value="STF">STF</option>
-                <option value="STJ">STJ</option>
-                <option value="TST">TST</option>
-                <option value="TRF">TRF</option>
-                <option value="TRT">TRT</option>
-                <option value="TJ">TJ</option>
-            </select>
-        </div>
-        <div class="jur-ia-search__field">
-            <label for="jurIaPeriodo">Período</label>
-            <select id="jurIaPeriodo" name="periodo" class="form-control">
-                <option value="">Qualquer período</option>
-                <option value="últimos 6 meses">Últimos 6 meses</option>
-                <option value="último 1 ano">Último 1 ano</option>
-                <option value="últimos 3 anos">Últimos 3 anos</option>
-                <option value="últimos 5 anos">Últimos 5 anos</option>
-            </select>
-        </div>
-        <button type="submit" class="btn-unio jur-ia-search__submit" id="jurIaSubmit">
-            <i class="fas fa-magnifying-glass mr-1" aria-hidden="true"></i> Pesquisar com IA
-        </button>
-    </form>
-
-    <div class="jur-ia-search__loading" id="jurIaLoading" hidden>
-        <div class="jur-ia-search__loading-icon"><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i></div>
-        <span id="jurIaLoadingText">Bruna está pesquisando…</span>
-    </div>
-
-    <div class="jur-ia-search__error alert alert-danger" id="jurIaError" hidden></div>
-
-    <div class="jur-ia-search__results" id="jurIaResults" hidden>
-        <div class="jur-ia-search__results-grid" id="jurIaResultsGrid"></div>
-        <p class="jur-ia-search__disclaimer" id="jurIaDisclaimer"></p>
-    </div>
-</section>
+</div>
 
 <div class="unio-card">
     {% if itens is empty %}
         {% include 'components/empty_state.html.twig' with {
             icon: 'fa-gavel',
             title: 'Nenhuma jurisprudência cadastrada',
-            text: filter_q|default('') or filter_relevancia|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre a base de conhecimento do escritório.',
+            text: filter_q|default('') or filter_relevancia|default('') or filter_tribunal|default('') or filter_favoritos|default(false) ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre a base de conhecimento do escritório.',
             btn_label: 'Novo registro',
             btn_opens: 'juridico-jurisprudencia-novo',
             btn_icon: 'fa-plus'
@@ -119,6 +175,7 @@
         <table class="table table-unio table-hover mb-0">
             <thead>
                 <tr>
+                    <th aria-hidden="true"></th>
                     <th>Tema</th>
                     <th>Tribunal</th>
                     <th>Data</th>
@@ -130,6 +187,14 @@
             <tbody>
                 {% for j in itens %}
                 <tr>
+                    <td>
+                        <button type="button" class="jur-favorito-btn{{ j.favorito ? ' is-favorito' : '' }}"
+                                data-favoritar-url="{{ path('app_juridico_jurisprudencia_favoritar', { id: j.id }) }}"
+                                data-token="{{ csrf_token('juridico_jurisprudencia_favoritar_' ~ j.id) }}"
+                                title="{{ j.favorito ? 'Remover dos favoritos' : 'Marcar como favorito' }}">
+                            <i class="fa{{ j.favorito ? 's' : 'r' }} fa-star" aria-hidden="true"></i>
+                        </button>
+                    </td>
                     <td class="jur-cell-tema">
                         <div class="jur-cell-tema-row">
                             <strong>{{ j.tema }}</strong>
@@ -157,6 +222,10 @@
                     </td>
                     <td class="text-right">
                         <div class="jur-row-actions">
+                            <button type="button" class="btn-unio-ghost btn-xs jur-copiar-citacao-btn" title="Copiar citação"
+                                    data-citacao="{{ j.tema }}{{ j.referencia ? ' — ' ~ j.referencia : '' }}{{ j.tribunal ? ' (' ~ j.tribunal ~ ')' : '' }}">
+                                <i class="fas fa-copy" aria-hidden="true"></i>
+                            </button>
                             <a href="{{ path('app_juridico_jurisprudencia_editar', { id: j.id }) }}" class="btn-unio-ghost btn-xs" title="Editar">
                                 <i class="fas fa-pen" aria-hidden="true"></i>
                             </a>
@@ -189,5 +258,6 @@
 
 {% block javascripts %}
 {{ parent() }}
-<script src="{{ asset('js/unio-jurisprudencia-ia.js') }}?v=1" defer></script>
+<script src="{{ asset('js/unio-jurisprudencia-ia.js') }}?v=2" defer></script>
+<script src="{{ asset('js/unio-jurisprudencia-biblioteca.js') }}?v=1" defer></script>
 {% endblock %}

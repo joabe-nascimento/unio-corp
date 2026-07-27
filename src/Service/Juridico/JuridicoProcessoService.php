@@ -46,6 +46,21 @@ class JuridicoProcessoService
         $this->em->flush();
     }
 
+    /** Usado pelo Kanban de fases (drag-and-drop). */
+    public function atualizarFase(JuridicoProcesso $processo, string $fase): void
+    {
+        if (!\in_array($fase, JuridicoProcesso::FASES, true)) {
+            throw new JuridicoProcessException('Fase inválida.');
+        }
+
+        $processo->setFase($fase);
+        if ($fase === JuridicoProcesso::FASE_ENCERRADO && $processo->getStatus() !== JuridicoProcesso::STATUS_ENCERRADO) {
+            $processo->setStatus(JuridicoProcesso::STATUS_ENCERRADO);
+        }
+        $processo->touch();
+        $this->em->flush();
+    }
+
     public function loadForEmpresa(Empresa $empresa, int $id): JuridicoProcesso
     {
         $processo = $this->repo->findOneByEmpresa($empresa, $id);

@@ -21,15 +21,24 @@ class JuridicoJurisprudenciaRepository extends ServiceEntityRepository
     }
 
     /** @return list<JuridicoJurisprudencia> */
-    public function findForEmpresa(Empresa $empresa, ?string $relevancia = null, ?string $q = null): array
+    public function findForEmpresa(Empresa $empresa, ?string $relevancia = null, ?string $q = null, ?string $tribunal = null, bool $apenasFavoritos = false): array
     {
         $qb = $this->createQueryBuilder('j')
             ->andWhere('j.empresa = :empresa')
             ->setParameter('empresa', $empresa)
-            ->orderBy('j.criadoEm', 'DESC');
+            ->orderBy('j.favorito', 'DESC')
+            ->addOrderBy('j.criadoEm', 'DESC');
 
         if ($relevancia !== null && $relevancia !== '') {
             $qb->andWhere('j.relevancia = :relevancia')->setParameter('relevancia', $relevancia);
+        }
+
+        if ($tribunal !== null && $tribunal !== '') {
+            $qb->andWhere('j.tribunal = :tribunal')->setParameter('tribunal', $tribunal);
+        }
+
+        if ($apenasFavoritos) {
+            $qb->andWhere('j.favorito = true');
         }
 
         if ($q !== null && trim($q) !== '') {
@@ -45,6 +54,17 @@ class JuridicoJurisprudenciaRepository extends ServiceEntityRepository
         return (int) $this->createQueryBuilder('j')
             ->select('COUNT(j.id)')
             ->andWhere('j.empresa = :empresa')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countFavoritosByEmpresa(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('j')
+            ->select('COUNT(j.id)')
+            ->andWhere('j.empresa = :empresa')
+            ->andWhere('j.favorito = true')
             ->setParameter('empresa', $empresa)
             ->getQuery()
             ->getSingleScalarResult();

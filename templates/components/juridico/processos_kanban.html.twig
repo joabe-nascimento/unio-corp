@@ -1,0 +1,45 @@
+{#
+  juridico/processos_kanban — board de fases com drag-and-drop
+
+  Props: kanban_colunas (map fase => list<JuridicoProcesso>), fases (list<string>)
+#}
+{% set _fase_icon = {
+    conhecimento: 'fa-file-signature',
+    instrucao: 'fa-magnifying-glass',
+    sentenca: 'fa-gavel',
+    recursal: 'fa-arrow-up-right-dots',
+    execucao: 'fa-money-bill-transfer',
+    encerrado: 'fa-box-archive',
+} %}
+<div class="jur-kanban" id="jurProcessosKanban"
+     data-fase-url-base="{{ path('app_juridico_processos') }}"
+     data-token="{{ csrf_token('juridico_processo_kanban') }}">
+    {% for fase in fases %}
+    {% set _itens = kanban_colunas[fase]|default([]) %}
+    <div class="jur-kanban-col" data-fase="{{ fase }}">
+        <div class="jur-kanban-col__head">
+            <span class="jur-kanban-col__icon"><i class="fas {{ _fase_icon[fase]|default('fa-diagram-project') }}" aria-hidden="true"></i></span>
+            <span class="jur-kanban-col__title">{{ fase|capitalize }}</span>
+            <span class="jur-kanban-col__count">{{ _itens|length }}</span>
+        </div>
+        <div class="jur-kanban-col__body" data-fase-drop="{{ fase }}">
+            <p class="jur-kanban-col__empty"{% if _itens is not empty %} hidden{% endif %}>Sem processos nesta fase.</p>
+            {% for p in _itens %}
+            <a href="{{ path('app_juridico_processo_show', { id: p.id }) }}" class="jur-kanban-card" draggable="true" data-processo-id="{{ p.id }}">
+                <div class="jur-kanban-card__top">
+                    <code>{{ p.numero }}</code>
+                    {% if p.status == 'critico' %}
+                    <span class="jur-kanban-card__flag" title="Crítico"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
+                    {% endif %}
+                </div>
+                <div class="jur-kanban-card__cliente">{{ p.cliente ? p.cliente.nome : 'Sem cliente' }}</div>
+                <div class="jur-kanban-card__meta">
+                    {% if p.area %}<span class="badge badge-soft-primary">{{ p.area }}</span>{% endif %}
+                    {% if p.valor %}<span class="jur-kanban-card__valor">R$ {{ p.valor|number_format(0, ',', '.') }}</span>{% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>

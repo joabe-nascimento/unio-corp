@@ -100,11 +100,29 @@
                 '<button type="button" class="btn-unio btn-sm jur-ia-card__save" data-index="' + index + '">' +
                     '<i class="fas fa-bookmark mr-1" aria-hidden="true"></i> Salvar na biblioteca' +
                 '</button>' +
+                '<button type="button" class="btn-unio-ghost btn-sm jur-ia-card__copy" title="Copiar citação">' +
+                    '<i class="fas fa-copy" aria-hidden="true"></i>' +
+                '</button>' +
             '</div>';
 
         var saveBtn = card.querySelector('.jur-ia-card__save');
         saveBtn.addEventListener('click', function () {
             saveSuggestion(item, saveBtn, card);
+        });
+
+        var copyBtn = card.querySelector('.jur-ia-card__copy');
+        copyBtn.addEventListener('click', function () {
+            var texto = item.tema + (item.referencia ? ' — ' + item.referencia : '') + (item.tribunal ? ' (' + item.tribunal + ')' : '');
+            var done = function () {
+                var original = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
+                window.setTimeout(function () { copyBtn.innerHTML = original; }, 1400);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(texto).then(done);
+            } else {
+                done();
+            }
         });
 
         return card;

@@ -1,0 +1,47 @@
+{#
+  juridico/alertas_risco_panel — painel de alertas de risco calculados em tempo real
+
+  Props:
+    alertas          (list<{processo, tipo, nivel, icone, mensagem}>)
+    title            (string, opt)
+    empty_text       (string, opt)
+    show_processo    (bool, opt)  mostra o link/número do processo em cada linha (default: true)
+    limit            (int, opt)   corta a lista (default: sem limite)
+#}
+{% set _alertas = limit is defined and limit ? alertas|slice(0, limit) : alertas %}
+{% set _nivel_label = { alto: 'Alto', medio: 'Médio', baixo: 'Baixo' } %}
+{% set _nivel_class = { alto: 'jur-risco-badge--alto', medio: 'jur-risco-badge--medio', baixo: 'jur-risco-badge--baixo' } %}
+<div class="jur-risco-panel{% if alertas is empty %} jur-risco-panel--ok{% endif %}">
+    <div class="jur-risco-panel__head">
+        <span class="jur-risco-panel__icon"><i class="fas {{ alertas is empty ? 'fa-circle-check' : 'fa-shield-halved' }}" aria-hidden="true"></i></span>
+        <div>
+            <h3 class="jur-risco-panel__title">{{ title|default('Central de alertas de risco') }}</h3>
+            <p class="jur-risco-panel__subtitle">
+                {% if alertas is empty %}
+                    {{ empty_text|default('Nenhum alerta ativo no momento — carteira sob controle.') }}
+                {% else %}
+                    {{ alertas|length }} alerta{{ alertas|length > 1 ? 's' : '' }} calculado{{ alertas|length > 1 ? 's' : '' }} em tempo real a partir de status, prazos e tarefas.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% if _alertas is not empty %}
+    <ul class="jur-risco-list">
+        {% for a in _alertas %}
+        <li class="jur-risco-item">
+            <span class="jur-risco-badge {{ _nivel_class[a.nivel]|default('jur-risco-badge--medio') }}">{{ _nivel_label[a.nivel]|default('Médio') }}</span>
+            <span class="jur-risco-item__icon"><i class="fas {{ a.icone }}" aria-hidden="true"></i></span>
+            <span class="jur-risco-item__text">
+                {% if show_processo|default(true) %}
+                <a href="{{ path('app_juridico_processo_show', { id: a.processo.id }) }}" class="jur-risco-item__processo">{{ a.processo.numero }}</a> ·
+                {% endif %}
+                {{ a.mensagem }}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% if limit is defined and limit and alertas|length > limit %}
+    <p class="jur-risco-panel__more">+ {{ alertas|length - limit }} alerta{{ (alertas|length - limit) > 1 ? 's' : '' }} não exibido{{ (alertas|length - limit) > 1 ? 's' : '' }}.</p>
+    {% endif %}
+    {% endif %}
+</div>

@@ -51,6 +51,9 @@ class JuridicoJurisprudencia
     private ?User $createdBy = null;
 
     #[ORM\Column]
+    private bool $favorito = false;
+
+    #[ORM\Column]
     private \DateTimeImmutable $criadoEm;
 
     #[ORM\Column(nullable: true)]
@@ -80,6 +83,8 @@ class JuridicoJurisprudencia
     public function setResumo(?string $resumo): static { $this->resumo = $resumo; return $this; }
     public function getCreatedBy(): ?User { return $this->createdBy; }
     public function setCreatedBy(?User $createdBy): static { $this->createdBy = $createdBy; return $this; }
+    public function isFavorito(): bool { return $this->favorito; }
+    public function setFavorito(bool $favorito): static { $this->favorito = $favorito; return $this; }
     public function getCriadoEm(): \DateTimeImmutable { return $this->criadoEm; }
     public function getAtualizadoEm(): ?\DateTimeImmutable { return $this->atualizadoEm; }
     public function touch(): static { $this->atualizadoEm = new \DateTimeImmutable(); return $this; }

@@ -5,8 +5,10 @@ namespace App\Service\Juridico;
 use App\Doctrine\DateNormalizer;
 use App\Entity\Empresa;
 use App\Entity\JuridicoJurisprudencia;
+use App\Entity\JuridicoJurisprudenciaConsulta;
 use App\Entity\User;
 use App\Exception\JuridicoProcessException;
+use App\Repository\JuridicoJurisprudenciaConsultaRepository;
 use App\Repository\JuridicoJurisprudenciaRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -15,6 +17,7 @@ class JuridicoJurisprudenciaService
     public function __construct(
         private EntityManagerInterface $em,
         private JuridicoJurisprudenciaRepository $repo,
+        private JuridicoJurisprudenciaConsultaRepository $consultaRepo,
         private JurisFlowAiClient $jurisFlowAi,
     ) {}
 
@@ -25,7 +28,7 @@ class JuridicoJurisprudenciaService
      *
      * @return array{resultados: list<array{tribunal: string, tema: string, resultado: ?string, relevancia: string, referencia: ?string, resumo: ?string}>, disclaimer: string}
      */
-    public function buscarComIA(Empresa $empresa, string $tema, string $tribunal = 'Todos', string $periodo = '', string $areaJuridica = 'Geral'): array
+    public function buscarComIA(Empresa $empresa, string $tema, string $tribunal = 'Todos', string $periodo = '', string $areaJuridica = 'Geral', ?User $createdBy = null): array
     {
         $tema = trim($tema);
         if ($tema === '') {
@@ -48,7 +51,53 @@ class JuridicoJurisprudenciaService
             throw new JuridicoProcessException('Nenhum resultado encontrado para esse tema. Tente reformular a pesquisa.');
         }
 
+        $this->registrarConsulta($empresa, $tema, $tribunal ?: 'Todos', $periodo, $areaJuridica ?: 'Geral', \count($resultado['resultados']), $createdBy);
+
         return $resultado;
+    }
+
+    private function registrarConsulta(Empresa $empresa, string $tema, string $tribunal, string $periodo, string $areaJuridica, int $resultadosCount, ?User $createdBy): void
+    {
+        $consulta = new JuridicoJurisprudenciaConsulta();
+        $consulta->setEmpresa($empresa);
+        $consulta->setTema($tema);
+        $consulta->setTribunal($tribunal);
+        $consulta->setPeriodo($periodo !== '' ? $periodo : null);
+        $consulta->setAreaJuridica($areaJuridica !== '' ? $areaJuridica : null);
+        $consulta->setResultadosCount($resultadosCount);
+        $consulta->setCreatedBy($createdBy);
+        $this->em->persist($consulta);
+        $this->em->flush();
+    }
+
+    /** @return list<JuridicoJurisprudenciaConsulta> */
+    public function historicoRecente(Empresa $empresa, int $limit = 5): array
+    {
+        return $this->consultaRepo->findRecentForEmpresa($empresa, $limit);
+    }
+
+    public function toggleFavorito(Empresa $empresa, int $id): JuridicoJurisprudencia
+    {
+        $item = $this->loadForEmpresa($empresa, $id);
+        $item->setFavorito(!$item->isFavorito());
+        $this->em->flush();
+
+        return $item;
+    }
+
+    /**
+     * @return array{totalBiblioteca: int, favoritos: int, altaRelevancia: int, consultasMes: int}
+     */
+    public function estatisticas(Empresa $empresa): array
+    {
+        $inicioMes = new \DateTimeImmutable('first day of this month 00:00:00');
+
+        return [
+            'totalBiblioteca' => $this->repo->countByEmpresa($empresa),
+            'favoritos' => $this->repo->countFavoritosByEmpresa($empresa),
+            'altaRelevancia' => \count($this->repo->findForEmpresa($empresa, JuridicoJurisprudencia::RELEVANCIA_ALTA)),
+            'consultasMes' => $this->consultaRepo->countSince($empresa, $inicioMes),
+        ];
     }
 
     /** Salva uma sugestão da pesquisa com IA como registro na biblioteca do escritório. */
@@ -102,9 +151,9 @@ class JuridicoJurisprudenciaService
     }
 
     /** @return list<JuridicoJurisprudencia> */
-    public function findForEmpresa(Empresa $empresa, ?string $relevancia = null, ?string $q = null): array
+    public function findForEmpresa(Empresa $empresa, ?string $relevancia = null, ?string $q = null, ?string $tribunal = null, bool $apenasFavoritos = false): array
     {
-        return $this->repo->findForEmpresa($empresa, $relevancia, $q);
+        return $this->repo->findForEmpresa($empresa, $relevancia, $q, $tribunal, $apenasFavoritos);
     }
 
     /** @param array<string, mixed> $data */

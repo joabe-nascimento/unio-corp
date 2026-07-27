@@ -106,6 +106,21 @@
 {% endblock %}
 
 {% block page_list_content %}
+{% include 'components/juridico/alertas_risco_panel.html.twig' with { alertas: alertas|default([]), limit: 5 } %}
+
+{% set _view_params = { status: filter_status|default(''), q: filter_q|default('') } %}
+<div class="jur-view-tabs">
+    <a href="{{ path('app_juridico_processos', _view_params|merge({ view: 'lista' })) }}" class="jur-view-tab{{ view == 'kanban' ? '' : ' is-active' }}">
+        <i class="fas fa-list mr-1" aria-hidden="true"></i> Lista
+    </a>
+    <a href="{{ path('app_juridico_processos', _view_params|merge({ view: 'kanban' })) }}" class="jur-view-tab{{ view == 'kanban' ? ' is-active' : '' }}">
+        <i class="fas fa-table-columns mr-1" aria-hidden="true"></i> Kanban de fases
+    </a>
+</div>
+
+{% if view == 'kanban' %}
+    {% include 'components/juridico/processos_kanban.html.twig' with { kanban_colunas: kanban_colunas, fases: fases } %}
+{% else %}
 <div class="unio-card">
     {% if processos is empty %}
         {% include 'components/empty_state.html.twig' with {
@@ -169,6 +184,7 @@
     </div>
     {% endif %}
 </div>
+{% endif %}
 {% endblock %}
 
 {% block page_overlays %}
@@ -180,4 +196,11 @@
     form_action: path('app_juridico_processo_novo'),
     open: open_novo|default(false)
 } %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% if view == 'kanban' %}
+<script src="{{ asset('js/unio-processos-kanban.js') }}?v=1" defer></script>
+{% endif %}
 {% endblock %}

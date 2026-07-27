@@ -35,12 +35,18 @@ class JuridicoJurisprudenciaController extends AbstractController
         $empresa = $this->requireEmpresa();
         $relevancia = (string) $request->query->get('relevancia', '');
         $q = (string) $request->query->get('q', '');
+        $tribunal = (string) $request->query->get('tribunal', '');
+        $favoritos = $request->query->getBoolean('favoritos');
 
         return $this->render('modules/juridico/jurisprudencia_list.html.twig', [
-            'itens' => $this->jurisprudencia->findForEmpresa($empresa, $relevancia ?: null, $q ?: null),
+            'itens' => $this->jurisprudencia->findForEmpresa($empresa, $relevancia ?: null, $q ?: null, $tribunal ?: null, $favoritos),
             'filter_relevancia' => $relevancia,
             'filter_q' => $q,
+            'filter_tribunal' => $tribunal,
+            'filter_favoritos' => $favoritos,
             'open_novo' => $request->query->getBoolean('open_novo'),
+            'stats' => $this->jurisprudencia->estatisticas($empresa),
+            'historico' => $this->jurisprudencia->historicoRecente($empresa, 5),
         ]);
     }
 
@@ -59,12 +65,30 @@ class JuridicoJurisprudenciaController extends AbstractController
         $tribunal = trim((string) ($payload['tribunal'] ?? 'Todos'));
         $periodo = trim((string) ($payload['periodo'] ?? ''));
 
+        /** @var User|null $user */
+        $user = $this->getUser();
+
         try {
-            $resultado = $this->jurisprudencia->buscarComIA($empresa, $tema, $tribunal ?: 'Todos', $periodo);
+            $resultado = $this->jurisprudencia->buscarComIA($empresa, $tema, $tribunal ?: 'Todos', $periodo, 'Geral', $user);
 
             return $this->json($resultado);
         } catch (JuridicoProcessException $e) {
             return $this->json(['error' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    #[Route('/{id}/favoritar', name: 'app_juridico_jurisprudencia_favoritar', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function favoritar(int $id, Request $request): JsonResponse
+    {
+        $empresa = $this->requireEmpresa();
+        $this->requireCsrf($request, 'juridico_jurisprudencia_favoritar_' . $id);
+
+        try {
+            $item = $this->jurisprudencia->toggleFavorito($empresa, $id);
+
+            return $this->json(['favorito' => $item->isFavorito()]);
+        } catch (JuridicoProcessException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
 
