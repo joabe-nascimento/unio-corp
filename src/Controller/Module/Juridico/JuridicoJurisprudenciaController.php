@@ -7,6 +7,7 @@ use App\Exception\JuridicoProcessException;
 use App\Service\Juridico\JuridicoJurisprudenciaService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -41,6 +42,53 @@ class JuridicoJurisprudenciaController extends AbstractController
             'filter_q' => $q,
             'open_novo' => $request->query->getBoolean('open_novo'),
         ]);
+    }
+
+    #[Route('/pesquisar-ia', name: 'app_juridico_jurisprudencia_pesquisar_ia', methods: ['POST'])]
+    public function pesquisarIa(Request $request): JsonResponse
+    {
+        $empresa = $this->requireEmpresa();
+        $payload = json_decode($request->getContent(), true);
+        $payload = \is_array($payload) ? $payload : [];
+
+        if (!$this->isCsrfTokenValid('juridico_jurisprudencia_ia', (string) ($payload['_token'] ?? ''))) {
+            return $this->json(['error' => 'Token de segurança inválido.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $tema = trim((string) ($payload['tema'] ?? ''));
+        $tribunal = trim((string) ($payload['tribunal'] ?? 'Todos'));
+        $periodo = trim((string) ($payload['periodo'] ?? ''));
+
+        try {
+            $resultado = $this->jurisprudencia->buscarComIA($empresa, $tema, $tribunal ?: 'Todos', $periodo);
+
+            return $this->json($resultado);
+        } catch (JuridicoProcessException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    #[Route('/salvar-ia', name: 'app_juridico_jurisprudencia_salvar_ia', methods: ['POST'])]
+    public function salvarIa(Request $request): JsonResponse
+    {
+        $empresa = $this->requireEmpresa();
+        $payload = json_decode($request->getContent(), true);
+        $payload = \is_array($payload) ? $payload : [];
+
+        if (!$this->isCsrfTokenValid('juridico_jurisprudencia_ia', (string) ($payload['_token'] ?? ''))) {
+            return $this->json(['error' => 'Token de segurança inválido.'], Response::HTTP_FORBIDDEN);
+        }
+
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        try {
+            $item = $this->jurisprudencia->salvarSugestao($empresa, $payload['sugestao'] ?? [], $user);
+
+            return $this->json(['id' => $item->getId()]);
+        } catch (JuridicoProcessException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
     }
 
     #[Route('/novo', name: 'app_juridico_jurisprudencia_novo', methods: ['GET', 'POST'])]

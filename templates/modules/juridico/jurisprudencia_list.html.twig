@@ -42,6 +42,60 @@
 {% endblock %}
 
 {% block page_list_content %}
+<section class="jur-ia-search" id="jurIaSearch" data-search-url="{{ path('app_juridico_jurisprudencia_pesquisar_ia') }}" data-save-url="{{ path('app_juridico_jurisprudencia_salvar_ia') }}" data-token="{{ csrf_token('juridico_jurisprudencia_ia') }}">
+    <div class="jur-ia-search__header">
+        <span class="jur-ia-search__icon" aria-hidden="true"><i class="fas fa-robot"></i></span>
+        <div class="jur-ia-search__title-block">
+            <h2 class="jur-ia-search__title">Pesquisar jurisprudência com a Bruna</h2>
+            <p class="jur-ia-search__subtitle">Motor de IA (JurisFlow) que resume teses, súmulas e precedentes do STF, STJ, TST, TRTs e TJs, com citação pronta para usar.</p>
+        </div>
+    </div>
+
+    <form class="jur-ia-search__form" id="jurIaSearchForm">
+        <div class="jur-ia-search__field jur-ia-search__field--grow">
+            <label for="jurIaTema">Tema ou pergunta</label>
+            <input type="text" id="jurIaTema" name="tema" class="form-control" placeholder="Ex.: dano moral por negativação indevida" required>
+        </div>
+        <div class="jur-ia-search__field">
+            <label for="jurIaTribunal">Tribunal</label>
+            <select id="jurIaTribunal" name="tribunal" class="form-control">
+                <option value="Todos">Todos</option>
+                <option value="STF">STF</option>
+                <option value="STJ">STJ</option>
+                <option value="TST">TST</option>
+                <option value="TRF">TRF</option>
+                <option value="TRT">TRT</option>
+                <option value="TJ">TJ</option>
+            </select>
+        </div>
+        <div class="jur-ia-search__field">
+            <label for="jurIaPeriodo">Período</label>
+            <select id="jurIaPeriodo" name="periodo" class="form-control">
+                <option value="">Qualquer período</option>
+                <option value="últimos 6 meses">Últimos 6 meses</option>
+                <option value="último 1 ano">Último 1 ano</option>
+                <option value="últimos 3 anos">Últimos 3 anos</option>
+                <option value="últimos 5 anos">Últimos 5 anos</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-unio jur-ia-search__submit" id="jurIaSubmit">
+            <i class="fas fa-magnifying-glass mr-1" aria-hidden="true"></i> Pesquisar com IA
+        </button>
+    </form>
+
+    <div class="jur-ia-search__loading" id="jurIaLoading" hidden>
+        <div class="jur-ia-search__loading-icon"><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i></div>
+        <span id="jurIaLoadingText">Bruna está pesquisando…</span>
+    </div>
+
+    <div class="jur-ia-search__error alert alert-danger" id="jurIaError" hidden></div>
+
+    <div class="jur-ia-search__results" id="jurIaResults" hidden>
+        <div class="jur-ia-search__results-grid" id="jurIaResultsGrid"></div>
+        <p class="jur-ia-search__disclaimer" id="jurIaDisclaimer"></p>
+    </div>
+</section>
+
 <div class="unio-card">
     {% if itens is empty %}
         {% include 'components/empty_state.html.twig' with {
@@ -131,4 +185,9 @@
     form_action: path('app_juridico_jurisprudencia_novo'),
     open: open_novo|default(false)
 } %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/unio-jurisprudencia-ia.js') }}?v=1" defer></script>
 {% endblock %}

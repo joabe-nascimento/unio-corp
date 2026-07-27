@@ -93,6 +93,55 @@ final class JurisFlowAiClient
         }
     }
 
+    /**
+     * Pesquisa jurisprudencial estruturada (motor de IA "Jurisprudência IA").
+     *
+     * Retorna uma lista de julgados/teses (tribunal, resumo, referência, relevância)
+     * prontos para virar registros na biblioteca de jurisprudência do escritório.
+     *
+     * @return array{resultados: list<array{tribunal: string, tema: string, resultado: ?string, relevancia: string, referencia: ?string, resumo: ?string}>, disclaimer: string}|null
+     */
+    public function pesquisarJurisprudencia(
+        string $tema,
+        string $tribunal = 'Todos',
+        string $periodo = '',
+        string $areaJuridica = 'Geral',
+        string $escritorioId = '',
+    ): ?array {
+        if (!$this->enabled) {
+            return null;
+        }
+
+        $escritorioId = $escritorioId !== '' ? $escritorioId : $this->defaultEscritorioId;
+        if ($escritorioId === '') {
+            $escritorioId = 'default';
+        }
+
+        try {
+            $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/chains/jurisprudence-search', [
+                'json' => [
+                    'tema' => $tema,
+                    'tribunal' => $tribunal ?: 'Todos',
+                    'periodo' => $periodo,
+                    'area_juridica' => $areaJuridica ?: 'Geral',
+                    'escritorio_id' => $escritorioId,
+                ],
+                'timeout' => 40,
+            ]);
+
+            $data = $response->toArray(false);
+
+            return [
+                'resultados' => \is_array($data['resultados'] ?? null) ? $data['resultados'] : [],
+                'disclaimer' => (string) ($data['disclaimer'] ?? ''),
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->warning('Pesquisa de jurisprudência (JurisFlow) indisponível: {msg}', ['msg' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
     /** Status resumido do stack (vertical, LLM, RAG) — usado em painéis de diagnóstico. */
     public function status(): ?array
     {
