@@ -1079,8 +1079,10 @@ body.org-juridico .auth-card__mobile-logo img {
     border: 1px solid var(--accent-line, rgba(122, 33, 48, 0.18));
     border-radius: 16px;
     padding: 1.25rem 1.4rem 1.4rem;
-    margin-bottom: 1.25rem;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.045);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .jur-ia-search__header {
@@ -1558,11 +1560,14 @@ body.org-juridico .jur-proc-hero .btn-unio-ghost.jur-proc-hero__ghost i {
     display: inline-flex;
     align-items: center;
     padding: 0.4rem 0.85rem;
+    border: none;
     border-radius: 8px;
+    background: transparent;
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--text-2, #64748b);
     text-decoration: none;
+    cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -1826,6 +1831,145 @@ body.org-juridico .jur-proc-hero .btn-unio-ghost.jur-proc-hero__ghost i {
     color: #dc263d;
 }
 
+.jur-tarefa-list--scroll,
+.jur-parte-list--scroll {
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+}
+
+/* ============================================================
+   Processo — sidebar compacta de abas (Dados / Tarefas / Partes)
+   ============================================================ */
+
+.jur-processo-tabs-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.jur-processo-tabs {
+    display: flex;
+    align-items: stretch;
+    min-height: 380px;
+}
+
+.jur-processo-tabs__nav {
+    flex: 0 0 148px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1rem 0.6rem;
+    border-right: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+    background: var(--surface-2, rgba(0, 0, 0, 0.015));
+}
+
+.jur-processo-tabs__btn {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 0.65rem;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--text-2, #64748b);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.jur-processo-tabs__btn i {
+    flex: 0 0 auto;
+    width: 16px;
+    text-align: center;
+    color: var(--text-3, #94a3b8);
+}
+
+.jur-processo-tabs__btn:hover {
+    background: var(--surface, #fff);
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-processo-tabs__btn.is-active {
+    background: var(--accent-dim, rgba(122, 33, 48, 0.1));
+    color: var(--accent, #7a2130);
+}
+
+.jur-processo-tabs__btn.is-active i {
+    color: var(--accent, #7a2130);
+}
+
+.jur-processo-tabs__badge {
+    margin-left: auto;
+    flex: 0 0 auto;
+    min-width: 18px;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--accent, #7a2130);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.jur-processo-tabs__btn:not(.is-active) .jur-processo-tabs__badge {
+    background: var(--text-3, #94a3b8);
+}
+
+.jur-processo-tabs__panels {
+    flex: 1;
+    min-width: 0;
+    padding: 1.1rem 1.3rem;
+}
+
+.jur-processo-tabs__panel {
+    display: none;
+}
+
+.jur-processo-tabs__panel.is-active {
+    display: block;
+}
+
+.jur-processo-tabs__panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+}
+
+.jur-processo-tabs__panel-head h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-1, #1e2a3a);
+}
+
+@media (max-width: 767.98px) {
+    .jur-processo-tabs {
+        flex-direction: column;
+        min-height: 0;
+    }
+    .jur-processo-tabs__nav {
+        flex-direction: row;
+        flex: 0 0 auto;
+        overflow-x: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+    }
+    .jur-processo-tabs__btn {
+        white-space: nowrap;
+    }
+    .jur-processo-tabs__panels {
+        padding: 1rem;
+    }
+}
+
+[data-theme="dark"] .jur-processo-tabs__nav {
+    background: var(--surface, #1a1f2b);
+}
+
 /* ============================================================
    Jurisprudência — favoritos, copiar citação e histórico
    ============================================================ */
@@ -1939,6 +2083,30 @@ body.org-juridico .jur-proc-hero .btn-unio-ghost.jur-proc-hero__ghost i {
 .jur-historico-item__meta {
     font-size: 0.72rem;
     color: var(--text-2, #64748b);
+}
+
+.jur-historico-panel__mais {
+    margin-top: 0.6rem;
+    width: 100%;
+    padding: 0.5rem;
+    background: var(--surface-2, rgba(0, 0, 0, 0.03));
+    border: 1px dashed var(--border, rgba(0, 0, 0, 0.12));
+    border-radius: 9px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-2, #64748b);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.jur-historico-panel__mais:hover {
+    background: var(--accent-dim, rgba(122, 33, 48, 0.1));
+    color: var(--accent, #7a2130);
+}
+
+.jur-historico-panel__mais:disabled {
+    opacity: 0.65;
+    cursor: default;
 }
 
 @media (max-width: 991.98px) {

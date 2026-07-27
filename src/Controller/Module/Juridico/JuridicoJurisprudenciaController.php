@@ -37,6 +37,7 @@ class JuridicoJurisprudenciaController extends AbstractController
         $q = (string) $request->query->get('q', '');
         $tribunal = (string) $request->query->get('tribunal', '');
         $favoritos = $request->query->getBoolean('favoritos');
+        $historicoPagina = $this->jurisprudencia->historicoPagina($empresa, 0, 5);
 
         return $this->render('modules/juridico/jurisprudencia_list.html.twig', [
             'itens' => $this->jurisprudencia->findForEmpresa($empresa, $relevancia ?: null, $q ?: null, $tribunal ?: null, $favoritos),
@@ -46,8 +47,29 @@ class JuridicoJurisprudenciaController extends AbstractController
             'filter_favoritos' => $favoritos,
             'open_novo' => $request->query->getBoolean('open_novo'),
             'stats' => $this->jurisprudencia->estatisticas($empresa),
-            'historico' => $this->jurisprudencia->historicoRecente($empresa, 5),
+            'historico' => $historicoPagina['itens'],
+            'historico_tem_mais' => $historicoPagina['hasMore'],
         ]);
+    }
+
+    #[Route('/historico', name: 'app_juridico_jurisprudencia_historico', methods: ['GET'])]
+    public function historico(Request $request): JsonResponse
+    {
+        $empresa = $this->requireEmpresa();
+        $offset = max(0, $request->query->getInt('offset', 0));
+        $pagina = $this->jurisprudencia->historicoPagina($empresa, $offset, 5);
+
+        $itens = array_map(static function ($h) {
+            return [
+                'tema' => $h->getTema(),
+                'tribunal' => $h->getTribunal(),
+                'periodo' => $h->getPeriodo(),
+                'resultadosCount' => $h->getResultadosCount(),
+                'criadoEm' => $h->getCriadoEm()->format('d/m'),
+            ];
+        }, $pagina['itens']);
+
+        return $this->json(['itens' => $itens, 'hasMore' => $pagina['hasMore']]);
     }
 
     #[Route('/pesquisar-ia', name: 'app_juridico_jurisprudencia_pesquisar_ia', methods: ['POST'])]

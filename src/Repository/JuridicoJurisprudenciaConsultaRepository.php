@@ -16,12 +16,13 @@ class JuridicoJurisprudenciaConsultaRepository extends ServiceEntityRepository
     }
 
     /** @return list<JuridicoJurisprudenciaConsulta> */
-    public function findRecentForEmpresa(Empresa $empresa, int $limit = 5): array
+    public function findRecentForEmpresa(Empresa $empresa, int $limit = 5, int $offset = 0): array
     {
         return $this->createQueryBuilder('c')
             ->andWhere('c.empresa = :empresa')
             ->setParameter('empresa', $empresa)
             ->orderBy('c.criadoEm', 'DESC')
+            ->setFirstResult($offset)
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();

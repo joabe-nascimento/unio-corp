@@ -3,8 +3,31 @@
  * Drag-and-drop nativo (HTML5) para mover processos entre fases, com
  * atualização otimista e rollback em caso de erro.
  */
-(function (document) {
+(function (document, window) {
     'use strict';
+
+    var toggle = document.querySelector('[data-view-toggle]');
+    if (toggle) {
+        var btns = toggle.querySelectorAll('[data-view-btn]');
+        var panels = document.querySelectorAll('[data-view-panel]');
+        var baseUrl = toggle.dataset.viewUrl || window.location.pathname;
+
+        btns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var target = btn.dataset.viewBtn;
+
+                btns.forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+                panels.forEach(function (p) {
+                    p.classList.toggle('d-none', p.dataset.viewPanel !== target);
+                });
+
+                if (window.history && window.history.replaceState) {
+                    var sep = baseUrl.indexOf('?') === -1 ? '?' : '&';
+                    window.history.replaceState(null, '', baseUrl + sep + 'view=' + target);
+                }
+            });
+        });
+    }
 
     var board = document.getElementById('jurProcessosKanban');
     if (!board) return;
@@ -95,4 +118,4 @@
             if (empty) empty.hidden = count > 0;
         });
     }
-})(document);
+})(document, window);

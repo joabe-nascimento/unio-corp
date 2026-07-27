@@ -129,14 +129,14 @@
         </section>
     </div>
     <div class="col-xl-4">
-        <div class="jur-historico-panel">
+        <div class="jur-historico-panel" id="jurHistoricoPanel" data-historico-url="{{ path('app_juridico_jurisprudencia_historico') }}" data-offset="{{ historico|length }}">
             <div class="jur-historico-panel__head">
                 <span><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> Histórico de pesquisas</span>
             </div>
             {% if historico|default([]) is empty %}
-            <p class="jur-historico-panel__empty">Suas pesquisas com a Bruna aparecerão aqui.</p>
-            {% else %}
-            <ul class="jur-historico-list">
+            <p class="jur-historico-panel__empty" id="jurHistoricoEmpty">Suas pesquisas com a Bruna aparecerão aqui.</p>
+            {% endif %}
+            <ul class="jur-historico-list" id="jurHistoricoList">
                 {% for h in historico %}
                 <li class="jur-historico-item">
                     <button type="button" class="jur-historico-item__repetir" title="Repetir esta pesquisa"
@@ -147,6 +147,10 @@
                 </li>
                 {% endfor %}
             </ul>
+            {% if historico_tem_mais|default(false) %}
+            <button type="button" class="jur-historico-panel__mais" id="jurHistoricoMais">
+                Carregar mais <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
             {% endif %}
         </div>
     </div>
@@ -259,5 +263,5 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/unio-jurisprudencia-ia.js') }}?v=2" defer></script>
-<script src="{{ asset('js/unio-jurisprudencia-biblioteca.js') }}?v=1" defer></script>
+<script src="{{ asset('js/unio-jurisprudencia-biblioteca.js') }}?v=2" defer></script>
 {% endblock %}

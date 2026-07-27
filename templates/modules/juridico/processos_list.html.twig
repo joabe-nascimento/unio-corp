@@ -109,18 +109,19 @@
 {% include 'components/juridico/alertas_risco_panel.html.twig' with { alertas: alertas|default([]), limit: 5 } %}
 
 {% set _view_params = { status: filter_status|default(''), q: filter_q|default('') } %}
-<div class="jur-view-tabs">
-    <a href="{{ path('app_juridico_processos', _view_params|merge({ view: 'lista' })) }}" class="jur-view-tab{{ view == 'kanban' ? '' : ' is-active' }}">
+<div class="jur-view-tabs" data-view-toggle data-view-url="{{ path('app_juridico_processos', _view_params) }}">
+    <button type="button" class="jur-view-tab{{ view == 'kanban' ? '' : ' is-active' }}" data-view-btn="lista">
         <i class="fas fa-list mr-1" aria-hidden="true"></i> Lista
-    </a>
-    <a href="{{ path('app_juridico_processos', _view_params|merge({ view: 'kanban' })) }}" class="jur-view-tab{{ view == 'kanban' ? ' is-active' : '' }}">
+    </button>
+    <button type="button" class="jur-view-tab{{ view == 'kanban' ? ' is-active' : '' }}" data-view-btn="kanban">
         <i class="fas fa-table-columns mr-1" aria-hidden="true"></i> Kanban de fases
-    </a>
+    </button>
 </div>
 
-{% if view == 'kanban' %}
+<div data-view-panel="kanban" class="{{ view == 'kanban' ? '' : 'd-none' }}">
     {% include 'components/juridico/processos_kanban.html.twig' with { kanban_colunas: kanban_colunas, fases: fases } %}
-{% else %}
+</div>
+<div data-view-panel="lista" class="{{ view == 'kanban' ? 'd-none' : '' }}">
 <div class="unio-card">
     {% if processos is empty %}
         {% include 'components/empty_state.html.twig' with {
@@ -184,7 +185,7 @@
     </div>
     {% endif %}
 </div>
-{% endif %}
+</div>
 {% endblock %}
 
 {% block page_overlays %}
@@ -200,7 +201,5 @@
 
 {% block javascripts %}
 {{ parent() }}
-{% if view == 'kanban' %}
-<script src="{{ asset('js/unio-processos-kanban.js') }}?v=1" defer></script>
-{% endif %}
+<script src="{{ asset('js/unio-processos-kanban.js') }}?v=2" defer></script>
 {% endblock %}

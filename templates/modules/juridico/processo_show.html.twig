@@ -15,118 +15,141 @@
 {% if alertas_processo|default([]) is not empty %}
 {% include 'components/juridico/alertas_risco_panel.html.twig' with { alertas: alertas_processo, title: 'Alertas deste processo', show_processo: false } %}
 {% endif %}
+{% set _pendentes = tarefas|filter(t => not t.concluida)|length %}
 <div class="row g-4">
     <div class="col-xl-7">
-        <div class="unio-card">
-            {% include 'components/unio/detail_field_section.html.twig' with { title: 'Dados do processo', items: [
-                { label: 'Número (CNJ)', value: processo.numero, icon: 'fa-hashtag' },
-                { label: 'Cliente', value: processo.cliente ? processo.cliente.nome : '—', icon: 'fa-building' },
-                { label: 'Área', value: processo.area|default('—'), icon: 'fa-layer-group' },
-                { label: 'Fase', value: processo.fase|capitalize, icon: 'fa-diagram-project' },
-                { label: 'Tribunal', value: processo.tribunal|default('—'), icon: 'fa-landmark' },
-                { label: 'Responsável', value: processo.responsavel ? processo.responsavel.nome : '—', icon: 'fa-user-tie' },
-                { label: 'Valor da causa', value: processo.valor ? 'R$ ' ~ processo.valor|number_format(2, ',', '.') : '—', icon: 'fa-coins' },
-                { label: 'Resultado', value: processo.resultado ? processo.resultado|capitalize : 'Em andamento', icon: 'fa-flag-checkered' },
-                { label: 'Observações', value: processo.observacoes|default('—'), icon: 'fa-note-sticky', multiline: true },
-            ]} %}
-        </div>
+        <div class="unio-card jur-processo-tabs-card">
+            <div class="jur-processo-tabs" data-jur-tabs>
+                <nav class="jur-processo-tabs__nav" role="tablist" aria-label="Seções do processo">
+                    <button type="button" class="jur-processo-tabs__btn is-active" data-tab-btn="dados" role="tab" aria-selected="true">
+                        <i class="fas fa-file-lines" aria-hidden="true"></i><span>Dados</span>
+                    </button>
+                    <button type="button" class="jur-processo-tabs__btn" data-tab-btn="tarefas" role="tab" aria-selected="false">
+                        <i class="fas fa-list-check" aria-hidden="true"></i><span>Tarefas</span>
+                        {% if _pendentes > 0 %}<span class="jur-processo-tabs__badge">{{ _pendentes }}</span>{% endif %}
+                    </button>
+                    <button type="button" class="jur-processo-tabs__btn" data-tab-btn="partes" role="tab" aria-selected="false">
+                        <i class="fas fa-users" aria-hidden="true"></i><span>Partes</span>
+                        {% if partes|length > 0 %}<span class="jur-processo-tabs__badge">{{ partes|length }}</span>{% endif %}
+                    </button>
+                </nav>
 
-        <div class="unio-card mt-4">
-            {% include 'components/section_header.html.twig' with { title: 'Tarefas', subtitle: tarefas|filter(t => not t.concluida)|length ~ ' pendente(s) de ' ~ tarefas|length } %}
-            <div class="px-3 pb-3">
-                <form method="post" action="{{ path('app_juridico_processo_tarefa_novo', { id: processo.id }) }}" class="jur-inline-form">
-                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_tarefa_form') }}">
-                    <input type="text" name="titulo" class="form-control" placeholder="Nova tarefa…" required>
-                    <input type="date" name="prazo" class="form-control jur-inline-form__date" title="Prazo">
-                    <select name="responsavel_id" class="form-control jur-inline-form__select" title="Responsável">
-                        <option value="">— Responsável —</option>
-                        {% for u in responsaveis %}
-                        <option value="{{ u.id }}">{{ u.nome }}</option>
-                        {% endfor %}
-                    </select>
-                    <button type="submit" class="btn-unio btn-sm"><i class="fas fa-plus" aria-hidden="true"></i></button>
-                </form>
+                <div class="jur-processo-tabs__panels">
+                    <div class="jur-processo-tabs__panel is-active" data-tab-panel="dados" role="tabpanel">
+                        {% include 'components/unio/detail_field_section.html.twig' with { items: [
+                            { label: 'Número (CNJ)', value: processo.numero, icon: 'fa-hashtag' },
+                            { label: 'Cliente', value: processo.cliente ? processo.cliente.nome : '—', icon: 'fa-building' },
+                            { label: 'Área', value: processo.area|default('—'), icon: 'fa-layer-group' },
+                            { label: 'Fase', value: processo.fase|capitalize, icon: 'fa-diagram-project' },
+                            { label: 'Tribunal', value: processo.tribunal|default('—'), icon: 'fa-landmark' },
+                            { label: 'Responsável', value: processo.responsavel ? processo.responsavel.nome : '—', icon: 'fa-user-tie' },
+                            { label: 'Valor da causa', value: processo.valor ? 'R$ ' ~ processo.valor|number_format(2, ',', '.') : '—', icon: 'fa-coins' },
+                            { label: 'Resultado', value: processo.resultado ? processo.resultado|capitalize : 'Em andamento', icon: 'fa-flag-checkered' },
+                            { label: 'Observações', value: processo.observacoes|default('—'), icon: 'fa-note-sticky', multiline: true },
+                        ]} %}
+                    </div>
 
-                {% if tarefas is empty %}
-                <p class="text-muted small mt-3 mb-0">Nenhuma tarefa cadastrada para este processo ainda.</p>
-                {% else %}
-                <ul class="jur-tarefa-list">
-                    {% for t in tarefas %}
-                    <li class="jur-tarefa-item{{ t.concluida ? ' jur-tarefa-item--concluida' : '' }}{{ t.atrasada ? ' jur-tarefa-item--atrasada' : '' }}">
-                        <form method="post" action="{{ path('app_juridico_processo_tarefa_concluir', { id: processo.id, tarefaId: t.id }) }}" class="jur-tarefa-item__toggle-form">
-                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_tarefa_concluir_' ~ t.id) }}">
-                            <button type="submit" class="jur-tarefa-item__toggle" title="{{ t.concluida ? 'Reabrir tarefa' : 'Marcar como concluída' }}">
-                                <i class="fas {{ t.concluida ? 'fa-circle-check' : 'fa-circle' }}" aria-hidden="true"></i>
-                            </button>
-                        </form>
-                        <div class="jur-tarefa-item__body">
-                            <span class="jur-tarefa-item__titulo">{{ t.titulo }}</span>
-                            <span class="jur-tarefa-item__meta">
-                                {% if t.prazo %}<i class="fas fa-calendar-day" aria-hidden="true"></i> {{ t.prazo|date('d/m/Y') }}{% endif %}
-                                {% if t.responsavel %} · {{ t.responsavel.nome }}{% endif %}
-                                {% if t.atrasada %} · <strong>atrasada</strong>{% endif %}
-                            </span>
+                    <div class="jur-processo-tabs__panel" data-tab-panel="tarefas" role="tabpanel">
+                        <div class="jur-processo-tabs__panel-head">
+                            <h3>Tarefas</h3>
+                            <span class="text-muted small">{{ _pendentes }} pendente(s) de {{ tarefas|length }}</span>
                         </div>
-                        <form method="post" action="{{ path('app_juridico_processo_tarefa_excluir', { id: processo.id, tarefaId: t.id }) }}"
-                              onsubmit="return confirm('Remover esta tarefa?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_tarefa_excluir_' ~ t.id) }}">
-                            <button type="submit" class="jur-tarefa-item__delete" title="Remover"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+                        <form method="post" action="{{ path('app_juridico_processo_tarefa_novo', { id: processo.id }) }}" class="jur-inline-form">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_tarefa_form') }}">
+                            <input type="text" name="titulo" class="form-control" placeholder="Nova tarefa…" required>
+                            <input type="date" name="prazo" class="form-control jur-inline-form__date" title="Prazo">
+                            <select name="responsavel_id" class="form-control jur-inline-form__select" title="Responsável">
+                                <option value="">— Responsável —</option>
+                                {% for u in responsaveis %}
+                                <option value="{{ u.id }}">{{ u.nome }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-unio btn-sm"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </form>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
-        </div>
 
-        <div class="unio-card mt-4">
-            {% include 'components/section_header.html.twig' with { title: 'Partes e representação', subtitle: partes|length ~ ' cadastrada(s)' } %}
-            <div class="px-3 pb-3">
-                <form method="post" action="{{ path('app_juridico_processo_parte_novo', { id: processo.id }) }}" class="jur-inline-form jur-inline-form--wrap">
-                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_parte_form') }}">
-                    <input type="text" name="nome" class="form-control" placeholder="Nome da parte…" required>
-                    <select name="polo" class="form-control jur-inline-form__select" title="Polo">
-                        <option value="ativo">Polo ativo</option>
-                        <option value="passivo">Polo passivo</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                    <select name="tipo" class="form-control jur-inline-form__select" title="Tipo">
-                        <option value="autor">Autor</option>
-                        <option value="reu">Réu</option>
-                        <option value="terceiro">Terceiro</option>
-                        <option value="testemunha">Testemunha</option>
-                        <option value="perito">Perito</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                    <input type="text" name="advogado" class="form-control jur-inline-form__select" placeholder="Advogado (opcional)">
-                    <input type="text" name="oab" class="form-control jur-inline-form__date" placeholder="OAB">
-                    <button type="submit" class="btn-unio btn-sm"><i class="fas fa-plus" aria-hidden="true"></i></button>
-                </form>
+                        {% if tarefas is empty %}
+                        <p class="text-muted small mt-3 mb-0">Nenhuma tarefa cadastrada para este processo ainda.</p>
+                        {% else %}
+                        <ul class="jur-tarefa-list jur-tarefa-list--scroll">
+                            {% for t in tarefas %}
+                            <li class="jur-tarefa-item{{ t.concluida ? ' jur-tarefa-item--concluida' : '' }}{{ t.atrasada ? ' jur-tarefa-item--atrasada' : '' }}">
+                                <form method="post" action="{{ path('app_juridico_processo_tarefa_concluir', { id: processo.id, tarefaId: t.id }) }}" class="jur-tarefa-item__toggle-form">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_tarefa_concluir_' ~ t.id) }}">
+                                    <button type="submit" class="jur-tarefa-item__toggle" title="{{ t.concluida ? 'Reabrir tarefa' : 'Marcar como concluída' }}">
+                                        <i class="fas {{ t.concluida ? 'fa-circle-check' : 'fa-circle' }}" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                                <div class="jur-tarefa-item__body">
+                                    <span class="jur-tarefa-item__titulo">{{ t.titulo }}</span>
+                                    <span class="jur-tarefa-item__meta">
+                                        {% if t.prazo %}<i class="fas fa-calendar-day" aria-hidden="true"></i> {{ t.prazo|date('d/m/Y') }}{% endif %}
+                                        {% if t.responsavel %} · {{ t.responsavel.nome }}{% endif %}
+                                        {% if t.atrasada %} · <strong>atrasada</strong>{% endif %}
+                                    </span>
+                                </div>
+                                <form method="post" action="{{ path('app_juridico_processo_tarefa_excluir', { id: processo.id, tarefaId: t.id }) }}"
+                                      onsubmit="return confirm('Remover esta tarefa?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_tarefa_excluir_' ~ t.id) }}">
+                                    <button type="submit" class="jur-tarefa-item__delete" title="Remover"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
 
-                {% if partes is empty %}
-                <p class="text-muted small mt-3 mb-0">Nenhuma parte cadastrada — adicione autor, réu, terceiros e advogados envolvidos.</p>
-                {% else %}
-                <ul class="jur-parte-list">
-                    {% for parte in partes %}
-                    <li class="jur-parte-item">
-                        <span class="badge {{ parte.polo == 'ativo' ? 'badge-soft-primary' : (parte.polo == 'passivo' ? 'badge-soft-secondary' : 'badge-secondary') }}">{{ parte.polo|capitalize }}</span>
-                        <div class="jur-parte-item__body">
-                            <span class="jur-parte-item__nome">{{ parte.nome }}</span>
-                            <span class="jur-parte-item__meta">
-                                {{ parte.tipo|capitalize }}
-                                {% if parte.advogado %} · Adv. {{ parte.advogado }}{% endif %}
-                                {% if parte.oab %} (OAB {{ parte.oab }}){% endif %}
-                            </span>
+                    <div class="jur-processo-tabs__panel" data-tab-panel="partes" role="tabpanel">
+                        <div class="jur-processo-tabs__panel-head">
+                            <h3>Partes e representação</h3>
+                            <span class="text-muted small">{{ partes|length }} cadastrada(s)</span>
                         </div>
-                        <form method="post" action="{{ path('app_juridico_processo_parte_excluir', { id: processo.id, parteId: parte.id }) }}"
-                              onsubmit="return confirm('Remover esta parte?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_parte_excluir_' ~ parte.id) }}">
-                            <button type="submit" class="jur-tarefa-item__delete" title="Remover"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+                        <form method="post" action="{{ path('app_juridico_processo_parte_novo', { id: processo.id }) }}" class="jur-inline-form jur-inline-form--wrap">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_parte_form') }}">
+                            <input type="text" name="nome" class="form-control" placeholder="Nome da parte…" required>
+                            <select name="polo" class="form-control jur-inline-form__select" title="Polo">
+                                <option value="ativo">Polo ativo</option>
+                                <option value="passivo">Polo passivo</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                            <select name="tipo" class="form-control jur-inline-form__select" title="Tipo">
+                                <option value="autor">Autor</option>
+                                <option value="reu">Réu</option>
+                                <option value="terceiro">Terceiro</option>
+                                <option value="testemunha">Testemunha</option>
+                                <option value="perito">Perito</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                            <input type="text" name="advogado" class="form-control jur-inline-form__select" placeholder="Advogado (opcional)">
+                            <input type="text" name="oab" class="form-control jur-inline-form__date" placeholder="OAB">
+                            <button type="submit" class="btn-unio btn-sm"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </form>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
+
+                        {% if partes is empty %}
+                        <p class="text-muted small mt-3 mb-0">Nenhuma parte cadastrada — adicione autor, réu, terceiros e advogados envolvidos.</p>
+                        {% else %}
+                        <ul class="jur-parte-list jur-parte-list--scroll">
+                            {% for parte in partes %}
+                            <li class="jur-parte-item">
+                                <span class="badge {{ parte.polo == 'ativo' ? 'badge-soft-primary' : (parte.polo == 'passivo' ? 'badge-soft-secondary' : 'badge-secondary') }}">{{ parte.polo|capitalize }}</span>
+                                <div class="jur-parte-item__body">
+                                    <span class="jur-parte-item__nome">{{ parte.nome }}</span>
+                                    <span class="jur-parte-item__meta">
+                                        {{ parte.tipo|capitalize }}
+                                        {% if parte.advogado %} · Adv. {{ parte.advogado }}{% endif %}
+                                        {% if parte.oab %} (OAB {{ parte.oab }}){% endif %}
+                                    </span>
+                                </div>
+                                <form method="post" action="{{ path('app_juridico_processo_parte_excluir', { id: processo.id, parteId: parte.id }) }}"
+                                      onsubmit="return confirm('Remover esta parte?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_parte_excluir_' ~ parte.id) }}">
+                                    <button type="submit" class="jur-tarefa-item__delete" title="Remover"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -169,4 +192,9 @@
     form_action: path('app_juridico_processo_editar', { id: processo.id }),
     open: app.request.query.getBoolean('open_editar')
 } %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/unio-processo-tabs.js') }}?v=1" defer></script>
 {% endblock %}

@@ -90,6 +90,60 @@
             } else {
                 form.dispatchEvent(new Event('submit', { cancelable: true }));
             }
+            return;
+        }
+
+        var maisBtn = e.target.closest('#jurHistoricoMais');
+        if (maisBtn) {
+            e.preventDefault();
+            carregarMaisHistorico(maisBtn);
         }
     });
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    function carregarMaisHistorico(btn) {
+        var panel = document.getElementById('jurHistoricoPanel');
+        var list = document.getElementById('jurHistoricoList');
+        if (!panel || !list) return;
+
+        var offset = parseInt(panel.dataset.offset || '0', 10);
+        var url = panel.dataset.historicoUrl + '?offset=' + offset;
+
+        btn.disabled = true;
+        var originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> Carregando…';
+
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var itens = data.itens || [];
+                itens.forEach(function (h) {
+                    var li = document.createElement('li');
+                    li.className = 'jur-historico-item';
+                    li.innerHTML = '<button type="button" class="jur-historico-item__repetir" title="Repetir esta pesquisa"' +
+                        ' data-tema="' + escapeHtml(h.tema) + '" data-tribunal="' + escapeHtml(h.tribunal) + '" data-periodo="' + escapeHtml(h.periodo) + '">' +
+                        '<span class="jur-historico-item__tema">' + escapeHtml(h.tema) + '</span>' +
+                        '<span class="jur-historico-item__meta">' + escapeHtml(h.tribunal) + ' · ' + h.resultadosCount + ' resultado' + (h.resultadosCount !== 1 ? 's' : '') + ' · ' + escapeHtml(h.criadoEm) + '</span>' +
+                        '</button>';
+                    list.appendChild(li);
+                });
+
+                panel.dataset.offset = String(offset + itens.length);
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+
+                if (!data.hasMore) {
+                    btn.remove();
+                }
+            })
+            .catch(function () {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            });
+    }
 })(document);

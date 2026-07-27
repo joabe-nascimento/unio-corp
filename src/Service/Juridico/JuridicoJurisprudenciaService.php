@@ -71,9 +71,22 @@ class JuridicoJurisprudenciaService
     }
 
     /** @return list<JuridicoJurisprudenciaConsulta> */
-    public function historicoRecente(Empresa $empresa, int $limit = 5): array
+    public function historicoRecente(Empresa $empresa, int $limit = 5, int $offset = 0): array
     {
-        return $this->consultaRepo->findRecentForEmpresa($empresa, $limit);
+        return $this->consultaRepo->findRecentForEmpresa($empresa, $limit, $offset);
+    }
+
+    /**
+     * Busca uma página do histórico de pesquisas, com indicação se há mais itens além dela.
+     *
+     * @return array{itens: list<JuridicoJurisprudenciaConsulta>, hasMore: bool}
+     */
+    public function historicoPagina(Empresa $empresa, int $offset, int $limit = 5): array
+    {
+        $itens = $this->consultaRepo->findRecentForEmpresa($empresa, $limit + 1, $offset);
+        $hasMore = \count($itens) > $limit;
+
+        return ['itens' => \array_slice($itens, 0, $limit), 'hasMore' => $hasMore];
     }
 
     public function toggleFavorito(Empresa $empresa, int $id): JuridicoJurisprudencia

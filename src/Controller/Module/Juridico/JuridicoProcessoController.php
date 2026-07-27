@@ -50,13 +50,11 @@ class JuridicoProcessoController extends AbstractController
         $processos = $this->processos->findForEmpresa($empresa, $status ?: null, $q ?: null);
 
         $kanbanColunas = [];
-        if ($view === 'kanban') {
-            foreach (JuridicoProcesso::FASES as $fase) {
-                $kanbanColunas[$fase] = [];
-            }
-            foreach ($processos as $processo) {
-                $kanbanColunas[$processo->getFase()][] = $processo;
-            }
+        foreach (JuridicoProcesso::FASES as $fase) {
+            $kanbanColunas[$fase] = [];
+        }
+        foreach ($processos as $processo) {
+            $kanbanColunas[$processo->getFase()][] = $processo;
         }
 
         return $this->render('modules/juridico/processos_list.html.twig', [
