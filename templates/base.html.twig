@@ -73,7 +73,7 @@
     }
     </style>
     {% if organismo.enabled|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=67">
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=68">
     <link rel="stylesheet" href="{{ asset('css/unio-brand-polish.css') }}?v=6">
     <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=9">
     {% if org_clinic|default(false) %}
@@ -887,6 +887,7 @@ window.addEventListener('load', runShellSidebarControls);
         }
         messagesEl.innerHTML = html;
         if (suggestions) suggestions.style.display = session.messages.length ? 'none' : '';
+        applyCardStates(session);
         scrollMessages();
     }
 
@@ -910,7 +911,9 @@ window.addEventListener('load', runShellSidebarControls);
         if (!results || !results.length) return '';
         var html = '<div class="helix-tool-actions mt-2">';
         results.forEach(function (r) {
-            if (r.url) {
+            if (r.type === 'confirm') {
+                html += renderConfirmCard(r);
+            } else if (r.url) {
                 var label = r.nome || r.label || r.membro || 'Abrir';
                 html += '<a class="helix-tool-action-btn" href="' + escapeHtml(r.url) + '">' + escapeHtml(label) + '</a>';
             } else if (r.action === 'open_url' && r.url) {
@@ -921,7 +924,56 @@ window.addEventListener('load', runShellSidebarControls);
         return html;
     }
 
-    function runHelixTool(toolName, params) {
+    var helixConfirmCardSeq = 0;
+
+    /**
+     * Cartão de confirmação antes de qualquer gravação (criar tarefa, registrar prazo,
+     * salvar jurisprudência…). Nada é escrito no sistema sem o clique explícito aqui —
+     * é o "aperto de mão" humano entre a sugestão da Bruna e a ação de verdade.
+     */
+    function renderConfirmCard(item) {
+        var cardId = 'helix-confirm-' + (++helixConfirmCardSeq);
+        var rows = (item.preview || []).map(function (p) {
+            return '<div class="helix-confirm-row">' +
+                '<span class="helix-confirm-row__label">' + escapeHtml(p.label || '') + '</span>' +
+                '<span class="helix-confirm-row__value">' + escapeHtml(p.value || '') + '</span>' +
+                '</div>';
+        }).join('');
+        var paramsJson = escapeHtml(JSON.stringify(item.params || {}));
+
+        return '<div class="helix-confirm-card" id="' + cardId + '">' +
+            (item.title ? '<div class="helix-confirm-card__title"><i class="fas fa-file-signature" aria-hidden="true"></i>' + escapeHtml(item.title) + '</div>' : '') +
+            (rows ? '<div class="helix-confirm-card__body">' + rows + '</div>' : '') +
+            '<div class="helix-confirm-card__actions">' +
+            '<button type="button" class="helix-confirm-btn helix-confirm-btn--yes" ' +
+            'data-run-suggested-tool="' + escapeHtml(item.tool) + '" data-run-suggested-params="' + paramsJson + '" data-confirm-card="' + cardId + '">' +
+            '<i class="fas fa-check" aria-hidden="true"></i> ' + escapeHtml(item.confirm_label || 'Confirmar') + '</button>' +
+            '<button type="button" class="helix-confirm-btn helix-confirm-btn--no" data-cancel-card="' + cardId + '">' +
+            escapeHtml(item.cancel_label || 'Agora não') + '</button>' +
+            '</div></div>';
+    }
+
+    /**
+     * Botões "Executar" sugeridos pela camada de intenção (LegalIntentDetector) junto
+     * com a resposta da Bruna — a IA responde em texto, e ao lado disso o sistema já
+     * oferece a ação determinística (calcular prazo, honorários, analisar carteira…)
+     * pronta para rodar com um clique, sem depender do serviço de IA estar disponível.
+     */
+    function renderSuggestedActions(actions) {
+        if (!actions || !actions.length) return '';
+        var html = '<div class="helix-tool-actions mt-2">';
+        actions.forEach(function (a) {
+            if (!a || !a.tool) return;
+            var paramsJson = escapeHtml(JSON.stringify(a.params || {}));
+            html += '<button type="button" class="helix-tool-action-btn helix-tool-action-btn--primary" ' +
+                'data-run-suggested-tool="' + escapeHtml(a.tool) + '" data-run-suggested-params="' + paramsJson + '">' +
+                '<i class="fas fa-bolt" aria-hidden="true"></i> ' + escapeHtml(a.label || 'Executar') + '</button>';
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function runHelixTool(toolName, params, confirmCardId) {
         var base = panel.dataset.vitoriaToolsUrl || '';
         if (!base) return;
         var url = base.replace(/\/$/, '') + '/' + encodeURIComponent(toolName);
@@ -936,6 +988,7 @@ window.addEventListener('load', runShellSidebarControls);
                 var sid = ensureSession();
                 var session = getSession(sid);
                 if (!session) return;
+                markCardState(session, confirmCardId, 'done');
                 session.messages.push({
                     role: 'assistant',
                     text: data.summary || 'Ação concluída.',
@@ -944,27 +997,55 @@ window.addEventListener('load', runShellSidebarControls);
                 });
                 session.updatedAt = new Date().toISOString();
                 upsertSession(session);
-                renderMessagesWithActions(session);
+                renderMessages(session);
                 renderHistory();
             })
             .catch(function () {
+                var sid2 = ensureSession();
+                var session2 = getSession(sid2);
+                if (session2) {
+                    markCardState(session2, confirmCardId, null);
+                    upsertSession(session2);
+                    renderMessages(session2);
+                }
                 sendMessage('Não consegui executar a ação agora.');
             });
     }
 
-    function renderMessagesWithActions(session) {
-        if (!messagesEl || !session) return;
-        var html = '';
-        session.messages.forEach(function (m) {
-            html += messageHtml(m.role, m.text, m.actionsHtml || '');
-        });
-        if (!html) {
-            renderWelcomeOnly();
-            return;
+    /**
+     * Guarda, dentro da própria sessão, o desfecho de um cartão de confirmação
+     * (feito, cancelado ou de volta ao normal) — assim ele nunca "reaparece"
+     * clicável depois de um novo render da conversa.
+     */
+    function markCardState(session, cardId, state) {
+        if (!cardId || !session) return;
+        session.cardStates = session.cardStates || {};
+        if (state) {
+            session.cardStates[cardId] = state;
+        } else {
+            delete session.cardStates[cardId];
         }
-        messagesEl.innerHTML = html;
-        if (suggestions) suggestions.style.display = session.messages.length ? 'none' : '';
-        scrollMessages();
+    }
+
+    function applyCardStates(session) {
+        if (!messagesEl || !session || !session.cardStates) return;
+        Object.keys(session.cardStates).forEach(function (id) {
+            var card = document.getElementById(id);
+            if (!card) return;
+            var state = session.cardStates[id];
+            card.classList.remove('is-loading');
+            if (state === 'done') {
+                card.classList.add('is-done');
+                card.innerHTML = '<div class="helix-confirm-done"><i class="fas fa-circle-check" aria-hidden="true"></i> Feito — já providenciei isso pra você.</div>';
+            } else if (state === 'cancelled') {
+                card.classList.add('is-dismissed');
+                card.innerHTML = '<div class="helix-confirm-dismissed"><i class="fas fa-circle-check" aria-hidden="true"></i> Tudo bem, não fiz nada.</div>';
+            }
+        });
+    }
+
+    function renderMessagesWithActions(session) {
+        renderMessages(session);
     }
 
     function escapeHtml(str) {
@@ -1036,7 +1117,8 @@ window.addEventListener('load', runShellSidebarControls);
                 session.messages.push({
                     role: 'assistant',
                     text: data.reply || assistantReplyFallback(),
-                    at: new Date().toISOString()
+                    at: new Date().toISOString(),
+                    actionsHtml: renderSuggestedActions(data.suggested_actions)
                 });
                 session.updatedAt = new Date().toISOString();
                 upsertSession(session);
@@ -1200,6 +1282,47 @@ window.addEventListener('load', runShellSidebarControls);
             runHelixTool(chip.dataset.helixTool, params);
         });
     });
+
+    if (messagesEl) {
+        messagesEl.addEventListener('click', function (e) {
+            var cancelBtn = e.target.closest('[data-cancel-card]');
+            if (cancelBtn) {
+                var cardId = cancelBtn.dataset.cancelCard;
+                var card = document.getElementById(cardId);
+                if (card) {
+                    card.classList.add('is-dismissed');
+                    card.innerHTML = '<div class="helix-confirm-dismissed"><i class="fas fa-circle-check" aria-hidden="true"></i> Tudo bem, não fiz nada.</div>';
+                }
+                var sid = ensureSession();
+                var session = getSession(sid);
+                if (session) {
+                    markCardState(session, cardId, 'cancelled');
+                    upsertSession(session);
+                }
+                return;
+            }
+
+            var btn = e.target.closest('[data-run-suggested-tool]');
+            if (!btn) return;
+            var params = {};
+            try {
+                params = JSON.parse(btn.dataset.runSuggestedParams || '{}');
+            } catch (err) {
+                params = {};
+            }
+
+            var confirmCardId = btn.dataset.confirmCard || null;
+            var confirmCard = confirmCardId ? document.getElementById(confirmCardId) : null;
+            if (confirmCard) {
+                confirmCard.classList.add('is-loading');
+                confirmCard.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+                var icon = btn.querySelector('i');
+                if (icon) icon.className = 'fas fa-spinner fa-spin';
+            }
+            btn.disabled = true;
+            runHelixTool(btn.dataset.runSuggestedTool, params, confirmCardId);
+        });
+    }
 
     panel.querySelectorAll('[data-helix-prompt]').forEach(function (chip) {
         chip.addEventListener('click', function () {

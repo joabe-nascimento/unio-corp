@@ -1136,6 +1136,165 @@ body.unio-organismo .main-header.navbar.organismo-toolbar {
     border-color: transparent;
 }
 
+/* ── Cartão de confirmação (ações de escrita: criar tarefa, registrar prazo, salvar jurisprudência) ── */
+.unio-organismo .helix-confirm-card {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: var(--org-surface, #fff);
+    border: 1px solid var(--org-border, rgba(20, 20, 30, .1));
+    box-shadow: 0 8px 22px rgba(20, 20, 30, .07);
+    animation: helixConfirmIn .32s cubic-bezier(.22, 1, .36, 1);
+    transition: opacity .2s ease;
+}
+
+.unio-organismo .helix-confirm-card.is-loading {
+    opacity: .72;
+}
+
+.unio-organismo .helix-confirm-card__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--org-ink, #1c2230);
+    margin-bottom: 9px;
+}
+
+.unio-organismo .helix-confirm-card__title i {
+    color: var(--org-blue);
+    font-size: 12px;
+}
+
+.unio-organismo .helix-confirm-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 11px;
+    padding: 9px 11px;
+    border-radius: 11px;
+    background: var(--org-blue-soft, rgba(20, 20, 30, .035));
+}
+
+.unio-organismo .helix-confirm-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    font-size: 12.5px;
+    line-height: 1.45;
+}
+
+.unio-organismo .helix-confirm-row__label {
+    color: var(--org-ink-soft, #7a8799);
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.unio-organismo .helix-confirm-row__value {
+    color: var(--org-ink, #1c2230);
+    font-weight: 700;
+    text-align: right;
+}
+
+.unio-organismo .helix-confirm-card__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.unio-organismo .helix-confirm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease, background .15s ease;
+    font-family: inherit;
+}
+
+.unio-organismo .helix-confirm-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.unio-organismo .helix-confirm-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.unio-organismo .helix-confirm-btn:disabled {
+    opacity: .65;
+    cursor: default;
+    transform: none;
+}
+
+.unio-organismo .helix-confirm-btn--yes {
+    background: linear-gradient(135deg, var(--org-blue), #9c2c3c);
+    color: #fff;
+    box-shadow: 0 5px 14px rgba(var(--accent-rgb, 122, 33, 48), .3);
+}
+
+.unio-organismo .helix-confirm-btn--no {
+    background: transparent;
+    color: var(--org-ink-soft, #7a8799);
+    border: 1px solid var(--org-border, rgba(20, 20, 30, .14));
+}
+
+.unio-organismo .helix-confirm-btn--no:hover:not(:disabled) {
+    color: var(--org-ink, #1c2230);
+    border-color: var(--org-ink-soft, #7a8799);
+    background: var(--org-blue-hover, rgba(0, 0, 0, .03));
+}
+
+.unio-organismo .helix-confirm-done,
+.unio-organismo .helix-confirm-dismissed {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 3px 1px;
+    animation: helixConfirmIn .25s ease;
+}
+
+.unio-organismo .helix-confirm-done {
+    color: var(--org-sage, #4f8a5e);
+}
+
+.unio-organismo .helix-confirm-done i,
+.unio-organismo .helix-confirm-dismissed i {
+    font-size: 14px;
+}
+
+.unio-organismo .helix-confirm-done i {
+    color: var(--org-sage, #4f8a5e);
+    animation: helixConfirmPop .4s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.unio-organismo .helix-confirm-dismissed {
+    color: var(--org-ink-soft, #7a8799);
+}
+
+.unio-organismo .helix-confirm-dismissed i {
+    color: var(--org-ink-soft, #7a8799);
+}
+
+@keyframes helixConfirmIn {
+    from { opacity: 0; transform: translateY(6px) scale(.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes helixConfirmPop {
+    0% { transform: scale(.4); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
 .unio-organismo .helix-panel--lumen .helix-drawer {
     border-left: 1px solid var(--org-sand);
     background: var(--org-cream);

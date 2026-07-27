@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\User;
 use App\Service\Juridico\JurisFlowAiClient;
+use App\Service\Juridico\LegalIntentDetector;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\PosOperatorio\VitoriaContextService;
 use App\Service\Vitoria\VitoriaClient;
@@ -27,6 +28,7 @@ final class VitoriaApiController extends AbstractController
         private VitoriaContextService $vitoriaContext,
         private VitoriaToolRegistry $toolRegistry,
         private OrganismoCopyService $organismoCopy,
+        private LegalIntentDetector $legalIntentDetector,
     ) {}
 
     /**
@@ -129,15 +131,29 @@ final class VitoriaApiController extends AbstractController
             $context = $this->vitoriaContext->enrichChatContext($empresa, $context, is_string($pacienteCodigo) ? $pacienteCodigo : null);
         }
 
+        $isJuridico = $this->organismoCopy->isJuridicoProfile();
+        $acoesSugeridas = $isJuridico ? $this->legalIntentDetector->detect($message) : [];
+
         $result = $this->activeClient()->chat($message, $history, $context);
         if ($result === null) {
+            $reply = sprintf(
+                '%s está temporariamente indisponível. Tente novamente em instantes.',
+                $this->organismoCopy->lumen(),
+            );
+
+            if ($acoesSugeridas !== []) {
+                $reply .= ' Enquanto isso, posso executar isto direto no sistema, sem precisar da IA:';
+            }
+
             return $this->json([
-                'reply' => sprintf(
-                    '%s está temporariamente indisponível. Tente novamente em instantes.',
-                    $this->organismoCopy->lumen(),
-                ),
+                'reply' => $reply,
                 'source' => 'offline',
+                'suggested_actions' => $acoesSugeridas,
             ]);
+        }
+
+        if ($isJuridico && $acoesSugeridas !== []) {
+            $result['suggested_actions'] = $acoesSugeridas;
         }
 
         return $this->json($result);
