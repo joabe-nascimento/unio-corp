@@ -4,20 +4,24 @@
 {% set _classes = class|default('') %}
 {% set _is_svg = _href|lower ends with '.svg' %}
 
+{% set _width = width|default(null) %}
+{% set _height = height|default(null) %}
+{% set _id = id|default(null) %}
+{% set _crossorigin = crossorigin|default(null) %}
 {% if _is_svg %}
 <object type="image/svg+xml"
         data="{{ _href }}"
         class="platform-asset-svg {{ _classes }}"
         aria-label="{{ _alt }}"
-        {% if width is defined %}width="{{ width }}"{% endif %}
-        {% if height is defined %}height="{{ height }}"{% endif %}
-        {% if id is defined %}id="{{ id }}"{% endif %}></object>
+        {% if _width is not null %}width="{{ _width }}"{% endif %}
+        {% if _height is not null %}height="{{ _height }}"{% endif %}
+        {% if _id is not null %}id="{{ _id }}"{% endif %}></object>
 {% else %}
 <img src="{{ _href }}"
      alt="{{ _alt }}"
      {% if _classes %}class="{{ _classes }}"{% endif %}
-     {% if width is defined %}width="{{ width }}"{% endif %}
-     {% if height is defined %}height="{{ height }}"{% endif %}
-     {% if id is defined %}id="{{ id }}"{% endif %}
-     {% if crossorigin is defined %}crossorigin="{{ crossorigin }}"{% endif %}>
+     {% if _width is not null %}width="{{ _width }}"{% endif %}
+     {% if _height is not null %}height="{{ _height }}"{% endif %}
+     {% if _id is not null %}id="{{ _id }}"{% endif %}
+     {% if _crossorigin is not null %}crossorigin="{{ _crossorigin }}"{% endif %}>
 {% endif %}
