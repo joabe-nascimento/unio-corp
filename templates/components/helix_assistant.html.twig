@@ -7,6 +7,7 @@
 {% set _assistant = _juridico ? 'Bruna' : (_org ? _copy.lumen|default('Lumen') : 'Vitória') %}
 {% set _subtitle = _org ? (_clinic ? (_copy.lumen_subtitle|default('Assistente clínico')) : (_juridico ? (_copy.lumen_subtitle|default('Assistente jurídica')) : (_copy.lumen_subtitle|default('Consciência da colônia')))) : 'Assistente virtual' %}
 {% set _slogan = _copy.brand_slogan|default('Saúde que acompanha.') %}
+{% set _avatar_src = _juridico ? 'images/marketing/bruna-assistant-juridico.jpg' : 'images/avatar.jpg' %}
 
 <div id="helixPanel"
      class="helix-panel{% if _org %} helix-panel--lumen{% endif %}"
@@ -15,6 +16,7 @@
      data-vitoria-chat-url="{{ path('api_vitoria_chat') }}"
      data-vitoria-tools-url="{{ path('api_vitoria_tools') }}"
      data-assistant-name="{{ _assistant|e('html_attr') }}"
+     data-assistant-avatar="{{ asset(_avatar_src) }}"
      data-organismo="{{ _org ? '1' : '0' }}"
      data-clinic="{{ _clinic ? '1' : '0' }}"
      data-juridico="{{ _juridico ? '1' : '0' }}"
@@ -24,7 +26,7 @@
     <aside class="helix-drawer" role="dialog" aria-modal="true" aria-labelledby="helixTitle">
         <header class="helix-header">
             <div class="helix-header-brand">
-                {{ helix.avatar('md', false, _juridico ? 'images/marketing/bruna-assistant-juridico.jpg' : null) }}
+                {{ helix.avatar('md', false, _avatar_src) }}
                 <div class="helix-header-text">
                     <h2 id="helixTitle" class="helix-title">{{ _assistant }}</h2>
                     <p class="helix-subtitle">{{ _subtitle }}</p>
@@ -65,7 +67,7 @@
             <div class="helix-main">
                 <div class="helix-messages" id="helixMessages" aria-live="polite">
                     <div class="helix-msg helix-msg--assistant">
-                        {{ helix.face('sm') }}
+                        {{ helix.face('sm', _avatar_src) }}
                         <div class="helix-msg-bubble">
                             {% if _clinic %}
                             <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou {{ _assistant }} — assistente clínico da {{ _copy.brand_name|default('Unio Saúde') }}.</p>
@@ -111,6 +113,16 @@
                 </div>
 
                 <form class="helix-composer" id="helixForm">
+                    <div class="helix-composer-actions">
+                        <button type="button" class="helix-composer-action-btn" title="Anexar arquivo (em desenvolvimento)" disabled>
+                            <i class="fas fa-paperclip" aria-hidden="true"></i>
+                            <span class="helix-composer-action-badge">Em breve</span>
+                        </button>
+                        <button type="button" class="helix-composer-action-btn" title="Chat por voz (em desenvolvimento)" disabled>
+                            <i class="fas fa-microphone" aria-hidden="true"></i>
+                            <span class="helix-composer-action-badge">Em breve</span>
+                        </button>
+                    </div>
                     <div class="helix-composer-inner">
                         <textarea
                             id="helixInput"
@@ -129,3 +141,4 @@
         </div>
     </aside>
 </div>
+<script type="text/template" id="helixFaceSmTemplate">{{ helix.face('sm', _avatar_src) }}</script>

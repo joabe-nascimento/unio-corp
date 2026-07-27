@@ -90,6 +90,8 @@ final class OrganismoCopyService
     /** @return array<string, string> */
     public function getGlobals(): array
     {
+        $lumen = $this->isJuridicoProfile() ? 'Bruna' : 'Lumen';
+
         return [
             'brand_name' => $this->brandName,
             'brand_slogan' => $this->brandSlogan,
@@ -103,8 +105,8 @@ final class OrganismoCopyService
             'pulso' => 'Pulso',
             'memoria' => 'Memória',
             'rede' => 'Rede',
-            'lumen' => 'Lumen',
-            'lumen_subtitle' => $this->lumenSubtitle,
+            'lumen' => $lumen,
+            'lumen_subtitle' => $this->isJuridicoProfile() ? 'Assistente jurídica' : $this->lumenSubtitle,
             'eco' => 'Eco',
             'praticas' => 'Práticas',
             'cena' => 'Entrega',

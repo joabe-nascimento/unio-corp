@@ -547,14 +547,12 @@ body.layout-inset-shell .empty-state--compact .btn-unio-primary:hover {
     box-shadow: 0 8px 22px rgba(var(--accent-rgb, 79, 127, 255), 0.22);
 }
 
-/* Cards de conteúdo — sombra mais leve */
-body.layout-inset-shell .page-body-inner--organismo > .hub-tab-panel > .unio-card,
-body.layout-inset-shell .page-body-inner--organismo .hub-tab-panel--active > .unio-card,
-body.layout-inset-shell .page-body-inner > .unio-card.mb-0,
-body.layout-inset-shell .content-wrapper .unio-card:has(> .table-responsive),
-body.layout-inset-shell .content-wrapper .unio-card:has(> .admin-table),
-body.layout-inset-shell .content-wrapper .unio-card:has(> table.table-unio),
-body.layout-inset-shell .content-wrapper .unio-card:has(> table.unio-table) {
+/* Cards de conteúdo — sombra mais leve (exceto listagens com tabela flush) */
+body.layout-inset-shell .page-body-inner--organismo > .hub-tab-panel > .unio-card:not(:has(> .table-responsive)):not(:has(> table.table-unio)),
+body.layout-inset-shell .page-body-inner--organismo .hub-tab-panel--active > .unio-card:not(:has(> .table-responsive)):not(:has(> table.table-unio)),
+body.layout-inset-shell .page-body-inner > .unio-card.mb-0:not(:has(> .table-responsive)):not(:has(> table.table-unio)),
+body.layout-inset-shell .content-wrapper .unio-card:has(> .admin-table):not(:has(> .table-responsive)),
+body.layout-inset-shell .content-wrapper .unio-card:has(> table.unio-table):not(:has(> .table-responsive)) {
     box-shadow: 0 6px 24px rgba(15, 23, 42, 0.045);
 }
 
@@ -649,4 +647,111 @@ body.layout-inset-shell .unio-card table.table.table-sm:not(.admin-table):not(.t
     padding: 14px 16px !important;
     font-size: 13.5px;
     vertical-align: middle;
+}
+
+/* ============================================================
+   Listagens — tabelas sem card wrapper (full-bleed no corpo)
+   ============================================================ */
+body.layout-inset-shell .page-body-inner {
+    --page-list-gutter-x: 20px;
+}
+
+@media (max-width: 1199.98px) {
+    body.layout-inset-shell .page-body-inner {
+        --page-list-gutter-x: var(--page-mobile-gutter, 12px);
+    }
+}
+
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .table-responsive),
+body.layout-inset-shell .page-body-inner > .unio-card:has(> table.table-unio),
+body.layout-inset-shell .page-body-inner > .unio-card:has(> table.unio-table),
+body.layout-inset-shell .page-body-inner > .unio-card:has(> table.admin-table),
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .jur-table-meta),
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .empty-state),
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .section-header--in-card),
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> .table-responsive),
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> table.table-unio),
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> table.unio-table),
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> table.admin-table),
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> .jur-table-meta),
+body.layout-inset-shell .content-wrapper .page-body-inner .unio-card:has(> .admin-table-wrap) {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    margin-left: calc(-1 * var(--page-list-gutter-x)) !important;
+    margin-right: calc(-1 * var(--page-list-gutter-x)) !important;
+    width: calc(100% + (2 * var(--page-list-gutter-x))) !important;
+    max-width: none !important;
+}
+
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .table-responsive):hover,
+body.layout-inset-shell .page-body-inner > .unio-card:has(> table.table-unio):hover,
+body.layout-inset-shell .page-body-inner > .unio-card:has(> table.unio-table):hover,
+body.layout-inset-shell .page-body-inner > .unio-card:has(> table.admin-table):hover,
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .jur-table-meta):hover,
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .empty-state):hover,
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .section-header--in-card):hover,
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> .table-responsive):hover,
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> table.table-unio):hover,
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> table.unio-table):hover,
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> table.admin-table):hover,
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> .jur-table-meta):hover {
+    border-color: transparent !important;
+}
+
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .table-responsive) > .table-responsive,
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .jur-table-meta) > .table-responsive,
+body.layout-inset-shell .hub-tab-panel > .unio-card:has(> .table-responsive) > .table-responsive {
+    overflow-x: visible;
+    max-width: 100%;
+}
+
+@media (max-width: 767.98px) {
+    body.layout-inset-shell .page-body-inner > .unio-card:has(> .table-responsive) > .table-responsive,
+    body.layout-inset-shell .page-body-inner > .unio-card:has(> .jur-table-meta) > .table-responsive,
+    body.layout-inset-shell .hub-tab-panel > .unio-card:has(> .table-responsive) > .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+body.layout-inset-shell .page-body-inner > .unio-card table.table-unio,
+body.layout-inset-shell .page-body-inner > .unio-card table.unio-table,
+body.layout-inset-shell .page-body-inner > .unio-card table.admin-table,
+body.layout-inset-shell .hub-tab-panel > .unio-card table.table-unio,
+body.layout-inset-shell .hub-tab-panel > .unio-card table.unio-table,
+body.layout-inset-shell .hub-tab-panel > .unio-card table.admin-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+body.layout-inset-shell .page-body-inner > .unio-card table.table-unio th:not(.text-right),
+body.layout-inset-shell .page-body-inner > .unio-card table.table-unio td:not(.text-right),
+body.layout-inset-shell .page-body-inner > .unio-card table.unio-table th:not(.text-right),
+body.layout-inset-shell .page-body-inner > .unio-card table.unio-table td:not(.text-right),
+body.layout-inset-shell .hub-tab-panel > .unio-card table.table-unio th:not(.text-right),
+body.layout-inset-shell .hub-tab-panel > .unio-card table.table-unio td:not(.text-right) {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+body.layout-inset-shell .page-body-inner > .unio-card table.table-unio th.text-right,
+body.layout-inset-shell .page-body-inner > .unio-card table.table-unio td.text-right,
+body.layout-inset-shell .hub-tab-panel > .unio-card table.table-unio th.text-right,
+body.layout-inset-shell .hub-tab-panel > .unio-card table.table-unio td.text-right {
+    white-space: nowrap;
+    width: 1%;
+}
+
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .jur-table-meta) > .jur-table-meta {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+body.layout-inset-shell .page-body-inner > .unio-card:has(> .section-header--in-card) > .section-header--in-card {
+    padding-left: 0;
+    padding-right: 0;
 }

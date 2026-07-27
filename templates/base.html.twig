@@ -645,8 +645,54 @@ window.addEventListener('load', runShellSidebarControls);
 
     var faceTplEl = document.getElementById('helixFaceSmTemplate');
     var FACE_SM = faceTplEl ? faceTplEl.innerHTML.trim() : '';
+    if (!FACE_SM && panel.dataset.assistantAvatar) {
+        FACE_SM = '<span class="helix-face helix-face--sm" aria-hidden="true"><img src="' +
+            panel.dataset.assistantAvatar.replace(/"/g, '&quot;') + '" alt=""></span>';
+    }
 
     var currentSessionId = null;
+    var helixRequestInFlight = false;
+    var subtitleEl = panel.querySelector('.helix-subtitle');
+    var subtitleDefault = subtitleEl ? subtitleEl.textContent : '';
+
+    function assistantName() {
+        return panel.dataset.assistantName || (panel.dataset.juridico === '1' ? 'Bruna' : 'Vitória');
+    }
+
+    function setHelixLoading(loading) {
+        helixRequestInFlight = loading;
+        panel.classList.toggle('is-helix-loading', loading);
+        if (input) input.disabled = loading;
+        if (sendBtn) sendBtn.disabled = loading || !(input && input.value.trim());
+        if (subtitleEl) {
+            subtitleEl.textContent = loading
+                ? assistantName() + ' está digitando…'
+                : subtitleDefault;
+        }
+    }
+
+    function typingIndicatorHtml() {
+        var name = assistantName();
+        return '<div class="helix-msg helix-msg--assistant helix-msg--typing" id="helixTypingIndicator" aria-live="polite" aria-label="' +
+            escapeHtml(name) + ' está digitando">' +
+            FACE_SM +
+            '<div class="helix-msg-bubble helix-msg-bubble--typing">' +
+            '<span class="helix-typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>' +
+            '<span class="helix-typing-label">' + escapeHtml(name) + ' está digitando…</span>' +
+            '</div></div>';
+    }
+
+    function showTypingIndicator() {
+        hideTypingIndicator();
+        if (!messagesEl) return;
+        messagesEl.insertAdjacentHTML('beforeend', typingIndicatorHtml());
+        scrollMessages();
+    }
+
+    function hideTypingIndicator() {
+        var el = document.getElementById('helixTypingIndicator');
+        if (el) el.remove();
+    }
 
     function isMobileHelix() {
         return mobileMq.matches;
@@ -721,7 +767,7 @@ window.addEventListener('load', runShellSidebarControls);
     function renderWelcomeOnly() {
         if (!messagesEl) return;
         var first = panel.dataset.userFirst || '';
-        var assistant = panel.dataset.assistantName || 'Vitória';
+        var assistant = assistantName();
         var isOrganismo = panel.dataset.organismo === '1';
         var isClinic = panel.dataset.clinic === '1';
         var isJuridico = panel.dataset.juridico === '1';
@@ -853,12 +899,12 @@ window.addEventListener('load', runShellSidebarControls);
     }
 
     function assistantReplyFallback() {
-        return 'Não consegui contactar a Vitória agora. Sua mensagem foi salva — tente novamente em instantes.';
+        return 'Não consegui contactar a ' + assistantName() + ' agora. Sua mensagem foi salva — tente novamente em instantes.';
     }
 
     function sendMessage(text) {
         text = (text || '').trim();
-        if (!text) return;
+        if (!text || helixRequestInFlight) return;
 
         var sid = ensureSession();
         var session = getSession(sid);
@@ -892,6 +938,9 @@ window.addEventListener('load', runShellSidebarControls);
             return { role: m.role, content: m.text };
         });
 
+        setHelixLoading(true);
+        showTypingIndicator();
+
         fetch(chatUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -923,6 +972,11 @@ window.addEventListener('load', runShellSidebarControls);
                 upsertSession(session);
                 renderMessages(session);
                 renderHistory();
+            })
+            .finally(function () {
+                hideTypingIndicator();
+                setHelixLoading(false);
+                updateSendState();
             });
     }
 
@@ -1048,7 +1102,7 @@ window.addEventListener('load', runShellSidebarControls);
     });
 
     document.getElementById('helixClearHistory')?.addEventListener('click', function () {
-        if (!confirm('Limpar todo o histórico da Vitória?')) return;
+        if (!confirm('Limpar todo o histórico de conversas com ' + assistantName() + '?')) return;
         saveSessions([]);
         currentSessionId = null;
         newChat();
