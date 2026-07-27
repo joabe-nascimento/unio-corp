@@ -1,0 +1,70 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}{{ processo.numero }} · Processos{% endblock %}
+{% set page_list_title = processo.numero %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-processo-editar">
+    <i class="fas fa-pen mr-1" aria-hidden="true"></i> Editar
+</button>
+<a href="{{ path('app_juridico_processos') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row g-4">
+    <div class="col-xl-7">
+        <div class="unio-card">
+            {% include 'components/unio/detail_field_section.html.twig' with { title: 'Dados do processo', items: [
+                { label: 'Número (CNJ)', value: processo.numero, icon: 'fa-hashtag' },
+                { label: 'Cliente', value: processo.cliente ? processo.cliente.nome : '—', icon: 'fa-building' },
+                { label: 'Área', value: processo.area|default('—'), icon: 'fa-layer-group' },
+                { label: 'Fase', value: processo.fase|capitalize, icon: 'fa-diagram-project' },
+                { label: 'Tribunal', value: processo.tribunal|default('—'), icon: 'fa-landmark' },
+                { label: 'Responsável', value: processo.responsavel ? processo.responsavel.nome : '—', icon: 'fa-user-tie' },
+                { label: 'Valor da causa', value: processo.valor ? 'R$ ' ~ processo.valor|number_format(2, ',', '.') : '—', icon: 'fa-coins' },
+                { label: 'Resultado', value: processo.resultado ? processo.resultado|capitalize : 'Em andamento', icon: 'fa-flag-checkered' },
+                { label: 'Observações', value: processo.observacoes|default('—'), icon: 'fa-note-sticky', multiline: true },
+            ]} %}
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Status' } %}
+            <div class="px-3 pb-3">
+                {% if processo.status == 'critico' %}
+                <span class="badge badge-danger">Crítico</span>
+                {% elseif processo.status == 'encerrado' %}
+                <span class="badge badge-secondary">Encerrado</span>
+                {% else %}
+                <span class="badge badge-success">Ativo</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="unio-card mt-4">
+            {% include 'components/section_header.html.twig' with { title: 'Zona de risco' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_juridico_processo_excluir', { id: processo.id }) }}"
+                      onsubmit="return confirm('Tem certeza que deseja excluir este processo? Esta ação não pode ser desfeita.');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_processo_excluir_' ~ processo.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-danger-ghost btn-sm">
+                        <i class="fas fa-trash mr-1" aria-hidden="true"></i> Excluir processo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/processo_offcanvas.html.twig' with {
+    id: 'juridico-processo-editar',
+    processo: processo,
+    clientes: clientes,
+    responsaveis: responsaveis,
+    form_id: 'juridicoProcessoEditarForm',
+    form_action: path('app_juridico_processo_editar', { id: processo.id }),
+    open: app.request.query.getBoolean('open_editar')
+} %}
+{% endblock %}

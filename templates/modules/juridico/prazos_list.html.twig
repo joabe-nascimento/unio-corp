@@ -1,0 +1,126 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Prazos & Diligências · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Prazos & Diligências' %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-prazo-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo prazo
+</button>
+<a href="{{ path('app_juridico_modulo', { slug: 'prazos' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_prazos') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    search_in_section: true,
+    search_placeholder: 'Buscar tipo, descrição ou processo…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Situação',
+            name: 'situacao',
+            value: filter_situacao|default(''),
+            min_width: '150px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'pendentes', label: 'Pendentes' },
+                { value: 'cumpridos', label: 'Cumpridos' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_prazos'),
+            has_filters: filter_q|default('') or filter_situacao|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if prazos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-hourglass-half',
+            title: 'Nenhum prazo cadastrado',
+            text: filter_q|default('') or filter_situacao|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre o primeiro prazo do escritório.',
+            btn_label: 'Novo prazo',
+            btn_opens: 'juridico-prazo-novo',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    {% set _criticos = 0 %}
+    {% for p in prazos %}{% if p.statusLabel == 'critico' %}{% set _criticos = _criticos + 1 %}{% endif %}{% endfor %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: prazos|length,
+        label_singular: 'prazo encontrado',
+        label_plural: 'prazos encontrados',
+        extra_html: _criticos > 0 ? '<span class="jur-table-meta-highlight"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ' ~ _criticos ~ ' crítico(s)</span>' : ''
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Processo</th>
+                    <th>Data limite</th>
+                    <th>Responsável</th>
+                    <th>Status</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in prazos %}
+                <tr>
+                    <td>
+                        <strong>{{ p.tipo }}</strong>
+                        {% if p.descricao %}<br><small class="text-muted">{{ p.descricao }}</small>{% endif %}
+                    </td>
+                    <td>{% if p.processo %}<code class="text-muted" style="font-size: 0.82rem;">{{ p.processo.numero }}</code>{% else %}—{% endif %}</td>
+                    <td>{{ p.dataLimite|date('d/m/Y') }}<br><small class="text-muted">{{ p.diasRestantes }} dia(s)</small></td>
+                    <td>{{ p.responsavel ? p.responsavel.nome : '—' }}</td>
+                    <td>
+                        {% set st = p.statusLabel %}
+                        {% if st == 'concluido' %}
+                        <span class="badge badge-success">Concluído</span>
+                        {% elseif st == 'critico' %}
+                        <span class="badge badge-danger">Crítico</span>
+                        {% elseif st == 'alerta' %}
+                        <span class="badge badge-warning">Alerta</span>
+                        {% else %}
+                        <span class="badge badge-info">OK</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <div class="d-inline-flex gap-1">
+                            <form method="post" action="{{ path('app_juridico_prazo_marcar_cumprido', { id: p.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('juridico_prazo_cumprido_' ~ p.id) }}">
+                                <button type="submit" class="btn-unio-ghost btn-sm" title="{{ p.cumprido ? 'Reabrir' : 'Marcar cumprido' }}">
+                                    <i class="fas {{ p.cumprido ? 'fa-rotate-left' : 'fa-check' }}" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            <a href="{{ path('app_juridico_prazo_editar', { id: p.id }) }}" class="btn-unio-ghost btn-sm">Editar</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/prazo_offcanvas.html.twig' with {
+    id: 'juridico-prazo-novo',
+    processos: processos,
+    responsaveis: responsaveis,
+    form_id: 'juridicoPrazoNovoForm',
+    form_action: path('app_juridico_prazo_novo'),
+    open: open_novo|default(false)
+} %}
+{% endblock %}

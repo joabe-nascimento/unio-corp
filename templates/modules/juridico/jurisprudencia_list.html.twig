@@ -1,0 +1,134 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Jurisprudência IA · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Jurisprudência IA' %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-jurisprudencia-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo registro
+</button>
+<a href="{{ path('app_juridico_modulo', { slug: 'jurisprudencia' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_jurisprudencia') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    search_in_section: true,
+    search_placeholder: 'Buscar tema, tribunal ou referência…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Relevância',
+            name: 'relevancia',
+            value: filter_relevancia|default(''),
+            min_width: '140px',
+            options: [
+                { value: '', label: 'Todas' },
+                { value: 'alta', label: 'Alta' },
+                { value: 'media', label: 'Média' },
+                { value: 'baixa', label: 'Baixa' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_jurisprudencia'),
+            has_filters: filter_q|default('') or filter_relevancia|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if itens is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-gavel',
+            title: 'Nenhuma jurisprudência cadastrada',
+            text: filter_q|default('') or filter_relevancia|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre a base de conhecimento do escritório.',
+            btn_label: 'Novo registro',
+            btn_opens: 'juridico-jurisprudencia-novo',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    {% set _alta = 0 %}
+    {% for j in itens %}{% if j.relevancia == 'alta' %}{% set _alta = _alta + 1 %}{% endif %}{% endfor %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: itens|length,
+        label_singular: 'registro encontrado',
+        label_plural: 'registros encontrados',
+        extra_html: _alta > 0 ? '<span class="jur-table-meta-highlight"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ' ~ _alta ~ ' de relevância alta</span>' : ''
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Tema</th>
+                    <th>Tribunal</th>
+                    <th>Data</th>
+                    <th>Referência</th>
+                    <th>Relevância</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for j in itens %}
+                <tr>
+                    <td class="jur-cell-tema">
+                        <div class="jur-cell-tema-row">
+                            <strong>{{ j.tema }}</strong>
+                            {% if j.resumo %}
+                            <i class="fas fa-file-lines jur-cell-tema-resumo-icon" aria-hidden="true" title="{{ j.resumo|striptags|slice(0, 220) }}{{ j.resumo|length > 220 ? '…' : '' }}"></i>
+                            {% endif %}
+                        </div>
+                        {% if j.resultado %}<small class="text-muted">{{ j.resultado }}</small>{% endif %}
+                    </td>
+                    <td><span class="badge badge-soft-secondary"><i class="fas fa-landmark-dome mr-1" aria-hidden="true"></i>{{ j.tribunal }}</span></td>
+                    <td>
+                        {% if j.data %}
+                        <span title="{{ j.data|date('d/m/Y') }}">{{ j.data|date('d/m/Y') }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="text-muted">{{ j.referencia|default('—') }}</td>
+                    <td>
+                        {% if j.relevancia == 'alta' %}
+                        <span class="badge badge-danger">Alta</span>
+                        {% elseif j.relevancia == 'media' %}
+                        <span class="badge badge-warning">Média</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Baixa</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <div class="jur-row-actions">
+                            <a href="{{ path('app_juridico_jurisprudencia_editar', { id: j.id }) }}" class="btn-unio-ghost btn-xs" title="Editar">
+                                <i class="fas fa-pen" aria-hidden="true"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_juridico_jurisprudencia_excluir', { id: j.id }) }}"
+                                  onsubmit="return confirm('Excluir este registro de jurisprudência?');" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('juridico_jurisprudencia_excluir_' ~ j.id) }}">
+                                <button type="submit" class="btn-unio-ghost btn-xs btn-danger-ghost" title="Excluir">
+                                    <i class="fas fa-trash" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/jurisprudencia_offcanvas.html.twig' with {
+    id: 'juridico-jurisprudencia-novo',
+    form_id: 'juridicoJurisprudenciaNovoForm',
+    form_action: path('app_juridico_jurisprudencia_novo'),
+    open: open_novo|default(false)
+} %}
+{% endblock %}

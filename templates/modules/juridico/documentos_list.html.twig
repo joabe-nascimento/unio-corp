@@ -1,0 +1,120 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}GED Jurídico · Documentos{% endblock %}
+{% set page_list_title = 'GED Jurídico' %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-documento-novo">
+    <i class="fas fa-file-arrow-up mr-1" aria-hidden="true"></i> Novo documento
+</button>
+<a href="{{ path('app_juridico_modulo', { slug: 'documentos' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_documentos') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    search_in_section: true,
+    search_placeholder: 'Buscar nome ou processo…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Categoria',
+            name: 'categoria',
+            value: filter_categoria|default(''),
+            min_width: '160px',
+            options: [
+                { value: '', label: 'Todas' },
+                { value: 'peticao', label: 'Petição' },
+                { value: 'peca_processual', label: 'Peça processual' },
+                { value: 'contrato', label: 'Contrato' },
+                { value: 'parecer', label: 'Parecer' },
+                { value: 'procuracao', label: 'Procuração' },
+                { value: 'outro', label: 'Outro' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_documentos'),
+            has_filters: filter_q|default('') or filter_categoria|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if documentos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-folder-open',
+            title: 'Nenhum documento enviado',
+            text: filter_q|default('') or filter_categoria|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Envie o primeiro documento do escritório.',
+            btn_label: 'Novo documento',
+            btn_opens: 'juridico-documento-novo',
+            btn_icon: 'fa-file-arrow-up'
+        } %}
+    {% else %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: documentos|length,
+        label_singular: 'documento encontrado',
+        label_plural: 'documentos encontrados'
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th>Tamanho</th>
+                    <th>Data</th>
+                    <th>Processo</th>
+                    <th>Confidencial</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in documentos %}
+                <tr>
+                    <td><i class="fas fa-file-lines text-muted mr-2"></i><strong>{{ d.nome }}</strong></td>
+                    <td><span class="badge badge-soft-secondary">{{ d.categoria|replace({'_': ' '})|capitalize }}</span></td>
+                    <td class="text-muted">{{ d.tamanhoFormatado }}</td>
+                    <td>{{ d.criadoEm|date('d/m/Y') }}</td>
+                    <td>{% if d.processo %}<code style="font-size: 0.82rem;">{{ d.processo.numero }}</code>{% else %}—{% endif %}</td>
+                    <td>
+                        {% if d.confidencial %}
+                        <i class="fas fa-lock text-warning" title="Confidencial"></i>
+                        {% else %}
+                        <i class="fas fa-lock-open text-muted" title="Público"></i>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <div class="d-inline-flex gap-1">
+                            <a href="{{ path('app_juridico_documento_download', { id: d.id }) }}" class="btn-unio-ghost btn-sm" title="Baixar">
+                                <i class="fas fa-download" aria-hidden="true"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_juridico_documento_excluir', { id: d.id }) }}"
+                                  onsubmit="return confirm('Excluir este documento?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('juridico_documento_excluir_' ~ d.id) }}">
+                                <button type="submit" class="btn-unio-ghost btn-danger-ghost btn-sm" title="Excluir">
+                                    <i class="fas fa-trash" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/documento_offcanvas.html.twig' with {
+    processos: processos,
+    open: open_novo|default(false)
+} %}
+{% endblock %}

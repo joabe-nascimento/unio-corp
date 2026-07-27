@@ -1,0 +1,24 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: id|default('juridico-prazo-novo'),
+    title: 'Novo prazo',
+    subtitle: 'Agenda fatal · Unio Jurídico',
+    icon: 'fa-hourglass-half',
+    size: 'md',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+    {% include 'components/juridico/prazo_form_fields.html.twig' with {
+        processos: processos|default([]),
+        responsaveis: responsaveis|default([]),
+        form_id: form_id|default('juridicoPrazoForm'),
+        form_action: form_action,
+        csrf_id: 'juridico_prazo_form'
+    } %}
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="{{ form_id|default('juridicoPrazoForm') }}" class="btn-unio">Salvar prazo</button>
+</div>
+{% endblock %}
+{% endembed %}

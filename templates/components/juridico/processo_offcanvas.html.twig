@@ -1,0 +1,25 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: id|default('juridico-processo-novo'),
+    title: processo|default(null) ? 'Editar processo' : 'Novo processo',
+    subtitle: 'Contencioso · Unio Jurídico',
+    icon: 'fa-scale-balanced',
+    size: 'lg',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+    {% include 'components/juridico/processo_form_fields.html.twig' with {
+        processo: processo|default(null),
+        clientes: clientes|default([]),
+        responsaveis: responsaveis|default([]),
+        form_id: form_id|default('juridicoProcessoForm'),
+        form_action: form_action,
+        csrf_id: 'juridico_processo_form'
+    } %}
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="{{ form_id|default('juridicoProcessoForm') }}" class="btn-unio">Salvar processo</button>
+</div>
+{% endblock %}
+{% endembed %}

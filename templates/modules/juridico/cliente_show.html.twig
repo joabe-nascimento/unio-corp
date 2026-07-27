@@ -1,0 +1,71 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}{{ cliente.nome }} · CRM Jurídico{% endblock %}
+{% set page_list_title = cliente.nome %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-cliente-editar">
+    <i class="fas fa-pen mr-1" aria-hidden="true"></i> Editar
+</button>
+<a href="{{ path('app_juridico_clientes') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: processos_ativos, label: 'Processos ativos' },
+        { value: 'R$ ' ~ valor_carteira|number_format(2, ',', '.'), label: 'Valor em carteira' },
+        { value: cliente.status == 'premium' ? 'Premium' : 'Standard', label: 'Carteira' },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row g-4">
+    <div class="col-xl-7">
+        <div class="unio-card">
+            {% include 'components/unio/detail_field_section.html.twig' with { title: 'Dados do cliente', items: [
+                { label: 'Nome / Razão social', value: cliente.nome, icon: 'fa-building' },
+                { label: 'Tipo', value: cliente.tipo == 'PJ' ? 'Pessoa Jurídica' : 'Pessoa Física', icon: 'fa-id-card' },
+                { label: 'CNPJ / CPF', value: cliente.documento|default('—'), icon: 'fa-hashtag' },
+                { label: 'E-mail', value: cliente.email|default('—'), icon: 'fa-envelope' },
+                { label: 'Telefone', value: cliente.telefone|default('—'), icon: 'fa-phone' },
+                { label: 'Área de atuação', value: cliente.areaAtuacao|default('—'), icon: 'fa-briefcase' },
+                { label: 'Observações', value: cliente.observacoes|default('—'), icon: 'fa-note-sticky', multiline: true },
+            ]} %}
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Processos vinculados' } %}
+            <p class="text-muted px-3 pb-3 mb-0">
+                {{ processos_ativos }} processo(s) ativo(s) vinculado(s) a este cliente.
+                <a href="{{ path('app_juridico_processos', { q: cliente.nome }) }}">Ver processos</a>
+            </p>
+        </div>
+        <div class="unio-card mt-4">
+            {% include 'components/section_header.html.twig' with { title: 'Zona de risco' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_juridico_cliente_excluir', { id: cliente.id }) }}"
+                      onsubmit="return confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_cliente_excluir_' ~ cliente.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-danger-ghost btn-sm">
+                        <i class="fas fa-trash mr-1" aria-hidden="true"></i> Excluir cliente
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/cliente_offcanvas.html.twig' with {
+    id: 'juridico-cliente-editar',
+    cliente: cliente,
+    form_id: 'juridicoClienteEditarForm',
+    form_action: path('app_juridico_cliente_editar', { id: cliente.id }),
+    open: app.request.query.getBoolean('open_editar')
+} %}
+{% endblock %}

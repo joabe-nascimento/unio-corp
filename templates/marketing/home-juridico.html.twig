@@ -18,7 +18,7 @@
     {% include 'components/unio_theme_vars.html.twig' %}
     <link rel="stylesheet" href="{{ asset('css/marketing-home.css') }}?v=19">
     <link rel="stylesheet" href="{{ asset('css/marketing-home-v2.css') }}?v=6">
-    <link rel="stylesheet" href="{{ asset('css/marketing-home-juridico.css') }}?v=16">
+    <link rel="stylesheet" href="{{ asset('css/marketing-home-juridico.css') }}?v=17">
 </head>
 <body class="marketing-home mkt-v2 mkt-juridico">
 
@@ -115,13 +115,14 @@
             <header class="jur-section__head jur-reveal">
                 <p class="jur-section__eyebrow">Módulos</p>
                 <h2>Operação jurídica completa</h2>
+                <p>6 módulos já em produção, com dados reais do seu escritório — os demais seguem em desenvolvimento no roadmap.</p>
             </header>
             <div class="jur-modules">
                 {% for mod in juridico_modules|default([]) %}
-                <div class="jur-module jur-reveal">
+                <div class="jur-module jur-reveal{{ mod.live|default(false) ? ' jur-module--live' : '' }}">
                     <i class="fas {{ mod.icon }}" aria-hidden="true"></i>
                     <div>
-                        <strong>{{ mod.label }}</strong>
+                        <strong>{{ mod.label }}{% if mod.live|default(false) %} <span class="jur-module__badge">Em produção</span>{% endif %}</strong>
                         <span>{{ mod.desc }}</span>
                     </div>
                 </div>
@@ -145,12 +146,13 @@
             <div class="jur-ia-copy jur-reveal">
                 <p class="jur-section__eyebrow">Inteligência artificial</p>
                 <h2>Conheça a Bruna, sua assistente jurídica</h2>
-                <p>Calcule prazos processuais, pesquise jurisprudência, resuma peças, analise contratos e tire dúvidas sobre honorários, tudo dentro da plataforma.</p>
+                <p>Calcule prazos processuais, pesquise jurisprudência, resuma peças, analise contratos e tire dúvidas sobre honorários — em uma conversa natural, com memória do que já foi dito, dentro da plataforma.</p>
                 <ul class="jur-ia-chips">
                     <li><i class="fas fa-clock"></i> Prazos</li>
                     <li><i class="fas fa-book-open"></i> Jurisprudência</li>
                     <li><i class="fas fa-file-contract"></i> Contratos</li>
                     <li><i class="fas fa-coins"></i> Honorários</li>
+                    <li><i class="fas fa-comments"></i> Conversa contínua</li>
                 </ul>
                 <a href="{{ path('app_login') }}" class="mkt-btn mkt-btn--glow">
                     Testar a Bruna agora

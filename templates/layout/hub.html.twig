@@ -9,14 +9,10 @@
 {% set _can_manage_perm = not _org and perm_scope != '' and can_manage_permissions(perm_scope) %}
 {% set _show_perm_tab = not _org and (_can_manage_perm or (hub_permissions_tab|default(false) and perm_scope != '')) %}
 {% set _show_hub_tabs = hub_show_tabs|default(_can_manage_perm or _show_perm_tab) %}
+{% set _hub_extra_tabs_html %}{% block hub_extra_tabs %}{% endblock %}{% endset %}
+{% set _hub_actions_html %}{% block hub_toolbar_actions %}{% endblock %}{% endset %}
 <div class="page-lead-zone{% if _show_hub_tabs %} page-lead-zone--hub-tabs{% endif %}{% if _org %} page-lead-zone--organismo{% endif %}">
     {% if _org %}
-    {% set _hub_extra_tabs_html %}
-{{ block('hub_extra_tabs') }}
-    {% endset %}
-    {% set _hub_actions_html %}
-{{ block('hub_toolbar_actions') }}
-    {% endset %}
     {# Clínica: marca no eyebrow por padrão em todas as telas hub #}
     {% set _hub_eyebrow = hub_page_eyebrow|default(null) %}
     {% if _hub_eyebrow is same as(null) and org_clinic|default(false) %}
@@ -39,6 +35,7 @@
         hub_clinic_tabs: hub_clinic_tabs|default([])
     } %}
     {% else %}
+    {% set _hub_toolbar_filters_html %}{% block hub_toolbar_filters %}{% endblock %}{% endset %}
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: hub_page_title|default(''),
         page_subtitle: hub_page_subtitle|default(''),
@@ -46,10 +43,13 @@
         search_disabled: hub_search_disabled|default(true),
         search_hidden: hub_search_hidden|default(true),
         actions_in_top: true,
-        actions_before_title: hub_actions_before_title|default(false)
+        actions_before_title: hub_actions_before_title|default(false),
+        _hub_actions_html: _hub_actions_html,
+        _hub_toolbar_filters_html: _hub_toolbar_filters_html,
+        _hub_extra_tabs_html: _hub_extra_tabs_html
     } %}
-        {% block toolbar_actions %}{{ block('hub_toolbar_actions') }}{% endblock %}
-        {% block toolbar_filters %}{% block hub_toolbar_filters %}{% endblock %}{% endblock %}
+        {% block toolbar_actions %}{{ _hub_actions_html|raw }}{% endblock %}
+        {% block toolbar_filters %}{{ _hub_toolbar_filters_html|raw }}{% endblock %}
         {% block toolbar_subnav %}
             {% if _show_hub_tabs %}
                 <div class="list-toolbar-subnav">
@@ -57,7 +57,7 @@
                         <button type="button" class="hub-overview-tab hub-overview-tab--active" data-hub-tab="overview" role="tab" aria-selected="true">
                             Visão geral
                         </button>
-                        {{ block('hub_extra_tabs') }}
+                        {{ _hub_extra_tabs_html|raw }}
                         {% if _show_perm_tab %}
                         <button type="button" class="hub-overview-tab" data-hub-tab="permissions" role="tab" aria-selected="false">
                             <i class="fas fa-shield-halved mr-1" aria-hidden="true"></i> Permissões
@@ -104,6 +104,3 @@
 </div>
 
 {% endblock %}
-
-{% block hub_extra_tabs %}{% endblock %}
-{% block hub_toolbar_actions %}{% endblock %}

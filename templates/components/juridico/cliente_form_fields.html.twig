@@ -1,0 +1,67 @@
+{#
+  juridico/cliente_form_fields — campos do formulário de cliente (usado em criar e editar)
+
+  Props:
+    cliente    (JuridicoCliente|null)
+    form_id    (string)
+    form_action (string)
+    csrf_id    (string)
+#}
+{% set c = cliente|default(null) %}
+<form method="post" action="{{ form_action }}" id="{{ form_id }}" class="crm-form">
+    <input type="hidden" name="_token" value="{{ csrf_token(csrf_id) }}">
+
+    <div class="form-group">
+        <label for="{{ form_id }}-nome">Nome / Razão social *</label>
+        <input class="form-control" id="{{ form_id }}-nome" name="nome" required autofocus
+               value="{{ c ? c.nome : '' }}" placeholder="Ex.: Silva &amp; Associados Ltda.">
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-tipo">Tipo</label>
+            <select class="form-control" id="{{ form_id }}-tipo" name="tipo">
+                <option value="PJ"{% if not c or c.tipo == 'PJ' %} selected{% endif %}>Pessoa Jurídica</option>
+                <option value="PF"{% if c and c.tipo == 'PF' %} selected{% endif %}>Pessoa Física</option>
+            </select>
+        </div>
+        <div class="col-md-8 form-group">
+            <label for="{{ form_id }}-documento">CNPJ / CPF</label>
+            <input class="form-control" id="{{ form_id }}-documento" name="documento" inputmode="numeric"
+                   value="{{ c ? c.documento : '' }}" placeholder="00.000.000/0001-00">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7 form-group">
+            <label for="{{ form_id }}-email">E-mail</label>
+            <input class="form-control" id="{{ form_id }}-email" type="email" name="email"
+                   value="{{ c ? c.email : '' }}" placeholder="contato@escritorio.com.br">
+        </div>
+        <div class="col-md-5 form-group">
+            <label for="{{ form_id }}-telefone">Telefone</label>
+            <input class="form-control" id="{{ form_id }}-telefone" name="telefone" type="tel" data-mask="phone"
+                   value="{{ c ? c.telefone : '' }}" placeholder="(11) 98888-0000">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7 form-group">
+            <label for="{{ form_id }}-area">Área de atuação</label>
+            <input class="form-control" id="{{ form_id }}-area" name="area_atuacao"
+                   value="{{ c ? c.areaAtuacao : '' }}" placeholder="Ex.: Construção Civil">
+        </div>
+        <div class="col-md-5 form-group">
+            <label for="{{ form_id }}-status">Carteira</label>
+            <select class="form-control" id="{{ form_id }}-status" name="status">
+                <option value="standard"{% if not c or c.status == 'standard' %} selected{% endif %}>Standard</option>
+                <option value="premium"{% if c and c.status == 'premium' %} selected{% endif %}>Premium</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group mb-0">
+        <label for="{{ form_id }}-observacoes">Observações</label>
+        <textarea class="form-control" id="{{ form_id }}-observacoes" name="observacoes" rows="4">{{ c ? c.observacoes : '' }}</textarea>
+    </div>
+</form>

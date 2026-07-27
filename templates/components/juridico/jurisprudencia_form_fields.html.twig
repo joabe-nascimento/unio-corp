@@ -1,0 +1,54 @@
+{#
+  juridico/jurisprudencia_form_fields — campos do formulário de jurisprudência (criar/editar)
+
+  Props: item (JuridicoJurisprudencia|null), form_id, form_action, csrf_id
+#}
+{% set j = item|default(null) %}
+<form method="post" action="{{ form_action }}" id="{{ form_id }}" class="crm-form">
+    <input type="hidden" name="_token" value="{{ csrf_token(csrf_id) }}">
+
+    <div class="row">
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-tribunal">Tribunal *</label>
+            <input class="form-control" id="{{ form_id }}-tribunal" name="tribunal" required autofocus
+                   value="{{ j ? j.tribunal : '' }}" placeholder="Ex.: STJ">
+        </div>
+        <div class="col-md-8 form-group">
+            <label for="{{ form_id }}-tema">Tema *</label>
+            <input class="form-control" id="{{ form_id }}-tema" name="tema" required
+                   value="{{ j ? j.tema : '' }}" placeholder="Ex.: Dano moral em relação de consumo">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-data">Data do julgado</label>
+            <input class="form-control" id="{{ form_id }}-data" name="data" type="date"
+                   value="{{ j and j.data ? j.data|date('Y-m-d') : '' }}">
+        </div>
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-relevancia">Relevância</label>
+            <select class="form-control" id="{{ form_id }}-relevancia" name="relevancia">
+                <option value="alta"{% if j and j.relevancia == 'alta' %} selected{% endif %}>Alta</option>
+                <option value="media"{% if not j or j.relevancia == 'media' %} selected{% endif %}>Média</option>
+                <option value="baixa"{% if j and j.relevancia == 'baixa' %} selected{% endif %}>Baixa</option>
+            </select>
+        </div>
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-referencia">Referência</label>
+            <input class="form-control" id="{{ form_id }}-referencia" name="referencia"
+                   value="{{ j ? j.referencia : '' }}" placeholder="Ex.: REsp 1.234.567/SP">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form_id }}-resultado">Resultado do julgamento</label>
+        <input class="form-control" id="{{ form_id }}-resultado" name="resultado"
+               value="{{ j ? j.resultado : '' }}" placeholder="Ex.: Recurso provido">
+    </div>
+
+    <div class="form-group mb-0">
+        <label for="{{ form_id }}-resumo">Resumo</label>
+        <textarea class="form-control" id="{{ form_id }}-resumo" name="resumo" rows="5">{{ j ? j.resumo : '' }}</textarea>
+    </div>
+</form>

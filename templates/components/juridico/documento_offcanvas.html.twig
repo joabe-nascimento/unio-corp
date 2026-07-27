@@ -1,0 +1,60 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'juridico-documento-novo',
+    title: 'Novo documento',
+    subtitle: 'GED Jurídico · Unio Jurídico',
+    icon: 'fa-file-arrow-up',
+    size: 'md',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_juridico_documento_novo') }}" id="juridicoDocumentoForm" class="crm-form" enctype="multipart/form-data">
+    <input type="hidden" name="_token" value="{{ csrf_token('juridico_documento_form') }}">
+
+    <div class="form-group">
+        <label for="juridico-doc-arquivo">Arquivo *</label>
+        <input class="form-control" id="juridico-doc-arquivo" name="arquivo" type="file" required
+               accept=".pdf,.doc,.docx,.odt,.jpg,.jpeg,.png,.xls,.xlsx">
+        <small class="form-text text-muted">PDF, Word, Excel ou imagem — máx. 20 MB.</small>
+    </div>
+
+    <div class="form-group">
+        <label for="juridico-doc-nome">Nome do documento</label>
+        <input class="form-control" id="juridico-doc-nome" name="nome" placeholder="Ex.: Petição inicial — ação trabalhista">
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 form-group">
+            <label for="juridico-doc-categoria">Categoria</label>
+            <select class="form-control" id="juridico-doc-categoria" name="categoria">
+                <option value="peticao">Petição</option>
+                <option value="peca_processual">Peça processual</option>
+                <option value="contrato">Contrato</option>
+                <option value="parecer">Parecer</option>
+                <option value="procuracao">Procuração</option>
+                <option value="outro" selected>Outro</option>
+            </select>
+        </div>
+        <div class="col-md-6 form-group">
+            <label for="juridico-doc-processo">Processo vinculado</label>
+            <select class="form-control" id="juridico-doc-processo" name="processo_id">
+                <option value="">— Sem processo vinculado —</option>
+                {% for p in processos|default([]) %}
+                <option value="{{ p.id }}">{{ p.numero }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group form-check mb-0">
+        <input type="checkbox" class="form-check-input" id="juridico-doc-confidencial" name="confidencial" value="1">
+        <label class="form-check-label" for="juridico-doc-confidencial">Documento confidencial</label>
+    </div>
+</form>
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="juridicoDocumentoForm" class="btn-unio">Enviar documento</button>
+</div>
+{% endblock %}
+{% endembed %}

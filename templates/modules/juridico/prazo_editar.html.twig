@@ -1,0 +1,44 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Editar prazo · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Editar prazo' %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_juridico_prazos') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row g-4">
+    <div class="col-xl-7">
+        <div class="unio-card p-3">
+            {% include 'components/juridico/prazo_form_fields.html.twig' with {
+                prazo: prazo,
+                processos: processos,
+                responsaveis: responsaveis,
+                form_id: 'juridicoPrazoEditarForm',
+                form_action: path('app_juridico_prazo_editar', { id: prazo.id }),
+                csrf_id: 'juridico_prazo_form'
+            } %}
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a href="{{ path('app_juridico_prazos') }}" class="btn-unio-ghost">Cancelar</a>
+                <button type="submit" form="juridicoPrazoEditarForm" class="btn-unio">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Zona de risco' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_juridico_prazo_excluir', { id: prazo.id }) }}"
+                      onsubmit="return confirm('Tem certeza que deseja excluir este prazo?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_prazo_excluir_' ~ prazo.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-danger-ghost btn-sm">
+                        <i class="fas fa-trash mr-1" aria-hidden="true"></i> Excluir prazo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

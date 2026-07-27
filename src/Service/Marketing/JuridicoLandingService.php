@@ -177,14 +177,14 @@ final class JuridicoLandingService
     public function modules(): array
     {
         return [
-            ['label' => 'Pulso', 'desc' => 'Visão executiva do escritório', 'icon' => 'fa-gauge-high'],
-            ['label' => 'Processos', 'desc' => 'Contencioso e andamentos', 'icon' => 'fa-scale-balanced'],
-            ['label' => 'Prazos', 'desc' => 'Motor CPC e agenda fatal', 'icon' => 'fa-hourglass-half'],
-            ['label' => 'CRM Jurídico', 'desc' => 'Clientes e carteira', 'icon' => 'fa-user-tie'],
-            ['label' => 'GED & Petições', 'desc' => 'Documentos e minutas', 'icon' => 'fa-folder-open'],
+            ['label' => 'Pulso', 'desc' => 'Visão executiva do escritório', 'icon' => 'fa-gauge-high', 'live' => true],
+            ['label' => 'Processos', 'desc' => 'Contencioso e andamentos', 'icon' => 'fa-scale-balanced', 'live' => true],
+            ['label' => 'Prazos', 'desc' => 'Motor CPC e agenda fatal', 'icon' => 'fa-hourglass-half', 'live' => true],
+            ['label' => 'CRM Jurídico', 'desc' => 'Clientes e carteira', 'icon' => 'fa-user-tie', 'live' => true],
+            ['label' => 'GED & Documentos', 'desc' => 'Upload e organização', 'icon' => 'fa-folder-open', 'live' => true],
+            ['label' => 'Honorários', 'desc' => 'Timesheet e OAB', 'icon' => 'fa-coins', 'live' => true],
+            ['label' => 'Jurisprudência IA', 'desc' => 'Pesquisa com Bruna', 'icon' => 'fa-book-open', 'live' => true],
             ['label' => 'Contratos', 'desc' => 'Consultivo e riscos', 'icon' => 'fa-handshake'],
-            ['label' => 'Honorários', 'desc' => 'Timesheet e OAB', 'icon' => 'fa-coins'],
-            ['label' => 'Jurisprudência IA', 'desc' => 'Pesquisa com Bruna', 'icon' => 'fa-book-open'],
             ['label' => 'PJe & Tribunais', 'desc' => 'Integração oficial', 'icon' => 'fa-building-columns'],
             ['label' => 'Portal do Cliente', 'desc' => 'Transparência e self-service', 'icon' => 'fa-globe'],
             ['label' => 'Due Diligence', 'desc' => 'M&A e data room', 'icon' => 'fa-magnifying-glass-chart'],

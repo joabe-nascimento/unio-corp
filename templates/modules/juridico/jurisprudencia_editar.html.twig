@@ -1,0 +1,42 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Editar jurisprudência{% endblock %}
+{% set page_list_title = 'Editar registro' %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_juridico_jurisprudencia') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="unio-card p-3">
+            {% include 'components/juridico/jurisprudencia_form_fields.html.twig' with {
+                item: item,
+                form_id: 'juridicoJurisprudenciaEditarForm',
+                form_action: path('app_juridico_jurisprudencia_editar', { id: item.id }),
+                csrf_id: 'juridico_jurisprudencia_form'
+            } %}
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a href="{{ path('app_juridico_jurisprudencia') }}" class="btn-unio-ghost">Cancelar</a>
+                <button type="submit" form="juridicoJurisprudenciaEditarForm" class="btn-unio">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Zona de risco' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_juridico_jurisprudencia_excluir', { id: item.id }) }}"
+                      onsubmit="return confirm('Excluir este registro?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_jurisprudencia_excluir_' ~ item.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-danger-ghost btn-sm">
+                        <i class="fas fa-trash mr-1" aria-hidden="true"></i> Excluir registro
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

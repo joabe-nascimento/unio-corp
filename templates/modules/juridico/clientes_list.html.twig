@@ -1,0 +1,116 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}CRM Jurídico · Clientes{% endblock %}
+{% set page_list_title = 'CRM Jurídico' %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-cliente-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo cliente
+</button>
+<a href="{{ path('app_juridico_modulo', { slug: 'clientes' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_clientes') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    search_in_section: true,
+    search_placeholder: 'Buscar nome, e-mail ou documento…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Carteira',
+            name: 'status',
+            value: filter_status|default(''),
+            min_width: '140px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'premium', label: 'Premium' },
+                { value: 'standard', label: 'Standard' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_clientes'),
+            has_filters: filter_q|default('') or filter_status|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if rows is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-building',
+            title: 'Nenhum cliente cadastrado',
+            text: filter_q|default('') or filter_status|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre o primeiro cliente do escritório.',
+            btn_label: 'Novo cliente',
+            btn_opens: 'juridico-cliente-novo',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: rows|length,
+        label_singular: 'cliente encontrado',
+        label_plural: 'clientes encontrados'
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Tipo</th>
+                    <th>Contato</th>
+                    <th>Área de atuação</th>
+                    <th>Processos ativos</th>
+                    <th>Valor em carteira</th>
+                    <th>Carteira</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                {% set c = row.cliente %}
+                <tr>
+                    <td>
+                        <strong>{{ c.nome }}</strong>
+                        {% if c.documento %}<br><small class="text-muted">{{ c.documento }}</small>{% endif %}
+                    </td>
+                    <td><span class="badge badge-soft-secondary">{{ c.tipo }}</span></td>
+                    <td>
+                        {{ c.email|default('—') }}
+                        {% if c.telefone %}<br><small class="text-muted">{{ c.telefone }}</small>{% endif %}
+                    </td>
+                    <td>{{ c.areaAtuacao|default('—') }}</td>
+                    <td><span class="badge badge-info">{{ row.processos_ativos }}</span></td>
+                    <td>R$ {{ row.valor_carteira|number_format(2, ',', '.') }}</td>
+                    <td>
+                        {% if c.status == 'premium' %}
+                        <span class="badge badge-warning">Premium</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Standard</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="{{ path('app_juridico_cliente_show', { id: c.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/cliente_offcanvas.html.twig' with {
+    id: 'juridico-cliente-novo',
+    form_id: 'juridicoClienteNovoForm',
+    form_action: path('app_juridico_cliente_novo'),
+    open: open_novo|default(false)
+} %}
+{% endblock %}

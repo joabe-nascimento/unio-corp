@@ -47,9 +47,10 @@
     </div>
 </li>
 {% for module in section.modules %}
+{% set _graduated_route = juridico_graduated_routes[module.slug]|default(null) %}
 <li class="nav-item">
-    <a href="{{ path('app_juridico_modulo', { slug: module.slug }) }}"
-       class="nav-link {{ route == 'app_juridico_modulo' and _active_slug == module.slug ? 'active' : '' }}">
+    <a href="{{ _graduated_route ? path(_graduated_route) : path('app_juridico_modulo', { slug: module.slug }) }}"
+       class="nav-link {{ (_graduated_route and route == _graduated_route) or (route == 'app_juridico_modulo' and _active_slug == module.slug) ? 'active' : '' }}">
         <span class="nav-icon-slot">
             <i class="fas {{ module.icon }} nav-icon" aria-hidden="true"></i>
         </span>

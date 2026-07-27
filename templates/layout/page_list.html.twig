@@ -18,15 +18,29 @@
 {% block page_toolbar_layout %}yes{% endblock %}
 {% block page_show_title %}{% endblock %}
 
+{#
+  IMPORTANTE — blocos aninhados dentro de {% embed %} NÃO são sobrescrevíveis
+  por templates-neto (que fazem {% extends 'layout/page_list.html.twig' %}):
+  o Twig resolve blocos definidos dentro de um embed no escopo do próprio
+  embed, então "page_list_toolbar_actions" nunca era encontrado e os botões
+  de ação da toolbar (ex.: "+ Novo") sumiam silenciosamente em todas as
+  listagens. Por isso capturamos o conteúdo dos blocos ANTES do embed (via
+  {% set %}...{% endset %}, que não imprime o bloco inline) e só então
+  repassamos o HTML já resolvido como variável para dentro do embed.
+#}
+{% set _toolbar_actions_html %}{% block page_list_toolbar_actions %}{% endblock %}{% endset %}
+{% set _toolbar_subnav_html %}{% block page_list_toolbar_subnav %}{% endblock %}{% endset %}
 {% block content_lead %}
 <div class="page-lead-zone">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: page_list_title|default(''),
         actions_in_top: page_list_actions_in_top|default(true),
-        actions_before_title: page_list_actions_before_title|default(false)
+        actions_before_title: page_list_actions_before_title|default(false),
+        _toolbar_actions_html: _toolbar_actions_html,
+        _toolbar_subnav_html: _toolbar_subnav_html
     } %}
-        {% block toolbar_actions %}{% block page_list_toolbar_actions %}{% endblock %}{% endblock %}
-        {% block toolbar_subnav %}{% block page_list_toolbar_subnav %}{% endblock %}{% endblock %}
+        {% block toolbar_actions %}{{ _toolbar_actions_html|raw }}{% endblock %}
+        {% block toolbar_subnav %}{{ _toolbar_subnav_html|raw }}{% endblock %}
     {% endembed %}
 </div>
 {% endblock %}

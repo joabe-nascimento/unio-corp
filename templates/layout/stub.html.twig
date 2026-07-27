@@ -2,15 +2,19 @@
 {% block page_scroll_mode %}fill{% endblock %}
 {% block page_toolbar_layout %}yes{% endblock %}
 {% block page_show_title %}{% endblock %}
+{% set _stub_toolbar_actions_html %}{% block stub_toolbar_actions %}{% endblock %}{% endset %}
+{% set _stub_toolbar_filters_html %}{% block stub_toolbar_filters %}{% endblock %}{% endset %}
 {% block content_lead %}
 <div class="page-lead-zone">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: stub_page_title|default(''),
         search_disabled: true,
-        actions_in_top: true
+        actions_in_top: true,
+        _stub_toolbar_actions_html: _stub_toolbar_actions_html,
+        _stub_toolbar_filters_html: _stub_toolbar_filters_html
     } %}
-        {% block toolbar_actions %}{% block stub_toolbar_actions %}{% endblock %}{% endblock %}
-        {% block toolbar_filters %}{% block stub_toolbar_filters %}{% endblock %}{% endblock %}
+        {% block toolbar_actions %}{{ _stub_toolbar_actions_html|raw }}{% endblock %}
+        {% block toolbar_filters %}{{ _stub_toolbar_filters_html|raw }}{% endblock %}
     {% endembed %}
 </div>
 {% endblock %}

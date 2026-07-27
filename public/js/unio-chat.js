@@ -1774,7 +1774,7 @@
     });
     chatInput && chatInput.addEventListener('input', function () {
         chatInput.style.height = 'auto';
-        chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+        chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + 'px';
         updateSendState();
         clearTimeout(typingPulseTimer);
         typingPulseTimer = setTimeout(pulseTyping, 400);

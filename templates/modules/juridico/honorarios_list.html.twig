@@ -1,0 +1,166 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Honorários & Timesheet · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Honorários & Timesheet' %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-honorario-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo lançamento
+</button>
+<a href="{{ path('app_juridico_modulo', { slug: 'honorarios' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: horas_mes|number_format(1, ',', '.') ~ 'h', label: 'Horas no mês' },
+        { value: 'R$ ' ~ receita_mes|number_format(2, ',', '.'), label: 'Receita do mês' },
+        { value: resumo|length, label: 'Advogados com lançamento' },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_honorarios') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    title: 'Lançamentos',
+    subtitle: 'Filtre por mês ou advogado'
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Mês',
+            type: 'month',
+            name: 'mes',
+            value: filter_mes|default(''),
+            min_width: '150px'
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Advogado',
+            name: 'advogado_id',
+            value: filter_advogado_id|default(''),
+            min_width: '160px',
+            options: [{ value: '', label: 'Todos' }]|merge(advogados|map(a => { value: a.id, label: a.nome }))
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_honorarios'),
+            has_filters: filter_advogado_id|default(0) > 0
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Resumo por advogado', subtitle: 'Mês selecionado' } %}
+    {% if resumo is empty %}
+        {% include 'components/empty_state.html.twig' with { icon: 'fa-user-tie', title: 'Sem lançamentos no período', compact: true } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Advogado</th>
+                    <th>Horas/mês</th>
+                    <th>Processos ativos</th>
+                    <th>Taxa êxito</th>
+                    <th>Receita/mês</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in resumo %}
+                <tr>
+                    <td><strong>{{ r.advogado.nome }}</strong></td>
+                    <td>{{ r.horas|number_format(1, ',', '.') }}h</td>
+                    <td><span class="badge badge-info">{{ r.processos_ativos }}</span></td>
+                    <td>
+                        {% if r.taxa_exito is null %}
+                        <span class="text-muted">—</span>
+                        {% elseif r.taxa_exito >= 75 %}
+                        <span class="badge badge-success">{{ r.taxa_exito }}%</span>
+                        {% else %}
+                        <span class="badge badge-warning">{{ r.taxa_exito }}%</span>
+                        {% endif %}
+                    </td>
+                    <td>R$ {{ r.receita|number_format(2, ',', '.') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+<div class="unio-card">
+    {% include 'components/section_header.html.twig' with { title: 'Lançamentos individuais' } %}
+    {% if lancamentos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-stopwatch',
+            title: 'Nenhum lançamento registrado',
+            btn_label: 'Novo lançamento',
+            btn_opens: 'juridico-honorario-novo',
+            btn_icon: 'fa-plus',
+            compact: true
+        } %}
+    {% else %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: lancamentos|length,
+        label_singular: 'lançamento encontrado',
+        label_plural: 'lançamentos encontrados'
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Advogado</th>
+                    <th>Processo</th>
+                    <th>Horas</th>
+                    <th>Valor</th>
+                    <th>Faturável</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in lancamentos %}
+                <tr>
+                    <td>{{ l.data|date('d/m/Y') }}</td>
+                    <td>{{ l.advogado ? l.advogado.nome : '—' }}</td>
+                    <td>{% if l.processo %}<code style="font-size: 0.82rem;">{{ l.processo.numero }}</code>{% else %}—{% endif %}</td>
+                    <td>{{ l.horas|number_format(1, ',', '.') }}h</td>
+                    <td>R$ {{ l.valorTotal|number_format(2, ',', '.') }}</td>
+                    <td>{% if l.faturavel %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-xmark text-muted"></i>{% endif %}</td>
+                    <td class="text-right">
+                        <div class="jur-row-actions">
+                            <a href="{{ path('app_juridico_honorario_editar', { id: l.id }) }}" class="btn-unio-ghost btn-xs" title="Editar">
+                                <i class="fas fa-pen" aria-hidden="true"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_juridico_honorario_excluir', { id: l.id }) }}"
+                                  onsubmit="return confirm('Excluir este lançamento?');" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('juridico_honorario_excluir_' ~ l.id) }}">
+                                <button type="submit" class="btn-unio-ghost btn-xs btn-danger-ghost" title="Excluir">
+                                    <i class="fas fa-trash" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/honorario_offcanvas.html.twig' with {
+    id: 'juridico-honorario-novo',
+    advogados: advogados,
+    processos: processos,
+    form_id: 'juridicoHonorarioNovoForm',
+    form_action: path('app_juridico_honorario_novo'),
+    open: open_novo|default(false)
+} %}
+{% endblock %}

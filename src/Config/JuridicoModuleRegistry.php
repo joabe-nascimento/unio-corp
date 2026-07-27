@@ -700,6 +700,31 @@ final class JuridicoModuleRegistry
         ],
     ];
 
+    /**
+     * Módulos "graduados" para telas reais (CRUD com banco de dados), com a rota
+     * dedicada que substitui a vitrine genérica `app_juridico_modulo`.
+     *
+     * @var array<string, string>
+     */
+    public const GRADUATED_ROUTES = [
+        'processos' => 'app_juridico_processos',
+        'prazos' => 'app_juridico_prazos',
+        'clientes' => 'app_juridico_clientes',
+        'documentos' => 'app_juridico_documentos',
+        'honorarios' => 'app_juridico_honorarios',
+        'jurisprudencia' => 'app_juridico_jurisprudencia',
+    ];
+
+    public static function isGraduated(string $slug): bool
+    {
+        return isset(self::GRADUATED_ROUTES[$slug]);
+    }
+
+    public static function graduatedRoute(string $slug): ?string
+    {
+        return self::GRADUATED_ROUTES[$slug] ?? null;
+    }
+
     public static function findBySlug(string $slug): ?array
     {
         foreach (self::MODULES as $module) {

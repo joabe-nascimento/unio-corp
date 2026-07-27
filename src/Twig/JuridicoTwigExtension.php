@@ -21,12 +21,14 @@ final class JuridicoTwigExtension extends AbstractExtension implements GlobalsIn
             return [
                 'juridico_modules' => [],
                 'juridico_module_sections' => [],
+                'juridico_graduated_routes' => [],
             ];
         }
 
         return [
             'juridico_modules' => JuridicoModuleRegistry::MODULES,
             'juridico_module_sections' => JuridicoModuleRegistry::grouped(),
+            'juridico_graduated_routes' => JuridicoModuleRegistry::GRADUATED_ROUTES,
         ];
     }
 }

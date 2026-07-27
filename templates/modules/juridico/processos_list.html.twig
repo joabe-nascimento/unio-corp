@@ -1,0 +1,119 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Processos · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Processos' %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-processo-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo processo
+</button>
+<a href="{{ path('app_juridico_modulo', { slug: 'processos' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_processos') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    search_in_section: true,
+    search_placeholder: 'Buscar número, cliente ou área…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filter_status|default(''),
+            min_width: '140px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'ativo', label: 'Ativo' },
+                { value: 'critico', label: 'Crítico' },
+                { value: 'encerrado', label: 'Encerrado' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_processos'),
+            has_filters: filter_q|default('') or filter_status|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if processos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-scale-balanced',
+            title: 'Nenhum processo cadastrado',
+            text: filter_q|default('') or filter_status|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre o primeiro processo do escritório.',
+            btn_label: 'Novo processo',
+            btn_opens: 'juridico-processo-novo',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    {% set _criticos = 0 %}
+    {% for p in processos %}{% if p.status == 'critico' %}{% set _criticos = _criticos + 1 %}{% endif %}{% endfor %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: processos|length,
+        label_singular: 'processo encontrado',
+        label_plural: 'processos encontrados',
+        extra_html: _criticos > 0 ? '<span class="jur-table-meta-highlight"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ' ~ _criticos ~ ' crítico(s)</span>' : ''
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Cliente</th>
+                    <th>Área</th>
+                    <th>Fase</th>
+                    <th>Responsável</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in processos %}
+                <tr>
+                    <td><code class="text-muted" style="font-size: 0.85rem;">{{ p.numero }}</code></td>
+                    <td>{{ p.cliente ? p.cliente.nome : '—' }}</td>
+                    <td>{% if p.area %}<span class="badge badge-soft-primary">{{ p.area }}</span>{% else %}—{% endif %}</td>
+                    <td>{{ p.fase|capitalize }}</td>
+                    <td>{{ p.responsavel ? p.responsavel.nome : '—' }}</td>
+                    <td>{{ p.valor ? 'R$ ' ~ p.valor|number_format(2, ',', '.') : '—' }}</td>
+                    <td>
+                        {% if p.status == 'critico' %}
+                        <span class="badge badge-danger">Crítico</span>
+                        {% elseif p.status == 'encerrado' %}
+                        <span class="badge badge-secondary">Encerrado</span>
+                        {% else %}
+                        <span class="badge badge-success">Ativo</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="{{ path('app_juridico_processo_show', { id: p.id }) }}" class="btn-unio-ghost btn-sm">
+                            <i class="fas fa-arrow-right mr-1" aria-hidden="true"></i>Abrir
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/processo_offcanvas.html.twig' with {
+    id: 'juridico-processo-novo',
+    clientes: clientes,
+    responsaveis: responsaveis,
+    form_id: 'juridicoProcessoNovoForm',
+    form_action: path('app_juridico_processo_novo'),
+    open: open_novo|default(false)
+} %}
+{% endblock %}

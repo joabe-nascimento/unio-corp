@@ -13,12 +13,14 @@
 
 {% block content_lead %}
 {% set perm_scope = block('permissions_scope')|trim %}
+{% set _toolbar_actions_html %}{% block page_list_toolbar_actions %}{% endblock %}{% endset %}
 <div class="page-lead-zone page-lead-zone--hub-tabs">
     {% embed 'components/list_toolbar.html.twig' with {
         page_title: page_list_title|default(''),
-        actions_in_top: page_list_actions_in_top|default(false)
+        actions_in_top: page_list_actions_in_top|default(false),
+        _toolbar_actions_html: _toolbar_actions_html
     } %}
-        {% block toolbar_actions %}{% block page_list_toolbar_actions %}{% endblock %}{% endblock %}
+        {% block toolbar_actions %}{{ _toolbar_actions_html|raw }}{% endblock %}
         {% block toolbar_subnav %}
             <div class="list-toolbar-subnav">
                 {% include 'components/core_projetos_tabs.html.twig' with {

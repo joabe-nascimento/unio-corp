@@ -134,6 +134,21 @@ html[data-theme="dark"] body.unio-organismo.org-juridico {
     border-color: rgba(217, 138, 150, 0.24);
 }
 
+/* Botão primário do banner de ativação — evita texto rosa sobre fundo rosa
+   (a regra genérica [data-theme=dark] body.org-juridico .btn-unio usava texto
+   escuro sobre gradiente claro, ilegível dentro do card escuro do banner). */
+[data-theme="dark"] .unio-ritual--juridico .unio-ritual__actions .btn-unio {
+    background: linear-gradient(135deg, #c94b5c 0%, #9c2c3c 55%, #7a2130 100%) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+}
+
+[data-theme="dark"] .unio-ritual--juridico .unio-ritual__actions .btn-unio:hover {
+    background: linear-gradient(135deg, #d9636f 0%, #b8384a 55%, #8a2838 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 24px rgba(156, 44, 60, 0.4);
+}
+
 /* Sidebar colapsada — mesmo comportamento da clínica */
 @media (min-width: 1200px) {
     body.org-juridico.unio-organismo.sidebar-mini.sidebar-collapse:not(.sidebar-open) .main-sidebar {
@@ -972,4 +987,61 @@ body.org-juridico .auth-card__mobile-logo img {
     width: auto;
     max-width: 220px;
     object-fit: contain;
+}
+
+/* ============================================================
+   Tabelas dos módulos Jurídico — barra de contagem + ações compactas
+   ============================================================ */
+.jur-table-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.85rem 1.1rem 0.6rem;
+    font-size: 0.82rem;
+    color: var(--text-2, #64748b);
+    border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.06));
+}
+.jur-table-meta strong { color: var(--text-1, #1e2a3a); }
+.jur-table-meta-sep { opacity: 0.5; }
+.jur-table-meta-highlight {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #c94b5c;
+    font-weight: 600;
+}
+
+.jur-cell-tema-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.jur-cell-tema-resumo-icon {
+    color: var(--text-3, #94a3b8);
+    font-size: 0.78rem;
+    cursor: help;
+}
+.jur-cell-tema small { display: block; margin-top: 2px; }
+
+.jur-row-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.jur-row-actions .btn-xs {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.78rem;
+    line-height: 1;
+}
+
+.table-unio.table-hover tbody tr:hover {
+    background: var(--surface-2, rgba(0, 0, 0, 0.02));
+}
+
+[data-theme="dark"] .jur-table-meta {
+    border-bottom-color: rgba(239, 195, 201, 0.12);
+}
+[data-theme="dark"] .jur-table-meta strong {
+    color: #f4d8dc;
 }

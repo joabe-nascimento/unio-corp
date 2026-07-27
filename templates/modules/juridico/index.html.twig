@@ -53,12 +53,13 @@
 {% for section in sections %}
     {% set module_items = [] %}
     {% for m in section.modules %}
+        {% set _graduated_route = juridico_graduated_routes[m.slug]|default(null) %}
         {% set module_items = module_items|merge([{
             icon: m.icon,
             title: m.label,
-            subtitle: m.subtitle ~ ' · ' ~ (m.status == 'alpha' ? 'Alpha' : (m.status == 'beta' ? 'Beta' : 'Em breve')),
-            route: 'app_juridico_modulo',
-            route_params: { slug: m.slug }
+            subtitle: m.subtitle ~ ' · ' ~ (_graduated_route ? 'Em produção' : (m.status == 'alpha' ? 'Alpha' : (m.status == 'beta' ? 'Beta' : 'Em breve'))),
+            route: _graduated_route ?: 'app_juridico_modulo',
+            route_params: _graduated_route ? {} : { slug: m.slug }
         }]) %}
     {% endfor %}
     {% include 'components/module_grid.html.twig' with {

@@ -116,6 +116,7 @@ final class JurisFlowAiClient
     private function periodOfDay(int $hour): string
     {
         return match (true) {
+            $hour < 6 => 'madrugada',
             $hour < 12 => 'manhã',
             $hour < 18 => 'tarde',
             default => 'noite',

@@ -1,0 +1,22 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: id|default('juridico-jurisprudencia-novo'),
+    title: 'Nova jurisprudência',
+    subtitle: 'Jurisprudência IA · Unio Jurídico',
+    icon: 'fa-gavel',
+    size: 'lg',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+    {% include 'components/juridico/jurisprudencia_form_fields.html.twig' with {
+        form_id: form_id|default('juridicoJurisprudenciaForm'),
+        form_action: form_action,
+        csrf_id: 'juridico_jurisprudencia_form'
+    } %}
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="{{ form_id|default('juridicoJurisprudenciaForm') }}" class="btn-unio">Salvar registro</button>
+</div>
+{% endblock %}
+{% endembed %}

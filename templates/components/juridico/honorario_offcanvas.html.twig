@@ -1,0 +1,24 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: id|default('juridico-honorario-novo'),
+    title: 'Novo lançamento de horas',
+    subtitle: 'Honorários & Timesheet · Unio Jurídico',
+    icon: 'fa-stopwatch',
+    size: 'md',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+    {% include 'components/juridico/honorario_form_fields.html.twig' with {
+        advogados: advogados|default([]),
+        processos: processos|default([]),
+        form_id: form_id|default('juridicoHonorarioForm'),
+        form_action: form_action,
+        csrf_id: 'juridico_honorario_form'
+    } %}
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="{{ form_id|default('juridicoHonorarioForm') }}" class="btn-unio">Salvar lançamento</button>
+</div>
+{% endblock %}
+{% endembed %}

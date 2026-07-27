@@ -1,0 +1,58 @@
+{#
+  juridico/honorario_form_fields — campos do lançamento de horas (criar/editar)
+
+  Props: lancamento (JuridicoHonorarioLancamento|null), advogados (list<User>), processos (list), form_id, form_action, csrf_id
+#}
+{% set l = lancamento|default(null) %}
+<form method="post" action="{{ form_action }}" id="{{ form_id }}" class="crm-form">
+    <input type="hidden" name="_token" value="{{ csrf_token(csrf_id) }}">
+
+    <div class="row">
+        <div class="col-md-6 form-group">
+            <label for="{{ form_id }}-advogado">Advogado *</label>
+            <select class="form-control" id="{{ form_id }}-advogado" name="advogado_id" required>
+                <option value="">Selecione…</option>
+                {% for u in advogados %}
+                <option value="{{ u.id }}"{% if l and l.advogado and l.advogado.id == u.id %} selected{% endif %}>{{ u.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6 form-group">
+            <label for="{{ form_id }}-data">Data *</label>
+            <input class="form-control" id="{{ form_id }}-data" name="data" type="date" required
+                   value="{{ l ? l.data|date('Y-m-d') : 'now'|date('Y-m-d') }}">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-horas">Horas *</label>
+            <input class="form-control" id="{{ form_id }}-horas" name="horas" inputmode="decimal" required
+                   value="{{ l ? l.horas : '' }}" placeholder="Ex.: 2,5">
+        </div>
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-valor-hora">Valor/hora</label>
+            <input class="form-control" id="{{ form_id }}-valor-hora" name="valor_hora" inputmode="decimal"
+                   value="{{ l and l.valorHora ? l.valorHora|number_format(2, ',', '.') : '' }}" placeholder="R$ 0,00">
+        </div>
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-processo">Processo</label>
+            <select class="form-control" id="{{ form_id }}-processo" name="processo_id">
+                <option value="">— Sem processo —</option>
+                {% for p in processos %}
+                <option value="{{ p.id }}"{% if l and l.processo and l.processo.id == p.id %} selected{% endif %}>{{ p.numero }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form_id }}-descricao">Descrição</label>
+        <textarea class="form-control" id="{{ form_id }}-descricao" name="descricao" rows="4">{{ l ? l.descricao : '' }}</textarea>
+    </div>
+
+    <div class="form-group form-check mb-0">
+        <input type="checkbox" class="form-check-input" id="{{ form_id }}-faturavel" name="faturavel" value="1"{% if not l or l.faturavel %} checked{% endif %}>
+        <label class="form-check-label" for="{{ form_id }}-faturavel">Horas faturáveis</label>
+    </div>
+</form>

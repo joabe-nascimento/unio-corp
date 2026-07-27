@@ -1,0 +1,16 @@
+{#
+  juridico/table_meta_bar — contador de registros acima da tabela
+
+  Props:
+    count            (int)    total de linhas exibidas
+    label_singular   (string) ex.: "processo encontrado"
+    label_plural     (string) ex.: "processos encontrados"
+    extra_html       (string, opt) HTML já pronto para um destaque extra (ex.: alertas)
+#}
+<div class="jur-table-meta">
+    <span><strong>{{ count }}</strong> {{ count == 1 ? label_singular : label_plural }}</span>
+    {% if extra_html|default('') %}
+    <span class="jur-table-meta-sep">·</span>
+    {{ extra_html|raw }}
+    {% endif %}
+</div>

@@ -1,0 +1,23 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: id|default('juridico-cliente-novo'),
+    title: cliente|default(null) ? 'Editar cliente' : 'Novo cliente',
+    subtitle: 'Cadastro do Unio Jurídico',
+    icon: 'fa-building',
+    size: 'lg',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+    {% include 'components/juridico/cliente_form_fields.html.twig' with {
+        cliente: cliente|default(null),
+        form_id: form_id|default('juridicoClienteForm'),
+        form_action: form_action,
+        csrf_id: 'juridico_cliente_form'
+    } %}
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="{{ form_id|default('juridicoClienteForm') }}" class="btn-unio">Salvar cliente</button>
+</div>
+{% endblock %}
+{% endembed %}

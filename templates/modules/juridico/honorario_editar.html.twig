@@ -1,0 +1,44 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Editar lançamento · Honorários{% endblock %}
+{% set page_list_title = 'Editar lançamento' %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_juridico_honorarios') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row g-4">
+    <div class="col-xl-7">
+        <div class="unio-card p-3">
+            {% include 'components/juridico/honorario_form_fields.html.twig' with {
+                lancamento: lancamento,
+                advogados: advogados,
+                processos: processos,
+                form_id: 'juridicoHonorarioEditarForm',
+                form_action: path('app_juridico_honorario_editar', { id: lancamento.id }),
+                csrf_id: 'juridico_honorario_form'
+            } %}
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a href="{{ path('app_juridico_honorarios') }}" class="btn-unio-ghost">Cancelar</a>
+                <button type="submit" form="juridicoHonorarioEditarForm" class="btn-unio">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Zona de risco' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_juridico_honorario_excluir', { id: lancamento.id }) }}"
+                      onsubmit="return confirm('Excluir este lançamento?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_honorario_excluir_' ~ lancamento.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-danger-ghost btn-sm">
+                        <i class="fas fa-trash mr-1" aria-hidden="true"></i> Excluir lançamento
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

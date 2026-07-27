@@ -1,0 +1,90 @@
+{#
+  juridico/processo_form_fields — campos do formulário de processo (criar/editar)
+
+  Props: processo (JuridicoProcesso|null), clientes (list), responsaveis (list<User>), form_id, form_action, csrf_id
+#}
+{% set p = processo|default(null) %}
+<form method="post" action="{{ form_action }}" id="{{ form_id }}" class="crm-form">
+    <input type="hidden" name="_token" value="{{ csrf_token(csrf_id) }}">
+
+    <div class="form-group">
+        <label for="{{ form_id }}-numero">Número do processo (CNJ) *</label>
+        <input class="form-control" id="{{ form_id }}-numero" name="numero" required autofocus
+               value="{{ p ? p.numero : '' }}" placeholder="0000000-00.0000.0.00.0000">
+    </div>
+
+    <div class="row">
+        <div class="col-md-7 form-group">
+            <label for="{{ form_id }}-cliente">Cliente</label>
+            <select class="form-control" id="{{ form_id }}-cliente" name="cliente_id">
+                <option value="">— Sem cliente vinculado —</option>
+                {% for c in clientes %}
+                <option value="{{ c.id }}"{% if p and p.cliente and p.cliente.id == c.id %} selected{% endif %}>{{ c.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-5 form-group">
+            <label for="{{ form_id }}-area">Área</label>
+            <input class="form-control" id="{{ form_id }}-area" name="area"
+                   value="{{ p ? p.area : '' }}" placeholder="Ex.: Trabalhista">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-fase">Fase</label>
+            <select class="form-control" id="{{ form_id }}-fase" name="fase">
+                {% for f in ['conhecimento', 'instrucao', 'sentenca', 'recursal', 'execucao', 'encerrado'] %}
+                <option value="{{ f }}"{% if p and p.fase == f or (not p and f == 'conhecimento') %} selected{% endif %}>
+                    {{ f|capitalize }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-status">Status</label>
+            <select class="form-control" id="{{ form_id }}-status" name="status">
+                <option value="ativo"{% if not p or p.status == 'ativo' %} selected{% endif %}>Ativo</option>
+                <option value="critico"{% if p and p.status == 'critico' %} selected{% endif %}>Crítico</option>
+                <option value="encerrado"{% if p and p.status == 'encerrado' %} selected{% endif %}>Encerrado</option>
+            </select>
+        </div>
+        <div class="col-md-4 form-group">
+            <label for="{{ form_id }}-tribunal">Tribunal</label>
+            <input class="form-control" id="{{ form_id }}-tribunal" name="tribunal"
+                   value="{{ p ? p.tribunal : '' }}" placeholder="Ex.: TJSP">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 form-group">
+            <label for="{{ form_id }}-responsavel">Advogado responsável</label>
+            <select class="form-control" id="{{ form_id }}-responsavel" name="responsavel_id">
+                <option value="">— A definir —</option>
+                {% for u in responsaveis %}
+                <option value="{{ u.id }}"{% if p and p.responsavel and p.responsavel.id == u.id %} selected{% endif %}>{{ u.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6 form-group">
+            <label for="{{ form_id }}-valor">Valor da causa</label>
+            <input class="form-control" id="{{ form_id }}-valor" name="valor" inputmode="decimal"
+                   value="{{ p and p.valor ? p.valor|number_format(2, ',', '.') : '' }}" placeholder="R$ 0,00">
+        </div>
+    </div>
+
+    <div class="form-group{% if not p %} d-none{% endif %}">
+        <label for="{{ form_id }}-resultado">Resultado (ao encerrar)</label>
+        <select class="form-control" id="{{ form_id }}-resultado" name="resultado">
+            <option value="">— Em andamento —</option>
+            <option value="procedente"{% if p and p.resultado == 'procedente' %} selected{% endif %}>Procedente</option>
+            <option value="improcedente"{% if p and p.resultado == 'improcedente' %} selected{% endif %}>Improcedente</option>
+            <option value="acordo"{% if p and p.resultado == 'acordo' %} selected{% endif %}>Acordo</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-0">
+        <label for="{{ form_id }}-observacoes">Observações</label>
+        <textarea class="form-control" id="{{ form_id }}-observacoes" name="observacoes" rows="4">{{ p ? p.observacoes : '' }}</textarea>
+    </div>
+</form>
