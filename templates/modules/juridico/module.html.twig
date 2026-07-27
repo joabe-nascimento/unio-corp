@@ -8,6 +8,12 @@
 
 {% block hub_toolbar_actions %}
 <span class="jur-mod-status jur-mod-status--{{ module.status }}">{{ status_label }}</span>
+{% if list_route|default('') %}
+<a href="{{ path(list_route) }}" class="btn-unio btn-sm">
+    <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i>
+    Voltar à lista
+</a>
+{% endif %}
 <button type="button"
         class="btn-unio btn-sm js-helix-prompt"
         data-helix-prompt="{{ module.bruna_prompt }}">
@@ -412,6 +418,17 @@
             {% endif %}
 
             <section class="unio-card jur-mod-block jur-mod-side mt-4 jur-mod-side--muted">
+                {% if is_graduated|default(false) %}
+                {% include 'components/empty_state.html.twig' with {
+                    icon: module.icon,
+                    title: module.label ~ ' disponível',
+                    text: 'Este módulo já está ativo no escritório. Use a lista para operar no dia a dia e volte aqui quando quiser revisar a visão de produto.',
+                    btn_label: 'Ir para a lista',
+                    btn_href: path(list_route),
+                    btn_sm: true,
+                    compact: true
+                } %}
+                {% else %}
                 {% include 'components/empty_state.html.twig' with {
                     icon: module.icon,
                     title: module.empty_title,
@@ -421,6 +438,7 @@
                     btn_sm: true,
                     compact: true
                 } %}
+                {% endif %}
             </section>
         </div>
     </div>

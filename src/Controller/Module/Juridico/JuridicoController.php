@@ -49,16 +49,15 @@ class JuridicoController extends AbstractController
             throw new NotFoundHttpException();
         }
 
-        if (JuridicoModuleRegistry::isGraduated($slug)) {
-            return $this->redirectToRoute(JuridicoModuleRegistry::graduatedRoute($slug));
-        }
-
         $seedData = $this->getSeedDataForModule($slug);
+        $listRoute = JuridicoModuleRegistry::graduatedRoute($slug);
 
         return $this->render('modules/juridico/module.html.twig', [
             'module' => $module,
             'status_label' => JuridicoModuleRegistry::statusLabel($module['status']),
             'seed_data' => $seedData,
+            'list_route' => $listRoute,
+            'is_graduated' => $listRoute !== null,
         ]);
     }
 
