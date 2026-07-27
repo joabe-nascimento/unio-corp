@@ -20,7 +20,7 @@
     <script>(function(){var m=window.matchMedia('(max-width:1199.98px)');function s(){document.documentElement.classList.toggle('shell-drawer',m.matches);}s();if(m.addEventListener){m.addEventListener('change',s);}else{m.addListener(s);}})();</script>
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=350">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=351">
     {% set _shell_polish_css = app.debug ? 'css/unio-shell-polish.css' : 'css/unio-shell-polish.min.css' %}
     <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=35">
 
@@ -671,14 +671,58 @@ window.addEventListener('load', runShellSidebarControls);
         }
     }
 
+    var HELIX_TYPING_STEPS = {
+        clinic: [
+            { icon: 'fa-magnifying-glass', text: 'Lendo sua mensagem…' },
+            { icon: 'fa-heart-pulse', text: 'Consultando Pulso e protocolos…' },
+            { icon: 'fa-lightbulb', text: 'Organizando a resposta…' },
+            { icon: 'fa-check', text: 'Quase pronto…' }
+        ],
+        juridico: [
+            { icon: 'fa-magnifying-glass', text: 'Lendo sua mensagem…' },
+            { icon: 'fa-scale-balanced', text: 'Coletando informações do caso…' },
+            { icon: 'fa-gavel', text: 'Consultando prazos e jurisprudência…' },
+            { icon: 'fa-file-lines', text: 'Redigindo a resposta…' },
+            { icon: 'fa-check', text: 'Quase pronto…' }
+        ],
+        organismo: [
+            { icon: 'fa-magnifying-glass', text: 'Lendo sua intenção…' },
+            { icon: 'fa-diagram-project', text: 'Buscando na colônia…' },
+            { icon: 'fa-lightbulb', text: 'Organizando a resposta…' },
+            { icon: 'fa-check', text: 'Quase pronto…' }
+        ],
+        default: [
+            { icon: 'fa-magnifying-glass', text: 'Lendo sua mensagem…' },
+            { icon: 'fa-database', text: 'Buscando contexto…' },
+            { icon: 'fa-lightbulb', text: 'Organizando a resposta…' },
+            { icon: 'fa-check', text: 'Quase pronto…' }
+        ]
+    };
+    var typingStepTimer = null;
+
+    function typingSteps() {
+        if (panel.dataset.clinic === '1') return HELIX_TYPING_STEPS.clinic;
+        if (panel.dataset.juridico === '1') return HELIX_TYPING_STEPS.juridico;
+        if (panel.dataset.organismo === '1') return HELIX_TYPING_STEPS.organismo;
+        return HELIX_TYPING_STEPS.default;
+    }
+
     function typingIndicatorHtml() {
         var name = assistantName();
+        var steps = typingSteps();
+        var first = steps[0];
+        var dotsHtml = steps.map(function (_, i) {
+            return '<span class="helix-typing-progress-dot' + (i === 0 ? ' is-active' : '') + '"></span>';
+        }).join('');
         return '<div class="helix-msg helix-msg--assistant helix-msg--typing" id="helixTypingIndicator" aria-live="polite" aria-label="' +
             escapeHtml(name) + ' está digitando">' +
             FACE_SM +
             '<div class="helix-msg-bubble helix-msg-bubble--typing">' +
-            '<span class="helix-typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>' +
-            '<span class="helix-typing-label">' + escapeHtml(name) + ' está digitando…</span>' +
+            '<div class="helix-typing-row">' +
+            '<span class="helix-typing-icon-wrap"><i class="fas ' + first.icon + ' helix-typing-icon" id="helixTypingIcon" aria-hidden="true"></i></span>' +
+            '<span class="helix-typing-label" id="helixTypingLabel">' + escapeHtml(first.text) + '</span>' +
+            '</div>' +
+            '<div class="helix-typing-progress" id="helixTypingProgress">' + dotsHtml + '</div>' +
             '</div></div>';
     }
 
@@ -687,9 +731,42 @@ window.addEventListener('load', runShellSidebarControls);
         if (!messagesEl) return;
         messagesEl.insertAdjacentHTML('beforeend', typingIndicatorHtml());
         scrollMessages();
+
+        var steps = typingSteps();
+        var idx = 0;
+        typingStepTimer = setInterval(function () {
+            idx += 1;
+            if (idx >= steps.length) {
+                idx = steps.length - 1;
+            }
+            var iconEl = document.getElementById('helixTypingIcon');
+            var labelEl = document.getElementById('helixTypingLabel');
+            var progressEl = document.getElementById('helixTypingProgress');
+            if (!iconEl || !labelEl || !progressEl) {
+                clearInterval(typingStepTimer);
+                typingStepTimer = null;
+                return;
+            }
+            var step = steps[idx];
+            iconEl.className = 'fas ' + step.icon + ' helix-typing-icon';
+            labelEl.textContent = step.text;
+            var dots = progressEl.querySelectorAll('.helix-typing-progress-dot');
+            dots.forEach(function (dot, i) {
+                dot.classList.toggle('is-active', i <= idx);
+            });
+            scrollMessages();
+            if (idx >= steps.length - 1) {
+                clearInterval(typingStepTimer);
+                typingStepTimer = null;
+            }
+        }, 1400);
     }
 
     function hideTypingIndicator() {
+        if (typingStepTimer) {
+            clearInterval(typingStepTimer);
+            typingStepTimer = null;
+        }
         var el = document.getElementById('helixTypingIndicator');
         if (el) el.remove();
     }
