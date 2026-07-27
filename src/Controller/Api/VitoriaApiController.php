@@ -136,17 +136,13 @@ final class VitoriaApiController extends AbstractController
 
         $result = $this->activeClient()->chat($message, $history, $context);
         if ($result === null) {
-            $reply = sprintf(
-                '%s está temporariamente indisponível. Tente novamente em instantes.',
-                $this->organismoCopy->lumen(),
-            );
-
-            if ($acoesSugeridas !== []) {
-                $reply .= ' Enquanto isso, posso executar isto direto no sistema, sem precisar da IA:';
-            }
-
             return $this->json([
-                'reply' => $reply,
+                'reply' => $acoesSugeridas !== []
+                    ? $this->mensagemParaAcoesSugeridas($acoesSugeridas)
+                    : sprintf(
+                        '%s está temporariamente indisponível. Tente novamente em instantes.',
+                        $this->organismoCopy->lumen(),
+                    ),
                 'source' => 'offline',
                 'suggested_actions' => $acoesSugeridas,
             ]);
@@ -154,17 +150,45 @@ final class VitoriaApiController extends AbstractController
 
         if ($isJuridico && $acoesSugeridas !== []) {
             $result['suggested_actions'] = $acoesSugeridas;
-            
-            // Quando há ações sugeridas determinísticas, sobrescreve mensagem genérica
-            // da IA com algo direto e útil, evitando ruído
-            $replyLower = mb_strtolower($result['reply']);
-            if (str_contains($replyLower, 'instabilidade') || str_contains($replyLower, 'indisponível') || str_contains($replyLower, 'tudo bem por aqui')) {
-                $primeiraAcao = $acoesSugeridas[0];
-                $acao = mb_strtolower(str_replace(['Registrar prazo:', 'Criar tarefa:', 'Calcular', ': De ', ': '], ['registrar esse prazo', 'criar essa tarefa', 'calcular isso', ' de ', ' '], $primeiraAcao['label']));
-                $result['reply'] = sprintf('Entendi! Posso %s para você.', $acao);
-            }
+            $result['reply'] = $this->mensagemParaAcoesSugeridas($acoesSugeridas);
         }
 
         return $this->json($result);
+    }
+
+    /**
+     * Quando o detector já sabe o que fazer, a resposta deve ser direta — sem ruído
+     * de mensagens genéricas do provedor de IA (ex.: "instabilidade no provedor").
+     *
+     * @param list<array{tool: string, label: string, params: array<string, mixed>}> $acoes
+     */
+    private function mensagemParaAcoesSugeridas(array $acoes): string
+    {
+        $primeira = $acoes[0];
+        $label = mb_strtolower(trim((string) ($primeira['label'] ?? '')));
+
+        if (str_starts_with($label, 'registrar prazo')) {
+            $tipo = trim(str_replace('registrar prazo:', '', $label));
+
+            return $tipo !== ''
+                ? sprintf('Entendi! Posso registrar esse prazo de %s para você. Confira abaixo e confirme se estiver certo.', $tipo)
+                : 'Entendi! Posso registrar esse prazo para você. Confira abaixo e confirme se estiver certo.';
+        }
+
+        if (str_starts_with($label, 'criar tarefa')) {
+            return 'Entendi! Posso criar essa tarefa para você. Confira os detalhes abaixo e confirme se estiver certo.';
+        }
+
+        if (str_contains($label, 'pesquisar jurisprudência') || str_contains($label, 'pesquisar jurisprudencia')) {
+            return 'Posso pesquisar essa jurisprudência para você. É só confirmar abaixo.';
+        }
+
+        if (str_contains($label, 'calcular')) {
+            return 'Posso calcular isso para você. Confira abaixo e confirme se quiser seguir.';
+        }
+
+        $rotulo = trim((string) ($primeira['label'] ?? 'executar essa ação'));
+
+        return sprintf('Entendi! Posso %s para você. Confira abaixo e confirme se estiver certo.', mb_strtolower($rotulo));
     }
 }
