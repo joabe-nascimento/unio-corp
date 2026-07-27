@@ -126,7 +126,7 @@ final class JurisFlowAiClient
                     'area_juridica' => $areaJuridica ?: 'Geral',
                     'escritorio_id' => $escritorioId,
                 ],
-                'timeout' => 40,
+                'timeout' => 75,
             ]);
 
             $data = $response->toArray(false);
