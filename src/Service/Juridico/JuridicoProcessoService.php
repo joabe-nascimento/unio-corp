@@ -68,6 +68,23 @@ class JuridicoProcessoService
         return $this->repo->findAllForSelect($empresa);
     }
 
+    /**
+     * Painel de indicadores da carteira de processos do escritório.
+     *
+     * @return array{total: int, ativos: int, criticos: int, encerrados: int, valorAtivo: float, taxaExito: ?float}
+     */
+    public function estatisticas(Empresa $empresa): array
+    {
+        return [
+            'total' => $this->repo->countByEmpresa($empresa),
+            'ativos' => $this->repo->countByEmpresaAndStatus($empresa, JuridicoProcesso::STATUS_ATIVO),
+            'criticos' => $this->repo->countByEmpresaAndStatus($empresa, JuridicoProcesso::STATUS_CRITICO),
+            'encerrados' => $this->repo->countByEmpresaAndStatus($empresa, JuridicoProcesso::STATUS_ENCERRADO),
+            'valorAtivo' => $this->repo->sumValorAtivoByEmpresa($empresa),
+            'taxaExito' => $this->repo->taxaExito($empresa),
+        ];
+    }
+
     /** @param array<string, mixed> $data */
     private function applyData(Empresa $empresa, JuridicoProcesso $processo, array $data): void
     {

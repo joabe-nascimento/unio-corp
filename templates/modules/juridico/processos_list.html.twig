@@ -2,6 +2,70 @@
 {% block title %}Processos · Unio Jurídico{% endblock %}
 {% set page_list_title = 'Processos' %}
 
+{% block page_list_kpis %}
+{% set _first_name = app.user.nome|default('')|split(' ')|first %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-scale-balanced" aria-hidden="true"></i> Contencioso · Painel do escritório</span>
+        <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'Painel de processos' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if stats.total|default(0) == 0 %}
+                Cadastre o primeiro processo do escritório para acompanhar fases, valores e prazos em um só lugar.
+            {% elseif stats.criticos|default(0) > 0 %}
+                Você tem <strong>{{ stats.criticos }}</strong> processo{{ stats.criticos > 1 ? 's' : '' }} crítico{{ stats.criticos > 1 ? 's' : '' }} pedindo atenção agora, de uma carteira com <strong>{{ stats.total }}</strong> processo{{ stats.total != 1 ? 's' : '' }} no total.
+            {% else %}
+                Nenhum processo crítico no momento — sua carteira com <strong>{{ stats.total }}</strong> processo{{ stats.total != 1 ? 's' : '' }} está sob controle.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-processo-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo processo
+            </button>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Analise a saúde da minha carteira de processos e sugira prioridades para esta semana.">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Bruna
+            </button>
+        </div>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        {
+            value: stats.ativos|default(0),
+            label: 'Processos ativos',
+            sub: 'Em andamento',
+            icon: 'fa-folder-open',
+            tone: 'sky',
+            route: 'app_juridico_processos',
+            route_params: { status: 'ativo' },
+        },
+        {
+            value: stats.criticos|default(0),
+            label: 'Críticos',
+            sub: stats.criticos|default(0) > 0 ? 'Precisam de atenção' : 'Tudo sob controle',
+            icon: 'fa-triangle-exclamation',
+            tone: stats.criticos|default(0) > 0 ? 'rose' : 'sage',
+            pulse: stats.criticos|default(0) > 0,
+            route: 'app_juridico_processos',
+            route_params: { status: 'critico' },
+        },
+        {
+            value: 'R$ ' ~ stats.valorAtivo|default(0)|number_format(2, ',', '.'),
+            label: 'Valor em carteira',
+            sub: 'Processos ativos',
+            icon: 'fa-sack-dollar',
+            tone: 'amber',
+        },
+        {
+            value: stats.taxaExito is defined and stats.taxaExito is not null ? stats.taxaExito|number_format(1, ',', '.') ~ '%' : '—',
+            label: 'Taxa de êxito',
+            sub: 'Processos encerrados',
+            icon: 'fa-chart-line',
+            tone: 'lavender',
+        },
+    ] } %}
+</div>
+{% endblock %}
+
 {% block page_list_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-processo-novo">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo processo

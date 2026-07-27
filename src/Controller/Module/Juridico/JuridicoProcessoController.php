@@ -45,6 +45,7 @@ class JuridicoProcessoController extends AbstractController
             'filter_status' => $status,
             'filter_q' => $q,
             'open_novo' => $request->query->getBoolean('open_novo'),
+            'stats' => $this->processos->estatisticas($empresa),
         ]);
     }
 
