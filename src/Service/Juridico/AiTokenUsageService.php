@@ -6,13 +6,14 @@ use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Agrega o consumo de tokens do JurisFlow (Azure OpenAI) para exibição no shell.
+ * Agrega o consumo de tokens do JurisFlow (tempo real) + Azure Monitor (histórico sincronizado).
  */
 final class AiTokenUsageService
 {
     public function __construct(
         private HttpClientInterface $httpClient,
         private JurisFlowAiClient $jurisFlowAi,
+        private AzureTokenUsageStore $azureStore,
         private LoggerInterface $logger,
         private bool $enabled,
         private string $baseUrl,
@@ -27,12 +28,53 @@ final class AiTokenUsageService
      *     today: array{prompt_tokens: int, completion_tokens: int, total_tokens: int, requests: int},
      *     month: array{prompt_tokens: int, completion_tokens: int, total_tokens: int, requests: int},
      *     lifetime: array{prompt_tokens: int, completion_tokens: int, total_tokens: int, requests: int},
-     *     last_request_at: ?string
+     *     last_request_at: ?string,
+     *     synced_at: ?string
      * }|null
      */
     public function getSummary(): ?array
     {
-        if (!$this->enabled || $this->baseUrl === '') {
+        if (!$this->enabled) {
+            return null;
+        }
+
+        $azure = $this->azureStore->load();
+        $jurisflow = $this->fetchJurisFlowSummary();
+
+        if ($azure === null && $jurisflow === null) {
+            return $this->fallbackFromStatus();
+        }
+
+        $today = $this->mergeBuckets($azure['today'] ?? null, $jurisflow['today'] ?? null);
+        $month = $this->mergeBuckets($azure['month'] ?? null, $jurisflow['month'] ?? null);
+        $lifetime = $this->mergeBuckets($azure['lifetime'] ?? null, $jurisflow['lifetime'] ?? null);
+
+        return [
+            'online' => $jurisflow['online'] ?? true,
+            'provider' => (string) ($azure['provider'] ?? $jurisflow['provider'] ?? 'azure'),
+            'model' => (string) ($jurisflow['model'] ?? $azure['model'] ?? ''),
+            'today' => $today,
+            'month' => $month,
+            'lifetime' => $lifetime,
+            'last_request_at' => $jurisflow['last_request_at'] ?? null,
+            'synced_at' => $azure['synced_at'] ?? null,
+        ];
+    }
+
+    /**
+     * @return array{
+     *     online: bool,
+     *     provider: string,
+     *     model: string,
+     *     today: array<string, int>,
+     *     month: array<string, int>,
+     *     lifetime: array<string, int>,
+     *     last_request_at: ?string
+     * }|null
+     */
+    private function fetchJurisFlowSummary(): ?array
+    {
+        if ($this->baseUrl === '') {
             return null;
         }
 
@@ -42,7 +84,7 @@ final class AiTokenUsageService
             ]);
 
             if ($response->getStatusCode() !== 200) {
-                return $this->fallbackFromStatus();
+                return null;
             }
 
             $data = $response->toArray(false);
@@ -59,8 +101,22 @@ final class AiTokenUsageService
         } catch (\Throwable $e) {
             $this->logger->debug('Resumo de tokens IA indisponível: {msg}', ['msg' => $e->getMessage()]);
 
-            return $this->fallbackFromStatus();
+            return null;
         }
+    }
+
+    /** @param array<string, int>|null $azure @param array<string, int>|null $live */
+    private function mergeBuckets(?array $azure, ?array $live): array
+    {
+        $azure = $azure ?? $this->normalizeBucket([]);
+        $live = $live ?? $this->normalizeBucket([]);
+
+        return [
+            'prompt_tokens' => max($azure['prompt_tokens'], $live['prompt_tokens']),
+            'completion_tokens' => max($azure['completion_tokens'], $live['completion_tokens']),
+            'total_tokens' => max($azure['total_tokens'], $live['total_tokens']),
+            'requests' => max($azure['requests'], $live['requests']),
+        ];
     }
 
     /** @param array<string, mixed> $bucket */
@@ -86,6 +142,7 @@ final class AiTokenUsageService
                 'month' => $this->normalizeBucket([]),
                 'lifetime' => $this->normalizeBucket([]),
                 'last_request_at' => null,
+                'synced_at' => null,
             ];
         }
 
@@ -97,6 +154,7 @@ final class AiTokenUsageService
             'month' => $this->normalizeBucket([]),
             'lifetime' => $this->normalizeBucket([]),
             'last_request_at' => null,
+            'synced_at' => null,
         ];
     }
 }

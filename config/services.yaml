@@ -16,6 +16,10 @@ parameters:
     legal_ai_url_default: 'http://127.0.0.1:8090'
     legal_ai_enabled_default: 'false'
     legal_ai_escritorio_id_default: 'default'
+    azure_tenant_id_default: ''
+    azure_client_id_default: ''
+    azure_client_secret_default: ''
+    azure_openai_resource_id_default: ''
     default_uri_default: 'http://127.0.0.1:8000'
     mercure_url_default: 'http://localhost:3000/.well-known/mercure'
     mercure_jwt_default: '!ChangeMe!UnioMercureJwtDevSecret32!'
@@ -230,6 +234,17 @@ services:
         arguments:
             $enabled: '%env(bool:default:legal_ai_enabled_default:LEGAL_AI_ENABLED)%'
             $baseUrl: '%env(default:legal_ai_url_default:LEGAL_AI_URL)%'
+
+    App\Service\Juridico\AzureMonitorTokenImporter:
+        arguments:
+            $tenantId: '%env(default:azure_tenant_id_default:AZURE_TENANT_ID)%'
+            $clientId: '%env(default:azure_client_id_default:AZURE_CLIENT_ID)%'
+            $clientSecret: '%env(default:azure_client_secret_default:AZURE_CLIENT_SECRET)%'
+            $resourceId: '%env(default:azure_openai_resource_id_default:AZURE_OPENAI_RESOURCE_ID)%'
+
+    App\Controller\Admin\AiTokensAdminController:
+        arguments:
+            $jurisflowBaseUrl: '%env(default:legal_ai_url_default:LEGAL_AI_URL)%'
 
     App\Command\VitoriaSmokeTestCommand:
         arguments:
