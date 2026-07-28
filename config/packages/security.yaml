@@ -32,6 +32,16 @@ security:
             custom_authenticators:
                 - App\Security\ApiTokenAuthenticator
 
+        # API interna servidor-a-servidor (JurisFlow -> Unio Jurídico). Não usa
+        # sessão/cookies nem o token da API pública — autenticação própria por
+        # segredo compartilhado no header X-Internal-Secret (ver
+        # AiInternalApiController::assertSecret). Sem isso, a rota cairia no
+        # access_control catch-all "roles: ROLE_USER" do firewall "main" e
+        # exigiria login, quebrando a chamada servidor-a-servidor.
+        api_interno:
+            pattern: ^/api/v1/interno
+            security: false
+
         main:
             lazy: true
             provider: app_user_provider
