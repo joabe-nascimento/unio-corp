@@ -2,7 +2,9 @@
 
 namespace App\Controller\Api;
 
+use App\Dev\DevSeedEmails;
 use App\Entity\User;
+use App\Service\Juridico\AiTokenUsageService;
 use App\Service\Juridico\JurisFlowAiClient;
 use App\Service\Juridico\LegalIntentDetector;
 use App\Service\Organismo\OrganismoCopyService;
@@ -29,6 +31,7 @@ final class VitoriaApiController extends AbstractController
         private VitoriaToolRegistry $toolRegistry,
         private OrganismoCopyService $organismoCopy,
         private LegalIntentDetector $legalIntentDetector,
+        private AiTokenUsageService $aiTokenUsage,
     ) {}
 
     /**
@@ -88,6 +91,28 @@ final class VitoriaApiController extends AbstractController
             'summary' => $result['summary'],
             'results' => $result['results'],
         ]);
+    }
+
+    #[Route('/ai-usage', name: 'api_vitoria_ai_usage', methods: ['GET'])]
+    public function aiUsage(): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (mb_strtolower($user->getEmail() ?? '') !== mb_strtolower(DevSeedEmails::JOABE)) {
+            return $this->json(['error' => 'Indisponível'], Response::HTTP_FORBIDDEN);
+        }
+
+        if (!$this->organismoCopy->isJuridicoProfile()) {
+            return $this->json(['error' => 'Indisponível neste perfil'], Response::HTTP_FORBIDDEN);
+        }
+
+        $summary = $this->aiTokenUsage->getSummary();
+        if ($summary === null) {
+            return $this->json(['error' => 'IA jurídica desabilitada'], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        return $this->json($summary);
     }
 
     #[Route('/chat', name: 'api_vitoria_chat', methods: ['POST'])]
