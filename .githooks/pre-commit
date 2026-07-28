@@ -1,0 +1,53 @@
+#!/bin/sh
+# Git pre-commit hook para prevenir BOM e outros problemas
+
+echo ""
+echo "🔍 Pre-commit check..."
+echo ""
+
+# Verificar se está no Windows (PowerShell disponível)
+if command -v pwsh >/dev/null 2>&1; then
+    # Executar script PowerShell
+    pwsh -ExecutionPolicy Bypass -File "$(git rev-parse --show-toplevel)/scripts/remove-bom.ps1" -CheckOnly
+    
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "❌ BOM detectado em arquivos!"
+        echo "   Execute: pwsh scripts/remove-bom.ps1"
+        echo "   Ou adicione com --no-verify (não recomendado)"
+        exit 1
+    fi
+elif command -v powershell >/dev/null 2>&1; then
+    # Fallback para PowerShell 5.x
+    powershell -ExecutionPolicy Bypass -File "$(git rev-parse --show-toplevel)/scripts/remove-bom.ps1" -CheckOnly
+    
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "❌ BOM detectado em arquivos!"
+        echo "   Execute: powershell scripts/remove-bom.ps1"
+        echo "   Ou adicione com --no-verify (não recomendado)"
+        exit 1
+    fi
+else
+    # Unix/Linux - usar script shell
+    REPO_ROOT=$(git rev-parse --show-toplevel)
+    
+    # Verificar BOM em arquivos staged
+    for file in $(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(env|php|yaml|yml|twig|js|json|xml|md|sh)$'); do
+        if [ -f "$REPO_ROOT/$file" ]; then
+            # Verificar se tem BOM (UTF-8: EF BB BF)
+            if head -c 3 "$REPO_ROOT/$file" | od -An -tx1 | grep -q 'ef bb bf'; then
+                echo "❌ BOM encontrado: $file"
+                echo ""
+                echo "Execute:"
+                echo "  sed -i '1s/^\xEF\xBB\xBF//' \"$REPO_ROOT/$file\""
+                echo "  git add \"$REPO_ROOT/$file\""
+                exit 1
+            fi
+        fi
+    done
+fi
+
+echo "✅ Pre-commit check passou!"
+echo ""
+exit 0

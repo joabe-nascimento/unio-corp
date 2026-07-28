@@ -54,6 +54,16 @@ Set-Location $root
 
 Write-Host "== Deploy manual Unio Juridico (PC -> HostGator) ==" -ForegroundColor Cyan
 
+# Pré-deploy check: remover BOM automaticamente
+Write-Host ""
+Write-Host "[0/5] Verificando e removendo BOM..." -ForegroundColor Yellow
+& "$PSScriptRoot/remove-bom.ps1"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Falha ao remover BOM" -ForegroundColor Red
+    exit 1
+}
+Write-Host ""
+
 $cfg = @{}
 Load-EnvFile "$root\config\deploy-hostgator.defaults.env" $cfg
 $localEnv = "$root\config\deploy-uniojuridico.local.env"
