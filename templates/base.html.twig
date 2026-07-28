@@ -978,16 +978,28 @@ window.addEventListener('load', runShellSidebarControls);
 
     function runHelixTool(toolName, params, confirmCardId) {
         var base = panel.dataset.vitoriaToolsUrl || '';
-        if (!base) return;
+        if (!base) {
+            console.error('[Helix] vitoriaToolsUrl não definido');
+            return;
+        }
         var url = base.replace(/\/$/, '') + '/' + encodeURIComponent(toolName);
+        console.log('[Helix] Executando ferramenta:', toolName, 'Params:', params, 'URL:', url);
+        
         fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin',
             body: JSON.stringify(params || {})
         })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                console.log('[Helix] Response status:', r.status);
+                if (!r.ok) {
+                    throw new Error('HTTP ' + r.status);
+                }
+                return r.json();
+            })
             .then(function (data) {
+                console.log('[Helix] Tool result:', data);
                 var sid = ensureSession();
                 var session = getSession(sid);
                 if (!session) return;
@@ -1003,7 +1015,8 @@ window.addEventListener('load', runShellSidebarControls);
                 renderMessages(session);
                 renderHistory();
             })
-            .catch(function () {
+            .catch(function (err) {
+                console.error('[Helix] Tool execution failed:', err);
                 var sid2 = ensureSession();
                 var session2 = getSession(sid2);
                 if (session2) {
@@ -1011,7 +1024,7 @@ window.addEventListener('load', runShellSidebarControls);
                     upsertSession(session2);
                     renderMessages(session2);
                 }
-                sendMessage('Não consegui executar a ação agora.');
+                sendMessage('Não consegui executar a ação agora. Erro: ' + err.message);
             });
     }
 
@@ -1307,10 +1320,14 @@ window.addEventListener('load', runShellSidebarControls);
 
             var btn = e.target.closest('[data-run-suggested-tool]');
             if (!btn) return;
+            
+            console.log('[Helix] Botão de ação sugerida clicado:', btn.dataset.runSuggestedTool);
+            
             var params = {};
             try {
                 params = JSON.parse(btn.dataset.runSuggestedParams || '{}');
             } catch (err) {
+                console.error('[Helix] Erro ao parsear params:', err);
                 params = {};
             }
 
@@ -1321,8 +1338,16 @@ window.addEventListener('load', runShellSidebarControls);
                 confirmCard.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
                 var icon = btn.querySelector('i');
                 if (icon) icon.className = 'fas fa-spinner fa-spin';
+            } else {
+                // Feedback visual para botões sem card de confirmação
+                btn.disabled = true;
+                var btnIcon = btn.querySelector('i');
+                if (btnIcon) {
+                    btnIcon.className = 'fas fa-spinner fa-spin';
+                }
+                btn.style.opacity = '0.7';
             }
-            btn.disabled = true;
+            
             runHelixTool(btn.dataset.runSuggestedTool, params, confirmCardId);
         });
     }
