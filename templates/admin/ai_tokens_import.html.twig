@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Importar Tokens Azure OpenAI{% endblock %}
+
+{% block body %}
+<div class="container mt-5" style="max-width: 800px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Importar Dados Históricos - Azure OpenAI
+            </h3>
+        </div>
+        <div class="card-body">
+            {% if imported %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Sucesso!</strong> Dados históricos importados com sucesso.
+                    <br><br>
+                    <a href="{{ path('org_juridico_home') }}" class="btn btn-sm btn-success">
+                        <i class="fas fa-home"></i> Voltar ao Início
+                    </a>
+                </div>
+            {% elseif error %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Erro:</strong> {{ error }}
+                </div>
+            {% endif %}
+
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> Como obter os dados do Portal Azure</h5>
+                <ol class="mb-0">
+                    <li>Acesse: <a href="https://portal.azure.com" target="_blank">portal.azure.com</a></li>
+                    <li>Vá em: <strong>Azure OpenAI</strong> → Seu recurso</li>
+                    <li>Menu lateral: <strong>Metrics</strong></li>
+                    <li>Selecione a métrica: <strong>Token Transaction</strong></li>
+                    <li>Agregação: <strong>Sum</strong></li>
+                    <li>Defina o período desejado e copie os valores totais abaixo</li>
+                </ol>
+            </div>
+
+            <form method="post">
+                <h5 class="mt-4 mb-3 text-primary">
+                    <i class="fas fa-calendar-day"></i> Hoje (últimas 24h)
+                </h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Total de Tokens</label>
+                        <input type="number" name="today_tokens" class="form-control" 
+                               placeholder="Ex: 1500" min="0" value="0">
+                        <small class="text-muted">Tokens processados hoje</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Número de Requests</label>
+                        <input type="number" name="today_requests" class="form-control" 
+                               placeholder="Ex: 10" min="0" value="0">
+                        <small class="text-muted">Chamadas de API hoje</small>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="mb-3 text-primary">
+                    <i class="fas fa-calendar-alt"></i> Mês Atual
+                </h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Total de Tokens</label>
+                        <input type="number" name="month_tokens" class="form-control" 
+                               placeholder="Ex: 45000" min="0" value="0">
+                        <small class="text-muted">Tokens do mês corrente</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Número de Requests</label>
+                        <input type="number" name="month_requests" class="form-control" 
+                               placeholder="Ex: 300" min="0" value="0">
+                        <small class="text-muted">Chamadas do mês</small>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="mb-3 text-primary">
+                    <i class="fas fa-infinity"></i> Total Histórico (Lifetime)
+                </h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Total de Tokens</label>
+                        <input type="number" name="lifetime_tokens" class="form-control" 
+                               placeholder="Ex: 200000" min="0" value="0">
+                        <small class="text-muted">Todos os tokens desde o início</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Número de Requests</label>
+                        <input type="number" name="lifetime_requests" class="form-control" 
+                               placeholder="Ex: 2000" min="0" value="0">
+                        <small class="text-muted">Total de chamadas</small>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-upload"></i>
+                        Importar Dados Históricos
+                    </button>
+                    <a href="{{ path('org_juridico_home') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+
+            <div class="alert alert-warning mt-4">
+                <h6><i class="fas fa-exclamation-triangle"></i> Importante</h6>
+                <ul class="mb-0 small">
+                    <li>Os valores importados serão <strong>somados</strong> aos dados existentes</li>
+                    <li>Não importe os mesmos dados duas vezes</li>
+                    <li>Use a estimativa 50/50 para prompt/completion tokens</li>
+                    <li>Esta ação é <strong>irreversível</strong> - verifique os valores antes de importar</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 text-muted">
+        <small>
+            <i class="fas fa-shield-alt"></i>
+            Acesso restrito a joabe.nascimento@unio.dev
+        </small>
+    </div>
+</div>
+{% endblock %}
