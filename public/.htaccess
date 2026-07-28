@@ -10,6 +10,12 @@ DirectoryIndex index.php
     RewriteCond %{HTTP:Authorization} .
     RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
+    # LiteSpeed/CGI neste host nao repassa headers customizados por padrao —
+    # sem isso, X-Internal-Secret chega vazio no PHP e a API interna
+    # (AiInternalApiController) usada pelo agente da Sasha nunca autentica.
+    RewriteCond %{HTTP:X-Internal-Secret} .
+    RewriteRule ^ - [E=HTTP_X_INTERNAL_SECRET:%{HTTP:X-Internal-Secret}]
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>

@@ -134,7 +134,14 @@ final class AiInternalApiController extends AbstractController
 
     private function assertSecret(Request $request): void
     {
+        // Preferimos o header X-Internal-Secret, mas alguns hosts (ex.: LiteSpeed/CGI
+        // na HostGator) descartam headers HTTP customizados antes de chegar ao PHP —
+        // por isso aceitamos também o segredo via query string como alternativa.
         $recebido = (string) $request->headers->get('X-Internal-Secret', '');
+        if ($recebido === '') {
+            $recebido = (string) $request->query->get('internal_secret', '');
+        }
+
         if ($this->internalSecret === '' || !hash_equals($this->internalSecret, $recebido)) {
             throw new AccessDeniedHttpException('Segredo interno inválido.');
         }
