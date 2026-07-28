@@ -27,11 +27,11 @@ $patterns = @(
 
 # Diretórios a verificar
 $directories = @(
-    ".",
     "src",
     "config",
     "templates",
-    "public",
+    "public/css",
+    "public/js",
     "tests"
 )
 
