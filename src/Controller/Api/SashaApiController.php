@@ -1,6 +1,7 @@
-﻿<?php
+<?php
 
 namespace App\Controller\Api;
+
 
 use App\Dev\DevSeedEmails;
 use App\Entity\User;
@@ -22,7 +23,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/vitoria')]
 #[IsGranted('ROLE_USER')]
-final class VitoriaApiController extends AbstractController
+final class SashaApiController extends AbstractController
 {
     /**
      * Ferramentas de leitura (não gravam nada) rodam sozinhas assim que a intenção é
@@ -65,7 +66,7 @@ final class VitoriaApiController extends AbstractController
         return $this->vitoria;
     }
 
-    #[Route('/status', name: 'api_vitoria_status', methods: ['GET'])]
+    #[Route('/status', name: 'api_sasha_status', methods: ['GET'])]
     public function status(): JsonResponse
     {
         return $this->json([
@@ -75,7 +76,7 @@ final class VitoriaApiController extends AbstractController
         ]);
     }
 
-    #[Route('/tools', name: 'api_vitoria_tools', methods: ['GET'])]
+    #[Route('/tools', name: 'api_sasha_tools', methods: ['GET'])]
     public function tools(): JsonResponse
     {
         /** @var User $user */
@@ -84,7 +85,7 @@ final class VitoriaApiController extends AbstractController
         return $this->json(['tools' => $this->toolRegistry->listFor($user)]);
     }
 
-    #[Route('/tools/{name}', name: 'api_vitoria_tool_run', methods: ['POST'])]
+    #[Route('/tools/{name}', name: 'api_sasha_tool_run', methods: ['POST'])]
     public function runTool(string $name, Request $request): JsonResponse
     {
         /** @var User $user */
@@ -111,7 +112,7 @@ final class VitoriaApiController extends AbstractController
         ]);
     }
 
-    #[Route('/ai-usage', name: 'api_vitoria_ai_usage', methods: ['GET'])]
+    #[Route('/ai-usage', name: 'api_sasha_ai_usage', methods: ['GET'])]
     public function aiUsage(): JsonResponse
     {
         /** @var User $user */
@@ -138,7 +139,7 @@ final class VitoriaApiController extends AbstractController
      * rodando via cron independente do chat). Visível para qualquer usuário do perfil
      * jurídico — é um indicador operacional, não um dado sensível.
      */
-    #[Route('/agente-status', name: 'api_vitoria_agente_status', methods: ['GET'])]
+    #[Route('/agente-status', name: 'api_sasha_agente_status', methods: ['GET'])]
     public function agenteStatus(): JsonResponse
     {
         if (!$this->organismoCopy->isJuridicoProfile()) {
@@ -148,7 +149,7 @@ final class VitoriaApiController extends AbstractController
         return $this->json($this->agenteStatus->resumo());
     }
 
-    #[Route('/chat', name: 'api_vitoria_chat', methods: ['POST'])]
+    #[Route('/chat', name: 'api_sasha_chat', methods: ['POST'])]
     public function chat(Request $request): JsonResponse
     {
         /** @var User $user */
