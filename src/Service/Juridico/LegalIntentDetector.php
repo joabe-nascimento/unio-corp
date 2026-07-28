@@ -108,6 +108,13 @@ final class LegalIntentDetector
             $acoes[] = $this->detectarJurisprudencia($mensagem, $texto);
         }
 
+        // Fallback independente de palavras-gatilho: um número de processo (CNJ) na
+        // mensagem já é intenção suficiente para buscar, mesmo em frases não previstas
+        // (ex.: "e o processo 1234567-89.2024.8.26.0100, como está?").
+        if ($acoes === [] && preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagem)) {
+            $acoes[] = $this->detectarBuscaProcesso($mensagem, $texto);
+        }
+
         return \array_slice($this->deduplicar($acoes), 0, 2);
     }
 

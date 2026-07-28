@@ -124,6 +124,21 @@ final class LegalIntentDetectorTest extends TestCase
         self::assertArrayHasKey('tipo', $acoes[0]['params']);
     }
 
+    public function testDetectaNumeroDeProcessoMesmoSemPalavraGatilho(): void
+    {
+        $acoes = $this->detector->detect('E o processo 1234567-89.2024.8.26.0100, como está a situação dele?');
+
+        self::assertSame('buscar_processo', $acoes[0]['tool']);
+        self::assertSame('1234567-89.2024.8.26.0100', $acoes[0]['params']['query']);
+    }
+
+    public function testNumeroDeProcessoNaoSobrepoeIntencaoJaDetectada(): void
+    {
+        $acoes = $this->detector->detect('Registrar prazo de audiência para 17/08/2026 no processo 1234567-89.2024.8.26.0100.');
+
+        self::assertSame('registrar_prazo', $acoes[0]['tool']);
+    }
+
     public function testLimitaNoMaximoDeDuasSugestoes(): void
     {
         $acoes = $this->detector->detect(

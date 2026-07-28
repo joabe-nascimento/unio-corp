@@ -524,6 +524,7 @@ window.addEventListener('load', runShellSidebarControls);
 <script src="{{ asset('js/unio-sidebar-identity.js') }}?v=3"></script>
 {% if org_juridico|default(false) %}
 <script src="{{ asset('js/ai-token-meter.js') }}?v=1" defer></script>
+<script src="{{ asset('js/agente-autonomo-meter.js') }}?v=1" defer></script>
 {% endif %}
 <script src="{{ asset('js/unio-ambient-sound.js') }}?v=3"></script>
 <script src="{{ asset('js/unio-input-masks.js') }}?v=4" defer></script>
@@ -1130,11 +1131,12 @@ window.addEventListener('load', runShellSidebarControls);
         })
             .then(function (r) { return r.json(); })
             .then(function (data) {
+                var actionsHtml = (renderToolActions(data.tool_results) || '') + (renderSuggestedActions(data.suggested_actions) || '');
                 session.messages.push({
                     role: 'assistant',
                     text: data.reply || assistantReplyFallback(),
                     at: new Date().toISOString(),
-                    actionsHtml: renderSuggestedActions(data.suggested_actions)
+                    actionsHtml: actionsHtml
                 });
                 session.updatedAt = new Date().toISOString();
                 upsertSession(session);

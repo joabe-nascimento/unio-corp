@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Dev\DevSeedEmails;
 use App\Entity\User;
+use App\Service\Juridico\AgenteAutonomoStatusStore;
 use App\Service\Juridico\AiTokenUsageService;
 use App\Service\Juridico\JurisFlowAiClient;
 use App\Service\Juridico\LegalIntentDetector;
@@ -23,6 +24,20 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 final class VitoriaApiController extends AbstractController
 {
+    /**
+     * Ferramentas de leitura (não gravam nada) rodam sozinhas assim que a intenção é
+     * detectada — o agente já responde com o resultado, sem exigir clique nem depender
+     * do provedor de IA externo estar disponível. Ferramentas de escrita nunca entram
+     * aqui: sempre passam pelo fluxo de confirmação explícita.
+     */
+    private const FERRAMENTAS_LEITURA_AUTOMATICA = [
+        'calcular_prazo',
+        'calcular_honorarios',
+        'analisar_carteira',
+        'tarefas_urgentes',
+        'buscar_processo',
+    ];
+
     public function __construct(
         private VitoriaClient $vitoria,
         private JurisFlowAiClient $juridicoAi,
@@ -32,6 +47,7 @@ final class VitoriaApiController extends AbstractController
         private OrganismoCopyService $organismoCopy,
         private LegalIntentDetector $legalIntentDetector,
         private AiTokenUsageService $aiTokenUsage,
+        private AgenteAutonomoStatusStore $agenteStatus,
     ) {}
 
     /**
@@ -115,6 +131,21 @@ final class VitoriaApiController extends AbstractController
         return $this->json($summary);
     }
 
+    /**
+     * Status do Agente Autônomo (monitoramento em background de prazos/tarefas/carteira,
+     * rodando via cron independente do chat). Visível para qualquer usuário do perfil
+     * jurídico — é um indicador operacional, não um dado sensível.
+     */
+    #[Route('/agente-status', name: 'api_vitoria_agente_status', methods: ['GET'])]
+    public function agenteStatus(): JsonResponse
+    {
+        if (!$this->organismoCopy->isJuridicoProfile()) {
+            return $this->json(['error' => 'Indisponível neste perfil'], Response::HTTP_FORBIDDEN);
+        }
+
+        return $this->json($this->agenteStatus->resumo());
+    }
+
     #[Route('/chat', name: 'api_vitoria_chat', methods: ['POST'])]
     public function chat(Request $request): JsonResponse
     {
@@ -159,26 +190,72 @@ final class VitoriaApiController extends AbstractController
         $isJuridico = $this->organismoCopy->isJuridicoProfile();
         $acoesSugeridas = $isJuridico ? $this->legalIntentDetector->detect($message) : [];
 
-        $result = $this->activeClient()->chat($message, $history, $context);
-        if ($result === null) {
+        // Intenção determinística já resolvida: responde na hora, sem chamar a IA externa.
+        // Mais rápido e não depende do provedor de IA estar disponível.
+        if ($isJuridico && $acoesSugeridas !== []) {
+            $auto = $this->executarAutomaticamente($user, $acoesSugeridas[0]);
+            if ($auto !== null) {
+                return $this->json([
+                    'reply' => $auto['reply'],
+                    'source' => 'agent',
+                    'suggested_actions' => [],
+                    'tool_results' => $auto['tool_results'],
+                ]);
+            }
+
             return $this->json([
-                'reply' => $acoesSugeridas !== []
-                    ? $this->mensagemParaAcoesSugeridas($acoesSugeridas)
-                    : sprintf(
-                        '%s está temporariamente indisponível. Tente novamente em instantes.',
-                        $this->organismoCopy->lumen(),
-                    ),
-                'source' => 'offline',
+                'reply' => $this->mensagemParaAcoesSugeridas($acoesSugeridas),
+                'source' => 'agent',
                 'suggested_actions' => $acoesSugeridas,
+                'tool_results' => [],
             ]);
         }
 
-        if ($isJuridico && $acoesSugeridas !== []) {
-            $result['suggested_actions'] = $acoesSugeridas;
-            $result['reply'] = $this->mensagemParaAcoesSugeridas($acoesSugeridas);
+        $result = $this->activeClient()->chat($message, $history, $context);
+        if ($result === null) {
+            return $this->json([
+                'reply' => sprintf(
+                    '%s está temporariamente indisponível. Tente novamente em instantes.',
+                    $this->organismoCopy->lumen(),
+                ),
+                'source' => 'offline',
+                'suggested_actions' => [],
+            ]);
         }
 
         return $this->json($result);
+    }
+
+    /**
+     * Executa de imediato uma ferramenta de leitura já identificada pelo detector de
+     * intenção — o agente age sozinho quando não há risco de gravação indevida.
+     *
+     * @param array{tool: string, label: string, params: array<string, mixed>} $acao
+     *
+     * @return array{reply: string, tool_results: list<array<string, mixed>>}|null
+     */
+    private function executarAutomaticamente(User $user, array $acao): ?array
+    {
+        $tool = (string) ($acao['tool'] ?? '');
+        if (!\in_array($tool, self::FERRAMENTAS_LEITURA_AUTOMATICA, true)) {
+            return null;
+        }
+        if (!$this->toolRegistry->supports($user, $tool)) {
+            return null;
+        }
+
+        $toolObj = $this->toolRegistry->get($tool);
+        if ($toolObj === null) {
+            return null;
+        }
+
+        $execResult = $toolObj->execute($user, \is_array($acao['params'] ?? null) ? $acao['params'] : []);
+        $summary = trim((string) ($execResult['summary'] ?? ''));
+
+        return [
+            'reply' => $summary !== '' ? $summary : 'Já verifiquei isso pra você.',
+            'tool_results' => \is_array($execResult['results'] ?? null) ? $execResult['results'] : [],
+        ];
     }
 
     /**
