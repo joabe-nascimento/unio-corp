@@ -64,6 +64,11 @@ CI_REPORT_STEP="Limpar cache prod corrompido"
 ci_report_step "$CI_REPORT_STEP"
 rm -rf var/cache/prod/* 2>/dev/null || true
 
+# Remover arquivos órfãos de renomeações git mv
+if [[ -f "$ROOT/scripts/cleanup-orphaned-files.sh" ]]; then
+  bash "$ROOT/scripts/cleanup-orphaned-files.sh"
+fi
+
 CI_REPORT_STEP="Doctrine schema / migrations"
 ci_report_step "$CI_REPORT_STEP"
 
