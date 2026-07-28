@@ -844,9 +844,9 @@ class NavigationService
                 ),
             ),
             [
-                'id' => 'bruna',
+                'id' => 'sasha',
                 'icon' => 'fa-robot',
-                'label' => $this->shortMobileLabel((string) ($copy['lumen'] ?? 'Bruna')),
+                'label' => $this->shortMobileLabel((string) ($copy['lumen'] ?? 'Sasha')),
                 'type' => 'action',
                 'action' => 'open-helix',
                 'active' => false,
