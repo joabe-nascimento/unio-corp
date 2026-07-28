@@ -84,7 +84,7 @@ final class OrganismoCopyService
 
     public function lumen(): string
     {
-        return 'Lumen';
+        return $this->isJuridicoProfile() ? 'Sasha' : 'Lumen';
     }
 
     /** @return array<string, string> */
