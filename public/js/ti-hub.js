@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hub TI — charts, chamados (wizard + filtros + kanban/lista)
  */
 (function () {
@@ -723,7 +723,7 @@
             if (panel) {
                 panel.hidden = false;
                 var status = panel.querySelector('[data-ti-helia-status]');
-                if (status) status.textContent = 'Vitória analisando…';
+                if (status) status.textContent = 'Sasha analisando…';
             }
 
             var body = new FormData();

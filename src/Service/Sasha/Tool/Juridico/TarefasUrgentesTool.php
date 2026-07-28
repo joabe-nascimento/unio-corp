@@ -1,15 +1,15 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Service\Juridico\JuridicoProcessoTarefaService;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class TarefasUrgentesTool implements VitoriaToolInterface
+final class TarefasUrgentesTool implements SashaToolInterface
 {
     private const DIAS_PROXIMO = 3;
 

@@ -1,12 +1,12 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Repository\JuridicoProcessoRepository;
 use App\Service\Juridico\PrazoProcessualCalculator;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 
 /**
@@ -16,7 +16,7 @@ use App\Service\WorkspaceService;
  * Se `processo_id` for informado, encadeia com a `criar_tarefa`: sugere já deixar o
  * vencimento anotado como tarefa nesse processo, mas só grava depois de confirmado.
  */
-final class CalcularPrazoTool implements VitoriaToolInterface
+final class CalcularPrazoTool implements SashaToolInterface
 {
     use ConfirmableToolTrait;
 

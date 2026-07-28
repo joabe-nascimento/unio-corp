@@ -1,10 +1,10 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria;
+namespace App\Service\Sasha;
 
 use App\Entity\User;
 
-interface VitoriaToolInterface
+interface SashaToolInterface
 {
     public function getName(): string;
 

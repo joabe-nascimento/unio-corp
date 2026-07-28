@@ -1,7 +1,7 @@
-# Serviços locais e validação de qualidade (espelha o CI).
+﻿# Serviços locais e validação de qualidade (espelha o CI).
 #
-# Vitória AI (dev):
-#   docker compose up vitoria-ai
+# Sasha AI (dev):
+#   docker compose up Sasha-ai
 #
 # Validação completa antes de push/deploy (MariaDB + lints + seeds + PHPStan + PHPUnit):
 #   docker compose --profile validate run --rm validate
@@ -12,17 +12,17 @@
 #   composer hooks:install
 
 services:
-  vitoria-ai:
+  Sasha-ai:
     build:
-      context: ./services/vitoria-ai
+      context: ./services/Sasha-ai
       dockerfile: Dockerfile
     ports:
       - "8100:8100"
     environment:
-      VITORIA_HOST: 0.0.0.0
-      VITORIA_PORT: 8100
-      VITORIA_API_KEY: dev-vitoria-key-change-me
-      VITORIA_ENV: development
+      Sasha_HOST: 0.0.0.0
+      Sasha_PORT: 8100
+      Sasha_API_KEY: dev-Sasha-key-change-me
+      Sasha_ENV: development
       # OPENAI_API_KEY: sk-...
     restart: unless-stopped
 

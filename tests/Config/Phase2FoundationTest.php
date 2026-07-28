@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 
 namespace App\Tests\Config;
 
 use App\Service\PosOperatorio\PosOperatorioMercureTopics;
-use App\Service\PosOperatorio\VitoriaContextService;
+use App\Service\PosOperatorio\SashaContextService;
 use PHPUnit\Framework\TestCase;
 
 final class Phase2FoundationTest extends TestCase
@@ -17,9 +17,9 @@ final class Phase2FoundationTest extends TestCase
         );
     }
 
-    public function testVitoriaContextEnrichmentStructure(): void
+    public function testSashaContextEnrichmentStructure(): void
     {
-        $service = new VitoriaContextService(
+        $service = new SashaContextService(
             $this->createMock(\App\Repository\PosOperatorioPacienteRepository::class),
             $this->createMock(\App\Repository\PosOperatorioAlertaRepository::class),
         );

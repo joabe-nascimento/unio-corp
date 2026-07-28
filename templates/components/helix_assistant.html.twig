@@ -1,20 +1,20 @@
-{# Lumen — assistente Organismo (legado: Vitória) #}
+﻿{# Lumen — assistente Organismo (legado: Sasha) #}
 {% import 'macros/helix.html.twig' as helix %}
 {% set _org = organismo.enabled|default(false) %}
 {% set _clinic = org_clinic|default(false) %}
 {% set _juridico = org_juridico|default(false) %}
 {% set _copy = organismo.copy|default({}) %}
-{% set _assistant = _juridico ? 'Bruna' : (_org ? _copy.lumen|default('Lumen') : 'Vitória') %}
+{% set _assistant = _juridico ? 'Sasha' : (_org ? _copy.lumen|default('Lumen') : 'Sasha') %}
 {% set _subtitle = _org ? (_clinic ? (_copy.lumen_subtitle|default('Assistente clínico')) : (_juridico ? (_copy.lumen_subtitle|default('Assistente jurídica')) : (_copy.lumen_subtitle|default('Consciência da colônia')))) : 'Assistente virtual' %}
 {% set _slogan = _copy.brand_slogan|default('Saúde que acompanha.') %}
-{% set _avatar_src = _juridico ? 'images/marketing/bruna-assistant-juridico.jpg' : 'images/avatar.jpg' %}
+{% set _avatar_src = _juridico ? 'images/marketing/Sasha-assistant-juridico.jpg' : 'images/avatar.jpg' %}
 
 <div id="helixPanel"
      class="helix-panel{% if _org %} helix-panel--lumen{% endif %}"
      aria-hidden="true"
      {% if app.user %} data-user-first="{{ app.user.nome|split(' ')|first|e('html_attr') }}"{% endif %}
-     data-vitoria-chat-url="{{ path('api_vitoria_chat') }}"
-     data-vitoria-tools-url="{{ path('api_vitoria_tools') }}"
+     data-Sasha-chat-url="{{ path('api_Sasha_chat') }}"
+     data-Sasha-tools-url="{{ path('api_Sasha_tools') }}"
      data-assistant-name="{{ _assistant|e('html_attr') }}"
      data-assistant-avatar="{{ asset(_avatar_src) }}"
      data-organismo="{{ _org ? '1' : '0' }}"

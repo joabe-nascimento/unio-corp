@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Tests\Functional;
 
@@ -6,12 +6,12 @@ use App\Dev\DevSeedEmails;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-final class VitoriaToolsApiTest extends WebTestCase
+final class SashaToolsApiTest extends WebTestCase
 {
     public function testToolsListRequiresAuth(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/vitoria/tools');
+        $client->request('GET', '/api/Sasha/tools');
         self::assertTrue(
             $client->getResponse()->isRedirect()
             || $client->getResponse()->getStatusCode() === 403,
@@ -28,14 +28,14 @@ final class VitoriaToolsApiTest extends WebTestCase
         ]);
         $client->followRedirect();
 
-        $client->request('GET', '/api/vitoria/tools');
+        $client->request('GET', '/api/Sasha/tools');
         self::assertResponseIsSuccessful();
         $list = json_decode($client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR);
         self::assertNotEmpty($list['tools'] ?? []);
 
         $client->request(
             'POST',
-            '/api/vitoria/tools/abrir_admissao',
+            '/api/Sasha/tools/abrir_admissao',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: '{}',
         );
@@ -57,7 +57,7 @@ final class VitoriaToolsApiTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/vitoria/tools/buscar_membro',
+            '/api/Sasha/tools/buscar_membro',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode(['query' => 'a'], \JSON_THROW_ON_ERROR),
         );

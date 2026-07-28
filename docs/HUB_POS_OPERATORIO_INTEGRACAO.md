@@ -1,4 +1,4 @@
-# Integração do Hub Pós-Operatório na Plataforma Unio
+﻿# Integração do Hub Pós-Operatório na Plataforma Unio
 
 Documentação completa de como o **sistema de acompanhamento pós-operatório** proposto pelo Professor Paulo se integra à arquitetura, navegação, permissões e serviços transversais da plataforma Unio.
 
@@ -48,7 +48,7 @@ A Unio não é um prontuário eletrônico (PEP) completo — é uma **plataforma
 | Hub TI (alertas, SLA, War Room) | Alertas clínicos P1–P4 |
 | RH (workflows + checklist) | Protocolo pós-cirúrgico por fases |
 | Bate-papo | Comunicação paciente ↔ equipe |
-| Vitória IA | Orientações e triagem |
+| Sasha IA | Orientações e triagem |
 | Hub Integrações | Alta cirúrgica vinda do PEP/ERP |
 | Notificações + Mercure | Alertas em tempo real |
 
@@ -104,7 +104,7 @@ O hub usa o **layout padrão de núcleos** (`templates/layout/hub.html.twig`):
 - tabela de pacientes recentes;
 - painel de alertas P1/P2;
 - cards dos 6 módulos do núcleo;
-- card **Vitória · Insight** com sugestão operacional.
+- card **Sasha · Insight** com sugestão operacional.
 
 ### 2.4 Produtos internos do núcleo
 
@@ -153,7 +153,7 @@ flowchart TB
 
     subgraph Transversal["Serviços transversais Unio"]
         CHAT[Bate-papo]
-        VIT[Vitória IA]
+        VIT[Sasha IA]
         NOTIF[Notificações]
         INT[Hub Integrações]
         AUDIT[Auditoria]
@@ -268,7 +268,7 @@ Para adicionar novas rotas de produto, repetir o padrão documentado em `docs/QU
 │ PO-1041  João P.    Apendicectomia D+1│  │ P2  Febre 38,2°C     18 min  │
 └──────────────────────────────────────┘  └────────────────────────────────┘
 
-┌─ Vitória · Insight ──────────────────────────────────────────────────────┐
+┌─ Sasha · Insight ──────────────────────────────────────────────────────┐
 │ 2 pacientes em D+1 sem questionário hoje. Enviar lembrete antes das 20h. │
 └──────────────────────────────────────────────────────────────────────────┘
 
@@ -304,7 +304,7 @@ Interface simplificada, sem sidebar de núcleos:
 │  [ Responder agora ]        │
 ├─────────────────────────────┤
 │  💬 Falar com a equipe      │
-│  🤖 Perguntar à Vitória     │
+│  🤖 Perguntar à Sasha     │
 ├─────────────────────────────┤
 │  📖 Orientações pós-op      │
 │  • Medicação                │
@@ -402,7 +402,7 @@ sequenceDiagram
 | Dor ≥ 8/10 | P1 | 15 min |
 | Sangramento ativo | P1 | 15 min |
 | Questionário não respondido 24h | P3 | 4 h |
-| Dúvida Vitória não resolvida | P4 | 8 h |
+| Dúvida Sasha não resolvida | P4 | 8 h |
 
 *(Valores configuráveis por protocolo.)*
 
@@ -446,7 +446,7 @@ sequenceDiagram
 - histórico auditável (substitui WhatsApp informal);
 - integração via serviço de chat existente + `empresa_id` + referência `paciente_id`.
 
-### 7.4 Vitória IA
+### 7.4 Sasha IA
 
 Contexto injetado no prompt:
 
@@ -570,7 +570,7 @@ erDiagram
 |-------|------|-----------|
 | id | int PK | |
 | paciente_id | FK | |
-| tipo | varchar(32) | cadastro, questionario, alerta, chat, vitória |
+| tipo | varchar(32) | cadastro, questionario, alerta, chat, Sasha |
 | descricao | text | |
 | autor_id | FK User nullable | |
 | criado_em | datetime | |
@@ -689,7 +689,7 @@ Política sugerida (configurável por workspace):
 ### Fase 2 — Operacional (4–6 semanas)
 
 - [ ] Chat por paciente
-- [ ] Vitória com contexto clínico
+- [ ] Sasha com contexto clínico
 - [ ] SLA e métricas no painel
 - [ ] Lembretes automáticos (questionário pendente)
 - [ ] Export PDF/CSV

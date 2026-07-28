@@ -1,10 +1,10 @@
-<?php
+﻿<?php
 
 namespace App\Command;
 
 use App\Dev\DevSeedEmails;
 
-use App\Service\Vitoria\VitoriaClient;
+use App\Service\Sasha\SashaClient;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,7 +19,7 @@ use Symfony\Component\HttpClient\HttpClient;
 final class VitoriaSmokeTestCommand extends Command
 {
     public function __construct(
-        private VitoriaClient $vitoria,
+        private SashaClient $vitoria,
         private string $defaultUri,
     ) {
         parent::__construct();

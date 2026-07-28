@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 {% set _pnome = platform_config.plataforma_nome|default('Unio') %}
 {% set _tema  = platform_config.tema|default('dark') %}
 <html lang="pt-BR" data-theme="{{ _tema }}">
@@ -660,7 +660,7 @@ window.addEventListener('load', runShellSidebarControls);
     var subtitleDefault = subtitleEl ? subtitleEl.textContent : '';
 
     function assistantName() {
-        return panel.dataset.assistantName || (panel.dataset.juridico === '1' ? 'Bruna' : 'Vitória');
+        return panel.dataset.assistantName || (panel.dataset.juridico === '1' ? 'Sasha' : 'Sasha');
     }
 
     function setHelixLoading(loading) {
@@ -933,7 +933,7 @@ window.addEventListener('load', runShellSidebarControls);
     /**
      * Cartão de confirmação antes de qualquer gravação (criar tarefa, registrar prazo,
      * salvar jurisprudência…). Nada é escrito no sistema sem o clique explícito aqui —
-     * é o "aperto de mão" humano entre a sugestão da Bruna e a ação de verdade.
+     * é o "aperto de mão" humano entre a sugestão da Sasha e a ação de verdade.
      */
     function renderConfirmCard(item) {
         var cardId = 'helix-confirm-' + (++helixConfirmCardSeq);
@@ -959,7 +959,7 @@ window.addEventListener('load', runShellSidebarControls);
 
     /**
      * Botões "Executar" sugeridos pela camada de intenção (LegalIntentDetector) junto
-     * com a resposta da Bruna — a IA responde em texto, e ao lado disso o sistema já
+     * com a resposta da Sasha — a IA responde em texto, e ao lado disso o sistema já
      * oferece a ação determinística (calcular prazo, honorários, analisar carteira…)
      * pronta para rodar com um clique, sem depender do serviço de IA estar disponível.
      */
@@ -978,9 +978,9 @@ window.addEventListener('load', runShellSidebarControls);
     }
 
     function runHelixTool(toolName, params, confirmCardId) {
-        var base = panel.dataset.vitoriaToolsUrl || '';
+        var base = panel.dataset.SashaToolsUrl || '';
         if (!base) {
-            console.error('[Helix] vitoriaToolsUrl não definido');
+            console.error('[Helix] SashaToolsUrl não definido');
             return;
         }
         var url = base.replace(/\/$/, '') + '/' + encodeURIComponent(toolName);
@@ -1100,7 +1100,7 @@ window.addEventListener('load', runShellSidebarControls);
             updateSendState();
         }
 
-        var chatUrl = panel.dataset.vitoriaChatUrl || '';
+        var chatUrl = panel.dataset.SashaChatUrl || '';
         if (!chatUrl) {
             session.messages.push({ role: 'assistant', text: assistantReplyFallback(), at: new Date().toISOString() });
             upsertSession(session);

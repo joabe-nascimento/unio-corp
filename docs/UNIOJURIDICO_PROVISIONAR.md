@@ -1,4 +1,4 @@
-# Checklist — Provisionar Unio Jurídico no HostGator (primeira vez)
+﻿# Checklist — Provisionar Unio Jurídico no HostGator (primeira vez)
 
 Guia passo a passo para configurar o subdomínio **uniojuridico.uniowork.com.br** e banco de dados no cPanel da HostGator.
 
@@ -264,7 +264,7 @@ bash "$DEPLOY_PATH/scripts/lib/sync-public-html-entrypoint.sh"
 3. ✅ Login funcionando
 4. 🔲 Subir JurisFlow AI Service (IA jurídica) — ver [docs/uniojuridico/README.md](uniojuridico/README.md)
 5. 🔲 Configurar `LEGAL_AI_URL` no `.env.local`
-6. 🔲 Testar chat da Bruna no Pulso
+6. 🔲 Testar chat da Sasha no Pulso
 7. 🔲 Cadastrar primeiro escritório/cliente
 
 ---

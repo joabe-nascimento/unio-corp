@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+﻿import { chromium } from 'playwright';
 
 const BASE = process.env.UNIO_BASE_URL || 'http://127.0.0.1:8000';
 const EMAIL = process.env.UNIO_TEST_EMAIL || 'joabe.nascimento@unio.dev';
@@ -18,13 +18,13 @@ async function main() {
   console.log('   Pós-login:', page.url());
   await page.goto(`${BASE}/pos-operatorio`, { waitUntil: 'networkidle' });
 
-  console.log('2. Abrir painel Vitória (Helix)');
+  console.log('2. Abrir painel Sasha (Helix)');
   await page.waitForSelector('#helixOpenBtn', { timeout: 15000 });
   await page.click('#helixOpenBtn');
   await page.waitForSelector('#helixPanel.is-open', { timeout: 5000 });
   await page.evaluate(() => document.querySelector('.sf-toolbar')?.remove());
 
-  const chatUrl = await page.getAttribute('#helixPanel', 'data-vitoria-chat-url');
+  const chatUrl = await page.getAttribute('#helixPanel', 'data-sasha-chat-url');
   console.log('   URL chat Symfony:', chatUrl);
 
   console.log('3. Enviar mensagem de teste');
@@ -33,7 +33,7 @@ async function main() {
   await page.dispatchEvent('#helixInput', 'input');
 
   const [response] = await Promise.all([
-    page.waitForResponse((r) => r.url().includes('/api/vitoria/chat') && r.status() === 200, { timeout: 25000 }),
+    page.waitForResponse((r) => r.url().includes('/api/sasha/chat') && r.status() === 200, { timeout: 25000 }),
     page.locator('#helixForm').evaluate((form) => form.requestSubmit()),
   ]);
   const apiBody = await response.json();
@@ -49,11 +49,11 @@ async function main() {
     nodes.map((n) => n.textContent?.trim() || ''),
   );
   const lastReply = assistantTexts[assistantTexts.length - 1] || '';
-  console.log('4. Resposta da Vitória:', lastReply.slice(0, 200));
+  console.log('4. Resposta da Sasha:', lastReply.slice(0, 200));
 
   const offline = lastReply.includes('Não consegui contactar');
   if (offline) {
-    console.error('FALHA: Vitória offline no proxy Symfony');
+    console.error('FALHA: Sasha offline no proxy Symfony');
     process.exit(1);
   }
 

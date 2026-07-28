@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Tests\Functional;
 
@@ -6,13 +6,13 @@ use App\Dev\DevSeedEmails;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-final class VitoriaChatApiTest extends WebTestCase
+final class SashaChatApiTest extends WebTestCase
 {
-    private static function requireVitoriaPythonOnline(): void
+    private static function requireSashaPythonOnline(): void
     {
-        $url = getenv('VITORIA_AI_URL') ?: ($_ENV['VITORIA_AI_URL'] ?? '');
+        $url = getenv('Sasha_AI_URL') ?: ($_ENV['Sasha_AI_URL'] ?? '');
         if ($url === '') {
-            self::markTestSkipped('VITORIA_AI_URL não configurado.');
+            self::markTestSkipped('Sasha_AI_URL não configurado.');
         }
 
         $parts = parse_url($url);
@@ -25,9 +25,9 @@ final class VitoriaChatApiTest extends WebTestCase
         fclose($fp);
     }
 
-    public function testAuthenticatedChatProxyReturnsVitoriaReply(): void
+    public function testAuthenticatedChatProxyReturnsSashaReply(): void
     {
-        self::requireVitoriaPythonOnline();
+        self::requireSashaPythonOnline();
 
         $client = static::createClient();
         $client->request('GET', '/login');
@@ -44,7 +44,7 @@ final class VitoriaChatApiTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/vitoria/chat',
+            '/api/Sasha/chat',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
                 'message' => 'Como priorizo alertas P1 no pós-operatório?',
@@ -60,9 +60,9 @@ final class VitoriaChatApiTest extends WebTestCase
         self::assertContains($data['source'] ?? '', ['fallback', 'llm', 'guardrail']);
     }
 
-    public function testVitoriaStatusReportsOnlineWhenPythonRunning(): void
+    public function testSashaStatusReportsOnlineWhenPythonRunning(): void
     {
-        self::requireVitoriaPythonOnline();
+        self::requireSashaPythonOnline();
         $client = static::createClient();
         $client->request('GET', '/login');
         $client->submitForm('Entrar na plataforma', [
@@ -71,7 +71,7 @@ final class VitoriaChatApiTest extends WebTestCase
         ]);
         $client->followRedirect();
 
-        $client->request('GET', '/api/vitoria/status');
+        $client->request('GET', '/api/Sasha/status');
         self::assertResponseIsSuccessful();
         $data = json_decode($client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR);
         self::assertTrue($data['enabled'] ?? false);

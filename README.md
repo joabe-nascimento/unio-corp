@@ -1,4 +1,4 @@
-# Unio — Plataforma de Gestão de Pessoas
+﻿# Unio — Plataforma de Gestão de Pessoas
 
 Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Maturidade.
 
@@ -76,8 +76,8 @@ npm run docs:pos-operatorio-pdf
 ### Serviços Docker opcionais
 
 ```bash
-# Vitória AI (assistente) — serviço definido em docker-compose.yml
-docker compose up -d vitoria-ai
+# Sasha AI (assistente) — serviço definido em docker-compose.yml
+docker compose up -d Sasha-ai
 
 # Mercure e Redis: configure no .env para produção (ver config/packages/prod/cache.yaml).
 # Não há serviços mercure/redis no compose local neste repositório.

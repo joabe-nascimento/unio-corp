@@ -1,4 +1,4 @@
-# Hub Pós-Operatório — Proposta Técnica Unio
+﻿# Hub Pós-Operatório — Proposta Técnica Unio
 
 > **Documentação completa de integração:** [HUB_POS_OPERATORIO_INTEGRACAO.md](./HUB_POS_OPERATORIO_INTEGRACAO.md)  
 > **PDF para reunião/apresentação:** [HUB_POS_OPERATORIO_INTEGRACAO.pdf](./HUB_POS_OPERATORIO_INTEGRACAO.pdf)  
@@ -15,7 +15,7 @@ A Unio é uma plataforma **multi-empresa (workspace)** com **hubs modulares**. U
 - autenticação e permissões granulares
 - notificações e alertas (padrão Hub TI)
 - bate-papo integrado
-- Vitória IA (copiloto contextual)
+- Sasha IA (copiloto contextual)
 - integrações via API/webhooks
 - conformidade LGPD (workspace isolado + auditoria)
 
@@ -48,7 +48,7 @@ Plataforma Unio
 │   │   ├── Produto: Alertas
 │   │   ├── Produto: Painel médico
 │   │   └── Produto: Portal do paciente
-│   └── Serviços compartilhados (Chat, Vitória, Notificações, API)
+│   └── Serviços compartilhados (Chat, Sasha, Notificações, API)
 └── Permissões: escopo × produto × perfil (MEMBRO → GESTOR)
 ```
 
@@ -83,7 +83,7 @@ Referência: `docs/ESTRUTURA.md`, `docs/QUALIDADE_PERFORMANCE_E_HUBS.md`
 3. **Questionário diário** → paciente responde no celular (dor, febre, sangramento, mobilidade)
 4. **Motor de alertas** → respostas críticas disparam notificação (equivalente a chamado P1 no Hub TI)
 5. **Equipe responde** → chat + registro na linha do tempo
-6. **Vitória IA** → orienta dúvidas frequentes e escala para humano quando necessário
+6. **Sasha IA** → orienta dúvidas frequentes e escala para humano quando necessário
 7. **Encerramento** → alta do acompanhamento + relatório exportável
 
 ---
@@ -97,7 +97,7 @@ Referência: `docs/ESTRUTURA.md`, `docs/QUALIDADE_PERFORMANCE_E_HUBS.md`
 | Sala de crise | War Room (TI) | Adaptar |
 | Workflow com checklist | RH — admissão/offboarding | Adaptar |
 | Chat paciente ↔ equipe | Bate-papo | Reutilizar |
-| Orientações automáticas | Vitória IA | Reutilizar + contexto clínico |
+| Orientações automáticas | Sasha IA | Reutilizar + contexto clínico |
 | Dashboard KPIs | Hub TI / RH | Reutilizar layout |
 | Integração prontuário | Hub Integrações | Reutilizar |
 | LGPD | Auditoria + workspace isolado | Reutilizar + reforço saúde |
@@ -148,7 +148,7 @@ Referência: `docs/ESTRUTURA.md`, `docs/QUALIDADE_PERFORMANCE_E_HUBS.md`
 ### Fase 2 — Operacional (4–6 semanas)
 
 - [ ] Chat integrado paciente ↔ equipe
-- [ ] Vitória IA com base de orientações pós-op
+- [ ] Sasha IA com base de orientações pós-op
 - [ ] SLA de resposta da equipe
 - [ ] Relatórios e exportação PDF/CSV
 - [ ] Notificações push/e-mail
@@ -181,7 +181,7 @@ A base LGPD da Unio (workspace isolado, grants, sessão segura) já cobre parte 
 | Item | Benefício |
 |------|-----------|
 | Menos readmissões | Detecção precoce de complicações |
-| Menos ligações | Questionário + Vitória respondem dúvidas rotineiras |
+| Menos ligações | Questionário + Sasha respondem dúvidas rotineiras |
 | Registro único | Substituir WhatsApp solto + planilha |
 | Escala | Mesma plataforma para N clínicas (workspaces) |
 

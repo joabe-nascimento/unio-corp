@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\JuridicoProcesso;
 use App\Entity\User;
 use App\Repository\JuridicoProcessoRepository;
 use App\Service\Juridico\JuridicoRiscoAlertaService;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * já usado no painel de Processos) e devolve um raio-x priorizado — sem IA generativa,
  * direto do banco de dados da empresa ativa.
  */
-final class AnalisarCarteiraTool implements VitoriaToolInterface
+final class AnalisarCarteiraTool implements SashaToolInterface
 {
     public function __construct(
         private OrganismoCopyService $organismoCopy,

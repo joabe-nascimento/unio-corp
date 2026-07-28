@@ -1,8 +1,8 @@
-# Como Iniciar o JurisFlow AI Service
+﻿# Como Iniciar o JurisFlow AI Service
 
 ## ⚠️ IMPORTANTE
 
-O **JurisFlow** é um serviço Python separado que precisa estar rodando para a Bruna funcionar.  
+O **JurisFlow** é um serviço Python separado que precisa estar rodando para a Sasha funcionar.  
 Sem ele, o chat retorna "Lumen está temporariamente indisponível".
 
 ---
@@ -87,7 +87,7 @@ Seguir: `DEPLOY_HOSTGATOR.md` no repositório do JurisFlow
 - [ ] `/health` retorna `{"status":"ok"}`
 - [ ] `/v1/status` retorna JSON com `"status":"online"`
 - [ ] `.env` do Unio Jurídico tem `LEGAL_AI_URL=http://127.0.0.1:8090`
-- [ ] Chat da Bruna responde (não diz "indisponível")
+- [ ] Chat da Sasha responde (não diz "indisponível")
 
 ---
 
@@ -101,7 +101,7 @@ Seguir: `DEPLOY_HOSTGATOR.md` no repositório do JurisFlow
 - **Causa:** Porta 8090 já ocupada
 - **Solução:** Matar processo anterior com `taskkill /F /IM python.exe`
 
-### "detail": "Not Found" no endpoint `/v1/assistant/bruna/chat`
+### "detail": "Not Found" no endpoint `/v1/assistant/Sasha/chat`
 - **Causa:** Código desatualizado do JurisFlow
 - **Solução:** `git pull` no repositório do JurisFlow e reiniciar
 

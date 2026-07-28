@@ -1,4 +1,4 @@
-# Unio Jurídico — Setup inicial (servidor)
+﻿# Unio Jurídico — Setup inicial (servidor)
 
 Script de reparo/setup para configurar o subdomínio **uniojuridico.uniowork.com.br** após o provisionamento inicial no cPanel.
 
@@ -126,7 +126,7 @@ Se o serviço estiver em outro servidor, ajuste `LEGAL_AI_URL` para a URL públi
 2. Alterar senha default (`unio123`) em `/admin/usuario`
 3. Configurar branding (logo, cores) em `/admin/configuracoes`
 4. Subir o JurisFlow AI Service e configurar `LEGAL_AI_URL` no `.env.local`
-5. Testar chat da IA (Bruna) no Pulso
+5. Testar chat da IA (Sasha) no Pulso
 
 ---
 

@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Service\Juridico\HonorariosCalculator;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 
-final class CalcularHonorariosTool implements VitoriaToolInterface
+final class CalcularHonorariosTool implements SashaToolInterface
 {
     public function __construct(
         private OrganismoCopyService $organismoCopy,

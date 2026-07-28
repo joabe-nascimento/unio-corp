@@ -1,19 +1,19 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool;
+namespace App\Service\Sasha\Tool;
 
 use App\Entity\User;
-use App\Repository\RhFeriasRepository;
+use App\Repository\FuncionarioRepository;
 use App\Service\NavigationService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class FeriasPendentesTool implements VitoriaToolInterface
+final class BuscarMembroTool implements SashaToolInterface
 {
     public function __construct(
         private WorkspaceService $workspace,
-        private RhFeriasRepository $feriasRepo,
+        private FuncionarioRepository $funcionarioRepo,
         private NavigationService $navigation,
         private UrlGeneratorInterface $router,
     ) {
@@ -21,12 +21,12 @@ final class FeriasPendentesTool implements VitoriaToolInterface
 
     public function getName(): string
     {
-        return 'ferias_pendentes';
+        return 'buscar_membro';
     }
 
     public function getDescription(): string
     {
-        return 'Lista férias aguardando aprovação na colônia';
+        return 'Busca membros da colônia por nome, e-mail ou CPF';
     }
 
     public function getRequiredScopes(): array
@@ -46,22 +46,26 @@ final class FeriasPendentesTool implements VitoriaToolInterface
             return ['summary' => 'Nenhuma colônia ativa.', 'results' => []];
         }
 
-        $pendentes = $this->feriasRepo->findPendingRecent($empresa, 10);
+        $query = trim((string) ($params['query'] ?? $params['q'] ?? ''));
+        if ($query === '') {
+            return ['summary' => 'Informe um nome ou termo de busca.', 'results' => []];
+        }
+
+        $found = $this->funcionarioRepo->findForEmpresa($empresa, null, $query);
         $results = [];
-        foreach ($pendentes as $ferias) {
-            $func = $ferias->getFuncionario();
+        foreach (\array_slice($found, 0, 8) as $func) {
             $results[] = [
-                'id' => $ferias->getId(),
-                'membro' => $func->getNome(),
-                'status' => $ferias->getStatus(),
-                'url' => $this->router->generate('app_rh_ferias'),
+                'id' => $func->getId(),
+                'nome' => $func->getNome(),
+                'email' => $func->getEmail(),
+                'url' => $this->router->generate('app_rh_funcionario_show', ['id' => $func->getId()]),
             ];
         }
 
         $count = \count($results);
         $summary = $count === 0
-            ? 'Não há férias pendentes de aprovação.'
-            : sprintf('%d solicitação(ões) aguardando aprovação.', $count);
+            ? 'Nenhum membro encontrado.'
+            : ($count === 1 ? 'Encontrei 1 membro.' : sprintf('Encontrei %d membros.', $count));
 
         return ['summary' => $summary, 'results' => $results];
     }

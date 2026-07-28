@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 
 namespace App\Service\PosOperatorio;
 
 use App\Entity\PosOperatorioPaciente;
-use App\Service\Vitoria\VitoriaClient;
+use App\Service\Sasha\SashaClient;
 
 /**
  * Motor de triagem clínica — Vitória com fallback local.
@@ -11,7 +11,7 @@ use App\Service\Vitoria\VitoriaClient;
 final class PosOperatorioTriageService
 {
     public function __construct(
-        private VitoriaClient $vitoria,
+        private SashaClient $vitoria,
     ) {}
 
     /**

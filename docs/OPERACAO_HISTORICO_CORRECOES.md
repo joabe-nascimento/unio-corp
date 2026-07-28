@@ -1,4 +1,4 @@
-# Histórico de correções — erros até sucesso (jul/2026)
+﻿# Histórico de correções — erros até sucesso (jul/2026)
 
 Cronologia do trabalho de estabilização: sessão 403, pipeline CI/CD, deploy HostGator, kanban, permissões e validação automática.
 
@@ -47,7 +47,7 @@ Cronologia do trabalho de estabilização: sessão 403, pipeline CI/CD, deploy H
 | Erro | Fix |
 |------|-----|
 | PHPStan 38+ erros | Baseline regenerado (`0590eb4`) |
-| `VitoriaChatApiTest` falha sem Python | Skip quando porta 8100 offline (`8079078`) |
+| `SashaChatApiTest` falha sem Python | Skip quando porta 8100 offline (`8079078`) |
 | PHPStan no push `production` | Ignorado via `GIT_BRANCH=production` no script de validação |
 | `SystemValidationServiceTest` — supervisor | Grant legado `GESTOR` em `product_pessoas/membros`; seed `--force` limpa grants (`62d3203`) |
 

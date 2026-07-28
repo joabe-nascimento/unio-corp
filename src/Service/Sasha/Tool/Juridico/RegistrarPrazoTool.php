@@ -1,12 +1,12 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Repository\JuridicoProcessoRepository;
 use App\Service\Juridico\JuridicoPrazoService;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * Registra um compromisso na agenda de "Prazos & Diligências" do escritório —
  * com prévia e confirmação antes de gravar, igual às demais ferramentas de escrita.
  */
-final class RegistrarPrazoTool implements VitoriaToolInterface
+final class RegistrarPrazoTool implements SashaToolInterface
 {
     use ConfirmableToolTrait;
 

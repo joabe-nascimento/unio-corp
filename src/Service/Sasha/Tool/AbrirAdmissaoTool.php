@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool;
+namespace App\Service\Sasha\Tool;
 
 use App\Entity\User;
 use App\Service\NavigationService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class AbrirAdmissaoTool implements VitoriaToolInterface
+final class AbrirAdmissaoTool implements SashaToolInterface
 {
     public function __construct(
         private NavigationService $navigation,

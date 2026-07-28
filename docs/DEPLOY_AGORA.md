@@ -1,4 +1,4 @@
-# Deploy agora — checklist HostGator (joabef36)
+﻿# Deploy agora — checklist HostGator (joabef36)
 
 **Documentação operacional completa (jul/2026):** [OPERACAO_INDICE.md](./OPERACAO_INDICE.md) — histórico de correções, branches, Actions e validação local.
 
@@ -79,9 +79,9 @@ MAILER_FROM_ADDRESS=noreply@uniowork.com.br
 
 MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
 
-VITORIA_AI_ENABLED=false
-VITORIA_AI_URL=
-VITORIA_AI_KEY=
+Sasha_AI_ENABLED=false
+Sasha_AI_URL=
+Sasha_AI_KEY=
 
 MERCURE_URL=
 MERCURE_PUBLIC_URL=

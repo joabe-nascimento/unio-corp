@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Repository\JuridicoTribunalConfigRepository;
 use App\Service\Juridico\DataJud\DataJudClient;
 use App\Service\Juridico\DataJud\DataJudException;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * Pública do DataJud (CNJ) — base nacional que agrega PJe, e-SAJ, Projudi e demais
  * sistemas dos tribunais. Requer que o escritório tenha configurado sua chave gratuita.
  */
-final class ConsultarDatajudTool implements VitoriaToolInterface
+final class ConsultarDatajudTool implements SashaToolInterface
 {
     public function __construct(
         private OrganismoCopyService $organismoCopy,

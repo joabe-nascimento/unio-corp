@@ -1,12 +1,12 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Repository\JuridicoProcessoRepository;
 use App\Service\Juridico\PrevisaoExitoService;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * Ferramenta autônoma: calcula a previsão de êxito heurística de um processo já
  * cadastrado — sem IA generativa, direto do histórico real da carteira do escritório.
  */
-final class PreverExitoTool implements VitoriaToolInterface
+final class PreverExitoTool implements SashaToolInterface
 {
     public function __construct(
         private OrganismoCopyService $organismoCopy,

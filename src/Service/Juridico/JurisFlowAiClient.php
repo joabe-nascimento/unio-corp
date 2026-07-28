@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Service\Juridico;
 
@@ -9,7 +9,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Cliente HTTP para o motor de IA jurídica (JurisFlow AI Service — LangChain + RAG + Agents).
  *
  * O serviço é multi-vertical (app/verticals/legal) e multi-tenant via `escritorio_id`.
- * Mantém a mesma "forma" de resposta do VitoriaClient para que o mesmo chat (Lumen/Vitória)
+ * Mantém a mesma "forma" de resposta do SashaClient para que o mesmo chat (Lumen/Vitória)
  * do shell Organismo funcione sem alterações no front-end, apenas trocando o backend
  * quando a identidade ativa é a Unio Jurídico.
  */

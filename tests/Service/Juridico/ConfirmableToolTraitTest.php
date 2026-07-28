@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 
 namespace App\Tests\Service\Juridico;
 
-use App\Service\Vitoria\Tool\Juridico\ConfirmableToolTrait;
+use App\Service\Sasha\Tool\Juridico\ConfirmableToolTrait;
 use PHPUnit\Framework\TestCase;
 
 final class ConfirmableToolTraitTest extends TestCase

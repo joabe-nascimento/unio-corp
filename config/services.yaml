@@ -10,9 +10,9 @@ parameters:
     app.mailer_from: '%env(MAILER_FROM_ADDRESS)%'
     app.default_user_password_default: 'unio123'
     env(APP_DEFAULT_USER_PASSWORD): ''
-    vitoria_ai_url_default: ''
-    vitoria_ai_key_default: 'dev-vitoria-key-change-me'
-    vitoria_ai_enabled_default: 'true'
+    sasha_ai_url_default: ''
+    sasha_ai_key_default: 'dev-sasha-key-change-me'
+    sasha_ai_enabled_default: 'true'
     legal_ai_url_default: 'http://127.0.0.1:8090'
     legal_ai_enabled_default: 'false'
     legal_ai_escritorio_id_default: 'default'
@@ -218,11 +218,11 @@ services:
         arguments:
             $passwordHasher: '@security.user_password_hasher'
 
-    App\Service\Vitoria\VitoriaClient:
+    App\Service\Sasha\SashaClient:
         arguments:
-            $enabled: '%env(bool:default:vitoria_ai_enabled_default:VITORIA_AI_ENABLED)%'
-            $baseUrl: '%env(default:vitoria_ai_url_default:VITORIA_AI_URL)%'
-            $apiKey: '%env(default:vitoria_ai_key_default:VITORIA_AI_KEY)%'
+            $enabled: '%env(bool:default:sasha_ai_enabled_default:SASHA_AI_ENABLED)%'
+            $baseUrl: '%env(default:sasha_ai_url_default:SASHA_AI_URL)%'
+            $apiKey: '%env(default:sasha_ai_key_default:SASHA_AI_KEY)%'
 
     App\Service\Juridico\JurisFlowAiClient:
         arguments:
@@ -250,7 +250,7 @@ services:
             $clientSecret: '%env(default:azure_client_secret_default:AZURE_CLIENT_SECRET)%'
             $resourceId: '%env(default:azure_openai_resource_id_default:AZURE_OPENAI_RESOURCE_ID)%'
 
-    App\Command\VitoriaSmokeTestCommand:
+    App\Command\SashaSmokeTestCommand:
         arguments:
             $defaultUri: '%env(default:default_uri_default:DEFAULT_URI)%'
 

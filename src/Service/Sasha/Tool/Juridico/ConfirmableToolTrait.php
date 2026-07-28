@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 /**
  * Padrão comum das ferramentas que escrevem no sistema: nada é gravado no primeiro

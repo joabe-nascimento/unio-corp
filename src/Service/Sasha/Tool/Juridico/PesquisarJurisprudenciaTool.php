@@ -1,12 +1,12 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Exception\JuridicoProcessException;
 use App\Service\Juridico\JuridicoJurisprudenciaService;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * registra a consulta no histórico do escritório — igual ao módulo "Jurisprudência IA",
  * só que disparável direto do chat da Bruna com um clique.
  */
-final class PesquisarJurisprudenciaTool implements VitoriaToolInterface
+final class PesquisarJurisprudenciaTool implements SashaToolInterface
 {
     public function __construct(
         private OrganismoCopyService $organismoCopy,

@@ -1,4 +1,4 @@
-# Sistema de Importação de Tokens Históricos da Azure OpenAI
+﻿# Sistema de Importação de Tokens Históricos da Azure OpenAI
 
 ## Visão Geral
 
@@ -205,7 +205,7 @@ Após a importação:
 1. Acesse: https://uniojuridico.uniowork.com.br
 2. Faça login como `joabe.nascimento@unio.dev`
 3. Observe o medidor de tokens no header (canto superior direito)
-4. Interaja com a Bruna para ver os tokens atualizarem em tempo real
+4. Interaja com a Sasha para ver os tokens atualizarem em tempo real
 
 ## Desenvolvimento Futuro
 

@@ -1,4 +1,4 @@
-# Roadmap Unio — 30 / 60 / 90 dias
+﻿# Roadmap Unio — 30 / 60 / 90 dias
 
 Plano de evolução da plataforma com base no estado atual do repositório (março/2026). Complementa [RH_ROADMAP.md](RH_ROADMAP.md), [QUALIDADE_PERFORMANCE_E_HUBS.md](QUALIDADE_PERFORMANCE_E_HUBS.md) e [ESTRUTURA.md](ESTRUTURA.md).
 
@@ -69,7 +69,7 @@ Objetivo: o usuário consegue trabalhar bem no mobile e na primeira semana.
 | P2-01 | Onboarding persistente (DB) | Core | `OnboardingProgressService.php`, migration User/onboarding | Progresso sobrevive logout/dispositivo |
 | P2-02 | Perfil: troca de senha | Core | `profile/index.html.twig`, controller | Form funcional com validação Symfony |
 | P2-03 | Perfil: editar nome/foto | Core | `User` entity, upload avatar | Salva e reflete no header |
-| P2-04 | Vitória: mensagens consistentes | Shell | `helix_assistant.html.twig`, `base.html.twig` | Sem “Em breve” se chat API ativa |
+| P2-04 | Sasha: mensagens consistentes | Shell | `helix_assistant.html.twig`, `base.html.twig` | Sem “Em breve” se chat API ativa |
 | P2-05 | Extrair JS Helix do base | Shell | `public/js/unio-helix-panel.js` | `base.html.twig` sem bloco JS grande |
 
 ### Semana 7–8: Mobile e design system
@@ -271,7 +271,7 @@ flowchart TD
 - Hub de Ajuda + tour sob demanda (`OnboardingTourService`, `unio-shell-tour.js`)
 - Hub Recrutamento operacional (vagas, pipeline, candidatos, analytics)
 - Grants granulares (`ProductGrantAccess`, `ProductGrantRouteMap`)
-- Vitória AI (`VitoriaApiController`, serviço Python)
+- Sasha AI (`SashaApiController`, serviço Python)
 - Galeria `/dev/components`
 - CI: PHPUnit + MariaDB + `validate:system`
 

@@ -1,9 +1,9 @@
-# Unio Jurídico
+﻿# Unio Jurídico
 
 Plataforma de gestão para escritórios de advocacia, construída sobre o mesmo shell
 **Organismo** do Unio Saúde (branch `uniosaude`), com identidade visual própria e uma
-IA jurídica dedicada (**Bruna**, via **JurisFlow AI Service**) plugada no chat
-Vitória/Lumen já existente.
+IA jurídica dedicada (**Sasha**, via **JurisFlow AI Service**) plugada no chat
+Sasha/Lumen já existente.
 
 > Branch: `uniojuridico` (criada a partir de `uniosaude`).
 > Escopo desta branch: **identidade** (marca, cores, vocabulário) + **integração de IA**.
@@ -21,7 +21,7 @@ Vitória/Lumen já existente.
 | Logo | `public/images/logos/unio-juridico.png` |
 | Favicon/mark | `public/images/logos/favicon-unio-juridico.png` |
 | Tema CSS | `public/css/unio-juridico-theme.css` (sobrescreve `--org-blue*` do shell Organismo) |
-| Assistente de IA | **Bruna** — assistente jurídica |
+| Assistente de IA | **Sasha** — assistente jurídica |
 
 A detecção de perfil é automática: `OrganismoCopyService::isJuridicoProfile()` retorna
 `true` quando `UNIO_ORGANISMO_BRAND_NAME` (ou `UNIO_ORGANISMO_UNIT_LABEL`) contém
@@ -30,7 +30,7 @@ A detecção de perfil é automática: `OrganismoCopyService::isJuridicoProfile(
 - a classe `org-juridico` no `<body>` (tema visual);
 - o global Twig `org_juridico` (usado em `helix_assistant.html.twig` e demais templates);
 - o logo/favicon padrão da Unio Jurídico (`PlatformConfigExtension`);
-- o roteamento do chat para o backend JurisFlow (`VitoriaApiController::activeClient()`).
+- o roteamento do chat para o backend JurisFlow (`SashaApiController::activeClient()`).
 
 Todo o vocabulário de navegação (Clientes, Prazos, Modelos de Petição, Portal do
 Cliente etc.) é configurado via variáveis de ambiente — veja `.env.uniojuridico.example`
@@ -45,8 +45,8 @@ apenas conectando o Symfony a ele:
 
 ```
 Symfony (Unio Jurídico)  ──HTTP──▶  JurisFlow AI Service (FastAPI/LangChain)
-  VitoriaApiController                app/main.py
-  └─ JurisFlowAiClient                 POST /v1/assistant/bruna/chat
+  SashaApiController                app/main.py
+  └─ JurisFlowAiClient                 POST /v1/assistant/Sasha/chat
      src/Service/Juridico/             GET  /health
 ```
 
@@ -71,33 +71,33 @@ LEGAL_AI_ESCRITORIO_ID=default
 ```
 
 O `escritorio_id` isola a base de conhecimento (RAG) por tenant no JurisFlow. O
-`VitoriaApiController` já envia automaticamente o id da empresa ativa do usuário
+`SashaApiController` já envia automaticamente o id da empresa ativa do usuário
 logado como `escritorio_id` — múltiplos escritórios cadastrados na mesma instalação
 ficam com memórias/RAG separados sem configuração adicional.
 
 ### 2.3 Como o chat decide o backend
 
-`src/Controller/Api/VitoriaApiController.php`:
+`src/Controller/Api/SashaApiController.php`:
 
 ```php
-private function activeClient(): VitoriaClient|JurisFlowAiClient
+private function activeClient(): SashaClient|JurisFlowAiClient
 {
     if ($this->organismoCopy->isJuridicoProfile()) {
         return $this->juridicoAi;
     }
 
-    return $this->vitoria;
+    return $this->Sasha;
 }
 ```
 
 Ou seja: a **mesma** UI do chat (`templates/components/helix_assistant.html.twig`,
-`helix_dock.html.twig`) e a **mesma** rota (`POST /api/vitoria/chat`) continuam
+`helix_dock.html.twig`) e a **mesma** rota (`POST /api/Sasha/chat`) continuam
 funcionando — só o backend muda, sem exigir nenhuma alteração de front-end para
 trocar de vertical no futuro.
 
-### 2.4 Funcionalidades extras já plugadas na Bruna
+### 2.4 Funcionalidades extras já plugadas na Sasha
 
-O orquestrador do JurisFlow (`bruna_orchestrator`) decide sozinho, por mensagem,
+O orquestrador do JurisFlow (`Sasha_orchestrator`) decide sozinho, por mensagem,
 se deve responder via RAG (pesquisa na base de conhecimento) ou acionar o **Agente
 com Tools** (ReAct) para:
 
@@ -140,7 +140,7 @@ instalações Unio — ajuste conforme o provisionamento real do servidor/domín
 ## 5. O que é reaproveitado do Unio Saúde (sem alteração funcional)
 
 - Autenticação, workspaces, multi-empresa;
-- Shell Organismo (Colônia, Pulso, Cena, Lumen/Vitória);
+- Shell Organismo (Colônia, Pulso, Cena, Lumen/Sasha);
 - WhatsApp (lembretes — reaproveitável para prazos/audiências);
 - Asaas (cobrança — reaproveitável para honorários);
 - Toda a infraestrutura de permissões, e-mail, LGPD etc.

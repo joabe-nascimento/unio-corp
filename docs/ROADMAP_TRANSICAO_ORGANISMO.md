@@ -1,4 +1,4 @@
-# Roadmap de transição — Unio Organismo
+﻿# Roadmap de transição — Unio Organismo
 
 Plano de evolução da plataforma do modelo **Hub / Núcleo / Tenant** para o modelo **Colônia / Cena / Pulso / Lumen**, com matriz de tecnologias e tasks de código concretas.
 
@@ -35,7 +35,7 @@ Complementa [ROADMAP_90_DIAS.md](ROADMAP_90_DIAS.md) (consolidação do produto 
 | **Prática** | Hub / Produto / módulo | Capacidade: admitir, acompanhar, fechar folha |
 | **Presença** | `UserProductGrant`, escopo | O que a pessoa pode fazer (Ver / Agir / Conduzir / Arquitetar) |
 | **Pulso** | Dashboard | Batimento vivo da colônia — o que acontece agora |
-| **Lumen** | Vitória / Helix | Assistente — interface de ação, não painel lateral |
+| **Lumen** | Sasha / Helix | Assistente — interface de ação, não painel lateral |
 | **Rede** | Cortex | Mapa de relações entre cenas, membros e práticas |
 | **Eco** | Bate Papo | Conversas ligadas a cenas |
 | **Membro** | `Funcionario` | Pessoa dentro da colônia |
@@ -74,7 +74,7 @@ Complementa [ROADMAP_90_DIAS.md](ROADMAP_90_DIAS.md) (consolidação do produto 
 | **Mercure** | ✅ Manter | ✅ Pulso ao vivo | Ably/Pusher | Mercure gargalo ops |
 | **Meilisearch** | ❌ | ✅ Ctrl+K intenção | Algolia | >100k registros |
 | **LangGraph (Python)** | 🌱 Tools básicas | ✅ Lumen abre Cenas | Multi-agent | >20 tipos de ação |
-| **OpenAI / Claude API** | ✅ vitoria-ai | ✅ Streaming front | Fine-tune | IA >$2k/mês |
+| **OpenAI / Claude API** | ✅ Sasha-ai | ✅ Streaming front | Fine-tune | IA >$2k/mês |
 | **Neo4j** | ❌ | ❌ | ✅ Rede complexa | >1M arestas |
 | **React Flow / Cytoscape** | ❌ | 🌱 MVP Rede | Three.js/R3F | Rede feature vendável |
 | **Liveblocks** | ❌ | ❌ | ✅ Collab cena | 2+ editores simultâneos |
@@ -214,24 +214,24 @@ assets/pulso/
 
 ---
 
-## Semana 7–8: Lumen tools (Vitória com ação)
+## Semana 7–8: Lumen tools (Sasha com ação)
 
 | ID | Item | Arquivos / notas | Critério de feito |
 |----|------|------------------|-------------------|
-| T0-20 | Registry de tools | `src/Service/Vitoria/VitoriaToolRegistry.php` (novo) | Registra tools por nome + descrição + handler |
-| T0-21 | Tool: buscar membro | `src/Service/Vitoria/Tool/BuscarMembroTool.php` | Input: nome/CPF parcial; output: lista `Funcionario` da colônia |
-| T0-22 | Tool: férias pendentes | `src/Service/Vitoria/Tool/FeriasPendentesTool.php` | Reutiliza repo RH; count + links rotas |
-| T0-23 | Tool: abrir admissão | `src/Service/Vitoria/Tool/AbrirAdmissaoTool.php` | Retorna URL `app_rh_onboarding_*` ou rota admissão existente |
-| T0-24 | Endpoint tools | `src/Controller/Api/VitoriaApiController.php` — `POST /api/vitoria/tools/{name}` | Executa tool; JSON resultado; audit log opcional |
-| T0-25 | Endpoint list tools | `GET /api/vitoria/tools` | Lista tools disponíveis por perfil/grant |
-| T0-26 | Prompt system Lumen | `services/vitoria-ai/` — contexto tools no system prompt | Vitória sugere tool quando intenção detectada |
+| T0-20 | Registry de tools | `src/Service/Sasha/SashaToolRegistry.php` (novo) | Registra tools por nome + descrição + handler |
+| T0-21 | Tool: buscar membro | `src/Service/Sasha/Tool/BuscarMembroTool.php` | Input: nome/CPF parcial; output: lista `Funcionario` da colônia |
+| T0-22 | Tool: férias pendentes | `src/Service/Sasha/Tool/FeriasPendentesTool.php` | Reutiliza repo RH; count + links rotas |
+| T0-23 | Tool: abrir admissão | `src/Service/Sasha/Tool/AbrirAdmissaoTool.php` | Retorna URL `app_rh_onboarding_*` ou rota admissão existente |
+| T0-24 | Endpoint tools | `src/Controller/Api/SashaApiController.php` — `POST /api/Sasha/tools/{name}` | Executa tool; JSON resultado; audit log opcional |
+| T0-25 | Endpoint list tools | `GET /api/Sasha/tools` | Lista tools disponíveis por perfil/grant |
+| T0-26 | Prompt system Lumen | `services/Sasha-ai/` — contexto tools no system prompt | Sasha sugere tool quando intenção detectada |
 | T0-27 | Helix: botões de ação | `templates/components/helix_assistant.html.twig`, `public/js/unio-helix-panel.js` | Resposta com `action: { tool, params }` renderiza botão “Executar” |
-| T0-28 | Testes tools | `tests/Functional/VitoriaToolsApiTest.php` | 3 tools retornam 200 com grant; 403 sem grant |
+| T0-28 | Testes tools | `tests/Functional/SashaToolsApiTest.php` | 3 tools retornam 200 com grant; 403 sem grant |
 
 **Contrato tool call:**
 
 ```json
-POST /api/vitoria/tools/buscar_membro
+POST /api/Sasha/tools/buscar_membro
 { "query": "Ana" }
 
 → {
@@ -306,7 +306,7 @@ CenaEvento (append-only)
 | `/api/pulso` | `api_pulso` | Agora |
 | `/cena/{id}` | `app_cena_show` | 6 meses |
 | `/api/cenas` | `api_cenas` | 6 meses |
-| `/api/vitoria/tools/*` | `api_vitoria_tools_*` | Agora |
+| `/api/Sasha/tools/*` | `api_Sasha_tools_*` | Agora |
 
 ---
 
@@ -350,7 +350,7 @@ CenaEvento (append-only)
 ```
 Symfony 7 + MySQL + Redis + Mercure
 Twig (maduro) + Vite/React (Pulso PoC)
-Python vitoria-ai + tools Symfony
+Python Sasha-ai + tools Symfony
 Tailwind (só Pulso)
 GitHub Actions + Docker
 ```
@@ -415,7 +415,7 @@ FrankenPHP/K3s · Datadog/OpenTelemetry
 | Documento | Relação |
 |-----------|---------|
 | [ROADMAP_90_DIAS.md](ROADMAP_90_DIAS.md) | Consolidação produto atual (paralelo fase Agora) |
-| [ESTRUTURA.md](ESTRUTURA.md) | Convenções pastas — novos namespaces `Organismo/`, `Vitoria/Tool/` |
+| [ESTRUTURA.md](ESTRUTURA.md) | Convenções pastas — novos namespaces `Organismo/`, `Sasha/Tool/` |
 | [QUALIDADE_PERFORMANCE_E_HUBS.md](QUALIDADE_PERFORMANCE_E_HUBS.md) | Hubs legados — congelar expansão UI |
 | [OPERACAO_HOMOLOG_PRODUTO.md](OPERACAO_HOMOLOG_PRODUTO.md) | Piloto Pulso em `rh.uniowork.com.br` |
 

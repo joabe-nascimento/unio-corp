@@ -1,4 +1,4 @@
-# Unio Jurídico — banco de dados (jul/2026)
+﻿# Unio Jurídico — banco de dados (jul/2026)
 
 Referência do MySQL/MariaDB da instância **uniojuridico** (UnioJurídico): conexão, migrations, backup e tabelas de clientes/processos.
 
@@ -128,7 +128,7 @@ Após deploy em https://uniojuridico.uniowork.com.br:
 |-------|-----|
 | Login staff | `/login` |
 | Pulso (dashboard) | `/pulso` |
-| Chat IA (Bruna) | `/pulso` (botão Lumen no toolbar) |
+| Chat IA (Sasha) | `/pulso` (botão Lumen no toolbar) |
 | Admin | `/admin` |
 | Clientes | `/clientes` (a implementar) |
 | Processos | `/processos` (a implementar) |

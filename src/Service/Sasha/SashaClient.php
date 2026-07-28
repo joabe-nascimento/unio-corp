@@ -1,14 +1,14 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria;
+namespace App\Service\Sasha;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Cliente HTTP para o serviço Python Vitória AI (services/vitoria-ai).
+ * Cliente HTTP para o serviço Python Sasha AI (services/Sasha-ai).
  */
-final class VitoriaClient
+final class SashaClient
 {
     private const SLA_MINUTES = ['P1' => 15, 'P2' => 60, 'P3' => 240, 'P4' => 1440];
 
@@ -71,7 +71,7 @@ final class VitoriaClient
                 'suggested_actions' => $data['suggested_actions'] ?? [],
             ];
         } catch (\Throwable $e) {
-            $this->logger->warning('Vitória AI indisponível: {msg}', ['msg' => $e->getMessage()]);
+            $this->logger->warning('Sasha AI indisponível: {msg}', ['msg' => $e->getMessage()]);
 
             return null;
         }
@@ -109,7 +109,7 @@ final class VitoriaClient
 
             return $response->toArray(false);
         } catch (\Throwable $e) {
-            $this->logger->warning('Triagem Vitória indisponível: {msg}', ['msg' => $e->getMessage()]);
+            $this->logger->warning('Triagem Sasha indisponível: {msg}', ['msg' => $e->getMessage()]);
 
             return null;
         }
@@ -152,7 +152,7 @@ final class VitoriaClient
                 'action' => (string) ($data['action'] ?? 'Ver plano sugerido'),
             ];
         } catch (\Throwable $e) {
-            $this->logger->warning('Insight Vitória indisponível: {msg}', ['msg' => $e->getMessage()]);
+            $this->logger->warning('Insight Sasha indisponível: {msg}', ['msg' => $e->getMessage()]);
 
             return null;
         }

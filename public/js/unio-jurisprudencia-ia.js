@@ -1,5 +1,5 @@
-/**
- * Jurisprudência IA — pesquisa jurisprudencial com a Bruna (JurisFlow).
+﻿/**
+ * Jurisprudência IA — pesquisa jurisprudencial com a Sasha (JurisFlow).
  * Busca teses/julgados estruturados e permite salvar sugestões na biblioteca
  * do escritório com um clique.
  */
@@ -23,7 +23,7 @@
     var token = panel.dataset.token;
 
     var LOADING_STEPS = [
-        'Bruna está pesquisando…',
+        'Sasha está pesquisando…',
         'Consultando STF, STJ, TST e TRTs…',
         'Lendo súmulas e precedentes…',
         'Redigindo resumos e citações…'

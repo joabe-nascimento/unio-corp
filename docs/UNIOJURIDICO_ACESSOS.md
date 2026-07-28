@@ -1,4 +1,4 @@
-# Unio Jurídico — Acessos (produção)
+﻿# Unio Jurídico — Acessos (produção)
 
 Credenciais e URLs para gerenciamento da instância **uniojuridico** (jul/2026).
 
@@ -91,7 +91,7 @@ mysql -u USUARIO -p joabef36_unio_uniojuridico
 | **URL dev** | http://127.0.0.1:8090 |
 | **URL produção** | (a definir — hospedar em VM/Railway/Render) |
 | **Vertical** | `legal` |
-| **Assistente** | Bruna (assistente jurídica) |
+| **Assistente** | Sasha (assistente jurídica) |
 
 ### Subir localmente (dev)
 

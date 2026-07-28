@@ -1,4 +1,4 @@
-# Unio Jurídico — Índice de documentação
+﻿# Unio Jurídico — Índice de documentação
 
 Documentação completa da plataforma Unio Jurídico (branch `uniojuridico`).
 
@@ -121,9 +121,9 @@ LEGAL_AI_ESCRITORIO_ID=default
 
 ---
 
-## 🤖 IA Jurídica (Bruna)
+## 🤖 IA Jurídica (Sasha)
 
-O chat da Vitória/Lumen automaticamente troca para a IA jurídica (**Bruna**, assistente jurídica) quando a identidade da plataforma é "Unio Jurídico".
+O chat da Sasha/Lumen automaticamente troca para a IA jurídica (**Sasha**, assistente jurídica) quando a identidade da plataforma é "Unio Jurídico".
 
 **Funcionalidades:**
 - ✅ Calcular prazos processuais

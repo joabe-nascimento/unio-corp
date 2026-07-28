@@ -1,4 +1,4 @@
-# Unio — arquitetura do sistema
+﻿# Unio — arquitetura do sistema
 
 Snapshot do código e do deploy em **jul/2026**.  
 Complementa: [OPERACAO_INDICE.md](OPERACAO_INDICE.md) · [ESTRUTURA.md](ESTRUTURA.md) · [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md)
@@ -60,7 +60,7 @@ HTTP
   → Twig
   → (async) Messenger: mail, Pós-Operatório
   → (realtime) Mercure: chat, Pós-Operatório
-  → (opcional) Vitória AI: Service\Vitoria\VitoriaClient
+  → (opcional) Sasha AI: Service\Sasha\SashaClient
 ```
 
 ---
@@ -132,7 +132,7 @@ Matriz comercial detalhada: [OPERACAO_CLIENTE_MATRIZ.md](OPERACAO_CLIENTE_MATRIZ
 | **Filas** | Messenger `doctrine://default` — mail, notifier, Pós-Op |
 | **E-mail** | Symfony Mailer + Titan SMTP (`MAILER_DSN`) |
 | **Realtime** | Mercure (`config/packages/mercure.yaml`) |
-| **IA** | Vitória AI (HTTP opcional, Docker `vitoria-ai`) |
+| **IA** | Sasha AI (HTTP opcional, Docker `Sasha-ai`) |
 | **Cache** | Redis opcional; pools Doctrine em prod |
 | **Uploads** | Filesystem local (RH, TI, anexos) |
 

@@ -1,4 +1,4 @@
-# Deploy completo — Unio na HostGator
+﻿# Deploy completo — Unio na HostGator
 
 Fluxo passo a passo: o que fazer **no seu PC (projeto)** e o que fazer **na HostGator (painel/servidor)**.
 
@@ -217,7 +217,7 @@ MAILER_FROM_ADDRESS=noreply@uniowork.com.br
 
 MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
 
-VITORIA_AI_ENABLED=false
+Sasha_AI_ENABLED=false
 MERCURE_URL=
 MERCURE_PUBLIC_URL=
 MERCURE_JWT_SECRET=

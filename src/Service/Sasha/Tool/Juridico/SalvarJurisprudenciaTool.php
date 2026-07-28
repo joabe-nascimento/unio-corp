@@ -1,11 +1,11 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Service\Juridico\JuridicoJurisprudenciaService;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * já aparece junto de cada resultado de pesquisa — mas também aceita ser pedida
  * em texto livre, quando então pede confirmação antes de gravar.
  */
-final class SalvarJurisprudenciaTool implements VitoriaToolInterface
+final class SalvarJurisprudenciaTool implements SashaToolInterface
 {
     use ConfirmableToolTrait;
 

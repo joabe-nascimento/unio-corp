@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\Empresa;
 use App\Entity\JuridicoProcesso;
@@ -8,7 +8,7 @@ use App\Entity\User;
 use App\Repository\JuridicoProcessoRepository;
 use App\Service\Juridico\JuridicoProcessoTarefaService;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * Cria uma tarefa em um processo a pedido da Bruna — sempre com uma prévia antes
  * de gravar. Nada entra na base sem o usuário confirmar o que vai ser criado.
  */
-final class CriarTarefaTool implements VitoriaToolInterface
+final class CriarTarefaTool implements SashaToolInterface
 {
     use ConfirmableToolTrait;
 

@@ -1,12 +1,12 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria;
+namespace App\Service\Sasha;
 
 use App\Entity\User;
 
-final class VitoriaToolRegistry
+final class SashaToolRegistry
 {
-    /** @param iterable<VitoriaToolInterface> $tools */
+    /** @param iterable<SashaToolInterface> $tools */
     public function __construct(
         private iterable $tools,
     ) {
@@ -29,7 +29,7 @@ final class VitoriaToolRegistry
         return $list;
     }
 
-    public function get(string $name): ?VitoriaToolInterface
+    public function get(string $name): ?SashaToolInterface
     {
         foreach ($this->tools as $tool) {
             if ($tool->getName() === $name) {

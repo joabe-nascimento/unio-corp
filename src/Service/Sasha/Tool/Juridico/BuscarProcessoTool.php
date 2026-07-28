@@ -1,15 +1,15 @@
-<?php
+﻿<?php
 
-namespace App\Service\Vitoria\Tool\Juridico;
+namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Repository\JuridicoProcessoRepository;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\Vitoria\VitoriaToolInterface;
+use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class BuscarProcessoTool implements VitoriaToolInterface
+final class BuscarProcessoTool implements SashaToolInterface
 {
     public function __construct(
         private OrganismoCopyService $organismoCopy,

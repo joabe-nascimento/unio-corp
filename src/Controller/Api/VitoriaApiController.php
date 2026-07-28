@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Controller\Api;
 
@@ -9,9 +9,9 @@ use App\Service\Juridico\AiTokenUsageService;
 use App\Service\Juridico\JurisFlowAiClient;
 use App\Service\Juridico\LegalIntentDetector;
 use App\Service\Organismo\OrganismoCopyService;
-use App\Service\PosOperatorio\VitoriaContextService;
-use App\Service\Vitoria\VitoriaClient;
-use App\Service\Vitoria\VitoriaToolRegistry;
+use App\Service\PosOperatorio\SashaContextService;
+use App\Service\Sasha\SashaClient;
+use App\Service\Sasha\SashaToolRegistry;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -41,11 +41,11 @@ final class VitoriaApiController extends AbstractController
     ];
 
     public function __construct(
-        private VitoriaClient $vitoria,
+        private SashaClient $vitoria,
         private JurisFlowAiClient $juridicoAi,
         private WorkspaceService $workspace,
-        private VitoriaContextService $vitoriaContext,
-        private VitoriaToolRegistry $toolRegistry,
+        private SashaContextService $vitoriaContext,
+        private SashaToolRegistry $toolRegistry,
         private OrganismoCopyService $organismoCopy,
         private LegalIntentDetector $legalIntentDetector,
         private AiTokenUsageService $aiTokenUsage,
@@ -56,7 +56,7 @@ final class VitoriaApiController extends AbstractController
      * Escolhe o motor de IA ativo conforme a identidade da plataforma:
      * Unio Jurídico usa o JurisFlow (LangChain + RAG jurídico); demais usam a Vitória padrão.
      */
-    private function activeClient(): VitoriaClient|JurisFlowAiClient
+    private function activeClient(): SashaClient|JurisFlowAiClient
     {
         if ($this->organismoCopy->isJuridicoProfile()) {
             return $this->juridicoAi;
