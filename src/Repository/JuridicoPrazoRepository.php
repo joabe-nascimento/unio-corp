@@ -70,4 +70,54 @@ class JuridicoPrazoRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /**
+     * Percentual de prazos cumpridos dentro do prazo (SLA) — usado no BI de carteira.
+     *
+     * @param list<Empresa> $empresas
+     *
+     * @return array{cumpridos: int, vencidos_pendentes: int, no_prazo: int, taxa: float}
+     */
+    public function slaGrupo(array $empresas): array
+    {
+        $hoje = new \DateTimeImmutable('today');
+
+        $cumpridos = (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->andWhere('p.cumprido = true')
+            ->setParameter('empresas', $empresas)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $vencidosPendentes = (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->andWhere('p.cumprido = false')
+            ->andWhere('p.dataLimite < :hoje')
+            ->setParameter('empresas', $empresas)
+            ->setParameter('hoje', $hoje)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $noPrazo = (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->andWhere('p.cumprido = false')
+            ->andWhere('p.dataLimite >= :hoje')
+            ->setParameter('empresas', $empresas)
+            ->setParameter('hoje', $hoje)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $totalDecidido = $cumpridos + $vencidosPendentes;
+        $taxa = $totalDecidido > 0 ? round(($cumpridos / $totalDecidido) * 100, 1) : 100.0;
+
+        return [
+            'cumpridos' => $cumpridos,
+            'vencidos_pendentes' => $vencidosPendentes,
+            'no_prazo' => $noPrazo,
+            'taxa' => $taxa,
+        ];
+    }
 }

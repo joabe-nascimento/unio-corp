@@ -35,4 +35,9 @@ class EmpresaRepository extends ServiceEntityRepository
 
         return (int) $qb->getQuery()->getSingleScalarResult() > 0;
     }
+
+    public function findByCodigoGrupo(string $codigo): ?Empresa
+    {
+        return $this->findOneBy(['codigoGrupo' => $codigo]);
+    }
 }

@@ -130,6 +130,59 @@ class JuridicoProcessoRepository extends ServiceEntityRepository
         return round(($favoraveis / $total) * 100, 1);
     }
 
+    /** @param list<Empresa> $empresas */
+    public function sumValorAtivoByEmpresas(array $empresas): float
+    {
+        return (float) $this->createQueryBuilder('p')
+            ->select('COALESCE(SUM(p.valor), 0)')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->andWhere('p.status != :encerrado')
+            ->setParameter('empresas', $empresas)
+            ->setParameter('encerrado', JuridicoProcesso::STATUS_ENCERRADO)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /** @param list<Empresa> $empresas */
+    public function countByEmpresasAndStatus(array $empresas, string $status): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->andWhere('p.status = :status')
+            ->setParameter('empresas', $empresas)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /** @param list<Empresa> $empresas */
+    public function taxaExitoGrupo(array $empresas): ?float
+    {
+        $total = (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->andWhere('p.resultado IS NOT NULL')
+            ->setParameter('empresas', $empresas)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ($total === 0) {
+            return null;
+        }
+
+        $favoraveis = (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->andWhere('p.resultado IN (:resultados)')
+            ->setParameter('empresas', $empresas)
+            ->setParameter('resultados', [JuridicoProcesso::RESULTADO_PROCEDENTE, JuridicoProcesso::RESULTADO_ACORDO])
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return round(($favoraveis / $total) * 100, 1);
+    }
+
     /** @return list<JuridicoProcesso> */
     public function findAllForSelect(Empresa $empresa): array
     {
@@ -169,6 +222,201 @@ class JuridicoProcessoRepository extends ServiceEntityRepository
         }
 
         return $out;
+    }
+
+    /**
+     * @param list<Empresa> $empresas
+     *
+     * @return array{labels: list<string>, values: list<int>}
+     */
+    public function countByAreaGrouped(array $empresas): array
+    {
+        $rows = $this->createQueryBuilder('p')
+            ->select("COALESCE(NULLIF(p.area, ''), 'Não informada') AS area", 'COUNT(p.id) AS total')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->setParameter('empresas', $empresas)
+            ->groupBy('area')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getArrayResult();
+
+        return $this->pluckLabelValue($rows, 'area');
+    }
+
+    /**
+     * @param list<Empresa> $empresas
+     *
+     * @return array{labels: list<string>, values: list<int>}
+     */
+    public function countByFaseGrouped(array $empresas): array
+    {
+        $labelsMap = [
+            JuridicoProcesso::FASE_CONHECIMENTO => 'Conhecimento',
+            JuridicoProcesso::FASE_INSTRUCAO => 'Instrução',
+            JuridicoProcesso::FASE_SENTENCA => 'Sentença',
+            JuridicoProcesso::FASE_RECURSAL => 'Recursal',
+            JuridicoProcesso::FASE_EXECUCAO => 'Execução',
+            JuridicoProcesso::FASE_ENCERRADO => 'Encerrado',
+        ];
+
+        $rows = $this->createQueryBuilder('p')
+            ->select('p.fase AS fase', 'COUNT(p.id) AS total')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->setParameter('empresas', $empresas)
+            ->groupBy('p.fase')
+            ->getQuery()
+            ->getArrayResult();
+
+        $labels = [];
+        $values = [];
+        foreach ($labelsMap as $key => $label) {
+            $found = null;
+            foreach ($rows as $row) {
+                if ($row['fase'] === $key) {
+                    $found = (int) $row['total'];
+                    break;
+                }
+            }
+            if ($found === null) {
+                continue;
+            }
+            $labels[] = $label;
+            $values[] = $found;
+        }
+
+        return ['labels' => $labels, 'values' => $values];
+    }
+
+    /**
+     * @param list<Empresa> $empresas
+     *
+     * @return array{labels: list<string>, values: list<int>}
+     */
+    public function countByStatusGrouped(array $empresas): array
+    {
+        $map = [
+            JuridicoProcesso::STATUS_ATIVO => 'Ativos',
+            JuridicoProcesso::STATUS_CRITICO => 'Críticos',
+            JuridicoProcesso::STATUS_ENCERRADO => 'Encerrados',
+        ];
+
+        $rows = $this->createQueryBuilder('p')
+            ->select('p.status AS status', 'COUNT(p.id) AS total')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->setParameter('empresas', $empresas)
+            ->groupBy('p.status')
+            ->getQuery()
+            ->getArrayResult();
+
+        $labels = [];
+        $values = [];
+        foreach ($rows as $row) {
+            $labels[] = $map[$row['status']] ?? (string) $row['status'];
+            $values[] = (int) $row['total'];
+        }
+
+        return ['labels' => $labels, 'values' => $values];
+    }
+
+    /**
+     * @param list<Empresa> $empresas
+     *
+     * @return array{labels: list<string>, values: list<int>}
+     */
+    public function countByTribunalGrouped(array $empresas): array
+    {
+        $rows = $this->createQueryBuilder('p')
+            ->select("COALESCE(NULLIF(p.tribunal, ''), 'Não informado') AS tribunal", 'COUNT(p.id) AS total')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->setParameter('empresas', $empresas)
+            ->groupBy('tribunal')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults(8)
+            ->getQuery()
+            ->getArrayResult();
+
+        return $this->pluckLabelValue($rows, 'tribunal');
+    }
+
+    /**
+     * Evolução mensal de novos processos cadastrados (últimos $meses).
+     *
+     * @param list<Empresa> $empresas
+     *
+     * @return array{labels: list<string>, values: list<int>}
+     */
+    public function evolucaoMensal(array $empresas, int $meses = 6): array
+    {
+        $tz = new \DateTimeZone('America/Sao_Paulo');
+        $now = new \DateTimeImmutable('now', $tz);
+        $mesesPt = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        $labels = [];
+        $values = [];
+
+        for ($i = $meses - 1; $i >= 0; --$i) {
+            $inicio = $now->modify('first day of this month')->modify("-{$i} months")->setTime(0, 0);
+            $fim = $inicio->modify('last day of this month')->setTime(23, 59, 59);
+            $labels[] = $mesesPt[(int) $inicio->format('n') - 1] . '/' . $inicio->format('y');
+
+            $values[] = (int) $this->createQueryBuilder('p')
+                ->select('COUNT(p.id)')
+                ->andWhere('p.empresa IN (:empresas)')
+                ->andWhere('p.criadoEm BETWEEN :inicio AND :fim')
+                ->setParameter('empresas', $empresas)
+                ->setParameter('inicio', $inicio)
+                ->setParameter('fim', $fim)
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
+        return ['labels' => $labels, 'values' => $values];
+    }
+
+    /**
+     * Taxa de êxito histórica por área do direito — usada pela previsão de êxito heurística.
+     *
+     * @return array<string, array{total: int, favoraveis: int, taxa: float}>
+     */
+    public function taxaExitoPorArea(Empresa $empresa): array
+    {
+        $rows = $this->createQueryBuilder('p')
+            ->select("COALESCE(NULLIF(p.area, ''), 'geral') AS area", 'p.resultado AS resultado', 'COUNT(p.id) AS cnt')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.resultado IS NOT NULL')
+            ->setParameter('empresa', $empresa)
+            ->groupBy('area, p.resultado')
+            ->getQuery()
+            ->getArrayResult();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $area = (string) $row['area'];
+            $out[$area] ??= ['total' => 0, 'favoraveis' => 0, 'taxa' => 0.0];
+            $out[$area]['total'] += (int) $row['cnt'];
+            if (\in_array($row['resultado'], [JuridicoProcesso::RESULTADO_PROCEDENTE, JuridicoProcesso::RESULTADO_ACORDO], true)) {
+                $out[$area]['favoraveis'] += (int) $row['cnt'];
+            }
+        }
+
+        foreach ($out as $area => $dados) {
+            $out[$area]['taxa'] = $dados['total'] > 0 ? round(($dados['favoraveis'] / $dados['total']) * 100, 1) : 0.0;
+        }
+
+        return $out;
+    }
+
+    /** @param list<array<string, mixed>> $rows @return array{labels: list<string>, values: list<int>} */
+    private function pluckLabelValue(array $rows, string $labelField): array
+    {
+        $labels = [];
+        $values = [];
+        foreach ($rows as $row) {
+            $labels[] = (string) $row[$labelField];
+            $values[] = (int) $row['total'];
+        }
+
+        return ['labels' => $labels, 'values' => $values];
     }
 
     /**

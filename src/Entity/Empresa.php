@@ -58,12 +58,28 @@ class Empresa
     #[ORM\OneToMany(targetEntity: Departamento::class, mappedBy: 'empresa')]
     private Collection $departamentos;
 
+    /**
+     * Código único do grupo econômico/rede de escritórios — compartilhado com filiais
+     * para que elas possam se vincular a esta empresa como matriz (multi-escritório).
+     */
+    #[ORM\Column(length: 12, nullable: true, unique: true)]
+    private ?string $codigoGrupo = null;
+
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'filiais')]
+    #[ORM\JoinColumn(name: 'empresa_matriz_id', nullable: true, onDelete: 'SET NULL')]
+    private ?self $empresaMatriz = null;
+
+    /** @var Collection<int, self> */
+    #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'empresaMatriz')]
+    private Collection $filiais;
+
     public function __construct()
     {
         $this->criadoEm   = new \DateTimeImmutable();
         $this->usuarios    = new ArrayCollection();
         $this->funcionarios = new ArrayCollection();
         $this->departamentos = new ArrayCollection();
+        $this->filiais = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -93,4 +109,30 @@ class Empresa
     public function getUsuarios(): Collection { return $this->usuarios; }
     public function getFuncionarios(): Collection { return $this->funcionarios; }
     public function getDepartamentos(): Collection { return $this->departamentos; }
+
+    public function getCodigoGrupo(): ?string { return $this->codigoGrupo; }
+    public function setCodigoGrupo(?string $codigoGrupo): static { $this->codigoGrupo = $codigoGrupo; return $this; }
+    public function getEmpresaMatriz(): ?self { return $this->empresaMatriz; }
+    public function setEmpresaMatriz(?self $empresaMatriz): static { $this->empresaMatriz = $empresaMatriz; return $this; }
+
+    /** @return Collection<int, self> */
+    public function getFiliais(): Collection { return $this->filiais; }
+
+    public function isMatriz(): bool { return $this->empresaMatriz === null && !$this->filiais->isEmpty(); }
+    public function isFilial(): bool { return $this->empresaMatriz !== null; }
+
+    /**
+     * @return list<self> a própria empresa + matriz (se filial) + todas as filiais dela —
+     *                     usado para consolidar dados de BI em um grupo de escritórios.
+     */
+    public function grupoEconomico(): array
+    {
+        $raiz = $this->empresaMatriz ?? $this;
+        $out = [$raiz];
+        foreach ($raiz->getFiliais() as $filial) {
+            $out[] = $filial;
+        }
+
+        return $out;
+    }
 }

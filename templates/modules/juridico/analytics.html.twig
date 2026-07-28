@@ -1,0 +1,127 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Analytics · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Analytics Jurídico' %}
+
+{% block page_list_kpis %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-chart-line" aria-hidden="true"></i> Inteligência Jurídica · BI de carteira</span>
+        <h2 class="jur-proc-hero__title">{{ consolidado ? 'Visão consolidada do grupo' : 'Visão do escritório' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if kpis.processos_total == 0 %}
+                Cadastre processos e prazos para ver aqui indicadores reais de carteira, êxito e produtividade.
+            {% else %}
+                <strong>{{ kpis.processos_total }}</strong> processo{{ kpis.processos_total != 1 ? 's' : '' }}
+                {{ consolidado ? 'em ' ~ kpis.escritorios ~ ' escritório(s) do grupo' : 'na carteira' }},
+                SLA de prazos em <strong>{{ kpis.sla_prazos|number_format(1, ',', '.') }}%</strong>.
+            {% endif %}
+        </p>
+        {% if tem_grupo %}
+        <div class="jur-proc-hero__actions">
+            <a href="{{ path('app_juridico_analytics', { grupo: 1 }) }}" class="btn-unio-ghost btn-sm jur-proc-hero__ghost{% if consolidado %} active{% endif %}">
+                <i class="fas fa-diagram-project mr-1" aria-hidden="true"></i> Grupo consolidado
+            </a>
+            <a href="{{ path('app_juridico_analytics', { grupo: 0 }) }}" class="btn-unio-ghost btn-sm jur-proc-hero__ghost{% if not consolidado %} active{% endif %}">
+                <i class="fas fa-building mr-1" aria-hidden="true"></i> Só este escritório
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: kpis.processos_ativos, label: 'Processos ativos', sub: kpis.processos_criticos ~ ' crítico(s)', icon: 'fa-folder-open', tone: 'sky' },
+        { value: 'R$ ' ~ kpis.valor_carteira|number_format(0, ',', '.'), label: 'Valor em carteira', sub: consolidado ? 'Grupo' : 'Este escritório', icon: 'fa-sack-dollar', tone: 'amber' },
+        { value: kpis.taxa_exito is not null ? kpis.taxa_exito|number_format(1, ',', '.') ~ '%' : '—', label: 'Taxa de êxito', sub: 'Processos encerrados', icon: 'fa-trophy', tone: 'sage' },
+        { value: kpis.sla_prazos|number_format(1, ',', '.') ~ '%', label: 'SLA de prazos', sub: 'Cumpridos no prazo', icon: 'fa-gauge-high', tone: 'lavender' },
+        { value: 'R$ ' ~ kpis.receita_mes|number_format(0, ',', '.'), label: 'Receita do mês', sub: 'Honorários faturáveis', icon: 'fa-coins', tone: 'sky' },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_juridico_processos') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-scale-balanced mr-1" aria-hidden="true"></i> Processos
+</a>
+<a href="{{ path('app_juridico_modulo', { slug: 'analytics' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+{% if chart_sections|default([])|length == 0 %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-chart-pie',
+        title: 'Ainda sem dados suficientes',
+        text: 'Cadastre processos, prazos e lançamentos de honorários para ver os gráficos de BI da carteira.',
+        btn_label: 'Ir para Processos',
+        btn_href: path('app_juridico_processos'),
+        btn_icon: 'fa-plus',
+        btn_sm: true,
+        compact: true
+    } %}
+{% else %}
+<div class="mb-4">
+    {% include 'components/charts/panel.html.twig' with {
+        sections: chart_sections,
+        panel_id: 'juridico-bi',
+        title: 'BI de carteira',
+        subtitle: consolidado ? 'Dados consolidados do grupo de escritórios' : 'Dados deste escritório',
+        title_icon: 'fa-chart-pie',
+        show_chartjs_badge: true,
+        class: 'juridico-bi-charts'
+    } only %}
+</div>
+{% endif %}
+
+<section class="unio-card jur-grupo-card">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Grupo de escritórios (multi-escritório)',
+        subtitle: 'Vincule filiais a uma matriz para consolidar o BI da rede inteira'
+    } %}
+    <div class="jur-grupo-card__body px-3 pb-3">
+        {% if e_filial %}
+            <p class="mb-3">
+                <i class="fas fa-diagram-project mr-1 text-muted" aria-hidden="true"></i>
+                Este escritório é <strong>filial</strong> do grupo de <strong>{{ empresa_matriz.nome }}</strong>.
+            </p>
+            <form method="post" action="{{ path('app_juridico_analytics_desvincular') }}" onsubmit="return confirm('Desvincular este escritório do grupo?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('juridico_grupo_desvincular') }}">
+                <button type="submit" class="btn-unio-ghost btn-sm"><i class="fas fa-link-slash mr-1" aria-hidden="true"></i> Desvincular do grupo</button>
+            </form>
+        {% else %}
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h4 class="h6">Sou a matriz — meu código do grupo</h4>
+                    {% if codigo_grupo %}
+                        <p class="mb-2">Compartilhe este código com as filiais para que elas se vinculem:</p>
+                        <code class="jur-grupo-card__code">{{ codigo_grupo }}</code>
+                        {% if filiais|length > 0 %}
+                        <p class="small text-muted mt-2 mb-0">{{ filiais|length }} filial(is) vinculada(s): {{ filiais|map(f => f.nome)|join(', ') }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-2">Gere um código único para começar a montar sua rede de escritórios.</p>
+                        <form method="post" action="{{ path('app_juridico_analytics_gerar_codigo') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_grupo_codigo') }}">
+                            <button type="submit" class="btn-unio btn-sm"><i class="fas fa-key mr-1" aria-hidden="true"></i> Gerar código do grupo</button>
+                        </form>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h4 class="h6">Sou uma filial — entrar em um grupo</h4>
+                    <form method="post" action="{{ path('app_juridico_analytics_vincular') }}" class="d-flex gap-2">
+                        <input type="hidden" name="_token" value="{{ csrf_token('juridico_grupo_vincular') }}">
+                        <input type="text" name="codigo" class="form-control form-control-sm" placeholder="Código do grupo da matriz" maxlength="12" style="max-width:220px;">
+                        <button type="submit" class="btn-unio-ghost btn-sm"><i class="fas fa-link mr-1" aria-hidden="true"></i> Vincular</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% include 'components/charts/assets.html.twig' with { sections: chart_sections|default([]), version: 1 } only %}
+{% endblock %}

@@ -87,14 +87,14 @@ final class JuridicoLandingService
             [
                 'icon' => 'fa-building-columns',
                 'title' => 'Integração com Tribunais',
-                'text' => 'Sincronização automática com PJe, e-SAJ e Projudi para captura de andamentos.',
-                'status' => 'planned',
+                'text' => 'Consulta oficial de andamentos via DataJud (CNJ), base que agrega PJe, e-SAJ e Projudi.',
+                'status' => 'development',
             ],
             [
                 'icon' => 'fa-scale-unbalanced',
                 'title' => 'Previsão de Êxito',
-                'text' => 'Modelo preditivo que estima probabilidade de sucesso baseado em histórico e jurisprudência.',
-                'status' => 'planned',
+                'text' => 'Score heurístico e explicável de probabilidade de sucesso, baseado no histórico real da carteira.',
+                'status' => 'active',
             ],
         ];
     }
@@ -185,10 +185,11 @@ final class JuridicoLandingService
             ['label' => 'Honorários', 'desc' => 'Timesheet e OAB', 'icon' => 'fa-coins', 'live' => true],
             ['label' => 'Jurisprudência IA', 'desc' => 'Pesquisa com Bruna', 'icon' => 'fa-book-open', 'live' => true],
             ['label' => 'Contratos', 'desc' => 'Consultivo e riscos', 'icon' => 'fa-handshake'],
-            ['label' => 'PJe & Tribunais', 'desc' => 'Integração oficial', 'icon' => 'fa-building-columns'],
+            ['label' => 'PJe & Tribunais', 'desc' => 'Consulta oficial via DataJud', 'icon' => 'fa-building-columns', 'live' => true],
             ['label' => 'Portal do Cliente', 'desc' => 'Transparência e self-service', 'icon' => 'fa-globe'],
             ['label' => 'Due Diligence', 'desc' => 'M&A e data room', 'icon' => 'fa-magnifying-glass-chart'],
-            ['label' => 'Analytics', 'desc' => 'BI e produtividade', 'icon' => 'fa-chart-line'],
+            ['label' => 'Analytics', 'desc' => 'BI de carteira em produção', 'icon' => 'fa-chart-line', 'live' => true],
+            ['label' => 'API Pública', 'desc' => 'Tokens e integrações externas', 'icon' => 'fa-plug-circle-bolt', 'live' => true],
         ];
     }
 

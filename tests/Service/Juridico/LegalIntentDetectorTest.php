@@ -139,6 +139,29 @@ final class LegalIntentDetectorTest extends TestCase
         self::assertSame('registrar_prazo', $acoes[0]['tool']);
     }
 
+    public function testDetectaPrevisaoDeExitoComNumeroDeProcesso(): void
+    {
+        $acoes = $this->detector->detect('Qual a chance de êxito do processo 1234567-12.2024.8.26.0100?');
+
+        self::assertSame('prever_exito', $acoes[0]['tool']);
+        self::assertSame('1234567-12.2024.8.26.0100', $acoes[0]['params']['query']);
+    }
+
+    public function testDetectaConsultaDatajudComNumeroDeProcesso(): void
+    {
+        $acoes = $this->detector->detect('Consultar no DataJud o andamento oficial do processo 1234567-12.2024.8.26.0100.');
+
+        self::assertSame('consultar_datajud', $acoes[0]['tool']);
+        self::assertSame('1234567-12.2024.8.26.0100', $acoes[0]['params']['numero']);
+    }
+
+    public function testNaoSugereConsultaDatajudSemNumeroDeProcesso(): void
+    {
+        $acoes = $this->detector->detect('Consultar no DataJud o andamento oficial do meu caso.');
+
+        self::assertSame([], array_filter($acoes, static fn (array $a) => $a['tool'] === 'consultar_datajud'));
+    }
+
     public function testLimitaNoMaximoDeDuasSugestoes(): void
     {
         $acoes = $this->detector->detect(

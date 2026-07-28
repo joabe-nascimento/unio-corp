@@ -1,0 +1,126 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}API Pública · Unio Jurídico{% endblock %}
+{% set page_list_title = 'API Pública' %}
+
+{% block page_list_kpis %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-plug-circle-bolt" aria-hidden="true"></i> Integrações · REST API v1</span>
+        <h2 class="jur-proc-hero__title">Conecte sistemas externos ao Unio Jurídico</h2>
+        <p class="jur-proc-hero__text">
+            Gere tokens de acesso e consuma processos, prazos, tarefas e jurisprudência do seu escritório
+            em qualquer sistema externo — BI, ERP, portal do cliente ou automações próprias.
+        </p>
+    </div>
+</section>
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_juridico_modulo', { slug: 'processos' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o roadmap
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+{% if novo_token %}
+<div class="unio-card jur-api-token-reveal mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Copie seu token agora', subtitle: 'Por segurança, ele não será mostrado novamente' } %}
+    <div class="px-3 pb-3">
+        <code class="jur-api-token-reveal__code" id="jurApiTokenNovo">{{ novo_token }}</code>
+        <button type="button" class="btn-unio-ghost btn-sm ml-2" onclick="navigator.clipboard.writeText(document.getElementById('jurApiTokenNovo').textContent); this.innerHTML='<i class=\'fas fa-check mr-1\'></i> Copiado!';">
+            <i class="fas fa-copy mr-1" aria-hidden="true"></i> Copiar
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <section class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Novo token', subtitle: 'Escopo de leitura por padrão' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_juridico_api_tokens_gerar') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_api_token_gerar') }}">
+                    <label class="form-label small">Nome do token</label>
+                    <input type="text" name="nome" class="form-control form-control-sm mb-2" placeholder="Ex.: Integração BI, ERP financeiro…" maxlength="120">
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" name="escrita" id="jurApiTokenEscrita" value="1">
+                        <label class="form-check-label small" for="jurApiTokenEscrita">Permitir escrita (reservado para uso futuro)</label>
+                    </div>
+                    <button type="submit" class="btn-unio btn-sm"><i class="fas fa-key mr-1" aria-hidden="true"></i> Gerar token</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="unio-card mt-4">
+            {% include 'components/section_header.html.twig' with { title: 'Tokens ativos' } %}
+            <div class="px-3 pb-3">
+                {% if tokens|length == 0 %}
+                    <p class="text-muted small mb-0">Nenhum token gerado ainda.</p>
+                {% else %}
+                <ul class="jur-api-token-list">
+                    {% for token in tokens %}
+                    <li class="jur-api-token-list__item {{ token.ativo ? '' : 'is-revogado' }}">
+                        <div>
+                            <strong>{{ token.nome }}</strong>
+                            <span class="jur-api-token-list__prefix">{{ token.tokenPrefix }}…</span>
+                            <div class="small text-muted">
+                                {{ token.scopes|join(', ') }} ·
+                                {{ token.totalRequisicoes }} requisição(ões){% if token.ultimoUsoEm %} · último uso {{ token.ultimoUsoEm|date('d/m/Y H:i') }}{% endif %}
+                            </div>
+                        </div>
+                        {% if token.ativo %}
+                        <form method="post" action="{{ path('app_juridico_api_tokens_revogar', { id: token.id }) }}" onsubmit="return confirm('Revogar este token? Integrações que o usam param de funcionar.');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_api_token_revogar_' ~ token.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm btn-danger-ghost"><i class="fas fa-ban" aria-hidden="true"></i></button>
+                        </form>
+                        {% else %}
+                        <span class="badge badge-secondary">Revogado</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-7">
+        <section class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Como usar', subtitle: 'Autenticação Bearer + REST/JSON' } %}
+            <div class="px-3 pb-3">
+                <p class="small">Envie o token no cabeçalho <code>Authorization</code> em toda requisição:</p>
+                <pre class="jur-api-code">curl {{ base_url }}/api/v1/publica/processos \
+  -H "Authorization: Bearer ujr_live_SEU_TOKEN_AQUI"</pre>
+
+                <h4 class="h6 mt-4">Endpoints disponíveis</h4>
+                <ul class="jur-api-endpoints">
+                    <li><code>GET /api/v1/publica/me</code> — dados do token e escritório</li>
+                    <li><code>GET /api/v1/publica/processos</code> — lista processos (filtros: <code>status</code>, <code>q</code>, <code>limit</code>)</li>
+                    <li><code>GET /api/v1/publica/processos/{numero}</code> — detalhe de um processo pelo número CNJ</li>
+                    <li><code>GET /api/v1/publica/prazos</code> — prazos (filtro <code>situacao=pendentes|cumpridos</code>)</li>
+                    <li><code>GET /api/v1/publica/tarefas</code> — tarefas pendentes da carteira</li>
+                    <li><code>GET /api/v1/publica/jurisprudencia</code> — biblioteca de jurisprudência (filtros <code>q</code>, <code>tribunal</code>)</li>
+                </ul>
+
+                <h4 class="h6 mt-4">Exemplo de resposta — <code>/processos</code></h4>
+                <pre class="jur-api-code">{
+  "total": 1,
+  "data": [
+    {
+      "id": 42,
+      "numero": "0001234-56.2026.8.26.0100",
+      "area": "Cível",
+      "fase": "instrucao",
+      "status": "ativo",
+      "cliente": "Empresa Exemplo Ltda",
+      "valor": "125000.00"
+    }
+  ]
+}</pre>
+                <p class="small text-muted mb-0">Todos os dados são escopados automaticamente ao escritório dono do token — nunca é preciso (nem possível) informar o escritório na requisição.</p>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

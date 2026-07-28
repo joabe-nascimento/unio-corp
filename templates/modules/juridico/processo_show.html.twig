@@ -166,6 +166,40 @@
                 {% endif %}
             </div>
         </div>
+        {% if previsao %}
+        <div class="unio-card mt-4 jur-previsao-card">
+            {% include 'components/section_header.html.twig' with { title: 'Previsão de êxito', subtitle: 'Score heurístico e explicável' } %}
+            <div class="px-3 pb-3">
+                <div class="jur-previsao-score" style="--jur-previsao-cor: {{ previsao.cor }};">
+                    <span class="jur-previsao-score__num">{{ previsao.score }}</span>
+                    <span class="jur-previsao-score__label">{{ previsao.label }}</span>
+                </div>
+                <ul class="jur-previsao-fatores">
+                    {% for fator in previsao.fatores %}
+                    <li class="jur-previsao-fatores__item {{ fator.favoravel ? 'is-favoravel' : 'is-desfavoravel' }}">
+                        <i class="fas {{ fator.favoravel ? 'fa-circle-check' : 'fa-circle-minus' }}" aria-hidden="true"></i>
+                        <div>
+                            <strong>{{ fator.label }}</strong>{% if fator.peso != 0 %} <span class="jur-previsao-fatores__peso">({{ fator.peso > 0 ? '+' : '' }}{{ fator.peso }})</span>{% endif %}
+                            <p class="mb-0 small text-muted">{{ fator.detalhe }}</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <p class="small text-muted mb-0 mt-2"><i class="fas fa-circle-info mr-1" aria-hidden="true"></i>Estimativa heurística e 100% explicável, calculada a partir do histórico real da carteira — não substitui a análise jurídica.</p>
+            </div>
+        </div>
+        {% endif %}
+        <div class="unio-card mt-4">
+            {% include 'components/section_header.html.twig' with { title: 'Consulta oficial (DataJud)', subtitle: 'PJe, e-SAJ, Projudi via CNJ' } %}
+            <div class="px-3 pb-3">
+                <div class="d-flex gap-2 mb-2">
+                    <input type="text" id="jurDatajudNumero" class="form-control form-control-sm" value="{{ processo.numero }}">
+                    <button type="button" id="jurDatajudBtn" class="btn-unio-ghost btn-sm text-nowrap"><i class="fas fa-magnifying-glass mr-1" aria-hidden="true"></i> Consultar</button>
+                </div>
+                <div id="jurDatajudResultado" class="jur-datajud-resultado" aria-live="polite"></div>
+                <p class="small text-muted mb-0 mt-2"><a href="{{ path('app_juridico_tribunais') }}">Configurar chave do DataJud →</a></p>
+            </div>
+        </div>
         <div class="unio-card mt-4">
             {% include 'components/section_header.html.twig' with { title: 'Zona de risco' } %}
             <div class="px-3 pb-3">
@@ -197,4 +231,7 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="{{ asset('js/unio-processo-tabs.js') }}?v=1" defer></script>
+<script src="{{ asset('js/juridico-datajud.js') }}?v=1" defer
+        data-consultar-url="{{ path('app_juridico_tribunais_consultar') }}"
+        data-csrf="{{ csrf_token('juridico_datajud_ajax') }}"></script>
 {% endblock %}

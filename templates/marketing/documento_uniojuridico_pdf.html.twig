@@ -1,0 +1,853 @@
+{# Documento institucional Unio Jurídico — mPDF · capa full-bleed + corpo completo #}
+<style>
+    body { font-family: dejavusans, sans-serif; color: #3a2c2f; font-size: 9.5pt; line-height: 1.4; }
+    h1 { font-size: 14.5pt; color: #3a0a16; margin: 0 0 5pt; font-weight: bold; }
+    h2 { font-size: 10.5pt; color: #3a0a16; margin: 8pt 0 4pt; font-weight: bold; }
+    h3 { font-size: 9.5pt; color: #4a1620; margin: 0 0 2pt; font-weight: bold; }
+    p { margin: 0 0 6pt; }
+    .eyebrow { font-size: 7.5pt; letter-spacing: 1.4px; text-transform: uppercase; color: #9C2C3C; font-weight: bold; margin: 0 0 3pt; }
+    .lead { font-size: 9pt; color: #6b5257; margin: 0 0 8pt; }
+    .page { page-break-after: always; }
+    .page-last { page-break-after: auto; }
+    .muted { color: #6b5257; }
+    .small { font-size: 8pt; }
+    .card {
+        border: 1px solid #ecd9c9;
+        border-radius: 4px;
+        padding: 7pt 8pt;
+        margin: 0 0 6pt;
+        background: #fff;
+    }
+    .callout {
+        border-left: 2.5px solid #9C2C3C;
+        background: #fbf1ee;
+        padding: 6pt 8pt;
+        margin: 8pt 0 0;
+    }
+    .callout strong { display: block; color: #3a0a16; margin-bottom: 1pt; font-size: 8.5pt; }
+    .callout-gold {
+        border-left: 2.5px solid #B8892B;
+        background: #fbf6ea;
+        padding: 6pt 8pt;
+        margin: 8pt 0 0;
+    }
+    .callout-gold strong { display: block; color: #6b4e13; margin-bottom: 1pt; font-size: 8.5pt; }
+    table.grid { width: 100%; border-collapse: separate; border-spacing: 4pt; margin: 0 -4pt; }
+    table.grid td {
+        width: 50%;
+        vertical-align: top;
+        border: 1px solid #ecd9c9;
+        border-radius: 4px;
+        padding: 6pt 7pt;
+        background: #fff;
+    }
+    table.stats { width: 100%; border-collapse: collapse; margin: 6pt 0 8pt; }
+    table.stats td {
+        text-align: center;
+        background: #fbf3ee;
+        border: 1px solid #ecd9c9;
+        padding: 7pt 4pt;
+    }
+    table.stats strong { display: block; font-size: 11pt; color: #3a0a16; line-height: 1.1; }
+    table.stats span { font-size: 7pt; color: #6b5257; }
+    table.data { width: 100%; border-collapse: collapse; margin-top: 4pt; }
+    table.data th {
+        text-align: left;
+        background: #f6ece4;
+        color: #9C2C3C;
+        font-size: 7pt;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 4pt 5pt;
+        border-bottom: 1px solid #ecd9c9;
+    }
+    table.data td {
+        padding: 4.5pt 5pt;
+        border-bottom: 1px solid #ecd9c9;
+        font-size: 8pt;
+        vertical-align: top;
+    }
+    table.data td:first-child { font-weight: bold; color: #3a0a16; }
+    ul.clean { margin: 2pt 0 0 12pt; padding: 0; }
+    ul.clean li { margin: 0 0 2pt; font-size: 8.5pt; color: #6b5257; }
+    .toc td { padding: 3pt 0; border-bottom: 1px solid #ecd9c9; font-size: 8.5pt; }
+    .toc .num { color: #9C2C3C; font-weight: bold; width: 22pt; }
+    .toc .pg { color: #a98d90; width: 16pt; text-align: right; }
+    .pill {
+        display: inline-block;
+        font-size: 6.5pt;
+        font-weight: bold;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: #6b0f22;
+        background: #f6e3e6;
+        border: 1px solid #e3b9c0;
+        padding: 2pt 5pt;
+        margin: 0 2pt 2pt 0;
+        border-radius: 8pt;
+    }
+    .pill-gold {
+        display: inline-block;
+        font-size: 6.5pt;
+        font-weight: bold;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: #6b4e13;
+        background: #faf1da;
+        border: 1px solid #e6cd94;
+        padding: 2pt 5pt;
+        margin: 0 2pt 2pt 0;
+        border-radius: 8pt;
+    }
+    .status-beta { color: #1a7a4c; font-weight: bold; }
+    .status-alpha { color: #B8892B; font-weight: bold; }
+    .status-planned { color: #9aa0a6; font-weight: bold; }
+    .close-box {
+        background: #2b0a10;
+        color: #fff;
+        padding: 12pt;
+        text-align: center;
+        border-radius: 4px;
+        margin-top: 8pt;
+    }
+    .close-box h2 { color: #fff; margin: 0 0 3pt; font-size: 12pt; }
+    .close-box p { color: rgba(248,240,238,0.75); margin: 0; font-size: 8.5pt; }
+    .close-box a { color: #f0cf9a; font-weight: bold; text-decoration: none; }
+
+    /* Capa */
+    .cover-bleed { width: 210mm; height: 297mm; background: #2b0a10; color: #f8f0ee; margin: 0; padding: 0; }
+    .cover-inner { padding: 16mm 15mm 12mm; }
+    .cover-top {
+        border-bottom: 1px solid rgba(255,255,255,0.14);
+        padding-bottom: 8pt;
+        margin-bottom: 16pt;
+        font-size: 7.5pt;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: rgba(248,240,238,0.55);
+    }
+    .cover-badge {
+        float: right;
+        font-size: 7pt;
+        letter-spacing: 1px;
+        color: #f0cf9a;
+        border: 1px solid rgba(184,137,43,0.55);
+        background: rgba(184,137,43,0.16);
+        padding: 3pt 7pt;
+        border-radius: 8pt;
+        text-transform: uppercase;
+    }
+    .cover-logo { text-align: center; margin: 6pt 0 16pt; }
+    .cover-logo img { height: 52pt; width: auto; }
+    .cover-tag {
+        text-align: center;
+        font-size: 8pt;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: #e2a03c;
+        font-weight: bold;
+        margin: 0 0 8pt;
+    }
+    .cover-title {
+        text-align: center;
+        font-size: 17pt;
+        font-weight: bold;
+        color: #fff;
+        line-height: 1.22;
+        margin: 0 0 8pt;
+    }
+    .cover-title span { color: #f0cf9a; }
+    .cover-lead {
+        text-align: center;
+        font-size: 9pt;
+        color: rgba(248,240,238,0.7);
+        margin: 0 auto 14pt;
+        line-height: 1.45;
+        max-width: 160mm;
+    }
+    .cover-kpi { width: 100%; border-collapse: collapse; margin-bottom: 10pt; }
+    .cover-kpi td {
+        width: 25%;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.045);
+        padding: 8pt 3pt;
+        vertical-align: top;
+    }
+    .cover-kpi strong { display: block; font-size: 10.5pt; color: #f8f0ee; line-height: 1.1; }
+    .cover-kpi span { font-size: 6.5pt; color: rgba(248,240,238,0.52); }
+    .cover-box {
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.035);
+        padding: 5.5pt 8pt;
+        margin: 0 0 3.5pt;
+        font-size: 8pt;
+        color: rgba(248,240,238,0.8);
+    }
+    .cover-box strong { color: #f0cf9a; }
+    .cover-foot {
+        margin-top: 12pt;
+        border-top: 1px solid rgba(255,255,255,0.14);
+        padding-top: 8pt;
+        font-size: 7.5pt;
+        color: rgba(248,240,238,0.48);
+        text-align: center;
+    }
+    .slogan-line {
+        text-align: center;
+        font-size: 9pt;
+        color: rgba(248,240,238,0.88);
+        margin: 0 0 4pt;
+        font-weight: bold;
+    }
+    .slogan-sub {
+        text-align: center;
+        font-size: 8pt;
+        color: rgba(248,240,238,0.55);
+        margin: 0 0 12pt;
+    }
+</style>
+
+{% if doc_section|default('body') == 'cover' %}
+
+<div class="cover-bleed">
+    <div class="cover-inner">
+        <div class="cover-top">
+            <span class="cover-badge">Confidencial</span>
+            Documento institucional · v{{ doc_version }}
+        </div>
+
+        <div class="cover-logo">
+            {% if logo_path|default('') %}
+            <img src="{{ logo_path }}" alt="Unio Jurídico" height="56" />
+            {% else %}
+            <div style="font-size:26pt;font-weight:bold;color:#fff;">Unio Jurídico</div>
+            {% endif %}
+        </div>
+
+        <p class="slogan-line">Justiça que acompanha.</p>
+        <p class="slogan-sub">O escritório de advocacia, do balcão ao tribunal, em um só lugar.</p>
+
+        <div class="cover-tag">Legal tech · Organismo digital · Bruna IA</div>
+        <div class="cover-title">Um sistema vivo para escritórios<br><span>pensar, decidir e proteger prazos.</span></div>
+        <p class="cover-lead">
+            A Unio Jurídico une gestão de processos, jurisprudência com inteligência artificial,
+            clientes, prazos e financeiro do escritório em uma única plataforma — com a Bruna,
+            assistente jurídica dedicada, plugada em cada tela.
+        </p>
+
+        <table class="cover-kpi">
+            <tr>
+                <td><strong>Processos</strong><span>Kanban &amp; riscos</span></td>
+                <td><strong>Bruna</strong><span>IA jurídica</span></td>
+                <td><strong>7</strong><span>Áreas do escritório</span></td>
+                <td><strong>20+</strong><span>Módulos no roadmap</span></td>
+            </tr>
+        </table>
+
+        <div class="cover-box"><strong>Contencioso —</strong> Processos, prazos, audiências, publicações e tribunais em um só painel.</div>
+        <div class="cover-box"><strong>Inteligência —</strong> Bruna + JurisFlow AI Service: pesquisa, resumo e cálculo jurídico sob demanda.</div>
+        <div class="cover-box"><strong>Relacionamento —</strong> CRM jurídico, portal do cliente e atendimento no mesmo organismo.</div>
+        <div class="cover-box"><strong>Plataforma —</strong> Multi-escritório, grants por perfil e identidade white-label herdadas do Organismo Unio.</div>
+
+        <div class="cover-foot">
+            {{ doc_date }} · uniojuridico.uniowork.com.br · © {{ doc_year }} Unio · Não distribuir sem autorização
+        </div>
+    </div>
+</div>
+
+{% else %}
+
+{# ── 2 ── #}
+<div class="page">
+    <p class="eyebrow">Documento · v{{ doc_version }}</p>
+    <h1>Sumário</h1>
+    <p class="lead">Material institucional completo da <strong>Unio Jurídico</strong> — plataforma de gestão para escritórios de advocacia.</p>
+
+    <table class="toc" width="100%">
+        <tr><td class="num">01</td><td>Capa</td><td class="pg">1</td></tr>
+        <tr><td class="num">02</td><td>Sumário</td><td class="pg">2</td></tr>
+        <tr><td class="num">03</td><td>A ideia — por que a Unio Jurídico existe</td><td class="pg">3</td></tr>
+        <tr><td class="num">04</td><td>O que tem por trás — o Organismo Unio</td><td class="pg">4</td></tr>
+        <tr><td class="num">05</td><td>Bruna — a assistente jurídica e o JurisFlow AI Service</td><td class="pg">5</td></tr>
+        <tr><td class="num">06</td><td>Mapa completo de módulos (7 áreas)</td><td class="pg">6</td></tr>
+        <tr><td class="num">07</td><td>Em produção — Processos (detalhe)</td><td class="pg">7</td></tr>
+        <tr><td class="num">08</td><td>Em produção — Jurisprudência IA (detalhe)</td><td class="pg">8</td></tr>
+        <tr><td class="num">09</td><td>Contencioso &amp; processual — o resto da esteira</td><td class="pg">9</td></tr>
+        <tr><td class="num">10</td><td>Clientes, relacionamento e produção documental</td><td class="pg">10</td></tr>
+        <tr><td class="num">11</td><td>Consultivo, financeiro e governança</td><td class="pg">11</td></tr>
+        <tr><td class="num">12</td><td>Multi-escritório, segurança e white-label</td><td class="pg">12</td></tr>
+        <tr><td class="num">13</td><td>Jornada de uso e papéis</td><td class="pg">13</td></tr>
+        <tr><td class="num">14</td><td>Roadmap consolidado</td><td class="pg">14</td></tr>
+        <tr><td class="num">15</td><td>Diferenciais — o que é e o que não é</td><td class="pg">15</td></tr>
+        <tr><td class="num">16</td><td>Encerramento e contato</td><td class="pg">16</td></tr>
+    </table>
+
+    <div class="callout">
+        <strong>Classificação — Confidencial</strong>
+        <span class="small muted">Uso interno e comercial sob NDA. Marca d'água "UNIO JURÍDICO · CONFIDENCIAL" nas páginas internas. Distribuição apenas com autorização.</span>
+    </div>
+</div>
+
+{# ── 3 ── #}
+<div class="page">
+    <p class="eyebrow">Posicionamento</p>
+    <h1>A ideia — por que a Unio Jurídico existe</h1>
+    <p class="lead">Escritórios de advocacia hoje operam com planilhas, WhatsApp, e-mail e o sistema do tribunal — cada informação
+    do caso espalhada em um lugar diferente. A Unio Jurídico nasce para ser o <strong>organismo único</strong> onde o processo,
+    o cliente, o prazo, a tese e o honorário vivem juntos.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Slogan</h3>
+                <p class="small muted" style="margin:0"><strong style="color:#3a0a16">Justiça que acompanha.</strong><br>Do balcão à sentença, sem perder o fio da carteira.</p>
+            </td>
+            <td>
+                <h3>Promessa</h3>
+                <p class="small muted" style="margin:0"><strong style="color:#3a0a16">Um painel, um copiloto, um escritório.</strong><br>KPIs de carteira, riscos calculados e a Bruna a um clique em cada tela.</p>
+            </td>
+        </tr>
+    </table>
+
+    <h2>Três camadas do produto</h2>
+    <table class="data">
+        <thead>
+            <tr><th>Camada</th><th>O que é</th><th>Exemplo na Unio Jurídico</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Operação</td><td>Tocar o caso no dia a dia</td><td>Processos · Kanban de fases · tarefas · partes</td></tr>
+            <tr><td>Inteligência</td><td>Pensar mais rápido que o prazo</td><td>Bruna · Jurisprudência IA · cálculo de honorários e prazos</td></tr>
+            <tr><td>Relacionamento</td><td>Sustentar a confiança do cliente</td><td>CRM jurídico · portal do cliente · cobrança de honorários</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout">
+        <strong>A tese central</strong>
+        <span class="small muted">Um escritório não perde caso por falta de conhecimento jurídico — perde por prazo perdido, informação
+        espalhada e retrabalho. A Unio Jurídico ataca exatamente esse ponto: visibilidade de carteira, alerta de risco em tempo
+        real e uma IA que já conhece o contexto do caso.</span>
+    </div>
+</div>
+
+{# ── 4 ── #}
+<div class="page">
+    <p class="eyebrow">Arquitetura de produto</p>
+    <h1>O que tem por trás — o Organismo Unio</h1>
+    <p class="lead">A Unio Jurídico não nasceu do zero: é uma <strong>identidade vertical</strong> construída sobre o mesmo
+    "Organismo" que já sustenta o Unio Saúde e a Unio genérica — um monólito modular Symfony que muda de marca, vocabulário
+    e IA conforme o perfil detectado do cliente.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Um código, várias marcas</h3>
+                <p class="small muted" style="margin:0">A branch <code>uniojuridico</code> herda autenticação, workspaces, multi-empresa,
+                cobrança (Asaas), WhatsApp e toda a base de permissões do Unio Saúde — sem reescrever nada disso. Só a
+                identidade (cores bordô/dourado, vocabulário "Clientes", "Prazos", "Modelos de Petição") e o backend de IA mudam.</p>
+            </td>
+            <td>
+                <h3>Detecção automática de perfil</h3>
+                <p class="small muted" style="margin:0"><code>OrganismoCopyService::isJuridicoProfile()</code> ativa o tema visual,
+                o logo, o favicon e o roteamento do chat para o backend jurídico — de forma automática, a partir de uma
+                variável de ambiente. Nenhuma tela precisa saber que existe mais de uma vertical.</p>
+            </td>
+        </tr>
+    </table>
+
+    <h2>Stack técnica</h2>
+    <table class="data">
+        <thead>
+            <tr><th>Camada</th><th>Tecnologia</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Backend</td><td>PHP 8.2 + Symfony 7.4 (monólito modular, não microserviços)</td></tr>
+            <tr><td>Dados</td><td>Doctrine ORM 3.6 + MariaDB/MySQL, migrations versionadas</td></tr>
+            <tr><td>Front-end</td><td>Twig + CSS próprio (tema bordô/dourado) + JavaScript progressivo (sem framework pesado)</td></tr>
+            <tr><td>IA</td><td>JurisFlow AI Service — FastAPI/LangChain em Python, dedicado ao vertical jurídico</td></tr>
+            <tr><td>Multi-tenant</td><td>Entidade <code>Empresa</code> = escritório; isolamento por escopo em serviços/repositórios</td></tr>
+            <tr><td>Deploy</td><td>HostGator via script manual SSH/SCP, ambiente próprio (<code>uniojuridico.uniowork.com.br</code>)</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout-gold">
+        <strong>Por que reaproveitar o Organismo</strong>
+        <span class="small muted">Cada vertical nova (Saúde, Jurídico, e as que vierem) chega ao mercado em semanas, não meses —
+        porque autenticação, cobrança, permissões e infraestrutura já existem e são maduras. O trabalho de cada vertical se
+        concentra no que é realmente específico: o vocabulário, os módulos de domínio e a IA.</span>
+    </div>
+</div>
+
+{# ── 5 ── #}
+<div class="page">
+    <p class="eyebrow">Inteligência artificial</p>
+    <h1>Bruna — a assistente jurídica e o JurisFlow AI Service</h1>
+    <p class="lead">A Bruna é a interface conversacional da Unio Jurídico — mesma UI de chat usada em todas as verticais Unio,
+    mas conectada a um backend de IA próprio para o Direito.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Arquitetura da IA</h3>
+                <ul class="clean">
+                    <li>Symfony chama o <strong>JurisFlow AI Service</strong> via HTTP</li>
+                    <li>Serviço próprio em Python (FastAPI + LangChain)</li>
+                    <li>Vertical <code>legal</code> dedicada, reutilizável em outros nichos jurídicos</li>
+                    <li>RAG isolado por escritório via <code>escritorio_id</code></li>
+                    <li>Mesma rota de chat do resto da Unio — só o backend muda</li>
+                </ul>
+            </td>
+            <td>
+                <h3>O que a Bruna já faz</h3>
+                <ul class="clean">
+                    <li>Pesquisa jurisprudencial com resumo e citação pronta</li>
+                    <li>Análise de saúde da carteira de processos</li>
+                    <li>Orquestrador decide sozinho: responder via RAG ou acionar tools</li>
+                    <li>Agente com ferramentas (ReAct): prazos, honorários OAB, jurisprudência</li>
+                    <li>Base de conhecimento (RAG) isolada por escritório instalado</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <h2>Fluxo de uma pergunta à Bruna</h2>
+    <table class="data">
+        <thead>
+            <tr><th>Etapa</th><th>O que acontece</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>1. Usuário pergunta</td><td>No chat (mesma UI de todas as verticais Unio) ou em botão dedicado ("Perguntar à Bruna")</td></tr>
+            <tr><td>2. Roteamento</td><td>Symfony detecta perfil jurídico e envia a mensagem ao JurisFlow, com o ID do escritório ativo</td></tr>
+            <tr><td>3. Orquestração</td><td>JurisFlow decide: base de conhecimento (RAG) ou agente com ferramentas</td></tr>
+            <tr><td>4. Ação ou resposta</td><td>Calcula prazo, busca jurisprudência, estima honorários ou resume o pedido em linguagem natural</td></tr>
+            <tr><td>5. Retorno</td><td>Resposta formatada no chat, com citação pronta para copiar quando aplicável</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout">
+        <strong>Hoje em produção (Jurisprudência IA)</strong>
+        <span class="small muted">Pesquisa por tema, tribunal e período com resumo de teses e súmulas; favoritar registros;
+        histórico de pesquisas com "carregar mais"; citação copiável direto para a petição — tudo já rodando em
+        <strong>uniojuridico.uniowork.com.br</strong>.</span>
+    </div>
+</div>
+
+{# ── 6 ── #}
+<div class="page">
+    <p class="eyebrow">Mapa da plataforma</p>
+    <h1>Visão geral — mapa completo de módulos</h1>
+    <p class="lead">O roadmap da Unio Jurídico está organizado em 7 áreas do escritório, com {{ total_modulos }} módulos
+    mapeados. Dois já estão em produção real (beta); os demais seguem em alpha ou planejados.</p>
+
+    <table class="stats">
+        <tr>
+            <td style="width:25%"><strong>{{ total_modulos }}</strong><span>Módulos mapeados</span></td>
+            <td style="width:25%"><strong>7</strong><span>Áreas do escritório</span></td>
+            <td style="width:25%"><strong>2</strong><span>Em produção (beta)</span></td>
+            <td style="width:25%"><strong>Bruna</strong><span>IA em todas as áreas</span></td>
+        </tr>
+    </table>
+
+    {% for grupo in mapa_modulos %}
+    <h2>{{ grupo.label }}</h2>
+    <table class="data" style="margin-bottom:6pt">
+        <thead>
+            <tr><th>Módulo</th><th>Foco</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            {% for m in grupo.modules %}
+            <tr>
+                <td>{{ m.label }}</td>
+                <td>{{ m.subtitle }}</td>
+                <td class="status-{{ m.status }}">{{ m.status_label }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</div>
+
+{# ── 7 ── #}
+<div class="page">
+    <p class="eyebrow">Em produção · Beta</p>
+    <h1>Processos — detalhe operacional</h1>
+    <p class="lead">O módulo mais maduro da plataforma: carteira completa de processos com KPIs, Kanban de fases, tarefas,
+    partes e um motor de alertas de risco calculado em tempo real.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Painel executivo</h3>
+                <ul class="clean">
+                    <li>Banner dinâmico com saudação e alerta de críticos</li>
+                    <li>4 KPIs: ativos, críticos, valor em carteira, taxa de êxito</li>
+                    <li>Cadastro por número CNJ, tribunal, área, fase, cliente</li>
+                    <li>Filtros por status e busca por número/cliente/área</li>
+                </ul>
+            </td>
+            <td>
+                <h3>Operação por processo</h3>
+                <ul class="clean">
+                    <li>Kanban de fases com drag-and-drop entre etapas</li>
+                    <li>Sidebar de abas: Dados · Tarefas · Partes (sem scroll longo)</li>
+                    <li>Tarefas com prazo, responsável e alerta de atraso</li>
+                    <li>Partes e representação: autor, réu, terceiros, OAB</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <div class="card">
+        <h3>Motor de alertas de risco</h3>
+        <p class="small muted" style="margin:0">Cruza status do processo, tarefas atrasadas e tempo sem movimentação para
+        apontar, em tempo real, o que precisa de atenção — sem esperar relatório manual. Cada alerta tem nível (alto/médio/baixo)
+        e leva direto ao processo.</p>
+    </div>
+
+    <p class="small muted" style="margin-top:8pt">
+        <span class="pill">Kanban de fases</span>
+        <span class="pill">Tarefas</span>
+        <span class="pill">Partes</span>
+        <span class="pill">Alertas de risco</span>
+        <span class="pill">KPIs executivos</span>
+        <span class="pill-gold">Bruna integrada</span>
+    </p>
+</div>
+
+{# ── 8 ── #}
+<div class="page">
+    <p class="eyebrow">Em produção · Beta</p>
+    <h1>Jurisprudência IA — detalhe operacional</h1>
+    <p class="lead">Motor de pesquisa jurisprudencial com IA: o advogado pergunta em linguagem natural e recebe teses,
+    súmulas e precedentes resumidos, prontos para virar fundamento de peça.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Pesquisa com a Bruna</h3>
+                <ul class="clean">
+                    <li>Busca por tema, tribunal e período</li>
+                    <li>Resumo executivo de acórdãos e teses</li>
+                    <li>Citação pronta com botão de copiar</li>
+                    <li>Salvar sugestão direto na biblioteca do escritório</li>
+                </ul>
+            </td>
+            <td>
+                <h3>Biblioteca do escritório</h3>
+                <ul class="clean">
+                    <li>Favoritar registros mais usados</li>
+                    <li>Filtro por tribunal, relevância e favoritos</li>
+                    <li>KPIs reais: consultas do mês, biblioteca, favoritos</li>
+                    <li>Histórico de pesquisas com "carregar mais" (paginado)</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <div class="callout-gold">
+        <strong>Próximo passo do módulo</strong>
+        <span class="small muted">Integração com o DataJud (metadados processuais oficiais do CNJ) e RAG com a base de
+        documentos própria de cada escritório — hoje a pesquisa já usa IA generativa, o próximo salto é cruzar isso com
+        dados processuais reais do tribunal.</span>
+    </div>
+
+    <p class="small muted" style="margin-top:8pt">
+        <span class="pill">Busca por IA</span>
+        <span class="pill">Favoritos</span>
+        <span class="pill">Histórico paginado</span>
+        <span class="pill">Citação copiável</span>
+        <span class="pill-gold">JurisFlow AI Service</span>
+    </p>
+</div>
+
+{# ── 9 ── #}
+<div class="page">
+    <p class="eyebrow">Contencioso &amp; processual</p>
+    <h1>O resto da esteira do processo</h1>
+    <p class="lead">Além de Processos, a área de Contencioso mapeia toda a rotina que cerca o litígio — do prazo à
+    integração direta com os tribunais.</p>
+
+    <table class="data">
+        <thead>
+            <tr><th>Módulo</th><th>O que resolve</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Prazos &amp; Diligências</td><td>Cálculo CPC/CPP com feriados, prazos em dobro, fila crítica com semáforo, lembretes WhatsApp/e-mail</td><td class="status-alpha">Alpha</td></tr>
+            <tr><td>Audiências</td><td>Agenda por vara/juiz, checklist de preparação, ata assistida, links de videoconferência</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Publicações &amp; Intimações</td><td>Captura de diários oficiais (DJe/DJEN), triagem por IA, sugestão automática de prazo</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Integração Tribunais</td><td>Conectores PJe, e-SAJ, Projudi e EPROC com sincronização incremental</td><td class="status-planned">Planejado</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout">
+        <strong>A lógica da esteira</strong>
+        <span class="small muted">Publicação chega → prazo é calculado automaticamente → tarefa nasce no processo →
+        alerta de risco monitora até a audiência. Cada módulo desta página se conecta ao Kanban de Processos já em produção.</span>
+    </div>
+</div>
+
+{# ── 10 ── #}
+<div class="page">
+    <p class="eyebrow">Relacionamento &amp; produção</p>
+    <h1>Clientes, relacionamento e documentos</h1>
+    <p class="lead">O escritório também é uma operação comercial e documental — a Unio Jurídico trata isso com o mesmo
+    padrão visual do restante da plataforma.</p>
+
+    <h2>Clientes &amp; Relacionamento</h2>
+    <table class="data" style="margin-bottom:6pt">
+        <thead>
+            <tr><th>Módulo</th><th>O que resolve</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>CRM Jurídico</td><td>Lead → consulta → proposta → contrato de honorários, com verificação de conflito de interesses</td><td class="status-alpha">Alpha</td></tr>
+            <tr><td>Portal do Cliente</td><td>Timeline de andamentos, upload de documentos, aprovação de minutas, cobrança com link de pagamento</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Central de Atendimento</td><td>Inbox unificada WhatsApp + e-mail, SLA por cliente, sugestão de resposta pela Bruna</td><td class="status-planned">Planejado</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Produção &amp; Documentos</h2>
+    <table class="data">
+        <thead>
+            <tr><th>Módulo</th><th>O que resolve</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>GED Jurídico</td><td>Repositório por cliente/caso, versionamento, OCR e busca semântica com a Bruna</td><td class="status-alpha">Alpha</td></tr>
+            <tr><td>Petições &amp; Modelos</td><td>Biblioteca de modelos com variáveis automáticas e montagem assistida por IA</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Assinatura &amp; Protocolo</td><td>E-sign ICP-Brasil, ordem de assinantes, comprovante de protocolo anexado ao GED</td><td class="status-planned">Planejado</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{# ── 11 ── #}
+<div class="page">
+    <p class="eyebrow">Consultivo, financeiro e governança</p>
+    <h1>O escritório que não litiga também opera aqui</h1>
+    <p class="lead">Contratos, due diligence, honorários e compliance completam o organismo — para escritórios full
+    service ou boutiques consultivas.</p>
+
+    <h2>Consultivo</h2>
+    <table class="data" style="margin-bottom:6pt">
+        <thead>
+            <tr><th>Módulo</th><th>O que resolve</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Contratos</td><td>Ciclo de vida, alertas de renovação, playbooks de cláusulas, análise de risco pela Bruna</td><td class="status-alpha">Alpha</td></tr>
+            <tr><td>Due Diligence</td><td>Data room, checklists setoriais, matriz de achados para M&amp;A</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Societário &amp; M&amp;A</td><td>Quadro societário, atas, calendário de obrigações</td><td class="status-planned">Planejado</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Financeiro do escritório</h2>
+    <table class="data" style="margin-bottom:6pt">
+        <thead>
+            <tr><th>Módulo</th><th>O que resolve</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Honorários &amp; Timesheet</td><td>Apontamento de horas, tabela OAB, honorários de êxito, rateio entre sócios</td><td class="status-alpha">Alpha</td></tr>
+            <tr><td>Cobrança &amp; Inadimplência</td><td>Aging, régua de cobrança, links de pagamento via Asaas</td><td class="status-planned">Planejado</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Inteligência &amp; Governança</h2>
+    <table class="data">
+        <thead>
+            <tr><th>Módulo</th><th>O que resolve</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Analytics Jurídico</td><td>Taxa de êxito, receita por cliente, SLA de prazos, carga da equipe</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Previsão de Êxito</td><td>Score preditivo de probabilidade de êxito e simulador acordo vs. litígio</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Compliance OAB &amp; LGPD</td><td>Políticas, incidentes, mapa de dados e evidências para auditoria</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Conflito de Interesses</td><td>Bloqueio preventivo e ethical wall entre equipes</td><td class="status-planned">Planejado</td></tr>
+            <tr><td>Auditoria de Atos</td><td>Trilha imutável de acessos, alterações e exportações sensíveis</td><td class="status-planned">Planejado</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{# ── 12 ── #}
+<div class="page">
+    <p class="eyebrow">Arquitetura e confiança</p>
+    <h1>Multi-escritório, segurança e white-label</h1>
+    <p class="lead">A mesma instalação pode atender vários escritórios com dados isolados, marca própria e controle
+    fino de acesso — herdado do Organismo Unio.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Multi-tenant por escritório</h3>
+                <p class="small muted" style="margin:0">Cada escritório é uma <code>Empresa</code> isolada. A base de
+                conhecimento (RAG) da Bruna também é separada por <code>escritorio_id</code> — sem vazamento de dados
+                entre clientes da plataforma.</p>
+            </td>
+            <td>
+                <h3>Grants por perfil</h3>
+                <p class="small muted" style="margin:0">Sócio, associado, secretaria e cliente enxergam módulos diferentes.
+                O mesmo mecanismo de permissões (roles + grants por produto) usado nas demais verticais Unio.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>White-label</h3>
+                <p class="small muted" style="margin:0">Logo, cores (bordô/dourado por padrão) e vocabulário de navegação
+                configuráveis por variável de ambiente — cada escritório pode ter sua própria cara.</p>
+            </td>
+            <td>
+                <h3>Segurança &amp; LGPD</h3>
+                <p class="small muted" style="margin:0">CSRF em todos os formulários e ações AJAX, sessão segura,
+                isolamento multi-tenant e trilha de auditoria planejada para módulos sensíveis.</p>
+            </td>
+        </tr>
+    </table>
+
+    <h2>O que é reaproveitado sem alteração funcional</h2>
+    <table class="data">
+        <thead>
+            <tr><th>Bloco</th><th>Origem</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Autenticação e workspaces</td><td>Shell Organismo (mesmo do Unio Saúde)</td></tr>
+            <tr><td>Cobrança de honorários</td><td>Integração Asaas já madura na plataforma</td></tr>
+            <tr><td>Lembretes de prazo/audiência</td><td>Motor de WhatsApp reaproveitado do lembrete clínico</td></tr>
+            <tr><td>Permissões e LGPD</td><td>Infraestrutura global de grants e privacidade</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{# ── 13 ── #}
+<div class="page">
+    <p class="eyebrow">Uso real</p>
+    <h1>Jornada e papéis</h1>
+    <p class="lead">Como diferentes perfis do escritório entram e operam a Unio Jurídico no dia a dia.</p>
+
+    <table class="data">
+        <thead>
+            <tr><th>#</th><th>Passo</th><th>Detalhe</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>01</td><td>Login</td><td>Acesso em uniojuridico.uniowork.com.br com sessão segura</td></tr>
+            <tr><td>02</td><td>Workspace</td><td>Escolha do escritório ativo — dados no escopo certo</td></tr>
+            <tr><td>03</td><td>Painel</td><td>KPIs de carteira e alertas de risco assim que a sessão abre</td></tr>
+            <tr><td>04</td><td>Operação</td><td>Kanban de fases, tarefas, jurisprudência ou financeiro conforme o grant</td></tr>
+            <tr><td>05</td><td>Bruna</td><td>Pergunta em linguagem natural a qualquer momento, em qualquer tela</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Quem usa o quê</h2>
+    <table class="data">
+        <thead>
+            <tr><th>Perfil</th><th>Foco principal</th><th>Módulos típicos</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Sócio</td><td>Visão de carteira e risco</td><td>KPIs · alertas · analytics · financeiro</td></tr>
+            <tr><td>Advogado associado</td><td>Execução do caso</td><td>Processos · tarefas · jurisprudência · petições</td></tr>
+            <tr><td>Secretaria / estagiário</td><td>Rotina e triagem</td><td>Publicações · agenda · partes · documentos</td></tr>
+            <tr><td>Cliente</td><td>Acompanhamento</td><td>Portal do cliente · timeline · documentos</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{# ── 14 ── #}
+<div class="page">
+    <p class="eyebrow">Evolução do produto</p>
+    <h1>Roadmap consolidado</h1>
+    <p class="lead">O roadmap segue o mesmo ritmo trimestral do resto da plataforma Unio, com marcos já entregues e
+    próximos passos claros por módulo.</p>
+
+    <table class="data">
+        <thead>
+            <tr><th>Horizonte</th><th>Entregue / planejado</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Q3 — Fundação ✅</td><td>CRUD de processos, dashboard com 4 KPIs, filtros e busca, integração inicial com a Bruna, pesquisa jurisprudencial com IA</td></tr>
+            <tr><td>Q4 — Operação avançada ✅</td><td>Kanban de fases, tarefas por processo, alertas de risco em tempo real, partes e representação, favoritos e histórico de jurisprudência</td></tr>
+            <tr><td>Q4 — Em andamento</td><td>Prazos automáticos, publicações via DJe, honorários e timesheet, CRM jurídico, GED, contratos</td></tr>
+            <tr><td>2027 — Enterprise ✅</td><td>Multi-escritório (grupo matriz/filial), API pública com tokens, integração com PJe/e-SAJ/Projudi via DataJud, BI de carteira com dados reais, previsão de êxito heurística e explicável</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout-gold">
+        <strong>Metodologia</strong>
+        <span class="small muted">Cada módulo do roadmap já nasce com o "prompt da Bruna" mapeado — ou seja, a pergunta
+        em linguagem natural que a IA deve saber responder quando o módulo entrar em produção. Isso mantém a inteligência
+        artificial como parte do design, não como um recurso adicionado depois.</span>
+    </div>
+</div>
+
+{# ── 15 ── #}
+<div class="page">
+    <p class="eyebrow">Clareza de produto</p>
+    <h1>Diferenciais — e o que a Unio Jurídico não é</h1>
+    <p class="lead">Deixa explícito o recorte atual para não misturar com as outras verticais Unio nem prometer o que
+    ainda não está em produção.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>É (hoje)</h3>
+                <ul class="clean">
+                    <li>Plataforma de gestão para escritórios de advocacia</li>
+                    <li>Processos com Kanban, tarefas e alertas de risco em produção</li>
+                    <li>Jurisprudência com IA (Bruna + JurisFlow) em produção</li>
+                    <li>API pública com tokens, BI de carteira e integração DataJud em produção</li>
+                    <li>Organismo Unio: multi-escritório (grupo matriz/filial), grants e white-label</li>
+                    <li>Roadmap público com 7 áreas e 20+ módulos mapeados</li>
+                </ul>
+            </td>
+            <td>
+                <h3>Não é (ainda)</h3>
+                <ul class="clean">
+                    <li>Webservice oficial nativo por certificado A1/A3 em cada tribunal (a integração real hoje é via DataJud/CNJ)</li>
+                    <li>Unio Saúde (vertical clínica — produto irmão, não este)</li>
+                    <li>ERP financeiro completo de escritório</li>
+                    <li>Assinatura eletrônica ICP-Brasil nativa</li>
+                    <li>Modelo de machine learning treinado para previsão de êxito (hoje é heurística explicável)</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <div class="callout">
+        <strong>Unio Saúde</strong>
+        <span class="small muted">Produto vertical irmão, hospedado em domínio próprio, para clínicas e hospitais
+        (pós-operatório, carteirinha, guia médico). Mesmo Organismo, identidade e módulos totalmente diferentes.
+        Este documento trata exclusivamente da <strong>Unio Jurídico</strong>.</span>
+    </div>
+
+    <div class="card" style="margin-top:8pt">
+        <h3>Mensagem em uma linha</h3>
+        <p class="small muted" style="margin:0"><strong style="color:#3a0a16">Unio Jurídico: o escritório inteiro — processos, prazos, clientes e a Bruna — em um único organismo digital.</strong></p>
+    </div>
+</div>
+
+{# ── 16 ── #}
+<div class="page-last">
+    <p class="eyebrow">Próximos passos</p>
+    <h1>Encerramento</h1>
+    <p class="lead">Documento institucional completo da Unio Jurídico — pronto para propostas, demos e alinhamento interno.</p>
+
+    <table class="grid">
+        <tr>
+            <td>
+                <h3>Ambiente</h3>
+                <p class="small muted" style="margin:0">Produção<br><strong style="color:#3a0a16">uniojuridico.uniowork.com.br</strong></p>
+            </td>
+            <td>
+                <h3>Documento</h3>
+                <p class="small muted" style="margin:0">v{{ doc_version }} · {{ doc_date }}<br>A4 · mPDF · marca d'água</p>
+            </td>
+        </tr>
+    </table>
+
+    <div class="close-box">
+        {% if logo_path|default('') %}
+        <img src="{{ logo_path }}" alt="Unio Jurídico" height="40" style="margin-bottom:8pt" /><br>
+        {% endif %}
+        <h2>Unio Jurídico</h2>
+        <p>Justiça que acompanha.</p>
+        <p style="margin-top:4pt">O escritório inteiro, em um só organismo digital.</p>
+        <p style="margin-top:8pt"><a href="https://uniojuridico.uniowork.com.br">uniojuridico.uniowork.com.br</a></p>
+    </div>
+
+    <p class="small muted" style="margin-top:10pt;text-align:center">© {{ doc_year }} Unio · Confidencial · v{{ doc_version }}</p>
+</div>
+
+{% endif %}

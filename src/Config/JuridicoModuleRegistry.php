@@ -69,9 +69,9 @@ final class JuridicoModuleRegistry
             'roadmap' => [
                 ['phase' => 'Q3', 'title' => 'Fundação ✅', 'items' => ['CRUD processos ✅', 'Dashboard 4 KPIs ✅', 'Filtros e busca ✅', 'Integração Bruna ✅']],
                 ['phase' => 'Q4', 'title' => 'Operação avançada ✅', 'items' => ['Kanban de fases ✅', 'Tarefas por processo ✅', 'Alertas de risco ✅', 'Partes e representação ✅']],
-                ['phase' => '2027', 'title' => 'Enterprise', 'items' => ['Multi-escritório', 'API pública', 'BI de carteira', 'PJe/e-SAJ/Projudi']],
+                ['phase' => '2027', 'title' => 'Enterprise ✅', 'items' => ['Multi-escritório (grupo matriz/filial) ✅', 'API pública com tokens ✅', 'BI de carteira ✅', 'DataJud — PJe/e-SAJ/Projudi ✅']],
             ],
-            'integrations' => ['JurisFlow / Bruna', 'DataJud (futuro)', 'PJe (futuro)'],
+            'integrations' => ['JurisFlow / Bruna', 'DataJud (CNJ)', 'API Pública'],
             'bruna_prompt' => 'Analise a saúde da minha carteira de processos e sugira prioridades para esta semana.',
             'metrics' => [
                 ['label' => 'Processos ativos', 'value' => '—'],
@@ -182,27 +182,29 @@ final class JuridicoModuleRegistry
             'label' => 'Integração Tribunais',
             'icon' => 'fa-building-columns',
             'subtitle' => 'PJe, e-SAJ, Projudi',
-            'tagline' => 'Conectores oficiais para sincronizar processos, documentos e movimentações sem retrabalho.',
-            'status' => 'planned',
-            'empty_title' => 'Hub de integrações tribunais',
-            'empty_text' => 'Conectores PJe, e-SAJ, Projudi e APIs de tribunais estaduais com monitoramento de saúde.',
+            'tagline' => 'Consulta oficial de andamentos via API Pública do DataJud (CNJ), que agrega PJe, e-SAJ, Projudi e mais de 90 tribunais.',
+            'status' => 'alpha',
+            'empty_title' => 'Hub de integração com tribunais',
+            'empty_text' => 'Cadastre a chave gratuita do DataJud e consulte andamentos oficiais direto pelo número do processo, com histórico de movimentações.',
             'features' => [
-                'Autenticação segura por certificado A1/A3',
-                'Sincronização incremental de andamentos',
-                'Download automático de anexos relevantes',
-                'Monitor de disponibilidade dos tribunais',
-                'Log de sincronização por escritório',
+                'Consulta oficial por número CNJ, com detecção automática do tribunal',
+                'Cobertura de mais de 90 tribunais (TJs, TRFs, TRTs, STF, STJ e mais)',
+                'Histórico de movimentações oficiais direto no processo',
+                'Chave de API gratuita por escritório (cadastro no CNJ)',
+                'Ferramenta "consultar_datajud" disponível no chat da Bruna',
             ],
             'capabilities' => [
-                ['icon' => 'fa-shield-halved', 'title' => 'Credenciais isoladas', 'text' => 'Cofre por advogado com permissão do escritório.'],
+                ['icon' => 'fa-landmark', 'title' => 'Base nacional do CNJ', 'text' => 'Metadados oficiais direto da fonte, sem scraping e sem depender de login em cada tribunal.'],
+                ['icon' => 'fa-robot', 'title' => 'Bruna consulta para você', 'text' => 'Peça "consultar andamento oficial do processo X" no chat e receba o resultado na hora.'],
             ],
             'roadmap' => [
-                ['phase' => '2027', 'title' => 'Conectores', 'items' => ['PJe TRT', 'e-SAJ SP', 'Projudi PR']],
+                ['phase' => 'Q4', 'title' => 'DataJud ✅', 'items' => ['Chave por escritório ✅', 'Consulta por CNJ ✅', 'Ferramenta no chat ✅']],
+                ['phase' => '2027', 'title' => 'Conectores nativos', 'items' => ['Webservice PJe (certificado A1/A3)', 'e-SAJ SP', 'Projudi PR']],
             ],
-            'integrations' => ['PJe', 'e-SAJ', 'Projudi', 'EPROC'],
-            'bruna_prompt' => 'Quais tribunais devo priorizar para integração se atuo em contencioso trabalhista em SP e RJ?',
+            'integrations' => ['DataJud (CNJ)', 'PJe', 'e-SAJ', 'Projudi', 'EPROC'],
+            'bruna_prompt' => 'Consultar andamento oficial do processo 0001234-56.2026.8.26.0100 no DataJud.',
             'metrics' => [
-                ['label' => 'Conectores ativos', 'value' => '0'],
+                ['label' => 'Consultas realizadas', 'value' => '—'],
                 ['label' => 'Última sync', 'value' => '—'],
             ],
         ],
@@ -574,24 +576,27 @@ final class JuridicoModuleRegistry
             'label' => 'Analytics Jurídico',
             'icon' => 'fa-chart-line',
             'subtitle' => 'BI e produtividade',
-            'tagline' => 'Indicadores de produtividade, taxa de êxito, receita por área e carga da equipe.',
-            'status' => 'planned',
-            'empty_title' => 'BI jurídico em desenvolvimento',
-            'empty_text' => 'Dashboards executivos para sócios — carteira, produtividade, SLA de prazos e rentabilidade por cliente.',
+            'tagline' => 'BI de carteira com gráficos reais: status, fase, área, tribunal, evolução mensal, receita e SLA de prazos.',
+            'status' => 'beta',
+            'empty_title' => 'BI de carteira em produção',
+            'empty_text' => 'Dashboards executivos com dados reais da carteira — status, fase, área, tribunal, evolução mensal, receita de honorários e SLA de prazos, com visão consolidada de grupo (multi-escritório).',
             'features' => [
-                'Taxa de êxito por área e magistrado',
-                'Receita e margem por cliente/caso',
-                'Carga horária vs. orçado (timesheet)',
-                'SLA de prazos e gargalos operacionais',
-                'Exportação para PDF e apresentações',
+                'Composição da carteira por status, fase, área e tribunal',
+                'Evolução mensal de novos processos e receita de honorários',
+                'SLA de cumprimento de prazos com gauge executivo',
+                'Taxa de êxito real calculada a partir dos processos encerrados',
+                'Visão consolidada de grupo para escritórios com filiais (matriz/filial)',
+                'Todos os gráficos com dados 100% reais do banco — zero mock',
             ],
             'capabilities' => [
-                ['icon' => 'fa-gauge-high', 'title' => 'Pulso executivo', 'text' => 'KPIs jurídicos integrados ao Pulso do escritório.'],
+                ['icon' => 'fa-gauge-high', 'title' => 'BI executivo real', 'text' => 'Gráficos Chart.js/ECharts com dados reais: composição, evolução e produtividade.'],
+                ['icon' => 'fa-diagram-project', 'title' => 'Grupo consolidado', 'text' => 'Matriz enxerga a carteira somada de todas as filiais vinculadas por código de grupo.'],
             ],
             'roadmap' => [
-                ['phase' => '2027', 'title' => 'BI', 'items' => ['Dashboards', 'Export', 'Metas']],
+                ['phase' => 'Q4', 'title' => 'BI ✅', 'items' => ['Dashboards com dados reais ✅', 'SLA de prazos ✅', 'Multi-escritório consolidado ✅']],
+                ['phase' => '2027', 'title' => 'Avançado', 'items' => ['Exportação para PDF', 'Metas por sócio/área']],
             ],
-            'integrations' => ['Pulso', 'Honorários', 'Processos'],
+            'integrations' => ['Pulso', 'Honorários', 'Processos', 'Prazos'],
             'bruna_prompt' => 'Quais KPIs um escritório de contencioso cível deve acompanhar mensalmente?',
             'metrics' => [
                 ['label' => 'Taxa êxito', 'value' => '—'],
@@ -604,26 +609,60 @@ final class JuridicoModuleRegistry
             'label' => 'Previsão de Êxito',
             'icon' => 'fa-brain',
             'subtitle' => 'Scoring de risco IA',
-            'tagline' => 'Modelo preditivo de probabilidade de êxito, duração e valor baseado em histórico e jurisprudência.',
-            'status' => 'planned',
-            'empty_title' => 'Inteligência preditiva em pesquisa',
-            'empty_text' => 'Score de risco por caso, simulação de cenários e recomendação de acordo vs. litígio.',
+            'tagline' => 'Score heurístico e 100% explicável de probabilidade de êxito, calculado a partir do histórico real da carteira.',
+            'status' => 'alpha',
+            'empty_title' => 'Previsão de êxito ativa nos processos',
+            'empty_text' => 'Abra qualquer processo ativo para ver o score de 0 a 100 com os fatores explicáveis que o compõem — histórico da área, fase, execução e tempo de tramitação.',
             'features' => [
-                'Score de probabilidade de êxito',
-                'Estimativa de duração e custo processual',
-                'Simulador acordo vs. sentença',
-                'Fatores explicáveis (XAI) para o advogado',
+                'Score de 0 a 100 exibido em cada processo ativo',
+                'Fatores 100% explicáveis (sem "caixa-preta") — cada peso é auditável',
+                'Baseado no histórico real de êxito por área do escritório',
+                'Ferramenta "prever_exito" disponível no chat da Bruna',
+                'Modelo de machine learning treinado — roadmap 2027',
             ],
             'capabilities' => [
-                ['icon' => 'fa-scale-unbalanced', 'title' => 'Apoio à decisão', 'text' => 'Insights para sócios priorizarem acordos e recursos.'],
+                ['icon' => 'fa-scale-unbalanced', 'title' => 'Apoio à decisão', 'text' => 'Insights explicáveis para sócios priorizarem acordos e recursos.'],
+                ['icon' => 'fa-list-check', 'title' => 'Fatores auditáveis', 'text' => 'Cada ponto do score vem com a explicação exata do porquê — sem caixa-preta.'],
             ],
             'roadmap' => [
-                ['phase' => '2027', 'title' => 'ML jurídico', 'items' => ['Modelo piloto', 'Explicabilidade', 'Calibração']],
+                ['phase' => 'Q4', 'title' => 'Heurística ✅', 'items' => ['Score explicável ✅', 'Histórico por área ✅', 'Ferramenta no chat ✅']],
+                ['phase' => '2027', 'title' => 'ML jurídico', 'items' => ['Modelo treinado com histórico setorial', 'Calibração cruzada entre escritórios']],
             ],
-            'integrations' => ['JurisFlow AI Service', 'Analytics Jurídico'],
+            'integrations' => ['Processos', 'Analytics Jurídico'],
             'bruna_prompt' => 'Quais fatores aumentam a chance de procedência em ação de cobrança com nota promissória?',
             'metrics' => [
                 ['label' => 'Casos scored', 'value' => '—'],
+            ],
+        ],
+        [
+            'slug' => 'api-publica',
+            'section' => 'governanca',
+            'label' => 'API Pública',
+            'icon' => 'fa-plug-circle-bolt',
+            'subtitle' => 'Tokens e integrações externas',
+            'tagline' => 'REST API v1 autenticada por token — conecte BI, ERP, portal do cliente e automações próprias ao Unio Jurídico.',
+            'status' => 'beta',
+            'empty_title' => 'API Pública em produção',
+            'empty_text' => 'Gere tokens de acesso e consuma processos, prazos, tarefas e jurisprudência do escritório em qualquer sistema externo.',
+            'features' => [
+                'Tokens escopados por escritório (nunca vazam dados entre clientes)',
+                'Autenticação Bearer stateless — sem sessão, sem cookie',
+                'Endpoints reais: processos, prazos, tarefas e jurisprudência',
+                'Painel de gestão para gerar e revogar tokens a qualquer momento',
+                'Documentação com exemplos de requisição prontos para uso',
+            ],
+            'capabilities' => [
+                ['icon' => 'fa-key', 'title' => 'Tokens seguros', 'text' => 'Hash SHA-256 no banco — o token bruto só é exibido uma vez, na criação.'],
+                ['icon' => 'fa-code', 'title' => 'REST/JSON simples', 'text' => 'Sem SDK necessário: qualquer linguagem que fale HTTP consome a API.'],
+            ],
+            'roadmap' => [
+                ['phase' => 'Q4', 'title' => 'API v1 ✅', 'items' => ['Tokens por escritório ✅', 'Endpoints de leitura ✅', 'Painel de gestão ✅']],
+                ['phase' => '2027', 'title' => 'Avançado', 'items' => ['Webhooks de eventos', 'Escopo de escrita completo', 'Rate limit configurável por plano']],
+            ],
+            'integrations' => ['Processos', 'Prazos', 'Jurisprudência IA'],
+            'bruna_prompt' => 'Como um sistema de BI externo pode consumir os processos do meu escritório pela API?',
+            'metrics' => [
+                ['label' => 'Tokens ativos', 'value' => '—'],
             ],
         ],
         [
@@ -726,6 +765,9 @@ final class JuridicoModuleRegistry
         'documentos' => 'app_juridico_documentos',
         'honorarios' => 'app_juridico_honorarios',
         'jurisprudencia' => 'app_juridico_jurisprudencia',
+        'analytics' => 'app_juridico_analytics',
+        'tribunais' => 'app_juridico_tribunais',
+        'api-publica' => 'app_juridico_api_tokens',
     ];
 
     public static function isGraduated(string $slug): bool
@@ -789,7 +831,7 @@ final class JuridicoModuleRegistry
         return $out;
     }
 
-    /** @return list<array{value: string, label: string, tone: string}>} */
+    /** @return list<array{value: string, label: string, tone: string}> */
     public static function dashboardKpis(): array
     {
         return [

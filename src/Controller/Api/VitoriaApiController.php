@@ -36,6 +36,8 @@ final class VitoriaApiController extends AbstractController
         'analisar_carteira',
         'tarefas_urgentes',
         'buscar_processo',
+        'prever_exito',
+        'consultar_datajud',
     ];
 
     public function __construct(

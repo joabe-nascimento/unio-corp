@@ -26,6 +26,12 @@ security:
             pattern: ^/(_profiler|_wdt)
             security: false
 
+        api_publica:
+            pattern: ^/api/v1/publica
+            stateless: true
+            custom_authenticators:
+                - App\Security\ApiTokenAuthenticator
+
         main:
             lazy: true
             provider: app_user_provider
@@ -72,6 +78,7 @@ security:
         - { path: ^/api/whatsapp/meta,    roles: PUBLIC_ACCESS }
         - { path: ^/api/asaas/webhook,    roles: PUBLIC_ACCESS }
         - { path: ^/api/mobile,           roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/publica,       roles: ROLE_API_CLIENT }
         - { path: ^/paciente,             roles: PUBLIC_ACCESS }
         - { path: ^/verificar,             roles: PUBLIC_ACCESS }
         - { path: ^/wallet,                roles: PUBLIC_ACCESS }

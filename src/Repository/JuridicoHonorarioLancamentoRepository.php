@@ -119,6 +119,57 @@ class JuridicoHonorarioLancamentoRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * @param list<Empresa> $empresas
+     *
+     * @return array{labels: list<string>, values: list<float>}
+     */
+    public function receitaUltimosMeses(array $empresas, int $meses = 6): array
+    {
+        $tz = new \DateTimeZone('America/Sao_Paulo');
+        $now = new \DateTimeImmutable('now', $tz);
+        $mesesPt = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        $labels = [];
+        $values = [];
+
+        for ($i = $meses - 1; $i >= 0; --$i) {
+            $inicio = $now->modify('first day of this month')->modify("-{$i} months")->setTime(0, 0);
+            $fim = $inicio->modify('last day of this month')->setTime(23, 59, 59);
+            $labels[] = $mesesPt[(int) $inicio->format('n') - 1] . '/' . $inicio->format('y');
+
+            $values[] = (float) $this->createQueryBuilder('l')
+                ->select('COALESCE(SUM(l.horas * l.valorHora), 0)')
+                ->andWhere('l.empresa IN (:empresas)')
+                ->andWhere('l.data >= :inicio AND l.data < :fim')
+                ->setParameter('empresas', $empresas)
+                ->setParameter('inicio', $inicio)
+                ->setParameter('fim', $fim)
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
+        return ['labels' => $labels, 'values' => $values];
+    }
+
+    /** @param list<Empresa> $empresas */
+    public function sumReceitaGrupoMes(array $empresas, ?string $mes = null): float
+    {
+        $mes ??= (new \DateTimeImmutable('today'))->format('Y-m');
+        [$ano, $mesNum] = explode('-', $mes);
+        $inicio = new \DateTimeImmutable("{$ano}-{$mesNum}-01");
+        $fim = $inicio->modify('first day of next month');
+
+        return (float) $this->createQueryBuilder('l')
+            ->select('COALESCE(SUM(l.horas * l.valorHora), 0)')
+            ->andWhere('l.empresa IN (:empresas)')
+            ->andWhere('l.data >= :inicio AND l.data < :fim')
+            ->setParameter('empresas', $empresas)
+            ->setParameter('inicio', $inicio)
+            ->setParameter('fim', $fim)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function sumHorasMes(Empresa $empresa, ?string $mes = null): float
     {
         $mes ??= (new \DateTimeImmutable('today'))->format('Y-m');

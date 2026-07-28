@@ -10,6 +10,7 @@ use App\Service\Juridico\JuridicoProcessoParteService;
 use App\Service\Juridico\JuridicoProcessoService;
 use App\Service\Juridico\JuridicoProcessoTarefaService;
 use App\Service\Juridico\JuridicoRiscoAlertaService;
+use App\Service\Juridico\PrevisaoExitoService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,6 +33,7 @@ class JuridicoProcessoController extends AbstractController
         private JuridicoProcessoTarefaService $tarefas,
         private JuridicoProcessoParteService $partes,
         private JuridicoRiscoAlertaService $riscos,
+        private PrevisaoExitoService $previsaoExito,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -130,6 +132,7 @@ class JuridicoProcessoController extends AbstractController
             'tarefas' => $tarefas,
             'partes' => $this->partes->findForProcesso($processo),
             'alertas_processo' => $this->riscos->avaliarProcesso($processo, $pendentes),
+            'previsao' => $processo->getStatus() !== JuridicoProcesso::STATUS_ENCERRADO ? $this->previsaoExito->prever($processo) : null,
         ]);
     }
 

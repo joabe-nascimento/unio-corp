@@ -322,4 +322,15 @@ final class ChartConfig
     {
         return $this->payload;
     }
+
+    /**
+     * Devolve uma cópia do gráfico com chaves extras mescladas ao payload —
+     * útil para anotações pontuais como `size` (compacto) ou `kpi` (destaque numérico).
+     *
+     * @param array<string, mixed> $extra
+     */
+    public function with(array $extra): self
+    {
+        return new self(array_merge($this->payload, $extra));
+    }
 }

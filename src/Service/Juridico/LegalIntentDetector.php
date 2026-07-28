@@ -59,6 +59,17 @@ final class LegalIntentDetector
 
     private const TRIBUNAIS_CONHECIDOS = ['STF', 'STJ', 'TST', 'TSE', 'STM', 'TRF1', 'TRF2', 'TRF3', 'TRF4', 'TRF5', 'TRT', 'TJSP', 'TJRJ', 'TJMG'];
 
+    private const GATILHOS_PREVISAO = [
+        'previsão de êxito', 'previsao de exito', 'chance de êxito', 'chance de exito', 'probabilidade de êxito',
+        'probabilidade de exito', 'vou ganhar', 'chance de ganhar', 'vale a pena recorrer', 'score de êxito', 'score de exito',
+    ];
+
+    private const GATILHOS_DATAJUD = [
+        'andamento oficial', 'consultar no datajud', 'buscar no datajud', 'andamento no tribunal',
+        'movimentação oficial', 'movimentacao oficial', 'consultar tribunal', 'andamento do pje', 'andamento do e-saj',
+        'andamento do esaj', 'andamento do projudi', 'consultar pje', 'consultar e-saj', 'consultar projudi',
+    ];
+
     /**
      * @return list<SuggestedAction>
      */
@@ -106,6 +117,20 @@ final class LegalIntentDetector
 
         if ($this->contemAlgum($texto, self::GATILHOS_JURISPRUDENCIA)) {
             $acoes[] = $this->detectarJurisprudencia($mensagem, $texto);
+        }
+
+        if ($this->contemAlgum($texto, self::GATILHOS_PREVISAO)) {
+            $acao = $this->detectarPrevisaoExito($mensagem, $texto);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
+        }
+
+        if ($this->contemAlgum($texto, self::GATILHOS_DATAJUD)) {
+            $acao = $this->detectarConsultaDatajud($mensagem);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
         }
 
         // Fallback independente de palavras-gatilho: um número de processo (CNJ) na
@@ -201,6 +226,28 @@ final class LegalIntentDetector
             'label' => sprintf('Pesquisar jurisprudência%s', $tribunal !== 'Todos' ? ' no ' . $tribunal : ''),
             'params' => ['tema' => $tema, 'tribunal' => $tribunal],
         ];
+    }
+
+    /** @return SuggestedAction|null */
+    private function detectarPrevisaoExito(string $mensagemOriginal, string $texto): ?array
+    {
+        if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
+            return ['tool' => 'prever_exito', 'label' => 'Ver previsão de êxito', 'params' => ['query' => $m[0]]];
+        }
+
+        $query = trim($this->extrairRestante($texto, self::GATILHOS_PREVISAO));
+
+        return $query !== '' ? ['tool' => 'prever_exito', 'label' => 'Ver previsão de êxito', 'params' => ['query' => $query]] : null;
+    }
+
+    /** @return SuggestedAction|null */
+    private function detectarConsultaDatajud(string $mensagemOriginal): ?array
+    {
+        if (!preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
+            return null;
+        }
+
+        return ['tool' => 'consultar_datajud', 'label' => 'Consultar andamento oficial (DataJud)', 'params' => ['numero' => $m[0]]];
     }
 
     /** @return SuggestedAction */
