@@ -670,132 +670,110 @@ html[data-theme="light"] .unio-organismo .sidebar-bottom,
     margin-left: auto;
 }
 
-/* Medidor de tokens Azure OpenAI (diagnóstico) */
-.unio-organismo .ai-token-meter {
+.unio-organismo .organismo-status-meters {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 10px 6px 8px;
+    flex-shrink: 0;
+}
+
+/* Badges de status (Agente + IA) — mesma largura e altura */
+.unio-organismo .org-meter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: 132px;
+    height: 36px;
+    padding: 0 9px 0 7px;
     border-radius: 999px;
     border: 1px solid var(--org-border-soft, rgba(20, 20, 30, .1));
-    background: linear-gradient(135deg, rgba(156, 44, 60, .06), rgba(184, 137, 43, .08));
+    background: rgba(255, 255, 255, .72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: var(--org-text, #1a1a24);
     font-size: 11px;
     line-height: 1;
     white-space: nowrap;
     cursor: default;
-    transition: box-shadow .2s ease, transform .2s ease;
+    box-shadow: 0 1px 2px rgba(20, 20, 30, .04), inset 0 1px 0 rgba(255, 255, 255, .65);
+    transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
 }
 
-.unio-organismo .ai-token-meter:hover {
-    box-shadow: 0 4px 14px rgba(156, 44, 60, .12);
+.unio-organismo .org-meter:hover {
+    transform: translateY(-1px);
 }
 
-.unio-organismo .ai-token-meter__icon {
+.unio-organismo .org-meter--agente {
+    background: linear-gradient(135deg, rgba(43, 130, 184, .09), rgba(43, 184, 137, .07)), rgba(255, 255, 255, .72);
+    border-color: rgba(43, 130, 184, .18);
+}
+
+.unio-organismo .org-meter--agente:hover {
+    box-shadow: 0 4px 14px rgba(43, 130, 184, .14), inset 0 1px 0 rgba(255, 255, 255, .65);
+    border-color: rgba(43, 130, 184, .28);
+}
+
+.unio-organismo .org-meter--ia {
+    background: linear-gradient(135deg, rgba(156, 44, 60, .08), rgba(184, 137, 43, .07)), rgba(255, 255, 255, .72);
+    border-color: rgba(156, 44, 60, .16);
+}
+
+.unio-organismo .org-meter--ia:hover {
+    box-shadow: 0 4px 14px rgba(156, 44, 60, .12), inset 0 1px 0 rgba(255, 255, 255, .65);
+    border-color: rgba(156, 44, 60, .26);
+}
+
+.unio-organismo .org-meter__icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background: rgba(156, 44, 60, .12);
-    color: var(--org-blue, #9C2C3C);
+    flex-shrink: 0;
     font-size: 10px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45);
 }
 
-.unio-organismo .ai-token-meter__body {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
-.unio-organismo .ai-token-meter__label {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--org-text-muted, #6b6b7b);
-}
-
-.unio-organismo .ai-token-meter__value {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--org-text, #1a1a24);
-}
-
-.unio-organismo .ai-token-meter__dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #c4c4cf;
-    flex-shrink: 0;
-}
-
-.unio-organismo .ai-token-meter__dot.is-online {
-    background: #22c55e;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
-}
-
-@media (max-width: 575.98px) {
-    .unio-organismo .ai-token-meter__body {
-        display: none;
-    }
-    .unio-organismo .ai-token-meter {
-        padding: 6px 8px;
-    }
-}
-
-.unio-organismo .agente-autonomo-meter {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px 6px 8px;
-    border-radius: 999px;
-    border: 1px solid var(--org-border-soft, rgba(20, 20, 30, .1));
-    background: linear-gradient(135deg, rgba(43, 130, 184, .07), rgba(43, 184, 137, .08));
-    color: var(--org-text, #1a1a24);
-    transition: box-shadow .2s ease;
-}
-
-.unio-organismo .agente-autonomo-meter:hover {
-    box-shadow: 0 4px 14px rgba(43, 130, 184, .12);
-}
-
-.unio-organismo .agente-autonomo-meter__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: rgba(43, 130, 184, .12);
+.unio-organismo .org-meter--agente .org-meter__icon {
+    background: rgba(43, 130, 184, .14);
     color: #2b82b8;
-    font-size: 11px;
 }
 
-.unio-organismo .agente-autonomo-meter__body {
+.unio-organismo .org-meter--ia .org-meter__icon {
+    background: rgba(156, 44, 60, .13);
+    color: var(--org-blue, #9C2C3C);
+}
+
+.unio-organismo .org-meter__body {
     display: inline-flex;
     flex-direction: column;
+    justify-content: center;
     gap: 2px;
+    flex: 1;
     min-width: 0;
 }
 
-.unio-organismo .agente-autonomo-meter__label {
-    font-size: 9px;
+.unio-organismo .org-meter__label {
+    font-size: 8.5px;
     font-weight: 700;
-    letter-spacing: .06em;
+    letter-spacing: .08em;
     text-transform: uppercase;
     color: var(--org-text-muted, #6b6b7b);
+    line-height: 1;
 }
 
-.unio-organismo .agente-autonomo-meter__value {
-    font-size: 12px;
+.unio-organismo .org-meter__value {
+    font-size: 11.5px;
     font-weight: 700;
     color: var(--org-text, #1a1a24);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.unio-organismo .agente-autonomo-meter__dot {
+.unio-organismo .org-meter__dot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
@@ -803,17 +781,26 @@ html[data-theme="light"] .unio-organismo .sidebar-bottom,
     flex-shrink: 0;
 }
 
-.unio-organismo .agente-autonomo-meter__dot.is-online {
+.unio-organismo .org-meter__dot.is-online {
     background: #22c55e;
     box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
+    animation: org-meter-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes org-meter-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, .18); }
+    50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, .08); }
 }
 
 @media (max-width: 575.98px) {
-    .unio-organismo .agente-autonomo-meter__body {
-        display: none;
+    .unio-organismo .org-meter {
+        width: 36px;
+        padding: 0 7px;
+        justify-content: center;
     }
-    .unio-organismo .agente-autonomo-meter {
-        padding: 6px 8px;
+    .unio-organismo .org-meter__body,
+    .unio-organismo .org-meter__dot {
+        display: none;
     }
 }
 
