@@ -78,5 +78,11 @@ organismo_env_sync_for_uri() {
       organismo_env_ensure "$env_file" UNIO_ORGANISMO_PULSO_HOME true
       echo "Organismo: clinicaunio (legado) — defaults YAML da clínica"
       ;;
+    https://uniojuridico.uniowork.com.br|http://uniojuridico.uniowork.com.br)
+      organismo_env_set_quoted "$env_file" LEGAL_AI_ENABLED true
+      organismo_env_set_quoted "$env_file" LEGAL_AI_URL 'http://127.0.0.1:8091'
+      organismo_env_ensure "$env_file" LEGAL_AI_ESCRITORIO_ID default
+      echo "Organismo: uniojuridico — JurisFlow AI em localhost:8091"
+      ;;
   esac
 }
