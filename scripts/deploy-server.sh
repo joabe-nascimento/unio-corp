@@ -69,6 +69,9 @@ if [[ -f "$ROOT/scripts/cleanup-orphaned-files.sh" ]]; then
   bash "$ROOT/scripts/cleanup-orphaned-files.sh"
 fi
 
+# Limpar autoload do Composer para regenerar mapeamento de classes
+$PHP_BIN "$ROOT/vendor/bin/composer" dump-autoload --no-dev --classmap-authoritative --quiet 2>/dev/null || true
+
 CI_REPORT_STEP="Doctrine schema / migrations"
 ci_report_step "$CI_REPORT_STEP"
 
