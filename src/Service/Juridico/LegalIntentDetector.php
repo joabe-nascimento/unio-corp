@@ -70,15 +70,45 @@ final class LegalIntentDetector
         'andamento do esaj', 'andamento do projudi', 'consultar pje', 'consultar e-saj', 'consultar projudi',
     ];
 
+    private const GATILHOS_RESUMIR = [
+        'resuma', 'resumir', 'resumo do documento', 'resumo desse documento', 'resumo deste documento',
+        'faça um resumo', 'faca um resumo', 'me dê um resumo', 'me de um resumo',
+    ];
+
+    private const GATILHOS_ANALISAR_CONTRATO = [
+        'analise este contrato', 'analise esse contrato', 'analisar contrato', 'analisar este contrato',
+        'analisar esse contrato', 'análise de risco do contrato', 'analise de risco do contrato',
+        'analise as cláusulas', 'analise as clausulas', 'revise este contrato', 'revise esse contrato',
+    ];
+
+    private const GATILHOS_GERAR_MINUTA = [
+        'gere uma minuta', 'gerar minuta', 'gere uma petição', 'gere uma peticao', 'gerar petição', 'gerar peticao',
+        'gere uma contestação', 'gere uma contestacao', 'gerar contestação', 'gerar contestacao',
+        'redija uma petição', 'redija uma peticao', 'redija uma contestação', 'redija uma contestacao',
+        'elabore uma procuração', 'elabore uma procuracao', 'gerar procuração', 'gerar procuracao',
+        'escreva uma petição', 'escreva uma peticao', 'escreva uma minuta',
+    ];
+
+    /** Tamanho mínimo do texto restante para considerar que há conteúdo real colado (evita falso positivo). */
+    private const MIN_LEN_TEXTO_COLADO = 25;
+
     /**
+     * @param string|null $numeroProcessoAtual Número do processo aberto na tela atual
+     *                                          (contexto injetado pelo front-end). Usado
+     *                                          como fallback quando a ação detectada
+     *                                          precisa de um número e a mensagem não traz
+     *                                          um explícito (ex.: "como está esse processo?").
+     *
      * @return list<SuggestedAction>
      */
-    public function detect(string $mensagem): array
+    public function detect(string $mensagem, ?string $numeroProcessoAtual = null): array
     {
         $texto = mb_strtolower(trim($mensagem));
         if ($texto === '') {
             return [];
         }
+
+        $numeroProcessoAtual = $numeroProcessoAtual !== null && trim($numeroProcessoAtual) !== '' ? trim($numeroProcessoAtual) : null;
 
         $acoes = [];
 
@@ -109,7 +139,7 @@ final class LegalIntentDetector
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_PROCESSO)) {
-            $acao = $this->detectarBuscaProcesso($mensagem, $texto);
+            $acao = $this->detectarBuscaProcesso($mensagem, $texto, $numeroProcessoAtual);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
@@ -120,14 +150,31 @@ final class LegalIntentDetector
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_PREVISAO)) {
-            $acao = $this->detectarPrevisaoExito($mensagem, $texto);
+            $acao = $this->detectarPrevisaoExito($mensagem, $texto, $numeroProcessoAtual);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_DATAJUD)) {
-            $acao = $this->detectarConsultaDatajud($mensagem);
+            $acao = $this->detectarConsultaDatajud($mensagem, $numeroProcessoAtual);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
+        }
+
+        if ($this->contemAlgum($texto, self::GATILHOS_GERAR_MINUTA)) {
+            $acao = $this->detectarGerarMinuta($mensagem, $texto);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
+        } elseif ($this->contemAlgum($texto, self::GATILHOS_ANALISAR_CONTRATO)) {
+            $acao = $this->detectarAnalisarContrato($mensagem, $texto);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
+        } elseif ($this->contemAlgum($texto, self::GATILHOS_RESUMIR)) {
+            $acao = $this->detectarResumir($mensagem, $texto);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
@@ -195,13 +242,17 @@ final class LegalIntentDetector
     }
 
     /** @return SuggestedAction */
-    private function detectarBuscaProcesso(string $mensagemOriginal, string $texto): array
+    private function detectarBuscaProcesso(string $mensagemOriginal, string $texto, ?string $numeroProcessoAtual = null): array
     {
         if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
             return ['tool' => 'buscar_processo', 'label' => 'Buscar processo pelo número', 'params' => ['query' => $m[0]]];
         }
 
         $query = trim(preg_replace('/buscar processo|encontrar processo|localizar processo|processo do cliente|processo n[uú]mero|abrir processo/u', '', $texto) ?? '');
+
+        if ($query === '' && $numeroProcessoAtual !== null) {
+            return ['tool' => 'buscar_processo', 'label' => 'Buscar processo desta tela', 'params' => ['query' => $numeroProcessoAtual]];
+        }
 
         return ['tool' => 'buscar_processo', 'label' => 'Buscar processo', 'params' => ['query' => $query]];
     }
@@ -229,25 +280,95 @@ final class LegalIntentDetector
     }
 
     /** @return SuggestedAction|null */
-    private function detectarPrevisaoExito(string $mensagemOriginal, string $texto): ?array
+    private function detectarPrevisaoExito(string $mensagemOriginal, string $texto, ?string $numeroProcessoAtual = null): ?array
     {
         if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
             return ['tool' => 'prever_exito', 'label' => 'Ver previsão de êxito', 'params' => ['query' => $m[0]]];
         }
 
         $query = trim($this->extrairRestante($texto, self::GATILHOS_PREVISAO));
+        if ($query !== '') {
+            return ['tool' => 'prever_exito', 'label' => 'Ver previsão de êxito', 'params' => ['query' => $query]];
+        }
 
-        return $query !== '' ? ['tool' => 'prever_exito', 'label' => 'Ver previsão de êxito', 'params' => ['query' => $query]] : null;
+        if ($numeroProcessoAtual !== null) {
+            return ['tool' => 'prever_exito', 'label' => 'Ver previsão de êxito desta tela', 'params' => ['query' => $numeroProcessoAtual]];
+        }
+
+        return null;
     }
 
     /** @return SuggestedAction|null */
-    private function detectarConsultaDatajud(string $mensagemOriginal): ?array
+    private function detectarConsultaDatajud(string $mensagemOriginal, ?string $numeroProcessoAtual = null): ?array
     {
-        if (!preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
+        if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
+            return ['tool' => 'consultar_datajud', 'label' => 'Consultar andamento oficial (DataJud)', 'params' => ['numero' => $m[0]]];
+        }
+
+        if ($numeroProcessoAtual !== null) {
+            return ['tool' => 'consultar_datajud', 'label' => 'Consultar andamento oficial (DataJud) desta tela', 'params' => ['numero' => $numeroProcessoAtual]];
+        }
+
+        return null;
+    }
+
+    /**
+     * Resumir/analisar/gerar minuta exigem texto colado pelo usuário — só disparam
+     * quando sobra conteúdo substancial após remover o gatilho, senão a mensagem cai
+     * no chat normal (que pede pra colar o texto).
+     */
+    /** @return SuggestedAction|null */
+    private function detectarResumir(string $mensagemOriginal, string $texto): ?array
+    {
+        $conteudo = trim($this->removerGatilhos($mensagemOriginal, self::GATILHOS_RESUMIR));
+        if (mb_strlen($conteudo) < self::MIN_LEN_TEXTO_COLADO) {
             return null;
         }
 
-        return ['tool' => 'consultar_datajud', 'label' => 'Consultar andamento oficial (DataJud)', 'params' => ['numero' => $m[0]]];
+        return ['tool' => 'resumir_documento', 'label' => 'Resumir documento', 'params' => ['texto' => $conteudo]];
+    }
+
+    /** @return SuggestedAction|null */
+    private function detectarAnalisarContrato(string $mensagemOriginal, string $texto): ?array
+    {
+        $conteudo = trim($this->removerGatilhos($mensagemOriginal, self::GATILHOS_ANALISAR_CONTRATO));
+        if (mb_strlen($conteudo) < self::MIN_LEN_TEXTO_COLADO) {
+            return null;
+        }
+
+        return ['tool' => 'analisar_contrato', 'label' => 'Analisar contrato', 'params' => ['texto' => $conteudo]];
+    }
+
+    /** @return SuggestedAction|null */
+    private function detectarGerarMinuta(string $mensagemOriginal, string $texto): ?array
+    {
+        $tipo = 'petição';
+        foreach (['contestação', 'contestacao', 'procuração', 'procuracao', 'petição', 'peticao', 'contrato', 'minuta'] as $candidato) {
+            if (str_contains($texto, $candidato)) {
+                $tipo = str_starts_with($candidato, 'peticao') || $candidato === 'petição' ? 'petição' : $candidato;
+                break;
+            }
+        }
+
+        $descricao = trim($this->removerGatilhos($mensagemOriginal, self::GATILHOS_GERAR_MINUTA));
+        if (mb_strlen($descricao) < self::MIN_LEN_TEXTO_COLADO) {
+            return null;
+        }
+
+        return [
+            'tool' => 'gerar_minuta',
+            'label' => sprintf('Gerar minuta (%s)', $tipo),
+            'params' => ['tipo' => $tipo, 'descricao' => $descricao],
+        ];
+    }
+
+    /** @param list<string> $gatilhos */
+    private function removerGatilhos(string $mensagemOriginal, array $gatilhos): string
+    {
+        $padroes = array_map(static fn (string $g) => preg_quote($g, '/'), $gatilhos);
+        $limpo = preg_replace('/' . implode('|', $padroes) . '/ui', ' ', $mensagemOriginal) ?? $mensagemOriginal;
+
+        return trim(preg_replace('/\s+/', ' ', $limpo) ?? '', " ,.:-");
     }
 
     /** @return SuggestedAction */

@@ -75,6 +75,7 @@ final class JurisFlowAiClient
                         'time' => $now->format('H:i'),
                         'period' => $this->periodOfDay((int) $now->format('G')),
                     ],
+                    'numero_processo_atual' => $context['numero_processo_atual'] ?? null,
                 ],
                 'timeout' => 45,
             ]);
@@ -137,6 +138,63 @@ final class JurisFlowAiClient
             ];
         } catch (\Throwable $e) {
             $this->logger->warning('Pesquisa de jurisprudência (JurisFlow) indisponível: {msg}', ['msg' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    /** Resume um texto/peça processual usando a chain `summarize` do JurisFlow. */
+    public function resumirDocumento(string $texto, string $escritorioId = ''): ?string
+    {
+        return $this->callTextChain('/v1/chains/summarize', ['text' => $texto], 'summary', $escritorioId);
+    }
+
+    /** Analisa riscos/cláusulas de um contrato usando a chain `contract-analysis`. */
+    public function analisarContrato(string $texto, string $escritorioId = ''): ?string
+    {
+        return $this->callTextChain('/v1/chains/contract-analysis', ['contract_text' => $texto], 'analysis', $escritorioId);
+    }
+
+    /** Gera uma minuta (petição, contrato, procuração, etc.) usando a chain `document-generation`. */
+    public function gerarMinuta(string $tipo, string $descricao, string $escritorioId = ''): ?string
+    {
+        return $this->callTextChain(
+            '/v1/chains/document-generation',
+            ['document_type' => $tipo, 'data' => $descricao],
+            'document',
+            $escritorioId,
+        );
+    }
+
+    /**
+     * Helper comum às chains de texto (resumo, análise de contrato, geração de
+     * documento): mesmo contrato de payload (`escritorio_id` + campos próprios),
+     * mesma resposta (um campo de texto), mesmo tratamento de erro.
+     *
+     * @param array<string, mixed> $extraPayload
+     */
+    private function callTextChain(string $path, array $extraPayload, string $responseField, string $escritorioId): ?string
+    {
+        if (!$this->enabled) {
+            return null;
+        }
+
+        $escritorioId = $escritorioId !== '' ? $escritorioId : $this->defaultEscritorioId;
+        if ($escritorioId === '') {
+            $escritorioId = 'default';
+        }
+
+        try {
+            $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . $path, [
+                'json' => array_merge($extraPayload, ['escritorio_id' => $escritorioId]),
+                'timeout' => 75,
+            ]);
+
+            $data = $response->toArray(false);
+
+            return (string) ($data[$responseField] ?? '');
+        } catch (\Throwable $e) {
+            $this->logger->warning('Chain do JurisFlow ({path}) indisponível: {msg}', ['path' => $path, 'msg' => $e->getMessage()]);
 
             return null;
         }

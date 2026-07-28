@@ -16,6 +16,7 @@ parameters:
     legal_ai_url_default: 'http://127.0.0.1:8090'
     legal_ai_enabled_default: 'false'
     legal_ai_escritorio_id_default: 'default'
+    legal_ai_internal_secret_default: ''
     azure_tenant_id_default: ''
     azure_client_id_default: ''
     azure_client_secret_default: ''
@@ -235,6 +236,10 @@ services:
             $enabled: '%env(bool:default:legal_ai_enabled_default:LEGAL_AI_ENABLED)%'
             $baseUrl: '%env(default:legal_ai_url_default:LEGAL_AI_URL)%'
 
+    App\Controller\Api\Interno\AiInternalApiController:
+        arguments:
+            $internalSecret: '%env(default:legal_ai_internal_secret_default:LEGAL_AI_INTERNAL_SECRET)%'
+
     App\Service\Juridico\AzureTokenUsageStore:
         arguments:
             $projectDir: '%kernel.project_dir%'
@@ -374,6 +379,15 @@ services:
         tags: ['app.sasha_tool']
 
     App\Service\Sasha\Tool\Juridico\ConsultarDatajudTool:
+        tags: ['app.sasha_tool']
+
+    App\Service\Sasha\Tool\Juridico\ResumirDocumentoTool:
+        tags: ['app.sasha_tool']
+
+    App\Service\Sasha\Tool\Juridico\AnalisarContratoTool:
+        tags: ['app.sasha_tool']
+
+    App\Service\Sasha\Tool\Juridico\GerarMinutaTool:
         tags: ['app.sasha_tool']
 
     # JWT Service for Mobile API

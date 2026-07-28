@@ -39,6 +39,9 @@ final class SashaApiController extends AbstractController
         'buscar_processo',
         'prever_exito',
         'consultar_datajud',
+        'resumir_documento',
+        'analisar_contrato',
+        'gerar_minuta',
     ];
 
     public function __construct(
@@ -177,11 +180,14 @@ final class SashaApiController extends AbstractController
 
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
         $pacienteCodigo = $payload['context']['patient_codigo'] ?? $payload['patient_codigo'] ?? null;
+        $numeroProcessoAtual = $payload['context']['numero_processo'] ?? $payload['numero_processo'] ?? null;
+        $numeroProcessoAtual = \is_string($numeroProcessoAtual) && trim($numeroProcessoAtual) !== '' ? trim($numeroProcessoAtual) : null;
         $context = [
             'hub' => (string) ($payload['context']['hub'] ?? $payload['hub'] ?? ''),
             'empresa_nome' => $empresa?->getNome(),
             'user_name' => $user->getNome() ?? 'Usuário',
             'patient_codigo' => $pacienteCodigo,
+            'numero_processo_atual' => $numeroProcessoAtual,
             'assistant' => $this->organismoCopy->lumen(),
             'escritorio_id' => $empresa?->getId() !== null ? (string) $empresa->getId() : 'default',
         ];
@@ -191,7 +197,7 @@ final class SashaApiController extends AbstractController
         }
 
         $isJuridico = $this->organismoCopy->isJuridicoProfile();
-        $acoesSugeridas = $isJuridico ? $this->legalIntentDetector->detect($message) : [];
+        $acoesSugeridas = $isJuridico ? $this->legalIntentDetector->detect($message, $numeroProcessoAtual) : [];
 
         // Intenção determinística já resolvida: responde na hora, sem chamar a IA externa.
         // Mais rápido e não depende do provedor de IA estar disponível.
