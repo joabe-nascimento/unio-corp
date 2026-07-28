@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/vitoria')]
+#[Route('/api/sasha')]
 #[IsGranted('ROLE_USER')]
 final class SashaApiController extends AbstractController
 {

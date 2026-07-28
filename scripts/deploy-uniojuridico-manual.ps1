@@ -142,6 +142,9 @@ if (-not $SkipBuild) {
     Write-Host "[skip] build local (--SkipBuild)" -ForegroundColor Yellow
 }
 
+$restoreDevDeps = $false
+if (-not $SkipBuild) { $restoreDevDeps = $true }
+
 Write-Host "[3/4] empacotar e enviar $ArchiveName" -ForegroundColor Cyan
 $archive = Join-Path $env:TEMP $ArchiveName
 if (Test-Path $archive) { Remove-Item $archive -Force }
@@ -171,6 +174,12 @@ if ($LASTEXITCODE -ne 0) { throw "tar falhou" }
 
 $archiveSizeMb = [math]::Round((Get-Item $archive).Length / 1MB, 1)
 Write-Host "      arquivo: $archive (${archiveSizeMb} MB)" -ForegroundColor DarkGray
+
+if ($restoreDevDeps) {
+    Write-Host "[restore] composer install (dev) — restaurando ambiente local" -ForegroundColor Yellow
+    & composer install --no-progress --prefer-dist --optimize-autoloader
+    if ($LASTEXITCODE -ne 0) { throw "composer install (dev) falhou ao restaurar ambiente local" }
+}
 
 Invoke-Retry {
     & scp @scpBase $archive "${sshTarget}:/tmp/$ArchiveName"
