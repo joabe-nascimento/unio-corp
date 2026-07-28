@@ -14,19 +14,6 @@
         return String(num);
     }
 
-    function setTooltip(data) {
-        if (!data) return;
-        var today = data.today || {};
-        var month = data.month || {};
-        var model = data.model ? ' · ' + data.model : '';
-        root.title = [
-            'Azure OpenAI' + model,
-            'Hoje: ' + formatTokens(today.total_tokens) + ' tokens (' + (today.requests || 0) + ' req.)',
-            'Mês: ' + formatTokens(month.total_tokens) + ' tokens',
-            'Entrada: ' + formatTokens(today.prompt_tokens) + ' · Saída: ' + formatTokens(today.completion_tokens),
-        ].join('\n');
-    }
-
     function refresh() {
         fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
             .then(function (r) { return r.ok ? r.json() : null; })
@@ -41,7 +28,6 @@
                 if (dotEl) {
                     dotEl.classList.toggle('is-online', !!data.online);
                 }
-                setTooltip(data);
             })
             .catch(function () {
                 valueEl.textContent = '—';
