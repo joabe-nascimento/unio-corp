@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Hub TI — charts, chamados (wizard + filtros + kanban/lista)
  */
 (function () {

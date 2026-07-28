@@ -1,4 +1,4 @@
-﻿# Roadmap de transição — Unio Organismo
+# Roadmap de transição — Unio Organismo
 
 Plano de evolução da plataforma do modelo **Hub / Núcleo / Tenant** para o modelo **Colônia / Cena / Pulso / Lumen**, com matriz de tecnologias e tasks de código concretas.
 

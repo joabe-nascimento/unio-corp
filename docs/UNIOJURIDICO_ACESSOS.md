@@ -1,4 +1,4 @@
-﻿# Unio Jurídico — Acessos (produção)
+# Unio Jurídico — Acessos (produção)
 
 Credenciais e URLs para gerenciamento da instância **uniojuridico** (jul/2026).
 

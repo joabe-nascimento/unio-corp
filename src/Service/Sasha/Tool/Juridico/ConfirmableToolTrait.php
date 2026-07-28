@@ -6,7 +6,7 @@ namespace App\Service\Sasha\Tool\Juridico;
  * Padrão comum das ferramentas que escrevem no sistema: nada é gravado no primeiro
  * clique. A ferramenta sempre devolve uma "prévia" com o que pretende fazer, e só
  * executa de verdade quando o usuário confirma explicitamente (`confirmado: true`
- * nos parâmetros) — o mesmo contrato para qualquer ação irreversível da Bruna.
+ * nos parâmetros) — o mesmo contrato para qualquer ação irreversível da Sasha.
  */
 trait ConfirmableToolTrait
 {

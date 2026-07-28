@@ -1,4 +1,4 @@
-﻿# Operação Unio Saúde — índice (jul/2026)
+# Operação Unio Saúde — índice (jul/2026)
 
 Documentação da instância **uniosaude** (Unio Saúde, deploy dedicado).
 

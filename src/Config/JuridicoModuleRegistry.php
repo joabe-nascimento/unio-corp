@@ -43,10 +43,10 @@ final class JuridicoModuleRegistry
             'label' => 'Processos',
             'icon' => 'fa-scale-balanced',
             'subtitle' => 'Carteira, KPIs e gestão',
-            'tagline' => 'Painel executivo de processos com 4 KPIs dinâmicos, gestão por status/fase e copiloto Bruna integrado.',
+            'tagline' => 'Painel executivo de processos com 4 KPIs dinâmicos, gestão por status/fase e copiloto Sasha integrado.',
             'status' => 'beta',
             'empty_title' => 'Gerencie sua carteira de processos',
-            'empty_text' => 'Painel com KPIs de carteira (ativos, críticos, valor e taxa de êxito), cadastro estruturado por área/fase/tribunal e filtros inteligentes — com a Bruna para análise da saúde da carteira.',
+            'empty_text' => 'Painel com KPIs de carteira (ativos, críticos, valor e taxa de êxito), cadastro estruturado por área/fase/tribunal e filtros inteligentes — com a Sasha para análise da saúde da carteira.',
             'features' => [
                 'Banner dinâmico com saudação e alerta de processos críticos',
                 '4 KPIs clicáveis: ativos, críticos (com alerta pulsante), valor em carteira e taxa de êxito',
@@ -56,22 +56,22 @@ final class JuridicoModuleRegistry
                 'Tarefas por processo com prazo, responsável e alerta de atraso',
                 'Cadastro de partes e representação (autor, réu, terceiros, advogados e OAB)',
                 'Central de alertas de risco calculada em tempo real (críticos, tarefas atrasadas, sem movimentação)',
-                'Botão "Perguntar à Bruna" para análise de carteira e sugestão de prioridades',
+                'Botão "Perguntar à Sasha" para análise de carteira e sugestão de prioridades',
             ],
             'capabilities' => [
                 ['icon' => 'fa-gauge-high', 'title' => 'KPIs executivos', 'text' => 'Painel com 4 indicadores-chave: processos ativos, críticos, valor em carteira e taxa de êxito real.'],
                 ['icon' => 'fa-table-columns', 'title' => 'Kanban de fases', 'text' => 'Arraste processos entre conhecimento, instrução, sentença, recursal e execução.'],
                 ['icon' => 'fa-list-check', 'title' => 'Tarefas e partes', 'text' => 'Checklist por processo com prazos e responsáveis, além do cadastro de partes e representação.'],
                 ['icon' => 'fa-shield-halved', 'title' => 'Alertas de risco', 'text' => 'Motor que cruza status, tarefas e tempo sem atualização para apontar o que precisa de atenção.'],
-                ['icon' => 'fa-robot', 'title' => 'Bruna integrada', 'text' => 'Botão dedicado para análise de carteira e sugestão de prioridades com base em prazos e riscos.'],
+                ['icon' => 'fa-robot', 'title' => 'Sasha integrada', 'text' => 'Botão dedicado para análise de carteira e sugestão de prioridades com base em prazos e riscos.'],
                 ['icon' => 'fa-filter', 'title' => 'Filtros inteligentes', 'text' => 'Busca por número/cliente/área + filtro de status, com contagem dinâmica de críticos na tabela.'],
             ],
             'roadmap' => [
-                ['phase' => 'Q3', 'title' => 'Fundação ✅', 'items' => ['CRUD processos ✅', 'Dashboard 4 KPIs ✅', 'Filtros e busca ✅', 'Integração Bruna ✅']],
+                ['phase' => 'Q3', 'title' => 'Fundação ✅', 'items' => ['CRUD processos ✅', 'Dashboard 4 KPIs ✅', 'Filtros e busca ✅', 'Integração Sasha ✅']],
                 ['phase' => 'Q4', 'title' => 'Operação avançada ✅', 'items' => ['Kanban de fases ✅', 'Tarefas por processo ✅', 'Alertas de risco ✅', 'Partes e representação ✅']],
                 ['phase' => '2027', 'title' => 'Enterprise ✅', 'items' => ['Multi-escritório (grupo matriz/filial) ✅', 'API pública com tokens ✅', 'BI de carteira ✅', 'DataJud — PJe/e-SAJ/Projudi ✅']],
             ],
-            'integrations' => ['JurisFlow / Bruna', 'DataJud (CNJ)', 'API Pública'],
+            'integrations' => ['JurisFlow / Sasha', 'DataJud (CNJ)', 'API Pública'],
             'bruna_prompt' => 'Analise a saúde da minha carteira de processos e sugira prioridades para esta semana.',
             'metrics' => [
                 ['label' => 'Processos ativos', 'value' => '—'],
@@ -98,7 +98,7 @@ final class JuridicoModuleRegistry
                 'Histórico auditável de prorrogações e justificativas',
             ],
             'capabilities' => [
-                ['icon' => 'fa-calculator', 'title' => 'Bruna calcula prazos', 'text' => 'IA jurídica com tabela de prazos e jurisprudência de contagem.'],
+                ['icon' => 'fa-calculator', 'title' => 'Sasha calcula prazos', 'text' => 'IA jurídica com tabela de prazos e jurisprudência de contagem.'],
                 ['icon' => 'fa-bell', 'title' => 'Alertas em camadas', 'text' => 'D-7, D-3, D-1 e vencido — com escalonamento para o sócio.'],
                 ['icon' => 'fa-calendar-check', 'title' => 'Agenda unificada', 'text' => 'Prazos, audiências e compromissos internos no mesmo calendário.'],
             ],
@@ -123,7 +123,7 @@ final class JuridicoModuleRegistry
             'tagline' => 'Gestão de audiências com roteiro, testemunhas, links virtuais e pós-sessão.',
             'status' => 'planned',
             'empty_title' => 'Módulo de audiências em desenvolvimento',
-            'empty_text' => 'Agenda de audiências, salas virtuais, checklist de preparação e ata assistida pela Bruna.',
+            'empty_text' => 'Agenda de audiências, salas virtuais, checklist de preparação e ata assistida pela Sasha.',
             'features' => [
                 'Calendário por vara, juiz e tipo de audiência',
                 'Checklist de preparação (testemunhas, documentos, links)',
@@ -163,7 +163,7 @@ final class JuridicoModuleRegistry
                 'Trilha de auditoria LGPD',
             ],
             'capabilities' => [
-                ['icon' => 'fa-robot', 'title' => 'Triagem Bruna', 'text' => 'IA resume a publicação e sugere ação em linguagem clara.'],
+                ['icon' => 'fa-robot', 'title' => 'Triagem Sasha', 'text' => 'IA resume a publicação e sugere ação em linguagem clara.'],
                 ['icon' => 'fa-filter', 'title' => 'Regras por cliente', 'text' => 'Priorize publicações de clientes estratégicos ou valores elevados.'],
             ],
             'roadmap' => [
@@ -191,11 +191,11 @@ final class JuridicoModuleRegistry
                 'Cobertura de mais de 90 tribunais (TJs, TRFs, TRTs, STF, STJ e mais)',
                 'Histórico de movimentações oficiais direto no processo',
                 'Chave de API gratuita por escritório (cadastro no CNJ)',
-                'Ferramenta "consultar_datajud" disponível no chat da Bruna',
+                'Ferramenta "consultar_datajud" disponível no chat da Sasha',
             ],
             'capabilities' => [
                 ['icon' => 'fa-landmark', 'title' => 'Base nacional do CNJ', 'text' => 'Metadados oficiais direto da fonte, sem scraping e sem depender de login em cada tribunal.'],
-                ['icon' => 'fa-robot', 'title' => 'Bruna consulta para você', 'text' => 'Peça "consultar andamento oficial do processo X" no chat e receba o resultado na hora.'],
+                ['icon' => 'fa-robot', 'title' => 'Sasha consulta para você', 'text' => 'Peça "consultar andamento oficial do processo X" no chat e receba o resultado na hora.'],
             ],
             'roadmap' => [
                 ['phase' => 'Q4', 'title' => 'DataJud ✅', 'items' => ['Chave por escritório ✅', 'Consulta por CNJ ✅', 'Ferramenta no chat ✅']],
@@ -279,19 +279,19 @@ final class JuridicoModuleRegistry
             'tagline' => 'Omni-canal jurídico com SLA, templates e histórico vinculado ao caso.',
             'status' => 'planned',
             'empty_title' => 'Central de atendimento em desenvolvimento',
-            'empty_text' => 'WhatsApp Business, e-mail e tickets internos com contexto do processo e respostas sugeridas pela Bruna.',
+            'empty_text' => 'WhatsApp Business, e-mail e tickets internos com contexto do processo e respostas sugeridas pela Sasha.',
             'features' => [
                 'Inbox unificada WhatsApp + e-mail',
                 'Templates de resposta por área do direito',
                 'SLA por tipo de cliente (premium, standard)',
-                'Sugestão de resposta pela Bruna com revisão humana',
+                'Sugestão de resposta pela Sasha com revisão humana',
                 'Vínculo automático mensagem ↔ processo/cliente',
             ],
             'capabilities' => [
                 ['icon' => 'fa-comments', 'title' => 'Contexto do caso', 'text' => 'Atendente vê prazos, status e última movimentação sem trocar de tela.'],
             ],
             'roadmap' => [
-                ['phase' => 'Q4', 'title' => 'Canais', 'items' => ['WhatsApp', 'Tickets', 'Templates Bruna']],
+                ['phase' => 'Q4', 'title' => 'Canais', 'items' => ['WhatsApp', 'Tickets', 'Templates Sasha']],
             ],
             'integrations' => ['WhatsApp Meta', 'JurisFlow / Bruna'],
             'bruna_prompt' => 'Sugira resposta empática para cliente ansioso perguntando prazo de sentença em ação de indenização.',
@@ -318,11 +318,11 @@ final class JuridicoModuleRegistry
                 'Exportação para protocolo e portal',
             ],
             'capabilities' => [
-                ['icon' => 'fa-magnifying-glass', 'title' => 'Busca semântica', 'text' => 'Encontre cláusulas e trechos via Bruna em toda a base do escritório.'],
+                ['icon' => 'fa-magnifying-glass', 'title' => 'Busca semântica', 'text' => 'Encontre cláusulas e trechos via Sasha em toda a base do escritório.'],
             ],
             'roadmap' => [
                 ['phase' => 'Q3', 'title' => 'Repositório', 'items' => ['Upload', 'Pastas', 'Permissões']],
-                ['phase' => 'Q4', 'title' => 'IA', 'items' => ['OCR', 'Resumo Bruna', 'Comparador']],
+                ['phase' => 'Q4', 'title' => 'IA', 'items' => ['OCR', 'Resumo Sasha', 'Comparador']],
             ],
             'integrations' => ['JurisFlow / Bruna', 'Portal do Cliente'],
             'bruna_prompt' => 'Resuma os pontos principais deste documento: [cole o texto ou descreva o anexo]',
@@ -346,10 +346,10 @@ final class JuridicoModuleRegistry
                 'Variáveis automáticas do cadastro processual',
                 'Fluxo de revisão sócio → associado → protocolo',
                 'Histórico de versões e comentários inline',
-                'Sugestão de teses pela Bruna',
+                'Sugestão de teses pela Sasha',
             ],
             'capabilities' => [
-                ['icon' => 'fa-wand-magic-sparkles', 'title' => 'Montagem assistida', 'text' => 'Bruna preenche fundamentos a partir do resumo do caso.'],
+                ['icon' => 'fa-wand-magic-sparkles', 'title' => 'Montagem assistida', 'text' => 'Sasha preenche fundamentos a partir do resumo do caso.'],
             ],
             'roadmap' => [
                 ['phase' => 'Q4', 'title' => 'Produção', 'items' => ['Templates', 'Variáveis', 'Export DOCX/PDF']],
@@ -398,12 +398,12 @@ final class JuridicoModuleRegistry
             'tagline' => 'Gestão consultiva de contratos com análise de cláusulas, renovações e obrigações.',
             'status' => 'alpha',
             'empty_title' => 'Gestão de contratos em desenvolvimento',
-            'empty_text' => 'Repositório contratual, alertas de renovação, playbooks de cláusulas e análise de risco pela Bruna.',
+            'empty_text' => 'Repositório contratual, alertas de renovação, playbooks de cláusulas e análise de risco pela Sasha.',
             'features' => [
                 'Cadastro com partes, vigência e valor',
                 'Alertas de renovação e reajuste',
                 'Playbooks de cláusulas por tipo de contrato',
-                'Análise de risco e desvios pela Bruna',
+                'Análise de risco e desvios pela Sasha',
                 'Vínculo com honorários e faturamento',
             ],
             'capabilities' => [
@@ -428,7 +428,7 @@ final class JuridicoModuleRegistry
             'tagline' => 'Data room, checklists por transação e relatório consolidado para M&A e investimentos.',
             'status' => 'planned',
             'empty_title' => 'Due diligence em desenvolvimento',
-            'empty_text' => 'Salas virtuais, checklists setoriais, pendências e relatório executivo com apoio da Bruna.',
+            'empty_text' => 'Salas virtuais, checklists setoriais, pendências e relatório executivo com apoio da Sasha.',
             'features' => [
                 'Data room com permissões por investidor',
                 'Checklists trabalhista, tributário, cível, regulatório',
@@ -494,7 +494,7 @@ final class JuridicoModuleRegistry
                 'Exportação para faturamento e Asaas',
             ],
             'capabilities' => [
-                ['icon' => 'fa-calculator', 'title' => 'Calculadora OAB', 'text' => 'Bruna calcula honorários com base na tabela e no valor da causa.'],
+                ['icon' => 'fa-calculator', 'title' => 'Calculadora OAB', 'text' => 'Sasha calcula honorários com base na tabela e no valor da causa.'],
             ],
             'roadmap' => [
                 ['phase' => 'Q4', 'title' => 'Financeiro jurídico', 'items' => ['Timesheet', 'Tabela OAB', 'Repasses']],
@@ -542,7 +542,7 @@ final class JuridicoModuleRegistry
             'label' => 'Jurisprudência IA',
             'icon' => 'fa-book-open',
             'subtitle' => 'Pesquisa STF, STJ e TRTs',
-            'tagline' => 'Motor de pesquisa jurisprudencial com resumos, citações e teses sugeridas pela Bruna.',
+            'tagline' => 'Motor de pesquisa jurisprudencial com resumos, citações e teses sugeridas pela Sasha.',
             'status' => 'beta',
             'empty_title' => 'Pesquisa jurisprudencial com IA',
             'empty_text' => 'Busca em tribunais superiores, súmulas, teses repetitivas e geração de fundamentos para peças.',
@@ -556,7 +556,7 @@ final class JuridicoModuleRegistry
                 'Sugestão de tese para o caso concreto',
             ],
             'capabilities' => [
-                ['icon' => 'fa-robot', 'title' => 'Bruna + JurisFlow', 'text' => 'Motor de IA (Azure OpenAI) que resume teses, súmulas e precedentes sob demanda.'],
+                ['icon' => 'fa-robot', 'title' => 'Sasha + JurisFlow', 'text' => 'Motor de IA (Azure OpenAI) que resume teses, súmulas e precedentes sob demanda.'],
                 ['icon' => 'fa-star', 'title' => 'Favoritos e histórico', 'text' => 'Marque os julgados mais usados e repita pesquisas anteriores com um clique.'],
                 ['icon' => 'fa-copy', 'title' => 'Citação pronta', 'text' => 'Copie a referência formatada direto para a petição, sem precisar redigitar.'],
             ],
@@ -617,7 +617,7 @@ final class JuridicoModuleRegistry
                 'Score de 0 a 100 exibido em cada processo ativo',
                 'Fatores 100% explicáveis (sem "caixa-preta") — cada peso é auditável',
                 'Baseado no histórico real de êxito por área do escritório',
-                'Ferramenta "prever_exito" disponível no chat da Bruna',
+                'Ferramenta "prever_exito" disponível no chat da Sasha',
                 'Modelo de machine learning treinado — roadmap 2027',
             ],
             'capabilities' => [
@@ -836,7 +836,7 @@ final class JuridicoModuleRegistry
     {
         return [
             ['value' => (string) \count(self::MODULES), 'label' => 'Módulos no roadmap', 'tone' => 'sky'],
-            ['value' => 'Bruna', 'label' => 'Copiloto IA ativo', 'tone' => 'amber'],
+            ['value' => 'Sasha', 'label' => 'Copiloto IA ativo', 'tone' => 'amber'],
             ['value' => '7', 'label' => 'Áreas do escritório', 'tone' => 'neutral'],
             ['value' => '2027', 'label' => 'Visão enterprise', 'tone' => 'rose'],
         ];

@@ -1,4 +1,4 @@
-﻿# Unio Jurídico
+# Unio Jurídico
 
 Plataforma de gestão para escritórios de advocacia, construída sobre o mesmo shell
 **Organismo** do Unio Saúde (branch `uniosaude`), com identidade visual própria e uma

@@ -1,4 +1,4 @@
-﻿# Unio — arquitetura do sistema
+# Unio — arquitetura do sistema
 
 Snapshot do código e do deploy em **jul/2026**.  
 Complementa: [OPERACAO_INDICE.md](OPERACAO_INDICE.md) · [ESTRUTURA.md](ESTRUTURA.md) · [DEPLOY_GITHUB_ACTIONS.md](DEPLOY_GITHUB_ACTIONS.md)

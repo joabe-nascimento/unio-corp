@@ -1,4 +1,4 @@
-﻿# Histórico de correções — erros até sucesso (jul/2026)
+# Histórico de correções — erros até sucesso (jul/2026)
 
 Cronologia do trabalho de estabilização: sessão 403, pipeline CI/CD, deploy HostGator, kanban, permissões e validação automática.
 

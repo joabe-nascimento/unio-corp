@@ -1,4 +1,4 @@
-﻿# Unio Jurídico — Índice de documentação
+# Unio Jurídico — Índice de documentação
 
 Documentação completa da plataforma Unio Jurídico (branch `uniojuridico`).
 

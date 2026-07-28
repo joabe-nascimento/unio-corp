@@ -1,4 +1,4 @@
-﻿# Como Iniciar o JurisFlow AI Service
+# Como Iniciar o JurisFlow AI Service
 
 ## ⚠️ IMPORTANTE
 

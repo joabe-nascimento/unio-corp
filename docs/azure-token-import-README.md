@@ -1,4 +1,4 @@
-﻿# Sistema de Importação de Tokens Históricos da Azure OpenAI
+# Sistema de Importação de Tokens Históricos da Azure OpenAI
 
 ## Visão Geral
 

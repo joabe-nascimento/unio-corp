@@ -1,4 +1,4 @@
-﻿# Unio Jurídico — Setup inicial (servidor)
+# Unio Jurídico — Setup inicial (servidor)
 
 Script de reparo/setup para configurar o subdomínio **uniojuridico.uniowork.com.br** após o provisionamento inicial no cPanel.
 

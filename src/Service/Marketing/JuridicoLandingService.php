@@ -28,7 +28,7 @@ final class JuridicoLandingService
             ],
             [
                 'icon' => 'fa-robot',
-                'title' => 'IA jurídica Bruna',
+                'title' => 'IA jurídica Sasha',
                 'text' => 'Agente autônomo que trabalha 24/7 gerenciando prazos, pesquisando jurisprudência e analisando contratos.',
             ],
             [
@@ -51,7 +51,7 @@ final class JuridicoLandingService
             [
                 'icon' => 'fa-brain',
                 'title' => 'Agente Autônomo 24/7',
-                'text' => 'Bruna monitora prazos críticos, identifica publicações relevantes e envia alertas automáticos mesmo fora do horário comercial.',
+                'text' => 'Sasha monitora prazos críticos, identifica publicações relevantes e envia alertas automáticos mesmo fora do horário comercial.',
                 'status' => 'active',
             ],
             [
@@ -106,7 +106,7 @@ final class JuridicoLandingService
             [
                 'time' => '08:00',
                 'title' => 'Resumo Matinal Automático',
-                'desc' => 'Bruna envia relatório com prazos do dia, novos andamentos e publicações relevantes.',
+                'desc' => 'Sasha envia relatório com prazos do dia, novos andamentos e publicações relevantes.',
                 'icon' => 'fa-sun',
             ],
             [
@@ -118,7 +118,7 @@ final class JuridicoLandingService
             [
                 'time' => '18:00',
                 'title' => 'Consolidação Noturna',
-                'desc' => 'Enquanto você descansa, Bruna organiza documentos, atualiza dashboards e prepara o dia seguinte.',
+                'desc' => 'Enquanto você descansa, Sasha organiza documentos, atualiza dashboards e prepara o dia seguinte.',
                 'icon' => 'fa-moon',
             ],
         ];
@@ -183,7 +183,7 @@ final class JuridicoLandingService
             ['label' => 'CRM Jurídico', 'desc' => 'Clientes e carteira', 'icon' => 'fa-user-tie', 'live' => true],
             ['label' => 'GED & Documentos', 'desc' => 'Upload e organização', 'icon' => 'fa-folder-open', 'live' => true],
             ['label' => 'Honorários', 'desc' => 'Timesheet e OAB', 'icon' => 'fa-coins', 'live' => true],
-            ['label' => 'Jurisprudência IA', 'desc' => 'Pesquisa com Bruna', 'icon' => 'fa-book-open', 'live' => true],
+            ['label' => 'Jurisprudência IA', 'desc' => 'Pesquisa com Sasha', 'icon' => 'fa-book-open', 'live' => true],
             ['label' => 'Contratos', 'desc' => 'Consultivo e riscos', 'icon' => 'fa-handshake'],
             ['label' => 'PJe & Tribunais', 'desc' => 'Consulta oficial via DataJud', 'icon' => 'fa-building-columns', 'live' => true],
             ['label' => 'Portal do Cliente', 'desc' => 'Transparência e self-service', 'icon' => 'fa-globe'],
@@ -222,7 +222,7 @@ final class JuridicoLandingService
     public function testimonial(): array
     {
         return [
-            'quote' => 'Antes eu perdia horas cruzando prazos em três planilhas diferentes. Hoje a Bruna me avisa antes, e o escritório inteiro trabalha no mesmo painel, sem mais surpresa em audiência.',
+            'quote' => 'Antes eu perdia horas cruzando prazos em três planilhas diferentes. Hoje a Sasha me avisa antes, e o escritório inteiro trabalha no mesmo painel, sem mais surpresa em audiência.',
             'name' => 'Camila Andrade',
             'role' => 'Sócia-fundadora, escritório de contencioso cível',
         ];
@@ -248,7 +248,7 @@ final class JuridicoLandingService
             ],
             [
                 'step' => '03',
-                'title' => 'Conte com a Bruna',
+                'title' => 'Conte com a Sasha',
                 'text' => 'IA jurídica calcula prazos, resume peças e apoia a produção.',
             ],
         ];
@@ -275,7 +275,7 @@ final class JuridicoLandingService
             [
                 'icon' => 'fa-headset',
                 'title' => 'Copiloto sempre disponível',
-                'text' => 'Bruna responde dúvidas jurídicas e operacionais dentro da plataforma.',
+                'text' => 'Sasha responde dúvidas jurídicas e operacionais dentro da plataforma.',
             ],
         ];
     }
@@ -321,7 +321,7 @@ final class JuridicoLandingService
             ],
             [
                 'time' => 'Tarde',
-                'title' => 'Produção com a Bruna',
+                'title' => 'Produção com a Sasha',
                 'text' => 'Calcule prazo, peça um resumo de peça ou valide honorários sem abrir outra ferramenta.',
             ],
             [
@@ -341,7 +341,7 @@ final class JuridicoLandingService
     {
         return [
             [
-                'q' => 'A Bruna substitui o advogado?',
+                'q' => 'A Sasha substitui o advogado?',
                 'a' => 'Não. Ela acelera tarefas repetitivas (prazos, resumos, consultas) e a decisão continua com o profissional.',
             ],
             [

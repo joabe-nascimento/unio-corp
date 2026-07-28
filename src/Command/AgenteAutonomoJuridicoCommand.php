@@ -15,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Coração do "Agente Autônomo 24/7": roda periodicamente (cron/systemd timer, a cada
  * 30 min) varrendo prazos, tarefas e carteira de todos os escritórios e notificando
- * quem precisa agir — sem esperar ninguém abrir o chat da Bruna.
+ * quem precisa agir — sem esperar ninguém abrir o chat da Sasha.
  */
 #[AsCommand(
     name: 'app:juridico:agente-autonomo',

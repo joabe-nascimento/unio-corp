@@ -1,4 +1,4 @@
-﻿# Deploy agora — checklist HostGator (joabef36)
+# Deploy agora — checklist HostGator (joabef36)
 
 **Documentação operacional completa (jul/2026):** [OPERACAO_INDICE.md](./OPERACAO_INDICE.md) — histórico de correções, branches, Actions e validação local.
 

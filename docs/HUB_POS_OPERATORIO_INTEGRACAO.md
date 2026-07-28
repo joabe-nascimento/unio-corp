@@ -1,4 +1,4 @@
-﻿# Integração do Hub Pós-Operatório na Plataforma Unio
+# Integração do Hub Pós-Operatório na Plataforma Unio
 
 Documentação completa de como o **sistema de acompanhamento pós-operatório** proposto pelo Professor Paulo se integra à arquitetura, navegação, permissões e serviços transversais da plataforma Unio.
 

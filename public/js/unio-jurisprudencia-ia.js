@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Jurisprudência IA — pesquisa jurisprudencial com a Sasha (JurisFlow).
  * Busca teses/julgados estruturados e permite salvar sugestões na biblioteca
  * do escritório com um clique.

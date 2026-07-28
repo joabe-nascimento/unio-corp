@@ -22,7 +22,7 @@ class JuridicoJurisprudenciaService
     ) {}
 
     /**
-     * Pesquisa jurisprudencial com IA (Bruna + JurisFlow): retorna teses e
+     * Pesquisa jurisprudencial com IA (Sasha + JurisFlow): retorna teses e
      * julgados sugeridos, prontos para virar registros na biblioteca do
      * escritório com um clique.
      *

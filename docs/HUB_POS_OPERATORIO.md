@@ -1,4 +1,4 @@
-﻿# Hub Pós-Operatório — Proposta Técnica Unio
+# Hub Pós-Operatório — Proposta Técnica Unio
 
 > **Documentação completa de integração:** [HUB_POS_OPERATORIO_INTEGRACAO.md](./HUB_POS_OPERATORIO_INTEGRACAO.md)  
 > **PDF para reunião/apresentação:** [HUB_POS_OPERATORIO_INTEGRACAO.pdf](./HUB_POS_OPERATORIO_INTEGRACAO.pdf)  

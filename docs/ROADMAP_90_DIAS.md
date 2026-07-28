@@ -1,4 +1,4 @@
-﻿# Roadmap Unio — 30 / 60 / 90 dias
+# Roadmap Unio — 30 / 60 / 90 dias
 
 Plano de evolução da plataforma com base no estado atual do repositório (março/2026). Complementa [RH_ROADMAP.md](RH_ROADMAP.md), [QUALIDADE_PERFORMANCE_E_HUBS.md](QUALIDADE_PERFORMANCE_E_HUBS.md) e [ESTRUTURA.md](ESTRUTURA.md).
 

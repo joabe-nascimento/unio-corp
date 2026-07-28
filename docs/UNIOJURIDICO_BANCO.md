@@ -1,4 +1,4 @@
-﻿# Unio Jurídico — banco de dados (jul/2026)
+# Unio Jurídico — banco de dados (jul/2026)
 
 Referência do MySQL/MariaDB da instância **uniojuridico** (UnioJurídico): conexão, migrations, backup e tabelas de clientes/processos.
 

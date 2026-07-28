@@ -1,4 +1,4 @@
-﻿# Deploy completo — Unio na HostGator
+# Deploy completo — Unio na HostGator
 
 Fluxo passo a passo: o que fazer **no seu PC (projeto)** e o que fazer **na HostGator (painel/servidor)**.
 

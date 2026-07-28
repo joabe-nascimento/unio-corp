@@ -1,4 +1,4 @@
-﻿# Checklist — Provisionar Unio Jurídico no HostGator (primeira vez)
+# Checklist — Provisionar Unio Jurídico no HostGator (primeira vez)
 
 Guia passo a passo para configurar o subdomínio **uniojuridico.uniowork.com.br** e banco de dados no cPanel da HostGator.
 
