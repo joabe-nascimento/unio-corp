@@ -61,7 +61,7 @@ final class JurisFlowAiClient
         $now = new \DateTimeImmutable('now');
 
         try {
-            $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/assistant/bruna/chat', [
+            $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/assistant/Sasha/chat', [
                 'json' => [
                     'message' => $message,
                     'escritorio_id' => $escritorioId,
