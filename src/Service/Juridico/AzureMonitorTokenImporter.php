@@ -64,6 +64,9 @@ final class AzureMonitorTokenImporter
             'lifetime' => $this->fetchBucket($accessToken, $now->modify('-90 days'), $now),
         ];
 
+        $summary['month'] = $this->maxBucket($summary['month'], $summary['today']);
+        $summary['lifetime'] = $this->maxBucket($summary['lifetime'], $summary['month']);
+
         $this->store->save($summary);
 
         $this->logger->info('Azure OpenAI usage synced', [
@@ -175,5 +178,21 @@ final class AzureMonitorTokenImporter
         }
 
         return $sum;
+    }
+
+    /**
+     * @param array{prompt_tokens: int, completion_tokens: int, total_tokens: int, requests: int} $a
+     * @param array{prompt_tokens: int, completion_tokens: int, total_tokens: int, requests: int} $b
+     *
+     * @return array{prompt_tokens: int, completion_tokens: int, total_tokens: int, requests: int}
+     */
+    private function maxBucket(array $a, array $b): array
+    {
+        return [
+            'total_tokens' => max($a['total_tokens'], $b['total_tokens']),
+            'prompt_tokens' => max($a['prompt_tokens'], $b['prompt_tokens']),
+            'completion_tokens' => max($a['completion_tokens'], $b['completion_tokens']),
+            'requests' => max($a['requests'], $b['requests']),
+        ];
     }
 }
