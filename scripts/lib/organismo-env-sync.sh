@@ -82,10 +82,10 @@ organismo_env_sync_for_uri() {
       organismo_env_set_quoted "$env_file" LEGAL_AI_ENABLED true
       # Porta do JurisFlow no HostGator — ver scripts/lib-hostgator.sh (JurisFlow-ai-service)
       # para o valor atual. Historico de portas trocadas por processos zumbis presos em
-      # sessoes SSH isoladas do CloudLinux jail (nao mata nem por PID/fuser/lsof): 8091, 8092.
-      organismo_env_set_quoted "$env_file" LEGAL_AI_URL 'http://127.0.0.1:8094'
+      # sessoes SSH isoladas do CloudLinux jail (nao mata nem por PID/fuser/lsof): 8091, 8092, 8094.
+      organismo_env_set_quoted "$env_file" LEGAL_AI_URL 'http://127.0.0.1:8095'
       organismo_env_ensure "$env_file" LEGAL_AI_ESCRITORIO_ID default
-      echo "Organismo: uniojuridico — JurisFlow AI em localhost:8094"
+      echo "Organismo: uniojuridico — JurisFlow AI em localhost:8095"
       ;;
   esac
 }
