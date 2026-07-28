@@ -9,9 +9,9 @@ use App\Repository\PosOperatorioPacienteRepository;
 use App\Service\Organismo\Memory\OrganismMemoryQuery;
 
 /**
- * Monta contexto clínico para a Vitória (chat com paciente em foco).
+ * Monta contexto clínico para a Sasha (chat com paciente em foco).
  */
-final class VitoriaContextService
+final class SashaContextService
 {
     public function __construct(
         private PosOperatorioPacienteRepository $pacienteRepo,

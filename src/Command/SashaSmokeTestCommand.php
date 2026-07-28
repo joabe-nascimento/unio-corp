@@ -13,13 +13,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpClient\HttpClient;
 
 #[AsCommand(
-    name: 'app:vitoria:smoke-test',
-    description: 'Valida Vitória AI (Python) e proxy Symfony end-to-end',
+    name: 'app:sasha:smoke-test',
+    description: 'Valida Sasha AI (Python) e proxy Symfony end-to-end',
 )]
-final class VitoriaSmokeTestCommand extends Command
+final class SashaSmokeTestCommand extends Command
 {
     public function __construct(
-        private SashaClient $vitoria,
+        private SashaClient $sasha,
         private string $defaultUri,
     ) {
         parent::__construct();
