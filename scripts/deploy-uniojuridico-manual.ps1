@@ -3,15 +3,24 @@
 #
 # Uso (na raiz do repo):
 #   powershell -ExecutionPolicy Bypass -File scripts\deploy-uniojuridico-manual.ps1
+#   powershell -ExecutionPolicy Bypass -File scripts\deploy-uniojuridico-manual.ps1 -Fast
 #
 # Pre-requisitos:
 #   - OpenSSH (ssh/scp) no PATH
 #   - tar (Windows 10+)
 #   - composer, npm, php
 #   - config/deploy-uniojuridico.local.env com DEPLOY_KEY_FILE
+#
+# Modos:
+#   (padrao)     build completo local + deploy remoto completo
+#   -SkipBuild   pula composer/npm local (so CSS/templates alterados)
+#   -Fast        pula build local, BOM, smoke e passos lentos no servidor (~3-5 min)
 
 param(
     [switch]$SkipBuild,
+    [switch]$Fast,
+    [switch]$SkipBomCheck,
+    [switch]$SkipSmoke,
     [string]$ArchiveName = "deploy-uniojuridico.tar.gz"
 )
 
@@ -49,20 +58,109 @@ function Invoke-Retry {
     }
 }
 
+function Test-NeedsNpmInstall {
+    param([string]$ProjectRoot)
+    $lock = Join-Path $ProjectRoot "package-lock.json"
+    $nodeModules = Join-Path $ProjectRoot "node_modules"
+    $marker = Join-Path $ProjectRoot "var\.deploy-npm-lock-hash"
+    if (-not (Test-Path $lock)) { return $false }
+    if (-not (Test-Path $nodeModules)) { return $true }
+    $hash = (Get-FileHash $lock -Algorithm SHA256).Hash
+    if (Test-Path $marker) {
+        $prev = (Get-Content $marker -Raw).Trim()
+        if ($prev -eq $hash) { return $false }
+    }
+    return $true
+}
+
+function Save-NpmLockHash {
+    param([string]$ProjectRoot)
+    $lock = Join-Path $ProjectRoot "package-lock.json"
+    $marker = Join-Path $ProjectRoot "var\.deploy-npm-lock-hash"
+    if (-not (Test-Path $lock)) { return }
+    New-Item -ItemType Directory -Force -Path (Split-Path $marker) | Out-Null
+    (Get-FileHash $lock -Algorithm SHA256).Hash | Set-Content $marker -NoNewline
+}
+
+function Invoke-ProjectBuild {
+    param([string]$ProjectRoot)
+    Push-Location $ProjectRoot
+    try {
+        Write-Host "      composer install (prod, no-dev)" -ForegroundColor DarkGray
+        & composer install --no-dev --no-progress --prefer-dist --optimize-autoloader --no-scripts
+        if ($LASTEXITCODE -ne 0) { throw "composer install falhou" }
+
+        if (Test-NeedsNpmInstall -ProjectRoot $ProjectRoot) {
+            Write-Host "      npm ci (package-lock alterado)" -ForegroundColor DarkGray
+            & npm ci --prefer-offline --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) { throw "npm ci falhou" }
+            Save-NpmLockHash -ProjectRoot $ProjectRoot
+        } else {
+            Write-Host "      npm ci (skip — lock inalterado)" -ForegroundColor DarkGray
+        }
+
+        & npm run vendor:sync
+        if ($LASTEXITCODE -ne 0) { throw "npm run vendor:sync falhou" }
+        & php bin/minify-css.php
+        if ($LASTEXITCODE -ne 0) { throw "minify-css falhou" }
+        Write-Host "      asset-map:compile" -ForegroundColor DarkGray
+        & php bin/console asset-map:compile --env=prod --no-interaction
+        if ($LASTEXITCODE -ne 0) { throw "asset-map:compile falhou" }
+    } finally {
+        Pop-Location
+    }
+}
+
+function New-DeployStagingDir {
+    param([string]$ProjectRoot)
+    $staging = Join-Path $env:TEMP ("unio-juridico-staging-" + [Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $staging | Out-Null
+    $stageTar = Join-Path $env:TEMP ("unio-juridico-stage-src-" + [Guid]::NewGuid().ToString("N") + ".tar")
+    Push-Location $ProjectRoot
+    try {
+        & tar --exclude=node_modules --exclude=.git --exclude=var/cache --exclude=var/log `
+            --exclude=public/uploads --exclude=tests --exclude=docs `
+            -cf $stageTar .
+        if ($LASTEXITCODE -ne 0) { throw "tar staging falhou" }
+        Push-Location $staging
+        & tar -xf $stageTar
+        if ($LASTEXITCODE -ne 0) { throw "tar extract staging falhou" }
+    } finally {
+        Pop-Location
+        Remove-Item $stageTar -Force -ErrorAction SilentlyContinue
+    }
+    return $staging
+}
+
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $root
 
-Write-Host "== Deploy manual Unio Juridico (PC -> HostGator) ==" -ForegroundColor Cyan
-
-# Pré-deploy check: remover BOM automaticamente
-Write-Host ""
-Write-Host "[0/5] Verificando e removendo BOM..." -ForegroundColor Yellow
-& "$PSScriptRoot/remove-bom.ps1"
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Falha ao remover BOM" -ForegroundColor Red
-    exit 1
+if ($Fast) {
+    $SkipBuild = $true
+    $SkipBomCheck = $true
+    $SkipSmoke = $true
 }
-Write-Host ""
+
+Write-Host "== Deploy manual Unio Juridico (PC -> HostGator) ==" -ForegroundColor Cyan
+if ($Fast) {
+    Write-Host "Modo: FAST (sem build local, sem passos lentos no servidor)" -ForegroundColor Yellow
+} elseif ($SkipBuild) {
+    Write-Host "Modo: SkipBuild (sem composer/npm local)" -ForegroundColor Yellow
+}
+
+# Pre-deploy check: remover BOM automaticamente (skip em -Fast)
+if (-not $SkipBomCheck) {
+    Write-Host ""
+    Write-Host "[0/5] Verificando e removendo BOM..." -ForegroundColor Yellow
+    & "$PSScriptRoot/remove-bom.ps1"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Falha ao remover BOM" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host ""
+} else {
+    Write-Host "[skip] verificacao BOM" -ForegroundColor DarkGray
+}
 
 $cfg = @{}
 Load-EnvFile "$root\config\deploy-hostgator.defaults.env" $cfg
@@ -122,28 +220,28 @@ Invoke-Retry {
 }
 Write-Host "[ok] SSH conectado" -ForegroundColor Green
 
+$stagingDir = $null
+$assetsPrecompiled = "0"
+
 if (-not $SkipBuild) {
     Write-Host ""
-    Write-Host "[1/4] composer install (prod)" -ForegroundColor Cyan
-    & composer install --no-dev --no-progress --prefer-dist --optimize-autoloader --no-scripts
-    if ($LASTEXITCODE -ne 0) { throw "composer install falhou" }
-
-    Write-Host "[2/4] npm ci + vendor:sync + minify CSS" -ForegroundColor Cyan
-    & npm ci
-    if ($LASTEXITCODE -ne 0) { throw "npm ci falhou" }
-    & npm run vendor:sync
-    if ($LASTEXITCODE -ne 0) { throw "npm run vendor:sync falhou" }
-    & php bin/minify-css.php
-    if ($LASTEXITCODE -ne 0) { throw "minify-css falhou" }
-    Write-Host "      asset-map:compile" -ForegroundColor DarkGray
-    & php bin/console asset-map:compile --env=prod --no-interaction
-    if ($LASTEXITCODE -ne 0) { throw "asset-map:compile falhou" }
+    Write-Host "[1/4] build em staging (nao altera vendor local)" -ForegroundColor Cyan
+    $stagingDir = New-DeployStagingDir -ProjectRoot $root
+    try {
+        Invoke-ProjectBuild -ProjectRoot $stagingDir
+        $tarSource = $stagingDir
+        $assetsPrecompiled = "1"
+    } catch {
+        if ($stagingDir -and (Test-Path $stagingDir)) {
+            Remove-Item $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        throw
+    }
 } else {
-    Write-Host "[skip] build local (--SkipBuild)" -ForegroundColor Yellow
+    Write-Host "[skip] build local" -ForegroundColor Yellow
+    $tarSource = $root
+    $assetsPrecompiled = if ($Fast) { "1" } else { "0" }
 }
-
-$restoreDevDeps = $false
-if (-not $SkipBuild) { $restoreDevDeps = $true }
 
 Write-Host "[3/4] empacotar e enviar $ArchiveName" -ForegroundColor Cyan
 $archive = Join-Path $env:TEMP $ArchiveName
@@ -169,17 +267,19 @@ $tarArgs = @(
     "-czf", $archive,
     "."
 )
-& tar @tarArgs
-if ($LASTEXITCODE -ne 0) { throw "tar falhou" }
+Push-Location $tarSource
+try {
+    & tar @tarArgs
+    if ($LASTEXITCODE -ne 0) { throw "tar falhou" }
+} finally {
+    Pop-Location
+    if ($stagingDir -and (Test-Path $stagingDir)) {
+        Remove-Item $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
 
 $archiveSizeMb = [math]::Round((Get-Item $archive).Length / 1MB, 1)
 Write-Host "      arquivo: $archive (${archiveSizeMb} MB)" -ForegroundColor DarkGray
-
-if ($restoreDevDeps) {
-    Write-Host "[restore] composer install (dev) — restaurando ambiente local" -ForegroundColor Yellow
-    & composer install --no-progress --prefer-dist --optimize-autoloader
-    if ($LASTEXITCODE -ne 0) { throw "composer install (dev) falhou ao restaurar ambiente local" }
-}
 
 Invoke-Retry {
     & scp @scpBase $archive "${sshTarget}:/tmp/$ArchiveName"
@@ -197,11 +297,15 @@ try {
 }
 
 $remoteEnvFile = Join-Path $env:TEMP "deploy-remote.env"
+$fastDeploy = if ($Fast) { "1" } else { "0" }
 $envLines = @(
     "DEPLOY_PATH=$deployPath"
     "PUBLIC_HTML=$publicHtml"
     "GITHUB_SHA=$gitSha"
     "GITHUB_REF_NAME=$gitRef"
+    "SKIP_UNIO_PLATFORM_STEPS=1"
+    "FAST_DEPLOY=$fastDeploy"
+    "ASSETS_PRECOMPILED=$assetsPrecompiled"
 )
 [System.IO.File]::WriteAllText($remoteEnvFile, ($envLines -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
 
@@ -229,18 +333,22 @@ if (Test-Path $reportLocal) {
 
 $defaultUri = $cfg["DEFAULT_URI"]
 if (-not $defaultUri) { $defaultUri = "https://uniojuridico.uniowork.com.br" }
-Write-Host ""
-Write-Host "Smoke: $defaultUri/login" -ForegroundColor Cyan
-try {
-    $resp = Invoke-WebRequest -Uri "$defaultUri/login" -Method Head -UseBasicParsing -TimeoutSec 30
-    Write-Host "[ok] HTTP $($resp.StatusCode)" -ForegroundColor Green
-} catch {
-    if ($_.Exception.Response) {
-        $code = [int]$_.Exception.Response.StatusCode
-        Write-Host "[aviso] HTTP $code — confira SSL/vhost se necessario" -ForegroundColor Yellow
-    } else {
-        Write-Host "[aviso] smoke externo falhou: $($_.Exception.Message)" -ForegroundColor Yellow
+if (-not $SkipSmoke) {
+    Write-Host ""
+    Write-Host "Smoke: $defaultUri/login" -ForegroundColor Cyan
+    try {
+        $resp = Invoke-WebRequest -Uri "$defaultUri/login" -Method Head -UseBasicParsing -TimeoutSec 15
+        Write-Host "[ok] HTTP $($resp.StatusCode)" -ForegroundColor Green
+    } catch {
+        if ($_.Exception.Response) {
+            $code = [int]$_.Exception.Response.StatusCode
+            Write-Host "[aviso] HTTP $code — confira SSL/vhost se necessario" -ForegroundColor Yellow
+        } else {
+            Write-Host "[aviso] smoke externo falhou: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
     }
+} else {
+    Write-Host "[skip] smoke test externo" -ForegroundColor DarkGray
 }
 
 Write-Host ""

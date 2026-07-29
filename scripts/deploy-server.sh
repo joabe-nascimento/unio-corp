@@ -81,11 +81,15 @@ db_has_core_schema() {
 }
 
 if db_has_core_schema; then
-  CI_REPORT_STEP="Backup DB (pré-migration)"
-  ci_report_step "$CI_REPORT_STEP"
-  backup_database_before_migrate "$DEPLOY_PATH" "$PHP_BIN" 7 || true
+  if [[ "${FAST_DEPLOY:-0}" != "1" ]]; then
+    CI_REPORT_STEP="Backup DB (pré-migration)"
+    ci_report_step "$CI_REPORT_STEP"
+    backup_database_before_migrate "$DEPLOY_PATH" "$PHP_BIN" 7 || true
+  else
+    echo "FAST_DEPLOY: backup DB pulado"
+  fi
 
-  $PHP_BIN bin/console doctrine:migrations:migrate --no-interaction
+  $PHP_BIN bin/console doctrine:migrations:migrate --no-interaction --env=prod
 else
   echo "Banco sem schema base — doctrine:schema:create + marcar migrations"
   $PHP_BIN bin/console doctrine:schema:create --no-interaction
@@ -99,23 +103,31 @@ else
   fi
 fi
 
-CI_REPORT_STEP="Doctrine migrations"
-ci_report_step "$CI_REPORT_STEP"
-$PHP_BIN bin/console doctrine:migrations:migrate --no-interaction --env=prod || echo "WARN: migrations falhou ou não há pendentes"
-
 CI_REPORT_STEP="Cache Symfony (prod)"
 ci_report_step "$CI_REPORT_STEP"
 $PHP_BIN bin/console cache:clear --env=prod --no-warmup
-$PHP_BIN bin/console cache:warmup --env=prod
+if [[ "${FAST_DEPLOY:-0}" == "1" ]]; then
+  echo "FAST_DEPLOY: cache warmup pulado (primeira requisicao aquece)"
+else
+  $PHP_BIN bin/console cache:warmup --env=prod
+fi
 
-CI_REPORT_STEP="Asset Mapper compile (prod)"
-ci_report_step "$CI_REPORT_STEP"
-$PHP_BIN bin/console asset-map:compile --env=prod --no-interaction 2>/dev/null \
-  || echo "WARN: asset-map:compile falhou ou indisponível — verifique public/assets"
+if [[ "${ASSETS_PRECOMPILED:-0}" == "1" ]]; then
+  echo "ASSETS_PRECOMPILED: asset-map:compile remoto pulado (ja compilado no build local)"
+else
+  CI_REPORT_STEP="Asset Mapper compile (prod)"
+  ci_report_step "$CI_REPORT_STEP"
+  $PHP_BIN bin/console asset-map:compile --env=prod --no-interaction 2>/dev/null \
+    || echo "WARN: asset-map:compile falhou ou indisponível — verifique public/assets"
+fi
 
 CI_REPORT_STEP="Migrar branding legado (admin_config)"
 ci_report_step "$CI_REPORT_STEP"
-bash "$ROOT/scripts/lib/migrate-legacy-branding.sh" "$DEPLOY_PATH" || true
+if [[ "${FAST_DEPLOY:-0}" != "1" ]]; then
+  bash "$ROOT/scripts/lib/migrate-legacy-branding.sh" "$DEPLOY_PATH" || true
+else
+  echo "FAST_DEPLOY: branding legado pulado"
+fi
 
 link_public_dir() {
   local rel="$1"
@@ -200,13 +212,15 @@ DEFAULT_URI="$(grep -E '^DEFAULT_URI=' .env.local 2>/dev/null | head -1 | cut -d
 VHOST="${DEFAULT_URI#https://}"
 VHOST="${VHOST#http://}"
 VHOST="${VHOST%%/*}"
-if command -v uapi >/dev/null 2>&1 && [[ -n "$VHOST" ]]; then
+if command -v uapi >/dev/null 2>&1 && [[ -n "$VHOST" ]] && [[ "${FAST_DEPLOY:-0}" != "1" ]]; then
   CI_REPORT_STEP="PHP vhost (cPanel)"
   ci_report_step "$CI_REPORT_STEP"
   uapi --output=json LangPHP php_set_vhost_versions version=ea-php82 vhost="${VHOST}" 2>/dev/null \
     || uapi --output=json LangPHP php_set_vhost_versions version=ea-php81 vhost="${VHOST}" 2>/dev/null \
     || true
   uapi --output=json SSL start_autossl_check 2>/dev/null || true
+elif [[ "${FAST_DEPLOY:-0}" == "1" ]]; then
+  echo "FAST_DEPLOY: PHP vhost (cPanel) pulado"
 fi
 
 CI_REPORT_STEP="Symfony entrypoint em public_html"
@@ -215,10 +229,14 @@ ci_report_step "$CI_REPORT_STEP"
 source "$ROOT/scripts/lib/sync-public-html-entrypoint.sh"
 
 if [[ -n "${DEFAULT_URI:-}" ]]; then
-  CI_REPORT_STEP="Reparo vhost subdominio (Apache)"
-  ci_report_step "$CI_REPORT_STEP"
-  export DEFAULT_URI
-  bash "$ROOT/scripts/lib/repair-subdomain-vhost.sh" || echo "AVISO: repair-subdomain-vhost (nao bloqueia deploy)"
+  if [[ "${FAST_DEPLOY:-0}" == "1" ]]; then
+    echo "FAST_DEPLOY: repair-subdomain-vhost pulado"
+  else
+    CI_REPORT_STEP="Reparo vhost subdominio (Apache)"
+    ci_report_step "$CI_REPORT_STEP"
+    export DEFAULT_URI
+    bash "$ROOT/scripts/lib/repair-subdomain-vhost.sh" || echo "AVISO: repair-subdomain-vhost (nao bloqueia deploy)"
+  fi
 fi
 
 CI_REPORT_STEP="Registrar revisão de deploy"
