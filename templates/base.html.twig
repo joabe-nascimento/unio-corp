@@ -100,11 +100,10 @@
     <link rel="stylesheet" href="{{ asset('css/unio-visual-improvements.css') }}?v=2">
 
     {% block stylesheets %}{% endblock %}
-    {% if app.user %}
-    <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=4">
-    {# highlight.js CSS removido temporariamente #}
-    <link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=1">
-    {% endif %}
+{% if app.user %}
+<link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=4">
+<link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=3">
+{% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
 <body class="hold-transition sidebar-mini{% if not organismo.enabled|default(false) %} sidebar-collapse{% endif %} layout-fixed layout-inset-shell{% if organismo.enabled|default(false) %} unio-organismo{% endif %}{% if org_clinic|default(false) %} org-clinic{% endif %}{% if org_juridico|default(false) %} org-juridico{% endif %}"{% block body_attrs %}{% endblock %}>
@@ -575,8 +574,7 @@ window.addEventListener('load', runShellSidebarControls);
 <script src="{{ asset('vendor/marked/marked.min.js') }}"></script>
 {# highlight.js removido temporariamente devido a erro de módulo #}
 <script src="{{ asset('js/helix-markdown.js') }}?v=2"></script>
-<script src="{{ asset('js/helix-darkmode.js') }}?v=2"></script>
-<script src="{{ asset('js/helix-features.js') }}?v=1"></script>
+<script src="{{ asset('js/helix-features.js') }}?v=2"></script>
 <script src="{{ asset('js/helix-history-api.js') }}?v=1"></script>
 <script src="{{ asset('js/helix-typing.js') }}?v=1"></script>
 {% endif %}
@@ -1157,22 +1155,35 @@ window.addEventListener('load', runShellSidebarControls);
             HelixTyping.show();
         }
 
+        // Enviar conversation_id se existir
+        var payload = {
+            message: text,
+            history: history,
+            context: {
+                hub: document.body.dataset.activeHub || document.querySelector('[data-sidebar-hubs]')?.dataset.activeHub || '',
+                patient_codigo: document.body.dataset.patientCodigo || null,
+                numero_processo: document.body.dataset.processoNumero || null
+            }
+        };
+        
+        // Se session tem conversation_id, incluir no payload
+        if (session.conversationId) {
+            payload.conversation_id = session.conversationId;
+        }
+        
         fetch(chatUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin',
-            body: JSON.stringify({
-                message: text,
-                history: history,
-                context: {
-                    hub: document.body.dataset.activeHub || document.querySelector('[data-sidebar-hubs]')?.dataset.activeHub || '',
-                    patient_codigo: document.body.dataset.patientCodigo || null,
-                    numero_processo: document.body.dataset.processoNumero || null
-                }
-            })
+            body: JSON.stringify(payload)
         })
             .then(function (r) { return r.json(); })
             .then(function (data) {
+                // Salvar conversation_id retornado pelo backend
+                if (data.conversation_id && !session.conversationId) {
+                    session.conversationId = data.conversation_id;
+                }
+                
                 var actionsHtml = (renderToolActions(data.tool_results) || '') + (renderSuggestedActions(data.suggested_actions) || '');
                 session.messages.push({
                     role: 'assistant',
@@ -1245,11 +1256,6 @@ window.addEventListener('load', runShellSidebarControls);
         openBtn.setAttribute('aria-expanded', 'true');
         openBtn.classList.add('is-active');
         document.body.classList.add('helix-open');
-        
-        // Aplicar tema do Helix ao panel
-        if (typeof HelixDarkMode !== 'undefined') {
-            panel.setAttribute('data-helix-theme', HelixDarkMode.getTheme());
-        }
         
         setTimeout(function () { if (input) input.focus(); }, 200);
         renderHistory();
