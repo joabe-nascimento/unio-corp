@@ -240,7 +240,10 @@ if (-not $SkipBuild) {
 } else {
     Write-Host "[skip] build local" -ForegroundColor Yellow
     $tarSource = $root
-    $assetsPrecompiled = if ($Fast) { "1" } else { "0" }
+    # Build local pulado (-Fast/-SkipBuild) => assets NAO foram compilados em lugar nenhum.
+    # Forcar sempre "0" para que o servidor rode asset-map:compile (custa ~5s) e evita
+    # servir digests/manifest.json desatualizados apos mudancas em assets/js|css.
+    $assetsPrecompiled = "0"
 }
 
 Write-Host "[3/4] empacotar e enviar $ArchiveName" -ForegroundColor Cyan
