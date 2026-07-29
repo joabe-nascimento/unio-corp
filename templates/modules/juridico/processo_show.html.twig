@@ -169,12 +169,17 @@
         </div>
         {% if previsao %}
         <div class="unio-card mt-4 jur-previsao-card">
-            {% include 'components/section_header.html.twig' with { title: 'Previsão de êxito', subtitle: 'Score heurístico e explicável' } %}
+            {% include 'components/section_header.html.twig' with { title: 'Previsão de êxito', subtitle: previsao.modelo == 'treinado' ? 'Modelo estatístico treinado e explicável' : 'Score heurístico e explicável' } %}
             <div class="px-3 pb-3">
                 <div class="jur-previsao-score" style="--jur-previsao-cor: {{ previsao.cor }};">
                     <span class="jur-previsao-score__num">{{ previsao.score }}</span>
                     <span class="jur-previsao-score__label">{{ previsao.label }}</span>
                 </div>
+                {% if previsao.modelo == 'treinado' %}
+                <span class="badge mb-2" style="background: #2fbf711a; color: #2fbf71; font-weight: 600;">
+                    <i class="fas fa-microchip mr-1" aria-hidden="true"></i> Modelo treinado
+                </span>
+                {% endif %}
                 <ul class="jur-previsao-fatores">
                     {% for fator in previsao.fatores %}
                     <li class="jur-previsao-fatores__item {{ fator.favoravel ? 'is-favoravel' : 'is-desfavoravel' }}">
@@ -186,7 +191,7 @@
                     </li>
                     {% endfor %}
                 </ul>
-                <p class="small text-muted mb-0 mt-2"><i class="fas fa-circle-info mr-1" aria-hidden="true"></i>Estimativa heurística e 100% explicável, calculada a partir do histórico real da carteira — não substitui a análise jurídica.</p>
+                <p class="small text-muted mb-0 mt-2"><i class="fas fa-circle-info mr-1" aria-hidden="true"></i>{{ previsao.modelo == 'treinado' ? 'Estimativa do modelo estatístico treinado com o histórico real da carteira, 100% explicável — não substitui a análise jurídica.' : 'Estimativa heurística e 100% explicável, calculada a partir do histórico real da carteira — não substitui a análise jurídica.' }}</p>
             </div>
         </div>
         {% endif %}

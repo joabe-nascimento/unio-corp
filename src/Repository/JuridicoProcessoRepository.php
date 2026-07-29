@@ -380,11 +380,25 @@ class JuridicoProcessoRepository extends ServiceEntityRepository
      */
     public function taxaExitoPorArea(Empresa $empresa): array
     {
+        return $this->taxaExitoPorAreaGrupo([$empresa]);
+    }
+
+    /**
+     * Igual a {@see self::taxaExitoPorArea()}, mas consolidando o grupo econômico
+     * (matriz + filiais) — usado para calibrar o modelo treinado com mais amostras
+     * quando o escritório faz parte de uma rede.
+     *
+     * @param list<Empresa> $empresas
+     *
+     * @return array<string, array{total: int, favoraveis: int, taxa: float}>
+     */
+    public function taxaExitoPorAreaGrupo(array $empresas): array
+    {
         $rows = $this->createQueryBuilder('p')
             ->select("COALESCE(NULLIF(p.area, ''), 'geral') AS area", 'p.resultado AS resultado', 'COUNT(p.id) AS cnt')
-            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.empresa IN (:empresas)')
             ->andWhere('p.resultado IS NOT NULL')
-            ->setParameter('empresa', $empresa)
+            ->setParameter('empresas', $empresas)
             ->groupBy('area, p.resultado')
             ->getQuery()
             ->getArrayResult();
@@ -404,6 +418,25 @@ class JuridicoProcessoRepository extends ServiceEntityRepository
         }
 
         return $out;
+    }
+
+    /**
+     * Processos encerrados com resultado conhecido — base de treino do modelo
+     * estatístico de previsão de êxito (regressão logística calibrada por escritório
+     * ou grupo econômico).
+     *
+     * @param list<Empresa> $empresas
+     *
+     * @return list<JuridicoProcesso>
+     */
+    public function findComResultado(array $empresas): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.empresa IN (:empresas)')
+            ->andWhere('p.resultado IS NOT NULL')
+            ->setParameter('empresas', $empresas)
+            ->getQuery()
+            ->getResult();
     }
 
     /** @param list<array<string, mixed>> $rows @return array{labels: list<string>, values: list<int>} */

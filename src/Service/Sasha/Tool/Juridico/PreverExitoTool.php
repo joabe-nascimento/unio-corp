@@ -11,8 +11,9 @@ use App\Service\WorkspaceService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Ferramenta autônoma: calcula a previsão de êxito heurística de um processo já
- * cadastrado — sem IA generativa, direto do histórico real da carteira do escritório.
+ * Ferramenta autônoma: calcula a previsão de êxito de um processo já cadastrado — sem
+ * IA generativa, direto do histórico real da carteira do escritório (heurística, ou
+ * modelo estatístico treinado quando há histórico suficiente).
  */
 final class PreverExitoTool implements SashaToolInterface
 {
@@ -63,7 +64,7 @@ final class PreverExitoTool implements SashaToolInterface
         }
 
         $processo = $encontrados[0];
-        $score = $this->previsao->prever($processo);
+        $score = $this->previsao->preverAuto($processo);
 
         $fatoresTexto = implode('; ', array_map(
             static fn (array $f) => $f['label'] . ($f['peso'] !== 0 ? sprintf(' (%s%d)', $f['peso'] > 0 ? '+' : '', $f['peso']) : ''),

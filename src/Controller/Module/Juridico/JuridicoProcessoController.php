@@ -132,7 +132,7 @@ class JuridicoProcessoController extends AbstractController
             'tarefas' => $tarefas,
             'partes' => $this->partes->findForProcesso($processo),
             'alertas_processo' => $this->riscos->avaliarProcesso($processo, $pendentes),
-            'previsao' => $processo->getStatus() !== JuridicoProcesso::STATUS_ENCERRADO ? $this->previsaoExito->prever($processo) : null,
+            'previsao' => $processo->getStatus() !== JuridicoProcesso::STATUS_ENCERRADO ? $this->previsaoExito->preverAuto($processo) : null,
         ]);
     }
 
