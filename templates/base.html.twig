@@ -102,7 +102,8 @@
     {% block stylesheets %}{% endblock %}
 {% if app.user %}
 <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=4">
-<link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=5">
+<link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=6">
+<link rel="stylesheet" href="{{ asset('css/helix-chat-redesign.css') }}?v=1">
 {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
@@ -575,7 +576,7 @@ window.addEventListener('load', runShellSidebarControls);
 {# highlight.js removido temporariamente devido a erro de módulo #}
 <script src="{{ asset('js/helix-markdown.js') }}?v=2"></script>
 <script src="{{ asset('js/helix-features.js') }}?v=4"></script>
-<script src="{{ asset('js/helix-history-api.js') }}?v=2"></script>
+<script src="{{ asset('js/helix-history-api.js') }}?v=3"></script>
 <script src="{{ asset('js/helix-typing.js') }}?v=1"></script>
 {% endif %}
 
@@ -1276,8 +1277,10 @@ window.addEventListener('load', runShellSidebarControls);
 
     function newChat() {
         currentSessionId = null;
+        // Usa resetCurrentConversation (não newConversation) para evitar recursão:
+        // newConversation() chama window.helixClearChat, que é esta própria função.
         if (typeof HelixHistory !== 'undefined') {
-            HelixHistory.newConversation();
+            HelixHistory.resetCurrentConversation();
         }
         renderWelcomeOnly();
         renderHistory();
@@ -1350,9 +1353,12 @@ window.addEventListener('load', runShellSidebarControls);
     });
 
     document.getElementById('helixClearHistory')?.addEventListener('click', function () {
-        if (!confirm('Limpar todo o histórico de conversas com ' + assistantName() + '?')) return;
+        if (!confirm('Excluir todo o histórico de conversas com ' + assistantName() + '? Esta ação não pode ser desfeita.')) return;
         saveSessions([]);
         currentSessionId = null;
+        if (typeof HelixHistory !== 'undefined') {
+            HelixHistory.deleteAllConversations();
+        }
         newChat();
     });
 
@@ -1471,22 +1477,36 @@ window.addEventListener('load', runShellSidebarControls);
     
     // Expor funções para os módulos externos
     window.helixScrollToBottom = scrollMessages;
-    window.helixRenderHistory = function(messages) {
-        if (!currentSessionId) {
-            var sid = ensureSession();
-            var session = getSession(sid);
-            if (session) {
-                session.messages = messages.map(function(m) {
-                    return {
-                        role: m.role,
-                        text: m.content,
-                        at: m.created_at || new Date().toISOString()
-                    };
-                });
-                upsertSession(session);
-                renderMessages(session);
-            }
+    window.helixRenderHistory = function(messages, conversationId) {
+        // Sempre substitui a sessão atual pela conversa selecionada no histórico,
+        // independente de já existir uma sessão ativa (corrige clique no histórico
+        // não fazendo nada quando o usuário já estava numa conversa).
+        var msgs = (messages || []).map(function(m) {
+            return {
+                role: m.role,
+                text: m.content,
+                at: m.created_at || new Date().toISOString()
+            };
+        });
+        var title = 'Conversa';
+        var firstUser = msgs.find(function(m) { return m.role === 'user'; });
+        if (firstUser && firstUser.text) {
+            title = firstUser.text.length > 48 ? firstUser.text.slice(0, 48) + '…' : firstUser.text;
         }
+        var session = {
+            id: uid(),
+            title: title,
+            createdAt: (msgs[0] && msgs[0].at) || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            messages: msgs,
+            conversationId: conversationId || null
+        };
+        upsertSession(session);
+        currentSessionId = session.id;
+        renderMessages(session);
+        if (suggestions) suggestions.style.display = msgs.length ? 'none' : '';
+        closeHistoryIfMobile();
+        scrollMessages();
     };
     window.helixClearChat = newChat;
     window.helixResendMessage = sendMessage;

@@ -185,7 +185,7 @@
                 
                 // Renderizar mensagens
                 if (data.messages && typeof window.helixRenderHistory === 'function') {
-                    window.helixRenderHistory(data.messages);
+                    window.helixRenderHistory(data.messages, conversationId);
                 }
                 
                 // Atualizar UI
@@ -249,7 +249,8 @@
                 if (data.success) {
                     if (conversationId === currentConversationId) {
                         currentConversationId = null;
-                        // Limpar chat
+                        updateActiveConversation(null);
+                        // Limpar chat (newChat() chama apenas resetCurrentConversation, sem recursão)
                         if (typeof window.helixClearChat === 'function') {
                             window.helixClearChat();
                         }
@@ -269,14 +270,52 @@
     }
 
     /**
-     * Cria nova conversa
+     * Exclui todas as conversas do usuário (via API, uma a uma em paralelo)
+     */
+    function deleteAllConversations() {
+        return fetch('/api/sasha/conversations')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var list = Array.isArray(data) ? data : (data.conversations || []);
+                if (!list.length) return Promise.resolve();
+                return Promise.all(list.map(function(conv) {
+                    return fetch('/api/sasha/conversations/' + conv.id, { method: 'DELETE' }).catch(function() {});
+                }));
+            })
+            .then(function() {
+                currentConversationId = null;
+                updateActiveConversation(null);
+                loadConversations();
+                if (typeof window.helixClearChat === 'function') {
+                    window.helixClearChat();
+                }
+            })
+            .catch(function(err) {
+                console.error('Failed to delete all conversations:', err);
+                if (typeof HelixFeatures !== 'undefined') {
+                    HelixFeatures.showToast('Erro ao excluir histórico', 'error');
+                }
+            });
+    }
+
+    /**
+     * Reseta apenas o estado interno (sem disparar clearChat, evita recursão
+     * quando chamado a partir do próprio newChat()).
+     */
+    function resetCurrentConversation() {
+        currentConversationId = null;
+        updateActiveConversation(null);
+    }
+
+    /**
+     * Cria nova conversa (chamado por botões/menus externos ao fluxo do chat)
      */
     function newConversation() {
         currentConversationId = null;
+        updateActiveConversation(null);
         if (typeof window.helixClearChat === 'function') {
             window.helixClearChat();
         }
-        updateActiveConversation(null);
     }
 
     /**
@@ -332,6 +371,8 @@
         loadConversations: loadConversations,
         loadConversation: loadConversation,
         newConversation: newConversation,
+        resetCurrentConversation: resetCurrentConversation,
+        deleteAllConversations: deleteAllConversations,
         getCurrentConversationId: getCurrentConversationId,
         setCurrentConversationId: setCurrentConversationId
     };
