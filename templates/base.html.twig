@@ -578,6 +578,7 @@ window.addEventListener('load', runShellSidebarControls);
 <script src="{{ asset('js/helix-features.js') }}?v=4"></script>
 <script src="{{ asset('js/helix-history-api.js') }}?v=3"></script>
 <script src="{{ asset('js/helix-typing.js') }}?v=1"></script>
+<script src="{{ asset('js/helix-attachments.js') }}?v=1"></script>
 {% endif %}
 
 {# ── View Toggle — JS genérico, carregado uma vez no base ── #}
@@ -1114,7 +1115,23 @@ window.addEventListener('load', runShellSidebarControls);
 
     function sendMessage(text) {
         text = (text || '').trim();
-        if (!text || helixRequestInFlight) return;
+
+        var hasAttachments = typeof HelixAttachments !== 'undefined' && HelixAttachments.hasPending();
+        if (!text && !hasAttachments) return;
+        if (helixRequestInFlight) return;
+
+        if (hasAttachments && HelixAttachments.isBusy()) {
+            if (typeof HelixFeatures !== 'undefined') {
+                HelixFeatures.showToast('Aguarde o processamento do(s) anexo(s)…', 'error');
+            }
+            return;
+        }
+
+        var attachmentSuffix = hasAttachments ? HelixAttachments.buildMessageSuffix() : '';
+        if (!text && attachmentSuffix) {
+            text = 'Analise o(s) documento(s) anexado(s).';
+        }
+        var textToSend = text + attachmentSuffix;
 
         var sid = ensureSession();
         var session = getSession(sid);
@@ -1132,8 +1149,11 @@ window.addEventListener('load', runShellSidebarControls);
         if (input) {
             input.value = '';
             input.style.height = '';
-            updateSendState();
         }
+        if (hasAttachments) {
+            HelixAttachments.clear();
+        }
+        updateSendState();
 
         var chatUrl = panel.dataset.sashaChatUrl || '';
         if (!chatUrl) {
@@ -1158,7 +1178,7 @@ window.addEventListener('load', runShellSidebarControls);
 
         // Enviar conversation_id se existir
         var payload = {
-            message: text,
+            message: textToSend,
             history: history,
             context: {
                 hub: document.body.dataset.activeHub || document.querySelector('[data-sidebar-hubs]')?.dataset.activeHub || '',
@@ -1304,8 +1324,10 @@ window.addEventListener('load', runShellSidebarControls);
 
     function updateSendState() {
         if (!sendBtn || !input) return;
-        sendBtn.disabled = !input.value.trim();
+        var hasAttachment = typeof HelixAttachments !== 'undefined' && HelixAttachments.hasPending();
+        sendBtn.disabled = !input.value.trim() && !hasAttachment;
     }
+    window.helixUpdateSendState = updateSendState;
 
     /* Recalcula a altura do textarea a partir do conteúdo atual — precisa ser
        chamada tanto ao digitar quanto sempre que o valor é definido via JS

@@ -49,8 +49,10 @@ final class GerarMinutaTool implements SashaToolInterface
             return ['summary' => 'Para gerar uma minuta, preciso que você descreva:\n• Quem são as partes (autor/réu)\n• Qual o pedido principal\n• Quais os fatos relevantes\n\nExemplo: "autor João Silva contra Empresa XYZ, pedido de indenização por danos morais, fatos: cobrança indevida em 15/03/2026"', 'results' => []];
         }
 
-        // Valida se não é apenas placeholder ou texto muito curto
-        if (mb_strlen($descricao) < 30 || str_contains($descricao, '[') || str_contains($descricao, 'descreva')) {
+        // Valida se não é apenas placeholder ou texto muito curto. Anexos de arquivo
+        // chegam no formato "[Anexo: nome.pdf]\n<texto>" — o regex só rejeita
+        // placeholders de exemplo tipo "[descreva aqui]", nunca um anexo real.
+        if (mb_strlen($descricao) < 30 || preg_match('/\[\s*(cole|insira|preencha|descreva)/ui', $descricao) === 1) {
             return ['summary' => 'A descrição está muito curta ou incompleta. Por favor, forneça detalhes sobre:\n• Partes envolvidas\n• Pedido/objetivo do documento\n• Fatos e fundamentos', 'results' => []];
         }
 

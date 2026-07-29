@@ -11,6 +11,7 @@ use App\Service\Juridico\JurisFlowAiClient;
 use App\Service\Juridico\LegalIntentDetector;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\PosOperatorio\SashaContextService;
+use App\Service\Sasha\DocumentTextExtractorService;
 use App\Service\Sasha\SashaClient;
 use App\Service\Sasha\SashaToolRegistry;
 use App\Service\WorkspaceService;
@@ -42,6 +43,10 @@ final class SashaApiController extends AbstractController
         'resumir_documento',
         'analisar_contrato',
         'gerar_minuta',
+        'analisar_sentenca',
+        'comparar_documentos',
+        'listar_prazos',
+        'sugerir_pecas_similares',
     ];
 
     public function __construct(
@@ -55,6 +60,7 @@ final class SashaApiController extends AbstractController
         private AiTokenUsageService $aiTokenUsage,
         private AgenteAutonomoStatusStore $agenteStatus,
         private \App\Service\Sasha\SashaConversationManager $conversationManager,
+        private DocumentTextExtractorService $documentTextExtractor,
     ) {}
 
     /**
@@ -235,6 +241,33 @@ final class SashaApiController extends AbstractController
         }
 
         return $this->json(['success' => true]);
+    }
+
+    /**
+     * Extrai texto de um arquivo anexado no chat (PDF/DOCX/TXT) para uso ad-hoc —
+     * nada é persistido aqui. O frontend anexa o texto extraído à própria mensagem
+     * antes de enviar para /chat, reaproveitando os gatilhos já existentes no
+     * {@see LegalIntentDetector} (resumir_documento, analisar_contrato, etc).
+     */
+    #[Route('/upload', name: 'api_sasha_upload', methods: ['POST'])]
+    public function upload(Request $request): JsonResponse
+    {
+        $file = $request->files->get('arquivo');
+        if ($file === null) {
+            return $this->json(['error' => 'Nenhum arquivo enviado.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $resultado = $this->documentTextExtractor->extract($file);
+        } catch (\Throwable $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return $this->json([
+            'filename' => $file->getClientOriginalName(),
+            'text' => $resultado['text'],
+            'truncated' => $resultado['truncated'],
+        ]);
     }
 
     #[Route('/chat', name: 'api_sasha_chat', methods: ['POST'])]

@@ -8,6 +8,7 @@
 {% set _subtitle = _org ? (_clinic ? (_copy.lumen_subtitle|default('Assistente clínico')) : (_juridico ? (_copy.lumen_subtitle|default('Assistente jurídica')) : (_copy.lumen_subtitle|default('Consciência da colônia')))) : 'Assistente virtual' %}
 {% set _slogan = _copy.brand_slogan|default('Saúde que acompanha.') %}
 {% set _avatar_src = _juridico ? 'images/marketing/sasha-assistant-juridico.jpg' : 'images/avatar.jpg' %}
+{% set _prazos_criticos = org_juridico_prazos_criticos|default(0) %}
 
 <div id="helixPanel"
      class="helix-panel{% if _org %} helix-panel--lumen{% endif %}"
@@ -75,6 +76,13 @@
                             <span class="helix-msg__signature">{{ _slogan }}</span>
                             {% elseif _juridico %}
                             <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou {{ _assistant }} — assistente jurídica da {{ _copy.brand_name|default('Unio Jurídico') }}.</p>
+                            {% if _prazos_criticos > 0 %}
+                            <p class="helix-msg-proactive-alert">
+                                <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                                Atenção: você tem <strong>{{ _prazos_criticos }}</strong> prazo{{ _prazos_criticos > 1 ? 's' : '' }} crítico{{ _prazos_criticos > 1 ? 's' : '' }} vencendo nos próximos dias.
+                                <button type="button" class="helix-msg-proactive-link" data-helix-prompt="Liste todos os prazos pendentes">Ver prazos agora</button>
+                            </p>
+                            {% endif %}
                             <p class="mb-0 helix-msg-muted">Posso calcular prazos processuais, pesquisar jurisprudência, resumir peças, analisar contratos e ajudar com clientes e casos do escritório.</p>
                             <span class="helix-msg__signature">{{ _slogan }}</span>
                             {% else %}
@@ -100,6 +108,10 @@
                         <button type="button" class="helix-chip" data-helix-prompt="Resuma este documento para mim">Resumir documento</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Analise os riscos deste contrato para mim">Analisar contrato</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Preciso de uma minuta de petição">Gerar minuta</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Analise esta sentença e diga as chances de recurso">Analisar sentença</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Compare estes dois documentos e destaque as diferenças">Comparar documentos</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Liste todos os prazos pendentes">Prazos em lote</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Sugira peças parecidas com uma petição inicial de indenização por dano moral">Peças similares</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Calcule os honorários advocatícios para uma ação cível de R$ 50.000, com 20% de êxito.">Calcular honorários</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Registrar prazo de audiência de instrução para 15/09/2026.">Registrar prazo na agenda</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Qual a previsão de êxito do meu processo?">Previsão de êxito</button>
@@ -119,12 +131,13 @@
                 </div>
 
                 <form class="helix-composer" id="helixForm">
+                    <div class="helix-attachments" id="helixAttachments" hidden></div>
                     <div class="helix-composer-inner">
                         <div class="helix-composer-tools">
-                            <button type="button" class="helix-tool-btn" title="Anexar arquivo — em desenvolvimento" disabled>
+                            <button type="button" class="helix-tool-btn" id="helixAttachBtn" title="Anexar arquivo (PDF, DOCX ou TXT)">
                                 <i class="fas fa-paperclip" aria-hidden="true"></i>
-                                <span class="helix-tool-btn-dot" aria-hidden="true"></span>
                             </button>
+                            <input type="file" id="helixAttachInput" accept=".pdf,.doc,.docx,.txt" multiple hidden>
                             <button type="button" class="helix-tool-btn" title="Conversar por voz — em desenvolvimento" disabled>
                                 <i class="fas fa-microphone" aria-hidden="true"></i>
                                 <span class="helix-tool-btn-dot" aria-hidden="true"></span>

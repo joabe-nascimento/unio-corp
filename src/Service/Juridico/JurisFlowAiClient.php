@@ -166,6 +166,23 @@ final class JurisFlowAiClient
         );
     }
 
+    /** Analisa uma sentença identificando chances de recurso usando a chain `sentence-analysis`. */
+    public function analisarSentenca(string $texto, string $escritorioId = ''): ?string
+    {
+        return $this->callTextChain('/v1/chains/sentence-analysis', ['sentence_text' => $texto], 'analysis', $escritorioId);
+    }
+
+    /** Compara dois documentos usando a chain `document-comparison`. */
+    public function compararDocumentos(string $textoA, string $textoB, string $escritorioId = ''): ?string
+    {
+        return $this->callTextChain(
+            '/v1/chains/document-comparison',
+            ['document_a' => $textoA, 'document_b' => $textoB],
+            'comparison',
+            $escritorioId,
+        );
+    }
+
     /**
      * Helper comum às chains de texto (resumo, análise de contrato, geração de
      * documento): mesmo contrato de payload (`escritorio_id` + campos próprios),
@@ -197,6 +214,66 @@ final class JurisFlowAiClient
             $this->logger->warning('Chain do JurisFlow ({path}) indisponível: {msg}', ['path' => $path, 'msg' => $e->getMessage()]);
 
             return null;
+        }
+    }
+
+    /**
+     * Indexa um documento na base de conhecimento (RAG) do JurisFlow, escopada por
+     * escritório. Usado para "sugerir peças similares" — reaproveita o RAG genérico
+     * já existente do serviço, sem pipeline de embeddings próprio.
+     *
+     * Best-effort: nunca lança exceção, apenas loga e retorna false em caso de falha
+     * (o RAG é um "nice to have" em memória, não pode travar o fluxo principal).
+     */
+    public function indexarDocumentoRag(string $escritorioId, string $source, string $title, string $content, string $category = 'Peça do escritório'): bool
+    {
+        if (!$this->enabled || trim($content) === '') {
+            return false;
+        }
+
+        try {
+            $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/rag/' . rawurlencode($escritorioId) . '/documents', [
+                'json' => [
+                    'title' => $title,
+                    'content' => $content,
+                    'category' => $category,
+                    'source' => $source,
+                ],
+                'timeout' => 8,
+            ]);
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->logger->info('Falha ao indexar documento no RAG do JurisFlow (não crítico): {msg}', ['msg' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Busca trechos semelhantes na base de conhecimento (RAG) de um escritório.
+     *
+     * @return list<array{document_id: string, document_title: string, category: string, content: string, score: float, source: string}>
+     */
+    public function buscarNaRag(string $escritorioId, string $query, int $limit = 8): array
+    {
+        if (!$this->enabled || trim($query) === '') {
+            return [];
+        }
+
+        try {
+            $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/rag/' . rawurlencode($escritorioId) . '/search', [
+                'json' => ['query' => $query, 'limit' => $limit],
+                'timeout' => 10,
+            ]);
+
+            $data = $response->toArray(false);
+
+            return \is_array($data['chunks'] ?? null) ? $data['chunks'] : [];
+        } catch (\Throwable $e) {
+            $this->logger->info('Falha ao buscar no RAG do JurisFlow (não crítico): {msg}', ['msg' => $e->getMessage()]);
+
+            return [];
         }
     }
 

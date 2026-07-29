@@ -22,6 +22,7 @@ class JuridicoDocumentoService
         private JuridicoDocumentoRepository $repo,
         private JuridicoProcessoRepository $processoRepo,
         private string $projectDir,
+        private JuridicoDocumentoRagSyncService $ragSync,
     ) {}
 
     /** @param array<string, mixed> $data */
@@ -77,6 +78,10 @@ class JuridicoDocumentoService
 
         $this->em->persist($documento);
         $this->em->flush();
+
+        // Best-effort: indexa no RAG do JurisFlow para "sugerir peças similares".
+        // Nunca lança exceção nem bloqueia o upload em caso de falha.
+        $this->ragSync->sync($documento);
 
         return $documento;
     }

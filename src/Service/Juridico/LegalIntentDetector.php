@@ -22,6 +22,12 @@ final class LegalIntentDetector
         'contar prazo', 'mandado de segurança', 'mandado de seguranca', 'impugnação', 'impugnacao',
     ];
 
+    private const GATILHOS_LISTAR_PRAZOS = [
+        'liste todos os prazos', 'listar todos os prazos', 'liste os prazos', 'listar os prazos',
+        'todos os prazos pendentes', 'quais são todos os prazos', 'quais sao todos os prazos',
+        'prazos em lote', 'prazos de todos os processos', 'liste meus prazos', 'listar meus prazos',
+    ];
+
     private const GATILHOS_HONORARIOS = [
         'honorário', 'honorario', 'honorários', 'honorarios', 'quanto cobrar', 'quanto cobro', 'orçamento de honorários',
     ];
@@ -81,6 +87,28 @@ final class LegalIntentDetector
         'analise as cláusulas', 'analise as clausulas', 'revise este contrato', 'revise esse contrato',
     ];
 
+    private const GATILHOS_PECAS_SIMILARES = [
+        'peças parecidas', 'pecas parecidas', 'peças similares', 'pecas similares',
+        'sugerir peças', 'sugerir pecas', 'sugira peças', 'sugira pecas',
+        'algo parecido na biblioteca', 'já tem peça parecida', 'ja tem peca parecida',
+        'modelo parecido', 'peça modelo para', 'peca modelo para', 'busque na biblioteca',
+    ];
+
+    private const GATILHOS_COMPARAR_DOCUMENTOS = [
+        'compare estes documentos', 'compare esses documentos', 'compare estes dois documentos',
+        'compare esses dois documentos', 'comparar documentos', 'compare este documento com',
+        'compare esse documento com', 'diferenças entre os documentos', 'diferencas entre os documentos',
+        'diferenças entre as duas versões', 'diferencas entre as duas versoes', 'compare as duas versões',
+        'compare as duas versoes', 'compare a petição com', 'compare a peticao com', 'compare o contrato com',
+    ];
+
+    private const GATILHOS_ANALISAR_SENTENCA = [
+        'analise esta sentença', 'analise essa sentença', 'analise esta sentenca', 'analise essa sentenca',
+        'analisar sentença', 'analisar sentenca', 'chances de recurso', 'chance de recurso',
+        'vale a pena recorrer desta sentença', 'vale a pena recorrer dessa sentença',
+        'pontos fracos da sentença', 'pontos fracos da sentenca', 'teses recursais',
+    ];
+
     private const GATILHOS_GERAR_MINUTA = [
         'gere uma minuta', 'gerar minuta', 'gere uma petição', 'gere uma peticao', 'gerar petição', 'gerar peticao',
         'gere uma contestação', 'gere uma contestacao', 'gerar contestação', 'gerar contestacao',
@@ -116,6 +144,11 @@ final class LegalIntentDetector
             $acoes[] = $this->detectarCriarTarefa($mensagem, $texto);
         } elseif ($this->contemAlgum($texto, self::GATILHOS_REGISTRAR_PRAZO)) {
             $acoes[] = $this->detectarRegistrarPrazo($mensagem, $texto);
+        } elseif ($this->contemAlgum($texto, self::GATILHOS_LISTAR_PRAZOS)) {
+            // Checado antes de GATILHOS_PRAZO: frases como "liste todos os prazos"
+            // contêm a substring "prazo" e cairiam erradamente no cálculo de prazo
+            // processual (calcular_prazo) se checadas depois.
+            $acoes[] = $this->detectarListarPrazos($mensagem, $texto);
         } elseif ($this->contemAlgum($texto, self::GATILHOS_PRAZO)) {
             $acao = $this->detectarPrazo($texto);
             if ($acao !== null) {
@@ -163,8 +196,25 @@ final class LegalIntentDetector
             }
         }
 
+        if ($this->contemAlgum($texto, self::GATILHOS_PECAS_SIMILARES)) {
+            $acao = $this->detectarPecasSimilares($mensagem, $texto);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
+        }
+
         if ($this->contemAlgum($texto, self::GATILHOS_GERAR_MINUTA)) {
             $acao = $this->detectarGerarMinuta($mensagem, $texto);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
+        } elseif ($this->contemAlgum($texto, self::GATILHOS_COMPARAR_DOCUMENTOS)) {
+            $acao = $this->detectarCompararDocumentos($mensagem);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
+        } elseif ($this->contemAlgum($texto, self::GATILHOS_ANALISAR_SENTENCA)) {
+            $acao = $this->detectarAnalisarSentenca($mensagem, $texto);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
@@ -219,6 +269,26 @@ final class LegalIntentDetector
                 'dobro' => $dobro,
             ],
         ];
+    }
+
+    /** @return SuggestedAction */
+    private function detectarListarPrazos(string $mensagemOriginal, string $texto): array
+    {
+        $params = [];
+
+        if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
+            $params['numero_processo'] = $m[0];
+        } elseif (preg_match('/(?:do cliente|da cliente|de|para)\s+([a-zà-ú][\wà-ú\s]{2,60}?)(?:\s*[,.?!]|$)/ui', $texto, $m)) {
+            $candidato = trim($m[1]);
+            // Evita capturar ruído comum tipo "de todos os processos", "para hoje".
+            if (!\in_array($candidato, ['todos os processos', 'todos', 'hoje', 'amanhã', 'amanha'], true) && mb_strlen($candidato) >= 3) {
+                $params['cliente'] = $candidato;
+            }
+        }
+
+        $label = 'Listar prazos pendentes' . (isset($params['cliente']) ? ' de ' . $params['cliente'] : (isset($params['numero_processo']) ? ' do processo' : ' (toda a carteira)'));
+
+        return ['tool' => 'listar_prazos', 'label' => $label, 'params' => $params];
     }
 
     /** @return SuggestedAction|null */
@@ -337,6 +407,69 @@ final class LegalIntentDetector
         }
 
         return ['tool' => 'analisar_contrato', 'label' => 'Analisar contrato', 'params' => ['texto' => $conteudo]];
+    }
+
+    /**
+     * "Comparar documentos" depende de exatamente 2 anexos na mensagem (formato
+     * `[Anexo: nome]\n<texto>` gerado pelo upload do chat). Se não houver pelo
+     * menos 1 anexo reconhecível, não dispara — vira mensagem normal no chat.
+     *
+     * @return SuggestedAction|null
+     */
+    private function detectarCompararDocumentos(string $mensagemOriginal): ?array
+    {
+        $anexos = $this->extrairAnexos($mensagemOriginal);
+        if ($anexos === []) {
+            return null;
+        }
+
+        $params = [
+            'documento_a' => $anexos[0]['texto'] ?? '',
+            'nome_a' => $anexos[0]['nome'] ?? 'Documento A',
+            'documento_b' => $anexos[1]['texto'] ?? '',
+            'nome_b' => $anexos[1]['nome'] ?? 'Documento B',
+        ];
+
+        return ['tool' => 'comparar_documentos', 'label' => 'Comparar documentos', 'params' => $params];
+    }
+
+    /**
+     * Extrai os blocos `[Anexo: nome.ext]\n<texto>` anexados pelo upload do chat.
+     *
+     * @return list<array{nome: string, texto: string}>
+     */
+    private function extrairAnexos(string $mensagemOriginal): array
+    {
+        if (!preg_match_all('/\[Anexo:\s*([^\]]+?)\]\r?\n(.*?)(?=(?:\r?\n\r?\n\[Anexo:)|\z)/su', $mensagemOriginal, $matches, \PREG_SET_ORDER)) {
+            return [];
+        }
+
+        return array_map(
+            static fn (array $m) => ['nome' => trim($m[1]), 'texto' => trim($m[2])],
+            $matches,
+        );
+    }
+
+    /** @return SuggestedAction|null */
+    private function detectarPecasSimilares(string $mensagemOriginal, string $texto): ?array
+    {
+        $descricao = trim($this->removerGatilhos($mensagemOriginal, self::GATILHOS_PECAS_SIMILARES));
+        if (mb_strlen($descricao) < 5) {
+            return null;
+        }
+
+        return ['tool' => 'sugerir_pecas_similares', 'label' => 'Sugerir peças similares', 'params' => ['descricao' => $descricao]];
+    }
+
+    /** @return SuggestedAction|null */
+    private function detectarAnalisarSentenca(string $mensagemOriginal, string $texto): ?array
+    {
+        $conteudo = trim($this->removerGatilhos($mensagemOriginal, self::GATILHOS_ANALISAR_SENTENCA));
+        if (mb_strlen($conteudo) < self::MIN_LEN_TEXTO_COLADO) {
+            return null;
+        }
+
+        return ['tool' => 'analisar_sentenca', 'label' => 'Analisar sentença', 'params' => ['texto' => $conteudo]];
     }
 
     /** @return SuggestedAction|null */

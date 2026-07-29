@@ -48,8 +48,10 @@ final class ResumirDocumentoTool implements SashaToolInterface
             return ['summary' => 'Para resumir um documento, cole o texto completo na mensagem. Posso resumir petições, contratos, decisões judiciais e outros documentos jurídicos.', 'results' => []];
         }
 
-        // Valida se não é placeholder ou texto muito curto
-        if (mb_strlen($texto) < 100 || str_contains($texto, '[') || str_contains($texto, 'cole')) {
+        // Valida se não é placeholder ou texto muito curto. Note: anexos de arquivo
+        // chegam no formato "[Anexo: nome.pdf]\n<texto>" — o regex abaixo só rejeita
+        // placeholders de exemplo tipo "[cole o texto aqui]", nunca um anexo real.
+        if (mb_strlen($texto) < 100 || preg_match('/\[\s*(cole|insira|preencha|descreva)/ui', $texto) === 1) {
             return ['summary' => 'O texto está muito curto ou parece incompleto. Cole o documento completo que você deseja resumir.', 'results' => []];
         }
 

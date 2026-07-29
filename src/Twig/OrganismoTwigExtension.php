@@ -5,6 +5,7 @@ namespace App\Twig;
 use App\Entity\User;
 use App\PosOperatorio\ClinicFeatureCatalog;
 use App\PosOperatorio\ClinicProductCatalog;
+use App\Repository\JuridicoPrazoRepository;
 use App\Service\Clinic\ClinicStaffAccess;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\Organismo\OrganismoFeature;
@@ -24,6 +25,7 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
         private WorkspaceService $workspace,
         private ClinicProductConfigService $productConfig,
         private ClinicStaffAccess $clinicStaffAccess,
+        private JuridicoPrazoRepository $prazoRepository,
     ) {
     }
 
@@ -70,6 +72,7 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
             ],
             'org_clinic' => $isClinic,
             'org_juridico' => $isJuridico,
+            'org_juridico_prazos_criticos' => $isJuridico ? $this->resolvePrazosCriticos() : 0,
             'org_brand_label' => $this->copy->brandName(),
             'clinic_nav_sections' => $isClinic ? ClinicFeatureCatalog::sectionsForFeatures($navFeatures) : [],
             'clinic_nav_features' => $navFeatures,
@@ -77,6 +80,31 @@ final class OrganismoTwigExtension extends AbstractExtension implements GlobalsI
             'clinic_products_enabled' => $enabledProducts,
             'clinic_pos_operatorio_enabled' => $enabledProducts[ClinicProductCatalog::POS_OPERATORIO] ?? true,
         ];
+    }
+
+    /**
+     * Reforço de UX proativo do Agente Autônomo: número de prazos críticos (vencendo
+     * em até {@see \App\Entity\JuridicoPrazo::LIMIAR_CRITICO_DIAS} dias) do escritório
+     * ativo, exibido como alerta espontâneo ao abrir o chat da Sasha — sem o usuário
+     * precisar perguntar.
+     */
+    private function resolvePrazosCriticos(): int
+    {
+        $user = $this->security->getUser();
+        if (!$user instanceof User) {
+            return 0;
+        }
+
+        $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
+        if ($empresa === null) {
+            return 0;
+        }
+
+        try {
+            return $this->prazoRepository->countCriticosByEmpresa($empresa);
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 
     /** @return array<string, bool> */
