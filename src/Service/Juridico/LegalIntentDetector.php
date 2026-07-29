@@ -131,7 +131,13 @@ final class LegalIntentDetector
      */
     public function detect(string $mensagem, ?string $numeroProcessoAtual = null): array
     {
-        $texto = mb_strtolower(trim($mensagem));
+        // Os gatilhos de palavra-chave devem reagir ao que o usuário digitou — nunca
+        // ao conteúdo do documento anexado. Um currículo que descreve um projeto
+        // jurídico (ex.: "processos, clientes, prazos, documentos...") não pode
+        // disparar cálculo de prazo processual só porque a palavra "prazos" aparece
+        // em algum lugar do texto extraído do anexo.
+        $mensagemUsuario = $this->removerAnexos($mensagem);
+        $texto = mb_strtolower(trim($mensagemUsuario));
         if ($texto === '') {
             return [];
         }
@@ -141,14 +147,14 @@ final class LegalIntentDetector
         $acoes = [];
 
         if ($this->contemAlgum($texto, self::GATILHOS_CRIAR_TAREFA)) {
-            $acoes[] = $this->detectarCriarTarefa($mensagem, $texto);
+            $acoes[] = $this->detectarCriarTarefa($mensagemUsuario, $texto);
         } elseif ($this->contemAlgum($texto, self::GATILHOS_REGISTRAR_PRAZO)) {
-            $acoes[] = $this->detectarRegistrarPrazo($mensagem, $texto);
+            $acoes[] = $this->detectarRegistrarPrazo($mensagemUsuario, $texto);
         } elseif ($this->contemAlgum($texto, self::GATILHOS_LISTAR_PRAZOS)) {
             // Checado antes de GATILHOS_PRAZO: frases como "liste todos os prazos"
             // contêm a substring "prazo" e cairiam erradamente no cálculo de prazo
             // processual (calcular_prazo) se checadas depois.
-            $acoes[] = $this->detectarListarPrazos($mensagem, $texto);
+            $acoes[] = $this->detectarListarPrazos($mensagemUsuario, $texto);
         } elseif ($this->contemAlgum($texto, self::GATILHOS_PRAZO)) {
             $acao = $this->detectarPrazo($texto);
             if ($acao !== null) {
@@ -172,25 +178,25 @@ final class LegalIntentDetector
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_PROCESSO)) {
-            $acao = $this->detectarBuscaProcesso($mensagem, $texto, $numeroProcessoAtual);
+            $acao = $this->detectarBuscaProcesso($mensagemUsuario, $texto, $numeroProcessoAtual);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_JURISPRUDENCIA)) {
-            $acoes[] = $this->detectarJurisprudencia($mensagem, $texto);
+            $acoes[] = $this->detectarJurisprudencia($mensagemUsuario, $texto);
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_PREVISAO)) {
-            $acao = $this->detectarPrevisaoExito($mensagem, $texto, $numeroProcessoAtual);
+            $acao = $this->detectarPrevisaoExito($mensagemUsuario, $texto, $numeroProcessoAtual);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_DATAJUD)) {
-            $acao = $this->detectarConsultaDatajud($mensagem, $numeroProcessoAtual);
+            $acao = $this->detectarConsultaDatajud($mensagemUsuario, $numeroProcessoAtual);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
@@ -222,14 +228,14 @@ final class LegalIntentDetector
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_PECAS_SIMILARES)) {
-            $acao = $this->detectarPecasSimilares($mensagem, $texto);
+            $acao = $this->detectarPecasSimilares($mensagemUsuario, $texto);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
         }
 
         if ($this->contemAlgum($texto, self::GATILHOS_GERAR_MINUTA)) {
-            $acao = $this->detectarGerarMinuta($mensagem, $texto);
+            $acao = $this->detectarGerarMinuta($mensagemUsuario, $texto);
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
@@ -258,8 +264,8 @@ final class LegalIntentDetector
         // Fallback independente de palavras-gatilho: um número de processo (CNJ) na
         // mensagem já é intenção suficiente para buscar, mesmo em frases não previstas
         // (ex.: "e o processo 1234567-89.2024.8.26.0100, como está?").
-        if ($acoes === [] && preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagem)) {
-            $acoes[] = $this->detectarBuscaProcesso($mensagem, $texto);
+        if ($acoes === [] && preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemUsuario)) {
+            $acoes[] = $this->detectarBuscaProcesso($mensagemUsuario, $texto);
         }
 
         return \array_slice($this->deduplicar($acoes), 0, 2);
@@ -395,12 +401,13 @@ final class LegalIntentDetector
 
     public function isConsultaDatajudSemNumero(string $mensagem, ?string $numeroProcessoAtual = null): bool
     {
-        $texto = mb_strtolower(trim($mensagem));
+        $mensagemUsuario = $this->removerAnexos($mensagem);
+        $texto = mb_strtolower(trim($mensagemUsuario));
         if ($texto === '' || !$this->contemAlgum($texto, self::GATILHOS_DATAJUD)) {
             return false;
         }
 
-        if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagem)) {
+        if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemUsuario)) {
             return false;
         }
 
@@ -497,6 +504,21 @@ final class LegalIntentDetector
             static fn (array $m) => ['nome' => trim($m[1]), 'texto' => trim($m[2])],
             $matches,
         );
+    }
+
+    /**
+     * Remove os blocos `[Anexo: nome]\n<texto>` da mensagem, devolvendo apenas o que
+     * o usuário efetivamente digitou. Os gatilhos de palavra-chave (prazo, honorários,
+     * jurisprudência, DataJud, etc.) precisam reagir ao pedido do usuário — nunca ao
+     * conteúdo do documento anexado, que pode conter qualquer palavra por coincidência
+     * (ex.: um currículo que menciona o projeto "processos, clientes, prazos..." não
+     * pode disparar cálculo de prazo processual em vez do resumo pedido).
+     */
+    private function removerAnexos(string $mensagem): string
+    {
+        $semAnexos = preg_replace('/\[Anexo:\s*[^\]]+?\]\r?\n.*?(?=(?:\r?\n\r?\n\[Anexo:)|\z)/su', '', $mensagem) ?? $mensagem;
+
+        return trim($semAnexos);
     }
 
     /** @return SuggestedAction|null */
