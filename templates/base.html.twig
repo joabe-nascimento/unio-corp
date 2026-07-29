@@ -102,7 +102,7 @@
     {% block stylesheets %}{% endblock %}
 {% if app.user %}
 <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=4">
-<link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=3">
+<link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=4">
 {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
@@ -574,8 +574,8 @@ window.addEventListener('load', runShellSidebarControls);
 <script src="{{ asset('vendor/marked/marked.min.js') }}"></script>
 {# highlight.js removido temporariamente devido a erro de módulo #}
 <script src="{{ asset('js/helix-markdown.js') }}?v=2"></script>
-<script src="{{ asset('js/helix-features.js') }}?v=2"></script>
-<script src="{{ asset('js/helix-history-api.js') }}?v=1"></script>
+<script src="{{ asset('js/helix-features.js') }}?v=3"></script>
+<script src="{{ asset('js/helix-history-api.js') }}?v=2"></script>
 <script src="{{ asset('js/helix-typing.js') }}?v=1"></script>
 {% endif %}
 
@@ -1182,6 +1182,10 @@ window.addEventListener('load', runShellSidebarControls);
                 // Salvar conversation_id retornado pelo backend
                 if (data.conversation_id && !session.conversationId) {
                     session.conversationId = data.conversation_id;
+                    if (typeof HelixHistory !== 'undefined') {
+                        HelixHistory.setCurrentConversationId(data.conversation_id);
+                        HelixHistory.loadConversations();
+                    }
                 }
                 
                 var actionsHtml = (renderToolActions(data.tool_results) || '') + (renderSuggestedActions(data.suggested_actions) || '');
@@ -1272,6 +1276,9 @@ window.addEventListener('load', runShellSidebarControls);
 
     function newChat() {
         currentSessionId = null;
+        if (typeof HelixHistory !== 'undefined') {
+            HelixHistory.newConversation();
+        }
         renderWelcomeOnly();
         renderHistory();
         closeHistoryIfMobile();

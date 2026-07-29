@@ -20,7 +20,8 @@
         return fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                conversations = data.conversations || [];
+                // API retorna array diretamente ou { conversations: [...] }
+                conversations = Array.isArray(data) ? data : (data.conversations || []);
                 renderConversations(conversations);
                 return conversations;
             })
@@ -35,6 +36,17 @@
      */
     function renderConversations(convs) {
         var list = document.getElementById('helixHistoryList');
+
+        var countEl = document.getElementById('helixHistoryCount');
+        if (countEl) countEl.textContent = String((convs || []).length);
+
+        var toggleCountEl = document.querySelector('.helix-history-toggle-count');
+        if (toggleCountEl) {
+            var n = (convs || []).length;
+            toggleCountEl.textContent = String(n);
+            toggleCountEl.setAttribute('data-count', String(n));
+        }
+
         if (!list) return;
 
         if (!convs || convs.length === 0) {

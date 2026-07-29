@@ -208,55 +208,70 @@
         if (!bubble) return;
 
         var originalText = message.text || message.content || '';
-        
+
+        // Esconder ações (copiar/editar) enquanto edita, evita sobreposição visual
+        msgEl.classList.add('is-editing');
+
         // Criar input de edição
         var editDiv = document.createElement('div');
         editDiv.className = 'helix-edit-wrapper';
-        
+
         var textarea = document.createElement('textarea');
         textarea.className = 'helix-edit-input';
         textarea.value = originalText;
         textarea.rows = 3;
-        
+
         var actionsDiv = document.createElement('div');
         actionsDiv.className = 'helix-edit-actions';
-        
-        var saveBtn = document.createElement('button');
-        saveBtn.className = 'helix-edit-btn helix-edit-btn--save';
-        saveBtn.textContent = 'Salvar';
-        
+
         var cancelBtn = document.createElement('button');
         cancelBtn.className = 'helix-edit-btn helix-edit-btn--cancel';
+        cancelBtn.type = 'button';
         cancelBtn.textContent = 'Cancelar';
-        
+
+        var saveBtn = document.createElement('button');
+        saveBtn.className = 'helix-edit-btn helix-edit-btn--save';
+        saveBtn.type = 'button';
+        saveBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Reenviar';
+
         actionsDiv.appendChild(cancelBtn);
         actionsDiv.appendChild(saveBtn);
-        
+
         editDiv.appendChild(textarea);
         editDiv.appendChild(actionsDiv);
-        
+
         // Substituir conteúdo
         var originalContent = bubble.innerHTML;
         bubble.innerHTML = '';
         bubble.appendChild(editDiv);
-        
+
         textarea.focus();
         textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-        
-        // Handlers
-        cancelBtn.addEventListener('click', function() {
+
+        function restore() {
             bubble.innerHTML = originalContent;
-        });
-        
+            msgEl.classList.remove('is-editing');
+        }
+
+        // Handlers
+        cancelBtn.addEventListener('click', restore);
+
         saveBtn.addEventListener('click', function() {
             var newText = textarea.value.trim();
+            restore();
             if (newText && newText !== originalText) {
-                // Reenviar mensagem
                 if (typeof window.helixResendMessage === 'function') {
                     window.helixResendMessage(newText);
                 }
             }
-            bubble.innerHTML = originalContent;
+        });
+
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                restore();
+            } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                saveBtn.click();
+            }
         });
     }
 
