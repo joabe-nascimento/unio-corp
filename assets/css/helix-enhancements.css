@@ -30,18 +30,18 @@
     opacity: 0.7;
 }
 
+/* Ações da mensagem (copiar/editar) — padrão ChatGPT/Claude:
+   em fluxo normal, abaixo do texto, dentro da própria bolha. */
 .helix-msg__actions {
-    position: absolute;
-    bottom: 4px;
-    right: 12px;
     display: flex;
-    gap: 6px;
+    gap: 4px;
+    margin-top: 6px;
     opacity: 0;
-    transition: opacity 0.2s ease;
-    z-index: 10;
+    transition: opacity 0.15s ease;
 }
 
-.helix-msg:hover .helix-msg__actions {
+.helix-msg:hover .helix-msg__actions,
+.helix-msg:focus-within .helix-msg__actions {
     opacity: 1;
 }
 
@@ -50,33 +50,43 @@
     display: none !important;
 }
 
+.helix-msg--user .helix-msg__actions {
+    justify-content: flex-end;
+}
+
 .helix-msg__action-btn {
-    background: #ffffff;
-    border: 1px solid #dee2e6;
+    background: transparent;
+    border: none;
     border-radius: 6px;
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 14px;
-    color: #495057;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.15s ease;
+    font-size: 12px;
+    color: #8a8f98;
+    padding: 0;
 }
 
-.helix-msg__action-btn:hover {
-    background: #f8f9fa;
+.helix-msg--assistant .helix-msg__action-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
     color: #212529;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+/* Bolha do usuário tem fundo escuro (accent) — ícones claros translúcidos */
+.helix-msg--user .helix-msg__action-btn {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.helix-msg--user .helix-msg__action-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
 }
 
 .helix-msg__action-btn--active {
     color: #3b82f6;
-    background: #eff6ff;
-    border-color: #3b82f6;
 }
 
 /* Rating Buttons */

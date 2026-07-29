@@ -89,43 +89,50 @@
 
     /**
      * Adiciona ações para mensagens do assistente
+     * Padrão recomendado (ChatGPT/Claude): ações ficam DENTRO da bolha,
+     * abaixo do texto, em fluxo normal — nunca sobrepostas via position:absolute.
      */
     function addAssistantActions(msgEl, message) {
+        var bubble = msgEl.querySelector('.helix-msg-bubble');
+        if (!bubble) return;
+
         var actions = document.createElement('div');
         actions.className = 'helix-msg__actions';
-        
+
         // Botão copiar
         var copyBtn = createActionButton('copy', 'Copiar resposta');
         copyBtn.addEventListener('click', function() {
             copyMessage(msgEl, message);
         });
         actions.appendChild(copyBtn);
-        
+
+        bubble.appendChild(actions);
+
         // Botão avaliar (thumbs up/down)
         var ratingDiv = createRatingButtons(message);
-        
-        msgEl.appendChild(actions);
-        
-        var bubble = msgEl.querySelector('.helix-msg-bubble');
-        if (bubble && ratingDiv) {
+        if (ratingDiv) {
             bubble.appendChild(ratingDiv);
         }
     }
 
     /**
      * Adiciona ações para mensagens do usuário
+     * Mesmo padrão: dentro da bolha, abaixo do texto.
      */
     function addUserActions(msgEl, message) {
+        var bubble = msgEl.querySelector('.helix-msg-bubble');
+        if (!bubble) return;
+
         var actions = document.createElement('div');
         actions.className = 'helix-msg__actions';
-        
+
         // Botão copiar
         var copyBtn = createActionButton('copy', 'Copiar mensagem');
         copyBtn.addEventListener('click', function() {
             copyMessage(msgEl, message);
         });
         actions.appendChild(copyBtn);
-        
+
         // Botão editar (apenas última mensagem)
         var messages = document.querySelectorAll('.helix-msg--user');
         if (messages[messages.length - 1] === msgEl) {
@@ -135,8 +142,8 @@
             });
             actions.appendChild(editBtn);
         }
-        
-        msgEl.appendChild(actions);
+
+        bubble.appendChild(actions);
     }
 
     /**
