@@ -9,7 +9,14 @@
 #}
 {% set _tones = ['sky', 'sage', 'lavender', 'teal', 'amber', 'plum', 'rose', 'blue'] %}
 {% set _layout = layout|default('strip') %}
-<div class="org-kpi-strip org-kpi-strip--{{ _layout }}{% if class|default('') %} {{ class }}{% endif %}" role="list">
+{#
+  data-count fixa o número real de colunas do grid no desktop (ver unio-kpi.css),
+  evitando a "coluna fantasma" que o `grid-template-columns: repeat(auto-fit, ...)`
+  pode deixar quando a largura do container não é múltipla exata da largura mínima
+  das colunas — o espaço sobrando aparecia como uma faixa vertical de cor diferente
+  colada na borda direita do último KPI.
+#}
+<div class="org-kpi-strip org-kpi-strip--{{ _layout }}{% if class|default('') %} {{ class }}{% endif %}" data-count="{{ items|length }}" role="list">
     {% for item in items %}
     {% set _tone = item.tone|default(_tones[loop.index0 % _tones|length]) %}
     {% set _variant = item.variant|default('') %}
