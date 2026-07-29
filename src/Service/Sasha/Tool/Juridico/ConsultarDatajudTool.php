@@ -56,7 +56,7 @@ final class ConsultarDatajudTool implements SashaToolInterface
 
         $numero = trim((string) ($params['numero'] ?? $params['query'] ?? ''));
         if ($numero === '') {
-            return ['summary' => 'Informe o número do processo no padrão CNJ para eu consultar no DataJud.', 'results' => []];
+            return ['summary' => 'Para consultar no DataJud, informe o número do processo no padrão CNJ.\n\nExemplo: 0001234-56.2024.8.26.0100', 'results' => []];
         }
 
         $config = $this->configRepo->findByEmpresa($empresa);

@@ -45,7 +45,12 @@ final class ResumirDocumentoTool implements SashaToolInterface
     {
         $texto = trim((string) ($params['texto'] ?? $params['text'] ?? ''));
         if ($texto === '') {
-            return ['summary' => 'Cole o texto do documento que você quer que eu resuma.', 'results' => []];
+            return ['summary' => 'Para resumir um documento, cole o texto completo na mensagem. Posso resumir petições, contratos, decisões judiciais e outros documentos jurídicos.', 'results' => []];
+        }
+
+        // Valida se não é placeholder ou texto muito curto
+        if (mb_strlen($texto) < 100 || str_contains($texto, '[') || str_contains($texto, 'cole')) {
+            return ['summary' => 'O texto está muito curto ou parece incompleto. Cole o documento completo que você deseja resumir.', 'results' => []];
         }
 
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
@@ -53,7 +58,7 @@ final class ResumirDocumentoTool implements SashaToolInterface
 
         $resumo = $this->jurisFlowAi->resumirDocumento($texto, $escritorioId);
         if ($resumo === null || trim($resumo) === '') {
-            return ['summary' => 'Não consegui resumir o documento agora. Tente novamente em instantes.', 'results' => []];
+            return ['summary' => 'O serviço de IA está temporariamente indisponível. Aguarde alguns instantes e tente novamente.', 'results' => []];
         }
 
         return ['summary' => $resumo, 'results' => []];

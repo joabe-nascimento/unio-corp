@@ -45,7 +45,12 @@ final class AnalisarContratoTool implements SashaToolInterface
     {
         $texto = trim((string) ($params['texto'] ?? $params['contract_text'] ?? ''));
         if ($texto === '') {
-            return ['summary' => 'Cole o texto do contrato que você quer que eu analise.', 'results' => []];
+            return ['summary' => 'Para analisar um contrato, cole o texto completo das cláusulas na mensagem. Vou identificar riscos, cláusulas abusivas e pontos de atenção.', 'results' => []];
+        }
+
+        // Valida se não é placeholder ou texto muito curto
+        if (mb_strlen($texto) < 100 || str_contains($texto, '[') || str_contains($texto, 'cole')) {
+            return ['summary' => 'O texto está muito curto ou parece incompleto. Cole o contrato completo que você deseja analisar.', 'results' => []];
         }
 
         $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
@@ -53,7 +58,7 @@ final class AnalisarContratoTool implements SashaToolInterface
 
         $analise = $this->jurisFlowAi->analisarContrato($texto, $escritorioId);
         if ($analise === null || trim($analise) === '') {
-            return ['summary' => 'Não consegui analisar o contrato agora. Tente novamente em instantes.', 'results' => []];
+            return ['summary' => 'O serviço de IA está temporariamente indisponível. Aguarde alguns instantes e tente novamente.', 'results' => []];
         }
 
         return ['summary' => $analise, 'results' => []];

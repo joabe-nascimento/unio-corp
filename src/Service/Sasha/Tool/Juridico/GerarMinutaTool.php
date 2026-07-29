@@ -46,7 +46,12 @@ final class GerarMinutaTool implements SashaToolInterface
     {
         $descricao = trim((string) ($params['descricao'] ?? $params['dados'] ?? $params['texto'] ?? ''));
         if ($descricao === '') {
-            return ['summary' => 'Descreva o que a minuta deve conter (partes, pedido, fatos relevantes).', 'results' => []];
+            return ['summary' => 'Para gerar uma minuta, preciso que você descreva:\n• Quem são as partes (autor/réu)\n• Qual o pedido principal\n• Quais os fatos relevantes\n\nExemplo: "autor João Silva contra Empresa XYZ, pedido de indenização por danos morais, fatos: cobrança indevida em 15/03/2026"', 'results' => []];
+        }
+
+        // Valida se não é apenas placeholder ou texto muito curto
+        if (mb_strlen($descricao) < 30 || str_contains($descricao, '[') || str_contains($descricao, 'descreva')) {
+            return ['summary' => 'A descrição está muito curta ou incompleta. Por favor, forneça detalhes sobre:\n• Partes envolvidas\n• Pedido/objetivo do documento\n• Fatos e fundamentos', 'results' => []];
         }
 
         $tipo = trim((string) ($params['tipo'] ?? 'petição')) ?: 'petição';
@@ -56,7 +61,7 @@ final class GerarMinutaTool implements SashaToolInterface
 
         $minuta = $this->jurisFlowAi->gerarMinuta($tipo, $descricao, $escritorioId);
         if ($minuta === null || trim($minuta) === '') {
-            return ['summary' => 'Não consegui gerar a minuta agora. Tente novamente em instantes.', 'results' => []];
+            return ['summary' => 'O serviço de IA está temporariamente indisponível. Aguarde alguns instantes e tente novamente.', 'results' => []];
         }
 
         return ['summary' => $minuta, 'results' => []];
