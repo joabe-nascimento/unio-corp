@@ -99,6 +99,10 @@ else
   fi
 fi
 
+CI_REPORT_STEP="Doctrine migrations"
+ci_report_step "$CI_REPORT_STEP"
+$PHP_BIN bin/console doctrine:migrations:migrate --no-interaction --env=prod || echo "WARN: migrations falhou ou não há pendentes"
+
 CI_REPORT_STEP="Cache Symfony (prod)"
 ci_report_step "$CI_REPORT_STEP"
 $PHP_BIN bin/console cache:clear --env=prod --no-warmup
