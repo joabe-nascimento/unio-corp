@@ -174,10 +174,43 @@
 }
 
 .helix-msg--user .helix-msg-bubble {
-    background: var(--accent);
     background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 82%, #000) 100%);
+    border: none;
+    color: #fff;
     border-bottom-right-radius: 5px;
     box-shadow: 0 4px 14px var(--accent-dim);
+}
+
+/* Evita “caixa clara” dentro da bolha bordô na 1ª mensagem do usuário (:first-child) */
+.helix-msg--user .helix-msg-bubble p,
+.helix-msg--user .helix-msg__body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    color: inherit;
+}
+
+.helix-msg--user .helix-msg-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.helix-msg--user .helix-msg-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #fff;
 }
 
 /* ---------- Typing indicator com mais vida ---------- */
@@ -258,7 +291,8 @@
 }
 
 /* ---------- Empty state / welcome mais acolhedor ---------- */
-.helix-messages .helix-msg--assistant:first-child .helix-msg-bubble {
+.helix-messages .helix-msg--welcome .helix-msg-bubble,
+.helix-messages .helix-msg--assistant.helix-msg--welcome .helix-msg-bubble {
     background: linear-gradient(135deg, var(--surface) 0%, var(--accent-dim) 130%);
 }
 

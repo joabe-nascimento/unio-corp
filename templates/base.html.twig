@@ -20,7 +20,7 @@
     <script>(function(){var m=window.matchMedia('(max-width:1199.98px)');function s(){document.documentElement.classList.toggle('shell-drawer',m.matches);}s();if(m.addEventListener){m.addEventListener('change',s);}else{m.addListener(s);}})();</script>
     {% include 'components/unio_theme_vars.html.twig' %}
     {% set _unio_css = app.debug ? 'css/unio-app.css' : 'css/unio-app.min.css' %}
-    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=352">
+    <link rel="stylesheet" href="{{ asset(_unio_css) }}?v=353">
     {% set _shell_polish_css = app.debug ? 'css/unio-shell-polish.css' : 'css/unio-shell-polish.min.css' %}
     <link rel="stylesheet" href="{{ asset(_shell_polish_css) }}?v=35">
 
@@ -73,9 +73,9 @@
     }
     </style>
     {% if organismo.enabled|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=71">
+    <link rel="stylesheet" href="{{ asset('css/unio-organismo.css') }}?v=70">
     <link rel="stylesheet" href="{{ asset('css/unio-brand-polish.css') }}?v=6">
-    <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=10">
+    <link rel="stylesheet" href="{{ asset('css/unio-kpi.css') }}?v=9">
     {% if org_clinic|default(false) %}
     <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish.css') }}?v=61">
     <link rel="stylesheet" href="{{ asset('css/unio-clinic-polish-pack.css') }}?v=13">
@@ -93,17 +93,17 @@
     <link rel="stylesheet" href="{{ asset('css/unio-ui-polish.css') }}?v=11">
 
     {% if org_juridico|default(false) %}
-    <link rel="stylesheet" href="{{ asset('css/unio-juridico-theme.css') }}?v=17">
+    <link rel="stylesheet" href="{{ asset('css/unio-juridico-theme.css') }}?v=16">
     <link rel="stylesheet" href="{{ asset('css/unio-juridico-modules.css') }}?v=2">
     {% endif %}
     
-    <link rel="stylesheet" href="{{ asset('css/unio-visual-improvements.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/unio-visual-improvements.css') }}?v=4">
 
     {% block stylesheets %}{% endblock %}
 {% if app.user %}
 <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=4">
-<link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=6">
-<link rel="stylesheet" href="{{ asset('css/helix-chat-redesign.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=7">
+<link rel="stylesheet" href="{{ asset('css/helix-chat-redesign.css') }}?v=2">
 {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
@@ -575,10 +575,10 @@ window.addEventListener('load', runShellSidebarControls);
 <script src="{{ asset('vendor/marked/marked.min.js') }}"></script>
 {# highlight.js removido temporariamente devido a erro de módulo #}
 <script src="{{ asset('js/helix-markdown.js') }}?v=2"></script>
-<script src="{{ asset('js/helix-features.js') }}?v=4"></script>
+<script src="{{ asset('js/helix-features.js') }}?v=5"></script>
 <script src="{{ asset('js/helix-history-api.js') }}?v=3"></script>
 <script src="{{ asset('js/helix-typing.js') }}?v=1"></script>
-<script src="{{ asset('js/helix-attachments.js') }}?v=1"></script>
+<script src="{{ asset('js/helix-attachments.js') }}?v=2"></script>
 {% endif %}
 
 {# ── View Toggle — JS genérico, carregado uma vez no base ── #}
@@ -881,7 +881,7 @@ window.addEventListener('load', runShellSidebarControls);
             sub = 'Posso ajudar com operação, alertas clínicos e fluxos dos núcleos.';
         }
         messagesEl.innerHTML =
-            '<div class="helix-msg helix-msg--assistant">' + FACE_SM +
+            '<div class="helix-msg helix-msg--assistant helix-msg--welcome">' + FACE_SM +
             '<div class="helix-msg-bubble">' +
             '<p>' + lead + '</p>' +
             '<p class="mb-0 helix-msg-muted">' + sub + '</p>' +
@@ -935,13 +935,29 @@ window.addEventListener('load', runShellSidebarControls);
         var signature = (!isUser && isClinic)
             ? '<span class="helix-msg__signature">' + escapeHtml(slogan) + '</span>'
             : '';
-        
-        // Criar timestamp se tiver
+
         var timestamp = message && message.at ? message.at : new Date().toISOString();
-        
+
+        var attachmentsHtml = '';
+        if (isUser && message && message.attachments && message.attachments.length) {
+            attachmentsHtml = '<div class="helix-msg-attachments">' + message.attachments.map(function (att) {
+                var title = att.truncated ? 'Texto truncado (documento muito longo)' : att.filename;
+                return '<span class="helix-msg-attachment" title="' + escapeHtml(title) + '">' +
+                    '<i class="fas fa-file-lines" aria-hidden="true"></i>' +
+                    escapeHtml(att.filename) +
+                    '</span>';
+            }).join('') + '</div>';
+        }
+
+        var bodyHtml = '<p class="mb-0">' + esc.replace(/\n/g, '<br>') + '</p>' + attachmentsHtml;
+        if (isUser) {
+            bodyHtml = '<div class="helix-msg__body">' + bodyHtml + '</div>';
+        }
+
         return '<div class="helix-msg helix-msg--' + (isUser ? 'user' : 'assistant') + '">' +
             (isUser ? '' : FACE_SM) +
-            '<div class="helix-msg-bubble"><p class="mb-0">' + esc.replace(/\n/g, '<br>') + '</p>' +
+            '<div class="helix-msg-bubble">' +
+            bodyHtml +
             (actionsHtml || '') +
             signature +
             '</div></div>';
@@ -1128,6 +1144,7 @@ window.addEventListener('load', runShellSidebarControls);
         }
 
         var attachmentSuffix = hasAttachments ? HelixAttachments.buildMessageSuffix() : '';
+        var attachmentMeta = hasAttachments ? HelixAttachments.getReadySnapshot() : [];
         if (!text && attachmentSuffix) {
             text = 'Analise o(s) documento(s) anexado(s).';
         }
@@ -1137,7 +1154,12 @@ window.addEventListener('load', runShellSidebarControls);
         var session = getSession(sid);
         if (!session) return;
 
-        session.messages.push({ role: 'user', text: text, at: new Date().toISOString() });
+        session.messages.push({
+            role: 'user',
+            text: text,
+            attachments: attachmentMeta,
+            at: new Date().toISOString()
+        });
         if (session.title === 'Nova conversa') {
             session.title = text.length > 48 ? text.slice(0, 48) + '…' : text;
         }

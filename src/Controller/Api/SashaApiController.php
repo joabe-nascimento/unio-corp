@@ -342,6 +342,19 @@ final class SashaApiController extends AbstractController
         $isJuridico = $this->organismoCopy->isJuridicoProfile();
         $acoesSugeridas = $isJuridico ? $this->legalIntentDetector->detect($message, $numeroProcessoAtual) : [];
 
+        if ($isJuridico && $this->legalIntentDetector->isConsultaDatajudSemNumero($message, $numeroProcessoAtual)) {
+            $reply = 'Para consultar o andamento oficial no DataJud, preciso do número do processo no formato CNJ (ex.: 0000000-00.0000.0.00.0000). Pode me informar?';
+            $this->conversationManager->addMessage($conversation, 'assistant', $reply);
+
+            return $this->json([
+                'reply' => $reply,
+                'source' => 'agent',
+                'suggested_actions' => [],
+                'tool_results' => [],
+                'conversation_id' => $conversation->getId(),
+            ]);
+        }
+
         // Intenção determinística já resolvida: responde na hora, sem chamar a IA externa.
         // Mais rápido e não depende do provedor de IA estar disponível.
         if ($isJuridico && $acoesSugeridas !== []) {

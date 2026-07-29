@@ -196,6 +196,31 @@ final class LegalIntentDetector
             }
         }
 
+        $anexos = $this->extrairAnexos($mensagem);
+        if ($anexos !== []) {
+            if ($this->contemAlgum($texto, self::GATILHOS_COMPARAR_DOCUMENTOS) && \count($anexos) >= 2) {
+                $acao = $this->detectarCompararDocumentos($mensagem);
+                if ($acao !== null) {
+                    $acoes[] = $acao;
+                }
+            } elseif ($this->contemAlgum($texto, self::GATILHOS_ANALISAR_SENTENCA)) {
+                $acao = $this->detectarAnalisarSentenca($mensagem, $texto);
+                if ($acao !== null) {
+                    $acoes[] = $acao;
+                }
+            } elseif ($this->contemAlgum($texto, self::GATILHOS_ANALISAR_CONTRATO)) {
+                $acao = $this->detectarAnalisarContrato($mensagem, $texto);
+                if ($acao !== null) {
+                    $acoes[] = $acao;
+                }
+            } elseif ($this->contemAlgum($texto, self::GATILHOS_RESUMIR) || $this->contemAlgum($texto, ['anexe', 'anexado', 'anexados', 'documento anexado', 'documentos anexados'])) {
+                $acao = $this->detectarResumir($mensagem, $texto);
+                if ($acao !== null) {
+                    $acoes[] = $acao;
+                }
+            }
+        }
+
         if ($this->contemAlgum($texto, self::GATILHOS_PECAS_SIMILARES)) {
             $acao = $this->detectarPecasSimilares($mensagem, $texto);
             if ($acao !== null) {
@@ -368,6 +393,20 @@ final class LegalIntentDetector
         return null;
     }
 
+    public function isConsultaDatajudSemNumero(string $mensagem, ?string $numeroProcessoAtual = null): bool
+    {
+        $texto = mb_strtolower(trim($mensagem));
+        if ($texto === '' || !$this->contemAlgum($texto, self::GATILHOS_DATAJUD)) {
+            return false;
+        }
+
+        if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagem)) {
+            return false;
+        }
+
+        return $numeroProcessoAtual === null || trim($numeroProcessoAtual) === '';
+    }
+
     /** @return SuggestedAction|null */
     private function detectarConsultaDatajud(string $mensagemOriginal, ?string $numeroProcessoAtual = null): ?array
     {
@@ -390,6 +429,11 @@ final class LegalIntentDetector
     /** @return SuggestedAction|null */
     private function detectarResumir(string $mensagemOriginal, string $texto): ?array
     {
+        $anexos = $this->extrairAnexos($mensagemOriginal);
+        if ($anexos !== []) {
+            return ['tool' => 'resumir_documento', 'label' => 'Resumir documento', 'params' => ['texto' => $anexos[0]['texto']]];
+        }
+
         $conteudo = trim($this->removerGatilhos($mensagemOriginal, self::GATILHOS_RESUMIR));
         if (mb_strlen($conteudo) < self::MIN_LEN_TEXTO_COLADO) {
             return null;
@@ -401,6 +445,11 @@ final class LegalIntentDetector
     /** @return SuggestedAction|null */
     private function detectarAnalisarContrato(string $mensagemOriginal, string $texto): ?array
     {
+        $anexos = $this->extrairAnexos($mensagemOriginal);
+        if ($anexos !== []) {
+            return ['tool' => 'analisar_contrato', 'label' => 'Analisar contrato', 'params' => ['texto' => $anexos[0]['texto']]];
+        }
+
         $conteudo = trim($this->removerGatilhos($mensagemOriginal, self::GATILHOS_ANALISAR_CONTRATO));
         if (mb_strlen($conteudo) < self::MIN_LEN_TEXTO_COLADO) {
             return null;
@@ -464,6 +513,11 @@ final class LegalIntentDetector
     /** @return SuggestedAction|null */
     private function detectarAnalisarSentenca(string $mensagemOriginal, string $texto): ?array
     {
+        $anexos = $this->extrairAnexos($mensagemOriginal);
+        if ($anexos !== []) {
+            return ['tool' => 'analisar_sentenca', 'label' => 'Analisar sentença', 'params' => ['texto' => $anexos[0]['texto']]];
+        }
+
         $conteudo = trim($this->removerGatilhos($mensagemOriginal, self::GATILHOS_ANALISAR_SENTENCA));
         if (mb_strlen($conteudo) < self::MIN_LEN_TEXTO_COLADO) {
             return null;
