@@ -49,7 +49,7 @@
         if (historyBtn) {
             header.insertBefore(toggle, historyBtn);
         } else {
-            header.prepend End(toggle);
+            header.prepend(toggle);
         }
     }
 

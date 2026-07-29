@@ -1,23 +1,13 @@
 /**
  * HELIX MARKDOWN RENDERER
- * Renderiza markdown com syntax highlighting
+ * Renderiza markdown (sem syntax highlighting por enquanto)
  */
 (function(window) {
     'use strict';
 
-    // Configurar marked com highlight.js
-    if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
+    // Configurar marked
+    if (typeof marked !== 'undefined') {
         marked.setOptions({
-            highlight: function(code, lang) {
-                if (lang && hljs.getLanguage(lang)) {
-                    try {
-                        return hljs.highlight(code, { language: lang }).value;
-                    } catch (e) {
-                        console.error('Highlight error:', e);
-                    }
-                }
-                return hljs.highlightAuto(code).value;
-            },
             breaks: true,
             gfm: true,
         });
