@@ -1,0 +1,505 @@
+/* ============================================
+   HELIX CHAT - MELHORIAS VISUAIS
+   - Dark mode com CSS variables
+   - Markdown styling
+   - Timestamps e avatares
+   - Botões de ação
+   - Typing indicator
+   ============================================ */
+
+:root {
+    --helix-bg: #ffffff;
+    --helix-surface: #f8f9fa;
+    --helix-border: #e0e0e0;
+    --helix-text: #2c3e50;
+    --helix-text-muted: #6c757d;
+    --helix-primary: #3b82f6;
+    --helix-success: #10b981;
+    --helix-danger: #ef4444;
+    --helix-warning: #f59e0b;
+    --helix-user-bubble: #3b82f6;
+    --helix-assistant-bubble: #f1f5f9;
+    --helix-code-bg: #1f2937;
+    --helix-shadow: rgba(0, 0, 0, 0.1);
+    --helix-hover: rgba(0, 0, 0, 0.05);
+}
+
+[data-helix-theme="dark"] {
+    --helix-bg: #0f172a;
+    --helix-surface: #1e293b;
+    --helix-border: #334155;
+    --helix-text: #f1f5f9;
+    --helix-text-muted: #94a3b8;
+    --helix-primary: #60a5fa;
+    --helix-success: #34d399;
+    --helix-danger: #f87171;
+    --helix-warning: #fbbf24;
+    --helix-user-bubble: #1e40af;
+    --helix-assistant-bubble: #1e293b;
+    --helix-code-bg: #0f172a;
+    --helix-shadow: rgba(0, 0, 0, 0.3);
+    --helix-hover: rgba(255, 255, 255, 0.05);
+}
+
+/* Dark Mode Toggle */
+.helix-darkmode-toggle {
+    background: var(--helix-surface);
+    border: 1px solid var(--helix-border);
+    border-radius: 20px;
+    width: 44px;
+    height: 24px;
+    padding: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+}
+
+.helix-darkmode-toggle__thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--helix-primary);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
+}
+
+[data-helix-theme="dark"] .helix-darkmode-toggle__thumb {
+    transform: translateX(20px);
+}
+
+/* Message Enhancements */
+.helix-msg {
+    position: relative;
+}
+
+.helix-msg__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--helix-text-muted);
+}
+
+.helix-msg__author {
+    font-weight: 600;
+    color: var(--helix-text);
+}
+
+.helix-msg__timestamp {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.helix-msg__actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.helix-msg:hover .helix-msg__actions {
+    opacity: 1;
+}
+
+.helix-msg__action-btn {
+    background: var(--helix-surface);
+    border: 1px solid var(--helix-border);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    color: var(--helix-text-muted);
+}
+
+.helix-msg__action-btn:hover {
+    background: var(--helix-hover);
+    color: var(--helix-text);
+    transform: translateY(-1px);
+}
+
+.helix-msg__action-btn--active {
+    color: var(--helix-primary);
+    background: var(--helix-primary);
+    color: white;
+}
+
+/* Rating Buttons */
+.helix-msg__rating {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.helix-rating-btn {
+    background: transparent;
+    border: 1px solid var(--helix-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.helix-rating-btn:hover {
+    background: var(--helix-hover);
+}
+
+.helix-rating-btn--active.helix-rating-btn--thumbs-up {
+    background: var(--helix-success);
+    border-color: var(--helix-success);
+    color: white;
+}
+
+.helix-rating-btn--active.helix-rating-btn--thumbs-down {
+    background: var(--helix-danger);
+    border-color: var(--helix-danger);
+    color: white;
+}
+
+/* Typing Indicator */
+.helix-typing {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+.helix-typing__dots {
+    display: flex;
+    gap: 4px;
+}
+
+.helix-typing__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--helix-text-muted);
+    animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.helix-typing__dot:nth-child(1) { animation-delay: -0.32s; }
+.helix-typing__dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+}
+
+.helix-typing__text {
+    font-size: 13px;
+    color: var(--helix-text-muted);
+    font-style: italic;
+}
+
+/* Markdown Styling */
+.helix-markdown {
+    line-height: 1.6;
+}
+
+.helix-markdown h1,
+.helix-markdown h2,
+.helix-markdown h3,
+.helix-markdown h4 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--helix-text);
+}
+
+.helix-markdown h1 { font-size: 1.5em; }
+.helix-markdown h2 { font-size: 1.3em; }
+.helix-markdown h3 { font-size: 1.1em; }
+
+.helix-markdown p {
+    margin-bottom: 12px;
+}
+
+.helix-markdown ul,
+.helix-markdown ol {
+    margin-bottom: 12px;
+    padding-left: 24px;
+}
+
+.helix-markdown li {
+    margin-bottom: 4px;
+}
+
+.helix-markdown code {
+    background: var(--helix-code-bg);
+    color: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: 'Courier New', monospace;
+}
+
+.helix-markdown pre {
+    background: var(--helix-code-bg);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 12px 0;
+}
+
+.helix-markdown pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+.helix-markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+}
+
+.helix-markdown th,
+.helix-markdown td {
+    border: 1px solid var(--helix-border);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.helix-markdown th {
+    background: var(--helix-surface);
+    font-weight: 600;
+}
+
+.helix-markdown blockquote {
+    border-left: 4px solid var(--helix-primary);
+    padding-left: 16px;
+    margin: 12px 0;
+    color: var(--helix-text-muted);
+    font-style: italic;
+}
+
+.helix-markdown a {
+    color: var(--helix-primary);
+    text-decoration: underline;
+}
+
+.helix-markdown a:hover {
+    opacity: 0.8;
+}
+
+.helix-markdown hr {
+    border: none;
+    border-top: 1px solid var(--helix-border);
+    margin: 16px 0;
+}
+
+/* Code Block with Copy Button */
+.helix-code-wrapper {
+    position: relative;
+}
+
+.helix-code-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.helix-code-copy:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.helix-code-copy--copied {
+    background: var(--helix-success);
+    border-color: var(--helix-success);
+}
+
+/* History Sidebar Enhancements */
+.helix-history-search {
+    padding: 12px;
+    border-bottom: 1px solid var(--helix-border);
+}
+
+.helix-history-search input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--helix-border);
+    border-radius: 6px;
+    background: var(--helix-surface);
+    color: var(--helix-text);
+    font-size: 14px;
+}
+
+.helix-history-search input::placeholder {
+    color: var(--helix-text-muted);
+}
+
+.helix-history-item {
+    position: relative;
+}
+
+.helix-history-item--pinned {
+    border-left: 3px solid var(--helix-warning);
+}
+
+.helix-history-item__actions {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.helix-history-item:hover .helix-history-item__actions {
+    opacity: 1;
+}
+
+.helix-history-action {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--helix-text-muted);
+    font-size: 13px;
+    transition: color 0.2s ease;
+}
+
+.helix-history-action:hover {
+    color: var(--helix-text);
+}
+
+.helix-history-action--pin.is-pinned {
+    color: var(--helix-warning);
+}
+
+/* Toast Notifications */
+.helix-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--helix-surface);
+    border: 1px solid var(--helix-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px var(--helix-shadow);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 9999;
+    animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.helix-toast--success {
+    border-left: 4px solid var(--helix-success);
+}
+
+.helix-toast--error {
+    border-left: 4px solid var(--helix-danger);
+}
+
+/* Edit Message Input */
+.helix-edit-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid var(--helix-primary);
+    border-radius: 8px;
+    background: var(--helix-bg);
+    color: var(--helix-text);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.helix-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    justify-content: flex-end;
+}
+
+.helix-edit-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.helix-edit-btn--save {
+    background: var(--helix-primary);
+    border: none;
+    color: white;
+}
+
+.helix-edit-btn--save:hover {
+    opacity: 0.9;
+}
+
+.helix-edit-btn--cancel {
+    background: transparent;
+    border: 1px solid var(--helix-border);
+    color: var(--helix-text);
+}
+
+.helix-edit-btn--cancel:hover {
+    background: var(--helix-hover);
+}
+
+/* Loading State */
+.helix-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .helix-msg__actions {
+        opacity: 1;
+    }
+    
+    .helix-history-item__actions {
+        opacity: 1;
+    }
+}

@@ -100,6 +100,8 @@
     {% block stylesheets %}{% endblock %}
     {% if app.user %}
     <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=4">
+    <link rel="stylesheet" href="{{ asset('vendor/highlight.js/github-dark.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=1">
     {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
@@ -568,6 +570,13 @@ window.addEventListener('load', runShellSidebarControls);
 {% block javascripts %}{% endblock %}
 {% if app.user %}
 <script src="{{ asset('js/ti-chamado-chat.js') }}?v=8" defer></script>
+<script src="{{ asset('vendor/marked/marked.min.js') }}"></script>
+<script src="{{ asset('vendor/highlight.js/highlight.min.js') }}"></script>
+<script src="{{ asset('js/helix-markdown.js') }}?v=1"></script>
+<script src="{{ asset('js/helix-darkmode.js') }}?v=1"></script>
+<script src="{{ asset('js/helix-features.js') }}?v=1"></script>
+<script src="{{ asset('js/helix-history-api.js') }}?v=1"></script>
+<script src="{{ asset('js/helix-typing.js') }}?v=1"></script>
 {% endif %}
 
 {# ── View Toggle — JS genérico, carregado uma vez no base ── #}
@@ -883,7 +892,7 @@ window.addEventListener('load', runShellSidebarControls);
         if (!messagesEl || !session) return;
         var html = '';
         session.messages.forEach(function (m) {
-            html += messageHtml(m.role, m.text, m.actionsHtml || '');
+            html += messageHtml(m.role, m.text, m.actionsHtml || '', m);
         });
         if (!html) {
             renderWelcomeOnly();
@@ -892,10 +901,31 @@ window.addEventListener('load', runShellSidebarControls);
         messagesEl.innerHTML = html;
         if (suggestions) suggestions.style.display = session.messages.length ? 'none' : '';
         applyCardStates(session);
+        
+        // Aplicar melhorias visuais de mensagem (timestamps, avatares, botões)
+        if (typeof HelixFeatures !== 'undefined') {
+            messagesEl.querySelectorAll('.helix-msg').forEach(function(msgEl, idx) {
+                var msg = session.messages[idx];
+                if (msg) {
+                    HelixFeatures.enhanceMessage(msgEl, msg, msg.role === 'assistant');
+                }
+            });
+        }
+        
+        // Renderizar markdown
+        if (typeof HelixMarkdown !== 'undefined') {
+            messagesEl.querySelectorAll('.helix-msg--assistant .helix-msg-bubble > p').forEach(function(p) {
+                if (!p.querySelector('.helix-tool-actions, .helix-confirm-card')) {
+                    var text = p.textContent || '';
+                    p.innerHTML = HelixMarkdown.render(text);
+                }
+            });
+        }
+        
         scrollMessages();
     }
 
-    function messageHtml(role, text, actionsHtml) {
+    function messageHtml(role, text, actionsHtml, message) {
         var isUser = role === 'user';
         var esc = escapeHtml(text);
         var isClinic = panel.dataset.clinic === '1';
@@ -903,6 +933,10 @@ window.addEventListener('load', runShellSidebarControls);
         var signature = (!isUser && isClinic)
             ? '<span class="helix-msg__signature">' + escapeHtml(slogan) + '</span>'
             : '';
+        
+        // Criar timestamp se tiver
+        var timestamp = message && message.at ? message.at : new Date().toISOString();
+        
         return '<div class="helix-msg helix-msg--' + (isUser ? 'user' : 'assistant') + '">' +
             (isUser ? '' : FACE_SM) +
             '<div class="helix-msg-bubble"><p class="mb-0">' + esc.replace(/\n/g, '<br>') + '</p>' +
@@ -1115,6 +1149,11 @@ window.addEventListener('load', runShellSidebarControls);
 
         setHelixLoading(true);
         showTypingIndicator();
+        
+        // Usar HelixTyping se disponível
+        if (typeof HelixTyping !== 'undefined') {
+            HelixTyping.show();
+        }
 
         fetch(chatUrl, {
             method: 'POST',
@@ -1153,12 +1192,22 @@ window.addEventListener('load', runShellSidebarControls);
             })
             .finally(function () {
                 hideTypingIndicator();
+                if (typeof HelixTyping !== 'undefined') {
+                    HelixTyping.hide();
+                }
                 setHelixLoading(false);
                 updateSendState();
             });
     }
 
     function renderHistory() {
+        // Se HelixHistory disponível, usar a API do banco
+        if (typeof HelixHistory !== 'undefined') {
+            HelixHistory.loadConversations();
+            return;
+        }
+        
+        // Fallback: histórico local
         var sessions = loadSessions();
         var count = String(sessions.length);
         if (historyCount) historyCount.textContent = count;
@@ -1194,6 +1243,12 @@ window.addEventListener('load', runShellSidebarControls);
         openBtn.setAttribute('aria-expanded', 'true');
         openBtn.classList.add('is-active');
         document.body.classList.add('helix-open');
+        
+        // Aplicar tema do Helix ao panel
+        if (typeof HelixDarkMode !== 'undefined') {
+            panel.setAttribute('data-helix-theme', HelixDarkMode.getTheme());
+        }
+        
         setTimeout(function () { if (input) input.focus(); }, 200);
         renderHistory();
     }
@@ -1398,6 +1453,29 @@ window.addEventListener('load', runShellSidebarControls);
 
     renderHistory();
     updateSendState();
+    
+    // Expor funções para os módulos externos
+    window.helixScrollToBottom = scrollMessages;
+    window.helixRenderHistory = function(messages) {
+        if (!currentSessionId) {
+            var sid = ensureSession();
+            var session = getSession(sid);
+            if (session) {
+                session.messages = messages.map(function(m) {
+                    return {
+                        role: m.role,
+                        text: m.content,
+                        at: m.created_at || new Date().toISOString()
+                    };
+                });
+                upsertSession(session);
+                renderMessages(session);
+            }
+        }
+    };
+    window.helixClearChat = newChat;
+    window.helixResendMessage = sendMessage;
+    window.helixAssistantName = assistantName();
 })();
 </script>
 {% include 'components/cookie_consent_banner.html.twig' %}

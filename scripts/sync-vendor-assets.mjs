@@ -34,6 +34,9 @@ const copies = [
   ['node_modules/flatpickr/dist/flatpickr.min.css', 'flatpickr/flatpickr.min.css'],
   ['node_modules/flatpickr/dist/l10n/pt.js', 'flatpickr/l10n/pt.min.js'],
   ['node_modules/cleave.js/dist/cleave.min.js', 'cleave/cleave.min.js'],
+  ['node_modules/marked/lib/marked.umd.js', 'marked/marked.min.js'],
+  ['node_modules/highlight.js/styles/github-dark.min.css', 'highlight.js/github-dark.min.css'],
+  ['node_modules/highlight.js/lib/core.js', 'highlight.js/highlight.min.js'],
 ];
 
 function copyFile(from, to) {
