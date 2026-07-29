@@ -71,8 +71,13 @@ final class PesquisarJurisprudenciaTool implements SashaToolInterface
             ];
         }
 
+        // Exibe todos os resultados encontrados (até um teto razoável para não
+        // sobrecarregar o chat) — antes ficava fixo em 3, divergindo da contagem
+        // real usada no resumo ("Encontrei 5 resultado(s)" mas só mostrava 3).
+        $limiteExibicao = 8;
+
         $results = [];
-        foreach (\array_slice($resultado['resultados'], 0, 3) as $item) {
+        foreach (\array_slice($resultado['resultados'], 0, $limiteExibicao) as $item) {
             $preview = array_values(array_filter([
                 ['label' => 'Tribunal', 'value' => (string) ($item['tribunal'] ?? '')],
                 ['label' => 'Tema', 'value' => (string) ($item['tema'] ?? $tema)],
@@ -105,6 +110,9 @@ final class PesquisarJurisprudenciaTool implements SashaToolInterface
 
         $count = \count($resultado['resultados']);
         $summary = sprintf('Encontrei %d resultado(s) sobre "%s"%s.', $count, $tema, $tribunal !== 'Todos' ? ' no ' . $tribunal : '');
+        if ($count > $limiteExibicao) {
+            $summary .= sprintf(' Mostrando os %d mais relevantes — veja os demais na biblioteca.', $limiteExibicao);
+        }
 
         return ['summary' => $summary, 'results' => $results];
     }
