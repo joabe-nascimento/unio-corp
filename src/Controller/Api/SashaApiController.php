@@ -54,6 +54,7 @@ final class SashaApiController extends AbstractController
         private LegalIntentDetector $legalIntentDetector,
         private AiTokenUsageService $aiTokenUsage,
         private AgenteAutonomoStatusStore $agenteStatus,
+        private \App\Service\Sasha\SashaConversationManager $conversationManager,
     ) {}
 
     /**
@@ -152,6 +153,90 @@ final class SashaApiController extends AbstractController
         return $this->json($this->agenteStatus->resumo());
     }
 
+    #[Route('/conversations', name: 'api_sasha_conversations', methods: ['GET'])]
+    public function conversations(): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
+
+        $conversations = $this->conversationManager->getUserConversations($user, $empresa);
+
+        return $this->json($conversations);
+    }
+
+    #[Route('/conversations/{id}', name: 'api_sasha_conversation_get', methods: ['GET'])]
+    public function getConversation(int $id): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $conversation = $this->conversationManager->getConversation($id, $user);
+
+        if ($conversation === null) {
+            return $this->json(['error' => 'Conversa não encontrada'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($conversation);
+    }
+
+    #[Route('/conversations/{id}', name: 'api_sasha_conversation_delete', methods: ['DELETE'])]
+    public function deleteConversation(int $id): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $success = $this->conversationManager->deleteConversation($id, $user);
+
+        if (!$success) {
+            return $this->json(['error' => 'Conversa não encontrada'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/conversations/{id}/pin', name: 'api_sasha_conversation_pin', methods: ['POST'])]
+    public function togglePin(int $id): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $success = $this->conversationManager->togglePin($id, $user);
+
+        if (!$success) {
+            return $this->json(['error' => 'Conversa não encontrada'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/messages/{id}/rate', name: 'api_sasha_message_rate', methods: ['POST'])]
+    public function rateMessage(int $id, Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $payload = json_decode($request->getContent(), true);
+
+        if (!\is_array($payload)) {
+            return $this->json(['error' => 'JSON inválido'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $rating = (int) ($payload['rating'] ?? 0);
+        $feedback = trim((string) ($payload['feedback'] ?? ''));
+
+        if ($rating < -1 || $rating > 1) {
+            return $this->json(['error' => 'Rating inválido (-1, 0, 1)'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $success = $this->conversationManager->rateMessage($id, $user, $rating, $feedback !== '' ? $feedback : null);
+
+        if (!$success) {
+            return $this->json(['error' => 'Mensagem não encontrada'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json(['success' => true]);
+    }
+
     #[Route('/chat', name: 'api_sasha_chat', methods: ['POST'])]
     public function chat(Request $request): JsonResponse
     {
@@ -167,6 +252,32 @@ final class SashaApiController extends AbstractController
             return $this->json(['error' => 'Mensagem vazia'], Response::HTTP_BAD_REQUEST);
         }
 
+        $conversationId = isset($payload['conversation_id']) ? (int) $payload['conversation_id'] : null;
+        $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
+        $context = $payload['context'] ?? [];
+        $contextType = isset($context['numero_processo']) ? 'processo' : (isset($context['patient_codigo']) ? 'paciente' : null);
+        $contextId = $contextType === 'processo' ? $context['numero_processo'] : ($contextType === 'paciente' ? $context['patient_codigo'] : null);
+
+        // Criar ou buscar conversa
+        if ($conversationId !== null) {
+            $conversationData = $this->conversationManager->getConversation($conversationId, $user);
+            if ($conversationData === null) {
+                return $this->json(['error' => 'Conversa não encontrada'], Response::HTTP_NOT_FOUND);
+            }
+            $conversation = $this->conversationManager->getConversationEntity($conversationId, $user);
+        } else {
+            $conversation = $this->conversationManager->createOrGetConversation(
+                $user,
+                $empresa,
+                $contextType,
+                $contextId,
+                $message
+            );
+        }
+
+        // Salvar mensagem do usuário
+        $this->conversationManager->addMessage($conversation, 'user', $message);
+
         $history = [];
         foreach ($payload['history'] ?? [] as $item) {
             if (!\is_array($item)) {
@@ -178,11 +289,10 @@ final class SashaApiController extends AbstractController
             ];
         }
 
-        $empresa = $this->workspace->getActiveEmpresa($user) ?? $user->getEmpresa();
         $pacienteCodigo = $payload['context']['patient_codigo'] ?? $payload['patient_codigo'] ?? null;
         $numeroProcessoAtual = $payload['context']['numero_processo'] ?? $payload['numero_processo'] ?? null;
         $numeroProcessoAtual = \is_string($numeroProcessoAtual) && trim($numeroProcessoAtual) !== '' ? trim($numeroProcessoAtual) : null;
-        $context = [
+        $contextData = [
             'hub' => (string) ($payload['context']['hub'] ?? $payload['hub'] ?? ''),
             'empresa_nome' => $empresa?->getNome(),
             'user_name' => $user->getNome() ?? 'Usuário',
@@ -193,7 +303,7 @@ final class SashaApiController extends AbstractController
         ];
 
         if ($empresa && !$this->organismoCopy->isJuridicoProfile()) {
-            $context = $this->vitoriaContext->enrichChatContext($empresa, $context, is_string($pacienteCodigo) ? $pacienteCodigo : null);
+            $contextData = $this->vitoriaContext->enrichChatContext($empresa, $contextData, is_string($pacienteCodigo) ? $pacienteCodigo : null);
         }
 
         $isJuridico = $this->organismoCopy->isJuridicoProfile();
@@ -204,35 +314,50 @@ final class SashaApiController extends AbstractController
         if ($isJuridico && $acoesSugeridas !== []) {
             $auto = $this->executarAutomaticamente($user, $acoesSugeridas[0]);
             if ($auto !== null) {
+                // Salvar resposta do assistente
+                $this->conversationManager->addMessage($conversation, 'assistant', $auto['reply'], ['tool_results' => $auto['tool_results']]);
+
                 return $this->json([
                     'reply' => $auto['reply'],
                     'source' => 'agent',
                     'suggested_actions' => [],
                     'tool_results' => $auto['tool_results'],
+                    'conversation_id' => $conversation->getId(),
                 ]);
             }
 
+            $reply = $this->mensagemParaAcoesSugeridas($acoesSugeridas);
+            $this->conversationManager->addMessage($conversation, 'assistant', $reply, ['suggested_actions' => $acoesSugeridas]);
+
             return $this->json([
-                'reply' => $this->mensagemParaAcoesSugeridas($acoesSugeridas),
+                'reply' => $reply,
                 'source' => 'agent',
                 'suggested_actions' => $acoesSugeridas,
                 'tool_results' => [],
+                'conversation_id' => $conversation->getId(),
             ]);
         }
 
-        $result = $this->activeClient()->chat($message, $history, $context);
+        $result = $this->activeClient()->chat($message, $history, $contextData);
         if ($result === null) {
+            $reply = sprintf(
+                '%s está temporariamente indisponível. Tente novamente em instantes.',
+                $this->organismoCopy->lumen(),
+            );
+            $this->conversationManager->addMessage($conversation, 'assistant', $reply);
+
             return $this->json([
-                'reply' => sprintf(
-                    '%s está temporariamente indisponível. Tente novamente em instantes.',
-                    $this->organismoCopy->lumen(),
-                ),
+                'reply' => $reply,
                 'source' => 'offline',
                 'suggested_actions' => [],
+                'conversation_id' => $conversation->getId(),
             ]);
         }
 
-        return $this->json($result);
+        // Salvar resposta do assistente
+        $this->conversationManager->addMessage($conversation, 'assistant', $result['reply'] ?? '', $result);
+
+        return $this->json(array_merge($result, ['conversation_id' => $conversation->getId()]));
     }
 
     /**
