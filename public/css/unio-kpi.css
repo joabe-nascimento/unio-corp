@@ -5,17 +5,30 @@
 /* ── Container ── */
 .org-kpi-strip {
     --kpi-radius: 16px;
-    --kpi-shadow: 0 8px 28px rgba(30, 42, 58, 0.07);
-    --kpi-shadow-hover: 0 14px 36px rgba(75, 114, 190, 0.14);
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
     gap: 0;
+    width: 100%;
+    max-width: 100%;
     background: var(--org-surface, #fff);
     border: 1px solid var(--org-border-soft, #e4eaf4);
     border-radius: var(--kpi-radius);
     overflow: hidden;
-    box-shadow: var(--kpi-shadow);
+    box-shadow: none;
 }
+
+/* Strip: colunas fixas por data-count (sem auto-fit = sem coluna fantasma) */
+.org-kpi-strip--strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.org-kpi-strip--strip[data-count="1"] { grid-template-columns: minmax(0, 1fr); }
+.org-kpi-strip--strip[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.org-kpi-strip--strip[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.org-kpi-strip--strip[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.org-kpi-strip--strip[data-count="5"] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.org-kpi-strip--strip[data-count="6"] { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.org-kpi-strip--strip[data-count="7"] { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.org-kpi-strip--strip[data-count="8"] { grid-template-columns: repeat(8, minmax(0, 1fr)); }
 
 .org-kpi-strip--tiles {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -36,20 +49,6 @@
 .org-kpi-strip--compact {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     border-radius: 12px;
-}
-
-/* Colunas fixas por contagem real de itens (desktop) — corrige a faixa
-   "fantasma" que sobrava na borda direita com auto-fit/minmax quando a
-   largura do container não é múltipla exata da coluna mínima. */
-@media (min-width: 768px) {
-    .org-kpi-strip--strip[data-count="1"] { grid-template-columns: minmax(0, 1fr); }
-    .org-kpi-strip--strip[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .org-kpi-strip--strip[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .org-kpi-strip--strip[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .org-kpi-strip--strip[data-count="5"] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-    .org-kpi-strip--strip[data-count="6"] { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-    .org-kpi-strip--strip[data-count="7"] { grid-template-columns: repeat(7, minmax(0, 1fr)); }
-    .org-kpi-strip--strip[data-count="8"] { grid-template-columns: repeat(8, minmax(0, 1fr)); }
 }
 
 .org-kpi-strip--compact .org-kpi-strip__item {
