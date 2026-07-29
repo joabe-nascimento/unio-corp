@@ -1,0 +1,189 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Previsão de Êxito · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Previsão de Êxito' %}
+
+{% block page_list_kpis %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-brain" aria-hidden="true"></i> Inteligência Jurídica · Scoring explicável</span>
+        <h2 class="jur-proc-hero__title">Radar de risco da carteira</h2>
+        <p class="jur-proc-hero__text">
+            {% if overview.total == 0 %}
+                Cadastre processos ativos para ver aqui o score de êxito de cada um, com fatores 100% explicáveis.
+            {% else %}
+                <strong>{{ overview.total }}</strong> processo{{ overview.total != 1 ? 's' : '' }} ativo{{ overview.total != 1 ? 's' : '' }} avaliado{{ overview.total != 1 ? 's' : '' }},
+                score médio de <strong>{{ overview.media|number_format(1, ',', '.') }}</strong> pontos.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <a href="{{ path('app_juridico_processos') }}" class="btn-unio-ghost btn-sm jur-proc-hero__ghost">
+                <i class="fas fa-scale-balanced mr-1" aria-hidden="true"></i> Ver processos
+            </a>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Quais fatores mais influenciam a previsão de êxito da minha carteira e o que eu deveria priorizar?">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
+        </div>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: overview.total, label: 'Processos avaliados', sub: 'Carteira ativa', icon: 'fa-folder-open', tone: 'sky' },
+        { value: overview.media, label: 'Score médio', sub: 'De 0 a 100', icon: 'fa-gauge-high', tone: 'lavender' },
+        { value: overview.distribuicao.alto, label: 'Probabilidade alta', sub: 'Score ≥ 70', icon: 'fa-circle-check', tone: 'sage' },
+        { value: overview.distribuicao.baixo, label: 'Probabilidade baixa', sub: 'Score < 45 — atenção', icon: 'fa-triangle-exclamation', tone: overview.distribuicao.baixo > 0 ? 'rose' : 'sage', pulse: overview.distribuicao.baixo > 0 },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_juridico_analytics') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-chart-line mr-1" aria-hidden="true"></i> Analytics Jurídico
+</a>
+<a href="{{ path('app_juridico_modulo', { slug: 'predicao' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_previsao_exito') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Área',
+            name: 'area',
+            value: filter_area|default(''),
+            min_width: '160px',
+            options: [{ value: '', label: 'Todas as áreas' }]|merge(overview.areas|map(a => { value: a, label: a }))
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Nível',
+            name: 'nivel',
+            value: filter_nivel|default(''),
+            min_width: '160px',
+            options: [
+                { value: '', label: 'Todos os níveis' },
+                { value: 'alto', label: 'Probabilidade alta' },
+                { value: 'medio', label: 'Probabilidade moderada' },
+                { value: 'baixo', label: 'Probabilidade baixa' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Ordenar',
+            name: 'ordenar',
+            value: filter_ordenar|default('score_asc'),
+            min_width: '180px',
+            options: [
+                { value: 'score_asc', label: 'Maior risco primeiro' },
+                { value: 'score_desc', label: 'Maior score primeiro' },
+                { value: 'valor_desc', label: 'Maior valor de causa' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_previsao_exito'),
+            has_filters: filter_area|default('') or filter_nivel|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+{% if overview.total == 0 %}
+    {% include 'components/empty_state.html.twig' with {
+        icon: 'fa-brain',
+        title: 'Ainda sem processos para avaliar',
+        text: 'Cadastre processos ativos para que a Sasha calcule o score de êxito de cada um automaticamente.',
+        btn_label: 'Ir para Processos',
+        btn_href: path('app_juridico_processos'),
+        btn_icon: 'fa-plus',
+        btn_sm: true,
+        compact: true
+    } %}
+{% else %}
+
+{% if overview.top_risco|length > 0 %}
+<section class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Maior atenção agora',
+        subtitle: 'Os ' ~ overview.top_risco|length ~ ' processo(s) com menor score de êxito da carteira'
+    } %}
+    <div class="px-3 pb-3">
+        <div class="row g-3">
+            {% for item in overview.top_risco %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ path('app_juridico_processo_show', { id: item.processo.id }) }}" class="jur-risco-card jur-risco-card--link" style="border-left-color: {{ item.previsao.cor }};">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <code class="text-muted" style="font-size: 0.8rem;">{{ item.processo.numero }}</code>
+                        <span class="badge" style="background: {{ item.previsao.cor }}1a; color: {{ item.previsao.cor }}; font-weight: 700;">{{ item.previsao.score }}</span>
+                    </div>
+                    <div class="mt-1 small text-muted">{{ item.processo.cliente ? item.processo.cliente.nome : 'Cliente não informado' }} · {{ item.processo.area|default('Área não informada') }}</div>
+                    <div class="mt-1" style="font-size: 0.82rem; color: {{ item.previsao.cor }};">{{ item.previsao.label }}</div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<div class="unio-card">
+    {% set _criticos = overview.distribuicao.baixo %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: overview.itens|length,
+        label_singular: 'processo na visão filtrada',
+        label_plural: 'processos na visão filtrada',
+        extra_html: _criticos > 0 ? '<span class="jur-table-meta-highlight"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ' ~ _criticos ~ ' com probabilidade baixa</span>' : ''
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Cliente</th>
+                    <th>Área</th>
+                    <th>Fase</th>
+                    <th>Valor</th>
+                    <th>Score</th>
+                    <th>Probabilidade</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in overview.itens %}
+                <tr>
+                    <td><code class="text-muted" style="font-size: 0.85rem;">{{ item.processo.numero }}</code></td>
+                    <td>{{ item.processo.cliente ? item.processo.cliente.nome : '—' }}</td>
+                    <td>{% if item.processo.area %}<span class="badge badge-soft-primary">{{ item.processo.area }}</span>{% else %}—{% endif %}</td>
+                    <td>{{ item.processo.fase|capitalize }}</td>
+                    <td>{{ item.processo.valor ? 'R$ ' ~ item.processo.valor|number_format(2, ',', '.') : '—' }}</td>
+                    <td>
+                        <div class="jur-score-bar" title="{{ item.previsao.score }}/100">
+                            <div class="jur-score-bar__fill" style="width: {{ item.previsao.score }}%; background: {{ item.previsao.cor }};"></div>
+                            <span class="jur-score-bar__value">{{ item.previsao.score }}</span>
+                        </div>
+                    </td>
+                    <td><span class="badge" style="background: {{ item.previsao.cor }}1a; color: {{ item.previsao.cor }};">{{ item.previsao.label }}</span></td>
+                    <td class="text-right">
+                        <a href="{{ path('app_juridico_processo_show', { id: item.processo.id }) }}" class="btn-unio-ghost btn-sm">
+                            <i class="fas fa-arrow-right mr-1" aria-hidden="true"></i>Abrir
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.jur-risco-card { display: block; border-left: 3px solid; border-radius: 10px; background: var(--card-bg, #fff); box-shadow: 0 1px 3px rgba(0,0,0,.06); padding: .75rem .9rem; text-decoration: none; color: inherit; transition: transform .15s ease, box-shadow .15s ease; }
+.jur-risco-card--link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); text-decoration: none; color: inherit; }
+.jur-score-bar { position: relative; width: 100px; height: 18px; border-radius: 9px; background: rgba(0,0,0,.06); overflow: hidden; }
+.jur-score-bar__fill { position: absolute; inset: 0 auto 0 0; height: 100%; border-radius: 9px; }
+.jur-score-bar__value { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; height: 100%; font-size: .72rem; font-weight: 700; color: #1c2430; mix-blend-mode: difference; filter: invert(1) grayscale(1) contrast(2); }
+</style>
+{% endblock %}

@@ -101,6 +101,27 @@ class JuridicoHonorarioLancamentoRepository extends ServiceEntityRepository
         return $out;
     }
 
+    public function sumReceitaMesPorArea(Empresa $empresa, string $area, ?string $mes = null): float
+    {
+        $mes ??= (new \DateTimeImmutable('today'))->format('Y-m');
+        [$ano, $mesNum] = explode('-', $mes);
+        $inicio = new \DateTimeImmutable("{$ano}-{$mesNum}-01");
+        $fim = $inicio->modify('first day of next month');
+
+        return (float) $this->createQueryBuilder('l')
+            ->select('COALESCE(SUM(l.horas * l.valorHora), 0)')
+            ->innerJoin('l.processo', 'p')
+            ->andWhere('l.empresa = :empresa')
+            ->andWhere('p.area = :area')
+            ->andWhere('l.data >= :inicio AND l.data < :fim')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('area', $area)
+            ->setParameter('inicio', $inicio)
+            ->setParameter('fim', $fim)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function sumReceitaMes(Empresa $empresa, ?string $mes = null): float
     {
         $mes ??= (new \DateTimeImmutable('today'))->format('Y-m');

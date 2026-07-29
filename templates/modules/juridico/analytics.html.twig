@@ -43,6 +43,12 @@
 <a href="{{ path('app_juridico_processos') }}" class="btn-unio-ghost btn-sm">
     <i class="fas fa-scale-balanced mr-1" aria-hidden="true"></i> Processos
 </a>
+<a href="{{ path('app_juridico_previsao_exito') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-brain mr-1" aria-hidden="true"></i> Previsão de Êxito
+</a>
+<button type="button" class="btn-unio-ghost btn-sm" onclick="window.print()" title="Exportar este painel em PDF (imprimir → salvar como PDF)">
+    <i class="fas fa-file-pdf mr-1" aria-hidden="true"></i> Exportar PDF
+</button>
 <a href="{{ path('app_juridico_modulo', { slug: 'analytics' }) }}" class="btn-unio-ghost btn-sm">
     <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
 </a>
@@ -73,6 +79,105 @@
     } only %}
 </div>
 {% endif %}
+
+<section class="unio-card jur-metas-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Metas do mês',
+        subtitle: 'Receita ou taxa de êxito — por escritório, área ou advogado'
+    } %}
+    <div class="px-3 pb-3">
+        <form method="get" action="{{ path('app_juridico_analytics') }}" class="d-flex align-items-center gap-2 mb-3">
+            {% if consolidado %}<input type="hidden" name="grupo" value="1">{% endif %}
+            <label class="small text-muted mb-0" for="periodo_metas">Período:</label>
+            <input type="month" id="periodo_metas" name="periodo_metas" value="{{ periodo_metas }}" class="filter-select" style="max-width:160px;" onchange="this.form.submit()">
+        </form>
+
+        {% if metas|length == 0 %}
+            <p class="text-muted small mb-3">Nenhuma meta cadastrada para {{ periodo_metas }} ainda. Cadastre uma meta abaixo para acompanhar o progresso real da carteira.</p>
+        {% else %}
+        <div class="row g-3 mb-3">
+            {% for item in metas %}
+            {% set m = item.meta %}
+            {% set _cor = item.atingida ? '#2fbf71' : (item.percentual >= 60 ? '#e8a33d' : '#e05260') %}
+            <div class="col-md-6 col-lg-4">
+                <div class="jur-meta-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="jur-meta-card__label">{{ m.tipo == 'receita' ? 'Receita' : 'Taxa de êxito' }}</div>
+                            <div class="jur-meta-card__scope">{{ m.escopoLabel }}</div>
+                        </div>
+                        <form method="post" action="{{ path('app_juridico_analytics_meta_excluir', { id: m.id }) }}" onsubmit="return confirm('Remover esta meta?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_meta_excluir_' ~ m.id) }}">
+                            <input type="hidden" name="periodo" value="{{ periodo_metas }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm" title="Remover meta"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                        </form>
+                    </div>
+                    <div class="jur-meta-card__bar">
+                        <div class="jur-meta-card__bar-fill" style="width: {{ item.percentual > 100 ? 100 : item.percentual }}%; background: {{ _cor }};"></div>
+                    </div>
+                    <div class="jur-meta-card__values">
+                        <span style="color: {{ _cor }}; font-weight: 700;">{{ item.percentual }}%</span>
+                        <span class="text-muted">
+                            {% if m.tipo == 'receita' %}
+                                R$ {{ item.atual|number_format(0, ',', '.') }} / R$ {{ m.valorMeta|number_format(0, ',', '.') }}
+                            {% else %}
+                                {{ item.atual|number_format(1, ',', '.') }}% / {{ m.valorMeta|number_format(0, ',', '.') }}%
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <details class="jur-meta-form-details">
+            <summary class="btn-unio-ghost btn-sm" style="display:inline-flex; cursor:pointer;"><i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova meta</summary>
+            <form method="post" action="{{ path('app_juridico_analytics_meta_nova') }}" class="row g-2 mt-2 align-items-end">
+                <input type="hidden" name="_token" value="{{ csrf_token('juridico_meta_form') }}">
+                <input type="hidden" name="periodo" value="{{ periodo_metas }}">
+                <div class="col-sm-6 col-md-3">
+                    <label class="small text-muted mb-1">Tipo</label>
+                    <select name="tipo" class="form-control form-control-sm">
+                        <option value="receita">Receita (R$)</option>
+                        <option value="taxa_exito">Taxa de êxito (%)</option>
+                    </select>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="small text-muted mb-1">Escopo</label>
+                    <select name="escopo" class="form-control form-control-sm" data-meta-escopo-select onchange="
+                        this.closest('form').querySelector('[data-meta-area]').style.display = this.value === 'area' ? '' : 'none';
+                        this.closest('form').querySelector('[data-meta-responsavel]').style.display = this.value === 'responsavel' ? '' : 'none';
+                    ">
+                        <option value="escritorio">Escritório inteiro</option>
+                        <option value="area">Por área</option>
+                        <option value="responsavel">Por advogado</option>
+                    </select>
+                </div>
+                <div class="col-sm-6 col-md-3" data-meta-area style="display:none;">
+                    <label class="small text-muted mb-1">Área</label>
+                    <input type="text" name="area" class="form-control form-control-sm" placeholder="Ex.: Trabalhista">
+                </div>
+                <div class="col-sm-6 col-md-3" data-meta-responsavel style="display:none;">
+                    <label class="small text-muted mb-1">Advogado</label>
+                    <select name="responsavel_id" class="form-control form-control-sm">
+                        <option value="">Selecione…</option>
+                        {% for r in responsaveis|default([]) %}
+                        <option value="{{ r.id }}">{{ r.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-6 col-md-2">
+                    <label class="small text-muted mb-1">Valor da meta</label>
+                    <input type="text" name="valor_meta" class="form-control form-control-sm" placeholder="Ex.: 50000 ou 75">
+                </div>
+                <div class="col-sm-6 col-md-2">
+                    <button type="submit" class="btn-unio btn-sm btn-block"><i class="fas fa-check mr-1" aria-hidden="true"></i> Salvar meta</button>
+                </div>
+            </form>
+        </details>
+    </div>
+</section>
 
 <section class="unio-card jur-grupo-card">
     {% include 'components/section_header.html.twig' with {
@@ -119,6 +224,28 @@
         {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.jur-meta-card { border: 1px solid rgba(0,0,0,.08); border-radius: 12px; padding: .85rem 1rem; height: 100%; background: var(--card-bg, #fff); }
+.jur-meta-card__label { font-weight: 700; font-size: .85rem; }
+.jur-meta-card__scope { font-size: .78rem; color: var(--text-muted, #7a8699); margin-top: 2px; }
+.jur-meta-card__bar { position: relative; height: 8px; border-radius: 4px; background: rgba(0,0,0,.06); margin: .6rem 0 .4rem; overflow: hidden; }
+.jur-meta-card__bar-fill { height: 100%; border-radius: 4px; transition: width .3s ease; }
+.jur-meta-card__values { display: flex; justify-content: space-between; align-items: center; font-size: .8rem; }
+.jur-meta-form-details summary::-webkit-details-marker { display: none; }
+@media print {
+    .main-sidebar, .main-header, .section-toolbar, .page-list-toolbar-actions,
+    .helix-panel, .helix-dock, .content-wrapper > .unio-alerts, .jur-grupo-card,
+    .toolbar-controls-dual, .breadcrumb, .main-footer { display: none !important; }
+    .content-wrapper, .app-inset-main, .wrapper { width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+    .unio-card { box-shadow: none !important; border: 1px solid #dfe3e8 !important; break-inside: avoid; }
+    body { background: #fff !important; }
+    .jur-proc-hero { background: none !important; color: #1c2430 !important; }
+}
+</style>
 {% endblock %}
 
 {% block javascripts %}

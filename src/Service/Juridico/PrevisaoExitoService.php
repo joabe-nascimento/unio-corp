@@ -28,6 +28,87 @@ final class PrevisaoExitoService
     }
 
     /**
+     * Visão de carteira: score de todos os processos não encerrados da empresa,
+     * com filtro por área/nível e ordenação — base do painel "Previsão de Êxito".
+     *
+     * @return array{
+     *     itens: list<array{processo: JuridicoProcesso, previsao: array}>,
+     *     total: int,
+     *     media: float,
+     *     distribuicao: array{alto: int, medio: int, baixo: int},
+     *     top_risco: list<array{processo: JuridicoProcesso, previsao: array}>,
+     *     areas: list<string>
+     * }
+     */
+    public function overview(Empresa $empresa, ?string $area = null, ?string $nivel = null, string $ordenar = 'score_asc'): array
+    {
+        $processos = array_values(array_filter(
+            $this->processoRepo->findForEmpresa($empresa),
+            static fn (JuridicoProcesso $p) => $p->getStatus() !== JuridicoProcesso::STATUS_ENCERRADO,
+        ));
+
+        $areas = [];
+        foreach ($processos as $p) {
+            $a = $p->getArea() !== null && $p->getArea() !== '' ? $p->getArea() : 'Não informada';
+            if (!\in_array($a, $areas, true)) {
+                $areas[] = $a;
+            }
+        }
+        sort($areas);
+
+        $itens = [];
+        foreach ($processos as $processo) {
+            $processoArea = $processo->getArea() !== null && $processo->getArea() !== '' ? $processo->getArea() : 'Não informada';
+            if ($area !== null && $area !== '' && $processoArea !== $area) {
+                continue;
+            }
+
+            $previsao = $this->prever($processo);
+            if ($nivel !== null && $nivel !== '' && $previsao['nivel'] !== $nivel) {
+                continue;
+            }
+
+            $itens[] = ['processo' => $processo, 'previsao' => $previsao];
+        }
+
+        $distribuicao = ['alto' => 0, 'medio' => 0, 'baixo' => 0];
+        $soma = 0;
+        foreach ($itens as $item) {
+            ++$distribuicao[$item['previsao']['nivel']];
+            $soma += $item['previsao']['score'];
+        }
+        $total = \count($itens);
+        $media = $total > 0 ? round($soma / $total, 1) : 0.0;
+
+        usort($itens, static function (array $a, array $b) use ($ordenar): int {
+            return match ($ordenar) {
+                'score_desc' => $b['previsao']['score'] <=> $a['previsao']['score'],
+                'valor_desc' => (float) ($b['processo']->getValor() ?? 0) <=> (float) ($a['processo']->getValor() ?? 0),
+                default => $a['previsao']['score'] <=> $b['previsao']['score'],
+            };
+        });
+
+        $topRisco = array_slice(
+            (static function (array $itens) {
+                usort($itens, static fn (array $a, array $b) => $a['previsao']['score'] <=> $b['previsao']['score']);
+
+                return $itens;
+            })($itens),
+            0,
+            5,
+        );
+
+        return [
+            'itens' => $itens,
+            'total' => $total,
+            'media' => $media,
+            'distribuicao' => $distribuicao,
+            'top_risco' => $topRisco,
+            'areas' => $areas,
+        ];
+    }
+
+    /**
      * @return array{score: int, nivel: string, label: string, cor: string, fatores: list<FatorPrevisao>}
      */
     public function prever(JuridicoProcesso $processo): array

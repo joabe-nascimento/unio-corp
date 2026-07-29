@@ -2,8 +2,13 @@
 
 namespace App\Controller\Module\Juridico;
 
+use App\Entity\JuridicoMeta;
+use App\Entity\User;
+use App\Exception\JuridicoProcessException;
 use App\Repository\EmpresaRepository;
+use App\Repository\UserRepository;
 use App\Service\Juridico\JuridicoAnalyticsService;
+use App\Service\Juridico\JuridicoMetaService;
 use App\Service\WorkspaceService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,7 +26,9 @@ class JuridicoAnalyticsController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private JuridicoAnalyticsService $analytics,
+        private JuridicoMetaService $metas,
         private EmpresaRepository $empresaRepo,
+        private UserRepository $userRepo,
         private EntityManagerInterface $em,
     ) {
     }
@@ -37,6 +44,7 @@ class JuridicoAnalyticsController extends AbstractController
         $empresa = $this->requireEmpresa();
         $temGrupo = $empresa->isMatriz() || $empresa->isFilial();
         $consolidado = $temGrupo && $request->query->getBoolean('grupo', $empresa->isMatriz());
+        $periodoMetas = (string) $request->query->get('periodo_metas', '') ?: (new \DateTimeImmutable('today'))->format('Y-m');
 
         return $this->render('modules/juridico/analytics.html.twig', [
             'kpis' => $this->analytics->kpis($empresa, $consolidado),
@@ -48,7 +56,47 @@ class JuridicoAnalyticsController extends AbstractController
             'codigo_grupo' => $empresa->getCodigoGrupo(),
             'filiais' => $empresa->isMatriz() ? $empresa->getFiliais() : [],
             'empresa_matriz' => $empresa->getEmpresaMatriz(),
+            'metas' => $this->metas->progresso($empresa, $periodoMetas),
+            'periodo_metas' => $periodoMetas,
+            'responsaveis' => $this->userRepo->findBy(['empresa' => $empresa], ['nome' => 'ASC']),
         ]);
+    }
+
+    #[Route('/metas', name: 'app_juridico_analytics_meta_nova', methods: ['POST'])]
+    public function novaMeta(Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $this->requireCsrf($request, 'juridico_meta_form');
+
+        $usuario = $this->getUser();
+
+        try {
+            $this->metas->create($empresa, $request->request->all(), $usuario instanceof User ? $usuario : null);
+            $this->addFlash('success', 'Meta cadastrada.');
+        } catch (JuridicoProcessException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_juridico_analytics', array_filter([
+            'periodo_metas' => (string) $request->request->get('periodo', ''),
+        ]));
+    }
+
+    #[Route('/metas/{id}/excluir', name: 'app_juridico_analytics_meta_excluir', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function excluirMeta(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $this->requireCsrf($request, 'juridico_meta_excluir_' . $id);
+
+        $meta = $this->em->getRepository(JuridicoMeta::class)->findOneBy(['id' => $id, 'empresa' => $empresa]);
+        if ($meta) {
+            $this->metas->delete($meta);
+            $this->addFlash('success', 'Meta removida.');
+        }
+
+        return $this->redirectToRoute('app_juridico_analytics', array_filter([
+            'periodo_metas' => (string) $request->request->get('periodo', ''),
+        ]));
     }
 
     #[Route('/grupo/gerar-codigo', name: 'app_juridico_analytics_gerar_codigo', methods: ['POST'])]
