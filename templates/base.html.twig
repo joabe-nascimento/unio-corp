@@ -103,7 +103,7 @@
 {% if app.user %}
 <link rel="stylesheet" href="{{ asset('css/ti-chat-widget.css') }}?v=4">
 <link rel="stylesheet" href="{{ asset('css/helix-enhancements.css') }}?v=7">
-<link rel="stylesheet" href="{{ asset('css/helix-chat-redesign.css') }}?v=6">
+<link rel="stylesheet" href="{{ asset('css/helix-chat-redesign.css') }}?v=7">
 {% endif %}
 </head>
 {% import 'macros/helix.html.twig' as helix %}
@@ -1351,7 +1351,12 @@ window.addEventListener('load', runShellSidebarControls);
         openBtn.classList.add('is-active');
         document.body.classList.add('helix-open');
         
-        setTimeout(function () { if (input) input.focus(); }, 200);
+        setTimeout(function () {
+            if (input) {
+                growHelixInput();
+                input.focus();
+            }
+        }, 200);
         renderHistory();
     }
 
@@ -1582,6 +1587,8 @@ window.addEventListener('load', runShellSidebarControls);
 
     renderHistory();
     updateSendState();
+    growHelixInput();
+    window.addEventListener('resize', growHelixInput);
 
     if (isStudio) {
         openPanel();
