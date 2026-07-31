@@ -3,16 +3,19 @@
 {% set _org = organismo.enabled|default(false) %}
 {% set _clinic = org_clinic|default(false) %}
 {% set _juridico = org_juridico|default(false) %}
+{% set _studio = app.request.attributes.get('_route') == 'app_juridico_sasha_studio' %}
 {% set _copy = organismo.copy|default({}) %}
 {% set _assistant = _juridico ? 'Sasha' : (_org ? _copy.lumen|default('Lumen') : 'Sasha') %}
-{% set _subtitle = _org ? (_clinic ? (_copy.lumen_subtitle|default('Assistente clínico')) : (_juridico ? (_copy.lumen_subtitle|default('Assistente jurídica')) : (_copy.lumen_subtitle|default('Consciência da colônia')))) : 'Assistente virtual' %}
+{% set _subtitle = _studio
+    ? 'Studio · workspace jurídico'
+    : (_org ? (_clinic ? (_copy.lumen_subtitle|default('Assistente clínico')) : (_juridico ? (_copy.lumen_subtitle|default('Assistente jurídica')) : (_copy.lumen_subtitle|default('Consciência da colônia')))) : 'Assistente virtual') %}
 {% set _slogan = _copy.brand_slogan|default('Saúde que acompanha.') %}
 {% set _avatar_src = _juridico ? 'images/marketing/sasha-assistant-juridico.jpg' : 'images/avatar.jpg' %}
 {% set _prazos_criticos = org_juridico_prazos_criticos|default(0) %}
 
 <div id="helixPanel"
-     class="helix-panel{% if _org %} helix-panel--lumen{% endif %}"
-     aria-hidden="true"
+     class="helix-panel{% if _org %} helix-panel--lumen{% endif %}{% if _studio %} helix-panel--studio{% endif %}"
+     aria-hidden="{{ _studio ? 'false' : 'true' }}"
      {% if app.user %} data-user-first="{{ app.user.nome|split(' ')|first|e('html_attr') }}"{% endif %}
      data-sasha-chat-url="{{ path('api_sasha_chat') }}"
      data-sasha-tools-url="{{ path('api_sasha_tools') }}"
@@ -21,31 +24,147 @@
      data-organismo="{{ _org ? '1' : '0' }}"
      data-clinic="{{ _clinic ? '1' : '0' }}"
      data-juridico="{{ _juridico ? '1' : '0' }}"
+     data-studio="{{ _studio ? '1' : '0' }}"
+     data-studio-exit="{{ path('app_dashboard') }}"
      data-brand-slogan="{{ _slogan|e('html_attr') }}">
     <div class="helix-backdrop" data-helix-close tabindex="-1" aria-hidden="true"></div>
 
-    <aside class="helix-drawer" role="dialog" aria-modal="true" aria-labelledby="helixTitle">
+    <aside class="helix-drawer" role="dialog" aria-modal="{{ _studio ? 'false' : 'true' }}" aria-labelledby="helixTitle">
         <header class="helix-header">
             <div class="helix-header-brand">
                 {{ helix.avatar('md', false, _avatar_src) }}
                 <div class="helix-header-text">
-                    <h2 id="helixTitle" class="helix-title">{{ _assistant }}</h2>
+                    <h2 id="helixTitle" class="helix-title">{{ _assistant }}{% if _studio %} <span class="helix-title-badge">Studio</span>{% endif %}</h2>
                     <p class="helix-subtitle">{{ _subtitle }}</p>
                 </div>
             </div>
             <div class="helix-header-actions">
                 {% if not _org %}<span class="helix-badge-soon">Em breve</span>{% endif %}
+                {% if _juridico %}
+                <button type="button"
+                        class="helix-lex-toggle"
+                        id="helixLexToggle"
+                        aria-pressed="false"
+                        title="Modo Lex — raciocínio superior e agentes ampliados">
+                    <i class="fas fa-gem" aria-hidden="true"></i>
+                    <span>Lex</span>
+                </button>
+                {% if not _studio %}
+                <a href="{{ path('app_juridico_sasha_studio') }}"
+                   class="helix-studio-launch"
+                   title="Abrir Studio — tela dedicada de bate-papo"
+                   aria-label="Abrir Studio Sasha">
+                    <i class="fas fa-expand" aria-hidden="true"></i>
+                    <span>Studio</span>
+                </a>
+                {% endif %}
+                {% endif %}
                 <button type="button" class="helix-history-toggle" id="helixHistoryToggle" aria-label="Histórico de conversas" aria-expanded="false" aria-controls="helixHistoryList">
                     <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
                     <span class="helix-history-toggle-count" id="helixHistoryToggleCount" data-count="0"></span>
                 </button>
+                {% if _studio %}
+                <a href="{{ path('app_dashboard') }}" class="helix-close-btn helix-studio-exit" aria-label="Sair do Studio" title="Voltar ao Pulso">
+                    <i class="fas fa-arrow-right-from-bracket"></i>
+                </a>
+                {% else %}
                 <button type="button" class="helix-close-btn" data-helix-close aria-label="Fechar">
                     <i class="fas fa-times"></i>
                 </button>
+                {% endif %}
             </div>
         </header>
 
-        <div class="helix-body">
+        <div class="helix-body{% if _studio and _juridico %} helix-body--studio{% endif %}">
+            {% if _studio and _juridico %}
+            <aside class="helix-studio-rail" aria-label="Atalhos do dia a dia">
+                <div class="helix-studio-rail__brand">
+                    <span class="helix-studio-rail__eyebrow">Workspace</span>
+                    <strong class="helix-studio-rail__name">Studio {{ _assistant }}</strong>
+                </div>
+
+                <section class="helix-studio-section">
+                    <h3 class="helix-studio-section__title">Hoje</h3>
+                    <div class="helix-studio-actions">
+                        <button type="button" class="helix-studio-action" data-helix-prompt="Liste todos os prazos pendentes e destaque os críticos.">
+                            <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                            <span>Prazos críticos{% if _prazos_criticos > 0 %} <em>{{ _prazos_criticos }}</em>{% endif %}</span>
+                        </button>
+                        <button type="button" class="helix-studio-action" data-helix-tool="tarefas_urgentes">
+                            <i class="fas fa-bolt" aria-hidden="true"></i>
+                            <span>Tarefas urgentes</span>
+                        </button>
+                        <button type="button" class="helix-studio-action" data-helix-tool="analisar_carteira">
+                            <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                            <span>Pulse da carteira</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="helix-studio-section">
+                    <h3 class="helix-studio-section__title">Produzir</h3>
+                    <div class="helix-studio-actions">
+                        <button type="button" class="helix-studio-action" data-helix-prompt="Preciso de uma minuta de petição. Me peça o tipo e os fatos essenciais.">
+                            <i class="fas fa-file-signature" aria-hidden="true"></i>
+                            <span>Gerar minuta</span>
+                        </button>
+                        <button type="button" class="helix-studio-action" data-helix-prompt="Analise os riscos deste contrato para mim">
+                            <i class="fas fa-file-contract" aria-hidden="true"></i>
+                            <span>Analisar contrato</span>
+                        </button>
+                        <button type="button" class="helix-studio-action" data-helix-prompt="Resuma este documento para mim">
+                            <i class="fas fa-align-left" aria-hidden="true"></i>
+                            <span>Resumir peça</span>
+                        </button>
+                        <button type="button" class="helix-studio-action" data-helix-prompt="Calcule o prazo para apelação considerando a data de hoje.">
+                            <i class="fas fa-calculator" aria-hidden="true"></i>
+                            <span>Calcular prazo</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="helix-studio-section">
+                    <h3 class="helix-studio-section__title">Pesquisar</h3>
+                    <div class="helix-studio-actions">
+                        <button type="button" class="helix-studio-action" data-helix-prompt="Pesquise jurisprudência relevante no STJ sobre o tema que eu descrever.">
+                            <i class="fas fa-book-open" aria-hidden="true"></i>
+                            <span>Jurisprudência</span>
+                        </button>
+                        <button type="button" class="helix-studio-action" data-helix-prompt="Consultar andamento oficial de um processo no DataJud.">
+                            <i class="fas fa-landmark" aria-hidden="true"></i>
+                            <span>DataJud</span>
+                        </button>
+                        <button type="button" class="helix-studio-action" data-helix-prompt="Qual a previsão de êxito do meu processo?">
+                            <i class="fas fa-brain" aria-hidden="true"></i>
+                            <span>Previsão de êxito</span>
+                        </button>
+                        <button type="button" class="helix-studio-action helix-studio-action--lex" data-helix-prompt="No Modo Lex, monte uma estratégia completa para o caso que eu descrever: risco, fundamento e próximo passo.">
+                            <i class="fas fa-gem" aria-hidden="true"></i>
+                            <span>Estratégia Lex</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="helix-studio-section helix-studio-section--links">
+                    <h3 class="helix-studio-section__title">Plataforma</h3>
+                    <div class="helix-studio-links">
+                        <a href="{{ path('app_juridico_agente_autonomo') }}" class="helix-studio-link">
+                            <i class="fas fa-robot" aria-hidden="true"></i> Agente 24/7
+                        </a>
+                        <a href="{{ path('app_juridico_processos') }}" class="helix-studio-link">
+                            <i class="fas fa-scale-balanced" aria-hidden="true"></i> Processos
+                        </a>
+                        <a href="{{ path('app_juridico_analytics') }}" class="helix-studio-link">
+                            <i class="fas fa-chart-line" aria-hidden="true"></i> Analytics
+                        </a>
+                        <a href="{{ path('app_dashboard') }}" class="helix-studio-link">
+                            <i class="fas fa-gauge-high" aria-hidden="true"></i> Pulso
+                        </a>
+                    </div>
+                </section>
+            </aside>
+            {% endif %}
+
             <div class="helix-sidebar" role="complementary" aria-label="Histórico de conversas">
                 <div class="helix-sidebar-head">
                     <span class="helix-sidebar-label">Histórico</span>
@@ -75,7 +194,7 @@
                             <p class="mb-0 helix-msg-muted">Posso ajudar com Pulso, Sala Crítica, pacientes na Trilha e contratos de cuidado.</p>
                             <span class="helix-msg__signature">{{ _slogan }}</span>
                             {% elseif _juridico %}
-                            <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou {{ _assistant }} — assistente jurídica da {{ _copy.brand_name|default('Unio Jurídico') }}.</p>
+                            <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou {{ _assistant }} — assistente jurídica da {{ _copy.brand_name|default('Unio Jurídico') }}{% if _studio %}, no Studio{% endif %}.</p>
                             {% if _prazos_criticos > 0 %}
                             <p class="helix-msg-proactive-alert">
                                 <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
@@ -83,7 +202,7 @@
                                 <button type="button" class="helix-msg-proactive-link" data-helix-prompt="Liste todos os prazos pendentes">Ver prazos agora</button>
                             </p>
                             {% endif %}
-                            <p class="mb-0 helix-msg-muted">Posso calcular prazos processuais, pesquisar jurisprudência, resumir peças, analisar contratos e ajudar com clientes e casos do escritório.</p>
+                            <p class="mb-0 helix-msg-muted">{% if _studio %}Use a coluna da esquerda para atalhos do dia a dia — ou digite livremente.{% else %}Posso calcular prazos processuais, pesquisar jurisprudência, resumir peças, analisar contratos e ajudar com clientes e casos do escritório.{% endif %}</p>
                             <span class="helix-msg__signature">{{ _slogan }}</span>
                             {% else %}
                             <p>Olá{% if app.user %}, {{ app.user.nome|split(' ')|first }}{% endif %}. Sou {{ _assistant }} — {{ _org ? 'a consciência da sua colônia.' : 'sua assistente na Unio.' }}</p>
@@ -100,7 +219,7 @@
                         <button type="button" class="helix-chip" data-helix-prompt="Quais alertas estão na Sala Crítica?">Sala Crítica</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Como atestar um marco na Trilha Unio?">Trilha Unio</button>
                         <button type="button" class="helix-chip" data-helix-prompt="O que a Unio lembra deste paciente?">Memória Unio</button>
-                        {% elseif _juridico %}
+                        {% elseif _juridico and not _studio %}
                         <button type="button" class="helix-chip" data-helix-tool="analisar_carteira">Analisar carteira agora</button>
                         <button type="button" class="helix-chip" data-helix-tool="tarefas_urgentes">Tarefas urgentes</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Calcule o prazo para apelação considerando a data de hoje.">Calcular prazo</button>
@@ -116,6 +235,12 @@
                         <button type="button" class="helix-chip" data-helix-prompt="Registrar prazo de audiência de instrução para 15/09/2026.">Registrar prazo na agenda</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Qual a previsão de êxito do meu processo?">Previsão de êxito</button>
                         <button type="button" class="helix-chip" data-helix-prompt="Consultar andamento oficial de um processo no DataJud.">Consultar tribunal (DataJud)</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Ative o melhor raciocínio: monte uma estratégia completa para um contencioso cível complexo.">Estratégia Lex</button>
+                        {% elseif _juridico and _studio %}
+                        <button type="button" class="helix-chip" data-helix-tool="analisar_carteira">Carteira</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Liste todos os prazos pendentes">Prazos</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="Preciso de uma minuta de petição">Minuta</button>
+                        <button type="button" class="helix-chip" data-helix-prompt="No Modo Lex, monte uma estratégia completa para o caso.">Estratégia Lex</button>
                         {% elseif _org %}
                         <button type="button" class="helix-chip" data-helix-tool="buscar_membro" data-helix-tool-query="Ana">Buscar membro</button>
                         <button type="button" class="helix-chip" data-helix-tool="ferias_pendentes">Férias pendentes</button>
@@ -143,17 +268,19 @@
                                 <span class="helix-tool-btn-dot" aria-hidden="true"></span>
                             </button>
                         </div>
-                        <textarea
-                            id="helixInput"
-                            class="helix-input"
-                            rows="2"
-                            placeholder="{{ _clinic ? 'Pergunte sobre Pulso, pacientes ou a Trilha…' : (_juridico ? 'Pergunte sobre prazos, processos ou jurisprudência…' : (_org ? 'Digite uma intenção…' : 'Mensagem…')) }}"
-                            maxlength="2000"
-                            aria-label="Mensagem"
-                        ></textarea>
-                        <button type="submit" class="helix-send-btn" id="helixSendBtn" aria-label="Enviar" disabled>
-                            <i class="fas fa-arrow-up"></i>
-                        </button>
+                        <div class="helix-input-field">
+                            <textarea
+                                id="helixInput"
+                                class="helix-input"
+                                rows="2"
+                                placeholder="{{ _clinic ? 'Pergunte sobre Pulso, pacientes ou a Trilha…' : (_juridico ? 'Pergunte sobre prazos, processos ou jurisprudência…' : (_org ? 'Digite uma intenção…' : 'Mensagem…')) }}"
+                                maxlength="2000"
+                                aria-label="Mensagem"
+                            ></textarea>
+                            <button type="submit" class="helix-send-btn" id="helixSendBtn" aria-label="Enviar" disabled>
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

@@ -1,0 +1,148 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Agente Autônomo · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Agente Autônomo 24/7' %}
+
+{% block page_list_kpis %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow">
+            <i class="fas fa-robot" aria-hidden="true"></i>
+            Inteligência Jurídica · monitoramento proativo
+        </span>
+        <h2 class="jur-proc-hero__title">
+            {% if resumo.ativo %}Agente ativo{% else %}Agente aguardando próxima varredura{% endif %}
+        </h2>
+        <p class="jur-proc-hero__text">
+            Varre prazos, tarefas e carteira a cada 30 minutos — sem depender do chat e sem depender do LLM.
+            {% if resumo.last_run_at %}
+                Última execução há <strong>{{ resumo.minutos_desde_execucao ?? '—' }} min</strong>.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <a href="{{ path('app_juridico_modulo', { slug: 'orquestracao-ia' }) }}" class="btn-unio-ghost btn-sm jur-proc-hero__ghost">
+                <i class="fas fa-gem mr-1" aria-hidden="true"></i> Orquestração Lex
+            </a>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Quais alertas o Agente Autônomo gerou hoje e o que precisa de atenção imediata?">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
+        </div>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: resumo.ativo ? 'Online' : 'Idle', label: 'Status', sub: 'Janela de 90 min', icon: 'fa-signal', tone: resumo.ativo ? 'sage' : 'amber' },
+        { value: resumo.alertas_hoje, label: 'Alertas hoje', sub: 'Deduplicados', icon: 'fa-bell', tone: 'amber' },
+        { value: resumo.total_runs, label: 'Varreduras', sub: 'Histórico acumulado', icon: 'fa-rotate', tone: 'sky' },
+        { value: resumo.empresas_monitoradas, label: 'Escritórios', sub: 'Monitorados', icon: 'fa-building', tone: 'lavender' },
+        { value: resumo.total_alertas, label: 'Alertas totais', sub: 'Desde o início', icon: 'fa-inbox', tone: 'sky' },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_juridico_modulo', { slug: 'agente-autonomo' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+<a href="{{ path('app_juridico_modulo', { slug: 'orquestracao-ia' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-gem mr-1" aria-hidden="true"></i> Orquestração Lex
+</a>
+{% if is_granted('ROLE_ADMIN') %}
+<form method="post" action="{{ path('app_juridico_agente_autonomo_executar') }}" class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('agente_autonomo_run') }}">
+    <button type="submit" class="btn-unio btn-sm">
+        <i class="fas fa-play mr-1" aria-hidden="true"></i> Executar agora
+    </button>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Escritórios na última passagem',
+        subtitle: 'Resultado da varredura mais recente por escritório monitorado'
+    } %}
+    {% if empresas is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-robot',
+            title: 'Ainda sem execuções registradas',
+            text: 'O cron roda a cada 30 minutos. Admins podem disparar uma varredura manual.',
+            compact: true
+        } %}
+    {% else %}
+        {% include 'components/juridico/table_meta_bar.html.twig' with {
+            count: empresas|length,
+            label_singular: 'escritório na última passagem',
+            label_plural: 'escritórios na última passagem',
+            extra_html: resumo.ativo
+                ? '<span class="jur-table-meta-highlight"><i class="fas fa-circle" aria-hidden="true"></i> Agente online</span>'
+                : '<span class="text-muted"><i class="fas fa-moon" aria-hidden="true"></i> Aguardando próxima varredura</span>'
+        } %}
+        <div class="table-responsive">
+            <table class="table table-unio table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Escritório</th>
+                        <th>Última varredura</th>
+                        <th class="text-right">Alertas na execução</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for id, emp in empresas %}
+                    <tr>
+                        <td>
+                            <strong>{{ emp.nome|default('Escritório #' ~ id) }}</strong>
+                            <div class="small text-muted">ID {{ id }}</div>
+                        </td>
+                        <td>
+                            {% if emp.last_run_at %}
+                                <span class="text-muted" style="font-size: 0.9rem;">{{ emp.last_run_at|date('d/m/Y H:i') }}</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            {% set _alertas = emp.alertas_nesta_execucao|default(0) %}
+                            {% if _alertas > 0 %}
+                                <span class="badge badge-warning">{{ _alertas }}</span>
+                            {% else %}
+                                <span class="badge badge-soft-secondary">0</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+
+<section class="unio-card jur-agente-fit mb-0">
+    {% include 'components/section_header.html.twig' with {
+        title: 'Como se encaixa na Sasha',
+        subtitle: 'Duas camadas complementares — monitoramento 24/7 e orquestração no chat'
+    } %}
+    <div class="px-3 pb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="jur-agente-fit__card">
+                    <div class="jur-agente-fit__icon" aria-hidden="true"><i class="fas fa-clock"></i></div>
+                    <h4 class="jur-agente-fit__title">Agente Autônomo</h4>
+                    <p class="jur-agente-fit__text">
+                        Determinístico (banco + cron). Varre prazos e carteira mesmo com o chat fechado — não depende do LLM.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="jur-agente-fit__card jur-agente-fit__card--lex">
+                    <div class="jur-agente-fit__icon" aria-hidden="true"><i class="fas fa-gem"></i></div>
+                    <h4 class="jur-agente-fit__title">Sasha · Modo Lex</h4>
+                    <p class="jur-agente-fit__text">
+                        No Pulso, ative <strong>Lex</strong> para raciocínio superior: router, RAG e agents com tools na Azure.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

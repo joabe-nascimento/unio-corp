@@ -263,10 +263,50 @@
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
+.helix-input-field {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 0;
+    min-height: 52px;
+    padding: 6px 6px 6px 12px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 92%, var(--accent-dim) 8%);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.helix-input-field .helix-input {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    min-height: 40px;
+    padding: 4px 0;
+}
+
+.helix-input-field > .helix-send-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+    align-self: flex-end;
+    margin-bottom: 1px;
+    flex-shrink: 0;
+}
+
 .helix-composer-inner:focus-within {
     border-color: var(--accent);
     box-shadow: 0 4px 20px var(--accent-dim);
     transform: translateY(-1px);
+}
+
+.helix-input-field {
+    border-color: color-mix(in srgb, var(--border) 85%, var(--accent) 15%);
+}
+
+.helix-input-field:focus-within {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent-dim);
 }
 
 .helix-send-btn {
@@ -402,5 +442,356 @@
     }
     .helix-msg-bubble {
         border-radius: 16px;
+    }
+    .helix-composer {
+        padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+    .helix-composer-inner {
+        min-height: 64px;
+        padding: 7px;
+        gap: 5px;
+    }
+    .helix-input-field {
+        min-height: 44px;
+        padding: 4px 4px 4px 10px;
+        border-radius: 14px;
+    }
+    .helix-input-field > .helix-send-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 11px;
+    }
+    .helix-input {
+        font-size: 16px;
+        min-height: 34px;
+    }
+    .helix-tool-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 13px;
+    }
+}
+
+/* ---------- Modo Lex (superior) — estilos canônicos em unio-juridico-theme.css ---------- */
+.helix-lex-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 11px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--nav-hover-bg, rgba(20, 30, 50, 0.06));
+    color: var(--text-3, #6b7280);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.helix-lex-toggle:hover {
+    color: var(--text-1, #1a2332);
+    background: var(--nav-hover-bg, rgba(20, 30, 50, 0.1));
+}
+.helix-lex-toggle.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, #5c1a2e 0%, #8b2e4a 58%, #a3485f 100%);
+    box-shadow: 0 4px 12px rgba(122, 33, 48, 0.28);
+}
+.helix-panel.is-lex-mode .helix-subtitle {
+    font-weight: 600;
+}
+
+/* ---------- Botão Studio (expandir para workspace) ---------- */
+.helix-studio-launch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 11px;
+    border: 1px solid var(--border, rgba(20, 30, 50, 0.12));
+    border-radius: 999px;
+    background: var(--surface, #fff);
+    color: var(--text-2, #4b5563);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    line-height: 1;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.helix-studio-launch:hover {
+    color: var(--accent, #7a2130);
+    border-color: color-mix(in srgb, var(--accent, #7a2130) 35%, transparent);
+    background: var(--accent-dim, rgba(122, 33, 48, 0.08));
+    text-decoration: none;
+}
+.helix-studio-launch i {
+    font-size: 11px;
+}
+
+.helix-title-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #5c1a2e 0%, #8b2e4a 100%);
+    vertical-align: middle;
+}
+
+/* ============================================================
+   STUDIO SASHA — workspace imersivo (tela dedicada)
+   Layout: rail de atalhos | histórico | conversa
+   ============================================================ */
+body[data-sasha-studio="1"] {
+    overflow: hidden !important;
+}
+body[data-sasha-studio="1"] .main-header,
+body[data-sasha-studio="1"] .main-sidebar,
+body[data-sasha-studio="1"] .main-footer,
+body[data-sasha-studio="1"] .content-wrapper,
+body[data-sasha-studio="1"] .control-sidebar,
+body[data-sasha-studio="1"] .helix-dock,
+body[data-sasha-studio="1"] #helixOpenBtn {
+    display: none !important;
+}
+
+body[data-sasha-studio="1"] .helix-panel,
+body[data-sasha-studio="1"] .helix-panel.helix-panel--studio {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    pointer-events: auto;
+    visibility: visible;
+}
+
+body[data-sasha-studio="1"] .helix-backdrop {
+    display: none;
+}
+
+body[data-sasha-studio="1"] .helix-drawer {
+    width: 100vw;
+    max-width: none;
+    height: 100%;
+    max-height: 100dvh;
+    right: 0;
+    left: 0;
+    border-left: none;
+    transform: none !important;
+    box-shadow: none;
+    background:
+        radial-gradient(ellipse at 12% 0%, rgba(122, 33, 48, 0.07) 0%, transparent 42%),
+        radial-gradient(ellipse at 88% 100%, rgba(122, 33, 48, 0.05) 0%, transparent 40%),
+        var(--bg, #f7f8fb);
+}
+
+body[data-sasha-studio="1"] .helix-body--studio {
+    display: grid;
+    grid-template-columns: minmax(220px, 260px) minmax(200px, 240px) minmax(0, 1fr);
+    gap: 0;
+}
+
+/* Rail esquerda — atalhos do dia a dia */
+.helix-studio-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 16px 14px 20px;
+    min-height: 0;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #1a0f14 0%, #2a151c 48%, #1e1218 100%);
+    color: rgba(255, 255, 255, 0.88);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.helix-studio-rail__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 4px 8px;
+}
+.helix-studio-rail__eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+}
+.helix-studio-rail__name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+}
+
+.helix-studio-section__title {
+    margin: 0 0 8px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.helix-studio-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.helix-studio-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 12.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.helix-studio-action i {
+    width: 16px;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+}
+.helix-studio-action:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    transform: translateX(2px);
+}
+.helix-studio-action:hover i {
+    color: #e8a0b0;
+}
+.helix-studio-action em {
+    font-style: normal;
+    margin-left: 4px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #c0392b;
+    color: #fff;
+}
+.helix-studio-action--lex {
+    background: linear-gradient(135deg, rgba(139, 46, 74, 0.35) 0%, rgba(92, 26, 46, 0.2) 100%);
+    border-color: rgba(232, 160, 176, 0.2);
+}
+.helix-studio-action--lex i {
+    color: #e8a0b0;
+}
+
+.helix-studio-links {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.helix-studio-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+    text-decoration: none;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+.helix-studio-link i {
+    width: 16px;
+    text-align: center;
+    font-size: 11px;
+}
+.helix-studio-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    text-decoration: none;
+}
+
+body[data-sasha-studio="1"] .helix-sidebar {
+    width: auto;
+    min-width: 0;
+    background: linear-gradient(180deg, var(--surface, #fff) 0%, var(--bg, #f7f8fb) 100%);
+}
+
+body[data-sasha-studio="1"] .helix-main {
+    background: transparent;
+}
+
+body[data-sasha-studio="1"] .helix-messages {
+    padding: 24px 28px 12px;
+    max-width: 920px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+body[data-sasha-studio="1"] .helix-suggestions,
+body[data-sasha-studio="1"] .helix-composer {
+    max-width: 920px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body[data-sasha-studio="1"] .helix-composer {
+    padding-left: 28px;
+    padding-right: 28px;
+}
+
+@media (max-width: 991.98px) {
+    body[data-sasha-studio="1"] .helix-body--studio {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+    body[data-sasha-studio="1"] .helix-studio-rail {
+        max-height: 42vh;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    body[data-sasha-studio="1"] .helix-sidebar {
+        display: none;
+    }
+    body[data-sasha-studio="1"].helix-open .helix-panel.is-history-open .helix-sidebar,
+    body[data-sasha-studio="1"] .helix-panel.is-history-open .helix-sidebar {
+        display: flex;
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        width: 100%;
+        background: var(--bg, #f7f8fb);
+    }
+    body[data-sasha-studio="1"] .helix-messages,
+    body[data-sasha-studio="1"] .helix-suggestions,
+    body[data-sasha-studio="1"] .helix-composer {
+        max-width: none;
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .helix-studio-action {
+        transition: none;
+    }
+    .helix-studio-action:hover {
+        transform: none;
     }
 }

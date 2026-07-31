@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+{% block title %}Studio {{ assistant_name|default('Sasha') }} · Unio Jurídico{% endblock %}
+{% block body_attrs %} data-sasha-studio="1"{% endblock %}
+{% block page_scroll_mode %}fill{% endblock %}
+{% block page_show_title %}{% endblock %}
+
+{% block content_lead %}{% endblock %}
+
+{% block content %}
+{# O Helix assume o workspace inteiro via CSS (body[data-sasha-studio]).
+   Este bloco só ancora o foco e um fallback acessível. #}
+<div class="sasha-studio-anchor" id="sashaStudioAnchor" tabindex="-1">
+    <p class="sr-only">Studio {{ assistant_name|default('Sasha') }} — workspace de chat jurídico imersivo.</p>
+    <noscript>
+        <div class="unio-card p-4">
+            <p>Ative o JavaScript para usar o Studio da {{ assistant_name|default('Sasha') }}.</p>
+            <a href="{{ path('app_dashboard') }}" class="btn-unio btn-sm">Voltar ao Pulso</a>
+        </div>
+    </noscript>
+</div>
+<script type="application/json" id="sashaStudioBoot">{{ {
+    agenteAtivo: agente.ativo|default(false),
+    alertasHoje: agente.alertas_hoje|default(0),
+    prazosCriticos: org_juridico_prazos_criticos|default(0),
+    assistant: assistant_name|default('Sasha')
+}|json_encode|raw }}</script>
+{% endblock %}

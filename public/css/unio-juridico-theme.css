@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Unio Jurídico — identidade visual (paleta bordô/dourado sobre o shell Organismo)
  */
 
@@ -419,6 +419,11 @@ body.org-juridico .helix-composer-inner:focus-within {
     box-shadow: 0 0 0 3px rgba(122, 33, 48, 0.12) !important;
 }
 
+body.org-juridico .helix-input-field:focus-within {
+    border-color: rgba(122, 33, 48, 0.45) !important;
+    box-shadow: inset 0 0 0 1px rgba(122, 33, 48, 0.14) !important;
+}
+
 body.org-juridico .helix-tool-btn:hover {
     background: rgba(122, 33, 48, 0.08) !important;
     color: var(--org-blue) !important;
@@ -708,9 +713,15 @@ body.org-juridico input[type="search"] {
     width: 100% !important;
 }
 
-body.org-juridico .helix-composer .helix-input {
-    min-width: 300px !important;
+body.org-juridico .helix-composer .helix-input-field {
+    min-width: 0 !important;
     width: 100% !important;
+    flex: 1 1 auto;
+}
+
+body.org-juridico .helix-composer .helix-input {
+    min-width: 0 !important;
+    width: auto !important;
 }
 
 /* Form groups e containers */
@@ -738,6 +749,11 @@ body.org-juridico .list-search-toggle + input {
     body.org-juridico input[type="password"],
     body.org-juridico input[type="search"] {
         min-width: 140px !important;
+    }
+
+    body.org-juridico .helix-composer .helix-input,
+    body.org-juridico .helix-composer .helix-input-field {
+        min-width: 0 !important;
     }
 }
 
@@ -2391,4 +2407,96 @@ body.org-juridico .jur-proc-hero .btn-unio-ghost.jur-proc-hero__ghost i {
 [data-theme="dark"] .jur-historico-item__repetir,
 [data-theme="dark"] .view-tabs {
     background: rgba(255, 255, 255, 0.03);
+}
+
+/* ── Agente Autônomo · cards de encaixe ── */
+.jur-agente-fit__card {
+    height: 100%;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border, rgba(20, 30, 50, 0.08));
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(248, 249, 252, 0.95) 100%);
+}
+.jur-agente-fit__card--lex {
+    border-color: rgba(122, 33, 48, 0.18);
+    background: linear-gradient(180deg, rgba(122, 33, 48, 0.05) 0%, rgba(248, 249, 252, 0.95) 100%);
+}
+.jur-agente-fit__icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(30, 77, 107, 0.08);
+    color: var(--org-blue, #1e4d6b);
+    margin-bottom: 0.65rem;
+    font-size: 0.95rem;
+}
+.jur-agente-fit__card--lex .jur-agente-fit__icon {
+    background: rgba(122, 33, 48, 0.1);
+    color: var(--org-blue, #7a2130);
+}
+.jur-agente-fit__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-1, #1a2332);
+    margin: 0 0 0.35rem;
+}
+.jur-agente-fit__text {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: var(--text-2, #4a5568);
+}
+
+[data-theme="dark"] .jur-agente-fit__card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+[data-theme="dark"] .jur-agente-fit__card--lex {
+    background: rgba(122, 33, 48, 0.12);
+    border-color: rgba(122, 33, 48, 0.28);
+}
+
+/* ── Helix · botão Modo Lex ── */
+body.org-juridico .helix-lex-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 11px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--nav-hover-bg, rgba(20, 30, 50, 0.06));
+    color: var(--text-3, #6b7280);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+body.org-juridico .helix-lex-toggle i {
+    font-size: 11px;
+}
+body.org-juridico .helix-lex-toggle:hover {
+    color: var(--org-blue, #7a2130);
+    background: rgba(122, 33, 48, 0.08);
+    border-color: rgba(122, 33, 48, 0.18);
+}
+body.org-juridico .helix-lex-toggle.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, #5c1a2e 0%, #8b2e4a 58%, #a3485f 100%);
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(122, 33, 48, 0.28);
+}
+body.org-juridico .helix-panel.is-lex-mode .helix-header {
+    background: linear-gradient(180deg, rgba(122, 33, 48, 0.07) 0%, var(--bg, #f7f8fb) 100%);
+}
+body.org-juridico .helix-panel.is-lex-mode .helix-subtitle {
+    color: var(--org-blue, #7a2130) !important;
+    font-weight: 600;
 }

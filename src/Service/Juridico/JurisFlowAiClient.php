@@ -61,11 +61,20 @@ final class JurisFlowAiClient
         $now = new \DateTimeImmutable('now');
 
         try {
+            $mode = strtolower(trim((string) ($context['mode'] ?? 'standard')));
+            if (!\in_array($mode, ['standard', 'superior', 'lex', 'premium'], true)) {
+                $mode = 'standard';
+            }
+            if (\in_array($mode, ['lex', 'premium'], true)) {
+                $mode = 'superior';
+            }
+
             $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/assistant/Sasha/chat', [
                 'json' => [
                     'message' => $message,
                     'escritorio_id' => $escritorioId,
                     'use_rag' => true,
+                    'mode' => $mode,
                     'history' => array_map(static fn (array $m) => [
                         'role' => $m['role'],
                         'content' => $m['content'],
@@ -77,13 +86,21 @@ final class JurisFlowAiClient
                     ],
                     'numero_processo_atual' => $context['numero_processo_atual'] ?? null,
                 ],
-                'timeout' => 45,
+                'timeout' => $mode === 'superior' ? 90 : 45,
             ]);
 
             $data = $response->toArray(false);
+            $reply = trim((string) ($data['answer'] ?? ''));
+
+            // Resposta vazia ou fallback antigo do JurisFlow = falha real (não mascarar).
+            if ($reply === '' || str_contains(mb_strtolower($reply), 'instabilidade no provedor de ia')) {
+                $this->logger->warning('IA jurídica (JurisFlow) retornou resposta inválida/vazia');
+
+                return null;
+            }
 
             return [
-                'reply' => (string) ($data['answer'] ?? ''),
+                'reply' => $reply,
                 'source' => 'jurisflow',
                 'suggested_actions' => [],
             ];

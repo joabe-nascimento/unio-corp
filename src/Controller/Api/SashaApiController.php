@@ -325,6 +325,13 @@ final class SashaApiController extends AbstractController
         $pacienteCodigo = $payload['context']['patient_codigo'] ?? $payload['patient_codigo'] ?? null;
         $numeroProcessoAtual = $payload['context']['numero_processo'] ?? $payload['numero_processo'] ?? null;
         $numeroProcessoAtual = \is_string($numeroProcessoAtual) && trim($numeroProcessoAtual) !== '' ? trim($numeroProcessoAtual) : null;
+        $chatMode = strtolower(trim((string) ($payload['mode'] ?? $payload['context']['mode'] ?? 'standard')));
+        if (\in_array($chatMode, ['lex', 'premium', 'high'], true)) {
+            $chatMode = 'superior';
+        }
+        if ($chatMode !== 'superior') {
+            $chatMode = 'standard';
+        }
         $contextData = [
             'hub' => (string) ($payload['context']['hub'] ?? $payload['hub'] ?? ''),
             'empresa_nome' => $empresa?->getNome(),
@@ -333,6 +340,7 @@ final class SashaApiController extends AbstractController
             'numero_processo_atual' => $numeroProcessoAtual,
             'assistant' => $this->organismoCopy->lumen(),
             'escritorio_id' => $empresa?->getId() !== null ? (string) $empresa->getId() : 'default',
+            'mode' => $chatMode,
         ];
 
         if ($empresa && !$this->organismoCopy->isJuridicoProfile()) {
