@@ -21,6 +21,24 @@ class JuridicoProcessoRepository extends ServiceEntityRepository
         return $this->findOneBy(['id' => $id, 'empresa' => $empresa]);
     }
 
+    public function findByNumeroNorm(Empresa $empresa, string $numeroNorm): ?JuridicoProcesso
+    {
+        $numeroNorm = preg_replace('/\D+/', '', $numeroNorm) ?? '';
+        if ($numeroNorm === '') {
+            return null;
+        }
+
+        $processos = $this->findForEmpresa($empresa);
+        foreach ($processos as $processo) {
+            $digits = preg_replace('/\D+/', '', $processo->getNumero()) ?? '';
+            if ($digits === $numeroNorm) {
+                return $processo;
+            }
+        }
+
+        return null;
+    }
+
     /** @return list<JuridicoProcesso> */
     public function findForEmpresa(Empresa $empresa, ?string $status = null, ?string $q = null): array
     {

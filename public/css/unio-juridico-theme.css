@@ -2531,3 +2531,724 @@ body.org-juridico .helix-panel.is-lex-mode .helix-subtitle {
     color: var(--org-blue, #7a2130) !important;
     font-weight: 600;
 }
+
+/* ===== Captura DJEN — painel OAB no offcanvas ===== */
+.jur-oab-capture {
+    padding: 0.25rem 0.15rem 0.5rem;
+}
+
+.jur-oab-capture__hint {
+    margin: 0 0 1rem;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--text-2, #64748b);
+}
+
+.jur-oab-capture__form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.65rem;
+    margin-bottom: 1.1rem;
+    padding: 0.85rem 0.9rem;
+    background: linear-gradient(180deg, var(--accent-dim, rgba(122, 33, 48, 0.06)) 0%, var(--surface, #fff) 72%);
+    border: 1px solid var(--accent-line, rgba(122, 33, 48, 0.16));
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.jur-oab-capture__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.jur-oab-capture__field--grow {
+    flex: 1 1 200px;
+}
+
+.jur-oab-capture__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-2, #64748b);
+}
+
+.jur-oab-capture__combo {
+    display: flex;
+    align-items: stretch;
+    min-height: 42px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, rgba(15, 23, 42, 0.12));
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.jur-oab-capture__combo:focus-within {
+    border-color: var(--accent, #7a2130);
+    box-shadow: 0 0 0 3px var(--accent-dim, rgba(122, 33, 48, 0.12));
+}
+
+.jur-oab-capture__input {
+    border: none;
+    background: transparent;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-1, #1e2a3a);
+    padding: 0.55rem 0.75rem;
+    min-height: 40px;
+    outline: none;
+    box-shadow: none;
+}
+
+.jur-oab-capture__input--num {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.jur-oab-capture__input--uf {
+    flex: 0 0 4.25rem;
+    padding-left: 0.35rem;
+    padding-right: 0.5rem;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2364748b' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.45rem center;
+    padding-right: 1.35rem;
+}
+
+.jur-oab-capture__sep {
+    display: flex;
+    align-items: center;
+    padding: 0 0.15rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-3, #94a3b8);
+    user-select: none;
+}
+
+.jur-oab-capture__submit {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 42px;
+    padding: 0 1.15rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(122, 33, 48, 0.22);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.jur-oab-capture__submit i {
+    font-size: 0.82rem;
+}
+
+.jur-oab-capture__submit:hover,
+.jur-oab-capture__submit:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(122, 33, 48, 0.28);
+}
+
+.jur-oab-capture__list {
+    list-style: none;
+    margin: 0 0 1.15rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.jur-oab-capture__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 0.8rem;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, rgba(15, 23, 42, 0.1));
+    border-radius: 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.jur-oab-capture__item:hover {
+    border-color: var(--accent-line, rgba(122, 33, 48, 0.22));
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.jur-oab-capture__item.is-inactive {
+    opacity: 0.72;
+}
+
+.jur-oab-capture__item-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.jur-oab-capture__item-icon {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-dim, rgba(122, 33, 48, 0.08));
+    color: var(--accent, #7a2130);
+    font-size: 0.82rem;
+}
+
+.jur-oab-capture__item-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.jur-oab-capture__item-oab {
+    font-size: 0.92rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-oab-capture__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    background: var(--surface-2, #f1f5f9);
+    color: var(--text-2, #64748b);
+}
+
+.jur-oab-capture__badge--active {
+    background: rgba(46, 125, 96, 0.12);
+    color: #1f7a5c;
+}
+
+.jur-oab-capture__item-meta {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.76rem;
+    color: var(--text-2, #64748b);
+}
+
+.jur-oab-capture__remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: #c53030;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.jur-oab-capture__remove:hover,
+.jur-oab-capture__remove:focus-visible {
+    background: rgba(197, 48, 48, 0.08);
+    border-color: rgba(197, 48, 48, 0.18);
+}
+
+.jur-oab-capture__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-bottom: 1.15rem;
+    padding: 1rem;
+    border: 1px dashed var(--border, rgba(15, 23, 42, 0.14));
+    border-radius: 12px;
+    font-size: 0.84rem;
+    color: var(--text-2, #64748b);
+}
+
+.jur-oab-capture__empty i {
+    color: var(--accent, #7a2130);
+    opacity: 0.7;
+}
+
+.jur-oab-capture__section {
+    margin-bottom: 1rem;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--border, rgba(15, 23, 42, 0.08));
+}
+
+.jur-oab-capture__section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0.85rem 0 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-oab-capture__section-title i {
+    color: var(--accent, #7a2130);
+    font-size: 0.78rem;
+}
+
+.jur-oab-capture__auto-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.jur-oab-capture__toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--border, rgba(15, 23, 42, 0.1));
+    border-radius: 12px;
+    background: var(--surface, #fff);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.jur-oab-capture__toggle:hover {
+    border-color: var(--accent-line, rgba(122, 33, 48, 0.2));
+}
+
+.jur-oab-capture__toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.jur-oab-capture__toggle-box {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-top: 0.1rem;
+    border: 2px solid var(--border, rgba(15, 23, 42, 0.2));
+    border-radius: 5px;
+    background: var(--surface, #fff);
+    position: relative;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.jur-oab-capture__toggle input:checked + .jur-oab-capture__toggle-box {
+    background: var(--accent, #7a2130);
+    border-color: var(--accent, #7a2130);
+}
+
+.jur-oab-capture__toggle input:checked + .jur-oab-capture__toggle-box::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.jur-oab-capture__toggle-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.jur-oab-capture__toggle-text strong {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-oab-capture__toggle-text small {
+    font-size: 0.76rem;
+    color: var(--text-2, #64748b);
+    line-height: 1.35;
+}
+
+.jur-oab-capture__phone {
+    margin-top: 0.15rem;
+}
+
+.jur-oab-capture__phone-hint {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.74rem;
+    color: var(--text-2, #64748b);
+    line-height: 1.4;
+}
+
+.jur-oab-capture__save {
+    align-self: flex-start;
+    margin-top: 0.15rem;
+}
+
+.jur-oab-capture__run {
+    margin: 0;
+}
+
+.jur-oab-capture__run-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.65rem 1rem;
+    border-radius: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(122, 33, 48, 0.24);
+}
+
+.jur-oab-capture__run-btn > span {
+    font-size: 0.92rem;
+}
+
+.jur-oab-capture__run-btn > small {
+    font-size: 0.72rem;
+    font-weight: 500;
+    opacity: 0.88;
+}
+
+.jur-oab-capture__run-btn:disabled {
+    opacity: 0.55;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.jur-oab-capture__footer {
+    margin: 0.65rem 0 0;
+    font-size: 0.74rem;
+    text-align: center;
+    color: var(--text-2, #64748b);
+    line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+    .jur-oab-capture__form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .jur-oab-capture__submit {
+        width: 100%;
+    }
+
+    .jur-oab-capture__item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .jur-oab-capture__item-action {
+        align-self: flex-end;
+    }
+}
+
+[data-theme="dark"] .jur-oab-capture__form {
+    background: linear-gradient(180deg, rgba(217, 138, 150, 0.08) 0%, rgba(255, 255, 255, 0.03) 72%);
+    border-color: rgba(217, 138, 150, 0.18);
+}
+
+[data-theme="dark"] .jur-oab-capture__combo,
+[data-theme="dark"] .jur-oab-capture__item,
+[data-theme="dark"] .jur-oab-capture__toggle {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .jur-oab-capture__input {
+    color: var(--text-1, #f8f0f1);
+}
+
+[data-theme="dark"] .jur-oab-capture__badge--active {
+    background: rgba(46, 125, 96, 0.22);
+    color: #6ee7b7;
+}
+
+/* ===== Publicação — detalhe (show) ===== */
+.jur-publicacao-show__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+}
+
+.jur-publicacao-show__chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 1rem;
+}
+
+.jur-publicacao-show__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    background: var(--surface-2, #f1f5f9);
+    color: var(--text-2, #64748b);
+    border: 1px solid var(--border, rgba(15, 23, 42, 0.08));
+}
+
+.jur-publicacao-show__chip--info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.jur-publicacao-show__chip--primary {
+    background: var(--accent-dim, rgba(122, 33, 48, 0.1));
+    color: var(--accent, #7a2130);
+    border-color: var(--accent-line, rgba(122, 33, 48, 0.2));
+}
+
+.jur-publicacao-show__chip--success {
+    background: rgba(46, 125, 96, 0.1);
+    color: #1f7a5c;
+    border-color: rgba(46, 125, 96, 0.2);
+}
+
+.jur-publicacao-show__chip--warning {
+    background: rgba(217, 119, 6, 0.1);
+    color: #b45309;
+    border-color: rgba(217, 119, 6, 0.2);
+}
+
+.jur-publicacao-show__chip--danger {
+    background: rgba(220, 38, 38, 0.1);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+.jur-publicacao-show__chip--dark {
+    background: rgba(15, 23, 42, 0.08);
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-publicacao-show__chip--muted {
+    text-transform: none;
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+
+.jur-publicacao-show__grid {
+    margin-top: 0;
+}
+
+.jur-publicacao-show__aside {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.jur-publicacao-show__card > .section-header--in-card {
+    padding: 1rem 1.15rem 0.85rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border, rgba(15, 23, 42, 0.08));
+}
+
+.jur-publicacao-show__card > .section-header--in-card .section-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
+}
+
+.jur-publicacao-show__card > .section-header--in-card .section-subtitle {
+    font-size: 0.78rem;
+}
+
+.jur-publicacao-show__body {
+    padding: 1rem 1.15rem 1.15rem;
+}
+
+.jur-publicacao-show__body--compact {
+    padding: 0.85rem 1.15rem 1rem;
+}
+
+.jur-publicacao-show__texto {
+    white-space: pre-wrap;
+    line-height: 1.65;
+    font-size: 0.92rem;
+    color: var(--text-1, #1e2a3a);
+    word-break: break-word;
+}
+
+.jur-pub-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 0.85rem;
+    margin: 0;
+}
+
+.jur-pub-meta-grid__item {
+    margin: 0;
+    min-width: 0;
+}
+
+.jur-pub-meta-grid__item--full {
+    grid-column: 1 / -1;
+}
+
+.jur-pub-meta-grid dt {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3, #94a3b8);
+}
+
+.jur-pub-meta-grid dt i {
+    width: 12px;
+    text-align: center;
+    font-size: 0.68rem;
+    opacity: 0.85;
+}
+
+.jur-pub-meta-grid dd {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-1, #1e2a3a);
+    word-break: break-word;
+}
+
+.jur-pub-meta-grid__code {
+    display: inline-block;
+    max-width: 100%;
+    padding: 0.15rem 0.4rem;
+    border-radius: 6px;
+    background: var(--surface-2, #f8fafc);
+    font-size: 0.8rem;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.jur-publicacao-show__card--sasha {
+    border-color: var(--accent-line, rgba(122, 33, 48, 0.18));
+    background: linear-gradient(180deg, var(--accent-dim, rgba(122, 33, 48, 0.05)) 0%, var(--surface, #fff) 42%);
+}
+
+.jur-publicacao-show__sasha-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    background: var(--accent, #7a2130);
+    color: #fff;
+}
+
+.jur-publicacao-show__sasha-block {
+    margin-bottom: 0.85rem;
+}
+
+.jur-publicacao-show__sasha-block:last-of-type {
+    margin-bottom: 0.65rem;
+}
+
+.jur-publicacao-show__sasha-block h4 {
+    margin: 0 0 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3, #94a3b8);
+}
+
+.jur-publicacao-show__sasha-block p {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    color: var(--text-1, #1e2a3a);
+}
+
+.jur-publicacao-show__sasha-prazo {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    background: var(--surface-2, #f8fafc);
+    border: 1px solid var(--border, rgba(15, 23, 42, 0.08));
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-2, #64748b);
+}
+
+.jur-publicacao-show__sasha-prazo i {
+    margin-top: 0.15rem;
+    color: var(--accent, #7a2130);
+}
+
+.jur-publicacao-show__field-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-3, #94a3b8);
+}
+
+.jur-publicacao-show__vinculo-atual code {
+    font-size: 0.82rem;
+}
+
+.jur-publicacao-show__archive {
+    color: var(--text-3, #94a3b8) !important;
+}
+
+@media (max-width: 575.98px) {
+    .jur-pub-meta-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+[data-theme="dark"] .jur-publicacao-show__card--sasha {
+    background: linear-gradient(180deg, rgba(217, 138, 150, 0.08) 0%, rgba(255, 255, 255, 0.03) 42%);
+}
+
+[data-theme="dark"] .jur-pub-meta-grid__code,
+[data-theme="dark"] .jur-publicacao-show__sasha-prazo {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}

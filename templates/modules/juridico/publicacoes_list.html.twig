@@ -1,0 +1,169 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Publicações & Intimações · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Publicações & Intimações' %}
+
+{% block page_list_kpis %}
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="unio-card p-3">
+            <div class="small text-muted">Não lidas</div>
+            <div class="h4 mb-0">{{ metricas.nao_lidas }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="unio-card p-3">
+            <div class="small text-muted">Triagem pendente</div>
+            <div class="h4 mb-0">{{ metricas.triagem_pendente }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="unio-card p-3">
+            <div class="small text-muted">OABs monitoradas</div>
+            <div class="h4 mb-0">{{ capturas|filter(c => c.ativo)|length }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-publicacao-manual">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Registrar manual
+</button>
+<button type="button" class="btn-unio-ghost btn-sm" data-unio-offcanvas-open="juridico-publicacao-config">
+    <i class="fas fa-gear mr-1" aria-hidden="true"></i> Captura DJEN
+</button>
+<a href="{{ path('app_juridico_modulo', { slug: 'publicacoes' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_publicacoes') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    search_in_section: true,
+    search_placeholder: 'Buscar processo, tribunal ou texto…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filter_status|default(''),
+            min_width: '150px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'nao_lida', label: 'Não lidas' },
+                { value: 'triagem', label: 'Em triagem' },
+                { value: 'vinculada', label: 'Vinculadas' },
+                { value: 'arquivada', label: 'Arquivadas' },
+                { value: 'cancelada', label: 'Canceladas' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Prioridade',
+            name: 'prioridade',
+            value: filter_prioridade|default(''),
+            min_width: '140px',
+            options: [
+                { value: '', label: 'Todas' },
+                { value: 'critica', label: 'Crítica' },
+                { value: 'alta', label: 'Alta' },
+                { value: 'normal', label: 'Normal' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_publicacoes'),
+            has_filters: filter_q|default('') or filter_status|default('') or filter_prioridade|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if publicacoes is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-newspaper',
+            title: 'Nenhuma publicação capturada',
+            text: filter_q|default('') or filter_status|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Cadastre as OABs do escritório em “Captura DJEN” e execute a primeira captura. Enquanto não houver OAB, a fila permanece vazia.',
+            btn_label: 'Configurar captura',
+            btn_opens: 'juridico-publicacao-config',
+            btn_icon: 'fa-gear'
+        } %}
+    {% else %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: publicacoes|length,
+        label_singular: 'publicação',
+        label_plural: 'publicações'
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Processo / Tipo</th>
+                    <th>Tribunal</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in publicacoes %}
+                <tr>
+                    <td>{{ p.dataDisponibilizacao ? p.dataDisponibilizacao|date('d/m/Y') : '—' }}</td>
+                    <td>
+                        <strong>{{ p.tituloCurto }}</strong>
+                        {% if p.numeroProcesso %}<br><code class="text-muted" style="font-size:0.82rem;">{{ p.numeroProcesso }}</code>{% endif %}
+                        {% if p.iaResumo %}<br><small class="text-muted">{{ p.iaResumo|slice(0, 90) }}{% if p.iaResumo|length > 90 %}…{% endif %}</small>{% endif %}
+                    </td>
+                    <td>{{ p.tribunal|default('—') }}</td>
+                    <td>
+                        {% if p.prioridade == 'critica' %}
+                        <span class="badge badge-danger">Crítica</span>
+                        {% elseif p.prioridade == 'alta' %}
+                        <span class="badge badge-warning">Alta</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Normal</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.status == 'cancelada' %}
+                        <span class="badge badge-dark">Cancelada</span>
+                        {% elseif p.status == 'nao_lida' %}
+                        <span class="badge badge-info">Nova</span>
+                        {% elseif p.status == 'triagem' %}
+                        <span class="badge badge-primary">Triagem</span>
+                        {% elseif p.status == 'vinculada' %}
+                        <span class="badge badge-success">Vinculada</span>
+                        {% else %}
+                        <span class="badge badge-light">{{ p.status|capitalize }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="{{ path('app_juridico_publicacao_show', { id: p.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/publicacao_config_offcanvas.html.twig' with {
+    id: 'juridico-publicacao-config',
+    open: open_config|default(false),
+    capturas: capturas,
+    config: config|default(null)
+} %}
+{% include 'components/juridico/publicacao_manual_offcanvas.html.twig' with {
+    id: 'juridico-publicacao-manual',
+    open: open_manual|default(false),
+    form_action: path('app_juridico_publicacao_manual')
+} %}
+{% endblock %}

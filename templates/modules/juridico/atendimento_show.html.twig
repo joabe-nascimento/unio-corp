@@ -1,0 +1,196 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}{{ ticket.assunto }} · Atendimento{% endblock %}
+{% set page_list_title = ticket.assunto %}
+
+{% block page_list_toolbar_actions %}
+<form method="post" action="{{ path('app_juridico_atendimento_status', { id: ticket.id }) }}" class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_status_' ~ ticket.id) }}">
+    <select name="status" class="form-control form-control-sm d-inline-block" style="width:auto;" onchange="this.form.submit()">
+        <option value="aberto" {% if ticket.status == 'aberto' %}selected{% endif %}>Novo</option>
+        <option value="em_atendimento" {% if ticket.status == 'em_atendimento' %}selected{% endif %}>Em atendimento</option>
+        <option value="aguardando_cliente" {% if ticket.status == 'aguardando_cliente' %}selected{% endif %}>Aguardando cliente</option>
+        <option value="resolvido" {% if ticket.status == 'resolvido' %}selected{% endif %}>Resolvido</option>
+    </select>
+</form>
+<a href="{{ path('app_juridico_atendimento') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-arrow-left mr-1"></i> Voltar
+</a>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <section class="unio-card p-3 mb-3">
+            {% include 'components/section_header.html.twig' with {
+                title: 'Conversa',
+                subtitle: ticket.canal|capitalize ~ ' · aberto em ' ~ ticket.criadoEm|date('d/m/Y H:i')
+            } %}
+            <div class="px-3 pb-2" id="jur-atendimento-thread">
+                {% for msg in ticket.mensagens %}
+                <div class="mb-3 {% if msg.direcao == 'entrada' %}text-left{% elseif msg.direcao == 'interno' %}text-center{% else %}text-right{% endif %}">
+                    <div class="d-inline-block p-2 rounded {% if msg.direcao == 'entrada' %}bg-light{% elseif msg.direcao == 'interno' %}bg-warning-light border{% else %}bg-primary text-white{% endif %}" style="max-width:85%;text-align:left;">
+                        <div class="small text-muted mb-1">
+                            {% if msg.direcao == 'entrada' %}
+                                {{ msg.remetenteNome|default('Cliente') }}
+                            {% elseif msg.direcao == 'interno' %}
+                                <i class="fas fa-lock"></i> Nota interna — {{ msg.autor ? msg.autor.nome : 'Equipe' }}
+                            {% else %}
+                                {{ msg.autor ? msg.autor.nome : 'Atendente' }}
+                                {% if msg.whatsappEnviado %}<i class="fab fa-whatsapp ml-1" title="Enviado via WhatsApp"></i>{% endif %}
+                            {% endif %}
+                            · {{ msg.criadoEm|date('d/m H:i') }}
+                        </div>
+                        <div style="white-space:pre-wrap;">{{ msg.corpo }}</div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted small">Sem mensagens.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% if ticket.isAberto %}
+        <section class="unio-card p-3">
+            {% include 'components/section_header.html.twig' with { title: 'Responder', subtitle: 'Templates ou sugestão Sasha' } %}
+            <div class="px-3 pb-3">
+                {% if templates is not empty %}
+                <div class="mb-2">
+                    <label class="form-label small">Template rápido</label>
+                    <select id="jurAtendimentoTemplateSelect" class="form-control form-control-sm">
+                        <option value="">— Selecionar template —</option>
+                        {% for tpl in templates %}
+                        <option value="{{ tpl.id }}" data-preview-url="{{ path('app_juridico_atendimento_template_preview', { id: tpl.id, ticketId: ticket.id }) }}">{{ tpl.titulo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <form method="post" action="{{ path('app_juridico_atendimento_mensagem', { id: ticket.id }) }}" id="jurAtendimentoRespostaForm">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_msg_' ~ ticket.id) }}">
+                    <textarea name="corpo" id="jurAtendimentoCorpo" class="form-control form-control-sm mb-2" rows="5" required placeholder="Digite a resposta ao cliente…"></textarea>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        {% if ticket.canal == 'whatsapp' and whatsapp_live and ticket.cliente and ticket.cliente.telefone %}
+                        <label class="small mb-0"><input type="checkbox" name="enviar_whatsapp" value="1" checked> Enviar via WhatsApp</label>
+                        {% endif %}
+                        <label class="small mb-0"><input type="checkbox" name="nota_interna" value="1"> Nota interna</label>
+                        <button type="button" class="btn-unio-ghost btn-sm ml-auto" id="jurAtendimentoSugerirBtn"
+                            data-url="{{ path('app_juridico_atendimento_sugerir', { id: ticket.id }) }}"
+                            data-csrf="{{ csrf_token('juridico_atendimento_sugerir_' ~ ticket.id) }}">
+                            <i class="fas fa-robot mr-1"></i> Sugerir com Sasha
+                        </button>
+                        <button type="submit" class="btn-unio btn-sm">Enviar</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <section class="unio-card p-3 mb-3">
+            {% include 'components/section_header.html.twig' with { title: 'Ticket' } %}
+            <div class="px-3 pb-2">
+                {% include 'components/unio/detail_field_section.html.twig' with { items: [
+                    { label: 'Canal', value: ticket.canal|capitalize, icon: 'fa-comments' },
+                    { label: 'Prioridade', value: ticket.prioridade|capitalize, icon: 'fa-flag' },
+                    { label: 'SLA', value: ticket.slaHoras ~ 'h (até ' ~ ticket.slaLimiteEm|date('d/m H:i') ~ ')', icon: 'fa-clock' },
+                    { label: 'Cliente', value: ticket.cliente ? ticket.cliente.nome : '—', icon: 'fa-user' },
+                    { label: 'Processo', value: ticket.processo ? ticket.processo.numero : '—', icon: 'fa-hashtag' },
+                ]} %}
+            </div>
+        </section>
+
+        {% if contexto.processo %}
+        <section class="unio-card p-3 mb-3">
+            {% include 'components/section_header.html.twig' with { title: 'Contexto do caso', subtitle: 'Sem trocar de tela' } %}
+            <div class="px-3 pb-2">
+                {% set proc = contexto.processo %}
+                {% include 'components/unio/detail_field_section.html.twig' with { items: [
+                    { label: 'Fase', value: proc.fase|capitalize, icon: 'fa-layer-group' },
+                    { label: 'Status', value: proc.status|capitalize, icon: 'fa-circle' },
+                    { label: 'Tribunal', value: proc.tribunal|default('—'), icon: 'fa-landmark' },
+                    { label: 'Área', value: proc.area|default('—'), icon: 'fa-briefcase' },
+                ]} %}
+                {% if contexto.prazos is not empty %}
+                <h6 class="small text-uppercase text-muted mt-3 mb-2">Prazos pendentes</h6>
+                <ul class="list-unstyled small mb-0">
+                    {% for pr in contexto.prazos|slice(0, 5) %}
+                    <li class="mb-1">
+                        <strong>{{ pr.tipo }}</strong> — {{ pr.dataLimite|date('d/m/Y') }}
+                        <a href="{{ path('app_juridico_prazos') }}" class="text-muted">ver</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="small text-muted mb-0 mt-2">Nenhum prazo pendente neste processo.</p>
+                {% endif %}
+                <p class="mt-2 mb-0"><a href="{{ path('app_juridico_processo_show', { id: proc.id }) }}" class="small">Abrir processo <i class="fas fa-external-link-alt"></i></a></p>
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="unio-card p-3">
+            {% include 'components/section_header.html.twig' with { title: 'Vincular caso' } %}
+            <div class="px-3 pb-3">
+                <form method="post" action="{{ path('app_juridico_atendimento_vincular', { id: ticket.id }) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_vincular_' ~ ticket.id) }}">
+                    <div class="mb-2">
+                        <label class="form-label small">Cliente</label>
+                        <select name="cliente_id" class="form-control form-control-sm">
+                            <option value="">— Nenhum —</option>
+                            {% for c in clientes %}
+                            <option value="{{ c.id }}" {% if ticket.cliente and ticket.cliente.id == c.id %}selected{% endif %}>{{ c.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Processo</label>
+                        <select name="processo_id" class="form-control form-control-sm">
+                            <option value="">— Nenhum —</option>
+                            {% for p in processos %}
+                            <option value="{{ p.id }}" {% if ticket.processo and ticket.processo.id == p.id %}selected{% endif %}>{{ p.numero }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-unio btn-sm w-100">Salvar vínculos</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var tplSelect = document.getElementById('jurAtendimentoTemplateSelect');
+    var corpo = document.getElementById('jurAtendimentoCorpo');
+    if (tplSelect && corpo) {
+        tplSelect.addEventListener('change', function () {
+            var opt = tplSelect.options[tplSelect.selectedIndex];
+            var url = opt.getAttribute('data-preview-url');
+            if (!url) return;
+            fetch(url, { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) { if (data.ok) corpo.value = data.texto; });
+        });
+    }
+
+    var btn = document.getElementById('jurAtendimentoSugerirBtn');
+    if (btn && corpo) {
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            var fd = new FormData();
+            fd.append('_token', btn.getAttribute('data-csrf'));
+            fetch(btn.getAttribute('data-url'), { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.ok) corpo.value = data.sugestao;
+                    else alert(data.erro || 'Sasha indisponível.');
+                })
+                .catch(function () { alert('Erro ao consultar a Sasha.'); })
+                .finally(function () { btn.disabled = false; });
+        });
+    }
+})();
+</script>
+{% endblock %}

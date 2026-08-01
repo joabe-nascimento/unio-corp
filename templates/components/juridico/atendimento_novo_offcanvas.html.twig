@@ -1,0 +1,57 @@
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: id|default('juridico-atendimento-novo'),
+    title: 'Novo ticket',
+    subtitle: 'WhatsApp, e-mail ou atendimento interno',
+    icon: 'fa-plus',
+    size: 'lg',
+    open: open|default(false)
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_juridico_atendimento_novo') }}" id="juridicoAtendimentoNovoForm">
+    <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_novo') }}">
+    <div class="mb-3">
+        <label class="form-label small">Assunto <span class="text-danger">*</span></label>
+        <input type="text" name="assunto" class="form-control form-control-sm" required maxlength="200" placeholder="Ex.: Dúvida sobre prazo de sentença">
+    </div>
+    <div class="row g-2 mb-3">
+        <div class="col-6">
+            <label class="form-label small">Canal</label>
+            <select name="canal" class="form-control form-control-sm">
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">E-mail</option>
+                <option value="interno" selected>Interno</option>
+            </select>
+        </div>
+        <div class="col-6">
+            <label class="form-label small">Cliente</label>
+            <select name="cliente_id" class="form-control form-control-sm">
+                <option value="">— Sem vínculo —</option>
+                {% for c in clientes %}
+                <option value="{{ c.id }}">{{ c.nome }}{% if c.status == 'premium' %} (Premium){% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label small">Processo (opcional)</label>
+        <select name="processo_id" class="form-control form-control-sm">
+            <option value="">— Nenhum —</option>
+            {% for p in processos %}
+            <option value="{{ p.id }}">{{ p.numero }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label small">Mensagem inicial <span class="text-danger">*</span></label>
+        <textarea name="mensagem" class="form-control form-control-sm" rows="6" required placeholder="Cole a mensagem do cliente ou descreva a demanda…"></textarea>
+    </div>
+    <p class="small text-muted mb-0">SLA: 4h para clientes Premium, 24h para Standard.</p>
+</form>
+{% endblock %}
+{% block offcanvas_footer %}
+<div class="unio-offcanvas-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn-unio-ghost" data-unio-offcanvas-close>Cancelar</button>
+    <button type="submit" form="juridicoAtendimentoNovoForm" class="btn-unio">Criar ticket</button>
+</div>
+{% endblock %}
+{% endembed %}

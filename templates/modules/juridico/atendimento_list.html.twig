@@ -1,0 +1,180 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Central de Atendimento · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Central de Atendimento' %}
+
+{% block page_list_kpis %}
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="unio-card p-3">
+            <div class="small text-muted">Tickets abertos</div>
+            <div class="h4 mb-0">{{ metricas.abertos }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="unio-card p-3">
+            <div class="small text-muted">SLA estourado</div>
+            <div class="h4 mb-0 {% if metricas.sla_estourado > 0 %}text-danger{% endif %}">{{ metricas.sla_estourado }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="unio-card p-3">
+            <div class="small text-muted">SLA médio (1ª resposta)</div>
+            <div class="h4 mb-0">{{ metricas.sla_medio|default('—') }}</div>
+        </div>
+    </div>
+</div>
+{% if whatsapp_live %}
+<div class="alert alert-success py-2 small mb-3"><i class="fab fa-whatsapp mr-1"></i> WhatsApp Meta conectado — respostas podem ser enviadas ao cliente.</div>
+{% else %}
+<div class="alert alert-light border py-2 small mb-3"><i class="fab fa-whatsapp mr-1 text-muted"></i> WhatsApp em modo simulado — mensagens são registradas no ticket.</div>
+{% endif %}
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-atendimento-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo ticket
+</button>
+<button type="button" class="btn-unio-ghost btn-sm" data-unio-offcanvas-open="juridico-atendimento-templates">
+    <i class="fas fa-file-alt mr-1" aria-hidden="true"></i> Templates Sasha
+</button>
+<a href="{{ path('app_juridico_modulo', { slug: 'atendimento' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_atendimento') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    search_in_section: true,
+    search_placeholder: 'Buscar assunto, cliente ou processo…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filter_status|default(''),
+            min_width: '150px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'abertos', label: 'Abertos' },
+                { value: 'aberto', label: 'Novo' },
+                { value: 'em_atendimento', label: 'Em atendimento' },
+                { value: 'aguardando_cliente', label: 'Aguardando cliente' },
+                { value: 'resolvido', label: 'Resolvido' },
+            ]
+        } %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Canal',
+            name: 'canal',
+            value: filter_canal|default(''),
+            min_width: '140px',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'whatsapp', label: 'WhatsApp' },
+                { value: 'email', label: 'E-mail' },
+                { value: 'interno', label: 'Interno' },
+            ]
+        } %}
+        {% include 'components/toolbar_filter_actions.html.twig' with {
+            clear_href: path('app_juridico_atendimento'),
+            has_filters: filter_q|default('') or filter_status|default('') or filter_canal|default('')
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if tickets is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-headset',
+            title: 'Nenhum ticket na fila',
+            text: filter_q|default('') or filter_status|default('') or filter_canal|default('') ? 'Nenhum resultado para os filtros aplicados.' : 'Abra o primeiro ticket de atendimento — WhatsApp, e-mail ou interno.',
+            btn_label: 'Novo ticket',
+            btn_opens: 'juridico-atendimento-novo',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    {% include 'components/juridico/table_meta_bar.html.twig' with {
+        count: tickets|length,
+        label_singular: 'ticket',
+        label_plural: 'tickets'
+    } %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Aberto em</th>
+                    <th>Assunto / Cliente</th>
+                    <th>Canal</th>
+                    <th>SLA</th>
+                    <th>Status</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tickets %}
+                <tr class="{% if t.slaEstourado %}table-danger{% endif %}">
+                    <td>{{ t.criadoEm|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <strong>{{ t.assunto }}</strong>
+                        {% if t.cliente %}<br><small class="text-muted">{{ t.cliente.nome }}</small>{% endif %}
+                        {% if t.processo %}<br><code class="text-muted" style="font-size:0.82rem;">{{ t.processo.numero }}</code>{% endif %}
+                    </td>
+                    <td>
+                        {% if t.canal == 'whatsapp' %}
+                        <span class="badge badge-success"><i class="fab fa-whatsapp"></i> WhatsApp</span>
+                        {% elseif t.canal == 'email' %}
+                        <span class="badge badge-info"><i class="fas fa-envelope"></i> E-mail</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Interno</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.primeiraRespostaEm %}
+                        <span class="text-success small">Respondido</span>
+                        {% elseif t.slaEstourado %}
+                        <span class="badge badge-danger">Estourado</span>
+                        {% else %}
+                        <span class="small text-muted">até {{ t.slaLimiteEm|date('d/m H:i') }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.status == 'aberto' %}
+                        <span class="badge badge-info">Novo</span>
+                        {% elseif t.status == 'em_atendimento' %}
+                        <span class="badge badge-primary">Em atendimento</span>
+                        {% elseif t.status == 'aguardando_cliente' %}
+                        <span class="badge badge-warning">Aguardando</span>
+                        {% else %}
+                        <span class="badge badge-success">Resolvido</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="{{ path('app_juridico_atendimento_show', { id: t.id }) }}" class="btn-unio-ghost btn-sm">Abrir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% include 'components/juridico/atendimento_novo_offcanvas.html.twig' with {
+    id: 'juridico-atendimento-novo',
+    open: open_novo|default(false),
+    clientes: clientes,
+    processos: processos
+} %}
+{% include 'components/juridico/atendimento_templates_offcanvas.html.twig' with {
+    id: 'juridico-atendimento-templates',
+    open: open_templates|default(false),
+    templates: templates
+} %}
+{% endblock %}

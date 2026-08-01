@@ -1,0 +1,124 @@
+<div class="jur-oab-capture">
+    <p class="jur-oab-capture__hint">Cadastre as OABs do escritório para monitorar o DJEN. Sem OAB ativa a fila fica vazia — isso é o comportamento esperado no primeiro acesso.</p>
+
+    <form method="post" action="{{ path('app_juridico_publicacao_oab_add') }}" class="jur-oab-capture__form" id="jurOabCaptureForm">
+        <input type="hidden" name="_token" value="{{ csrf_token('juridico_publicacao_oab') }}">
+        <div class="jur-oab-capture__field jur-oab-capture__field--grow">
+            <label class="jur-oab-capture__label" for="jurOabNumero">Inscrição OAB</label>
+            <div class="jur-oab-capture__combo" role="group" aria-labelledby="jurOabNumero">
+                <input type="text"
+                       id="jurOabNumero"
+                       name="numero_oab"
+                       class="jur-oab-capture__input jur-oab-capture__input--num"
+                       inputmode="numeric"
+                       pattern="[0-9]+"
+                       placeholder="123456"
+                       autocomplete="off"
+                       required>
+                <span class="jur-oab-capture__sep" aria-hidden="true">/</span>
+                <select name="uf_oab" class="jur-oab-capture__input jur-oab-capture__input--uf" required aria-label="UF da OAB">
+                    <option value="" disabled selected>UF</option>
+                    {% for uf in ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] %}
+                    <option value="{{ uf }}">{{ uf }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn-unio jur-oab-capture__submit" title="Adicionar OAB ao monitoramento">
+            <i class="fas fa-plus" aria-hidden="true"></i>
+            <span>Adicionar</span>
+        </button>
+    </form>
+
+    {% if capturas is not empty %}
+    <ul class="jur-oab-capture__list" aria-label="OABs monitoradas">
+        {% for c in capturas %}
+        <li class="jur-oab-capture__item{% if not c.ativo %} is-inactive{% endif %}">
+            <div class="jur-oab-capture__item-main">
+                <span class="jur-oab-capture__item-icon" aria-hidden="true"><i class="fas fa-id-card"></i></span>
+                <div class="jur-oab-capture__item-body">
+                    <div class="jur-oab-capture__item-head">
+                        <strong class="jur-oab-capture__item-oab">{{ c.labelOab }}</strong>
+                        {% if c.ativo %}
+                        <span class="jur-oab-capture__badge jur-oab-capture__badge--active">Ativa</span>
+                        {% else %}
+                        <span class="jur-oab-capture__badge">Inativa</span>
+                        {% endif %}
+                    </div>
+                    {% if c.ultimaCapturaEm %}
+                    <small class="jur-oab-capture__item-meta">Última captura: {{ c.ultimaCapturaEm|date('d/m/Y H:i') }}</small>
+                    {% else %}
+                    <small class="jur-oab-capture__item-meta">Aguardando primeira captura</small>
+                    {% endif %}
+                </div>
+            </div>
+            {% if c.ativo %}
+            <form method="post" action="{{ path('app_juridico_publicacao_oab_remove', { id: c.id }) }}" class="jur-oab-capture__item-action">
+                <input type="hidden" name="_token" value="{{ csrf_token('juridico_publicacao_oab_remove_' ~ c.id) }}">
+                <button type="submit" class="jur-oab-capture__remove" title="Remover OAB">
+                    <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                    <span>Remover</span>
+                </button>
+            </form>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="jur-oab-capture__empty">
+        <i class="fas fa-cloud-arrow-down" aria-hidden="true"></i>
+        <span>Nenhuma OAB cadastrada ainda</span>
+    </div>
+    {% endif %}
+
+    <section class="jur-oab-capture__section">
+        <h6 class="jur-oab-capture__section-title"><i class="fas fa-bolt" aria-hidden="true"></i> Automação</h6>
+        <form method="post" action="{{ path('app_juridico_publicacao_config_salvar') }}" class="jur-oab-capture__auto-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('juridico_publicacao_config') }}">
+            <label class="jur-oab-capture__toggle">
+                <input type="checkbox" name="prazo_automatico" value="1"
+                       {{ config is defined and config.prazoAutomatico ? 'checked' : (config is not defined ? 'checked' : '') }}>
+                <span class="jur-oab-capture__toggle-box" aria-hidden="true"></span>
+                <span class="jur-oab-capture__toggle-text">
+                    <strong>Prazo automático</strong>
+                    <small>Criar prazo após triagem, com processo vinculado</small>
+                </span>
+            </label>
+            <label class="jur-oab-capture__toggle">
+                <input type="checkbox" name="alerta_whatsapp" value="1"
+                       {{ config is defined and config.alertaWhatsapp ? 'checked' : (config is not defined ? 'checked' : '') }}>
+                <span class="jur-oab-capture__toggle-box" aria-hidden="true"></span>
+                <span class="jur-oab-capture__toggle-text">
+                    <strong>Alerta WhatsApp</strong>
+                    <small>Notificar em novas publicações</small>
+                </span>
+            </label>
+            <div class="jur-oab-capture__phone">
+                <label class="jur-oab-capture__label" for="jurOabPhone">Telefone WhatsApp (com DDD)</label>
+                <input type="tel"
+                       id="jurOabPhone"
+                       name="telefone_alerta"
+                       class="form-control form-control-sm"
+                       placeholder="11999999999"
+                       inputmode="tel"
+                       value="{{ config.telefoneAlerta|default('') }}">
+                <small class="jur-oab-capture__phone-hint">Requer Meta Cloud no ambiente. Sem telefone, só notificação na plataforma.</small>
+            </div>
+            <button type="submit" class="btn-unio-ghost btn-sm jur-oab-capture__save">
+                <i class="fas fa-save mr-1" aria-hidden="true"></i> Salvar automação
+            </button>
+        </form>
+    </section>
+
+    <form method="post" action="{{ path('app_juridico_publicacao_capturar') }}" class="jur-oab-capture__run">
+        <input type="hidden" name="_token" value="{{ csrf_token('juridico_publicacao_capturar') }}">
+        <button type="submit"
+                class="btn-unio jur-oab-capture__run-btn"
+                {{ capturas|filter(c => c.ativo)|length == 0 ? 'disabled' : '' }}>
+            <i class="fas fa-cloud-arrow-down" aria-hidden="true"></i>
+            <span>Capturar agora</span>
+            <small>últimos 3 dias</small>
+        </button>
+    </form>
+    <p class="jur-oab-capture__footer">Cron diário às 6h · matching → triagem Sasha → prazo automático → alerta</p>
+</div>

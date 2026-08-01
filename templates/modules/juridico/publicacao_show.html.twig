@@ -1,0 +1,197 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Publicação · Unio Jurídico{% endblock %}
+{% set page_list_title = publicacao.tituloCurto %}
+
+{% block page_list_toolbar_actions %}
+<div class="jur-publicacao-show__toolbar">
+    {% if publicacao.hash %}
+    <a href="{{ path('app_juridico_publicacao_certidao', { id: publicacao.id }) }}" class="btn-unio-ghost btn-sm">
+        <i class="fas fa-file-pdf mr-1"></i> Certidão PDF
+    </a>
+    {% endif %}
+    {% if not publicacao.iaResumo %}
+    <form method="post" action="{{ path('app_juridico_publicacao_triar', { id: publicacao.id }) }}" class="d-inline">
+        <input type="hidden" name="_token" value="{{ csrf_token('juridico_publicacao_triar_' ~ publicacao.id) }}">
+        <button type="submit" class="btn-unio btn-sm"><i class="fas fa-robot mr-1"></i> Triar com Sasha</button>
+    </form>
+    {% endif %}
+    <a href="{{ path('app_juridico_publicacoes') }}" class="btn-unio-ghost btn-sm">
+        <i class="fas fa-arrow-left mr-1"></i> Voltar
+    </a>
+</div>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="jur-publicacao-show">
+    <div class="jur-publicacao-show__chips" aria-label="Resumo da publicação">
+        {% if publicacao.status == 'cancelada' %}
+        <span class="jur-publicacao-show__chip jur-publicacao-show__chip--dark">Cancelada</span>
+        {% elseif publicacao.status == 'nao_lida' %}
+        <span class="jur-publicacao-show__chip jur-publicacao-show__chip--info">Nova</span>
+        {% elseif publicacao.status == 'triagem' %}
+        <span class="jur-publicacao-show__chip jur-publicacao-show__chip--primary">Em triagem</span>
+        {% elseif publicacao.status == 'vinculada' %}
+        <span class="jur-publicacao-show__chip jur-publicacao-show__chip--success">Vinculada</span>
+        {% elseif publicacao.status == 'arquivada' %}
+        <span class="jur-publicacao-show__chip">Arquivada</span>
+        {% endif %}
+
+        {% if publicacao.prioridade == 'critica' %}
+        <span class="jur-publicacao-show__chip jur-publicacao-show__chip--danger">Crítica</span>
+        {% elseif publicacao.prioridade == 'alta' %}
+        <span class="jur-publicacao-show__chip jur-publicacao-show__chip--warning">Alta</span>
+        {% endif %}
+
+        <span class="jur-publicacao-show__chip">{{ publicacao.fonte|upper }}</span>
+
+        {% if publicacao.dataDisponibilizacao %}
+        <span class="jur-publicacao-show__chip jur-publicacao-show__chip--muted">
+            <i class="far fa-calendar-alt" aria-hidden="true"></i> {{ publicacao.dataDisponibilizacao|date('d/m/Y') }}
+        </span>
+        {% endif %}
+
+        {% if publicacao.tribunal %}
+        <span class="jur-publicacao-show__chip jur-publicacao-show__chip--muted">
+            <i class="fas fa-landmark" aria-hidden="true"></i> {{ publicacao.tribunal }}
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="row g-3 align-items-start jur-publicacao-show__grid">
+        <div class="col-xl-8 col-lg-7">
+            <section class="unio-card jur-publicacao-show__card p-0">
+                {% include 'components/section_header.html.twig' with {
+                    title: 'Texto da publicação',
+                    subtitle: publicacao.tipoComunicacao|default('Comunicação') ~ (publicacao.tipoDocumento ? ' · ' ~ publicacao.tipoDocumento : '')
+                } %}
+                <div class="jur-publicacao-show__body">
+                    {% if publicacao.motivoCancelamento %}
+                    <div class="alert alert-warning small mb-3">Publicação cancelada pelo tribunal: {{ publicacao.motivoCancelamento }}</div>
+                    {% endif %}
+                    <div class="jur-publicacao-show__texto">{{ publicacao.texto|default('—') }}</div>
+                    {% if publicacao.link %}
+                    <p class="jur-publicacao-show__link mt-3 mb-0">
+                        <a href="{{ publicacao.link }}" target="_blank" rel="noopener" class="btn-unio-ghost btn-sm">
+                            Abrir no tribunal <i class="fas fa-external-link-alt ml-1"></i>
+                        </a>
+                    </p>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <aside class="jur-publicacao-show__aside">
+                <section class="unio-card jur-publicacao-show__card p-0">
+                    {% include 'components/section_header.html.twig' with { title: 'Metadados' } %}
+                    <div class="jur-publicacao-show__body jur-publicacao-show__body--compact">
+                        <dl class="jur-pub-meta-grid">
+                            <div class="jur-pub-meta-grid__item jur-pub-meta-grid__item--full">
+                                <dt><i class="fas fa-hashtag" aria-hidden="true"></i> Processo</dt>
+                                <dd>{% if publicacao.numeroProcesso %}<code class="jur-pub-meta-grid__code">{{ publicacao.numeroProcesso }}</code>{% else %}—{% endif %}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-landmark" aria-hidden="true"></i> Tribunal</dt>
+                                <dd>{{ publicacao.tribunal|default('—') }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-flag" aria-hidden="true"></i> Prioridade</dt>
+                                <dd>{{ publicacao.prioridade|capitalize }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-gavel" aria-hidden="true"></i> Órgão</dt>
+                                <dd>{{ publicacao.orgao|default('—') }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-folder" aria-hidden="true"></i> Classe</dt>
+                                <dd>{{ publicacao.classe|default('—') }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-envelope" aria-hidden="true"></i> Comunicação</dt>
+                                <dd>{{ publicacao.tipoComunicacao|default('—') }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-file" aria-hidden="true"></i> Documento</dt>
+                                <dd>{{ publicacao.tipoDocumento|default('—') }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+                {% if publicacao.iaResumo %}
+                <section class="unio-card jur-publicacao-show__card jur-publicacao-show__card--sasha p-0">
+                    {% include 'components/section_header.html.twig' with { title: 'Triagem Sasha', subtitle: 'Classificação e sugestão de ação' } %}
+                    <div class="jur-publicacao-show__body jur-publicacao-show__body--compact">
+                        {% if publicacao.iaClassificacao %}
+                        <span class="jur-publicacao-show__sasha-badge">{{ publicacao.iaClassificacao|capitalize }}</span>
+                        {% endif %}
+                        <div class="jur-publicacao-show__sasha-block">
+                            <h4>Resumo</h4>
+                            <p>{{ publicacao.iaResumo }}</p>
+                        </div>
+                        {% if publicacao.iaSugestaoAcao %}
+                        <div class="jur-publicacao-show__sasha-block">
+                            <h4>Ação sugerida</h4>
+                            <p>{{ publicacao.iaSugestaoAcao }}</p>
+                        </div>
+                        {% endif %}
+                        {% if publicacao.iaSugestaoPrazoDias %}
+                        <div class="jur-publicacao-show__sasha-prazo">
+                            <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                            Prazo sugerido: <strong>{{ publicacao.iaSugestaoTipoPrazo|default('Manifestação') }}</strong> em {{ publicacao.iaSugestaoPrazoDias }} dia(s)
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+                {% endif %}
+
+                <section class="unio-card jur-publicacao-show__card p-0">
+                    {% include 'components/section_header.html.twig' with { title: 'Vincular processo' } %}
+                    <div class="jur-publicacao-show__body jur-publicacao-show__body--compact">
+                        {% if publicacao.processo %}
+                        <p class="jur-publicacao-show__vinculo-atual mb-2">
+                            <span class="text-muted small">Vinculado:</span>
+                            <code>{{ publicacao.processo.numero }}</code>
+                        </p>
+                        {% endif %}
+                        <form method="post" action="{{ path('app_juridico_publicacao_vincular', { id: publicacao.id }) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_publicacao_vincular_' ~ publicacao.id) }}">
+                            <label class="jur-publicacao-show__field-label" for="pubProcessoSelect">Processo do escritório</label>
+                            <select id="pubProcessoSelect" name="processo_id" class="form-control form-control-sm mb-2" required>
+                                <option value="">Selecione o processo…</option>
+                                {% for proc in processos %}
+                                <option value="{{ proc.id }}" {{ publicacao.processo and publicacao.processo.id == proc.id ? 'selected' : '' }}>{{ proc.numero }}{% if proc.cliente %} — {{ proc.cliente.nome }}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-unio btn-sm w-100">Vincular processo</button>
+                        </form>
+                    </div>
+                </section>
+
+                {% if publicacao.iaResumo and not publicacao.prazoCriado %}
+                <section class="unio-card jur-publicacao-show__card p-0">
+                    {% include 'components/section_header.html.twig' with { title: 'Abrir prazo' } %}
+                    <div class="jur-publicacao-show__body jur-publicacao-show__body--compact">
+                        <form method="post" action="{{ path('app_juridico_publicacao_criar_prazo', { id: publicacao.id }) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_publicacao_prazo_' ~ publicacao.id) }}">
+                            <label class="jur-publicacao-show__field-label" for="pubPrazoTipo">Tipo</label>
+                            <input id="pubPrazoTipo" type="text" name="tipo" class="form-control form-control-sm mb-2" value="{{ publicacao.iaSugestaoTipoPrazo|default('Manifestação') }}">
+                            <label class="jur-publicacao-show__field-label" for="pubPrazoData">Data limite</label>
+                            <input id="pubPrazoData" type="date" name="data_limite" class="form-control form-control-sm mb-2">
+                            <button type="submit" class="btn-unio btn-sm w-100"><i class="fas fa-hourglass-half mr-1"></i> Criar prazo sugerido</button>
+                        </form>
+                    </div>
+                </section>
+                {% elseif publicacao.prazoCriado %}
+                <div class="alert alert-success small mb-0">Prazo já criado a partir desta publicação.</div>
+                {% endif %}
+
+                <form method="post" action="{{ path('app_juridico_publicacao_arquivar', { id: publicacao.id }) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_publicacao_arquivar_' ~ publicacao.id) }}">
+                    <button type="submit" class="btn-unio-ghost btn-sm w-100 jur-publicacao-show__archive">Arquivar publicação</button>
+                </form>
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}

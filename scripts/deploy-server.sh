@@ -36,6 +36,16 @@ if [[ -f .env.local && -n "$DEFAULT_URI" ]]; then
   # shellcheck source=scripts/lib/organismo-env-sync.sh
   source "$ROOT/scripts/lib/organismo-env-sync.sh"
   organismo_env_sync_for_uri "$DEPLOY_PATH/.env.local" "$DEFAULT_URI"
+  if [[ "$DEFAULT_URI" == *uniojuridico* ]]; then
+    CI_REPORT_STEP="JurisFlow AI (keepalive + LEGAL_AI_URL)"
+    ci_report_step "$CI_REPORT_STEP"
+    if bash "$ROOT/scripts/ensure-jurisflow-hostgator.sh"; then
+      echo "JurisFlow: OK"
+    else
+      echo "AVISO: JurisFlow indisponível — Sasha pode retornar offline até o watchdog recuperar"
+    fi
+    $PHP_BIN bin/console cache:clear --env=prod --no-debug 2>/dev/null || true
+  fi
 fi
 
 if [[ ! -f .env ]]; then

@@ -1,5 +1,15 @@
 <?php
-$url = 'http://127.0.0.1:8097';
+$port = 8098;
+$envPortFile = __DIR__ . '/lib/jurisflow-hostgator.env';
+if (is_readable($envPortFile)) {
+    foreach (file($envPortFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+        if (str_starts_with(trim($line), 'JURISFLOW_HOSTGATOR_PORT=')) {
+            $port = (int) trim(substr(trim($line), strlen('JURISFLOW_HOSTGATOR_PORT=')));
+            break;
+        }
+    }
+}
+$url = 'http://127.0.0.1:' . $port;
 $health = @file_get_contents($url . '/health');
 echo "HEALTH=" . trim((string) $health) . PHP_EOL;
 

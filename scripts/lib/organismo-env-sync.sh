@@ -36,6 +36,13 @@ organismo_env_sync_for_uri() {
   [[ -f "$env_file" ]] || return 0
   [[ -n "$default_uri" ]] || return 0
 
+  local jurisflow_port=8098
+  if [[ -f "$(dirname "${BASH_SOURCE[0]}")/jurisflow-hostgator.env" ]]; then
+    # shellcheck source=scripts/lib/jurisflow-hostgator.env
+    source "$(dirname "${BASH_SOURCE[0]}")/jurisflow-hostgator.env"
+    jurisflow_port="${JURISFLOW_HOSTGATOR_PORT:-8098}"
+  fi
+
   case "$default_uri" in
     https://uniowork.com.br|http://uniowork.com.br)
       organismo_env_set_quoted "$env_file" UNIO_ORGANISMO_ENABLED true
@@ -80,12 +87,9 @@ organismo_env_sync_for_uri() {
       ;;
     https://uniojuridico.uniowork.com.br|http://uniojuridico.uniowork.com.br)
       organismo_env_set_quoted "$env_file" LEGAL_AI_ENABLED true
-      # Porta do JurisFlow no HostGator — ver scripts/lib-hostgator.sh (JurisFlow-ai-service)
-      # para o valor atual. Historico de portas trocadas por processos zumbis presos em
-      # sessoes SSH isoladas do CloudLinux jail (nao mata nem por PID/fuser/lsof): 8091, 8092, 8094.
-      organismo_env_set_quoted "$env_file" LEGAL_AI_URL 'http://127.0.0.1:8097'
+      organismo_env_set_quoted "$env_file" LEGAL_AI_URL "http://127.0.0.1:${jurisflow_port}"
       organismo_env_ensure "$env_file" LEGAL_AI_ESCRITORIO_ID default
-      echo "Organismo: uniojuridico — JurisFlow AI em localhost:8097"
+      echo "Organismo: uniojuridico — JurisFlow AI em localhost:${jurisflow_port}"
       ;;
   esac
 }

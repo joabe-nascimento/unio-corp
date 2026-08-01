@@ -3,7 +3,7 @@
 require __DIR__ . '/../vendor/autoload.php';
 (new Symfony\Component\Dotenv\Dotenv())->bootEnv(dirname(__DIR__) . '/.env');
 
-$url = rtrim((string) ($_ENV['LEGAL_AI_URL'] ?? 'http://127.0.0.1:8097'), '/');
+$url = rtrim((string) ($_ENV['LEGAL_AI_URL'] ?? 'http://127.0.0.1:8098'), '/');
 $mensagem = 'Você era o dono de uma vila, e nessa vila haviam somente apenas seis tias, cada prima tinha um irmão, e cada irmão tinha um avô, quantas pessoas tinham na casa e quem era o dono ?';
 
 $payload = json_encode([

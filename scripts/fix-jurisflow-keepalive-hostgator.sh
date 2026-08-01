@@ -108,7 +108,7 @@ echo "--- health ---"
 curl -s -m 5 "http://127.0.0.1:${PORT}/health" || echo FAIL
 echo
 echo "--- processos ---"
-ps aux | grep -E 'uvicorn.*8097|jurisflow-supervisor' | grep -v grep || true
+ps aux | grep -E "uvicorn.*${PORT}|jurisflow-supervisor" | grep -v grep || true
 echo "--- supervisor log ---"
 tail -n 8 "$APP_DIR/supervisor.log" 2>/dev/null || true
 echo "OK keepalive aplicado"
