@@ -1,0 +1,113 @@
+{# Chat estilo WhatsApp Web — Central de Atendimento #}
+<section class="jur-wa-chat{% if ticket.canal == 'whatsapp' %} jur-wa-chat--whatsapp{% endif %}" aria-label="Conversa do ticket">
+    <header class="jur-wa-chat__header">
+        <div class="jur-wa-chat__avatar" aria-hidden="true">
+            {% if ticket.cliente %}
+            <span>{{ ticket.cliente.nome|slice(0, 1)|upper }}</span>
+            {% else %}
+            <i class="fas fa-user"></i>
+            {% endif %}
+        </div>
+        <div class="jur-wa-chat__contact">
+            <p class="jur-wa-chat__name">{{ ticket.cliente ? ticket.cliente.nome : 'Cliente não vinculado' }}</p>
+            <p class="jur-wa-chat__subtitle">
+                {% if ticket.canal == 'whatsapp' %}
+                <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                {% endif %}
+                {{ ticket.canal|capitalize }} · aberto {{ ticket.criadoEm|date('d/m/Y H:i') }}
+                {% if ticket.processo %}
+                · <span class="jur-wa-chat__processo" title="{{ ticket.processo.numero }}">{{ ticket.processo.numero }}</span>
+                {% endif %}
+            </p>
+        </div>
+        {% if ticket.canal == 'whatsapp' and whatsapp_live %}
+        <span class="jur-wa-chat__live" title="WhatsApp Meta conectado"><i class="fas fa-circle" aria-hidden="true"></i> online</span>
+        {% endif %}
+    </header>
+
+    <div class="jur-wa-chat__thread{% if ticket.canal == 'whatsapp' %} jur-wa-chat__thread--wa-bg{% endif %}" id="jur-atendimento-thread">
+        {% for msg in ticket.mensagens %}
+            {% if msg.direcao == 'interno' %}
+            <div class="jur-wa-bubble jur-wa-bubble--interno">
+                <div class="jur-wa-bubble__system">
+                    <i class="fas fa-lock" aria-hidden="true"></i>
+                    Nota interna — {{ msg.autor ? msg.autor.nome : 'Equipe' }} · {{ msg.criadoEm|date('d/m H:i') }}
+                </div>
+                <div class="jur-wa-bubble__body jur-wa-bubble__body--plain">{{ msg.corpo }}</div>
+            </div>
+            {% else %}
+            <div class="jur-wa-bubble jur-wa-bubble--{{ msg.direcao }}">
+                <div class="jur-wa-bubble__body">
+                    {% if msg.direcao == 'entrada' %}
+                    <span class="jur-wa-bubble__sender">{{ msg.remetenteNome|default('Cliente') }}</span>
+                    {% endif %}
+                    <span class="jur-wa-bubble__text">{{ msg.corpo }}</span>
+                    <span class="jur-wa-bubble__footer">
+                        <time datetime="{{ msg.criadoEm|date('c') }}">{{ msg.criadoEm|date('H:i') }}</time>
+                        {% if msg.direcao == 'saida' and msg.whatsappEnviado %}
+                        <span class="jur-wa-bubble__status" title="Enviado via WhatsApp" aria-label="Enviado via WhatsApp">
+                            <i class="fas fa-check-double" aria-hidden="true"></i>
+                        </span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+        <div class="jur-wa-chat__empty">
+            <i class="fas fa-comments" aria-hidden="true"></i>
+            <span>Nenhuma mensagem ainda</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if ticket.isAberto %}
+    <footer class="jur-wa-chat__composer">
+        {% if templates is not empty %}
+        <div class="jur-wa-chat__template-row">
+            <label class="jur-form-label" for="jurAtendimentoTemplateSelect">Template rápido</label>
+            <select id="jurAtendimentoTemplateSelect" class="jur-form-select">
+                <option value="">Selecionar template…</option>
+                {% for tpl in templates %}
+                <option value="{{ tpl.id }}" data-preview-url="{{ path('app_juridico_atendimento_template_preview', { id: tpl.id, ticketId: ticket.id }) }}">{{ tpl.titulo }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <form method="post" action="{{ path('app_juridico_atendimento_mensagem', { id: ticket.id }) }}" id="jurAtendimentoRespostaForm" class="jur-wa-chat__form">
+            <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_msg_' ~ ticket.id) }}">
+            <div class="jur-wa-chat__input-wrap">
+                <textarea name="corpo" id="jurAtendimentoCorpo" class="jur-wa-chat__input" rows="3" required placeholder="Digite a resposta ao cliente…"></textarea>
+            </div>
+            <div class="jur-wa-chat__actions">
+                <div class="jur-wa-chat__toggles">
+                    {% if ticket.canal == 'whatsapp' and whatsapp_live and ticket.cliente and ticket.cliente.telefone %}
+                    <label class="jur-wa-chat__toggle">
+                        <input type="checkbox" name="enviar_whatsapp" value="1" checked>
+                        <span><i class="fab fa-whatsapp"></i> Enviar WhatsApp</span>
+                    </label>
+                    {% endif %}
+                    <label class="jur-wa-chat__toggle">
+                        <input type="checkbox" name="nota_interna" value="1">
+                        <span><i class="fas fa-lock"></i> Nota interna</span>
+                    </label>
+                </div>
+                <div class="jur-wa-chat__action-btns">
+                    <button type="button" class="btn-unio-ghost btn-sm" id="jurAtendimentoSugerirBtn"
+                        data-url="{{ path('app_juridico_atendimento_sugerir', { id: ticket.id }) }}"
+                        data-csrf="{{ csrf_token('juridico_atendimento_sugerir_' ~ ticket.id) }}">
+                        <i class="fas fa-robot mr-1"></i> Sasha
+                    </button>
+                    <button type="submit" class="btn-unio btn-sm jur-wa-chat__send">
+                        <i class="fas fa-paper-plane mr-1"></i> Enviar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </footer>
+    {% else %}
+    <footer class="jur-wa-chat__composer jur-wa-chat__composer--closed">
+        <span><i class="fas fa-check-circle"></i> Ticket resolvido — reabra o status para responder.</span>
+    </footer>
+    {% endif %}
+</section>

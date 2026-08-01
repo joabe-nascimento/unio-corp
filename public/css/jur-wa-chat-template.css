@@ -1,0 +1,424 @@
+/**
+ * WhatsApp Web — template de chat (Central de Atendimento Jurídico)
+ * Cores e padrões alinhados ao WhatsApp Web (tema claro).
+ */
+
+.jur-wa-chat {
+    --wa-bg: #efeae2;
+    --wa-header: #008069;
+    --wa-header-text: #ffffff;
+    --wa-header-sub: rgba(255, 255, 255, 0.88);
+    --wa-in: #ffffff;
+    --wa-out: #d9fdd3;
+    --wa-text: #111b21;
+    --wa-meta: #667781;
+    --wa-sender: #027eb5;
+    --wa-composer: #f0f2f5;
+    --wa-thread-bg: #efeae2;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 520px;
+    max-height: min(78vh, 720px);
+    border-radius: 12px;
+    border: 1px solid rgba(11, 20, 26, 0.08);
+    background: var(--wa-bg);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(11, 20, 26, 0.08), 0 8px 24px rgba(11, 20, 26, 0.06);
+}
+
+/* Header */
+.jur-wa-chat__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    background: var(--accent, #7a2130);
+    color: var(--wa-header-text);
+    flex-shrink: 0;
+    min-height: 60px;
+}
+
+.jur-wa-chat--whatsapp .jur-wa-chat__header {
+    background: var(--wa-header);
+}
+
+.jur-wa-chat__avatar {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.jur-wa-chat__contact {
+    flex: 1;
+    min-width: 0;
+}
+
+.jur-wa-chat__name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: #fff !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.jur-wa-chat__subtitle {
+    margin: 0.1rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--wa-header-sub) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.jur-wa-chat__subtitle .fab.fa-whatsapp {
+    margin-right: 0.2rem;
+    font-size: 0.72rem;
+}
+
+.jur-wa-chat__processo {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.7rem;
+    letter-spacing: -0.02em;
+}
+
+.jur-wa-chat__live {
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.jur-wa-chat__live i {
+    color: #25d366;
+    font-size: 0.5rem;
+    margin-right: 0.25rem;
+    vertical-align: middle;
+}
+
+/* Thread — fundo doodle WhatsApp */
+.jur-wa-chat__thread {
+    flex: 1 1 auto;
+    min-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.75rem 4%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    background-color: var(--wa-thread-bg);
+}
+
+.jur-wa-chat__thread--wa-bg {
+    background-color: #d1c6bc;
+    background-size: 412.5px 749.25px;
+    background-repeat: repeat;
+}
+
+.jur-wa-chat__empty {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--wa-meta);
+    font-size: 0.86rem;
+    padding: 2rem 1rem;
+}
+
+.jur-wa-chat__empty i {
+    font-size: 1.75rem;
+    opacity: 0.55;
+}
+
+/* Bolhas */
+.jur-wa-bubble {
+    max-width: 65%;
+    display: flex;
+    flex-direction: column;
+}
+
+.jur-wa-bubble--entrada {
+    align-self: flex-start;
+}
+
+.jur-wa-bubble--saida {
+    align-self: flex-end;
+}
+
+.jur-wa-bubble--interno {
+    align-self: center;
+    max-width: 88%;
+}
+
+.jur-wa-bubble__body {
+    position: relative;
+    padding: 0.35rem 0.5rem 0.3rem 0.55rem;
+    border-radius: 7.5px;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--wa-text);
+    box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+
+.jur-wa-bubble--entrada .jur-wa-bubble__body {
+    background: var(--wa-in);
+    border-top-left-radius: 0;
+}
+
+.jur-wa-bubble--entrada .jur-wa-bubble__body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -8px;
+    width: 8px;
+    height: 13px;
+    background: var(--wa-in);
+    border-top-right-radius: 100%;
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
+
+.jur-wa-bubble--saida .jur-wa-bubble__body {
+    background: var(--wa-out);
+    border-top-right-radius: 0;
+}
+
+.jur-wa-bubble--saida .jur-wa-bubble__body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -8px;
+    width: 8px;
+    height: 13px;
+    background: var(--wa-out);
+    border-top-left-radius: 100%;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.jur-wa-bubble__sender {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--wa-sender);
+    margin-bottom: 0.15rem;
+    line-height: 1.3;
+}
+
+.jur-wa-bubble__text {
+    display: block;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding-right: 0.25rem;
+}
+
+.jur-wa-bubble__footer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.2rem;
+    float: right;
+    margin: 0.15rem 0 -0.1rem 0.75rem;
+    position: relative;
+    top: 0.35rem;
+    font-size: 0.68rem;
+    line-height: 1;
+    color: var(--wa-meta);
+    white-space: nowrap;
+}
+
+.jur-wa-bubble__status {
+    color: #53bdeb;
+    font-size: 0.72rem;
+    line-height: 1;
+}
+
+.jur-wa-bubble__system {
+    padding: 0.4rem 0.7rem;
+    border-radius: 7.5px;
+    background: rgba(255, 243, 205, 0.95);
+    border: 1px solid rgba(217, 119, 6, 0.18);
+    font-size: 0.72rem;
+    color: #7c4a03;
+    text-align: center;
+    margin-bottom: 0.25rem;
+}
+
+.jur-wa-bubble__body--plain {
+    background: rgba(255, 255, 255, 0.72);
+    border-radius: 7.5px;
+    color: var(--wa-text);
+    box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.1);
+}
+
+.jur-wa-bubble__body--plain::before {
+    display: none;
+}
+
+/* Composer */
+.jur-wa-chat__composer {
+    flex-shrink: 0;
+    padding: 0.6rem 0.75rem 0.75rem;
+    background: var(--wa-composer);
+    border-top: 1px solid rgba(11, 20, 26, 0.06);
+}
+
+.jur-wa-chat__composer--closed {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--wa-meta);
+    padding: 0.85rem;
+}
+
+.jur-wa-chat__template-row {
+    margin-bottom: 0.5rem;
+}
+
+.jur-wa-chat__form {
+    margin: 0;
+}
+
+.jur-wa-chat__input-wrap {
+    margin-bottom: 0.5rem;
+}
+
+.jur-wa-chat__input {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+    min-height: 68px;
+    padding: 0.6rem 0.85rem;
+    border: none;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--wa-text);
+    resize: vertical;
+    box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.08);
+}
+
+.jur-wa-chat__input::placeholder {
+    color: #8696a0;
+}
+
+.jur-wa-chat__input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 128, 105, 0.25);
+}
+
+.jur-wa-chat__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.jur-wa-chat__toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.jur-wa-chat__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--wa-meta);
+    cursor: pointer;
+}
+
+.jur-wa-chat__toggle input {
+    margin: 0;
+}
+
+.jur-wa-chat__toggle .fab.fa-whatsapp {
+    color: #25d366;
+}
+
+.jur-wa-chat__action-btns {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-left: auto;
+}
+
+.jur-wa-chat--whatsapp .jur-wa-chat__send {
+    background: var(--wa-header);
+    border-color: var(--wa-header);
+}
+
+.jur-wa-chat--whatsapp .jur-wa-chat__send:hover {
+    background: #006d5b;
+    border-color: #006d5b;
+}
+
+.jur-wa-chat__send {
+    border-radius: 999px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (max-width: 575.98px) {
+    .jur-wa-chat {
+        min-height: 420px;
+        max-height: none;
+        border-radius: 10px;
+    }
+
+    .jur-wa-bubble {
+        max-width: 85%;
+    }
+
+    .jur-wa-chat__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .jur-wa-chat__action-btns {
+        margin-left: 0;
+        justify-content: flex-end;
+    }
+}
+
+/* Dark mode */
+[data-theme="dark"] .jur-wa-chat {
+    --wa-bg: #111b21;
+    --wa-header: #1f2c34;
+    --wa-thread-bg: #0b141a;
+    --wa-in: #202c33;
+    --wa-out: #005c4b;
+    --wa-text: #e9edef;
+    --wa-meta: #8696a0;
+    --wa-composer: #1f2c34;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .jur-wa-chat__thread--wa-bg {
+    background-color: #0b141a;
+    background-size: 412.5px 749.25px;
+}
+
+[data-theme="dark"] .jur-wa-chat__input {
+    background: #2a3942;
+    color: var(--wa-text);
+}
+
+[data-theme="dark"] .jur-wa-bubble__body--plain {
+    background: rgba(32, 44, 51, 0.9);
+}
