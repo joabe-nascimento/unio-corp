@@ -1,5 +1,16 @@
-{# Chat estilo WhatsApp Web — Central de Atendimento #}
-<section class="jur-wa-chat{% if ticket.canal == 'whatsapp' %} jur-wa-chat--whatsapp{% endif %}" aria-label="Conversa do ticket">
+{# Chat estilo WhatsApp Web — componente autocontido (Central de Atendimento)
+   Uso:
+     {% block stylesheets %}
+       {% include 'components/juridico/atendimento_whatsapp_chat_assets.html.twig' %}
+     {% endblock %}
+     {% include 'components/juridico/atendimento_whatsapp_chat.html.twig' %}
+#}
+{% set _wa_style = whatsapp_style|default(ticket.canal == 'whatsapp') %}
+<section
+    class="jur-wa-chat{% if _wa_style %} jur-wa-chat--whatsapp{% endif %}"
+    aria-label="Conversa do ticket"
+    {% if _wa_style %}style="--jur-wa-bg-light: url('{{ asset('images/wa/wa-chat-bg-light.png') }}'); --jur-wa-bg-dark: url('{{ asset('images/wa/wa-chat-bg-dark.png') }}');"{% endif %}
+>
     <header class="jur-wa-chat__header">
         <div class="jur-wa-chat__avatar" aria-hidden="true">
             {% if ticket.cliente %}
@@ -29,7 +40,7 @@
         {% endif %}
     </header>
 
-    <div class="jur-wa-chat__thread{% if ticket.canal == 'whatsapp' %} jur-wa-chat__thread--wa-bg{% endif %}" id="jur-atendimento-thread">
+    <div class="jur-wa-chat__thread{% if _wa_style %} jur-wa-chat__thread--wa-bg{% endif %}" id="jur-atendimento-thread">
         {% for msg in ticket.mensagens %}
             {% if msg.direcao == 'interno' %}
             <div class="jur-wa-bubble jur-wa-bubble--interno">
