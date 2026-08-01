@@ -129,7 +129,7 @@
                                 <option value="{{ p.id }}" {% if ticket.processo and ticket.processo.id == p.id %}selected{% endif %}>{{ p.numero }}{% if p.cliente %} — {{ p.cliente.nome }}{% endif %}</option>
                                 {% endfor %}
                             </select>
-                            <button type="submit" class="btn-unio btn-sm w-100">Salvar vínculos</button>
+                            <button type="submit" class="btn-unio btn-sm w-100" data-loading-label="Salvando…">Salvar vínculos</button>
                         </form>
                     </div>
                 </section>
@@ -137,43 +137,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block javascripts %}
-<script>
-(function () {
-    var thread = document.getElementById('jur-atendimento-thread');
-    if (thread) thread.scrollTop = thread.scrollHeight;
-
-    var tplSelect = document.getElementById('jurAtendimentoTemplateSelect');
-    var corpo = document.getElementById('jurAtendimentoCorpo');
-    if (tplSelect && corpo) {
-        tplSelect.addEventListener('change', function () {
-            var opt = tplSelect.options[tplSelect.selectedIndex];
-            var url = opt.getAttribute('data-preview-url');
-            if (!url) return;
-            fetch(url, { headers: { 'Accept': 'application/json' } })
-                .then(function (r) { return r.json(); })
-                .then(function (data) { if (data.ok) corpo.value = data.texto; });
-        });
-    }
-
-    var btn = document.getElementById('jurAtendimentoSugerirBtn');
-    if (btn && corpo) {
-        btn.addEventListener('click', function () {
-            btn.disabled = true;
-            var fd = new FormData();
-            fd.append('_token', btn.getAttribute('data-csrf'));
-            fetch(btn.getAttribute('data-url'), { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    if (data.ok) corpo.value = data.sugestao;
-                    else alert(data.erro || 'Sasha indisponível.');
-                })
-                .catch(function () { alert('Erro ao consultar a Sasha.'); })
-                .finally(function () { btn.disabled = false; });
-        });
-    }
-})();
-</script>
 {% endblock %}
