@@ -158,7 +158,7 @@ link_public_dir() {
 
 CI_REPORT_STEP="Symlinks public_html → unio/public"
 ci_report_step "$CI_REPORT_STEP"
-for dir in css js images vendor uploads assets; do
+for dir in css js images img vendor uploads assets; do
   link_public_dir "$dir"
 done
 
