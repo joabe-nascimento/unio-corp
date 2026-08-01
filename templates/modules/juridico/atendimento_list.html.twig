@@ -3,31 +3,70 @@
 {% set page_list_title = 'Central de Atendimento' %}
 
 {% block page_list_kpis %}
-<div class="row g-3 mb-3">
-    <div class="col-md-4">
-        <div class="unio-card p-3">
-            <div class="small text-muted">Tickets abertos</div>
-            <div class="h4 mb-0">{{ metricas.abertos }}</div>
+{% set _first_name = app.user.nome|default('')|split(' ')|first %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-headset" aria-hidden="true"></i> Clientes & Relacionamento · Omni-canal</span>
+        <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'Central de Atendimento' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if metricas.sla_estourado|default(0) > 0 %}
+                <strong>{{ metricas.sla_estourado }}</strong> ticket{{ metricas.sla_estourado > 1 ? 's' : '' }} com SLA estourado — priorize a resposta ao cliente.
+            {% elseif metricas.abertos|default(0) > 0 %}
+                <strong>{{ metricas.abertos }}</strong> ticket{{ metricas.abertos > 1 ? 's' : '' }} aberto{{ metricas.abertos > 1 ? 's' : '' }} na fila{% if metricas.sla_medio %} · média de 1ª resposta em <strong>{{ metricas.sla_medio }}</strong>{% endif %}.
+            {% else %}
+                Nenhum ticket aberto no momento — a fila está em dia.
+            {% endif %}
+            {% if whatsapp_live %}
+            <br><span class="jur-proc-hero__inline-badge"><i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp Meta conectado</span>
+            {% else %}
+            <br><span class="jur-proc-hero__inline-badge jur-proc-hero__inline-badge--muted"><i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp em modo simulado</span>
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-atendimento-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo ticket
+            </button>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Quais tickets de atendimento precisam de resposta urgente e qual contexto do caso devo considerar?">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="unio-card p-3">
-            <div class="small text-muted">SLA estourado</div>
-            <div class="h4 mb-0 {% if metricas.sla_estourado > 0 %}text-danger{% endif %}">{{ metricas.sla_estourado }}</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="unio-card p-3">
-            <div class="small text-muted">SLA médio (1ª resposta)</div>
-            <div class="h4 mb-0">{{ metricas.sla_medio|default('—') }}</div>
-        </div>
-    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        {
+            value: metricas.abertos|default(0),
+            label: 'Tickets abertos',
+            sub: 'Na fila de atendimento',
+            icon: 'fa-inbox',
+            tone: 'sky',
+            route: 'app_juridico_atendimento',
+            route_params: { status: 'abertos' },
+        },
+        {
+            value: metricas.sla_estourado|default(0),
+            label: 'SLA estourado',
+            sub: metricas.sla_estourado|default(0) > 0 ? 'Ação imediata' : 'Dentro do prazo',
+            icon: 'fa-triangle-exclamation',
+            tone: metricas.sla_estourado|default(0) > 0 ? 'rose' : 'sage',
+            pulse: metricas.sla_estourado|default(0) > 0,
+        },
+        {
+            value: metricas.sla_medio|default('—'),
+            label: 'SLA médio',
+            sub: '1ª resposta ao cliente',
+            icon: 'fa-clock',
+            tone: 'lavender',
+        },
+        {
+            value: whatsapp_live ? 'Online' : 'Simulado',
+            label: 'WhatsApp',
+            sub: whatsapp_live ? 'Envio ao cliente ativo' : 'Somente registro interno',
+            icon: 'fa-comments',
+            tone: whatsapp_live ? 'sage' : 'amber',
+        },
+    ] } %}
 </div>
-{% if whatsapp_live %}
-<div class="alert alert-success py-2 small mb-3"><i class="fab fa-whatsapp mr-1"></i> WhatsApp Meta conectado — respostas podem ser enviadas ao cliente.</div>
-{% else %}
-<div class="alert alert-light border py-2 small mb-3"><i class="fab fa-whatsapp mr-1 text-muted"></i> WhatsApp em modo simulado — mensagens são registradas no ticket.</div>
-{% endif %}
 {% endblock %}
 
 {% block page_list_toolbar_actions %}

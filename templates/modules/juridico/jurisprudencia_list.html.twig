@@ -12,6 +12,28 @@
 {% endblock %}
 
 {% block page_list_kpis %}
+{% set _first_name = app.user.nome|default('')|split(' ')|first %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-book" aria-hidden="true"></i> Inteligência Jurídica · Biblioteca</span>
+        <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'Jurisprudência IA' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if stats.totalBiblioteca|default(0) == 0 %}
+                Salve precedentes e consultas da Sasha para montar a biblioteca do escritório.
+            {% else %}
+                Biblioteca com <strong>{{ stats.totalBiblioteca }}</strong> registro{{ stats.totalBiblioteca != 1 ? 's' : '' }} — <strong>{{ stats.consultasMes|default(0) }}</strong> consulta{{ stats.consultasMes|default(0) != 1 ? 's' : '' }} este mês.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-jurisprudencia-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo registro
+            </button>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Quais precedentes da biblioteca são mais relevantes para os casos ativos da carteira?">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
+        </div>
+    </div>
+</section>
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
         { value: stats.consultasMes|default(0), label: 'Consultas este mês', sub: 'Pesquisas com a Sasha', icon: 'fa-magnifying-glass', tone: 'sky' },

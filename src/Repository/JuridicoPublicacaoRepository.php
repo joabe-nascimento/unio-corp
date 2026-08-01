@@ -79,4 +79,31 @@ class JuridicoPublicacaoRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function countVinculadas(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.status = :status')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('status', JuridicoPublicacao::STATUS_VINCULADA)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countAtivas(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.status NOT IN (:statuses)')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('statuses', [
+                JuridicoPublicacao::STATUS_ARQUIVADA,
+                JuridicoPublicacao::STATUS_CANCELADA,
+            ])
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

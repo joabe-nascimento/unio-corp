@@ -1,20 +1,18 @@
 /**
  * WhatsApp Web — template de chat (Central de Atendimento Jurídico)
- * Cores e padrões alinhados ao WhatsApp Web (tema claro).
  */
 
 .jur-wa-chat {
     --wa-bg: #efeae2;
     --wa-header: #008069;
     --wa-header-text: #ffffff;
-    --wa-header-sub: rgba(255, 255, 255, 0.88);
+    --wa-header-sub: rgba(255, 255, 255, 0.82);
     --wa-in: #ffffff;
     --wa-out: #d9fdd3;
     --wa-text: #111b21;
     --wa-meta: #667781;
-    --wa-sender: #027eb5;
     --wa-composer: #f0f2f5;
-    --wa-thread-bg: #efeae2;
+    --wa-thread-bg: #d1c6bc;
 
     display: flex;
     flex-direction: column;
@@ -25,6 +23,8 @@
     background: var(--wa-bg);
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(11, 20, 26, 0.08), 0 8px 24px rgba(11, 20, 26, 0.06);
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, "Lucida Grande", Arial, Ubuntu, Cantarell, "Fira Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Header */
@@ -32,11 +32,11 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.65rem 1rem;
+    padding: 0.6rem 1rem;
     background: var(--accent, #7a2130);
     color: var(--wa-header-text);
     flex-shrink: 0;
-    min-height: 60px;
+    min-height: 59px;
 }
 
 .jur-wa-chat--whatsapp .jur-wa-chat__header {
@@ -51,10 +51,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.16);
     color: #fff;
-    font-weight: 600;
-    font-size: 1rem;
+    font-weight: 500;
+    font-size: 1.05rem;
 }
 
 .jur-wa-chat__contact {
@@ -65,7 +65,7 @@
 .jur-wa-chat__name {
     margin: 0;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.35;
     color: #fff !important;
     white-space: nowrap;
@@ -74,8 +74,9 @@
 }
 
 .jur-wa-chat__subtitle {
-    margin: 0.1rem 0 0;
-    font-size: 0.75rem;
+    margin: 0.12rem 0 0;
+    font-size: 0.8125rem;
+    font-weight: 400;
     line-height: 1.35;
     color: var(--wa-header-sub) !important;
     white-space: nowrap;
@@ -84,21 +85,21 @@
 }
 
 .jur-wa-chat__subtitle .fab.fa-whatsapp {
-    margin-right: 0.2rem;
-    font-size: 0.72rem;
+    margin-right: 0.15rem;
+    font-size: 0.75rem;
+    opacity: 0.95;
 }
 
 .jur-wa-chat__processo {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.7rem;
-    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
 }
 
 .jur-wa-chat__live {
     flex: 0 0 auto;
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .jur-wa-chat__live i {
@@ -108,16 +109,16 @@
     vertical-align: middle;
 }
 
-/* Thread — fundo doodle WhatsApp */
+/* Thread */
 .jur-wa-chat__thread {
     flex: 1 1 auto;
     min-height: 200px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0.75rem 4%;
+    padding: 0.65rem 5%;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.12rem;
     background-color: var(--wa-thread-bg);
 }
 
@@ -125,6 +126,7 @@
     background-color: #d1c6bc;
     background-size: 412.5px 749.25px;
     background-repeat: repeat;
+    background-position: top left;
 }
 
 .jur-wa-chat__empty {
@@ -134,20 +136,22 @@
     align-items: center;
     gap: 0.5rem;
     color: var(--wa-meta);
-    font-size: 0.86rem;
+    font-size: 0.875rem;
     padding: 2rem 1rem;
 }
 
 .jur-wa-chat__empty i {
     font-size: 1.75rem;
-    opacity: 0.55;
+    opacity: 0.5;
 }
 
 /* Bolhas */
 .jur-wa-bubble {
-    max-width: 65%;
     display: flex;
     flex-direction: column;
+    width: fit-content;
+    max-width: min(65%, 32rem);
+    margin-bottom: 0.18rem;
 }
 
 .jur-wa-bubble--entrada {
@@ -160,15 +164,18 @@
 
 .jur-wa-bubble--interno {
     align-self: center;
-    max-width: 88%;
+    max-width: min(88%, 36rem);
 }
 
 .jur-wa-bubble__body {
     position: relative;
-    padding: 0.35rem 0.5rem 0.3rem 0.55rem;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 4.75rem;
+    padding: 0.38rem 0.5rem 0.42rem 0.56rem;
     border-radius: 7.5px;
     font-size: 0.875rem;
-    line-height: 1.45;
+    line-height: 1.35;
     color: var(--wa-text);
     box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
 }
@@ -186,7 +193,6 @@
     width: 8px;
     height: 13px;
     background: var(--wa-in);
-    border-top-right-radius: 100%;
     clip-path: polygon(100% 0, 0 0, 100% 100%);
 }
 
@@ -203,24 +209,29 @@
     width: 8px;
     height: 13px;
     background: var(--wa-out);
-    border-top-left-radius: 100%;
     clip-path: polygon(0 0, 100% 0, 0 100%);
 }
 
-.jur-wa-bubble__sender {
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--wa-sender);
-    margin-bottom: 0.15rem;
-    line-height: 1.3;
+/* Texto + horário na mesma linha (padrão WhatsApp) */
+.jur-wa-bubble__copy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    column-gap: 0.35rem;
+    row-gap: 0.1rem;
 }
 
 .jur-wa-bubble__text {
-    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
     white-space: pre-wrap;
     word-break: break-word;
-    padding-right: 0.25rem;
+    overflow-wrap: anywhere;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--wa-text);
 }
 
 .jur-wa-bubble__footer {
@@ -228,35 +239,42 @@
     align-items: center;
     justify-content: flex-end;
     gap: 0.2rem;
-    float: right;
-    margin: 0.15rem 0 -0.1rem 0.75rem;
-    position: relative;
-    top: 0.35rem;
-    font-size: 0.68rem;
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding-bottom: 0.05rem;
+    font-size: 0.6875rem;
+    font-weight: 400;
     line-height: 1;
     color: var(--wa-meta);
     white-space: nowrap;
+    user-select: none;
+}
+
+.jur-wa-bubble__footer time {
+    font-variant-numeric: tabular-nums;
 }
 
 .jur-wa-bubble__status {
     color: #53bdeb;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     line-height: 1;
 }
 
 .jur-wa-bubble__system {
-    padding: 0.4rem 0.7rem;
+    padding: 0.42rem 0.75rem;
     border-radius: 7.5px;
-    background: rgba(255, 243, 205, 0.95);
-    border: 1px solid rgba(217, 119, 6, 0.18);
-    font-size: 0.72rem;
+    background: rgba(255, 243, 205, 0.96);
+    border: 1px solid rgba(217, 119, 6, 0.16);
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.4;
     color: #7c4a03;
     text-align: center;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
 }
 
 .jur-wa-bubble__body--plain {
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.82);
     border-radius: 7.5px;
     color: var(--wa-text);
     box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.1);
@@ -269,20 +287,29 @@
 /* Composer */
 .jur-wa-chat__composer {
     flex-shrink: 0;
-    padding: 0.6rem 0.75rem 0.75rem;
+    padding: 0.55rem 0.75rem 0.7rem;
     background: var(--wa-composer);
     border-top: 1px solid rgba(11, 20, 26, 0.06);
 }
 
 .jur-wa-chat__composer--closed {
     text-align: center;
-    font-size: 0.82rem;
+    font-size: 0.8125rem;
     color: var(--wa-meta);
     padding: 0.85rem;
 }
 
+.jur-wa-chat .jur-form-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--wa-meta);
+    margin-bottom: 0.3rem;
+}
+
 .jur-wa-chat__template-row {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.45rem;
 }
 
 .jur-wa-chat__form {
@@ -290,20 +317,22 @@
 }
 
 .jur-wa-chat__input-wrap {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.45rem;
 }
 
 .jur-wa-chat__input {
     display: block;
     width: 100%;
     min-width: 0 !important;
-    min-height: 68px;
-    padding: 0.6rem 0.85rem;
+    min-height: 64px;
+    padding: 0.58rem 0.8rem;
     border: none;
     border-radius: 8px;
     background: #fff;
+    font-family: inherit;
     font-size: 0.875rem;
-    line-height: 1.45;
+    font-weight: 400;
+    line-height: 1.4;
     color: var(--wa-text);
     resize: vertical;
     box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.08);
@@ -315,7 +344,7 @@
 
 .jur-wa-chat__input:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 128, 105, 0.25);
+    box-shadow: 0 0 0 2px rgba(0, 128, 105, 0.22);
 }
 
 .jur-wa-chat__actions {
@@ -338,7 +367,7 @@
     gap: 0.35rem;
     margin: 0;
     font-size: 0.78rem;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--wa-meta);
     cursor: pointer;
 }
@@ -382,7 +411,7 @@
     }
 
     .jur-wa-bubble {
-        max-width: 85%;
+        max-width: 88%;
     }
 
     .jur-wa-chat__actions {

@@ -2,6 +2,42 @@
 {% block title %}CRM Jurídico · Clientes{% endblock %}
 {% set page_list_title = 'CRM Jurídico' %}
 
+{% block page_list_kpis %}
+{% set _first_name = app.user.nome|default('')|split(' ')|first %}
+{% set _premium = rows|filter(r => r.cliente.status == 'premium')|length %}
+{% set _processos = 0 %}
+{% for r in rows %}{% set _processos = _processos + r.processos_ativos %}{% endfor %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-building" aria-hidden="true"></i> Clientes & Relacionamento · CRM</span>
+        <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'CRM Jurídico' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if rows|length == 0 %}
+                Cadastre o primeiro cliente do escritório para vincular processos, carteira e atendimento em um só lugar.
+            {% else %}
+                Carteira com <strong>{{ rows|length }}</strong> cliente{{ rows|length != 1 ? 's' : '' }}{% if _premium > 0 %}, sendo <strong>{{ _premium }}</strong> premium{% endif %} — <strong>{{ _processos }}</strong> processo{{ _processos != 1 ? 's' : '' }} ativo{{ _processos != 1 ? 's' : '' }} no total.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-cliente-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo cliente
+            </button>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Quais clientes da carteira merecem atenção prioritária nesta semana?">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
+        </div>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: rows|length, label: 'Clientes', sub: 'Na carteira', icon: 'fa-building', tone: 'sky' },
+        { value: _premium, label: 'Premium', sub: 'SLA prioritário', icon: 'fa-gem', tone: 'amber', route: 'app_juridico_clientes', route_params: { status: 'premium' } },
+        { value: _processos, label: 'Processos ativos', sub: 'Soma da carteira', icon: 'fa-folder-open', tone: 'lavender' },
+        { value: rows|length - _premium, label: 'Standard', sub: 'Carteira regular', icon: 'fa-user', tone: 'sage', route: 'app_juridico_clientes', route_params: { status: 'standard' } },
+    ] } %}
+</div>
+{% endblock %}
+
 {% block page_list_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-cliente-novo">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo cliente

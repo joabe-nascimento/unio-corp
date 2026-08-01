@@ -3,25 +3,72 @@
 {% set page_list_title = 'Publicações & Intimações' %}
 
 {% block page_list_kpis %}
-<div class="row g-3 mb-3">
-    <div class="col-md-4">
-        <div class="unio-card p-3">
-            <div class="small text-muted">Não lidas</div>
-            <div class="h4 mb-0">{{ metricas.nao_lidas }}</div>
+{% set _first_name = app.user.nome|default('')|split(' ')|first %}
+{% set _oabs = capturas|filter(c => c.ativo)|length %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-newspaper" aria-hidden="true"></i> Contencioso · DJEN e intimações</span>
+        <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'Publicações & Intimações' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if metricas.nao_lidas|default(0) > 0 %}
+                Você tem <strong>{{ metricas.nao_lidas }}</strong> publicação{{ metricas.nao_lidas > 1 ? 'ões' : '' }} nova{{ metricas.nao_lidas > 1 ? 's' : '' }} aguardando leitura.
+            {% elseif metricas.triagem_pendente|default(0) > 0 %}
+                <strong>{{ metricas.triagem_pendente }}</strong> publicação{{ metricas.triagem_pendente > 1 ? 'ões' : '' }} na fila de triagem da Sasha.
+            {% elseif metricas.total_ativas|default(0) == 0 %}
+                Configure as OABs do escritório em “Captura DJEN” e execute a primeira varredura no diário oficial.
+            {% else %}
+                Fila sob controle — <strong>{{ metricas.total_ativas }}</strong> publicação{{ metricas.total_ativas != 1 ? 'ões' : '' }} ativa{{ metricas.total_ativas != 1 ? 's' : '' }} e <strong>{{ _oabs }}</strong> OAB{{ _oabs != 1 ? 's' : '' }} monitorada{{ _oabs != 1 ? 's' : '' }}.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-publicacao-config">
+                <i class="fas fa-gear mr-1" aria-hidden="true"></i> Captura DJEN
+            </button>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Quais publicações e intimações precisam de atenção imediata na minha fila do DJEN?">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="unio-card p-3">
-            <div class="small text-muted">Triagem pendente</div>
-            <div class="h4 mb-0">{{ metricas.triagem_pendente }}</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="unio-card p-3">
-            <div class="small text-muted">OABs monitoradas</div>
-            <div class="h4 mb-0">{{ capturas|filter(c => c.ativo)|length }}</div>
-        </div>
-    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        {
+            value: metricas.nao_lidas|default(0),
+            label: 'Não lidas',
+            sub: 'Aguardando leitura',
+            icon: 'fa-envelope-open',
+            tone: metricas.nao_lidas|default(0) > 0 ? 'amber' : 'sage',
+            pulse: metricas.nao_lidas|default(0) > 0,
+            route: 'app_juridico_publicacoes',
+            route_params: { status: 'nao_lida' },
+        },
+        {
+            value: metricas.triagem_pendente|default(0),
+            label: 'Triagem pendente',
+            sub: 'Classificação Sasha',
+            icon: 'fa-wand-magic-sparkles',
+            tone: metricas.triagem_pendente|default(0) > 0 ? 'rose' : 'sage',
+            pulse: metricas.triagem_pendente|default(0) > 0,
+            route: 'app_juridico_publicacoes',
+            route_params: { status: 'triagem' },
+        },
+        {
+            value: metricas.vinculadas|default(0),
+            label: 'Vinculadas',
+            sub: 'Com processo no escritório',
+            icon: 'fa-link',
+            tone: 'sky',
+            route: 'app_juridico_publicacoes',
+            route_params: { status: 'vinculada' },
+        },
+        {
+            value: _oabs,
+            label: 'OABs monitoradas',
+            sub: 'Captura automática DJEN',
+            icon: 'fa-id-card',
+            tone: 'lavender',
+        },
+    ] } %}
 </div>
 {% endblock %}
 

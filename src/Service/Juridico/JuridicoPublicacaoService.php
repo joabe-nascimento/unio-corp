@@ -42,12 +42,14 @@ final class JuridicoPublicacaoService
         return $this->repo->findForEmpresa($empresa, $status, $prioridade, $q);
     }
 
-    /** @return array{nao_lidas: int, triagem_pendente: int} */
+    /** @return array{nao_lidas: int, triagem_pendente: int, vinculadas: int, total_ativas: int} */
     public function metricas(Empresa $empresa): array
     {
         return [
             'nao_lidas' => $this->repo->countNaoLidas($empresa),
             'triagem_pendente' => $this->repo->countTriagemPendente($empresa),
+            'vinculadas' => $this->repo->countVinculadas($empresa),
+            'total_ativas' => $this->repo->countAtivas($empresa),
         ];
     }
 

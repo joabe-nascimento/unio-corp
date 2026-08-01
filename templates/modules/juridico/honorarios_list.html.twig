@@ -12,11 +12,30 @@
 {% endblock %}
 
 {% block page_list_kpis %}
+{% set _first_name = app.user.nome|default('')|split(' ')|first %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-coins" aria-hidden="true"></i> Financeiro do Escritório · Timesheet</span>
+        <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'Honorários & Timesheet' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if resumo is empty %}
+                Registre horas e honorários do mês para acompanhar receita e produtividade por advogado.
+            {% else %}
+                Mês selecionado com <strong>{{ horas_mes|number_format(1, ',', '.') }}h</strong> registradas e receita de <strong>R$ {{ receita_mes|number_format(2, ',', '.') }}</strong>.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-honorario-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo lançamento
+            </button>
+        </div>
+    </div>
+</section>
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
-        { value: horas_mes|number_format(1, ',', '.') ~ 'h', label: 'Horas no mês' },
-        { value: 'R$ ' ~ receita_mes|number_format(2, ',', '.'), label: 'Receita do mês' },
-        { value: resumo|length, label: 'Advogados com lançamento' },
+        { value: horas_mes|number_format(1, ',', '.') ~ 'h', label: 'Horas no mês', sub: 'Timesheet', icon: 'fa-clock', tone: 'sky' },
+        { value: 'R$ ' ~ receita_mes|number_format(2, ',', '.'), label: 'Receita do mês', sub: 'Honorários faturáveis', icon: 'fa-sack-dollar', tone: 'amber' },
+        { value: resumo|length, label: 'Advogados', sub: 'Com lançamento', icon: 'fa-user-tie', tone: 'lavender' },
     ] } %}
 </div>
 {% endblock %}

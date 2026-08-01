@@ -1,256 +1,138 @@
-# Ship Unio Juridico — detecta alteracoes, commit, push e deploy rapido no HostGator.
+# Commit automático + push + deploy Unio Jurídico
 #
-# Uso (na raiz do repo unio-corp):
+# Uso (na raiz do repo):
 #   powershell -ExecutionPolicy Bypass -File scripts\ship-uniojuridico.ps1
+#   powershell -ExecutionPolicy Bypass -File scripts\ship-uniojuridico.ps1 -SkipDeploy
+#   powershell -ExecutionPolicy Bypass -File scripts\ship-uniojuridico.ps1 -Fast -SkipSmoke
 #
-# Opcoes:
-#   -Message "fix: ..."   mensagem manual (pula auto-mensagem)
-#   -SkipBuild              forca deploy sem build local
-#   -Fast                   forca modo rapido (sem build, sem passos lentos no servidor)
-#   -ForceBuild             forca composer/npm mesmo com so CSS/templates
-#   -NoDeploy               so commit + push
-#   -NoPush                 so commit (nao push / nao deploy)
-#   -DryRun                 mostra o que faria, sem executar
+# O script lê git status/diff, monta a mensagem de commit e publica.
 
 param(
-    [string]$Message = "",
-    [switch]$SkipBuild,
+    [switch]$SkipDeploy,
     [switch]$Fast,
-    [switch]$ForceBuild,
-    [switch]$NoDeploy,
-    [switch]$NoPush,
-    [switch]$DryRun
+    [switch]$SkipSmoke
 )
 
 $ErrorActionPreference = "Stop"
 
-$root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+function Invoke-Git {
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $out = & git @args 2>&1
+    $ErrorActionPreference = $prev
+    return $out
+}
+
+$root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-Write-Host "== Ship Unio Juridico ==" -ForegroundColor Cyan
-Write-Host "Repo: $root" -ForegroundColor DarkGray
+function Get-ChangeSummary {
+    $porcelain = Invoke-Git status --porcelain
+    if (-not $porcelain) { return $null }
 
-function Test-IsSecretPath {
-    param([string]$Path)
-    $p = $Path -replace '\\', '/'
-    $patterns = @(
-        '\.env$',
-        '\.env\.',
-        'deploy-.*\.local\.env$',
-        'composer\.phar$',
-        '\.p12$',
-        'google-service-account\.json$',
-        'mailbox-credentials',
-        'credentials\.json$',
-        'id_rsa',
-        '\.pem$'
-    )
-    foreach ($re in $patterns) {
-        if ($p -match $re) { return $true }
-    }
-    return $false
-}
+    $files = @($porcelain | ForEach-Object {
+        $line = $_.Trim()
+        if ($line.Length -lt 4) { return }
+        $line.Substring(3).Trim('"')
+    } | Where-Object { $_ })
 
-function Get-ChangedPaths {
-    $paths = New-Object System.Collections.Generic.List[string]
-    $raw = git status --porcelain -uall
-    if (-not $raw) { return @() }
-    foreach ($line in ($raw -split "`n")) {
-        $line = $line.TrimEnd()
-        if ([string]::IsNullOrWhiteSpace($line)) { continue }
-        $path = $line.Substring(3).Trim()
-        if ($path -match ' -> ') {
-            $path = ($path -split ' -> ', 2)[1]
-        }
-        if ($path.StartsWith('"') -and $path.EndsWith('"')) {
-            $path = $path.Substring(1, $path.Length - 2)
-        }
-        $paths.Add($path)
-    }
-    return $paths.ToArray()
-}
+    $stat = (Invoke-Git diff --stat HEAD | Out-String).Trim()
+    if (-not $stat) { $stat = (Invoke-Git diff --stat | Out-String).Trim() }
 
-function New-CommitMessage {
-    param([string[]]$Paths)
-
-    $hasCss = $false
-    $hasTwig = $false
-    $hasPhp = $false
-    $hasJs = $false
-    $hasTest = $false
-    $hasScript = $false
-    $areas = New-Object System.Collections.Generic.HashSet[string]
-
-    foreach ($p in $Paths) {
-        $n = $p -replace '\\', '/'
-        if ($n -match '\.css$') { $hasCss = $true }
-        if ($n -match '\.twig$|\.html$') { $hasTwig = $true }
-        if ($n -match '\.php$') {
-            if ($n -match '^tests/') { $hasTest = $true } else { $hasPhp = $true }
-        }
-        if ($n -match '\.(js|mjs|ts)$') { $hasJs = $true }
-        if ($n -match '^scripts/') { $hasScript = $true }
-
-        if ($n -match 'helix|sasha|chat') { [void]$areas.Add('sasha/chat') }
-        if ($n -match 'juridico|organismo') { [void]$areas.Add('juridico') }
-        if ($n -match 'deploy|ship-uniojuridico') { [void]$areas.Add('deploy') }
+    $themes = [ordered]@{}
+    $add = {
+        param($key, $detail)
+        if (-not $themes.Contains($key)) { $themes[$key] = [System.Collections.Generic.List[string]]::new() }
+        if ($detail -and -not $themes[$key].Contains($detail)) { [void]$themes[$key].Add($detail) }
     }
 
-    $type = 'chore'
-    if ($hasTest -and -not ($hasPhp -or $hasCss -or $hasTwig -or $hasJs)) {
-        $type = 'test'
-    } elseif ($hasPhp -and ($Paths | Where-Object { $_ -match 'Controller|Service|Entity|Migration|Tool' })) {
-        $type = 'feat'
-    } elseif ($hasCss -or $hasTwig) {
-        $type = 'fix'
-    } elseif ($hasPhp -or $hasJs) {
-        $type = 'fix'
-    } elseif ($hasScript) {
-        $type = 'chore'
-    }
-
-    $scopeParts = @($areas)
-    if ($scopeParts.Count -eq 0) {
-        if ($hasCss) { $scopeParts = @('css') }
-        elseif ($hasTwig) { $scopeParts = @('templates') }
-        elseif ($hasPhp) { $scopeParts = @('app') }
-        else { $scopeParts = @('uniojuridico') }
-    }
-
-    $scope = ($scopeParts | Select-Object -First 2) -join ', '
-    $n = $Paths.Count
-    $sample = ($Paths | Select-Object -First 3 | ForEach-Object { Split-Path $_ -Leaf }) -join ', '
-    if ($n -gt 3) { $sample = "$sample…" }
-
-    return "${type}: ${scope} (${n} arquivo(s): ${sample})"
-}
-
-function Test-NeedsFullBuild {
-    param([string[]]$Paths)
-    foreach ($p in $Paths) {
-        $n = $p -replace '\\', '/'
-        if ($n -match '^composer\.(json|lock)$') { return $true }
-        if ($n -match '^package(-lock)?\.json$') { return $true }
-        if ($n -match '^assets/') { return $true }
-        if ($n -match '^src/') { return $true }
-        if ($n -match '\.php$' -and $n -notmatch '^tests/') { return $true }
-        if ($n -match '^config/(packages|routes|services)') { return $true }
-        if ($n -match '^migrations/') { return $true }
-    }
-    return $false
-}
-
-$branch = (git rev-parse --abbrev-ref HEAD).Trim()
-if ($branch -ne 'uniojuridico') {
-    Write-Host "Aviso: branch atual e '$branch' (esperado: uniojuridico)." -ForegroundColor Yellow
-}
-
-$allPaths = Get-ChangedPaths
-if ($allPaths.Count -eq 0) {
-    $ahead = 0
-    try {
-        $counts = (git rev-list --left-right --count "origin/$branch...HEAD" 2>$null)
-        if ($counts) {
-            $parts = $counts.Trim() -split '\s+'
-            if ($parts.Count -ge 2) { $ahead = [int]$parts[1] }
-        }
-    } catch { }
-
-    if ($ahead -gt 0) {
-        Write-Host "Working tree limpa; $ahead commit(s) locais ainda nao no remoto." -ForegroundColor Yellow
-    } else {
-        Write-Host "Nada para commitar e branch sincronizada." -ForegroundColor Green
-        if (-not $NoDeploy -and -not $NoPush) {
-            Write-Host "Prosseguindo so com deploy do HEAD atual..." -ForegroundColor Cyan
-        } else {
-            exit 0
+    foreach ($f in $files) {
+        switch -Regex ($f) {
+            'publicacoes' { & $add 'Publicações DJEN' 'listagem com banner e KPIs padronizados' }
+            'atendimento_whatsapp_chat|jur-wa-chat' { & $add 'Chat WhatsApp' 'bolhas, alinhamento e tipografia' }
+            'atendimento_list' { & $add 'Central de Atendimento' 'banner jur-proc-hero e kpi_row' }
+            'clientes_list' { & $add 'CRM Clientes' 'banner e KPIs' }
+            'prazos_list' { & $add 'Prazos' 'banner e KPIs' }
+            'documentos_list' { & $add 'GED Documentos' 'banner e KPIs' }
+            'honorarios_list' { & $add 'Honorários' 'banner e KPIs' }
+            'jurisprudencia_list' { & $add 'Jurisprudência IA' 'banner e KPIs' }
+            'JuridicoPublicacao' { & $add 'Backend publicações' 'métricas vinculadas e total ativas' }
+            'unio-juridico-theme' { & $add 'Tema jurídico' 'estilos do banner e badges' }
+            'base\.html' { & $add 'Assets' 'cache-bust CSS' }
+            default { & $add 'Outros' $f }
         }
     }
-}
 
-$secretPaths = @($allPaths | Where-Object { Test-IsSecretPath $_ })
-$safePaths = @($allPaths | Where-Object { -not (Test-IsSecretPath $_) })
-
-if ($secretPaths.Count -gt 0) {
-    Write-Host "Ignorando arquivos sensiveis:" -ForegroundColor Yellow
-    $secretPaths | ForEach-Object { Write-Host "  - $_" -ForegroundColor DarkYellow }
-}
-
-Write-Host ""
-Write-Host "Alteracoes detectadas ($($safePaths.Count)):" -ForegroundColor Cyan
-$safePaths | ForEach-Object { Write-Host "  • $_" }
-
-if ($safePaths.Count -gt 0) {
-    if ([string]::IsNullOrWhiteSpace($Message)) {
-        $Message = New-CommitMessage -Paths $safePaths
+    $bullets = @()
+    foreach ($kv in $themes.GetEnumerator()) {
+        $details = ($kv.Value | Select-Object -Unique) -join '; '
+        $bullets += "- $($kv.Key): $details"
     }
-    Write-Host ""
-    Write-Host "Commit: $Message" -ForegroundColor Green
 
-    if ($DryRun) {
-        Write-Host "[dry-run] git add + commit" -ForegroundColor DarkGray
-    } else {
-        foreach ($p in $safePaths) {
-            git add -- $p
-            if ($LASTEXITCODE -ne 0) { throw "git add falhou: $p" }
-        }
-        git commit -m $Message
-        if ($LASTEXITCODE -ne 0) { throw "git commit falhou" }
-        Write-Host "[ok] commit criado" -ForegroundColor Green
+    $scope = switch ($themes.Count) {
+        { $_ -ge 4 } { 'UI e padronização das telas jurídicas' }
+        { $_ -ge 2 } { 'melhorias de UI jurídica' }
+        default { ($themes.Keys | Select-Object -First 1) }
     }
-} else {
-    Write-Host "Nenhum arquivo seguro para commit." -ForegroundColor DarkGray
-}
 
-if (-not $NoPush) {
-    if ($DryRun) {
-        Write-Host "[dry-run] git push -u origin HEAD" -ForegroundColor DarkGray
-    } else {
-        Write-Host ""
-        Write-Host "Push para origin/$branch ..." -ForegroundColor Cyan
-        git push -u origin HEAD
-        if ($LASTEXITCODE -ne 0) { throw "git push falhou" }
-        Write-Host "[ok] push concluido" -ForegroundColor Green
+    $title = "UI: $scope."
+    if ($themes.Contains('Backend publicações')) {
+        $title = "Feat: métricas de publicações e padronização de listagens jurídicas."
     }
-} else {
-    Write-Host "[skip] push (--NoPush)" -ForegroundColor Yellow
+
+    return [pscustomobject]@{
+        Title   = $title
+        Body    = ($bullets -join "`n")
+        Files   = $files
+        Stat    = $stat
+        Count   = $files.Count
+    }
 }
 
-if ($NoDeploy -or $NoPush) {
-    Write-Host "[skip] deploy" -ForegroundColor Yellow
-    exit 0
-}
+Write-Host "== Ship Unio Jurídico ==" -ForegroundColor Cyan
 
-$pathsForBuild = if ($safePaths.Count -gt 0) { $safePaths } else { @() }
-$needsFullBuild = Test-NeedsFullBuild -Paths $pathsForBuild
-if ($ForceBuild) { $needsFullBuild = $true }
-if ($SkipBuild -or $Fast) { $needsFullBuild = $false }
-
-$deployArgs = @()
-if (-not $needsFullBuild) {
-    $deployArgs += '-Fast'
-    Write-Host ""
-    Write-Host "Deploy rapido (-Fast): sem build local, sem passos lentos no servidor." -ForegroundColor DarkGray
-} else {
-    Write-Host ""
-    Write-Host "Deploy com build completo (composer/npm em staging)." -ForegroundColor DarkGray
-}
-
-$deployScript = Join-Path $root "scripts\deploy-uniojuridico-manual.ps1"
-if (-not (Test-Path $deployScript)) {
-    throw "Script de deploy nao encontrado: $deployScript"
-}
-
-if ($DryRun) {
-    Write-Host "[dry-run] $deployScript $($deployArgs -join ' ')" -ForegroundColor DarkGray
+$summary = Get-ChangeSummary
+if (-not $summary) {
+    Write-Host "Working tree limpo — nada para commitar." -ForegroundColor Yellow
+    if (-not $SkipDeploy) {
+        $deployArgs = @("-ExecutionPolicy", "Bypass", "-File", "scripts\deploy-uniojuridico-manual.ps1")
+        if ($Fast) { $deployArgs += "-Fast" }
+        if ($SkipSmoke) { $deployArgs += "-SkipSmoke" }
+        & powershell @deployArgs
+    }
     exit 0
 }
 
 Write-Host ""
-Write-Host "Iniciando deploy..." -ForegroundColor Cyan
-& powershell -ExecutionPolicy Bypass -File $deployScript @deployArgs
-if ($LASTEXITCODE -ne 0) { throw "deploy falhou (exit $LASTEXITCODE)" }
+Write-Host "Alterações detectadas ($($summary.Count) arquivo(s)):" -ForegroundColor Green
+Write-Host $summary.Stat
+Write-Host ""
+Write-Host "Mensagem de commit:" -ForegroundColor Green
+Write-Host "  $($summary.Title)"
+Write-Host $summary.Body
+Write-Host ""
+
+git add -A
+Invoke-Git commit -m $summary.Title -m $summary.Body | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "git commit falhou" }
 
 Write-Host ""
-Write-Host "Ship concluido." -ForegroundColor Green
-Write-Host "URL: https://uniojuridico.uniowork.com.br" -ForegroundColor Cyan
+Write-Host "Push para origin..." -ForegroundColor Cyan
+Invoke-Git push -u origin HEAD | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "git push falhou" }
+
+if ($SkipDeploy) {
+    Write-Host "Deploy pulado (-SkipDeploy)." -ForegroundColor Yellow
+    exit 0
+}
+
+Write-Host ""
+Write-Host "Deploy para HostGator..." -ForegroundColor Cyan
+$deployArgs = @("-ExecutionPolicy", "Bypass", "-File", "scripts\deploy-uniojuridico-manual.ps1")
+if ($Fast) { $deployArgs += "-Fast" }
+if ($SkipSmoke) { $deployArgs += "-SkipSmoke" }
+& powershell @deployArgs
+if ($LASTEXITCODE -ne 0) { throw "deploy falhou" }
+
+Write-Host ""
+Write-Host "Concluído: commit + push + deploy." -ForegroundColor Green

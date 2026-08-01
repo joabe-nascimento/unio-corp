@@ -2,6 +2,38 @@
 {% block title %}GED Jurídico · Documentos{% endblock %}
 {% set page_list_title = 'GED Jurídico' %}
 
+{% block page_list_kpis %}
+{% set _first_name = app.user.nome|default('')|split(' ')|first %}
+{% set _peticoes = documentos|filter(d => d.categoria == 'peticao')|length %}
+{% set _contratos = documentos|filter(d => d.categoria == 'contrato')|length %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-folder-open" aria-hidden="true"></i> Produção & Documentos · GED</span>
+        <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'GED Jurídico' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if documentos|length == 0 %}
+                Envie o primeiro documento do escritório — petições, contratos e peças vinculadas aos processos.
+            {% else %}
+                Biblioteca com <strong>{{ documentos|length }}</strong> documento{{ documentos|length != 1 ? 's' : '' }}{% if _peticoes > 0 %} · <strong>{{ _peticoes }}</strong> petição{{ _peticoes != 1 ? 'ões' : '' }}{% endif %}{% if _contratos > 0 %} · <strong>{{ _contratos }}</strong> contrato{{ _contratos != 1 ? 's' : '' }}{% endif %}.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-documento-novo">
+                <i class="fas fa-file-arrow-up mr-1" aria-hidden="true"></i> Novo documento
+            </button>
+        </div>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: documentos|length, label: 'Documentos', sub: 'Na listagem', icon: 'fa-file-lines', tone: 'sky' },
+        { value: _peticoes, label: 'Petições', sub: 'Categoria processual', icon: 'fa-gavel', tone: 'lavender', route: 'app_juridico_documentos', route_params: { categoria: 'peticao' } },
+        { value: _contratos, label: 'Contratos', sub: 'Consultivo', icon: 'fa-file-signature', tone: 'amber', route: 'app_juridico_documentos', route_params: { categoria: 'contrato' } },
+        { value: documentos|filter(d => d.processo)|length, label: 'Vinculados', sub: 'Com processo', icon: 'fa-link', tone: 'sage' },
+    ] } %}
+</div>
+{% endblock %}
+
 {% block page_list_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-documento-novo">
     <i class="fas fa-file-arrow-up mr-1" aria-hidden="true"></i> Novo documento

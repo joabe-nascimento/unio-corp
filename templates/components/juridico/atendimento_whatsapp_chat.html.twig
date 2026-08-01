@@ -16,7 +16,11 @@
                 {% endif %}
                 {{ ticket.canal|capitalize }} · aberto {{ ticket.criadoEm|date('d/m/Y H:i') }}
                 {% if ticket.processo %}
-                · <span class="jur-wa-chat__processo" title="{{ ticket.processo.numero }}">{{ ticket.processo.numero }}</span>
+                    {% set procNum = ticket.processo.numero|default('') %}
+                    {% set procDigits = procNum|replace({'.': '', '-': '', ' ': ''}) %}
+                    {% if procDigits|replace({'0': ''}) != '' %}
+                · <span class="jur-wa-chat__processo" title="{{ procNum }}">{{ procNum|length > 22 ? procNum|slice(0, 22) ~ '…' : procNum }}</span>
+                    {% endif %}
                 {% endif %}
             </p>
         </div>
@@ -38,18 +42,17 @@
             {% else %}
             <div class="jur-wa-bubble jur-wa-bubble--{{ msg.direcao }}">
                 <div class="jur-wa-bubble__body">
-                    {% if msg.direcao == 'entrada' %}
-                    <span class="jur-wa-bubble__sender">{{ msg.remetenteNome|default('Cliente') }}</span>
-                    {% endif %}
-                    <span class="jur-wa-bubble__text">{{ msg.corpo }}</span>
-                    <span class="jur-wa-bubble__footer">
-                        <time datetime="{{ msg.criadoEm|date('c') }}">{{ msg.criadoEm|date('H:i') }}</time>
-                        {% if msg.direcao == 'saida' and msg.whatsappEnviado %}
-                        <span class="jur-wa-bubble__status" title="Enviado via WhatsApp" aria-label="Enviado via WhatsApp">
-                            <i class="fas fa-check-double" aria-hidden="true"></i>
+                    <div class="jur-wa-bubble__copy">
+                        <span class="jur-wa-bubble__text">{{ msg.corpo }}</span>
+                        <span class="jur-wa-bubble__footer">
+                            <time datetime="{{ msg.criadoEm|date('c') }}">{{ msg.criadoEm|date('H:i') }}</time>
+                            {% if msg.direcao == 'saida' and msg.whatsappEnviado %}
+                            <span class="jur-wa-bubble__status" title="Enviado via WhatsApp" aria-label="Enviado via WhatsApp">
+                                <i class="fas fa-check-double" aria-hidden="true"></i>
+                            </span>
+                            {% endif %}
                         </span>
-                        {% endif %}
-                    </span>
+                    </div>
                 </div>
             </div>
             {% endif %}

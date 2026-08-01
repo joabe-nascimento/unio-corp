@@ -2,6 +2,44 @@
 {% block title %}Prazos & Diligências · Unio Jurídico{% endblock %}
 {% set page_list_title = 'Prazos & Diligências' %}
 
+{% block page_list_kpis %}
+{% set _first_name = app.user.nome|default('')|split(' ')|first %}
+{% set _criticos = prazos|filter(p => p.statusLabel == 'critico')|length %}
+{% set _pendentes = prazos|filter(p => not p.cumprido)|length %}
+{% set _cumpridos = prazos|filter(p => p.cumprido)|length %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-hourglass-half" aria-hidden="true"></i> Contencioso · Agenda fatal</span>
+        <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'Prazos & Diligências' }}</h2>
+        <p class="jur-proc-hero__text">
+            {% if _criticos > 0 %}
+                <strong>{{ _criticos }}</strong> prazo{{ _criticos > 1 ? 's' : '' }} crítico{{ _criticos > 1 ? 's' : '' }} nas próximas 48 horas — revise a fila com urgência.
+            {% elseif _pendentes == 0 %}
+                Nenhum prazo pendente na lista atual. Cadastre diligências e prazos fatais para acompanhar a equipe.
+            {% else %}
+                <strong>{{ _pendentes }}</strong> prazo{{ _pendentes > 1 ? 's' : '' }} pendente{{ _pendentes > 1 ? 's' : '' }} na agenda do escritório.
+            {% endif %}
+        </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-prazo-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo prazo
+            </button>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Quais prazos processuais vencem primeiro e o que preciso priorizar esta semana?">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
+        </div>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: _pendentes, label: 'Pendentes', sub: 'Na agenda', icon: 'fa-hourglass-half', tone: 'sky', route: 'app_juridico_prazos', route_params: { situacao: 'pendentes' } },
+        { value: _criticos, label: 'Críticos (48h)', sub: _criticos > 0 ? 'Atenção imediata' : 'Sem urgência', icon: 'fa-triangle-exclamation', tone: _criticos > 0 ? 'rose' : 'sage', pulse: _criticos > 0 },
+        { value: _cumpridos, label: 'Cumpridos', sub: 'Na listagem atual', icon: 'fa-circle-check', tone: 'sage', route: 'app_juridico_prazos', route_params: { situacao: 'cumpridos' } },
+        { value: prazos|length, label: 'Total listado', sub: 'Com filtros aplicados', icon: 'fa-list', tone: 'lavender' },
+    ] } %}
+</div>
+{% endblock %}
+
 {% block page_list_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-prazo-novo">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo prazo
