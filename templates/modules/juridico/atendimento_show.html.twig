@@ -3,158 +3,234 @@
 {% set page_list_title = ticket.assunto %}
 
 {% block page_list_toolbar_actions %}
-<form method="post" action="{{ path('app_juridico_atendimento_status', { id: ticket.id }) }}" class="d-inline">
-    <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_status_' ~ ticket.id) }}">
-    <select name="status" class="form-control form-control-sm d-inline-block" style="width:auto;" onchange="this.form.submit()">
-        <option value="aberto" {% if ticket.status == 'aberto' %}selected{% endif %}>Novo</option>
-        <option value="em_atendimento" {% if ticket.status == 'em_atendimento' %}selected{% endif %}>Em atendimento</option>
-        <option value="aguardando_cliente" {% if ticket.status == 'aguardando_cliente' %}selected{% endif %}>Aguardando cliente</option>
-        <option value="resolvido" {% if ticket.status == 'resolvido' %}selected{% endif %}>Resolvido</option>
-    </select>
-</form>
-<a href="{{ path('app_juridico_atendimento') }}" class="btn-unio-ghost btn-sm">
-    <i class="fas fa-arrow-left mr-1"></i> Voltar
-</a>
+<div class="jur-atendimento-show__toolbar">
+    <form method="post" action="{{ path('app_juridico_atendimento_status', { id: ticket.id }) }}" class="jur-atendimento-show__status-form">
+        <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_status_' ~ ticket.id) }}">
+        <select name="status" class="jur-form-select jur-form-select--inline" aria-label="Status do ticket" onchange="this.form.submit()">
+            <option value="aberto" {% if ticket.status == 'aberto' %}selected{% endif %}>Novo</option>
+            <option value="em_atendimento" {% if ticket.status == 'em_atendimento' %}selected{% endif %}>Em atendimento</option>
+            <option value="aguardando_cliente" {% if ticket.status == 'aguardando_cliente' %}selected{% endif %}>Aguardando cliente</option>
+            <option value="resolvido" {% if ticket.status == 'resolvido' %}selected{% endif %}>Resolvido</option>
+        </select>
+    </form>
+    <a href="{{ path('app_juridico_atendimento') }}" class="btn-unio-ghost btn-sm">
+        <i class="fas fa-arrow-left mr-1"></i> Voltar
+    </a>
+</div>
 {% endblock %}
 
 {% block page_list_content %}
-<div class="row g-4">
-    <div class="col-lg-8">
-        <section class="unio-card p-3 mb-3">
-            {% include 'components/section_header.html.twig' with {
-                title: 'Conversa',
-                subtitle: ticket.canal|capitalize ~ ' · aberto em ' ~ ticket.criadoEm|date('d/m/Y H:i')
-            } %}
-            <div class="px-3 pb-2" id="jur-atendimento-thread">
-                {% for msg in ticket.mensagens %}
-                <div class="mb-3 {% if msg.direcao == 'entrada' %}text-left{% elseif msg.direcao == 'interno' %}text-center{% else %}text-right{% endif %}">
-                    <div class="d-inline-block p-2 rounded {% if msg.direcao == 'entrada' %}bg-light{% elseif msg.direcao == 'interno' %}bg-warning-light border{% else %}bg-primary text-white{% endif %}" style="max-width:85%;text-align:left;">
-                        <div class="small text-muted mb-1">
-                            {% if msg.direcao == 'entrada' %}
-                                {{ msg.remetenteNome|default('Cliente') }}
-                            {% elseif msg.direcao == 'interno' %}
-                                <i class="fas fa-lock"></i> Nota interna — {{ msg.autor ? msg.autor.nome : 'Equipe' }}
-                            {% else %}
-                                {{ msg.autor ? msg.autor.nome : 'Atendente' }}
-                                {% if msg.whatsappEnviado %}<i class="fab fa-whatsapp ml-1" title="Enviado via WhatsApp"></i>{% endif %}
-                            {% endif %}
-                            · {{ msg.criadoEm|date('d/m H:i') }}
-                        </div>
-                        <div style="white-space:pre-wrap;">{{ msg.corpo }}</div>
-                    </div>
-                </div>
-                {% else %}
-                <p class="text-muted small">Sem mensagens.</p>
-                {% endfor %}
-            </div>
-        </section>
-
-        {% if ticket.isAberto %}
-        <section class="unio-card p-3">
-            {% include 'components/section_header.html.twig' with { title: 'Responder', subtitle: 'Templates ou sugestão Sasha' } %}
-            <div class="px-3 pb-3">
-                {% if templates is not empty %}
-                <div class="mb-2">
-                    <label class="form-label small">Template rápido</label>
-                    <select id="jurAtendimentoTemplateSelect" class="form-control form-control-sm">
-                        <option value="">— Selecionar template —</option>
-                        {% for tpl in templates %}
-                        <option value="{{ tpl.id }}" data-preview-url="{{ path('app_juridico_atendimento_template_preview', { id: tpl.id, ticketId: ticket.id }) }}">{{ tpl.titulo }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                {% endif %}
-                <form method="post" action="{{ path('app_juridico_atendimento_mensagem', { id: ticket.id }) }}" id="jurAtendimentoRespostaForm">
-                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_msg_' ~ ticket.id) }}">
-                    <textarea name="corpo" id="jurAtendimentoCorpo" class="form-control form-control-sm mb-2" rows="5" required placeholder="Digite a resposta ao cliente…"></textarea>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        {% if ticket.canal == 'whatsapp' and whatsapp_live and ticket.cliente and ticket.cliente.telefone %}
-                        <label class="small mb-0"><input type="checkbox" name="enviar_whatsapp" value="1" checked> Enviar via WhatsApp</label>
-                        {% endif %}
-                        <label class="small mb-0"><input type="checkbox" name="nota_interna" value="1"> Nota interna</label>
-                        <button type="button" class="btn-unio-ghost btn-sm ml-auto" id="jurAtendimentoSugerirBtn"
-                            data-url="{{ path('app_juridico_atendimento_sugerir', { id: ticket.id }) }}"
-                            data-csrf="{{ csrf_token('juridico_atendimento_sugerir_' ~ ticket.id) }}">
-                            <i class="fas fa-robot mr-1"></i> Sugerir com Sasha
-                        </button>
-                        <button type="submit" class="btn-unio btn-sm">Enviar</button>
-                    </div>
-                </form>
-            </div>
-        </section>
+<div class="jur-atendimento-show">
+    <div class="jur-atendimento-show__chips" aria-label="Resumo do ticket">
+        {% if ticket.canal == 'whatsapp' %}
+        <span class="jur-atendimento-show__chip jur-atendimento-show__chip--wa"><i class="fab fa-whatsapp"></i> WhatsApp</span>
+        {% elseif ticket.canal == 'email' %}
+        <span class="jur-atendimento-show__chip"><i class="fas fa-envelope"></i> E-mail</span>
+        {% else %}
+        <span class="jur-atendimento-show__chip"><i class="fas fa-headset"></i> Interno</span>
+        {% endif %}
+        {% if ticket.prioridade == 'alta' %}
+        <span class="jur-atendimento-show__chip jur-atendimento-show__chip--warn">Premium · SLA {{ ticket.slaHoras }}h</span>
+        {% else %}
+        <span class="jur-atendimento-show__chip jur-atendimento-show__chip--muted">SLA {{ ticket.slaHoras }}h · até {{ ticket.slaLimiteEm|date('d/m H:i') }}</span>
+        {% endif %}
+        {% if ticket.slaEstourado %}
+        <span class="jur-atendimento-show__chip jur-atendimento-show__chip--danger">SLA estourado</span>
         {% endif %}
     </div>
 
-    <div class="col-lg-4">
-        <section class="unio-card p-3 mb-3">
-            {% include 'components/section_header.html.twig' with { title: 'Ticket' } %}
-            <div class="px-3 pb-2">
-                {% include 'components/unio/detail_field_section.html.twig' with { items: [
-                    { label: 'Canal', value: ticket.canal|capitalize, icon: 'fa-comments' },
-                    { label: 'Prioridade', value: ticket.prioridade|capitalize, icon: 'fa-flag' },
-                    { label: 'SLA', value: ticket.slaHoras ~ 'h (até ' ~ ticket.slaLimiteEm|date('d/m H:i') ~ ')', icon: 'fa-clock' },
-                    { label: 'Cliente', value: ticket.cliente ? ticket.cliente.nome : '—', icon: 'fa-user' },
-                    { label: 'Processo', value: ticket.processo ? ticket.processo.numero : '—', icon: 'fa-hashtag' },
-                ]} %}
-            </div>
-        </section>
+    <div class="row g-3 align-items-start jur-atendimento-show__grid">
+        <div class="col-xl-8 col-lg-7">
+            <section class="jur-wa-chat{% if ticket.canal == 'whatsapp' %} jur-wa-chat--whatsapp{% endif %}" aria-label="Conversa do ticket">
+                <header class="jur-wa-chat__header">
+                    <div class="jur-wa-chat__avatar" aria-hidden="true">
+                        {% if ticket.cliente %}
+                        <span>{{ ticket.cliente.nome|slice(0, 1)|upper }}</span>
+                        {% else %}
+                        <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <div class="jur-wa-chat__contact">
+                        <strong>{{ ticket.cliente ? ticket.cliente.nome : 'Cliente não vinculado' }}</strong>
+                        <small>
+                            {{ ticket.canal|capitalize }} · aberto {{ ticket.criadoEm|date('d/m/Y H:i') }}
+                            {% if ticket.processo %} · {{ ticket.processo.numero }}{% endif %}
+                        </small>
+                    </div>
+                    {% if ticket.canal == 'whatsapp' and whatsapp_live %}
+                    <span class="jur-wa-chat__live" title="WhatsApp Meta conectado"><i class="fas fa-circle"></i> online</span>
+                    {% endif %}
+                </header>
 
-        {% if contexto.processo %}
-        <section class="unio-card p-3 mb-3">
-            {% include 'components/section_header.html.twig' with { title: 'Contexto do caso', subtitle: 'Sem trocar de tela' } %}
-            <div class="px-3 pb-2">
-                {% set proc = contexto.processo %}
-                {% include 'components/unio/detail_field_section.html.twig' with { items: [
-                    { label: 'Fase', value: proc.fase|capitalize, icon: 'fa-layer-group' },
-                    { label: 'Status', value: proc.status|capitalize, icon: 'fa-circle' },
-                    { label: 'Tribunal', value: proc.tribunal|default('—'), icon: 'fa-landmark' },
-                    { label: 'Área', value: proc.area|default('—'), icon: 'fa-briefcase' },
-                ]} %}
-                {% if contexto.prazos is not empty %}
-                <h6 class="small text-uppercase text-muted mt-3 mb-2">Prazos pendentes</h6>
-                <ul class="list-unstyled small mb-0">
-                    {% for pr in contexto.prazos|slice(0, 5) %}
-                    <li class="mb-1">
-                        <strong>{{ pr.tipo }}</strong> — {{ pr.dataLimite|date('d/m/Y') }}
-                        <a href="{{ path('app_juridico_prazos') }}" class="text-muted">ver</a>
-                    </li>
+                <div class="jur-wa-chat__thread" id="jur-atendimento-thread">
+                    {% for msg in ticket.mensagens %}
+                    <div class="jur-wa-bubble jur-wa-bubble--{{ msg.direcao }}">
+                        {% if msg.direcao == 'entrada' %}
+                        <div class="jur-wa-bubble__meta">
+                            <span class="jur-wa-bubble__author">{{ msg.remetenteNome|default('Cliente') }}</span>
+                            <time datetime="{{ msg.criadoEm|date('c') }}">{{ msg.criadoEm|date('d/m H:i') }}</time>
+                        </div>
+                        {% elseif msg.direcao == 'interno' %}
+                        <div class="jur-wa-bubble__system">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            Nota interna — {{ msg.autor ? msg.autor.nome : 'Equipe' }} · {{ msg.criadoEm|date('d/m H:i') }}
+                        </div>
+                        {% else %}
+                        <div class="jur-wa-bubble__meta jur-wa-bubble__meta--out">
+                            <span class="jur-wa-bubble__author">{{ msg.autor ? msg.autor.nome : 'Atendente' }}</span>
+                            <time datetime="{{ msg.criadoEm|date('c') }}">{{ msg.criadoEm|date('d/m H:i') }}</time>
+                            {% if msg.whatsappEnviado %}<i class="fab fa-whatsapp jur-wa-bubble__wa" title="Enviado via WhatsApp"></i>{% endif %}
+                        </div>
+                        {% endif %}
+                        <div class="jur-wa-bubble__body">{{ msg.corpo }}</div>
+                    </div>
+                    {% else %}
+                    <div class="jur-wa-chat__empty">
+                        <i class="fas fa-comments" aria-hidden="true"></i>
+                        <span>Nenhuma mensagem ainda</span>
+                    </div>
                     {% endfor %}
-                </ul>
-                {% else %}
-                <p class="small text-muted mb-0 mt-2">Nenhum prazo pendente neste processo.</p>
-                {% endif %}
-                <p class="mt-2 mb-0"><a href="{{ path('app_juridico_processo_show', { id: proc.id }) }}" class="small">Abrir processo <i class="fas fa-external-link-alt"></i></a></p>
-            </div>
-        </section>
-        {% endif %}
+                </div>
 
-        <section class="unio-card p-3">
-            {% include 'components/section_header.html.twig' with { title: 'Vincular caso' } %}
-            <div class="px-3 pb-3">
-                <form method="post" action="{{ path('app_juridico_atendimento_vincular', { id: ticket.id }) }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_vincular_' ~ ticket.id) }}">
-                    <div class="mb-2">
-                        <label class="form-label small">Cliente</label>
-                        <select name="cliente_id" class="form-control form-control-sm">
-                            <option value="">— Nenhum —</option>
-                            {% for c in clientes %}
-                            <option value="{{ c.id }}" {% if ticket.cliente and ticket.cliente.id == c.id %}selected{% endif %}>{{ c.nome }}</option>
+                {% if ticket.isAberto %}
+                <footer class="jur-wa-chat__composer">
+                    {% if templates is not empty %}
+                    <div class="jur-wa-chat__template-row">
+                        <label class="jur-form-label" for="jurAtendimentoTemplateSelect">Template rápido</label>
+                        <select id="jurAtendimentoTemplateSelect" class="jur-form-select">
+                            <option value="">Selecionar template…</option>
+                            {% for tpl in templates %}
+                            <option value="{{ tpl.id }}" data-preview-url="{{ path('app_juridico_atendimento_template_preview', { id: tpl.id, ticketId: ticket.id }) }}">{{ tpl.titulo }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Processo</label>
-                        <select name="processo_id" class="form-control form-control-sm">
-                            <option value="">— Nenhum —</option>
-                            {% for p in processos %}
-                            <option value="{{ p.id }}" {% if ticket.processo and ticket.processo.id == p.id %}selected{% endif %}>{{ p.numero }}</option>
-                            {% endfor %}
-                        </select>
+                    {% endif %}
+                    <form method="post" action="{{ path('app_juridico_atendimento_mensagem', { id: ticket.id }) }}" id="jurAtendimentoRespostaForm" class="jur-wa-chat__form">
+                        <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_msg_' ~ ticket.id) }}">
+                        <div class="jur-wa-chat__input-wrap">
+                            <textarea name="corpo" id="jurAtendimentoCorpo" class="jur-wa-chat__input" rows="3" required placeholder="Digite a resposta ao cliente…"></textarea>
+                        </div>
+                        <div class="jur-wa-chat__actions">
+                            <div class="jur-wa-chat__toggles">
+                                {% if ticket.canal == 'whatsapp' and whatsapp_live and ticket.cliente and ticket.cliente.telefone %}
+                                <label class="jur-wa-chat__toggle">
+                                    <input type="checkbox" name="enviar_whatsapp" value="1" checked>
+                                    <span><i class="fab fa-whatsapp"></i> Enviar WhatsApp</span>
+                                </label>
+                                {% endif %}
+                                <label class="jur-wa-chat__toggle">
+                                    <input type="checkbox" name="nota_interna" value="1">
+                                    <span><i class="fas fa-lock"></i> Nota interna</span>
+                                </label>
+                            </div>
+                            <div class="jur-wa-chat__action-btns">
+                                <button type="button" class="btn-unio-ghost btn-sm" id="jurAtendimentoSugerirBtn"
+                                    data-url="{{ path('app_juridico_atendimento_sugerir', { id: ticket.id }) }}"
+                                    data-csrf="{{ csrf_token('juridico_atendimento_sugerir_' ~ ticket.id) }}">
+                                    <i class="fas fa-robot mr-1"></i> Sasha
+                                </button>
+                                <button type="submit" class="btn-unio btn-sm jur-wa-chat__send">
+                                    <i class="fas fa-paper-plane mr-1"></i> Enviar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </footer>
+                {% else %}
+                <footer class="jur-wa-chat__composer jur-wa-chat__composer--closed">
+                    <span><i class="fas fa-check-circle"></i> Ticket resolvido — reabra o status para responder.</span>
+                </footer>
+                {% endif %}
+            </section>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <aside class="jur-atendimento-show__aside">
+                <section class="unio-card jur-atendimento-show__card p-0">
+                    {% include 'components/section_header.html.twig' with { title: 'Ticket' } %}
+                    <div class="jur-atendimento-show__body jur-atendimento-show__body--compact">
+                        <dl class="jur-pub-meta-grid">
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-comments" aria-hidden="true"></i> Canal</dt>
+                                <dd>{{ ticket.canal|capitalize }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-flag" aria-hidden="true"></i> Prioridade</dt>
+                                <dd>{{ ticket.prioridade|capitalize }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item jur-pub-meta-grid__item--full">
+                                <dt><i class="fas fa-user" aria-hidden="true"></i> Cliente</dt>
+                                <dd>{{ ticket.cliente ? ticket.cliente.nome : '—' }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item jur-pub-meta-grid__item--full">
+                                <dt><i class="fas fa-hashtag" aria-hidden="true"></i> Processo</dt>
+                                <dd>{% if ticket.processo %}<code class="jur-pub-meta-grid__code">{{ ticket.processo.numero }}</code>{% else %}—{% endif %}</dd>
+                            </div>
+                        </dl>
                     </div>
-                    <button type="submit" class="btn-unio btn-sm w-100">Salvar vínculos</button>
-                </form>
-            </div>
-        </section>
+                </section>
+
+                {% if contexto.processo %}
+                <section class="unio-card jur-atendimento-show__card p-0">
+                    {% include 'components/section_header.html.twig' with { title: 'Contexto do caso', subtitle: 'Sem trocar de tela' } %}
+                    <div class="jur-atendimento-show__body jur-atendimento-show__body--compact">
+                        {% set proc = contexto.processo %}
+                        <dl class="jur-pub-meta-grid">
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-layer-group" aria-hidden="true"></i> Fase</dt>
+                                <dd>{{ proc.fase|capitalize }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-circle" aria-hidden="true"></i> Status</dt>
+                                <dd>{{ proc.status|capitalize }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-landmark" aria-hidden="true"></i> Tribunal</dt>
+                                <dd>{{ proc.tribunal|default('—') }}</dd>
+                            </div>
+                            <div class="jur-pub-meta-grid__item">
+                                <dt><i class="fas fa-briefcase" aria-hidden="true"></i> Área</dt>
+                                <dd>{{ proc.area|default('—') }}</dd>
+                            </div>
+                        </dl>
+                        {% if contexto.prazos is not empty %}
+                        <h6 class="jur-atendimento-show__subhead">Prazos pendentes</h6>
+                        <ul class="jur-atendimento-show__prazos">
+                            {% for pr in contexto.prazos|slice(0, 5) %}
+                            <li><strong>{{ pr.tipo }}</strong> — {{ pr.dataLimite|date('d/m/Y') }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        <a href="{{ path('app_juridico_processo_show', { id: proc.id }) }}" class="jur-atendimento-show__link">Abrir processo <i class="fas fa-external-link-alt"></i></a>
+                    </div>
+                </section>
+                {% endif %}
+
+                <section class="unio-card jur-atendimento-show__card p-0">
+                    {% include 'components/section_header.html.twig' with { title: 'Vincular caso' } %}
+                    <div class="jur-atendimento-show__body jur-atendimento-show__body--compact">
+                        <form method="post" action="{{ path('app_juridico_atendimento_vincular', { id: ticket.id }) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_atendimento_vincular_' ~ ticket.id) }}">
+                            <label class="jur-form-label" for="atendClienteSelect">Cliente</label>
+                            <select id="atendClienteSelect" name="cliente_id" class="jur-form-select mb-2">
+                                <option value="">— Nenhum —</option>
+                                {% for c in clientes %}
+                                <option value="{{ c.id }}" {% if ticket.cliente and ticket.cliente.id == c.id %}selected{% endif %}>{{ c.nome }}</option>
+                                {% endfor %}
+                            </select>
+                            <label class="jur-form-label" for="atendProcessoSelect">Processo</label>
+                            <select id="atendProcessoSelect" name="processo_id" class="jur-form-select mb-3">
+                                <option value="">— Nenhum —</option>
+                                {% for p in processos %}
+                                <option value="{{ p.id }}" {% if ticket.processo and ticket.processo.id == p.id %}selected{% endif %}>{{ p.numero }}{% if p.cliente %} — {{ p.cliente.nome }}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-unio btn-sm w-100">Salvar vínculos</button>
+                        </form>
+                    </div>
+                </section>
+            </aside>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -162,6 +238,9 @@
 {% block javascripts %}
 <script>
 (function () {
+    var thread = document.getElementById('jur-atendimento-thread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
+
     var tplSelect = document.getElementById('jurAtendimentoTemplateSelect');
     var corpo = document.getElementById('jurAtendimentoCorpo');
     if (tplSelect && corpo) {
