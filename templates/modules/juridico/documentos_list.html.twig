@@ -30,6 +30,7 @@
         { value: _peticoes, label: 'Petições', sub: 'Categoria processual', icon: 'fa-gavel', tone: 'lavender', route: 'app_juridico_documentos', route_params: { categoria: 'peticao' } },
         { value: _contratos, label: 'Contratos', sub: 'Consultivo', icon: 'fa-file-signature', tone: 'amber', route: 'app_juridico_documentos', route_params: { categoria: 'contrato' } },
         { value: documentos|filter(d => d.processo)|length, label: 'Vinculados', sub: 'Com processo', icon: 'fa-link', tone: 'sage' },
+        { value: rag_sincronizados|default(0), label: 'No RAG', sub: 'Sasha indexados', icon: 'fa-robot', tone: 'amber' },
     ] } %}
 </div>
 {% endblock %}
@@ -102,6 +103,7 @@
                     <th>Tamanho</th>
                     <th>Data</th>
                     <th>Processo</th>
+                    <th>RAG</th>
                     <th>Confidencial</th>
                     <th class="text-right">Ação</th>
                 </tr>
@@ -114,6 +116,13 @@
                     <td class="text-muted">{{ d.tamanhoFormatado }}</td>
                     <td>{{ d.criadoEm|date('d/m/Y') }}</td>
                     <td>{% if d.processo %}<code style="font-size: 0.82rem;">{{ d.processo.numero }}</code>{% else %}—{% endif %}</td>
+                    <td>
+                        {% if d.ragSincronizado %}
+                        <span class="badge badge-success" title="Indexado em {{ d.ragSincronizadoEm|date('d/m/Y H:i') }}"><i class="fas fa-robot"></i> Sasha</span>
+                        {% else %}
+                        <span class="badge badge-soft-secondary">Pendente</span>
+                        {% endif %}
+                    </td>
                     <td>
                         {% if d.confidencial %}
                         <i class="fas fa-lock text-warning" title="Confidencial"></i>

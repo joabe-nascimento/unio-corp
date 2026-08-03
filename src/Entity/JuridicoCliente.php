@@ -59,6 +59,16 @@ class JuridicoCliente
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $atualizadoEm = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $portalUser = null;
+
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $portalInviteToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $portalInviteExpiresAt = null;
+
     public function __construct()
     {
         $this->criadoEm = new \DateTimeImmutable();
@@ -88,4 +98,11 @@ class JuridicoCliente
     public function touch(): static { $this->atualizadoEm = new \DateTimeImmutable(); return $this; }
 
     public function isPremium(): bool { return $this->status === self::STATUS_PREMIUM; }
+    public function getPortalUser(): ?User { return $this->portalUser; }
+    public function setPortalUser(?User $portalUser): static { $this->portalUser = $portalUser; return $this; }
+    public function getPortalInviteToken(): ?string { return $this->portalInviteToken; }
+    public function setPortalInviteToken(?string $portalInviteToken): static { $this->portalInviteToken = $portalInviteToken; return $this; }
+    public function getPortalInviteExpiresAt(): ?\DateTimeImmutable { return $this->portalInviteExpiresAt; }
+    public function setPortalInviteExpiresAt(?\DateTimeImmutable $portalInviteExpiresAt): static { $this->portalInviteExpiresAt = $portalInviteExpiresAt; return $this; }
+    public function hasPortalAtivo(): bool { return $this->portalUser !== null; }
 }

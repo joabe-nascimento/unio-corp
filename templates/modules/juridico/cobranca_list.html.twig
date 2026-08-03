@@ -1,0 +1,149 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Cobrança & Inadimplência · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Cobrança & Inadimplência' %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-cobranca-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo título
+</button>
+<form method="post" action="{{ path('app_juridico_cobranca_gerar_honorarios') }}" class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('juridico_cobranca_gerar') }}">
+    <input type="hidden" name="mes" value="{{ 'now'|date('Y-m') }}">
+    <button type="submit" class="btn-unio-ghost btn-sm">
+        <i class="fas fa-file-invoice-dollar mr-1" aria-hidden="true"></i> Gerar do timesheet
+    </button>
+</form>
+<a href="{{ path('app_juridico_analytics') }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-chart-line mr-1" aria-hidden="true"></i> Analytics
+</a>
+{% endblock %}
+
+{% block page_list_kpis %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: 'R$ ' ~ total_aberto|number_format(2, ',', '.'), label: 'Em aberto', icon: 'fa-sack-dollar', tone: 'amber' },
+        { value: total_vencido, label: 'Vencidos', icon: 'fa-triangle-exclamation', tone: total_vencido > 0 ? 'rose' : 'sage' },
+        { value: titulos|length, label: 'Títulos', icon: 'fa-list', tone: 'sky' },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_section_toolbar %}
+<form method="get" action="{{ path('app_juridico_cobranca') }}" style="display:contents;">
+{% embed 'components/section_toolbar.html.twig' with {
+    search_in_section: true,
+    search_placeholder: 'Buscar cliente, processo ou descrição…',
+    search_name: 'q',
+    search_value: filter_q|default('')
+} %}
+    {% block section_toolbar_filters %}
+        {% include 'components/filter_group.html.twig' with {
+            label: 'Status',
+            name: 'status',
+            value: filter_status|default(''),
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'pendente', label: 'Pendente' },
+                { value: 'vencido', label: 'Vencido' },
+                { value: 'pago', label: 'Pago' },
+            ]
+        } %}
+    {% endblock %}
+{% endembed %}
+</form>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if titulos is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-money-bill-wave',
+            title: 'Nenhum título de cobrança',
+            text: 'Gere títulos a partir do timesheet de honorários ou cadastre manualmente.',
+            btn_label: 'Novo título',
+            btn_opens: 'juridico-cobranca-novo',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-unio table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Cliente</th>
+                    <th>Vencimento</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th class="text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in titulos %}
+                <tr>
+                    <td><strong>{{ t.descricao }}</strong>{% if t.processo %}<br><small class="text-muted">{{ t.processo.numero }}</small>{% endif %}</td>
+                    <td>{{ t.cliente ? t.cliente.nome : '—' }}</td>
+                    <td>{{ t.vencimento|date('d/m/Y') }}{% if t.diasAtraso > 0 %}<br><small class="text-danger">{{ t.diasAtraso }}d atraso</small>{% endif %}</td>
+                    <td>R$ {{ t.valorFloat|number_format(2, ',', '.') }}</td>
+                    <td>
+                        {% if t.status == 'pago' %}<span class="badge badge-success">Pago</span>
+                        {% elseif t.status == 'vencido' %}<span class="badge badge-danger">Vencido</span>
+                        {% elseif t.status == 'cancelado' %}<span class="badge badge-secondary">Cancelado</span>
+                        {% else %}<span class="badge badge-warning">Pendente</span>{% endif %}
+                    </td>
+                    <td class="text-right">
+                        {% if t.isAberta %}
+                        <form method="post" action="{{ path('app_juridico_cobranca_whatsapp', { id: t.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_cobranca_whatsapp_' ~ t.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm" title="Cobrar via WhatsApp"><i class="fab fa-whatsapp"></i></button>
+                        </form>
+                        <form method="post" action="{{ path('app_juridico_cobranca_pagar', { id: t.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_cobranca_pagar_' ~ t.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm" title="Marcar pago"><i class="fas fa-check"></i></button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+{% embed 'components/unio_offcanvas.html.twig' with {
+    id: 'juridico-cobranca-novo',
+    title: 'Novo título de cobrança',
+    icon: 'fa-money-bill-wave',
+    open: open_novo|default(false)
+} %}
+{% block offcanvas_body %}
+<form method="post" action="{{ path('app_juridico_cobranca_novo') }}" id="juridicoCobrancaNovoForm">
+    <input type="hidden" name="_token" value="{{ csrf_token('juridico_cobranca_form') }}">
+    <div class="form-group">
+        <label>Descrição</label>
+        <input type="text" name="descricao" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label>Valor (R$)</label>
+        <input type="text" name="valor" class="form-control" placeholder="1.500,00" required>
+    </div>
+    <div class="form-group">
+        <label>Vencimento</label>
+        <input type="date" name="vencimento" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label>Cliente</label>
+        <select name="cliente_id" class="form-control">
+            <option value="">— Opcional —</option>
+            {% for c in clientes %}
+            <option value="{{ c.id }}">{{ c.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn-unio btn-sm">Criar título</button>
+</form>
+{% endblock %}
+{% endembed %}
+{% endblock %}

@@ -4,6 +4,7 @@ namespace App\Service\Juridico;
 
 use App\Entity\JuridicoDocumento;
 use App\Service\Sasha\DocumentTextExtractorService;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,6 +28,7 @@ final class JuridicoDocumentoRagSyncService
     public function __construct(
         private JurisFlowAiClient $jurisFlowAi,
         private DocumentTextExtractorService $textExtractor,
+        private EntityManagerInterface $em,
         private LoggerInterface $logger,
         private string $projectDir,
     ) {
@@ -77,15 +79,27 @@ final class JuridicoDocumentoRagSyncService
             return false;
         }
 
-        $escritorioId = (string) $documento->getEmpresa()->getId();
+        $texto = $resultado['text'];
+        $hash = hash('sha256', $texto);
+        if ($documento->getRagHash() === $hash && $documento->isRagSincronizado()) {
+            return true;
+        }
 
-        return $this->jurisFlowAi->indexarDocumentoRag(
+        $escritorioId = (string) $documento->getEmpresa()->getId();
+        $ok = $this->jurisFlowAi->indexarDocumentoRag(
             $escritorioId,
             self::sourceParaDocumento($documento->getId()),
             $documento->getNome(),
-            $resultado['text'],
+            $texto,
             $this->categoriaParaRag($documento->getCategoria()),
         );
+
+        if ($ok) {
+            $documento->setRagHash($hash)->setRagSincronizadoEm(new \DateTimeImmutable());
+            $this->em->flush();
+        }
+
+        return $ok;
     }
 
     private function categoriaParaRag(string $categoria): string

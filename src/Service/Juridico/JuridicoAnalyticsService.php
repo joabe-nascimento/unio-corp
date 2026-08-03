@@ -6,6 +6,7 @@ use App\Chart\ChartConfig;
 use App\Chart\ChartPanelBuilder;
 use App\Entity\Empresa;
 use App\Entity\JuridicoProcesso;
+use App\Repository\JuridicoCobrancaRepository;
 use App\Repository\JuridicoHonorarioLancamentoRepository;
 use App\Repository\JuridicoPrazoRepository;
 use App\Repository\JuridicoProcessoRepository;
@@ -21,6 +22,7 @@ final class JuridicoAnalyticsService
         private JuridicoProcessoRepository $processoRepo,
         private JuridicoPrazoRepository $prazoRepo,
         private JuridicoHonorarioLancamentoRepository $honorarioRepo,
+        private JuridicoCobrancaRepository $cobrancaRepo,
     ) {
     }
 
@@ -28,7 +30,8 @@ final class JuridicoAnalyticsService
      * @return array{
      *     processos_total: int, processos_ativos: int, processos_criticos: int,
      *     valor_carteira: float, taxa_exito: ?float, sla_prazos: float,
-     *     receita_mes: float, escritorios: int
+     *     receita_mes: float, escritorios: int,
+     *     recebido_mes: float, titulos_aberto: float, titulos_vencidos: int
      * }
      */
     public function kpis(Empresa $empresa, bool $consolidado): array
@@ -48,6 +51,9 @@ final class JuridicoAnalyticsService
             'taxa_exito' => $this->processoRepo->taxaExitoGrupo($empresas),
             'sla_prazos' => $sla['taxa'],
             'receita_mes' => $this->honorarioRepo->sumReceitaGrupoMes($empresas),
+            'recebido_mes' => $this->cobrancaRepo->sumRecebidoMes($empresas),
+            'titulos_aberto' => $this->cobrancaRepo->sumAberto($empresas),
+            'titulos_vencidos' => $this->cobrancaRepo->countVencidas($empresas),
             'escritorios' => \count($empresas),
         ];
     }
@@ -77,6 +83,7 @@ final class JuridicoAnalyticsService
         $evolucao = array_values(array_filter([
             $this->buildEvolucaoLine($empresas),
             $this->buildReceitaLine($empresas),
+            $this->buildRecebidoLine($empresas),
         ]));
         $builder->addSectionIfNotEmpty(
             'evolucao',
@@ -88,6 +95,7 @@ final class JuridicoAnalyticsService
 
         $produtividade = array_values(array_filter([
             $this->buildProdutividadeGauge($empresas),
+            $this->buildAgingBar($empresas),
         ]));
         $builder->addSectionIfNotEmpty(
             'produtividade',
@@ -170,6 +178,30 @@ final class JuridicoAnalyticsService
         return ChartConfig::line('bi-receita', 'Receita de honorários', $dados['labels'], [
             ['label' => 'Receita (R$)', 'data' => array_map(static fn ($v) => round($v, 2), $dados['values'])],
         ], 'Horas faturáveis × valor/hora, últimos 6 meses');
+    }
+
+    /** @param list<Empresa> $empresas */
+    private function buildRecebidoLine(array $empresas): ?ChartConfig
+    {
+        $dados = $this->cobrancaRepo->recebidoUltimosMeses($empresas, 6);
+        if (array_sum($dados['values']) <= 0) {
+            return null;
+        }
+
+        return ChartConfig::line('bi-recebido', 'Recebimentos (cobrança)', $dados['labels'], [
+            ['label' => 'Recebido (R$)', 'data' => array_map(static fn ($v) => round($v, 2), $dados['values'])],
+        ], 'Títulos pagos nos últimos 6 meses');
+    }
+
+    /** @param list<Empresa> $empresas */
+    private function buildAgingBar(array $empresas): ?ChartConfig
+    {
+        $dados = $this->cobrancaRepo->agingGrupo($empresas);
+        if (array_sum($dados['values']) <= 0) {
+            return null;
+        }
+
+        return ChartConfig::bar('bi-aging', 'Aging de inadimplência', $dados['labels'], $dados['values'], 'Valor em aberto por faixa de atraso', true);
     }
 
     /** @param list<Empresa> $empresas */

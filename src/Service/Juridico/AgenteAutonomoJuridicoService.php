@@ -36,6 +36,7 @@ final class AgenteAutonomoJuridicoService
         private UserRepository $userRepo,
         private PlatformNotificationService $notifications,
         private AgenteAutonomoStatusStore $statusStore,
+        private JuridicoPrazoAlertaService $prazoAlerta,
     ) {
     }
 
@@ -165,6 +166,8 @@ final class AgenteAutonomoJuridicoService
             $atrasado ? 'fa-hourglass-end' : 'fa-clock',
             $atrasado ? 'danger' : 'warning',
         );
+
+        $this->prazoAlerta->processarPrazo($empresa, $prazo);
 
         return $chave;
     }

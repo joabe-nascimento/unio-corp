@@ -45,6 +45,26 @@
             </p>
         </div>
         <div class="unio-card mt-4">
+            {% include 'components/section_header.html.twig' with { title: 'Portal do cliente' } %}
+            <div class="px-3 pb-3">
+                {% if cliente.hasPortalAtivo %}
+                <p class="text-muted mb-2"><i class="fas fa-check-circle text-success mr-1"></i> Acesso ativo — usuário vinculado.</p>
+                <a href="{{ path('app_juridico_portal') }}" class="btn-unio-ghost btn-sm">Ver portal</a>
+                {% else %}
+                <p class="text-muted mb-2">Gere um link de convite para o cliente acompanhar processos e documentos.</p>
+                {% if app.request.query.get('portal_url') %}
+                <div class="alert alert-info small">{{ app.request.query.get('portal_url') }}</div>
+                {% endif %}
+                <form method="post" action="{{ path('app_juridico_cliente_portal_convite', { id: cliente.id }) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_cliente_portal_' ~ cliente.id) }}">
+                    <button type="submit" class="btn-unio btn-sm">
+                        <i class="fas fa-link mr-1" aria-hidden="true"></i> Gerar convite do portal
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        <div class="unio-card mt-4">
             {% include 'components/section_header.html.twig' with { title: 'Zona de risco' } %}
             <div class="px-3 pb-3">
                 <form method="post" action="{{ path('app_juridico_cliente_excluir', { id: cliente.id }) }}"

@@ -4,6 +4,7 @@ namespace App\Controller\Module\Juridico;
 
 use App\Exception\JuridicoProcessException;
 use App\Service\Juridico\JuridicoClienteService;
+use App\Service\Juridico\JuridicoPortalInviteService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +21,7 @@ class JuridicoClienteController extends AbstractController
     public function __construct(
         private WorkspaceService $workspace,
         private JuridicoClienteService $clientes,
+        private JuridicoPortalInviteService $portalInvite,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -122,5 +124,24 @@ class JuridicoClienteController extends AbstractController
 
             return $this->redirectToRoute('app_juridico_cliente_show', ['id' => $id]);
         }
+    }
+
+    #[Route('/{id}/portal-convite', name: 'app_juridico_cliente_portal_convite', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function portalConvite(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $cliente = $this->clientes->loadForEmpresa($empresa, $id);
+        $this->requireCsrf($request, 'juridico_cliente_portal_' . $id);
+
+        if ($cliente->hasPortalAtivo()) {
+            $this->addFlash('info', 'Este cliente já possui acesso ao portal.');
+
+            return $this->redirectToRoute('app_juridico_cliente_show', ['id' => $id]);
+        }
+
+        $url = $this->portalInvite->generateInvite($cliente);
+        $this->addFlash('success', 'Link do portal gerado. Copie e envie ao cliente: ' . $url);
+
+        return $this->redirectToRoute('app_juridico_cliente_show', ['id' => $id, 'portal_url' => $url]);
     }
 }

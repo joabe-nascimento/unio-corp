@@ -4,8 +4,10 @@ namespace App\Controller\Module\Juridico;
 
 use App\Exception\JuridicoProcessException;
 use App\Repository\UserRepository;
+use App\Service\Juridico\JuridicoPrazoAlertaService;
 use App\Service\Juridico\JuridicoPrazoService;
 use App\Service\Juridico\JuridicoProcessoService;
+use App\Repository\JuridicoPrazoConfigRepository;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +26,8 @@ class JuridicoPrazoController extends AbstractController
         private JuridicoPrazoService $prazos,
         private JuridicoProcessoService $processos,
         private UserRepository $userRepo,
+        private JuridicoPrazoConfigRepository $prazoConfigRepo,
+        private JuridicoPrazoAlertaService $prazoAlertas,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -42,6 +46,7 @@ class JuridicoPrazoController extends AbstractController
             'prazos' => $this->prazos->findForEmpresa($empresa, $situacao ?: null, $q ?: null),
             'processos' => $this->processos->listForSelect($empresa),
             'responsaveis' => $this->userRepo->findBy(['empresa' => $empresa], ['nome' => 'ASC']),
+            'prazo_config' => $this->prazoConfigRepo->getOrCreate($empresa),
             'filter_situacao' => $situacao,
             'filter_q' => $q,
             'open_novo' => $request->query->getBoolean('open_novo'),
@@ -113,6 +118,22 @@ class JuridicoPrazoController extends AbstractController
         $this->requireCsrf($request, 'juridico_prazo_excluir_' . $id);
         $this->prazos->delete($prazo);
         $this->addFlash('success', 'Prazo excluído.');
+
+        return $this->redirectToRoute('app_juridico_prazos');
+    }
+
+    #[Route('/config', name: 'app_juridico_prazo_config', methods: ['POST'])]
+    public function salvarConfig(Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+
+        try {
+            $this->requireCsrf($request, 'juridico_prazo_config');
+            $this->prazoAlertas->salvarConfig($empresa, $request->request->all());
+            $this->addFlash('success', 'Configuração de alertas salva.');
+        } catch (JuridicoProcessException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
 
         return $this->redirectToRoute('app_juridico_prazos');
     }

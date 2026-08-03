@@ -68,6 +68,7 @@ class JuridicoDocumentoService
         $documento->setMimeType($mime);
         $documento->setTamanhoBytes($size);
         $documento->setConfidencial((bool) ($data['confidencial'] ?? false));
+        $documento->setVisivelPortal((bool) ($data['visivel_portal'] ?? false));
         $documento->setUploadedBy($uploadedBy);
 
         $processoId = (int) ($data['processo_id'] ?? 0);

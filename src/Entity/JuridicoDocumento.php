@@ -64,6 +64,15 @@ class JuridicoDocumento
     #[ORM\Column]
     private \DateTimeImmutable $criadoEm;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $ragSincronizadoEm = null;
+
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $ragHash = null;
+
+    #[ORM\Column]
+    private bool $visivelPortal = false;
+
     public function __construct()
     {
         $this->criadoEm = new \DateTimeImmutable();
@@ -89,6 +98,13 @@ class JuridicoDocumento
     public function getUploadedBy(): ?User { return $this->uploadedBy; }
     public function setUploadedBy(?User $uploadedBy): static { $this->uploadedBy = $uploadedBy; return $this; }
     public function getCriadoEm(): \DateTimeImmutable { return $this->criadoEm; }
+    public function getRagSincronizadoEm(): ?\DateTimeImmutable { return $this->ragSincronizadoEm; }
+    public function setRagSincronizadoEm(?\DateTimeImmutable $ragSincronizadoEm): static { $this->ragSincronizadoEm = $ragSincronizadoEm; return $this; }
+    public function getRagHash(): ?string { return $this->ragHash; }
+    public function setRagHash(?string $ragHash): static { $this->ragHash = $ragHash; return $this; }
+    public function isVisivelPortal(): bool { return $this->visivelPortal; }
+    public function setVisivelPortal(bool $visivelPortal): static { $this->visivelPortal = $visivelPortal; return $this; }
+    public function isRagSincronizado(): bool { return $this->ragSincronizadoEm !== null; }
 
     public function getTamanhoFormatado(): string
     {

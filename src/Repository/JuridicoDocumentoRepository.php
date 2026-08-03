@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Empresa;
+use App\Entity\JuridicoCliente;
 use App\Entity\JuridicoDocumento;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -40,6 +41,34 @@ class JuridicoDocumentoRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /** @return list<JuridicoDocumento> */
+    public function findVisiveisPortal(Empresa $empresa, JuridicoCliente $cliente): array
+    {
+        return $this->createQueryBuilder('d')
+            ->leftJoin('d.processo', 'p')
+            ->addSelect('p')
+            ->andWhere('d.empresa = :empresa')
+            ->andWhere('d.visivelPortal = true')
+            ->andWhere('d.confidencial = false')
+            ->andWhere('p.cliente = :cliente')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('cliente', $cliente)
+            ->orderBy('d.criadoEm', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countRagSincronizados(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('d')
+            ->select('COUNT(d.id)')
+            ->andWhere('d.empresa = :empresa')
+            ->andWhere('d.ragSincronizadoEm IS NOT NULL')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     public function countByEmpresa(Empresa $empresa): int

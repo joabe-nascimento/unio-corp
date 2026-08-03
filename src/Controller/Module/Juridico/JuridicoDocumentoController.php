@@ -4,6 +4,7 @@ namespace App\Controller\Module\Juridico;
 
 use App\Entity\User;
 use App\Exception\JuridicoProcessException;
+use App\Repository\JuridicoDocumentoRepository;
 use App\Service\Juridico\JuridicoDocumentoService;
 use App\Service\Juridico\JuridicoProcessoService;
 use App\Service\WorkspaceService;
@@ -25,6 +26,7 @@ class JuridicoDocumentoController extends AbstractController
         private WorkspaceService $workspace,
         private JuridicoDocumentoService $documentos,
         private JuridicoProcessoService $processos,
+        private JuridicoDocumentoRepository $documentoRepo,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -42,6 +44,7 @@ class JuridicoDocumentoController extends AbstractController
         return $this->render('modules/juridico/documentos_list.html.twig', [
             'documentos' => $this->documentos->findForEmpresa($empresa, $categoria ?: null, $q ?: null),
             'processos' => $this->processos->listForSelect($empresa),
+            'rag_sincronizados' => $this->documentoRepo->countRagSincronizados($empresa),
             'filter_categoria' => $categoria,
             'filter_q' => $q,
             'open_novo' => $request->query->getBoolean('open_novo'),
