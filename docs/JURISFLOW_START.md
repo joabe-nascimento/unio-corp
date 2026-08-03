@@ -9,6 +9,30 @@ Sem ele, o chat retorna "Lumen está temporariamente indisponível".
 
 ## 🚀 Iniciar Localmente (Desenvolvimento)
 
+### Opção rápida (recomendada)
+
+Na raiz do repositório **Unio**:
+
+```powershell
+# Sobe JurisFlow + indexa RAG + testa chat
+powershell -ExecutionPolicy Bypass -File scripts\setup-sasha-local.ps1
+
+# Só subir o motor Python (nova janela do terminal)
+powershell -ExecutionPolicy Bypass -File scripts\start-jurisflow-local.ps1
+```
+
+Variável opcional se o JurisFlow estiver em outro caminho:
+
+```powershell
+$env:JURISFLOW_AI_PATH = "C:\caminho\JurisFlow-ai-service"
+```
+
+Use o repositório **completo** (`app/main.py` com endpoint `/v1/assistant/Sasha/chat`), não o stub antigo que só expõe `/chat`.
+
+---
+
+### Manual (passo a passo)
+
 ### 1. Abrir terminal no diretório do JurisFlow
 
 ```powershell
@@ -83,10 +107,15 @@ Seguir: `DEPLOY_HOSTGATOR.md` no repositório do JurisFlow
 
 ## ✅ Checklist de Funcionamento
 
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup-sasha-local.ps1
+```
+
 - [ ] JurisFlow rodando na porta 8090
 - [ ] `/health` retorna `{"status":"ok"}`
 - [ ] `/v1/status` retorna JSON com `"status":"online"`
-- [ ] `.env` do Unio Jurídico tem `LEGAL_AI_URL=http://127.0.0.1:8090`
+- [ ] `app:juridico:rag:sync` indexou documentos (se houver na biblioteca)
+- [ ] `.env.local` do Unio tem `LEGAL_AI_URL=http://127.0.0.1:8090`
 - [ ] Chat da Sasha responde (não diz "indisponível")
 
 ---

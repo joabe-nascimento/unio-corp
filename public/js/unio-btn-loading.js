@@ -55,6 +55,7 @@
     function shouldAutoLoadForm(form) {
         if (!form || form.tagName !== 'FORM') return false;
         if (form.dataset.unioNoLoading !== undefined) return false;
+        if (form.id === 'helixForm' || form.closest('.helix-panel')) return false;
         if (form.closest('[data-unio-offcanvas]')) return true;
         if (document.body.classList.contains('org-juridico')) return true;
         return false;

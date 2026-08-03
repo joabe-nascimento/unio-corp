@@ -248,13 +248,115 @@
     box-shadow: 0 6px 16px var(--accent-dim);
 }
 
-/* ---------- Composer premium (flutuante, com sombra e foco vibrante) ---------- */
+/* ---------- Composer premium (barra unificada: anexos + texto + enviar) ---------- */
 .helix-composer {
     padding: 12px 16px 16px;
     background: linear-gradient(180deg, transparent 0%, var(--bg) 30%);
     border-top: none;
 }
 
+.helix-composer-bar,
+.helix-composer-inner:not(:has(.helix-input-field)) {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    min-height: 0;
+    padding: 7px 8px 7px 6px;
+    border: 1.5px solid color-mix(in srgb, var(--border) 85%, var(--accent) 15%);
+    border-radius: 22px;
+    background: var(--surface);
+    box-shadow: 0 2px 10px rgba(20, 10, 15, 0.06);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.helix-composer-bar:focus-within,
+.helix-composer-inner:not(:has(.helix-input-field)):focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 4px 20px var(--accent-dim);
+}
+
+.helix-composer-tools {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    flex-shrink: 0;
+    padding-bottom: 2px;
+}
+
+.helix-tool-btn {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-2);
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+
+.helix-tool-btn:not(:disabled):hover {
+    background: var(--accent-dim);
+    color: var(--accent);
+}
+
+.helix-tool-btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+}
+
+.helix-tool-btn-dot {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 1.5px solid var(--surface);
+}
+
+.helix-composer-bar .helix-input,
+.helix-composer-inner:not(:has(.helix-input-field)) .helix-input {
+    display: block;
+    flex: 1;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 24px !important;
+    max-height: 200px;
+    height: auto;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none;
+    resize: none;
+    padding: 6px 2px 6px 0 !important;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5 !important;
+    color: var(--text-1);
+    overflow-y: auto;
+    box-sizing: border-box;
+    field-sizing: content;
+}
+
+.helix-composer-bar .helix-send-btn,
+.helix-composer-inner:not(:has(.helix-input-field)) .helix-send-btn {
+    position: static;
+    width: 36px;
+    height: 36px;
+    margin: 0 0 2px;
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+/* Layout legado: campo com botão absoluto dentro */
 .helix-composer-inner {
     display: flex;
     align-items: flex-end;
@@ -330,18 +432,52 @@
 }
 
 .helix-send-btn {
+    border-radius: 50%;
+    border: none;
     background: var(--accent);
     background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 80%, #000) 100%);
     box-shadow: 0 3px 10px var(--accent-dim);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
-.helix-send-btn:not(:disabled):hover {
-    transform: scale(1.1);
+.helix-send-btn__spinner {
+    display: none;
+}
+
+.helix-send-btn.is-busy,
+.helix-panel.is-helix-loading .helix-send-btn {
+    opacity: 1 !important;
+    cursor: wait;
+    transform: none;
+}
+
+.helix-send-btn.is-busy .helix-send-btn__icon,
+.helix-panel.is-helix-loading .helix-send-btn .helix-send-btn__icon {
+    display: none;
+}
+
+.helix-send-btn.is-busy .helix-send-btn__spinner,
+.helix-panel.is-helix-loading .helix-send-btn .helix-send-btn__spinner {
+    display: inline-flex;
+}
+
+.helix-send-btn:not(:disabled):not(.is-busy):hover {
+    transform: scale(1.06);
     box-shadow: 0 4px 14px var(--accent-dim);
 }
 
-.helix-send-btn:not(:disabled):active {
+.helix-send-btn:not(:disabled):not(.is-busy):active {
     transform: scale(0.96);
+}
+
+.helix-send-btn:disabled:not(.is-busy) {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
 /* ---------- Scrollbar mais fina e elegante ---------- */
@@ -446,6 +582,7 @@
 }
 
 .helix-composer.is-drag-over .helix-composer-inner,
+.helix-composer.is-drag-over .helix-composer-bar,
 .helix-messages.is-drag-over {
     outline: 2px dashed var(--accent);
     outline-offset: -2px;
@@ -466,9 +603,23 @@
     .helix-composer {
         padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
     }
-    .helix-composer-inner {
-        gap: 6px;
-        padding: 0;
+    .helix-composer-bar,
+    .helix-composer-inner:not(:has(.helix-input-field)) {
+        gap: 4px;
+        padding: 6px 6px 6px 4px;
+        border-radius: 20px;
+    }
+    .helix-composer-bar .helix-input,
+    .helix-composer-inner:not(:has(.helix-input-field)) .helix-input {
+        font-size: 16px;
+        min-height: 24px !important;
+        line-height: 1.45 !important;
+    }
+    .helix-composer-bar .helix-send-btn,
+    .helix-composer-inner:not(:has(.helix-input-field)) .helix-send-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 12px;
     }
     .helix-input-field {
         min-height: 50px;
@@ -482,15 +633,10 @@
         height: 30px;
         font-size: 11px;
     }
-    .helix-input-field .helix-input {
-        font-size: 16px;
-        min-height: 24px !important;
-        line-height: 1.45 !important;
-    }
     .helix-tool-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 13px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
     }
 }
 
