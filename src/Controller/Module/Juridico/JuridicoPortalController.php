@@ -4,6 +4,7 @@ namespace App\Controller\Module\Juridico;
 
 use App\Entity\User;
 use App\Repository\JuridicoClienteRepository;
+use App\Service\Juridico\JuridicoModuleMetricsService;
 use App\Service\Juridico\JuridicoPortalInviteService;
 use App\Service\Juridico\JuridicoPortalService;
 use App\Service\WorkspaceService;
@@ -22,6 +23,7 @@ class JuridicoPortalController extends AbstractController
         private JuridicoClienteRepository $clienteRepo,
         private JuridicoPortalService $portalService,
         private JuridicoPortalInviteService $portalInvite,
+        private JuridicoModuleMetricsService $moduleMetrics,
     ) {
     }
 
@@ -48,10 +50,15 @@ class JuridicoPortalController extends AbstractController
             'timeline' => [],
         ];
 
+        $metricas = $empresa !== null
+            ? $this->moduleMetrics->portal($empresa)
+            : ['clientes_portal' => 0, 'convites_pendentes' => 0, 'docs_compartilhados' => 0];
+
         return $this->render('modules/juridico/portal.html.twig', array_merge([
             'cliente' => $cliente,
             'empresa' => $empresa,
             'is_cliente_portal' => $cliente !== null,
+            'metricas' => $metricas,
         ], $portalView));
     }
 

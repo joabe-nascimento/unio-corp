@@ -16,12 +16,23 @@
         <p class="jur-proc-hero__text">
             {% if is_cliente_portal %}
                 Acompanhe seus processos, prazos e documentos compartilhados pelo escritório.
+            {% elseif metricas.convites_pendentes|default(0) > 0 %}
+                <strong>{{ metricas.convites_pendentes }}</strong> convite{{ metricas.convites_pendentes > 1 ? 's' : '' }} aguardando aceite · <strong>{{ metricas.clientes_portal|default(0) }}</strong> cliente{{ metricas.clientes_portal|default(0) != 1 ? 's' : '' }} com acesso ativo.
             {% else %}
-                Gere convites em CRM Clientes para dar acesso seguro aos seus clientes.
+                Gere convites em CRM Clientes — <strong>{{ metricas.clientes_portal|default(0) }}</strong> cliente{{ metricas.clientes_portal|default(0) != 1 ? 's' : '' }} com portal ativo.
             {% endif %}
         </p>
     </div>
 </section>
+{% if not is_cliente_portal %}
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: metricas.clientes_portal|default(0), label: 'Clientes ativos', sub: 'Portal vinculado', icon: 'fa-user-check', tone: 'sage' },
+        { value: metricas.convites_pendentes|default(0), label: 'Convites pendentes', sub: 'Aguardando login', icon: 'fa-link', tone: metricas.convites_pendentes|default(0) > 0 ? 'amber' : 'lavender' },
+        { value: metricas.docs_compartilhados|default(0), label: 'Docs compartilhados', sub: 'Visíveis no portal', icon: 'fa-file-lines', tone: 'sky' },
+    ] } %}
+</div>
+{% endif %}
 {% endblock %}
 
 {% block page_list_content %}

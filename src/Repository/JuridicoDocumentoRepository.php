@@ -71,6 +71,17 @@ class JuridicoDocumentoRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function countVisivelPortal(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('d')
+            ->select('COUNT(d.id)')
+            ->andWhere('d.empresa = :empresa')
+            ->andWhere('d.visivelPortal = true')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function countByEmpresa(Empresa $empresa): int
     {
         return (int) $this->createQueryBuilder('d')

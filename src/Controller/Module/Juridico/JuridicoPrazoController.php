@@ -4,6 +4,7 @@ namespace App\Controller\Module\Juridico;
 
 use App\Exception\JuridicoProcessException;
 use App\Repository\UserRepository;
+use App\Service\Juridico\JuridicoModuleMetricsService;
 use App\Service\Juridico\JuridicoPrazoAlertaService;
 use App\Service\Juridico\JuridicoPrazoService;
 use App\Service\Juridico\JuridicoProcessoService;
@@ -28,6 +29,7 @@ class JuridicoPrazoController extends AbstractController
         private UserRepository $userRepo,
         private JuridicoPrazoConfigRepository $prazoConfigRepo,
         private JuridicoPrazoAlertaService $prazoAlertas,
+        private JuridicoModuleMetricsService $moduleMetrics,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -47,6 +49,7 @@ class JuridicoPrazoController extends AbstractController
             'processos' => $this->processos->listForSelect($empresa),
             'responsaveis' => $this->userRepo->findBy(['empresa' => $empresa], ['nome' => 'ASC']),
             'prazo_config' => $this->prazoConfigRepo->getOrCreate($empresa),
+            'metricas' => $this->moduleMetrics->prazos($empresa),
             'filter_situacao' => $situacao,
             'filter_q' => $q,
             'open_novo' => $request->query->getBoolean('open_novo'),

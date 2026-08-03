@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Exception\JuridicoProcessException;
 use App\Repository\JuridicoDocumentoRepository;
 use App\Service\Juridico\JuridicoDocumentoService;
+use App\Service\Juridico\JuridicoModuleMetricsService;
 use App\Service\Juridico\JuridicoProcessoService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,6 +28,7 @@ class JuridicoDocumentoController extends AbstractController
         private JuridicoDocumentoService $documentos,
         private JuridicoProcessoService $processos,
         private JuridicoDocumentoRepository $documentoRepo,
+        private JuridicoModuleMetricsService $moduleMetrics,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -45,6 +47,7 @@ class JuridicoDocumentoController extends AbstractController
             'documentos' => $this->documentos->findForEmpresa($empresa, $categoria ?: null, $q ?: null),
             'processos' => $this->processos->listForSelect($empresa),
             'rag_sincronizados' => $this->documentoRepo->countRagSincronizados($empresa),
+            'metricas' => $this->moduleMetrics->documentos($empresa),
             'filter_categoria' => $categoria,
             'filter_q' => $q,
             'open_novo' => $request->query->getBoolean('open_novo'),

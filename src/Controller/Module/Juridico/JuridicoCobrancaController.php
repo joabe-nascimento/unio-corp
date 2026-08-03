@@ -6,6 +6,7 @@ use App\Exception\JuridicoProcessException;
 use App\Repository\JuridicoClienteRepository;
 use App\Repository\JuridicoHonorarioLancamentoRepository;
 use App\Service\Juridico\JuridicoCobrancaService;
+use App\Service\Juridico\JuridicoModuleMetricsService;
 use App\Service\Juridico\JuridicoProcessoService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,6 +27,7 @@ class JuridicoCobrancaController extends AbstractController
         private JuridicoClienteRepository $clienteRepo,
         private JuridicoProcessoService $processos,
         private JuridicoHonorarioLancamentoRepository $honorarioRepo,
+        private JuridicoModuleMetricsService $moduleMetrics,
     ) {
     }
 
@@ -44,21 +46,13 @@ class JuridicoCobrancaController extends AbstractController
         $q = (string) $request->query->get('q', '');
         $titulos = $this->cobrancas->findForEmpresa($empresa, $status ?: null, $q ?: null);
 
-        $aberto = 0.0;
-        $vencido = 0;
-        foreach ($titulos as $t) {
-            if ($t->isAberta()) {
-                $aberto += $t->getValorFloat();
-            }
-            if ($t->getStatus() === 'vencido') {
-                ++$vencido;
-            }
-        }
+        $metricas = $this->moduleMetrics->cobranca($empresa);
 
         return $this->render('modules/juridico/cobranca_list.html.twig', [
             'titulos' => $titulos,
-            'total_aberto' => $aberto,
-            'total_vencido' => $vencido,
+            'metricas' => $metricas,
+            'total_aberto' => $metricas['em_aberto'],
+            'total_vencido' => $metricas['vencidos'],
             'clientes' => $this->clienteRepo->findBy(['empresa' => $empresa], ['nome' => 'ASC']),
             'processos' => $this->processos->listForSelect($empresa),
             'filter_status' => $status,

@@ -8,6 +8,7 @@ use App\Repository\JuridicoClienteRepository;
 use App\Repository\JuridicoHonorarioLancamentoRepository;
 use App\Repository\JuridicoPrazoRepository;
 use App\Repository\JuridicoProcessoRepository;
+use App\Service\Juridico\JuridicoModuleMetricsService;
 use App\Service\Juridico\JuridicoSeedService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,6 +28,7 @@ class JuridicoController extends AbstractController
         private JuridicoPrazoRepository $prazoRepo,
         private JuridicoClienteRepository $clienteRepo,
         private JuridicoHonorarioLancamentoRepository $honorarioRepo,
+        private JuridicoModuleMetricsService $moduleMetrics,
     ) {
     }
 
@@ -52,8 +54,17 @@ class JuridicoController extends AbstractController
         $seedData = $this->getSeedDataForModule($slug);
         $listRoute = JuridicoModuleRegistry::graduatedRoute($slug);
 
+        /** @var User|null $user */
+        $user = $this->getUser();
+        $empresa = $user ? $this->workspace->getActiveEmpresa($user) : null;
+        $liveMetrics = $empresa ? $this->moduleMetrics->paraModulo($slug, $empresa) : [];
+        $moduleWithMetrics = $module;
+        if ($liveMetrics !== []) {
+            $moduleWithMetrics['metrics'] = $liveMetrics;
+        }
+
         return $this->render('modules/juridico/module.html.twig', [
-            'module' => $module,
+            'module' => $moduleWithMetrics,
             'status_label' => JuridicoModuleRegistry::statusLabel($module['status']),
             'seed_data' => $seedData,
             'list_route' => $listRoute,

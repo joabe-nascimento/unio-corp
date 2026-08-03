@@ -62,6 +62,33 @@ class JuridicoClienteRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function countComPortalAtivo(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->andWhere('c.empresa = :empresa')
+            ->andWhere('c.portalUser IS NOT NULL')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countConvitesPendentes(Empresa $empresa): int
+    {
+        $agora = new \DateTimeImmutable();
+
+        return (int) $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->andWhere('c.empresa = :empresa')
+            ->andWhere('c.portalUser IS NULL')
+            ->andWhere('c.portalInviteToken IS NOT NULL')
+            ->andWhere('c.portalInviteExpiresAt IS NULL OR c.portalInviteExpiresAt >= :agora')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('agora', $agora)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /** @return list<JuridicoCliente> */
     public function findAllForSelect(Empresa $empresa): array
     {

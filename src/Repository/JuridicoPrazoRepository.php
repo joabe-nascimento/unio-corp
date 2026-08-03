@@ -71,6 +71,35 @@ class JuridicoPrazoRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function countPendentes(Empresa $empresa): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.cumprido = false')
+            ->setParameter('empresa', $empresa)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countVencemHoje(Empresa $empresa): int
+    {
+        $hoje = new \DateTimeImmutable('today');
+        $amanha = $hoje->modify('+1 day');
+
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.cumprido = false')
+            ->andWhere('p.dataLimite >= :hoje')
+            ->andWhere('p.dataLimite < :amanha')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('hoje', $hoje)
+            ->setParameter('amanha', $amanha)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /**
      * Percentual de prazos cumpridos dentro do prazo (SLA) — usado no BI de carteira.
      *

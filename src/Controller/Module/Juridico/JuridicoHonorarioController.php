@@ -6,6 +6,7 @@ use App\Exception\JuridicoProcessException;
 use App\Repository\JuridicoProcessoRepository;
 use App\Repository\UserRepository;
 use App\Service\Juridico\JuridicoHonorarioService;
+use App\Service\Juridico\JuridicoModuleMetricsService;
 use App\Service\Juridico\JuridicoProcessoService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,6 +27,7 @@ class JuridicoHonorarioController extends AbstractController
         private JuridicoProcessoService $processos,
         private JuridicoProcessoRepository $processoRepo,
         private UserRepository $userRepo,
+        private JuridicoModuleMetricsService $moduleMetrics,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -62,6 +64,7 @@ class JuridicoHonorarioController extends AbstractController
             'lancamentos' => $this->honorarios->findForEmpresa($empresa, $advogadoId ?: null, $mes),
             'receita_mes' => $this->honorarios->receitaMes($empresa, $mes),
             'horas_mes' => $this->honorarios->horasMes($empresa, $mes),
+            'metricas' => $this->moduleMetrics->honorarios($empresa),
             'advogados' => $this->userRepo->findBy(['empresa' => $empresa], ['nome' => 'ASC']),
             'processos' => $this->processos->listForSelect($empresa),
             'filter_mes' => $mes,

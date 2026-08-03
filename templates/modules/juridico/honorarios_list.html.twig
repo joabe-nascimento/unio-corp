@@ -24,10 +24,10 @@
         <span class="jur-proc-hero__eyebrow"><i class="fas fa-coins" aria-hidden="true"></i> Financeiro do Escritório · Timesheet</span>
         <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'Honorários & Timesheet' }}</h2>
         <p class="jur-proc-hero__text">
-            {% if resumo is empty %}
+            {% if metricas.lancamentos_mes|default(0) == 0 %}
                 Registre horas e honorários do mês para acompanhar receita e produtividade por advogado.
             {% else %}
-                Mês selecionado com <strong>{{ horas_mes|number_format(1, ',', '.') }}h</strong> registradas e receita de <strong>R$ {{ receita_mes|number_format(2, ',', '.') }}</strong>.
+                Mês com <strong>{{ metricas.horas_mes|number_format(1, ',', '.') }}h</strong> registradas e receita de <strong>R$ {{ metricas.receita_mes|number_format(2, ',', '.') }}</strong> · <strong>{{ metricas.lancamentos_mes }}</strong> lançamento{{ metricas.lancamentos_mes != 1 ? 's' : '' }}.
             {% endif %}
         </p>
         <div class="jur-proc-hero__actions">
@@ -39,9 +39,10 @@
 </section>
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
-        { value: horas_mes|number_format(1, ',', '.') ~ 'h', label: 'Horas no mês', sub: 'Timesheet', icon: 'fa-clock', tone: 'sky' },
-        { value: 'R$ ' ~ receita_mes|number_format(2, ',', '.'), label: 'Receita do mês', sub: 'Honorários faturáveis', icon: 'fa-sack-dollar', tone: 'amber' },
-        { value: resumo|length, label: 'Advogados', sub: 'Com lançamento', icon: 'fa-user-tie', tone: 'lavender' },
+        { value: metricas.horas_mes|default(0)|number_format(1, ',', '.') ~ 'h', label: 'Horas no mês', sub: 'Timesheet', icon: 'fa-clock', tone: 'sky' },
+        { value: 'R$ ' ~ metricas.receita_mes|default(0)|number_format(2, ',', '.'), label: 'Receita do mês', sub: 'Honorários faturáveis', icon: 'fa-sack-dollar', tone: 'amber' },
+        { value: metricas.lancamentos_mes|default(0), label: 'Lançamentos', sub: 'No mês atual', icon: 'fa-list', tone: 'lavender' },
+        { value: resumo|length, label: 'Advogados', sub: 'Com lançamento', icon: 'fa-user-tie', tone: 'sage' },
     ] } %}
 </div>
 {% endblock %}

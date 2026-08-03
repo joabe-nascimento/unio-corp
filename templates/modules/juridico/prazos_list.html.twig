@@ -4,20 +4,19 @@
 
 {% block page_list_kpis %}
 {% set _first_name = app.user.nome|default('')|split(' ')|first %}
-{% set _criticos = prazos|filter(p => p.statusLabel == 'critico')|length %}
-{% set _pendentes = prazos|filter(p => not p.cumprido)|length %}
-{% set _cumpridos = prazos|filter(p => p.cumprido)|length %}
 <section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
     <div class="jur-proc-hero__content">
         <span class="jur-proc-hero__eyebrow"><i class="fas fa-hourglass-half" aria-hidden="true"></i> Contencioso · Agenda fatal</span>
         <h2 class="jur-proc-hero__title">{{ _first_name ? 'Olá, ' ~ _first_name ~ '!' : 'Prazos & Diligências' }}</h2>
         <p class="jur-proc-hero__text">
-            {% if _criticos > 0 %}
-                <strong>{{ _criticos }}</strong> prazo{{ _criticos > 1 ? 's' : '' }} crítico{{ _criticos > 1 ? 's' : '' }} nas próximas 48 horas — revise a fila com urgência.
-            {% elseif _pendentes == 0 %}
-                Nenhum prazo pendente na lista atual. Cadastre diligências e prazos fatais para acompanhar a equipe.
+            {% if metricas.criticos|default(0) > 0 %}
+                <strong>{{ metricas.criticos }}</strong> prazo{{ metricas.criticos > 1 ? 's' : '' }} crítico{{ metricas.criticos > 1 ? 's' : '' }} nas próximas 48 horas — revise a fila com urgência.
+            {% elseif metricas.vencem_hoje|default(0) > 0 %}
+                <strong>{{ metricas.vencem_hoje }}</strong> prazo{{ metricas.vencem_hoje > 1 ? 's' : '' }} vence{{ metricas.vencem_hoje > 1 ? 'm' : '' }} hoje — priorize antes do expediente.
+            {% elseif metricas.pendentes|default(0) == 0 %}
+                Nenhum prazo pendente no escritório. Cadastre diligências e prazos fatais para acompanhar a equipe.
             {% else %}
-                <strong>{{ _pendentes }}</strong> prazo{{ _pendentes > 1 ? 's' : '' }} pendente{{ _pendentes > 1 ? 's' : '' }} na agenda do escritório.
+                <strong>{{ metricas.pendentes }}</strong> prazo{{ metricas.pendentes > 1 ? 's' : '' }} pendente{{ metricas.pendentes > 1 ? 's' : '' }} · SLA de cumprimento em <strong>{{ metricas.cumprimento|default(100) }}%</strong>.
             {% endif %}
         </p>
         <div class="jur-proc-hero__actions">
@@ -32,10 +31,10 @@
 </section>
 <div class="page-lead-kpis">
     {% include 'components/kpi_row.html.twig' with { items: [
-        { value: _pendentes, label: 'Pendentes', sub: 'Na agenda', icon: 'fa-hourglass-half', tone: 'sky', route: 'app_juridico_prazos', route_params: { situacao: 'pendentes' } },
-        { value: _criticos, label: 'Críticos (48h)', sub: _criticos > 0 ? 'Atenção imediata' : 'Sem urgência', icon: 'fa-triangle-exclamation', tone: _criticos > 0 ? 'rose' : 'sage', pulse: _criticos > 0 },
-        { value: _cumpridos, label: 'Cumpridos', sub: 'Na listagem atual', icon: 'fa-circle-check', tone: 'sage', route: 'app_juridico_prazos', route_params: { situacao: 'cumpridos' } },
-        { value: prazos|length, label: 'Total listado', sub: 'Com filtros aplicados', icon: 'fa-list', tone: 'lavender' },
+        { value: metricas.pendentes|default(0), label: 'Pendentes', sub: 'No escritório', icon: 'fa-hourglass-half', tone: 'sky', route: 'app_juridico_prazos', route_params: { situacao: 'pendentes' } },
+        { value: metricas.criticos|default(0), label: 'Críticos (48h)', sub: metricas.criticos|default(0) > 0 ? 'Atenção imediata' : 'Sem urgência', icon: 'fa-triangle-exclamation', tone: metricas.criticos|default(0) > 0 ? 'rose' : 'sage', pulse: metricas.criticos|default(0) > 0 },
+        { value: metricas.vencem_hoje|default(0), label: 'Vencem hoje', sub: 'Agenda fatal', icon: 'fa-calendar-day', tone: metricas.vencem_hoje|default(0) > 0 ? 'amber' : 'lavender' },
+        { value: metricas.cumprimento|default(100) ~ '%', label: 'SLA cumprimento', sub: 'Prazos no prazo', icon: 'fa-circle-check', tone: 'sage' },
     ] } %}
 </div>
 {% endblock %}

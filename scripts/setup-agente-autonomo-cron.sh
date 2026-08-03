@@ -12,9 +12,12 @@ CRON_LINE="*/30 * * * * cd ${APP_DIR} && /usr/local/bin/php bin/console app:juri
 RAG_MARK="app:juridico:rag:sync"
 RAG_LINE="0 */6 * * * cd ${APP_DIR} && /usr/local/bin/php bin/console app:juridico:rag:sync >> ${APP_DIR}/var/log/rag_sync.log 2>&1"
 
+PRAZO_MARK="app:juridico:prazo-alertas"
+PRAZO_LINE="0 7 * * * cd ${APP_DIR} && /usr/local/bin/php bin/console app:juridico:prazo-alertas >> ${APP_DIR}/var/log/prazo_alertas.log 2>&1"
+
 mkdir -p "${APP_DIR}/var/log"
 
-( crontab -l 2>/dev/null | grep -vF "${CRON_MARK}" | grep -vF "${RAG_MARK}"; echo "${CRON_LINE}"; echo "${RAG_LINE}" ) | crontab -
+( crontab -l 2>/dev/null | grep -vF "${CRON_MARK}" | grep -vF "${RAG_MARK}" | grep -vF "${PRAZO_MARK}"; echo "${CRON_LINE}"; echo "${RAG_LINE}"; echo "${PRAZO_LINE}" ) | crontab -
 
 echo "== Crontab atualizado =="
 crontab -l
