@@ -11576,6 +11576,10 @@
             z-index: 1060;
             pointer-events: none;
             visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(12px, 2.5vh, 28px);
         }
         .helix-panel.is-open {
             pointer-events: auto;
@@ -11593,20 +11597,25 @@
         .helix-panel.is-open .helix-backdrop { opacity: 1; }
 
         .helix-drawer {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: min(680px, 100vw);
-            height: 100%;
-            max-height: 100dvh;
+            position: relative;
+            z-index: 1;
+            width: min(920px, 100%);
+            height: min(86vh, 860px);
+            max-height: calc(100dvh - 24px);
             background: var(--bg);
-            border-left: 1px solid var(--border);
+            border: 1px solid var(--border);
+            border-radius: 18px;
             display: flex;
             flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+            overflow: hidden;
+            transform: translateY(18px) scale(0.96);
+            opacity: 0;
+            transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.22s ease;
         }
-        .helix-panel.is-open .helix-drawer { transform: translateX(0); }
+        .helix-panel.is-open .helix-drawer {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
 
         .helix-body {
             flex: 1;
@@ -12171,7 +12180,21 @@
         }
 
         @media (max-width: 575.98px) {
-            .helix-drawer { width: 100vw; }
+            .helix-panel {
+                padding: 0;
+                align-items: stretch;
+            }
+            .helix-drawer {
+                width: 100%;
+                height: 100%;
+                max-height: 100dvh;
+                border-radius: 0;
+                border: none;
+                transform: translateY(100%);
+            }
+            .helix-panel.is-open .helix-drawer {
+                transform: translateY(0);
+            }
             .helix-badge-soon { display: none; }
             .helix-history-toggle { display: inline-flex; align-items: center; justify-content: center; }
             .helix-close-btn,
