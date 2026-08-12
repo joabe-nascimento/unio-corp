@@ -594,7 +594,7 @@ def build_story():
     ))
     story.append(p(
         "A navegação lateral agrupa os módulos por eixo (Contencioso, Clientes, Produção, "
-        "etc.), com destaque para a entrada da assistente jurídica. O Hub Jurídico concentra "
+        "etc.), com destaque para a entrada da assistente jurídica. A Central Jurídica concentra "
         "catálogo e status dos módulos, útil para onboarding de novas equipes.",
         "Body",
     ))
@@ -750,7 +750,7 @@ def build_story():
         f"<b>{counts['beta']}</b> estão em estágio <b>Beta</b> (disponíveis para uso), "
         f"<b>{counts['alpha']}</b> em <b>Alpha</b> (estrutura pronta, evolução acelerada) "
         f"e <b>{counts['planned']}</b> <b>planejados</b> no roadmap. A maturidade de cada "
-        "módulo é transparente no Hub Jurídico da plataforma.",
+        "módulo é transparente na Central Jurídica da plataforma.",
         "BodyLead",
     ))
     story.append(p("Panorama por estágio", "H2"))

@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * Hub de integração com tribunais — configura a chave da API Pública do DataJud (CNJ),
+ * Central de integração com tribunais — configura a chave da API Pública do DataJud (CNJ),
  * que agrega oficialmente os dados de PJe, e-SAJ, Projudi, EPROC e demais sistemas.
  */
 #[Route('/juridico/tribunais')]

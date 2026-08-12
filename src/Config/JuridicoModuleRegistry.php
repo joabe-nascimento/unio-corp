@@ -193,7 +193,7 @@ final class JuridicoModuleRegistry
             'subtitle' => 'PJe, e-SAJ, Projudi',
             'tagline' => 'Consulta oficial de andamentos via API Pública do DataJud (CNJ), que agrega PJe, e-SAJ, Projudi e mais de 90 tribunais.',
             'status' => 'alpha',
-            'empty_title' => 'Hub de integração com tribunais',
+            'empty_title' => 'Central de integração com tribunais',
             'empty_text' => 'Cadastre a chave gratuita do DataJud e consulte andamentos oficiais direto pelo número do processo, com histórico de movimentações.',
             'features' => [
                 'Consulta oficial por número CNJ, com detecção automática do tribunal',

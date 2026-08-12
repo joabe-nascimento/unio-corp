@@ -179,7 +179,7 @@ final class PlannedHubRegistry
             'icon' => 'fa-gavel',
             'subtitle' => 'Plataforma completa para escritórios',
             'empty_icon' => 'fa-gavel',
-            'empty_title' => 'Hub Jurídico',
+            'empty_title' => 'Central Jurídica',
             'empty_text' => '21 módulos para contencioso, consultivo, financeiro, IA e governança — integrados à Bruna e ao JurisFlow.',
         ],
         [
