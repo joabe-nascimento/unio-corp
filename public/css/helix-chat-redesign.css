@@ -4,11 +4,58 @@
    da marca (bordô/vinho) preservada via var(--accent).
    ============================================================ */
 
-/* ---------- Fundo do drawer com leve profundidade (modal centralizado) ---------- */
-.helix-drawer {
+/* ---------- Modal centralizado (não drawer lateral) ---------- */
+.helix-panel:not(.helix-panel--studio) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: clamp(12px, 2.5vh, 28px) !important;
+}
+
+.helix-panel:not(.helix-panel--studio) .helix-drawer {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: min(960px, calc(100vw - 32px)) !important;
+    height: min(88vh, 820px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    border: 1px solid var(--border) !important;
+    border-left: 1px solid var(--border) !important;
+    border-radius: 20px !important;
+    overflow: hidden;
+    transform: translateY(16px) scale(0.97) !important;
+    opacity: 0;
     box-shadow:
         0 28px 72px rgba(20, 10, 15, 0.22),
         0 10px 28px rgba(20, 10, 15, 0.1);
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.22s ease !important;
+}
+
+.helix-panel.is-open:not(.helix-panel--studio) .helix-drawer {
+    transform: translateY(0) scale(1) !important;
+    opacity: 1 !important;
+}
+
+@media (max-width: 575.98px) {
+    .helix-panel:not(.helix-panel--studio) {
+        padding: 0 !important;
+        align-items: stretch !important;
+    }
+
+    .helix-panel:not(.helix-panel--studio) .helix-drawer {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        border: none !important;
+        transform: translateY(100%) !important;
+    }
+
+    .helix-panel.is-open:not(.helix-panel--studio) .helix-drawer {
+        transform: translateY(0) !important;
+    }
 }
 
 /* ---------- Header premium ---------- */
@@ -99,6 +146,8 @@
 
 /* ---------- Sidebar / histórico refinado ---------- */
 .helix-sidebar {
+    width: 220px;
+    min-width: 0;
     background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
 }
 
@@ -107,9 +156,19 @@
     font-weight: 700;
 }
 
+.helix-sidebar-head {
+    gap: 8px;
+}
+
+.helix-sidebar-foot {
+    align-items: stretch;
+    gap: 8px;
+}
+
 .helix-sidebar-btn {
     font-weight: 600;
     border-radius: 10px;
+    min-height: 36px;
 }
 
 .helix-sidebar-btn:not(.helix-sidebar-btn--danger) {
@@ -124,11 +183,49 @@
     box-shadow: 0 4px 12px var(--accent-dim);
 }
 
+.helix-sidebar-btn--danger {
+    flex: 0 0 36px;
+    width: 36px;
+    min-width: 36px;
+    padding: 0;
+}
+
 .helix-history-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+    max-width: 100%;
     border-radius: 12px;
     padding: 10px 11px;
     margin-bottom: 2px;
     border: 1px solid transparent;
+    text-align: left;
+    overflow: hidden;
+}
+
+.helix-history-item-title {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-1);
+    line-height: 1.3;
+}
+
+.helix-history-item-date {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10.5px;
+    color: var(--text-3);
 }
 
 .helix-history-item:hover {
