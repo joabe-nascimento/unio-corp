@@ -101,6 +101,8 @@
                     <li><code>GET /api/v1/publica/prazos</code> — prazos (filtro <code>situacao=pendentes|cumpridos</code>)</li>
                     <li><code>GET /api/v1/publica/tarefas</code> — tarefas pendentes da carteira</li>
                     <li><code>GET /api/v1/publica/jurisprudencia</code> — biblioteca de jurisprudência (filtros <code>q</code>, <code>tribunal</code>)</li>
+                    <li><code>GET /api/v1/publica/processos/{numero}/timeline</code> — linha do tempo unificada</li>
+                    <li><code>GET /api/v1/publica/webhooks</code> — assinaturas de evento</li>
                 </ul>
 
                 <h4 class="h6 mt-4">Exemplo de resposta — <code>/processos</code></h4>
@@ -121,6 +123,40 @@
                 <p class="small text-muted mb-0">Todos os dados são escopados automaticamente ao escritório dono do token — nunca é preciso (nem possível) informar o escritório na requisição.</p>
             </div>
         </section>
+    </div>
+</div>
+
+<div class="unio-card mt-4">
+    {% include 'components/section_header.html.twig' with { title: 'Webhooks', subtitle: 'Receba publicacao.nova, prazo.criado e documento.indexado no seu sistema' } %}
+    <div class="px-3 pb-3">
+        <form method="post" action="{{ path('app_juridico_api_webhooks_criar') }}" class="mb-3">
+            <input type="hidden" name="_token" value="{{ csrf_token('juridico_webhook_criar') }}">
+            <label class="form-label small">URL HTTPS</label>
+            <input type="url" name="url" class="form-control mb-2" required placeholder="https://seu-sistema.com/unio/webhook">
+            <label class="form-label small">Eventos (vírgula)</label>
+            <input type="text" name="eventos" class="form-control mb-2" value="publicacao.nova,prazo.criado,prazo.vencendo">
+            <p class="small text-muted">Disponíveis: {{ webhook_eventos|join(', ') }}</p>
+            <button type="submit" class="btn-unio btn-sm">Cadastrar webhook</button>
+        </form>
+        {% if webhooks|default([]) is empty %}
+        <p class="text-muted small mb-0">Nenhum webhook ainda.</p>
+        {% else %}
+        <ul class="list-unstyled mb-0">
+            {% for w in webhooks %}
+            <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <span class="small"><code>{{ w.url }}</code> · {{ w.eventos|join(', ') }}
+                    {% if not w.ativo %}<span class="badge badge-secondary">inativo</span>{% endif %}
+                </span>
+                {% if w.ativo %}
+                <form method="post" action="{{ path('app_juridico_api_webhooks_revogar', { id: w.id }) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_webhook_revogar_' ~ w.id) }}">
+                    <button class="btn-unio-ghost btn-sm" type="submit">Desativar</button>
+                </form>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

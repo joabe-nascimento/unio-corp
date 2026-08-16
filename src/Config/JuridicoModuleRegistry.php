@@ -122,9 +122,9 @@ final class JuridicoModuleRegistry
             'icon' => 'fa-gavel',
             'subtitle' => 'Sessões e preparação',
             'tagline' => 'Gestão de audiências com roteiro, testemunhas, links virtuais e pós-sessão.',
-            'status' => 'planned',
-            'empty_title' => 'Módulo de audiências em desenvolvimento',
-            'empty_text' => 'Agenda de audiências, salas virtuais, checklist de preparação e ata assistida pela Sasha.',
+            'status' => 'beta',
+            'empty_title' => 'Audiências ativas',
+            'empty_text' => 'Agenda de audiências, checklist de preparação e roteiro gerado pela Sasha.',
             'features' => [
                 'Calendário por vara, juiz e tipo de audiência',
                 'Checklist de preparação (testemunhas, documentos, links)',
@@ -748,7 +748,7 @@ final class JuridicoModuleRegistry
             ],
             'roadmap' => [
                 ['phase' => 'Q4', 'title' => 'API v1 ✅', 'items' => ['Tokens por escritório ✅', 'Endpoints de leitura ✅', 'Painel de gestão ✅']],
-                ['phase' => '2027', 'title' => 'Avançado', 'items' => ['Webhooks de eventos', 'Escopo de escrita completo', 'Rate limit configurável por plano']],
+                ['phase' => '2027', 'title' => 'Avançado ✅', 'items' => ['Webhooks de eventos ✅', 'Timeline do processo ✅', 'Rate limit por plano']],
             ],
             'integrations' => ['Processos', 'Prazos', 'Jurisprudência IA'],
             'bruna_prompt' => 'Como um sistema de BI externo pode consumir os processos do meu escritório pela API?',
@@ -763,9 +763,9 @@ final class JuridicoModuleRegistry
             'icon' => 'fa-shield-halved',
             'subtitle' => 'Ética e privacidade',
             'tagline' => 'Conformidade com Código de Ética OAB, LGPD e políticas internas do escritório.',
-            'status' => 'planned',
-            'empty_title' => 'Compliance jurídico em desenvolvimento',
-            'empty_text' => 'Políticas, treinamentos, registro de incidentes e evidências para auditoria regulatória.',
+            'status' => 'beta',
+            'empty_title' => 'Compliance jurídico ativo',
+            'empty_text' => 'Incidentes, redação de PII e trilha para auditoria OAB/ANPD.',
             'features' => [
                 'Políticas de privacidade e ética',
                 'Registro de incidentes e violações',
@@ -792,9 +792,9 @@ final class JuridicoModuleRegistry
             'icon' => 'fa-user-slash',
             'subtitle' => 'Ethical wall',
             'tagline' => 'Verificação automática de conflitos entre clientes, partes adversas e sócios.',
-            'status' => 'planned',
-            'empty_title' => 'Gestão de conflitos em desenvolvimento',
-            'empty_text' => 'Motor de regras, ethical wall entre equipes e bloqueio de novos casos conflitantes.',
+            'status' => 'beta',
+            'empty_title' => 'Gestão de conflitos ativa',
+            'empty_text' => 'Motor de similaridade na carteira — alerta ou bloqueio preventivo na entrada do caso.',
             'features' => [
                 'Verificação na entrada de leads e processos',
                 'Ethical wall entre advogados e áreas',
@@ -865,6 +865,9 @@ final class JuridicoModuleRegistry
         'api-publica' => 'app_juridico_api_tokens',
         'portal' => 'app_juridico_portal',
         'cobranca' => 'app_juridico_cobranca',
+        'audiencias' => 'app_juridico_audiencias',
+        'conflitos' => 'app_juridico_conflitos',
+        'compliance' => 'app_juridico_compliance',
     ];
 
     public static function isGraduated(string $slug): bool

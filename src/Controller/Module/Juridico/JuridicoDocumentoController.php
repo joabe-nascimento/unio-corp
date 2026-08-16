@@ -5,6 +5,7 @@ namespace App\Controller\Module\Juridico;
 use App\Entity\User;
 use App\Exception\JuridicoProcessException;
 use App\Repository\JuridicoDocumentoRepository;
+use App\Service\Juridico\JuridicoDocumentoIngestService;
 use App\Service\Juridico\JuridicoDocumentoService;
 use App\Service\Juridico\JuridicoModuleMetricsService;
 use App\Service\Juridico\JuridicoProcessoService;
@@ -29,6 +30,7 @@ class JuridicoDocumentoController extends AbstractController
         private JuridicoProcessoService $processos,
         private JuridicoDocumentoRepository $documentoRepo,
         private JuridicoModuleMetricsService $moduleMetrics,
+        private JuridicoDocumentoIngestService $ingest,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -109,6 +111,46 @@ class JuridicoDocumentoController extends AbstractController
         $this->requireCsrf($request, 'juridico_documento_excluir_' . $id);
         $this->documentos->delete($documento);
         $this->addFlash('success', 'Documento excluído.');
+
+        return $this->redirectToRoute('app_juridico_documentos');
+    }
+
+    #[Route('/{id}/extrair', name: 'app_juridico_documento_extrair', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function extrair(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $documento = $this->documentos->loadForEmpresa($empresa, $id);
+        $this->requireCsrf($request, 'juridico_documento_extrair_' . $id);
+        try {
+            $this->ingest->processar($documento);
+            $this->addFlash('success', 'Texto e metadados extraídos. A Sasha já pode usar este documento.');
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Não foi possível extrair o documento: ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_juridico_documentos');
+    }
+
+    #[Route('/{id}/precedente', name: 'app_juridico_documento_precedente', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function precedente(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $documento = $this->documentos->loadForEmpresa($empresa, $id);
+        $this->requireCsrf($request, 'juridico_documento_precedente_' . $id);
+        $this->documentos->marcarPrecedente($documento, !$documento->isPrecedente(), (string) $request->request->get('resultado') ?: null);
+        $this->addFlash('success', $documento->isPrecedente() ? 'Marcado como precedente interno.' : 'Precedente removido.');
+
+        return $this->redirectToRoute('app_juridico_documentos');
+    }
+
+    #[Route('/{id}/assinatura', name: 'app_juridico_documento_assinatura', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function assinatura(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $documento = $this->documentos->loadForEmpresa($empresa, $id);
+        $this->requireCsrf($request, 'juridico_documento_assinatura_' . $id);
+        $this->documentos->solicitarAssinatura($documento);
+        $this->addFlash('success', 'Envelope de assinatura criado em modo sandbox.');
 
         return $this->redirectToRoute('app_juridico_documentos');
     }

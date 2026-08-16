@@ -87,6 +87,26 @@ class JuridicoDocumentoService
         return $documento;
     }
 
+    public function persistOnly(JuridicoDocumento $documento): void
+    {
+        $this->em->flush();
+    }
+
+    public function marcarPrecedente(JuridicoDocumento $documento, bool $precedente, ?string $resultado = null): void
+    {
+        $documento->setPrecedente($precedente);
+        $documento->setResultadoPrecedente($resultado);
+        $this->em->flush();
+    }
+
+    public function solicitarAssinatura(JuridicoDocumento $documento, string $provider = 'clicksign'): void
+    {
+        $documento->setAssinaturaStatus('pendente');
+        $documento->setAssinaturaProvider($provider);
+        $documento->setAssinaturaRef('sandbox-'.bin2hex(random_bytes(6)));
+        $this->em->flush();
+    }
+
     public function delete(JuridicoDocumento $documento): void
     {
         $full = $this->resolveAbsolutePath($documento);

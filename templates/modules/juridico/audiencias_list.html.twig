@@ -1,0 +1,119 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Audiências · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Audiências' %}
+
+{% block page_list_kpis %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-gavel" aria-hidden="true"></i> Contencioso · Sessões</span>
+        <h2 class="jur-proc-hero__title">Audiências</h2>
+        <p class="jur-proc-hero__text">
+            {% if metricas.agendadas|default(0) > 0 %}
+                <strong>{{ metricas.agendadas }}</strong> audiência{{ metricas.agendadas > 1 ? 's' : '' }} agendada{{ metricas.agendadas > 1 ? 's' : '' }} — prepare roteiro, checklist e link da sala.
+            {% else %}
+                Agende sessões, gere o roteiro com a Sasha e evite conflito de agenda.
+            {% endif %}
+        </p>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: metricas.agendadas|default(0), label: 'Agendadas', icon: 'fa-calendar-check', tone: 'amber' },
+        { value: metricas.total|default(0), label: 'No calendário', icon: 'fa-gavel', tone: 'sky' },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-audiencia-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova audiência
+</button>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="unio-card">
+    {% if audiencias is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-gavel',
+            title: 'Nenhuma audiência agendada',
+            text: 'Cadastre a próxima sessão e a Sasha monta o roteiro de perguntas.',
+            btn_label: 'Nova audiência',
+            btn_opens: 'juridico-audiencia-novo',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table unio-table mb-0">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Processo</th>
+                    <th>Local / link</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for a in audiencias %}
+                <tr>
+                    <td>{{ a.dataHora|date('d/m/Y H:i') }}</td>
+                    <td>{{ a.tipo }}</td>
+                    <td>{% if a.processo %}<a href="{{ path('app_juridico_processo_show', { id: a.processo.id }) }}">{{ a.processo.numero }}</a>{% else %}—{% endif %}</td>
+                    <td>
+                        {{ a.local|default('—') }}
+                        {% if a.linkVirtual %}<div class="small"><a href="{{ a.linkVirtual }}" target="_blank" rel="noopener">Sala virtual</a></div>{% endif %}
+                    </td>
+                    <td><span class="badge badge-{{ a.status == 'agendada' ? 'info' : (a.status == 'realizada' ? 'success' : 'secondary') }}">{{ a.status|capitalize }}</span></td>
+                    <td>
+                        <form method="post" action="{{ path('app_juridico_audiencia_roteiro', { id: a.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_audiencia_roteiro_' ~ a.id) }}">
+                            <button type="submit" class="btn-unio-ghost btn-sm">Roteiro Sasha</button>
+                        </form>
+                    </td>
+                </tr>
+                {% if a.roteiro %}
+                <tr>
+                    <td colspan="6" class="small text-muted">{{ a.roteiro|nl2br }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+<div class="unio-offcanvas" data-unio-offcanvas="juridico-audiencia-novo"{% if open_novo|default(false) %} data-unio-offcanvas-open-on-load="1"{% endif %}>
+    <div class="unio-offcanvas-backdrop" data-unio-offcanvas-close></div>
+    <aside class="unio-offcanvas-drawer">
+        <header class="unio-offcanvas-head">
+            <h3>Nova audiência</h3>
+            <button type="button" class="btn-unio-ghost btn-sm" data-unio-offcanvas-close aria-label="Fechar"><i class="fas fa-times"></i></button>
+        </header>
+        <form method="post" action="{{ path('app_juridico_audiencia_novo') }}" class="p-3">
+            <input type="hidden" name="_token" value="{{ csrf_token('juridico_audiencia_form') }}">
+            <label class="form-label small">Tipo</label>
+            <input type="text" name="tipo" class="form-control mb-2" required placeholder="Instrução, conciliação, julgamento…">
+            <label class="form-label small">Data e hora</label>
+            <input type="datetime-local" name="data_hora" class="form-control mb-2" required>
+            <label class="form-label small">Processo</label>
+            <select name="processo_id" class="form-control mb-2">
+                <option value="">— Opcional —</option>
+                {% for p in processos %}
+                <option value="{{ p.id }}">{{ p.numero }}</option>
+                {% endfor %}
+            </select>
+            <label class="form-label small">Local</label>
+            <input type="text" name="local" class="form-control mb-2" placeholder="Vara, fórum ou endereço">
+            <label class="form-label small">Link virtual</label>
+            <input type="url" name="link_virtual" class="form-control mb-2" placeholder="https://">
+            <label class="form-label small">Checklist (um item por linha)</label>
+            <textarea name="checklist_texto" class="form-control mb-3" rows="4" placeholder="Confirmar testemunhas&#10;Organizar documentos"></textarea>
+            <button type="submit" class="btn-unio">Agendar</button>
+        </form>
+    </aside>
+</div>
+{% endblock %}

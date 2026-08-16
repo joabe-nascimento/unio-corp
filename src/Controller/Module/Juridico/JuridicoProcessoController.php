@@ -10,6 +10,7 @@ use App\Service\Juridico\JuridicoProcessoParteService;
 use App\Service\Juridico\JuridicoProcessoService;
 use App\Service\Juridico\JuridicoProcessoTarefaService;
 use App\Service\Juridico\JuridicoRiscoAlertaService;
+use App\Service\Juridico\JuridicoProcessoTimelineService;
 use App\Service\Juridico\PrevisaoExitoService;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,6 +35,7 @@ class JuridicoProcessoController extends AbstractController
         private JuridicoProcessoParteService $partes,
         private JuridicoRiscoAlertaService $riscos,
         private PrevisaoExitoService $previsaoExito,
+        private JuridicoProcessoTimelineService $timeline,
     ) {}
 
     protected function getWorkspace(): WorkspaceService
@@ -133,6 +135,7 @@ class JuridicoProcessoController extends AbstractController
             'partes' => $this->partes->findForProcesso($processo),
             'alertas_processo' => $this->riscos->avaliarProcesso($processo, $pendentes),
             'previsao' => $processo->getStatus() !== JuridicoProcesso::STATUS_ENCERRADO ? $this->previsaoExito->preverAuto($processo) : null,
+            'timeline' => $this->timeline->montar($processo),
         ]);
     }
 

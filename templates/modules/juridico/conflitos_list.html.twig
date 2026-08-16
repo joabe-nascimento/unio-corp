@@ -1,0 +1,65 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Conflito de interesses · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Conflito de interesses' %}
+
+{% block page_list_kpis %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-user-slash" aria-hidden="true"></i> Governança · Ética</span>
+        <h2 class="jur-proc-hero__title">Conflito de interesses</h2>
+        <p class="jur-proc-hero__text">Cruze o nome da parte com clientes e polos da carteira antes de aceitar o caso.</p>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: metricas.verificacoes|default(0), label: 'Verificações', icon: 'fa-magnifying-glass', tone: 'sky' },
+        { value: metricas.alertas|default(0), label: 'Alertas', icon: 'fa-ban', tone: metricas.alertas|default(0) > 0 ? 'rose' : 'sage' },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Verificar nome', subtitle: 'Cliente, parte adversa ou lead' } %}
+            <form method="post" class="px-3 pb-3">
+                <input type="hidden" name="_token" value="{{ csrf_token('juridico_conflito_form') }}">
+                <input type="text" name="nome" class="form-control mb-3" required placeholder="Nome completo">
+                <button type="submit" class="btn-unio">Verificar</button>
+            </form>
+            {% if resultado %}
+            <div class="px-3 pb-3">
+                <span class="badge badge-{{ resultado.resultado == 'livre' ? 'success' : (resultado.resultado == 'bloqueio' ? 'danger' : 'warning') }}">{{ resultado.resultado|upper }}</span>
+                {% if resultado.matches is empty %}
+                <p class="text-muted small mt-2 mb-0">Nenhum conflito encontrado na carteira.</p>
+                {% else %}
+                <ul class="mt-2 mb-0 small">
+                    {% for m in resultado.matches %}
+                    <li><strong>{{ m.nome }}</strong> — {{ m.detalhe }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="unio-card">
+            {% include 'components/section_header.html.twig' with { title: 'Histórico' } %}
+            {% if historico is empty %}
+            <p class="text-muted px-3 pb-3">As verificações aparecerão aqui.</p>
+            {% else %}
+            <ul class="list-unstyled px-3 pb-3 mb-0">
+                {% for h in historico %}
+                <li class="d-flex justify-content-between border-bottom py-2">
+                    <span>{{ h.nomeConsultado }}</span>
+                    <span class="badge badge-{{ h.resultado == 'livre' ? 'success' : (h.resultado == 'bloqueio' ? 'danger' : 'warning') }}">{{ h.resultado }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

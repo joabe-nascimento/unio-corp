@@ -352,6 +352,74 @@ final class JurisFlowAiClient
         }
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     * @return array{job_id?: string, status?: string, result?: array<string, mixed>}
+     */
+    public function submitJob(string $type, string $escritorioId, array $payload = []): array
+    {
+        if (!$this->enabled) {
+            return ['status' => 'disabled'];
+        }
+
+        try {
+            $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/jobs', [
+                'json' => [
+                    'type' => $type,
+                    'escritorio_id' => $escritorioId,
+                    'payload' => $payload,
+                ],
+                'timeout' => 12,
+            ]);
+
+            return $response->toArray(false);
+        } catch (\Throwable $e) {
+            $this->logger->info('Job JurisFlow indisponível ({type}): {msg}', ['type' => $type, 'msg' => $e->getMessage()]);
+
+            return ['status' => 'skipped', 'result' => []];
+        }
+    }
+
+    /**
+     * @return array{text?: string, metadata?: array<string, mixed>}
+     */
+    public function extractMetadata(string $texto, string $escritorioId = ''): array
+    {
+        if (!$this->enabled || trim($texto) === '') {
+            return [];
+        }
+
+        try {
+            $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/extract/process-metadata', [
+                'json' => ['text' => $texto, 'escritorio_id' => $escritorioId],
+                'timeout' => 20,
+            ]);
+
+            return $response->toArray(false);
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    public function redactPii(string $texto): string
+    {
+        if (!$this->enabled || trim($texto) === '') {
+            return $texto;
+        }
+
+        try {
+            $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/compliance/redact', [
+                'json' => ['text' => $texto],
+                'timeout' => 8,
+            ]);
+            $data = $response->toArray(false);
+
+            return (string) ($data['text'] ?? $texto);
+        } catch (\Throwable) {
+            return preg_replace('/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/', '[CPF]', $texto) ?? $texto;
+        }
+    }
+
     private function isConnectionError(\Throwable $e): bool
     {
         $msg = strtolower($e->getMessage());

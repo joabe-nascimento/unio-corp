@@ -106,4 +106,19 @@ class JuridicoPublicacaoRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /** @return list<JuridicoPublicacao> */
+    public function findPipelineErros(Empresa $empresa, int $limit = 50): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.empresa = :empresa')
+            ->andWhere('p.pipelineStatus = :st')
+            ->setParameter('empresa', $empresa)
+            ->setParameter('st', 'erro')
+            ->orderBy('p.atualizadoEm', 'DESC')
+            ->addOrderBy('p.criadoEm', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

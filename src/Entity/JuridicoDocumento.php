@@ -73,6 +73,31 @@ class JuridicoDocumento
     #[ORM\Column]
     private bool $visivelPortal = false;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $textoExtraido = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $ocrEm = null;
+
+    /** @var array<string, mixed>|null */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $metadataJson = null;
+
+    #[ORM\Column]
+    private bool $precedente = false;
+
+    #[ORM\Column(length: 24, nullable: true)]
+    private ?string $resultadoPrecedente = null;
+
+    #[ORM\Column(length: 24, nullable: true)]
+    private ?string $assinaturaStatus = null;
+
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $assinaturaProvider = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $assinaturaRef = null;
+
     public function __construct()
     {
         $this->criadoEm = new \DateTimeImmutable();
@@ -104,6 +129,24 @@ class JuridicoDocumento
     public function setRagHash(?string $ragHash): static { $this->ragHash = $ragHash; return $this; }
     public function isVisivelPortal(): bool { return $this->visivelPortal; }
     public function setVisivelPortal(bool $visivelPortal): static { $this->visivelPortal = $visivelPortal; return $this; }
+    public function getTextoExtraido(): ?string { return $this->textoExtraido; }
+    public function setTextoExtraido(?string $textoExtraido): static { $this->textoExtraido = $textoExtraido; return $this; }
+    public function getOcrEm(): ?\DateTimeImmutable { return $this->ocrEm; }
+    public function setOcrEm(?\DateTimeImmutable $ocrEm): static { $this->ocrEm = $ocrEm; return $this; }
+    /** @return array<string, mixed>|null */
+    public function getMetadataJson(): ?array { return $this->metadataJson; }
+    /** @param array<string, mixed>|null $metadataJson */
+    public function setMetadataJson(?array $metadataJson): static { $this->metadataJson = $metadataJson; return $this; }
+    public function isPrecedente(): bool { return $this->precedente; }
+    public function setPrecedente(bool $precedente): static { $this->precedente = $precedente; return $this; }
+    public function getResultadoPrecedente(): ?string { return $this->resultadoPrecedente; }
+    public function setResultadoPrecedente(?string $resultadoPrecedente): static { $this->resultadoPrecedente = $resultadoPrecedente; return $this; }
+    public function getAssinaturaStatus(): ?string { return $this->assinaturaStatus; }
+    public function setAssinaturaStatus(?string $assinaturaStatus): static { $this->assinaturaStatus = $assinaturaStatus; return $this; }
+    public function getAssinaturaProvider(): ?string { return $this->assinaturaProvider; }
+    public function setAssinaturaProvider(?string $assinaturaProvider): static { $this->assinaturaProvider = $assinaturaProvider; return $this; }
+    public function getAssinaturaRef(): ?string { return $this->assinaturaRef; }
+    public function setAssinaturaRef(?string $assinaturaRef): static { $this->assinaturaRef = $assinaturaRef; return $this; }
     public function isRagSincronizado(): bool { return $this->ragSincronizadoEm !== null; }
 
     public function getTamanhoFormatado(): string

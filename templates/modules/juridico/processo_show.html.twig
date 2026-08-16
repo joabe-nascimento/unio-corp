@@ -25,6 +25,9 @@
                     <button type="button" class="jur-processo-tabs__btn is-active" data-tab-btn="dados" role="tab" aria-selected="true">
                         <i class="fas fa-file-lines" aria-hidden="true"></i><span>Dados</span>
                     </button>
+                    <button type="button" class="jur-processo-tabs__btn" data-tab-btn="timeline" role="tab" aria-selected="false">
+                        <i class="fas fa-clock" aria-hidden="true"></i><span>Linha do tempo</span>
+                    </button>
                     <button type="button" class="jur-processo-tabs__btn" data-tab-btn="tarefas" role="tab" aria-selected="false">
                         <i class="fas fa-list-check" aria-hidden="true"></i><span>Tarefas</span>
                         {% if _pendentes > 0 %}<span class="jur-processo-tabs__badge">{{ _pendentes }}</span>{% endif %}
@@ -48,6 +51,31 @@
                             { label: 'Resultado', value: processo.resultado ? processo.resultado|capitalize : 'Em andamento', icon: 'fa-flag-checkered' },
                             { label: 'Observações', value: processo.observacoes|default('—'), icon: 'fa-note-sticky', multiline: true },
                         ]} %}
+                    </div>
+
+                    <div class="jur-processo-tabs__panel" data-tab-panel="timeline" role="tabpanel">
+                        <div class="jur-processo-tabs__panel-head">
+                            <h3>Linha do tempo</h3>
+                            <span class="text-muted small">Publicações, prazos, documentos e andamentos</span>
+                        </div>
+                        {% if timeline|default([]) is empty %}
+                        <p class="text-muted small mt-3 mb-0">Ainda não há eventos neste processo. Publicações, prazos e documentos aparecerão aqui automaticamente.</p>
+                        {% else %}
+                        <ul class="list-unstyled mb-0 mt-3">
+                            {% for ev in timeline %}
+                            <li class="d-flex gap-3 mb-3 pb-3 border-bottom">
+                                <span class="text-{{ ev.tom == 'danger' ? 'danger' : (ev.tom == 'warning' ? 'warning' : 'muted') }}">
+                                    <i class="fas {{ ev.icone }}" aria-hidden="true"></i>
+                                </span>
+                                <div>
+                                    <strong>{{ ev.titulo }}</strong>
+                                    {% if ev.resumo %}<p class="text-muted mb-0 small">{{ ev.resumo }}</p>{% endif %}
+                                    <small class="text-muted">{{ ev.ocorreu_em|date('d/m/Y H:i') }}</small>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                     </div>
 
                     <div class="jur-processo-tabs__panel" data-tab-panel="tarefas" role="tabpanel">

@@ -38,4 +38,20 @@ final class DateNormalizer
 
         return $date ?: null;
     }
+
+    public static function fromFormDateTime(mixed $value): ?\DateTimeImmutable
+    {
+        if (!is_string($value) || $value === '') {
+            return null;
+        }
+
+        foreach (['Y-m-d\TH:i', 'Y-m-d H:i', 'Y-m-d\TH:i:s', 'Y-m-d H:i:s'] as $fmt) {
+            $date = \DateTimeImmutable::createFromFormat($fmt, $value);
+            if ($date instanceof \DateTimeImmutable) {
+                return $date;
+            }
+        }
+
+        return self::fromFormDate($value);
+    }
 }

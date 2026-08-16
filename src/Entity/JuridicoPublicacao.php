@@ -118,6 +118,12 @@ class JuridicoPublicacao
     #[ORM\Column]
     private bool $prazoCriado = false;
 
+    #[ORM\Column(length: 32)]
+    private string $pipelineStatus = 'pendente';
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $prazoGeradoEm = null;
+
     #[ORM\Column]
     private \DateTimeImmutable $criadoEm;
 
@@ -186,6 +192,10 @@ class JuridicoPublicacao
     public function setTriadaPor(?User $triadaPor): static { $this->triadaPor = $triadaPor; return $this; }
     public function isPrazoCriado(): bool { return $this->prazoCriado; }
     public function setPrazoCriado(bool $prazoCriado): static { $this->prazoCriado = $prazoCriado; return $this; }
+    public function getPipelineStatus(): string { return $this->pipelineStatus; }
+    public function setPipelineStatus(string $pipelineStatus): static { $this->pipelineStatus = $pipelineStatus; return $this; }
+    public function getPrazoGeradoEm(): ?\DateTimeImmutable { return $this->prazoGeradoEm; }
+    public function setPrazoGeradoEm(?\DateTimeImmutable $prazoGeradoEm): static { $this->prazoGeradoEm = $prazoGeradoEm; return $this; }
     public function getCriadoEm(): \DateTimeImmutable { return $this->criadoEm; }
     public function getAtualizadoEm(): ?\DateTimeImmutable { return $this->atualizadoEm; }
     public function touch(): static { $this->atualizadoEm = new \DateTimeImmutable(); return $this; }

@@ -132,6 +132,24 @@
                             <a href="{{ path('app_juridico_documento_download', { id: d.id }) }}" class="btn-unio-ghost btn-sm" title="Baixar">
                                 <i class="fas fa-download" aria-hidden="true"></i>
                             </a>
+                            <form method="post" action="{{ path('app_juridico_documento_extrair', { id: d.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('juridico_documento_extrair_' ~ d.id) }}">
+                                <button type="submit" class="btn-unio-ghost btn-sm" title="Extrair texto e metadados">
+                                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            <form method="post" action="{{ path('app_juridico_documento_precedente', { id: d.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('juridico_documento_precedente_' ~ d.id) }}">
+                                <button type="submit" class="btn-unio-ghost btn-sm" title="{{ d.precedente ? 'Remover precedente' : 'Marcar precedente' }}">
+                                    <i class="fas {{ d.precedente ? 'fa-star' : 'fa-star' }}" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            <form method="post" action="{{ path('app_juridico_documento_assinatura', { id: d.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('juridico_documento_assinatura_' ~ d.id) }}">
+                                <button type="submit" class="btn-unio-ghost btn-sm" title="Solicitar assinatura">
+                                    <i class="fas fa-file-signature" aria-hidden="true"></i>
+                                </button>
+                            </form>
                             <form method="post" action="{{ path('app_juridico_documento_excluir', { id: d.id }) }}"
                                   onsubmit="return confirm('Excluir este documento?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('juridico_documento_excluir_' ~ d.id) }}">

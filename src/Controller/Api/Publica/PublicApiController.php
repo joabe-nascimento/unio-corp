@@ -7,7 +7,10 @@ use App\Repository\JuridicoJurisprudenciaRepository;
 use App\Repository\JuridicoPrazoRepository;
 use App\Repository\JuridicoProcessoRepository;
 use App\Repository\JuridicoProcessoTarefaRepository;
+use App\Repository\JuridicoWebhookSubscriptionRepository;
 use App\Security\ApiTokenUser;
+use App\Service\Juridico\JuridicoProcessoTimelineService;
+use App\Service\Juridico\JuridicoWebhookDispatcher;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +31,9 @@ final class PublicApiController extends AbstractController
         private JuridicoPrazoRepository $prazoRepo,
         private JuridicoProcessoTarefaRepository $tarefaRepo,
         private JuridicoJurisprudenciaRepository $jurisprudenciaRepo,
+        private JuridicoProcessoTimelineService $timeline,
+        private JuridicoWebhookDispatcher $webhooks,
+        private JuridicoWebhookSubscriptionRepository $webhookRepo,
     ) {
     }
 
@@ -166,6 +172,45 @@ final class PublicApiController extends AbstractController
                 'resumo' => $j->getResumo(),
                 'favorito' => $j->isFavorito(),
             ], $itens),
+        ]);
+    }
+
+    #[Route('/processos/{numero}/timeline', name: 'api_publica_processo_timeline', requirements: ['numero' => '.+'])]
+    public function timeline(string $numero): JsonResponse
+    {
+        $empresa = $this->tokenAtual()->getEmpresa();
+        $encontrados = $this->processoRepo->findForEmpresa($empresa, null, $numero);
+        $processo = $encontrados[0] ?? null;
+        if ($processo === null) {
+            return $this->json(['error' => 'Processo não encontrado.'], Response::HTTP_NOT_FOUND);
+        }
+        $itens = $this->timeline->montar($processo, 80);
+
+        return $this->json([
+            'total' => \count($itens),
+            'data' => array_map(static fn (array $e) => [
+                'tipo' => $e['tipo'],
+                'titulo' => $e['titulo'],
+                'resumo' => $e['resumo'],
+                'ocorreu_em' => $e['ocorreu_em']->format(DATE_ATOM),
+            ], $itens),
+        ]);
+    }
+
+    #[Route('/webhooks', name: 'api_publica_webhooks', methods: ['GET'])]
+    public function webhooks(): JsonResponse
+    {
+        $empresa = $this->tokenAtual()->getEmpresa();
+        $subs = $this->webhookRepo->findBy(['empresa' => $empresa], ['criadoEm' => 'DESC']);
+
+        return $this->json([
+            'eventos' => JuridicoWebhookDispatcher::EVENTOS,
+            'data' => array_map(static fn ($s) => [
+                'id' => $s->getId(),
+                'url' => $s->getUrl(),
+                'eventos' => $s->getEventos(),
+                'ativo' => $s->isAtivo(),
+            ], $subs),
         ]);
     }
 

@@ -111,21 +111,25 @@
         actions.className = 'helix-history-item__actions';
         
         var pinBtn = document.createElement('button');
+        pinBtn.type = 'button';
         pinBtn.className = 'helix-history-action helix-history-action--pin';
         if (conv.pinned) {
             pinBtn.classList.add('is-pinned');
         }
-        pinBtn.innerHTML = '<i class="fas fa-thumbtack"></i>';
+        pinBtn.setAttribute('aria-label', conv.pinned ? 'Desafixar conversa' : 'Fixar conversa');
         pinBtn.title = conv.pinned ? 'Desafixar' : 'Fixar';
+        pinBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M16 12V4h1V2H7v2h1v8l-2 3v2h5.2V22h1.6v-5H18v-2l-2-3z"/></svg>';
         pinBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             togglePin(conv.id);
         });
         
         var deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
         deleteBtn.className = 'helix-history-action helix-history-action--delete';
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        deleteBtn.setAttribute('aria-label', 'Excluir conversa');
         deleteBtn.title = 'Excluir';
+        deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
         deleteBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             deleteConversation(conv.id);

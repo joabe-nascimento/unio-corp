@@ -1,0 +1,102 @@
+{% extends 'layout/page_list.html.twig' %}
+{% block title %}Templates de peças · Unio Jurídico{% endblock %}
+{% set page_list_title = 'Templates de peças' %}
+
+{% block page_list_kpis %}
+<section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
+    <div class="jur-proc-hero__content">
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-file-contract" aria-hidden="true"></i> Produção · Governança</span>
+        <h2 class="jur-proc-hero__title">Templates de peças</h2>
+        <p class="jur-proc-hero__text">Rascunho, aprovação do sócio e variáveis <code>{{ '{{cliente}}' }}</code>, <code>{{ '{{processo.numero}}' }}</code> — a Sasha preenche, o escritório governa.</p>
+    </div>
+</section>
+<div class="page-lead-kpis">
+    {% include 'components/kpi_row.html.twig' with { items: [
+        { value: metricas.total|default(0), label: 'Templates', icon: 'fa-file-lines', tone: 'sky' },
+        { value: metricas.aprovados|default(0), label: 'Aprovados', icon: 'fa-stamp', tone: 'sage' },
+    ] } %}
+</div>
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-template-novo">
+    <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo template
+</button>
+{% endblock %}
+
+{% block page_list_content %}
+{% if preview %}
+<div class="unio-card mb-4">
+    {% include 'components/section_header.html.twig' with { title: 'Minuta gerada', subtitle: 'Revise antes de protocolar' } %}
+    <pre class="p-3 mb-0 small" style="white-space:pre-wrap;">{{ preview }}</pre>
+</div>
+{% endif %}
+<div class="unio-card">
+    {% if templates is empty %}
+        {% include 'components/empty_state.html.twig' with {
+            icon: 'fa-file-contract',
+            title: 'Nenhum template ainda',
+            text: 'Crie a primeira peça-padrão do escritório e aprove para a equipe usar.',
+            btn_label: 'Novo template',
+            btn_opens: 'juridico-template-novo',
+            btn_icon: 'fa-plus'
+        } %}
+    {% else %}
+    <div class="table-responsive">
+        <table class="table unio-table mb-0">
+            <thead><tr><th>Nome</th><th>Tipo</th><th>Status</th><th>Variáveis</th><th></th></tr></thead>
+            <tbody>
+            {% for t in templates %}
+                <tr>
+                    <td>{{ t.nome }} <span class="text-muted small">v{{ t.versao }}</span></td>
+                    <td>{{ t.tipo }}</td>
+                    <td><span class="badge badge-{{ t.aprovado ? 'success' : 'secondary' }}">{{ t.status }}</span></td>
+                    <td class="small">{{ t.variaveis|join(', ') }}</td>
+                    <td class="text-nowrap">
+                        {% if not t.aprovado %}
+                        <form method="post" action="{{ path('app_juridico_template_aprovar', { id: t.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_template_aprovar_' ~ t.id) }}">
+                            <button class="btn-unio-ghost btn-sm" type="submit">Aprovar</button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{{ path('app_juridico_template_gerar', { id: t.id }) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_template_gerar_' ~ t.id) }}">
+                            <select name="processo_id" class="form-control form-control-sm d-inline-block" style="width:auto;min-width:0;max-width:180px;">
+                                <option value="">Processo…</option>
+                                {% for p in processos %}<option value="{{ p.id }}">{{ p.numero }}</option>{% endfor %}
+                            </select>
+                            <button class="btn-unio btn-sm" type="submit">Gerar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_overlays %}
+<div class="unio-offcanvas" data-unio-offcanvas="juridico-template-novo"{% if open_novo|default(false) %} data-unio-offcanvas-open-on-load="1"{% endif %}>
+    <div class="unio-offcanvas-backdrop" data-unio-offcanvas-close></div>
+    <aside class="unio-offcanvas-drawer">
+        <header class="unio-offcanvas-head">
+            <h3>Novo template</h3>
+            <button type="button" class="btn-unio-ghost btn-sm" data-unio-offcanvas-close><i class="fas fa-times"></i></button>
+        </header>
+        <form method="post" action="{{ path('app_juridico_template_novo') }}" class="p-3">
+            <input type="hidden" name="_token" value="{{ csrf_token('juridico_template_form') }}">
+            <label class="form-label small">Nome</label>
+            <input type="text" name="nome" class="form-control mb-2" required>
+            <label class="form-label small">Tipo</label>
+            <input type="text" name="tipo" class="form-control mb-2" value="peticao" required>
+            <label class="form-label small">Área</label>
+            <input type="text" name="area" class="form-control mb-2" placeholder="Cível, trabalhista…">
+            <label class="form-label small">Corpo</label>
+            <textarea name="corpo" class="form-control mb-3" rows="12" required placeholder="Excelentíssimo(a)… {{ '{{cliente}}' }} no processo {{ '{{processo.numero}}' }}"></textarea>
+            <button type="submit" class="btn-unio">Salvar rascunho</button>
+        </form>
+    </aside>
+</div>
+{% endblock %}

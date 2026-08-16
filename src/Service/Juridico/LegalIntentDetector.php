@@ -117,6 +117,27 @@ final class LegalIntentDetector
         'escreva uma petição', 'escreva uma peticao', 'escreva uma minuta',
     ];
 
+    private const GATILHOS_TRIAR_PUBLICACAO = [
+        'triar publicação', 'triar publicacao', 'triar intimação', 'triar intimacao',
+        'processar publicação', 'processar publicacao', 'pipeline da publicação', 'pipeline da publicacao',
+    ];
+
+    private const GATILHOS_TIMELINE = [
+        'linha do tempo', 'timeline do processo', 'histórico do processo', 'historico do processo',
+        'movimentações do processo', 'movimentacoes do processo',
+    ];
+
+    private const GATILHOS_PUBLICACOES = [
+        'publicações djen', 'publicacoes djen', 'intimações novas', 'intimacoes novas',
+        'fila de publicações', 'fila de publicacoes', 'listar publicações', 'listar publicacoes',
+        'minhas publicações', 'minhas publicacoes',
+    ];
+
+    private const GATILHOS_INDEXAR = [
+        'indexar documento', 'indexar no rag', 'reindexar documento',
+        'adicionar à base de conhecimento', 'adicionar a base de conhecimento',
+    ];
+
     /** Tamanho mínimo do texto restante para considerar que há conteúdo real colado (evita falso positivo). */
     private const MIN_LEN_TEXTO_COLADO = 25;
 
@@ -259,6 +280,25 @@ final class LegalIntentDetector
             if ($acao !== null) {
                 $acoes[] = $acao;
             }
+        }
+
+        if ($this->contemAlgum($texto, self::GATILHOS_TRIAR_PUBLICACAO)) {
+            $acoes[] = $this->detectarTriarPublicacao($mensagemUsuario);
+        }
+
+        if ($this->contemAlgum($texto, self::GATILHOS_TIMELINE)) {
+            $acao = $this->detectarTimeline($mensagemUsuario, $numeroProcessoAtual);
+            if ($acao !== null) {
+                $acoes[] = $acao;
+            }
+        }
+
+        if ($this->contemAlgum($texto, self::GATILHOS_PUBLICACOES)) {
+            $acoes[] = $this->detectarPublicacoes($mensagemUsuario);
+        }
+
+        if ($this->contemAlgum($texto, self::GATILHOS_INDEXAR)) {
+            $acoes[] = $this->detectarIndexarDocumento($mensagemUsuario);
         }
 
         // Fallback independente de palavras-gatilho: um número de processo (CNJ) na
@@ -569,6 +609,52 @@ final class LegalIntentDetector
             'label' => sprintf('Gerar minuta (%s)', $tipo),
             'params' => ['tipo' => $tipo, 'descricao' => $descricao],
         ];
+    }
+
+    /** @return SuggestedAction */
+    private function detectarTriarPublicacao(string $mensagemOriginal): array
+    {
+        $params = [];
+        if (preg_match('/#?(\d{1,9})/', $mensagemOriginal, $m)) {
+            $params['publicacao_id'] = (int) $m[1];
+        }
+
+        return ['tool' => 'triar_publicacao', 'label' => 'Triar publicação DJEN', 'params' => $params];
+    }
+
+    /** @return SuggestedAction|null */
+    private function detectarTimeline(string $mensagemOriginal, ?string $numeroProcessoAtual = null): ?array
+    {
+        if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
+            return ['tool' => 'buscar_timeline_processo', 'label' => 'Ver linha do tempo do processo', 'params' => ['numero_processo' => $m[0]]];
+        }
+        if ($numeroProcessoAtual !== null) {
+            return ['tool' => 'buscar_timeline_processo', 'label' => 'Ver linha do tempo desta tela', 'params' => ['numero_processo' => $numeroProcessoAtual]];
+        }
+
+        return ['tool' => 'buscar_timeline_processo', 'label' => 'Ver linha do tempo do processo', 'params' => []];
+    }
+
+    /** @return SuggestedAction */
+    private function detectarPublicacoes(string $mensagemOriginal): array
+    {
+        $params = [];
+        if (preg_match('/\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}/', $mensagemOriginal, $m)) {
+            $params['numero_processo'] = $m[0];
+        }
+
+        return ['tool' => 'buscar_publicacoes', 'label' => 'Listar publicações DJEN', 'params' => $params];
+    }
+
+    /** @return SuggestedAction */
+    private function detectarIndexarDocumento(string $mensagemOriginal): array
+    {
+        $params = [];
+        if (preg_match('/#?(\d{1,9})/', $mensagemOriginal, $m)) {
+            $params['documento_id'] = (int) $m[1];
+        }
+
+        return ['tool' => 'indexar_documento', 'label' => 'Indexar documento no RAG', 'params' => $params];
     }
 
     /** @param list<string> $gatilhos */

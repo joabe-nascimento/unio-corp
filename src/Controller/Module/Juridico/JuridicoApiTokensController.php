@@ -6,6 +6,8 @@ use App\Entity\ApiToken;
 use App\Entity\User;
 use App\Repository\ApiTokenRepository;
 use App\Service\Juridico\ApiTokenService;
+use App\Service\Juridico\JuridicoWebhookDispatcher;
+use App\Repository\JuridicoWebhookSubscriptionRepository;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +28,8 @@ class JuridicoApiTokensController extends AbstractController
         private WorkspaceService $workspace,
         private ApiTokenRepository $tokenRepo,
         private ApiTokenService $tokenService,
+        private JuridicoWebhookDispatcher $webhooks,
+        private JuridicoWebhookSubscriptionRepository $webhookRepo,
     ) {
     }
 
@@ -43,6 +47,8 @@ class JuridicoApiTokensController extends AbstractController
             'tokens' => $this->tokenRepo->findForEmpresa($empresa),
             'base_url' => $request->getSchemeAndHttpHost(),
             'novo_token' => $request->getSession()->remove('juridico_api_token_novo') ?: null,
+            'webhooks' => $this->webhookRepo->findBy(['empresa' => $empresa], ['criadoEm' => 'DESC']),
+            'webhook_eventos' => JuridicoWebhookDispatcher::EVENTOS,
         ]);
     }
 
@@ -81,6 +87,37 @@ class JuridicoApiTokensController extends AbstractController
         if ($token !== null) {
             $this->tokenService->revogar($token);
             $this->addFlash('success', 'Token revogado.');
+        }
+
+        return $this->redirectToRoute('app_juridico_api_tokens');
+    }
+
+    #[Route('/webhooks', name: 'app_juridico_api_webhooks_criar', methods: ['POST'])]
+    #[IsGranted('ROLE_GESTOR')]
+    public function criarWebhook(Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $this->requireCsrf($request, 'juridico_webhook_criar');
+        try {
+            $this->webhooks->criar($empresa, $request->request->all());
+            $this->addFlash('success', 'Webhook cadastrado. Guarde o secret exibido no cadastro interno.');
+        } catch (\App\Exception\JuridicoProcessException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_juridico_api_tokens');
+    }
+
+    #[Route('/webhooks/{id}/revogar', name: 'app_juridico_api_webhooks_revogar', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted('ROLE_GESTOR')]
+    public function revogarWebhook(int $id, Request $request): Response
+    {
+        $empresa = $this->requireEmpresa();
+        $this->requireCsrf($request, 'juridico_webhook_revogar_'.$id);
+        $sub = $this->webhookRepo->findOneByEmpresa($empresa, $id);
+        if ($sub) {
+            $this->webhooks->revogar($sub);
+            $this->addFlash('success', 'Webhook desativado.');
         }
 
         return $this->redirectToRoute('app_juridico_api_tokens');

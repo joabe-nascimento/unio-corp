@@ -25,17 +25,73 @@
     border-left: 1px solid var(--border) !important;
     border-radius: 20px !important;
     overflow: hidden;
-    transform: translateY(16px) scale(0.97) !important;
+    /* Origem no dock (estilo Windows / barra de tarefas) */
+    transform: translate3d(var(--helix-from-x, 0px), var(--helix-from-y, 36px), 0)
+        scale(var(--helix-from-s, 0.08)) !important;
     opacity: 0;
+    filter: blur(2px);
     box-shadow:
         0 28px 72px rgba(20, 10, 15, 0.22),
         0 10px 28px rgba(20, 10, 15, 0.1);
-    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.22s ease !important;
+    transition:
+        transform 0.46s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.28s ease,
+        filter 0.28s ease !important;
+    will-change: transform, opacity;
 }
 
-.helix-panel.is-open:not(.helix-panel--studio) .helix-drawer {
-    transform: translateY(0) scale(1) !important;
+.helix-panel.is-open:not(.helix-panel--studio) .helix-drawer,
+.helix-panel.is-closing:not(.helix-panel--studio) .helix-drawer {
+    pointer-events: auto;
+}
+
+.helix-panel.is-open:not(.helix-panel--studio):not(.is-closing) .helix-drawer {
+    transform: translate3d(0, 0, 0) scale(1) !important;
     opacity: 1 !important;
+    filter: none;
+}
+
+.helix-panel.is-closing {
+    pointer-events: none !important;
+    visibility: visible !important;
+}
+
+/* O dock usa transform de aba; a “compressão” do Windows vai no avatar. */
+.helix-dock.helix-trigger.is-launching,
+.unio-organismo .helix-dock.helix-trigger.is-launching,
+body.org-juridico .helix-dock.helix-trigger.is-launching {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translate(calc(100% - 58px), -50%) !important;
+}
+
+.helix-dock.is-launching .helix-dock__avatar,
+.helix-dock.is-launching .helix-avatar {
+    animation: helixDockLaunch 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes helixDockLaunch {
+    0% { transform: scale(1); }
+    28% { transform: scale(0.82); }
+    62% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.helix-panel.is-closing .helix-backdrop {
+    opacity: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .helix-panel:not(.helix-panel--studio) .helix-drawer {
+        transform: none !important;
+        filter: none !important;
+        transition: opacity 0.16s ease !important;
+    }
+    .helix-dock.is-launching .helix-dock__avatar,
+    .helix-dock.is-launching .helix-avatar {
+        animation: none !important;
+    }
 }
 
 @media (max-width: 575.98px) {
@@ -50,11 +106,12 @@
         max-height: 100dvh !important;
         border-radius: 0 !important;
         border: none !important;
-        transform: translateY(100%) !important;
+        transform: translate3d(0, 100%, 0) scale(1) !important;
+        filter: none;
     }
 
-    .helix-panel.is-open:not(.helix-panel--studio) .helix-drawer {
-        transform: translateY(0) !important;
+    .helix-panel.is-open:not(.helix-panel--studio):not(.is-closing) .helix-drawer {
+        transform: translate3d(0, 0, 0) scale(1) !important;
     }
 }
 
@@ -215,9 +272,9 @@
 .helix-history-item {
     position: relative;
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) 76px;
     grid-template-rows: auto auto;
-    column-gap: 8px;
+    column-gap: 6px;
     row-gap: 2px;
     align-items: center;
     width: 100% !important;
@@ -225,12 +282,12 @@
     min-width: 0 !important;
     box-sizing: border-box !important;
     border-radius: 10px;
-    padding: 10px 10px 10px 12px !important;
+    padding: 10px 8px 10px 12px !important;
     margin: 0 0 2px !important;
     border: 1px solid transparent !important;
     border-left: 3px solid transparent !important;
     text-align: left;
-    overflow: hidden;
+    overflow: visible;
     background: transparent;
     cursor: pointer;
     color: #1e2a3a !important;
@@ -315,34 +372,121 @@
     top: auto !important;
     right: auto !important;
     transform: none !important;
-    display: flex;
+    display: flex !important;
     align-items: center;
-    gap: 2px;
+    justify-content: flex-end;
+    gap: 6px;
+    width: 76px;
+    min-width: 76px !important;
     flex-shrink: 0;
-    z-index: 1;
-    opacity: 0.55;
-    transition: opacity 0.15s ease;
+    z-index: 2;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
-.helix-history-item:hover .helix-history-item__actions,
-.helix-history-item--active .helix-history-item__actions {
-    opacity: 1;
+/*
+ * Ícones do histórico (fixar / excluir) desenhados em CSS.
+ * Font Awesome quebrava (traços cinza) e width:auto no tema jurídico
+ * esmagava o botão. Máscara SVG + tamanho fixo não dependem do markup.
+ */
+.helix-panel .helix-history-action,
+body.org-juridico .helix-panel .helix-history-action {
+    flex: 0 0 32px !important;
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 1px solid rgba(122, 33, 48, 0.18) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #7a2130 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    font-size: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
-.helix-history-action {
-    color: #6b7280 !important;
+.helix-history-action svg,
+.helix-history-action i,
+.helix-history-action .fas,
+.helix-history-action .fa,
+.helix-history-action::before {
+    display: none !important;
+    content: none !important;
+}
+
+.helix-history-action::after {
+    content: '' !important;
+    display: block !important;
+    width: 16px !important;
+    height: 16px !important;
+    background-color: currentColor !important;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.helix-history-action--pin {
+    color: #7a2130 !important;
+}
+
+.helix-history-action--pin::after {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 12V4h1V2H7v2h1v8l-2 3v2h5.2V22h1.6v-5H18v-2l-2-3z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 12V4h1V2H7v2h1v8l-2 3v2h5.2V22h1.6v-5H18v-2l-2-3z'/%3E%3C/svg%3E");
+}
+
+.helix-history-action--pin.is-pinned {
+    background: rgba(245, 158, 11, 0.18) !important;
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    color: #b45309 !important;
+}
+
+.helix-history-action--delete {
+    color: #b91c1c !important;
+    border-color: rgba(185, 28, 28, 0.22) !important;
+}
+
+.helix-history-action--delete::after {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z'/%3E%3C/svg%3E");
 }
 
 .helix-history-action:hover {
-    color: #1e2a3a !important;
+    background: #f8fafc !important;
+    transform: translateY(-1px);
 }
 
-[data-theme="dark"] .helix-history-action {
-    color: rgba(232, 236, 244, 0.55) !important;
+.helix-history-action--delete:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    color: #dc2626 !important;
+}
+
+[data-theme="dark"] .helix-panel .helix-history-action,
+[data-theme="dark"] body.org-juridico .helix-panel .helix-history-action {
+    background: rgba(232, 236, 244, 0.1) !important;
+    border-color: rgba(232, 236, 244, 0.22) !important;
+    color: #f3d5d8 !important;
+}
+
+[data-theme="dark"] .helix-history-action--delete {
+    color: #fca5a5 !important;
 }
 
 [data-theme="dark"] .helix-history-action:hover {
-    color: #e8ecf4 !important;
+    background: rgba(232, 236, 244, 0.18) !important;
+    color: #fff !important;
 }
 
 /* ---------- Mensagens: bolhas modernas com entrada animada ---------- */
