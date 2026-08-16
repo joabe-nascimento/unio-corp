@@ -28,6 +28,14 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 if [[ -d "$JURISFLOW_APP" ]]; then
+  mkdir -p "${JURISFLOW_APP}/scripts"
+  for f in lib-hostgator.sh watchdog-hostgator.sh jurisflow-supervisor-hostgator.sh; do
+    if [[ -f "$ROOT/scripts/$f" ]]; then
+      cp -f "$ROOT/scripts/$f" "${JURISFLOW_APP}/scripts/$f"
+    fi
+  done
+  chmod +x "${JURISFLOW_APP}/scripts/"*.sh 2>/dev/null || true
+
   if [[ -x "${JURISFLOW_APP}/scripts/watchdog-hostgator.sh" ]]; then
     bash "${JURISFLOW_APP}/scripts/watchdog-hostgator.sh" || true
   elif [[ -f "$ROOT/scripts/fix-jurisflow-keepalive-hostgator.sh" ]]; then

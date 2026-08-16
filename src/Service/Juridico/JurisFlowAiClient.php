@@ -37,6 +37,8 @@ final class JurisFlowAiClient
 
             return $response->getStatusCode() === 200;
         } catch (\Throwable) {
+            $this->nudgeWatchdog();
+
             return false;
         }
     }
@@ -59,16 +61,15 @@ final class JurisFlowAiClient
         }
 
         $now = new \DateTimeImmutable('now');
+        $mode = strtolower(trim((string) ($context['mode'] ?? 'standard')));
+        if (!\in_array($mode, ['standard', 'superior', 'lex', 'premium'], true)) {
+            $mode = 'standard';
+        }
+        if (\in_array($mode, ['lex', 'premium'], true)) {
+            $mode = 'superior';
+        }
 
         try {
-            $mode = strtolower(trim((string) ($context['mode'] ?? 'standard')));
-            if (!\in_array($mode, ['standard', 'superior', 'lex', 'premium'], true)) {
-                $mode = 'standard';
-            }
-            if (\in_array($mode, ['lex', 'premium'], true)) {
-                $mode = 'superior';
-            }
-
             $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/assistant/Sasha/chat', [
                 'json' => [
                     'message' => $message,
@@ -106,6 +107,43 @@ final class JurisFlowAiClient
             ];
         } catch (\Throwable $e) {
             $this->logger->warning('IA jurídica (JurisFlow) indisponível: {msg}', ['msg' => $e->getMessage()]);
+            if ($this->isConnectionError($e)) {
+                $this->nudgeWatchdog();
+                usleep(1_800_000);
+
+                try {
+                    $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/') . '/v1/assistant/Sasha/chat', [
+                        'json' => [
+                            'message' => $message,
+                            'escritorio_id' => $escritorioId,
+                            'use_rag' => true,
+                            'mode' => $mode,
+                            'history' => array_map(static fn (array $m) => [
+                                'role' => $m['role'],
+                                'content' => $m['content'],
+                            ], $history),
+                            'time_context' => [
+                                'date' => $this->formatDatePtBr($now),
+                                'time' => $now->format('H:i'),
+                                'period' => $this->periodOfDay((int) $now->format('G')),
+                            ],
+                            'numero_processo_atual' => $context['numero_processo_atual'] ?? null,
+                        ],
+                        'timeout' => $mode === 'superior' ? 90 : 45,
+                    ]);
+                    $data = $response->toArray(false);
+                    $reply = trim((string) ($data['answer'] ?? ''));
+                    if ($reply !== '' && !str_contains(mb_strtolower($reply), 'instabilidade no provedor de ia')) {
+                        return [
+                            'reply' => $reply,
+                            'source' => 'jurisflow',
+                            'suggested_actions' => [],
+                        ];
+                    }
+                } catch (\Throwable) {
+                    return null;
+                }
+            }
 
             return null;
         }
@@ -312,6 +350,31 @@ final class JurisFlowAiClient
 
             return null;
         }
+    }
+
+    private function isConnectionError(\Throwable $e): bool
+    {
+        $msg = strtolower($e->getMessage());
+
+        return str_contains($msg, 'connection refused')
+            || str_contains($msg, 'failed to connect')
+            || str_contains($msg, 'timed out')
+            || str_contains($msg, 'connection reset');
+    }
+
+    /** Religa o JurisFlow na HostGator sem bloquear o request (nohup). */
+    private function nudgeWatchdog(): void
+    {
+        $script = '/home2/joabef36/jurisflow-ai/scripts/watchdog-hostgator.sh';
+        $lock = '/home2/joabef36/jurisflow-ai/.php-nudge.lock';
+        if (!is_file($script)) {
+            return;
+        }
+        if (is_file($lock) && (time() - (int) filemtime($lock)) < 40) {
+            return;
+        }
+        @touch($lock);
+        @exec('nohup bash ' . escapeshellarg($script) . ' >/dev/null 2>&1 &');
     }
 
     private function periodOfDay(int $hour): string
