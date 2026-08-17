@@ -25,13 +25,11 @@
     </div>
 </section>
 {% if not is_cliente_portal %}
-<div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: metricas.clientes_portal|default(0), label: 'Clientes ativos', sub: 'Portal vinculado', icon: 'fa-user-check', tone: 'sage' },
-        { value: metricas.convites_pendentes|default(0), label: 'Convites pendentes', sub: 'Aguardando login', icon: 'fa-link', tone: metricas.convites_pendentes|default(0) > 0 ? 'amber' : 'lavender' },
-        { value: metricas.docs_compartilhados|default(0), label: 'Docs compartilhados', sub: 'Visíveis no portal', icon: 'fa-file-lines', tone: 'sky' },
-    ] } %}
-</div>
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: metricas.clientes_portal|default(0), label: 'Clientes ativos', sub: 'Portal vinculado', icon: 'fa-user-check', tone: 'sage' },
+    { value: metricas.convites_pendentes|default(0), label: 'Convites pendentes', sub: 'Aguardando login', icon: 'fa-link', tone: metricas.convites_pendentes|default(0) > 0 ? 'amber' : 'lavender' },
+    { value: metricas.docs_compartilhados|default(0), label: 'Docs compartilhados', sub: 'Visíveis no portal', icon: 'fa-file-alt', tone: 'sky' },
+] } %}
 {% endif %}
 {% endblock %}
 
@@ -44,41 +42,39 @@
     </div>
 </div>
 {% else %}
-<div class="row g-4">
-    <div class="col-xl-7">
-        <div class="unio-card">
+<div class="jur-ops-split">
+    <div class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Timeline', subtitle: 'Andamentos em linguagem simples' } %}
             {% if timeline is empty %}
-            <p class="text-muted px-3 pb-3">Nenhuma atualização recente nos seus processos.</p>
+            <p class="jur-empty-inline">Nenhuma atualização recente nos seus processos.</p>
             {% else %}
-            <ul class="list-unstyled px-3 pb-3 mb-0">
+            <ul class="jur-timeline jur-timeline--inset">
                 {% for ev in timeline %}
-                <li class="d-flex gap-3 mb-3 pb-3 border-bottom">
-                    <span class="text-{{ ev.tom == 'danger' ? 'danger' : (ev.tom == 'warning' ? 'warning' : 'muted') }}">
+                <li class="jur-timeline__item">
+                    <span class="jur-timeline__dot jur-timeline__dot--{{ ev.tom|default('muted') }}">
                         <i class="fas {{ ev.icone }}" aria-hidden="true"></i>
                     </span>
                     <div>
-                        <strong>{{ ev.titulo }}</strong>
-                        <p class="text-muted mb-0 small">{{ ev.texto }}</p>
-                        <small class="text-muted">{{ ev.data|date('d/m/Y') }}</small>
+                        <span class="jur-timeline__title">{{ ev.titulo }}</span>
+                        <p class="jur-timeline__text">{{ ev.texto }}</p>
+                        <span class="jur-timeline__when">{{ ev.data|date('d/m/Y') }}</span>
                     </div>
                 </li>
                 {% endfor %}
             </ul>
             {% endif %}
-        </div>
     </div>
-    <div class="col-xl-5">
+    <div>
         <div class="unio-card mb-4">
             {% include 'components/section_header.html.twig' with { title: 'Seus processos' } %}
             {% if processos is empty %}
-            <p class="text-muted px-3 pb-3">Nenhum processo vinculado.</p>
+            <p class="jur-empty-inline">Nenhum processo vinculado.</p>
             {% else %}
-            <ul class="list-unstyled px-3 pb-3 mb-0">
+            <ul class="jur-ops-list">
                 {% for p in processos %}
-                <li class="mb-2">
-                    <code>{{ p.numero }}</code>
-                    <span class="badge badge-{{ p.status == 'critico' ? 'danger' : 'info' }} ml-1">{{ p.fase|capitalize }}</span>
+                <li class="jur-ops-list__item">
+                    <div class="jur-ops-list__main"><code>{{ p.numero }}</code></div>
+                    <span class="jur-status jur-status--{{ p.status == 'critico' ? 'aberto' : 'agendada' }}">{{ p.fase|capitalize }}</span>
                 </li>
                 {% endfor %}
             </ul>
@@ -87,12 +83,12 @@
         <div class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Documentos compartilhados' } %}
             {% if documentos is empty %}
-            <p class="text-muted px-3 pb-3">Nenhum documento disponível no portal.</p>
+            <p class="jur-empty-inline">Nenhum documento disponível no portal.</p>
             {% else %}
-            <ul class="list-unstyled px-3 pb-3 mb-0">
+            <ul class="jur-ops-list">
                 {% for d in documentos %}
-                <li class="mb-2 d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-file-lines mr-1" aria-hidden="true"></i> {{ d.nome }}</span>
+                <li class="jur-ops-list__item">
+                    <div class="jur-ops-list__main"><i class="fas fa-file-alt mr-1" aria-hidden="true"></i> {{ d.nome }}</div>
                     <a href="{{ path('app_juridico_documento_download', { id: d.id }) }}" class="btn-unio-ghost btn-sm">Baixar</a>
                 </li>
                 {% endfor %}

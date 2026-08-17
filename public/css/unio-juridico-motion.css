@@ -1,0 +1,256 @@
+/**
+ * Unio Jurídico — movimento e fluidez
+ * Entradas em cascata, hovers suaves, microinterações.
+ * Respeita prefers-reduced-motion.
+ */
+
+body.org-juridico {
+    --jur-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --jur-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Página: conteúdo sobe ao carregar ── */
+body.org-juridico .content-wrapper > .content,
+body.org-juridico .app-page-scroll > .content {
+    animation: jurPageIn 0.48s var(--jur-ease) backwards;
+}
+
+@keyframes jurPageIn {
+    from { opacity: 0.01; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ── Hero ── */
+body.org-juridico .jur-proc-hero {
+    animation: jurHeroIn 0.62s var(--jur-ease) backwards;
+}
+
+body.org-juridico .jur-proc-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+        112deg,
+        transparent 28%,
+        rgba(255, 255, 255, 0.14) 48%,
+        transparent 68%
+    );
+    transform: translateX(-120%);
+    animation: jurShine 2.8s var(--jur-ease-out) 0.45s 1;
+}
+
+body.org-juridico .jur-proc-hero__eyebrow {
+    animation: jurFadeUp 0.5s var(--jur-ease) 0.08s backwards;
+}
+
+body.org-juridico .jur-proc-hero__title {
+    animation: jurFadeUp 0.55s var(--jur-ease) 0.16s backwards;
+}
+
+body.org-juridico .jur-proc-hero__text {
+    animation: jurFadeUp 0.55s var(--jur-ease) 0.24s backwards;
+}
+
+body.org-juridico .jur-proc-hero__actions,
+body.org-juridico .jur-proc-hero__badges {
+    animation: jurFadeUp 0.5s var(--jur-ease) 0.32s backwards;
+}
+
+@keyframes jurHeroIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.985); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes jurShine {
+    to { transform: translateX(120%); }
+}
+
+@keyframes jurFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ── KPIs em cascata ── */
+body.org-juridico .org-kpi-strip,
+body.org-juridico .page-lead-kpis {
+    animation: jurFadeUp 0.5s var(--jur-ease) 0.12s backwards;
+}
+
+body.org-juridico .org-kpi-strip__item {
+    animation: jurKpiIn 0.48s var(--jur-ease) backwards;
+}
+
+body.org-juridico .org-kpi-strip__item:nth-child(1) { animation-delay: 0.08s; }
+body.org-juridico .org-kpi-strip__item:nth-child(2) { animation-delay: 0.14s; }
+body.org-juridico .org-kpi-strip__item:nth-child(3) { animation-delay: 0.2s; }
+body.org-juridico .org-kpi-strip__item:nth-child(4) { animation-delay: 0.26s; }
+body.org-juridico .org-kpi-strip__item:nth-child(5) { animation-delay: 0.32s; }
+body.org-juridico .org-kpi-strip__item:nth-child(6) { animation-delay: 0.38s; }
+body.org-juridico .org-kpi-strip__item:nth-child(n+7) { animation-delay: 0.42s; }
+
+@keyframes jurKpiIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+}
+
+body.org-juridico a.org-kpi-strip__item,
+body.org-juridico .org-kpi-strip__item {
+    transition: background 0.22s var(--jur-ease), transform 0.22s var(--jur-ease), box-shadow 0.22s var(--jur-ease);
+}
+
+body.org-juridico a.org-kpi-strip__item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(122, 33, 48, 0.12);
+    z-index: 1;
+}
+
+/* ── Cards, tabelas, empty states ── */
+body.org-juridico .unio-card,
+body.org-juridico .org-hub-card,
+body.org-juridico .empty-state {
+    animation: jurCardIn 0.5s var(--jur-ease) 0.18s backwards;
+    transition: transform 0.28s var(--jur-ease), box-shadow 0.28s var(--jur-ease), border-color 0.22s ease;
+}
+
+@keyframes jurCardIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
+}
+
+body.org-juridico .page-body-inner > .unio-card:hover {
+    transform: none;
+    box-shadow: 0 14px 36px rgba(122, 33, 48, 0.08);
+}
+
+body.org-juridico .unio-table tbody tr {
+    animation: jurRowIn 0.36s var(--jur-ease) backwards;
+}
+
+body.org-juridico .unio-table tbody tr:nth-child(1) { animation-delay: 0.04s; }
+body.org-juridico .unio-table tbody tr:nth-child(2) { animation-delay: 0.07s; }
+body.org-juridico .unio-table tbody tr:nth-child(3) { animation-delay: 0.1s; }
+body.org-juridico .unio-table tbody tr:nth-child(4) { animation-delay: 0.13s; }
+body.org-juridico .unio-table tbody tr:nth-child(5) { animation-delay: 0.16s; }
+body.org-juridico .unio-table tbody tr:nth-child(6) { animation-delay: 0.19s; }
+body.org-juridico .unio-table tbody tr:nth-child(7) { animation-delay: 0.22s; }
+body.org-juridico .unio-table tbody tr:nth-child(8) { animation-delay: 0.25s; }
+body.org-juridico .unio-table tbody tr:nth-child(n+9) { animation-delay: 0.28s; }
+
+@keyframes jurRowIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: none; }
+}
+
+body.org-juridico .unio-table tbody tr {
+    transition: background 0.18s ease, transform 0.18s var(--jur-ease);
+}
+
+body.org-juridico .unio-table tbody tr:hover {
+    background: rgba(122, 33, 48, 0.05);
+}
+
+/* ── Botões ── */
+body.org-juridico .btn-unio,
+body.org-juridico .btn-unio-primary,
+body.org-juridico .btn-unio-ghost {
+    transition: transform 0.2s var(--jur-ease), box-shadow 0.2s var(--jur-ease), background 0.18s ease, border-color 0.18s ease, color 0.18s ease, filter 0.18s ease !important;
+}
+
+body.org-juridico .btn-unio:hover,
+body.org-juridico .btn-unio-primary:hover {
+    transform: translateY(-1px);
+}
+
+body.org-juridico .btn-unio:active,
+body.org-juridico .btn-unio-primary:active,
+body.org-juridico .btn-unio-ghost:active {
+    transform: translateY(0) scale(0.97);
+}
+
+/* ── Menu lateral ── */
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item > .nav-link {
+    transition: background 0.2s var(--jur-ease), color 0.2s ease, transform 0.2s var(--jur-ease), box-shadow 0.2s ease !important;
+}
+
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item > .nav-link:hover {
+    transform: translateX(3px);
+}
+
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item > .nav-link.active {
+    transform: none;
+}
+
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item {
+    animation: jurNavIn 0.4s var(--jur-ease) backwards;
+}
+
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(1) { animation-delay: 0.02s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(2) { animation-delay: 0.05s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(3) { animation-delay: 0.08s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(4) { animation-delay: 0.11s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(5) { animation-delay: 0.14s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(6) { animation-delay: 0.17s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(7) { animation-delay: 0.2s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(8) { animation-delay: 0.23s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(9) { animation-delay: 0.26s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(10) { animation-delay: 0.29s; }
+body.org-juridico.unio-organismo .nav-sidebar > .nav-item:nth-child(n+11) { animation-delay: 0.32s; }
+
+@keyframes jurNavIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ── Atalhos do pulso / chips ── */
+body.org-juridico .pulso-shortcut,
+body.org-juridico .jur-mod-chip {
+    transition: transform 0.2s var(--jur-ease), background 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease;
+}
+
+body.org-juridico .pulso-shortcut:hover,
+body.org-juridico .jur-mod-chip:hover {
+    transform: translateY(-2px);
+}
+
+/* ── Flash / toast ── */
+body.org-juridico .alert,
+body.org-juridico .unio-flash {
+    animation: jurFadeUp 0.4s var(--jur-ease) backwards;
+}
+
+/* ── Timeline do processo ── */
+body.org-juridico .jur-timeline-item,
+body.org-juridico .timeline-item {
+    animation: jurRowIn 0.4s var(--jur-ease) backwards;
+}
+
+body.org-juridico .jur-timeline-item:nth-child(1),
+body.org-juridico .timeline-item:nth-child(1) { animation-delay: 0.05s; }
+body.org-juridico .jur-timeline-item:nth-child(2),
+body.org-juridico .timeline-item:nth-child(2) { animation-delay: 0.1s; }
+body.org-juridico .jur-timeline-item:nth-child(3),
+body.org-juridico .timeline-item:nth-child(3) { animation-delay: 0.15s; }
+body.org-juridico .jur-timeline-item:nth-child(4),
+body.org-juridico .timeline-item:nth-child(4) { animation-delay: 0.2s; }
+body.org-juridico .jur-timeline-item:nth-child(n+5),
+body.org-juridico .timeline-item:nth-child(n+5) { animation-delay: 0.24s; }
+
+@media (prefers-reduced-motion: reduce) {
+    body.org-juridico,
+    body.org-juridico * {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    body.org-juridico .jur-proc-hero::before {
+        display: none;
+    }
+    body.org-juridico .btn-unio:hover,
+    body.org-juridico a.org-kpi-strip__item:hover,
+    body.org-juridico .unio-card:hover,
+    body.org-juridico.unio-organismo .nav-sidebar > .nav-item > .nav-link:hover {
+        transform: none !important;
+    }
+}

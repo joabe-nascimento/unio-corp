@@ -868,6 +868,8 @@ final class JuridicoModuleRegistry
         'audiencias' => 'app_juridico_audiencias',
         'conflitos' => 'app_juridico_conflitos',
         'compliance' => 'app_juridico_compliance',
+        'peticoes' => 'app_juridico_templates',
+        'orquestracao-ia' => 'app_juridico_ia_ops',
     ];
 
     public static function isGraduated(string $slug): bool

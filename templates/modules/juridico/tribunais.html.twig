@@ -5,7 +5,7 @@
 {% block page_list_kpis %}
 <section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
     <div class="jur-proc-hero__content">
-        <span class="jur-proc-hero__eyebrow"><i class="fas fa-building-columns" aria-hidden="true"></i> PJe · e-SAJ · Projudi · EPROC</span>
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-university" aria-hidden="true"></i> PJe · e-SAJ · Projudi · EPROC</span>
         <h2 class="jur-proc-hero__title">Andamentos oficiais via DataJud (CNJ)</h2>
         <p class="jur-proc-hero__text">
             O DataJud é a base nacional do CNJ que agrega, oficialmente, os metadados processuais de mais de 90 tribunais —
@@ -22,15 +22,14 @@
 {% endblock %}
 
 {% block page_list_content %}
-<div class="row g-4">
-    <div class="col-lg-5">
-        <section class="unio-card">
+<div class="jur-ops-split">
+    <section class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Chave de acesso DataJud', subtitle: 'Cadastro gratuito em datajud-wiki.cnj.jus.br' } %}
-            <div class="px-3 pb-3">
+            <div class="jur-ops-form">
                 {% if config and config.configurado %}
                     <p class="mb-2">
-                        <span class="badge {{ config.ultimoTesteOk ? 'badge-success' : 'badge-warning' }}">
-                            <i class="fas {{ config.ultimoTesteOk ? 'fa-circle-check' : 'fa-triangle-exclamation' }} mr-1" aria-hidden="true"></i>
+                        <span class="jur-status jur-status--{{ config.ultimoTesteOk ? 'online' : 'warn' }}">
+                            <i class="fas {{ config.ultimoTesteOk ? 'fa-check-circle' : 'fa-exclamation-triangle' }} mr-1" aria-hidden="true"></i>
                             {{ config.ultimoTesteOk ? 'Conectado' : 'Não validado' }}
                         </span>
                     </p>
@@ -49,27 +48,24 @@
                 {% endif %}
                 <form method="post" action="{{ path('app_juridico_tribunais_configurar') }}" class="mt-3">
                     <input type="hidden" name="_token" value="{{ csrf_token('juridico_tribunal_config') }}">
-                    <label class="form-label small">Chave de API (APIKey)</label>
+                    <label class="form-label">Chave de API (APIKey)</label>
                     <div class="d-flex gap-2">
-                        <input type="text" name="datajud_api_key" class="form-control form-control-sm" placeholder="Cole a chave do DataJud aqui" autocomplete="off">
+                        <input type="text" name="datajud_api_key" class="form-control" placeholder="Cole a chave do DataJud aqui" autocomplete="off">
                         <button type="submit" class="btn-unio btn-sm text-nowrap"><i class="fas fa-save mr-1" aria-hidden="true"></i> Salvar</button>
                     </div>
                 </form>
             </div>
-        </section>
-    </div>
-    <div class="col-lg-7">
-        <section class="unio-card">
+    </section>
+    <section class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Consultar processo', subtitle: 'Número no padrão CNJ (NNNNNNN-DD.AAAA.J.TR.OOOO)' } %}
-            <div class="px-3 pb-3">
+            <div class="jur-ops-form">
                 <div class="d-flex gap-2 mb-3">
-                    <input type="text" id="jurDatajudNumero" class="form-control form-control-sm" placeholder="0000000-00.0000.0.00.0000">
-                    <button type="button" id="jurDatajudBtn" class="btn-unio btn-sm text-nowrap"><i class="fas fa-magnifying-glass mr-1" aria-hidden="true"></i> Consultar</button>
+                    <input type="text" id="jurDatajudNumero" class="form-control" placeholder="0000000-00.0000.0.00.0000">
+                    <button type="button" id="jurDatajudBtn" class="btn-unio btn-sm text-nowrap"><i class="fas fa-search mr-1" aria-hidden="true"></i> Consultar</button>
                 </div>
                 <div id="jurDatajudResultado" class="jur-datajud-resultado" aria-live="polite"></div>
             </div>
-        </section>
-    </div>
+    </section>
 </div>
 {% endblock %}
 

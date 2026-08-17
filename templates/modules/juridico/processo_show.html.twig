@@ -59,18 +59,18 @@
                             <span class="text-muted small">Publicações, prazos, documentos e andamentos</span>
                         </div>
                         {% if timeline|default([]) is empty %}
-                        <p class="text-muted small mt-3 mb-0">Ainda não há eventos neste processo. Publicações, prazos e documentos aparecerão aqui automaticamente.</p>
+                        <p class="jur-empty-inline" style="padding-left:0;padding-right:0;padding-top:0.85rem;">Ainda não há eventos neste processo. Publicações, prazos e documentos aparecerão aqui automaticamente.</p>
                         {% else %}
-                        <ul class="list-unstyled mb-0 mt-3">
+                        <ul class="jur-timeline">
                             {% for ev in timeline %}
-                            <li class="d-flex gap-3 mb-3 pb-3 border-bottom">
-                                <span class="text-{{ ev.tom == 'danger' ? 'danger' : (ev.tom == 'warning' ? 'warning' : 'muted') }}">
+                            <li class="jur-timeline__item">
+                                <span class="jur-timeline__dot jur-timeline__dot--{{ ev.tom|default('muted') }}">
                                     <i class="fas {{ ev.icone }}" aria-hidden="true"></i>
                                 </span>
                                 <div>
-                                    <strong>{{ ev.titulo }}</strong>
-                                    {% if ev.resumo %}<p class="text-muted mb-0 small">{{ ev.resumo }}</p>{% endif %}
-                                    <small class="text-muted">{{ ev.ocorreu_em|date('d/m/Y H:i') }}</small>
+                                    <span class="jur-timeline__title">{{ ev.titulo }}</span>
+                                    {% if ev.resumo %}<p class="jur-timeline__text">{{ ev.resumo }}</p>{% endif %}
+                                    <span class="jur-timeline__when">{{ ev.ocorreu_em|date('d/m/Y H:i') }}</span>
                                 </div>
                             </li>
                             {% endfor %}

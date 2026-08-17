@@ -14,20 +14,29 @@
                 Agende sessões, gere o roteiro com a Sasha e evite conflito de agenda.
             {% endif %}
         </p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-audiencia-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova audiência
+            </button>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Monte um roteiro de perguntas para a próxima audiência de instrução.">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
+        </div>
     </div>
 </section>
-<div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: metricas.agendadas|default(0), label: 'Agendadas', icon: 'fa-calendar-check', tone: 'amber' },
-        { value: metricas.total|default(0), label: 'No calendário', icon: 'fa-gavel', tone: 'sky' },
-    ] } %}
-</div>
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: metricas.agendadas|default(0), label: 'Agendadas', sub: 'Na pauta', icon: 'fa-calendar-check', tone: 'amber' },
+    { value: metricas.total|default(0), label: 'No calendário', sub: 'Todas as sessões', icon: 'fa-gavel', tone: 'sky' },
+] } %}
 {% endblock %}
 
 {% block page_list_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-audiencia-novo">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Nova audiência
 </button>
+<a href="{{ path('app_juridico_modulo', { slug: 'audiencias' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
 {% endblock %}
 
 {% block page_list_content %}
@@ -47,36 +56,31 @@
             <thead>
                 <tr>
                     <th>Data</th>
-                    <th>Tipo</th>
+                    <th>Tipo e local</th>
                     <th>Processo</th>
-                    <th>Local / link</th>
                     <th>Status</th>
-                    <th></th>
+                    <th class="text-right">Ação</th>
                 </tr>
             </thead>
             <tbody>
             {% for a in audiencias %}
                 <tr>
-                    <td>{{ a.dataHora|date('d/m/Y H:i') }}</td>
-                    <td>{{ a.tipo }}</td>
-                    <td>{% if a.processo %}<a href="{{ path('app_juridico_processo_show', { id: a.processo.id }) }}">{{ a.processo.numero }}</a>{% else %}—{% endif %}</td>
+                    <td class="text-nowrap">{{ a.dataHora|date('d/m/Y H:i') }}</td>
                     <td>
-                        {{ a.local|default('—') }}
+                        <strong>{{ a.tipo }}</strong>
+                        <div class="small text-muted">{{ a.local|default('Local a confirmar') }}</div>
                         {% if a.linkVirtual %}<div class="small"><a href="{{ a.linkVirtual }}" target="_blank" rel="noopener">Sala virtual</a></div>{% endif %}
+                        {% if a.roteiro %}<div class="jur-roteiro">{{ a.roteiro|nl2br }}</div>{% endif %}
                     </td>
-                    <td><span class="badge badge-{{ a.status == 'agendada' ? 'info' : (a.status == 'realizada' ? 'success' : 'secondary') }}">{{ a.status|capitalize }}</span></td>
-                    <td>
+                    <td>{% if a.processo %}<a href="{{ path('app_juridico_processo_show', { id: a.processo.id }) }}">{{ a.processo.numero }}</a>{% else %}—{% endif %}</td>
+                    <td><span class="jur-status jur-status--{{ a.status }}">{{ a.status|replace({'_': ' '}) }}</span></td>
+                    <td class="jur-table-actions">
                         <form method="post" action="{{ path('app_juridico_audiencia_roteiro', { id: a.id }) }}" class="d-inline">
                             <input type="hidden" name="_token" value="{{ csrf_token('juridico_audiencia_roteiro_' ~ a.id) }}">
                             <button type="submit" class="btn-unio-ghost btn-sm">Roteiro Sasha</button>
                         </form>
                     </td>
                 </tr>
-                {% if a.roteiro %}
-                <tr>
-                    <td colspan="6" class="small text-muted">{{ a.roteiro|nl2br }}</td>
-                </tr>
-                {% endif %}
             {% endfor %}
             </tbody>
         </table>

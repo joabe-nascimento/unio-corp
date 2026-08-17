@@ -5,28 +5,46 @@
 {% block page_list_kpis %}
 <section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
     <div class="jur-proc-hero__content">
-        <span class="jur-proc-hero__eyebrow"><i class="fas fa-heart-pulse" aria-hidden="true"></i> Inteligência · Observabilidade</span>
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-heartbeat" aria-hidden="true"></i> Inteligência · Observabilidade</span>
         <h2 class="jur-proc-hero__title">Operações da Sasha</h2>
         <p class="jur-proc-hero__text">Saúde do JurisFlow, modelo em uso e capacidade disponível — para o escritório não depender de “está fora” sem diagnóstico.</p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="No Modo Lex, monte uma estratégia completa para um contencioso cível com risco de tutela antecipada.">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
+        </div>
     </div>
 </section>
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: available ? 'Online' : 'Offline', label: 'JurisFlow', sub: available ? 'Motor disponível' : 'Watchdog deve religar', icon: 'fa-heartbeat', tone: available ? 'sage' : 'rose', pulse: not available },
+    { value: status.llm_model|default('—'), label: 'Modelo', sub: status.llm_provider|default('LLM'), icon: 'fa-robot', tone: 'sky' },
+] } %}
+{% endblock %}
+
+{% block page_list_toolbar_actions %}
+<a href="{{ path('app_juridico_modulo', { slug: 'orquestracao-ia' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
 {% endblock %}
 
 {% block page_list_content %}
 <div class="unio-card">
     {% include 'components/section_header.html.twig' with { title: 'Status do motor', subtitle: escritorio } %}
     <div class="px-3 pb-3">
-        <p class="mb-2">
-            <span class="badge badge-{{ available ? 'success' : 'danger' }}">{{ available ? 'Online' : 'Offline' }}</span>
+        <p class="mb-3">
+            <span class="jur-status jur-status--{{ available ? 'online' : 'offline' }}">{{ available ? 'Online' : 'Offline' }}</span>
         </p>
         {% if status %}
-        <dl class="row mb-0 small">
-            <dt class="col-sm-4">Serviço</dt><dd class="col-sm-8">{{ status.service|default('JurisFlow') }}</dd>
-            <dt class="col-sm-4">LLM</dt><dd class="col-sm-8">{{ status.llm_provider|default('—') }} · {{ status.llm_model|default('—') }}</dd>
-            <dt class="col-sm-4">Versão</dt><dd class="col-sm-8">{{ status.version|default('—') }}</dd>
+        <dl class="jur-dl">
+            <dt>Serviço</dt>
+            <dd>{{ status.service|default('JurisFlow') }}</dd>
+            <dt>LLM</dt>
+            <dd>{{ status.llm_provider|default('—') }} · {{ status.llm_model|default('—') }}</dd>
+            <dt>Versão</dt>
+            <dd>{{ status.version|default('—') }}</dd>
         </dl>
         {% else %}
-        <p class="text-muted mb-0">Não foi possível ler <code>/v1/status</code>. O watchdog deve religar o serviço em instantes.</p>
+        <p class="jur-empty-inline" style="padding-left:0;padding-right:0;">Não foi possível ler <code>/v1/status</code>. O watchdog deve religar o serviço em instantes.</p>
         {% endif %}
     </div>
 </div>

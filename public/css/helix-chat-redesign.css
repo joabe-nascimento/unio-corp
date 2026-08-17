@@ -270,6 +270,8 @@ body.org-juridico .helix-dock.helix-trigger.is-launching {
  * Absolute + overflow:hidden escondia o título (parecia “texto em branco”).
  */
 .helix-history-item {
+    animation: helixHistIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) 76px;
@@ -353,6 +355,21 @@ body.org-juridico .helix-dock.helix-trigger.is-launching {
 .helix-history-item:hover {
     background: var(--accent-dim, rgba(122, 33, 48, 0.08));
     border-color: var(--accent-line, rgba(122, 33, 48, 0.2)) !important;
+}
+
+.helix-history-item:nth-child(1) { animation-delay: 0.02s; }
+.helix-history-item:nth-child(2) { animation-delay: 0.05s; }
+.helix-history-item:nth-child(3) { animation-delay: 0.08s; }
+.helix-history-item:nth-child(4) { animation-delay: 0.11s; }
+.helix-history-item:nth-child(5) { animation-delay: 0.14s; }
+.helix-history-item:nth-child(6) { animation-delay: 0.17s; }
+.helix-history-item:nth-child(7) { animation-delay: 0.2s; }
+.helix-history-item:nth-child(8) { animation-delay: 0.23s; }
+.helix-history-item:nth-child(n+9) { animation-delay: 0.26s; }
+
+@keyframes helixHistIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: none; }
 }
 
 .helix-history-item--active {
@@ -450,6 +467,13 @@ body.org-juridico .helix-panel .helix-history-action {
     background: rgba(245, 158, 11, 0.18) !important;
     border-color: rgba(245, 158, 11, 0.5) !important;
     color: #b45309 !important;
+    animation: helixPinPop 0.42s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+@keyframes helixPinPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.18) rotate(-12deg); }
+    100% { transform: scale(1) rotate(0); }
 }
 
 .helix-history-action--delete {
@@ -499,12 +523,30 @@ body.org-juridico .helix-panel .helix-history-action {
 }
 
 .helix-msg {
-    animation: helixMsgIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: helixMsgIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.helix-msg--user {
+    animation-name: helixMsgInUser;
+}
+
+.helix-msg--assistant {
+    animation-name: helixMsgInAssist;
 }
 
 @keyframes helixMsgIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes helixMsgInUser {
+    from { opacity: 0; transform: translateX(18px) translateY(6px) scale(0.96); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes helixMsgInAssist {
+    from { opacity: 0; transform: translateX(-16px) translateY(6px) scale(0.96); }
+    to { opacity: 1; transform: none; }
 }
 
 .helix-msg-bubble {
@@ -586,6 +628,17 @@ body.org-juridico .helix-panel .helix-history-action {
     border: 1px solid var(--border);
     background: var(--surface);
     transition: border-color 0.18s, color 0.18s, background 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+
+.helix-chip:nth-child(1) { animation: helixChipIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.04s backwards; }
+.helix-chip:nth-child(2) { animation: helixChipIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards; }
+.helix-chip:nth-child(3) { animation: helixChipIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.16s backwards; }
+.helix-chip:nth-child(4) { animation: helixChipIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.22s backwards; }
+.helix-chip:nth-child(n+5) { animation: helixChipIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.28s backwards; }
+
+@keyframes helixChipIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.94); }
+    to { opacity: 1; transform: none; }
 }
 
 .helix-chip:hover {
@@ -814,9 +867,19 @@ body.org-juridico .helix-panel .helix-history-action {
     display: inline-flex;
 }
 
+.helix-send-btn:not(:disabled):not(.is-busy) {
+    animation: helixSendGlow 2.8s ease-in-out infinite;
+}
+
+@keyframes helixSendGlow {
+    0%, 100% { box-shadow: 0 3px 10px var(--accent-dim); }
+    50% { box-shadow: 0 5px 18px var(--accent-dim); }
+}
+
 .helix-send-btn:not(:disabled):not(.is-busy):hover {
     transform: scale(1.06);
     box-shadow: 0 4px 14px var(--accent-dim);
+    animation: none;
 }
 
 .helix-send-btn:not(:disabled):not(.is-busy):active {
@@ -1304,10 +1367,18 @@ body[data-sasha-studio="1"] .helix-composer {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .helix-studio-action {
-        transition: none;
+    .helix-studio-action,
+    .helix-msg,
+    .helix-msg--user,
+    .helix-msg--assistant,
+    .helix-history-item,
+    .helix-chip,
+    .helix-send-btn {
+        animation: none !important;
     }
-    .helix-studio-action:hover {
+    .helix-studio-action:hover,
+    .helix-chip:hover,
+    .helix-send-btn:hover {
         transform: none;
     }
 }

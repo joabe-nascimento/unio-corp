@@ -5,7 +5,7 @@
 {% block page_list_kpis %}
 <section class="jur-proc-hero" style="--jur-proc-hero-img: url('{{ asset('images/marketing/hero-juridico.jpg') }}');">
     <div class="jur-proc-hero__content">
-        <span class="jur-proc-hero__eyebrow"><i class="fas fa-plug-circle-bolt" aria-hidden="true"></i> Integrações · REST API v1</span>
+        <span class="jur-proc-hero__eyebrow"><i class="fas fa-plug" aria-hidden="true"></i> Integrações · REST API v1</span>
         <h2 class="jur-proc-hero__title">Conecte sistemas externos ao Unio Jurídico</h2>
         <p class="jur-proc-hero__text">
             Gere tokens de acesso e consuma processos, prazos, tarefas e jurisprudência do seu escritório
@@ -34,59 +34,54 @@
 </div>
 {% endif %}
 
-<div class="row g-4">
-    <div class="col-lg-5">
+<div class="jur-ops-split">
+    <div>
         <section class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Novo token', subtitle: 'Escopo de leitura por padrão' } %}
-            <div class="px-3 pb-3">
-                <form method="post" action="{{ path('app_juridico_api_tokens_gerar') }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('juridico_api_token_gerar') }}">
-                    <label class="form-label small">Nome do token</label>
-                    <input type="text" name="nome" class="form-control form-control-sm mb-2" placeholder="Ex.: Integração BI, ERP financeiro…" maxlength="120">
-                    <div class="form-check mb-3">
-                        <input type="checkbox" class="form-check-input" name="escrita" id="jurApiTokenEscrita" value="1">
-                        <label class="form-check-label small" for="jurApiTokenEscrita">Permitir escrita (reservado para uso futuro)</label>
-                    </div>
-                    <button type="submit" class="btn-unio btn-sm"><i class="fas fa-key mr-1" aria-hidden="true"></i> Gerar token</button>
-                </form>
-            </div>
+            <form method="post" action="{{ path('app_juridico_api_tokens_gerar') }}" class="jur-ops-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('juridico_api_token_gerar') }}">
+                <label class="form-label">Nome do token</label>
+                <input type="text" name="nome" class="form-control" placeholder="Ex.: Integração BI, ERP financeiro…" maxlength="120">
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" name="escrita" id="jurApiTokenEscrita" value="1">
+                    <label class="form-check-label small" for="jurApiTokenEscrita">Permitir escrita (reservado para uso futuro)</label>
+                </div>
+                <button type="submit" class="btn-unio btn-sm"><i class="fas fa-key mr-1" aria-hidden="true"></i> Gerar token</button>
+            </form>
         </section>
 
         <section class="unio-card mt-4">
             {% include 'components/section_header.html.twig' with { title: 'Tokens ativos' } %}
-            <div class="px-3 pb-3">
-                {% if tokens|length == 0 %}
-                    <p class="text-muted small mb-0">Nenhum token gerado ainda.</p>
-                {% else %}
-                <ul class="jur-api-token-list">
-                    {% for token in tokens %}
-                    <li class="jur-api-token-list__item {{ token.ativo ? '' : 'is-revogado' }}">
-                        <div>
-                            <strong>{{ token.nome }}</strong>
-                            <span class="jur-api-token-list__prefix">{{ token.tokenPrefix }}…</span>
-                            <div class="small text-muted">
-                                {{ token.scopes|join(', ') }} ·
-                                {{ token.totalRequisicoes }} requisição(ões){% if token.ultimoUsoEm %} · último uso {{ token.ultimoUsoEm|date('d/m/Y H:i') }}{% endif %}
-                            </div>
+            {% if tokens|length == 0 %}
+                <p class="jur-empty-inline">Nenhum token gerado ainda.</p>
+            {% else %}
+            <ul class="jur-api-token-list jur-ops-list">
+                {% for token in tokens %}
+                <li class="jur-api-token-list__item {{ token.ativo ? '' : 'is-revogado' }}">
+                    <div>
+                        <strong>{{ token.nome }}</strong>
+                        <span class="jur-api-token-list__prefix">{{ token.tokenPrefix }}…</span>
+                        <div class="small text-muted">
+                            {{ token.scopes|join(', ') }} ·
+                            {{ token.totalRequisicoes }} requisição(ões){% if token.ultimoUsoEm %} · último uso {{ token.ultimoUsoEm|date('d/m/Y H:i') }}{% endif %}
                         </div>
-                        {% if token.ativo %}
-                        <form method="post" action="{{ path('app_juridico_api_tokens_revogar', { id: token.id }) }}" onsubmit="return confirm('Revogar este token? Integrações que o usam param de funcionar.');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('juridico_api_token_revogar_' ~ token.id) }}">
-                            <button type="submit" class="btn-unio-ghost btn-sm btn-danger-ghost"><i class="fas fa-ban" aria-hidden="true"></i></button>
-                        </form>
-                        {% else %}
-                        <span class="badge badge-secondary">Revogado</span>
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
+                    </div>
+                    {% if token.ativo %}
+                    <form method="post" action="{{ path('app_juridico_api_tokens_revogar', { id: token.id }) }}" onsubmit="return confirm('Revogar este token? Integrações que o usam param de funcionar.');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('juridico_api_token_revogar_' ~ token.id) }}">
+                        <button type="submit" class="btn-unio-ghost btn-sm btn-danger-ghost"><i class="fas fa-ban" aria-hidden="true"></i></button>
+                    </form>
+                    {% else %}
+                    <span class="jur-status jur-status--muted">Revogado</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </section>
     </div>
 
-    <div class="col-lg-7">
-        <section class="unio-card">
+    <section class="unio-card">
             {% include 'components/section_header.html.twig' with { title: 'Como usar', subtitle: 'Autenticação Bearer + REST/JSON' } %}
             <div class="px-3 pb-3">
                 <p class="small">Envie o token no cabeçalho <code>Authorization</code> em toda requisição:</p>
@@ -122,36 +117,38 @@
 }</pre>
                 <p class="small text-muted mb-0">Todos os dados são escopados automaticamente ao escritório dono do token — nunca é preciso (nem possível) informar o escritório na requisição.</p>
             </div>
-        </section>
-    </div>
+    </section>
 </div>
 
 <div class="unio-card mt-4">
     {% include 'components/section_header.html.twig' with { title: 'Webhooks', subtitle: 'Receba publicacao.nova, prazo.criado e documento.indexado no seu sistema' } %}
     <div class="px-3 pb-3">
-        <form method="post" action="{{ path('app_juridico_api_webhooks_criar') }}" class="mb-3">
+        <form method="post" action="{{ path('app_juridico_api_webhooks_criar') }}" class="jur-ops-form">
             <input type="hidden" name="_token" value="{{ csrf_token('juridico_webhook_criar') }}">
-            <label class="form-label small">URL HTTPS</label>
-            <input type="url" name="url" class="form-control mb-2" required placeholder="https://seu-sistema.com/unio/webhook">
-            <label class="form-label small">Eventos (vírgula)</label>
-            <input type="text" name="eventos" class="form-control mb-2" value="publicacao.nova,prazo.criado,prazo.vencendo">
+            <label class="form-label">URL HTTPS</label>
+            <input type="url" name="url" class="form-control" required placeholder="https://seu-sistema.com/unio/webhook">
+            <label class="form-label">Eventos (vírgula)</label>
+            <input type="text" name="eventos" class="form-control" value="publicacao.nova,prazo.criado,prazo.vencendo">
             <p class="small text-muted">Disponíveis: {{ webhook_eventos|join(', ') }}</p>
             <button type="submit" class="btn-unio btn-sm">Cadastrar webhook</button>
         </form>
         {% if webhooks|default([]) is empty %}
-        <p class="text-muted small mb-0">Nenhum webhook ainda.</p>
+        <p class="jur-empty-inline">Nenhum webhook ainda.</p>
         {% else %}
-        <ul class="list-unstyled mb-0">
+        <ul class="jur-ops-list">
             {% for w in webhooks %}
-            <li class="d-flex justify-content-between align-items-center border-bottom py-2">
-                <span class="small"><code>{{ w.url }}</code> · {{ w.eventos|join(', ') }}
-                    {% if not w.ativo %}<span class="badge badge-secondary">inativo</span>{% endif %}
-                </span>
+            <li class="jur-ops-list__item">
+                <div class="jur-ops-list__main">
+                    <code>{{ w.url }}</code>
+                    <div class="jur-ops-list__meta">{{ w.eventos|join(', ') }}</div>
+                </div>
                 {% if w.ativo %}
                 <form method="post" action="{{ path('app_juridico_api_webhooks_revogar', { id: w.id }) }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('juridico_webhook_revogar_' ~ w.id) }}">
                     <button class="btn-unio-ghost btn-sm" type="submit">Desativar</button>
                 </form>
+                {% else %}
+                <span class="jur-status jur-status--muted">inativo</span>
                 {% endif %}
             </li>
             {% endfor %}

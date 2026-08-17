@@ -1503,6 +1503,12 @@
             padding-top: 0;
             padding-bottom: 12px;
         }
+        /* Evita padding duplo quando o template envolve kpi_row (já emite .page-lead-kpis) */
+        .page-lead-kpis > .page-lead-kpis {
+            padding: 0;
+            margin: 0;
+            background: transparent;
+        }
         .page-lead-kpis .stats-row {
             margin: 0 -6px !important;
         }
@@ -9139,7 +9145,17 @@
         .gap-1 { gap: 0.25rem; }
         .gap-2 { gap: 0.5rem; }
         .gap-3 { gap: 1rem; }
+        .gap-4 { gap: 1.5rem; }
         .min-w-0 { min-width: 0; }
+
+        /* Bootstrap 5 row gutters — AdminLTE/BS4 não tem .g-* */
+        .row.g-2, .row.g-3, .row.g-4 { display: flex; flex-wrap: wrap; }
+        .row.g-2 { margin-left: -0.5rem; margin-right: -0.5rem; }
+        .row.g-3 { margin-left: -0.75rem; margin-right: -0.75rem; }
+        .row.g-4 { margin-left: -0.85rem; margin-right: -0.85rem; }
+        .row.g-2 > [class*="col-"] { padding-left: 0.5rem; padding-right: 0.5rem; margin-bottom: 0.75rem; }
+        .row.g-3 > [class*="col-"] { padding-left: 0.75rem; padding-right: 0.75rem; margin-bottom: 1rem; }
+        .row.g-4 > [class*="col-"] { padding-left: 0.85rem; padding-right: 0.85rem; margin-bottom: 1.25rem; }
 
         /* ?????? Mobile: shell, navbar, fichas ?????? */
         @media (max-width: 991.98px) {
@@ -11593,7 +11609,7 @@
             background: rgba(0, 0, 0, 0.45);
             backdrop-filter: blur(2px);
             opacity: 0;
-            transition: opacity 0.22s ease;
+            transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .helix-panel.is-open .helix-backdrop { opacity: 1; }
         .helix-panel.is-closing .helix-backdrop { opacity: 0; }

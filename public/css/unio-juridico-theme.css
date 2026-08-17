@@ -753,9 +753,31 @@ body.org-juridico textarea,
 body.org-juridico input[type="text"],
 body.org-juridico input[type="email"],
 body.org-juridico input[type="password"],
-body.org-juridico input[type="search"] {
-    min-width: 200px !important;
-    width: 100% !important;
+body.org-juridico input[type="search"],
+body.org-juridico input[type="url"],
+body.org-juridico input[type="date"],
+body.org-juridico input[type="datetime-local"],
+body.org-juridico select.form-control {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100%;
+    box-sizing: border-box !important;
+}
+
+body.org-juridico table .form-control,
+body.org-juridico .form-control.d-inline-block,
+body.org-juridico .form-control-sm {
+    width: auto;
+    max-width: 100%;
+}
+
+body.org-juridico .d-flex > .form-control,
+body.org-juridico .d-flex > input.form-control,
+body.org-juridico .d-inline-flex > .form-control {
+    flex: 1 1 auto;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100%;
 }
 
 /* Offcanvas / formulários estreitos: nunca forçar 200px (estoura o painel) */
@@ -4123,4 +4145,313 @@ body.org-juridico .jur-wa-chat__send.is-loading {
 
 body.org-juridico #jurAtendimentoSugerirBtn.is-loading {
     min-width: 9.5rem;
+}
+
+/* ── Bootstrap 5 gap/g-* (AdminLTE usa BS4 — sem essas classes o layout cola) ── */
+body.org-juridico .d-flex.gap-1,
+body.org-juridico .d-inline-flex.gap-1 { gap: 0.25rem; }
+body.org-juridico .d-flex.gap-2,
+body.org-juridico .d-inline-flex.gap-2 { gap: 0.5rem; }
+body.org-juridico .d-flex.gap-3,
+body.org-juridico .d-inline-flex.gap-3 { gap: 1rem; }
+body.org-juridico .d-flex.gap-4,
+body.org-juridico .d-inline-flex.gap-4 { gap: 1.5rem; }
+
+body.org-juridico .row.g-2,
+body.org-juridico .row.g-3,
+body.org-juridico .row.g-4 {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+body.org-juridico .row.g-2 > [class*="col-"] { padding-left: 0.5rem; padding-right: 0.5rem; margin-bottom: 0.75rem; }
+body.org-juridico .row.g-3 > [class*="col-"] { padding-left: 0.75rem; padding-right: 0.75rem; margin-bottom: 1rem; }
+body.org-juridico .row.g-4 > [class*="col-"] { padding-left: 0.85rem; padding-right: 0.85rem; margin-bottom: 1.25rem; }
+
+body.org-juridico .row.g-2 { margin-left: -0.5rem; margin-right: -0.5rem; }
+body.org-juridico .row.g-3 { margin-left: -0.75rem; margin-right: -0.75rem; }
+body.org-juridico .row.g-4 { margin-left: -0.85rem; margin-right: -0.85rem; }
+
+/* ── Operação: duas colunas, listas, status, código, timeline ── */
+body.org-juridico .jur-ops-split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+@media (max-width: 991.98px) {
+    body.org-juridico .jur-ops-split {
+        grid-template-columns: 1fr;
+    }
+}
+
+body.org-juridico .jur-ops-form {
+    padding: 0 1.15rem 1.15rem;
+}
+
+body.org-juridico .jur-ops-form .form-label {
+    display: block;
+    margin-bottom: 0.28rem;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3, #6b7280);
+}
+
+body.org-juridico .jur-ops-form .form-control {
+    margin-bottom: 0.75rem;
+}
+
+body.org-juridico .jur-ops-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 1.15rem 1.15rem;
+}
+
+body.org-juridico .jur-ops-list__item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(122, 33, 48, 0.08);
+}
+
+body.org-juridico .jur-ops-list__item:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+body.org-juridico .jur-ops-list__main {
+    min-width: 0;
+}
+
+body.org-juridico .jur-ops-list__main strong {
+    display: block;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    color: var(--org-ink, #1e2a3a);
+}
+
+body.org-juridico .jur-ops-list__meta {
+    margin-top: 0.2rem;
+    font-size: 12px;
+    color: var(--text-3, #6b7280);
+    line-height: 1.4;
+}
+
+body.org-juridico .jur-status {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.55rem;
+    border-radius: 99px;
+    line-height: 1.2;
+}
+
+body.org-juridico .jur-status--ok,
+body.org-juridico .jur-status--livre,
+body.org-juridico .jur-status--resolvido,
+body.org-juridico .jur-status--realizada,
+body.org-juridico .jur-status--aprovado {
+    background: rgba(31, 107, 82, 0.12);
+    color: #1f6b52;
+}
+
+body.org-juridico .jur-status--warn,
+body.org-juridico .jur-status--alerta,
+body.org-juridico .jur-status--agendada,
+body.org-juridico .jur-status--rascunho {
+    background: rgba(184, 137, 43, 0.16);
+    color: #7a5a12;
+}
+
+body.org-juridico .jur-status--bad,
+body.org-juridico .jur-status--bloqueio,
+body.org-juridico .jur-status--aberto {
+    background: rgba(185, 28, 28, 0.12);
+    color: #b91c1c;
+}
+
+body.org-juridico .jur-status--muted,
+body.org-juridico .jur-status--offline {
+    background: rgba(107, 114, 128, 0.12);
+    color: #4b5563;
+}
+
+body.org-juridico .jur-status--online {
+    background: rgba(31, 107, 82, 0.12);
+    color: #1f6b52;
+}
+
+body.org-juridico .jur-pre {
+    margin: 0 1.15rem 1.15rem;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    background: rgba(122, 33, 48, 0.04);
+    border: 1px solid rgba(122, 33, 48, 0.1);
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--org-ink, #1e2a3a);
+}
+
+body.org-juridico .jur-empty-inline {
+    margin: 0;
+    padding: 0 1.15rem 1.2rem;
+    font-size: 0.9rem;
+    color: var(--text-3, #6b7280);
+    line-height: 1.5;
+}
+
+body.org-juridico .jur-timeline--inset {
+    padding: 0 1.15rem 1.15rem;
+}
+
+body.org-juridico .jur-timeline__item {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: 0.85rem;
+    position: relative;
+    padding: 0 0 1.1rem;
+}
+
+body.org-juridico .jur-timeline__item::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 22px;
+    bottom: 0;
+    width: 2px;
+    background: rgba(122, 33, 48, 0.12);
+}
+
+body.org-juridico .jur-timeline__item:last-child {
+    padding-bottom: 0;
+}
+
+body.org-juridico .jur-timeline__item:last-child::before {
+    display: none;
+}
+
+body.org-juridico .jur-timeline__dot--danger,
+body.org-juridico .jur-timeline__dot--bad {
+    background: rgba(185, 28, 28, 0.12);
+    color: #b91c1c;
+}
+
+body.org-juridico .jur-timeline__dot--warning,
+body.org-juridico .jur-timeline__dot--warn {
+    background: rgba(184, 137, 43, 0.16);
+    color: #7a5a12;
+}
+
+body.org-juridico .jur-timeline__title {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--org-ink, #1e2a3a);
+    line-height: 1.35;
+}
+
+body.org-juridico .jur-timeline__text {
+    margin: 0.2rem 0 0;
+    font-size: 12.5px;
+    color: var(--text-2, #5b6b7c);
+    line-height: 1.45;
+}
+
+body.org-juridico .jur-timeline__when {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 11px;
+    color: var(--text-3, #94a3b8);
+}
+
+body.org-juridico .unio-table td,
+body.org-juridico .table-unio td {
+    vertical-align: middle;
+}
+
+body.org-juridico .unio-table .jur-table-actions,
+body.org-juridico .table-unio .jur-table-actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+body.org-juridico .jur-table-generate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+body.org-juridico .jur-table-generate .form-control {
+    width: auto !important;
+    min-width: 140px !important;
+    max-width: 220px;
+    margin: 0;
+}
+
+body.org-juridico .jur-roteiro {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-2, #5b6b7c);
+    background: rgba(122, 33, 48, 0.04);
+    border-radius: 10px;
+    padding: 0.7rem 0.85rem;
+    margin-top: 0.35rem;
+}
+
+body.org-juridico .jur-dl {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 0.45rem 1rem;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+body.org-juridico .jur-dl dt {
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-3, #6b7280);
+}
+
+body.org-juridico .jur-dl dd {
+    margin: 0;
+    color: var(--org-ink, #1e2a3a);
+}
+
+@media (max-width: 575.98px) {
+    body.org-juridico .jur-dl {
+        grid-template-columns: 1fr;
+        gap: 0.15rem;
+    }
+    body.org-juridico .jur-dl dt {
+        margin-top: 0.45rem;
+    }
+}
+
+[data-theme="dark"] body.org-juridico .jur-ops-list__item {
+    border-bottom-color: rgba(217, 138, 150, 0.12);
+}
+
+[data-theme="dark"] body.org-juridico .jur-pre {
+    background: rgba(217, 138, 150, 0.08);
+    border-color: rgba(217, 138, 150, 0.16);
+    color: #efc3c9;
+}
+
+[data-theme="dark"] body.org-juridico .jur-ops-list__main strong,
+[data-theme="dark"] body.org-juridico .jur-timeline__title,
+[data-theme="dark"] body.org-juridico .jur-dl dd {
+    color: #efc3c9;
 }

@@ -8,27 +8,36 @@
         <span class="jur-proc-hero__eyebrow"><i class="fas fa-file-contract" aria-hidden="true"></i> Produção · Governança</span>
         <h2 class="jur-proc-hero__title">Templates de peças</h2>
         <p class="jur-proc-hero__text">Rascunho, aprovação do sócio e variáveis <code>{{ '{{cliente}}' }}</code>, <code>{{ '{{processo.numero}}' }}</code> — a Sasha preenche, o escritório governa.</p>
+        <div class="jur-proc-hero__actions">
+            <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-template-novo">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo template
+            </button>
+            <button type="button" class="btn-unio-ghost btn-sm jur-proc-hero__ghost js-helix-prompt" data-helix-prompt="Estruture uma petição inicial de danos morais por negativação indevida com pedidos e fundamentos.">
+                <i class="fas fa-robot mr-1" aria-hidden="true"></i> Perguntar à Sasha
+            </button>
+        </div>
     </div>
 </section>
-<div class="page-lead-kpis">
-    {% include 'components/kpi_row.html.twig' with { items: [
-        { value: metricas.total|default(0), label: 'Templates', icon: 'fa-file-lines', tone: 'sky' },
-        { value: metricas.aprovados|default(0), label: 'Aprovados', icon: 'fa-stamp', tone: 'sage' },
-    ] } %}
-</div>
+{% include 'components/kpi_row.html.twig' with { items: [
+    { value: metricas.total|default(0), label: 'Templates', sub: 'No escritório', icon: 'fa-file-alt', tone: 'sky' },
+    { value: metricas.aprovados|default(0), label: 'Aprovados', sub: 'Prontos para gerar', icon: 'fa-stamp', tone: 'sage' },
+] } %}
 {% endblock %}
 
 {% block page_list_toolbar_actions %}
 <button type="button" class="btn-unio btn-sm" data-unio-offcanvas-open="juridico-template-novo">
     <i class="fas fa-plus mr-1" aria-hidden="true"></i> Novo template
 </button>
+<a href="{{ path('app_juridico_modulo', { slug: 'peticoes' }) }}" class="btn-unio-ghost btn-sm">
+    <i class="fas fa-th-large mr-1" aria-hidden="true"></i> Sobre o módulo
+</a>
 {% endblock %}
 
 {% block page_list_content %}
 {% if preview %}
 <div class="unio-card mb-4">
     {% include 'components/section_header.html.twig' with { title: 'Minuta gerada', subtitle: 'Revise antes de protocolar' } %}
-    <pre class="p-3 mb-0 small" style="white-space:pre-wrap;">{{ preview }}</pre>
+    <pre class="jur-pre">{{ preview }}</pre>
 </div>
 {% endif %}
 <div class="unio-card">
@@ -44,24 +53,32 @@
     {% else %}
     <div class="table-responsive">
         <table class="table unio-table mb-0">
-            <thead><tr><th>Nome</th><th>Tipo</th><th>Status</th><th>Variáveis</th><th></th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th>Variáveis</th>
+                    <th class="text-right">Ação</th>
+                </tr>
+            </thead>
             <tbody>
             {% for t in templates %}
                 <tr>
                     <td>{{ t.nome }} <span class="text-muted small">v{{ t.versao }}</span></td>
                     <td>{{ t.tipo }}</td>
-                    <td><span class="badge badge-{{ t.aprovado ? 'success' : 'secondary' }}">{{ t.status }}</span></td>
+                    <td><span class="jur-status jur-status--{{ t.aprovado ? 'aprovado' : 'rascunho' }}">{{ t.status }}</span></td>
                     <td class="small">{{ t.variaveis|join(', ') }}</td>
-                    <td class="text-nowrap">
+                    <td class="jur-table-actions">
                         {% if not t.aprovado %}
                         <form method="post" action="{{ path('app_juridico_template_aprovar', { id: t.id }) }}" class="d-inline">
                             <input type="hidden" name="_token" value="{{ csrf_token('juridico_template_aprovar_' ~ t.id) }}">
                             <button class="btn-unio-ghost btn-sm" type="submit">Aprovar</button>
                         </form>
                         {% endif %}
-                        <form method="post" action="{{ path('app_juridico_template_gerar', { id: t.id }) }}" class="d-inline">
+                        <form method="post" action="{{ path('app_juridico_template_gerar', { id: t.id }) }}" class="jur-table-generate">
                             <input type="hidden" name="_token" value="{{ csrf_token('juridico_template_gerar_' ~ t.id) }}">
-                            <select name="processo_id" class="form-control form-control-sm d-inline-block" style="width:auto;min-width:0;max-width:180px;">
+                            <select name="processo_id" class="form-control form-control-sm" aria-label="Processo">
                                 <option value="">Processo…</option>
                                 {% for p in processos %}<option value="{{ p.id }}">{{ p.numero }}</option>{% endfor %}
                             </select>
@@ -83,7 +100,7 @@
     <aside class="unio-offcanvas-drawer">
         <header class="unio-offcanvas-head">
             <h3>Novo template</h3>
-            <button type="button" class="btn-unio-ghost btn-sm" data-unio-offcanvas-close><i class="fas fa-times"></i></button>
+            <button type="button" class="btn-unio-ghost btn-sm" data-unio-offcanvas-close aria-label="Fechar"><i class="fas fa-times"></i></button>
         </header>
         <form method="post" action="{{ path('app_juridico_template_novo') }}" class="p-3">
             <input type="hidden" name="_token" value="{{ csrf_token('juridico_template_form') }}">
