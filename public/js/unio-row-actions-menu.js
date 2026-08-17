@@ -5,7 +5,7 @@
 (function () {
     'use strict';
 
-    var SELECTOR = '[data-unio-row-actions-menu], .unio-row-actions-menu, .clinic-agenda-row-actions__menu';
+    var SELECTOR = '[data-unio-row-actions-menu], [data-unio-toolbar-more-menu], .unio-row-actions-menu, .hub-toolbar-more, .clinic-agenda-row-actions__menu';
 
     function placeMenu(btn, menu) {
         var rect = btn.getBoundingClientRect();
