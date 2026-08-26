@@ -2,6 +2,7 @@
 
 namespace App\Service\Juridico;
 
+use App\Contract\LegalAiClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -12,8 +13,11 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Mantém a mesma "forma" de resposta do SashaClient para que o mesmo chat (Lumen/Vitória)
  * do shell Organismo funcione sem alterações no front-end, apenas trocando o backend
  * quando a identidade ativa é a Unio Jurídico.
+ *
+ * Implementa {@see LegalAiClientInterface} — use a interface nos construtores dos
+ * consumidores para tornar o código testável sem rede.
  */
-final class JurisFlowAiClient
+final class JurisFlowAiClient implements LegalAiClientInterface
 {
     public function __construct(
         private HttpClientInterface $httpClient,

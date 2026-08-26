@@ -1,6 +1,17 @@
-# Unio — Plataforma de Gestão de Pessoas
+# Unio — Plataforma de Gestão de Pessoas e Escritórios Jurídicos
 
-Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Maturidade.
+Plataforma SaaS multi-produto: RH, Gestão de Pessoas e Gestão Jurídica, todos no mesmo
+monólito Symfony com produtos isolados por branch e registry de módulos.
+
+## Produtos
+
+| Produto | Branch | Descrição |
+|---------|--------|-----------|
+| **Unio RH / Saúde** | `main` / `uniosaude` | Gestão de Pessoas, Talentos, Hub de Maturidade, Pós-Operatório |
+| **Unio Jurídico** | `uniojuridico` | Gestão de escritórios de advocacia com IA (JurisFlow + Sasha) |
+
+> Documentação do Jurídico: [docs/uniojuridico/README.md](docs/uniojuridico/README.md)
+> · Arquitetura: [docs/uniojuridico/ARCHITECTURE.md](docs/uniojuridico/ARCHITECTURE.md)
 
 ## Stack
 
@@ -8,6 +19,7 @@ Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Mat
 - **Doctrine ORM** + **MySQL**
 - **AdminLTE 3** + **Bootstrap 4** (assets locais em `public/vendor/`, sincronizados via npm)
 - **Twig** (templates)
+- **JurisFlow AI Service** (Python + FastAPI + LangChain) — apenas no vertical Jurídico
 
 ## Perfis de Acesso
 
@@ -37,6 +49,8 @@ Plataforma SaaS completa de RH, Gestão de Pessoas, Hub de Talentos e Hub de Mat
 | [docs/RH.md](docs/RH.md) | Módulo RH (implementado e roadmap) |
 | [docs/HUB_POS_OPERATORIO_INTEGRACAO.md](docs/HUB_POS_OPERATORIO_INTEGRACAO.md) | Hub Pós-Operatório — integração na plataforma ([PDF](docs/HUB_POS_OPERATORIO_INTEGRACAO.pdf)) |
 | [docs/DEPLOY_HOSTGATOR.md](docs/DEPLOY_HOSTGATOR.md) | Deploy na HostGator (`uniowork.com.br` / `.online`) |
+| [docs/uniojuridico/README.md](docs/uniojuridico/README.md) | Unio Jurídico — produto, IA e deploy |
+| [docs/uniojuridico/ARCHITECTURE.md](docs/uniojuridico/ARCHITECTURE.md) | Arquitetura, ADRs e fluxos do vertical Jurídico |
 
 ## Instalação
 
