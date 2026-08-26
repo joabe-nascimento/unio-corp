@@ -7,7 +7,7 @@ codebase, isolado por branch, prefixo de rota e registry de módulos.
 
 | Produto | Branch | Descrição |
 |---------|--------|-----------|
-| **Unio RH / Saúde** | `main` / `uniosaude` | Gestão de Pessoas, Talentos, Hub de Maturidade, Pós-Operatório |
+| **Unio RH / Saúde** | `main` / `uniosaude` | RH, Recrutamento, Pós-Operatório e gestão clínica |
 | **Unio Jurídico** | `uniojuridico` | Gestão de escritórios de advocacia com IA (JurisFlow + Sasha) |
 
 > Documentação do Jurídico: [docs/uniojuridico/README.md](docs/uniojuridico/README.md)
@@ -21,16 +21,17 @@ codebase, isolado por branch, prefixo de rota e registry de módulos.
 - **Twig** (templates)
 - **JurisFlow AI Service** (Python + FastAPI + LangChain) — apenas no vertical Jurídico
 
-## Perfis de Acesso
+## Controle de acesso
 
-| Perfil | Acesso |
-|--------|--------|
-| **Tenant** | Acesso total: todas as empresas, produtos e configurações globais da plataforma |
-| **Admin** | Gestão de usuários, configurações da empresa e permissões de produto |
-| **Gestor** | Dashboards gerenciais, analytics, metas e módulos estratégicos do produto ativo |
-| **Supervisor** | Módulos operacionais: equipes, funcionários, processos e tarefas do dia a dia |
-| **Operador / Advogado** | Processos, prazos, documentos e atendimentos *(vertical Jurídico)* |
-| **Colaborador** | Acesso ao próprio perfil, contracheque, férias e portal do colaborador *(vertical RH)* |
+Permissões por **empresa** (workspace) e **produto** (`product_rh`, `product_juridico`, etc.), via grants no Symfony — cada usuário enxerga só os módulos liberados para o produto ativo.
+
+| Nível | Uso típico |
+|--------|------------|
+| **Admin da empresa** | Usuários, permissões de produto e configurações do escritório ou clínica |
+| **Operacional** | RH, processos, atendimentos e rotinas do dia a dia |
+| **Colaborador / Cliente** | Portal próprio (contracheque, férias ou acompanhamento de processo) |
+
+Detalhes de roles e grants: [docs/ESTRUTURA.md](docs/ESTRUTURA.md) e [docs/RH.md](docs/RH.md).
 
 ## Módulos
 
@@ -40,9 +41,8 @@ codebase, isolado por branch, prefixo de rota e registry de módulos.
 |--------|----------------|
 | **RH** | Funcionários, admissões, demissões, férias, ponto, holerite, folha de pagamento, comunicados internos — [docs/RH.md](docs/RH.md) |
 | **Recrutamento** | Vagas, pipeline de candidatos, avaliação, aprovação e onboarding/offboarding |
-| **Gestão de Pessoas** | Equipes, cargos, organograma, avaliação de desempenho, PDI |
-| **Hub de Talentos** | Pool de talentos, trilhas de carreira, mentoria e mapeamento de competências |
-| **Hub de Maturidade** | Radar por dimensão, plano de ação, histórico e evolução por período |
+| **Pessoas** | Equipes, cargos, organograma, avaliação de desempenho e PDI |
+| **Talentos** | Pool de talentos, trilhas de carreira e mapeamento de competências |
 | **SST** | Saúde e Segurança do Trabalho: exames, EPIs, incidentes e laudos |
 | **Benefícios** | Gestão e consulta de benefícios corporativos |
 | **TI** | Chamados, ativos, licenças, planejamento, base de conhecimento e notas de atualização |
@@ -67,11 +67,11 @@ codebase, isolado por branch, prefixo de rota e registry de módulos.
 | Documento | Conteúdo |
 |-----------|----------|
 | [docs/ROADMAP_90_DIAS.md](docs/ROADMAP_90_DIAS.md) | Roadmap 30/60/90 dias + backlog por módulo |
-| [docs/ROADMAP_TRANSICAO_ORGANISMO.md](docs/ROADMAP_TRANSICAO_ORGANISMO.md) | Transição Hub/Núcleo → Colônia/Cena/Pulso + matriz tech + tasks T0 |
+| [docs/ROADMAP_TRANSICAO_ORGANISMO.md](docs/ROADMAP_TRANSICAO_ORGANISMO.md) | Transição Organismo → Colônia/Cena/Pulso + matriz tech + tasks T0 |
 | [docs/ESTRUTURA.md](docs/ESTRUTURA.md) | Pastas, convenções, módulos |
-| [docs/QUALIDADE_PERFORMANCE_E_HUBS.md](docs/QUALIDADE_PERFORMANCE_E_HUBS.md) | Empty states, hubs planejados, performance, Redis, PHPStan |
+| [docs/QUALIDADE_PERFORMANCE_E_HUBS.md](docs/QUALIDADE_PERFORMANCE_E_HUBS.md) | Empty states, performance, Redis, PHPStan |
 | [docs/RH.md](docs/RH.md) | Módulo RH (implementado e roadmap) |
-| [docs/HUB_POS_OPERATORIO_INTEGRACAO.md](docs/HUB_POS_OPERATORIO_INTEGRACAO.md) | Hub Pós-Operatório — integração na plataforma ([PDF](docs/HUB_POS_OPERATORIO_INTEGRACAO.pdf)) |
+| [docs/HUB_POS_OPERATORIO_INTEGRACAO.md](docs/HUB_POS_OPERATORIO_INTEGRACAO.md) | Pós-Operatório — integração na plataforma ([PDF](docs/HUB_POS_OPERATORIO_INTEGRACAO.pdf)) |
 | [docs/DEPLOY_HOSTGATOR.md](docs/DEPLOY_HOSTGATOR.md) | Deploy na HostGator (`uniowork.com.br` / `.online`) |
 | [docs/uniojuridico/README.md](docs/uniojuridico/README.md) | Unio Jurídico — produto, IA e deploy |
 | [docs/uniojuridico/ARCHITECTURE.md](docs/uniojuridico/ARCHITECTURE.md) | Arquitetura, ADRs e fluxos do vertical Jurídico |
@@ -106,7 +106,7 @@ symfony server:start
 composer phpstan
 composer minify-css
 
-# 8. (Opcional) Regenerar PDF da doc Hub Pós-Operatório
+# 8. (Opcional) Regenerar PDF da doc Pós-Operatório
 npx puppeteer browsers install chrome   # só na primeira vez
 npm run docs:pos-operatorio-pdf
 ```
@@ -135,13 +135,12 @@ src/
       Rh/                             # Funcionários, férias, ponto, folha, comunicados
       Pessoas/                        # Equipes, cargos, avaliação de desempenho
       Talentos/                       # Pool de talentos, vagas, recrutamento
-      Maturidade/                     # Radar, plano de ação, histórico
       Sst/                            # Saúde e Segurança do Trabalho
       Beneficios/                     # Benefícios corporativos
       Ti/                             # Chamados, ativos, licenças, base de conhecimento
       PosOperatorio/                  # Gestão clínica (TISS, pacientes, agendamentos)
       Juridico/                       # Processos, prazos, clientes, honorários, IA
-      Admin/                          # Configurações globais e gestão de usuários
+      Admin/                          # Administração da plataforma e usuários
       Analytics/                      # Dashboards e métricas
       Compliance/                     # Incidentes e conflitos
       Inovacao/ Comercial/ Financeiro/ Ti/ Operacoes/ ...
@@ -173,7 +172,7 @@ src/
 templates/
   base.html.twig                      # Layout AdminLTE
   juridico/                           # Templates do vertical Jurídico
-  rh/ pessoas/ talentos/ maturidade/  # Templates do vertical RH/Saúde
+  rh/ pessoas/ talentos/              # Templates do vertical RH/Saúde
   pos-operatorio/ ti/ inovacao/ ...
 
 config/

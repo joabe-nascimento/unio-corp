@@ -70,7 +70,7 @@ LEGAL_AI_URL=http://127.0.0.1:8090
 LEGAL_AI_ESCRITORIO_ID=default
 ```
 
-O `escritorio_id` isola a base de conhecimento (RAG) por tenant no JurisFlow. O
+O `escritorio_id` isola a base de conhecimento (RAG) por escritório no JurisFlow. O
 `SashaApiController` já envia automaticamente o id da empresa ativa do usuário
 logado como `escritorio_id` — múltiplos escritórios cadastrados na mesma instalação
 ficam com memórias/RAG separados sem configuração adicional.
