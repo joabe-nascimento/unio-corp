@@ -2,6 +2,7 @@
 
 namespace App\Service\Juridico;
 
+use App\Contract\LegalAiClientInterface;
 use App\Entity\JuridicoDocumento;
 use App\Service\Sasha\DocumentTextExtractorService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,7 +27,7 @@ final class JuridicoDocumentoRagSyncService
     private const PREFIXO_SOURCE = 'jd:';
 
     public function __construct(
-        private JurisFlowAiClient $jurisFlowAi,
+        private LegalAiClientInterface $jurisFlowAi,
         private DocumentTextExtractorService $textExtractor,
         private EntityManagerInterface $em,
         private LoggerInterface $logger,

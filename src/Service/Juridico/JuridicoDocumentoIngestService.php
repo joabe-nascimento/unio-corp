@@ -2,6 +2,7 @@
 
 namespace App\Service\Juridico;
 
+use App\Contract\LegalAiClientInterface;
 use App\Entity\JuridicoDocumento;
 use App\Entity\JuridicoProcessoEvento;
 use App\Service\Sasha\DocumentTextExtractorService;
@@ -10,7 +11,7 @@ final class JuridicoDocumentoIngestService
 {
     public function __construct(
         private DocumentTextExtractorService $extractor,
-        private JurisFlowAiClient $ai,
+        private LegalAiClientInterface $ai,
         private JuridicoDocumentoService $documentos,
         private JuridicoProcessoTimelineService $timeline,
         private JuridicoWebhookDispatcher $webhooks,

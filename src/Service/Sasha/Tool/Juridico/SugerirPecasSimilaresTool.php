@@ -4,7 +4,7 @@ namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
 use App\Repository\JuridicoDocumentoRepository;
-use App\Service\Juridico\JurisFlowAiClient;
+use App\Contract\LegalAiClientInterface;
 use App\Service\Juridico\JuridicoDocumentoRagSyncService;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\Sasha\SashaToolInterface;
@@ -21,7 +21,7 @@ final class SugerirPecasSimilaresTool implements SashaToolInterface
     public function __construct(
         private OrganismoCopyService $organismoCopy,
         private WorkspaceService $workspace,
-        private JurisFlowAiClient $jurisFlowAi,
+        private LegalAiClientInterface $jurisFlowAi,
         private JuridicoDocumentoRepository $documentoRepo,
         private UrlGeneratorInterface $router,
     ) {

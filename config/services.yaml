@@ -235,6 +235,10 @@ services:
             $baseUrl: '%env(default:legal_ai_url_default:LEGAL_AI_URL)%'
             $defaultEscritorioId: '%env(default:legal_ai_escritorio_id_default:LEGAL_AI_ESCRITORIO_ID)%'
 
+    # Interface binding: qualquer classe que pedir LegalAiClientInterface recebe JurisFlowAiClient.
+    # Para testes, substitua por NullLegalAiClient (sem rede).
+    App\Contract\LegalAiClientInterface: '@App\Service\Juridico\JurisFlowAiClient'
+
     App\Service\Juridico\AiTokenUsageService:
         arguments:
             $enabled: '%env(bool:default:legal_ai_enabled_default:LEGAL_AI_ENABLED)%'

@@ -2,6 +2,7 @@
 
 namespace App\Service\Juridico;
 
+use App\Contract\LegalAiClientInterface;
 use App\Doctrine\DateNormalizer;
 use App\Entity\Empresa;
 use App\Entity\JuridicoAudiencia;
@@ -21,7 +22,7 @@ final class JuridicoAudienciaService
         private UserRepository $userRepo,
         private JuridicoProcessoTimelineService $timeline,
         private JuridicoWebhookDispatcher $webhooks,
-        private JurisFlowAiClient $ai,
+        private LegalAiClientInterface $ai,
     ) {
     }
 

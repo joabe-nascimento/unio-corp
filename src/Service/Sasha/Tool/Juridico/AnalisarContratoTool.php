@@ -3,7 +3,7 @@
 namespace App\Service\Sasha\Tool\Juridico;
 
 use App\Entity\User;
-use App\Service\Juridico\JurisFlowAiClient;
+use App\Contract\LegalAiClientInterface;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\Sasha\SashaToolInterface;
 use App\Service\WorkspaceService;
@@ -17,7 +17,7 @@ final class AnalisarContratoTool implements SashaToolInterface
     public function __construct(
         private OrganismoCopyService $organismoCopy,
         private WorkspaceService $workspace,
-        private JurisFlowAiClient $jurisFlowAi,
+        private LegalAiClientInterface $jurisFlowAi,
     ) {
     }
 

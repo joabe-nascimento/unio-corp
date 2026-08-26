@@ -2,6 +2,7 @@
 
 namespace App\Service\Juridico;
 
+use App\Contract\LegalAiClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -12,7 +13,7 @@ final class AiTokenUsageService
 {
     public function __construct(
         private HttpClientInterface $httpClient,
-        private JurisFlowAiClient $jurisFlowAi,
+        private LegalAiClientInterface $jurisFlowAi,
         private AzureTokenUsageStore $azureStore,
         private LoggerInterface $logger,
         private bool $enabled,

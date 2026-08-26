@@ -2,6 +2,7 @@
 
 namespace App\Service\Juridico;
 
+use App\Contract\LegalAiClientInterface;
 use App\Entity\JuridicoPublicacao;
 use Psr\Log\LoggerInterface;
 
@@ -11,7 +12,7 @@ use Psr\Log\LoggerInterface;
 final class JuridicoPublicacaoTriagemService
 {
     public function __construct(
-        private JurisFlowAiClient $ai,
+        private LegalAiClientInterface $ai,
         private LoggerInterface $logger,
     ) {
     }

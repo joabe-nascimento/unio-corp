@@ -7,7 +7,7 @@ use App\Dev\DevSeedEmails;
 use App\Entity\User;
 use App\Service\Juridico\AgenteAutonomoStatusStore;
 use App\Service\Juridico\AiTokenUsageService;
-use App\Service\Juridico\JurisFlowAiClient;
+use App\Contract\LegalAiClientInterface;
 use App\Service\Juridico\LegalIntentDetector;
 use App\Service\Organismo\OrganismoCopyService;
 use App\Service\PosOperatorio\SashaContextService;
@@ -51,7 +51,7 @@ final class SashaApiController extends AbstractController
 
     public function __construct(
         private SashaClient $vitoria,
-        private JurisFlowAiClient $juridicoAi,
+        private LegalAiClientInterface $juridicoAi,
         private WorkspaceService $workspace,
         private SashaContextService $vitoriaContext,
         private SashaToolRegistry $toolRegistry,
@@ -67,7 +67,7 @@ final class SashaApiController extends AbstractController
      * Escolhe o motor de IA ativo conforme a identidade da plataforma:
      * Unio Jurídico usa o JurisFlow (LangChain + RAG jurídico); demais usam a Vitória padrão.
      */
-    private function activeClient(): SashaClient|JurisFlowAiClient
+    private function activeClient(): SashaClient|LegalAiClientInterface
     {
         if ($this->organismoCopy->isJuridicoProfile()) {
             return $this->juridicoAi;

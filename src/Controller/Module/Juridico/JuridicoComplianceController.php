@@ -5,7 +5,7 @@ namespace App\Controller\Module\Juridico;
 use App\Entity\JuridicoComplianceIncidente;
 use App\Exception\JuridicoProcessException;
 use App\Repository\JuridicoComplianceIncidenteRepository;
-use App\Service\Juridico\JurisFlowAiClient;
+use App\Contract\LegalAiClientInterface;
 use App\Service\WorkspaceService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,7 +24,7 @@ class JuridicoComplianceController extends AbstractController
         private WorkspaceService $workspace,
         private JuridicoComplianceIncidenteRepository $repo,
         private EntityManagerInterface $em,
-        private JurisFlowAiClient $ai,
+        private LegalAiClientInterface $ai,
     ) {
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Service\Juridico;
 
+use App\Contract\LegalAiClientInterface;
 use App\Entity\Empresa;
 use App\Entity\JuridicoAtendimentoTemplate;
 use App\Entity\JuridicoAtendimentoTicket;
@@ -38,7 +39,7 @@ final class JuridicoAtendimentoTemplateService
     public function __construct(
         private EntityManagerInterface $em,
         private JuridicoAtendimentoTemplateRepository $repo,
-        private JurisFlowAiClient $ai,
+        private LegalAiClientInterface $ai,
     ) {
     }
 

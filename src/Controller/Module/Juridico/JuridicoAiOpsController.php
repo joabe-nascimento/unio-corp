@@ -2,7 +2,7 @@
 
 namespace App\Controller\Module\Juridico;
 
-use App\Service\Juridico\JurisFlowAiClient;
+use App\Contract\LegalAiClientInterface;
 use App\Service\WorkspaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +17,7 @@ class JuridicoAiOpsController extends AbstractController
 
     public function __construct(
         private WorkspaceService $workspace,
-        private JurisFlowAiClient $ai,
+        private LegalAiClientInterface $ai,
     ) {
     }
 
